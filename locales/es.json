@@ -201,7 +201,7 @@
   "profile": {
     "namePlaceholder": "Nombre",
     "surnamePlaceholder": "Apellido",
-    "loading": "Cargando...",
+    "loading": "0",
     "privacyChangeSuccess": "Cambio exitoso",
     "privacyChangeMessage": "Tu perfil ahora es {{state}}.",
     "private": "privado",

@@ -11,6 +11,8 @@ import {
   Dimensions,
   Animated,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -401,10 +403,10 @@ export default function SignUp() {
   const pickImage = async (photoNumber) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
+      allowsEditing: false, // Habilita la edición para permitir redimensionamiento
+      quality: 1, // Máxima calidad
     });
-
+  
     if (!result.canceled) {
       handleAnswer(`photo${photoNumber}`, result.assets[0].uri);
       handleNext();
@@ -477,7 +479,10 @@ export default function SignUp() {
   const progress = (currentQuestionIndex + 1) / questions.length;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Image
           source={require("../assets/Logo_Invite_Me.png")}
@@ -757,7 +762,7 @@ export default function SignUp() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

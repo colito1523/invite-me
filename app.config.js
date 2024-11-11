@@ -14,7 +14,12 @@ export default {
       backgroundColor: "#ffffff"
     },
     ios: {
-      supportsTablet: true
+      supportsTablet: true,
+      infoPlist: {
+        NSCameraUsageDescription: "Se necesita acceso a la cámara para subir historias",
+        NSPhotoLibraryUsageDescription: "Se necesita acceso a la galería para subir historias",
+        NSPhotoLibraryAddUsageDescription: "Se necesita permiso para guardar fotos en tu galería"
+      }
     },
     android: {
       package: "inviteme.androidapp", 

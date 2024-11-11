@@ -131,48 +131,55 @@ export default function StorySlider() {
   };
 
   const handleCamera = async () => {
-    setIsModalVisible(false);
     try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(t('storySlider.permissionDenied'), t('storySlider.cameraPermissionNeeded'));
-        return;
-      }
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        quality: 1,
-      });
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        await uploadStory(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error(t('storySlider.cameraError'), error);
-      Alert.alert(t('storySlider.error'), t('storySlider.cameraOpenError'));
-    }
-  };
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert("Permiso denegado", "Se necesita acceso a la cámara para subir historias");
+            return;
+        }
 
-  const handleGallery = async () => {
-    setIsModalVisible(false);
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(t('storySlider.permissionDenied'), t('storySlider.galleryPermissionNeeded'));
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        quality: 1,
-      });
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        await uploadStory(result.assets[0].uri);
-      }
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 1,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            await uploadStory(result.assets[0].uri);
+        }
     } catch (error) {
-      console.error(t('storySlider.galleryError'), error);
-      Alert.alert(t('storySlider.error'), t('storySlider.galleryOpenError'));
+        console.error("Error al abrir la cámara:", error);
+        Alert.alert("Error", "Hubo un problema al intentar abrir la cámara.");
+    } finally {
+        setIsModalVisible(false); // Cierra el modal al final de la operación
     }
-  };
+};
+
+const handleGallery = async () => {
+    try {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert("Permiso denegado", "Se necesita acceso a la galería para subir historias");
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 1,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            await uploadStory(result.assets[0].uri);
+        }
+    } catch (error) {
+        console.error("Error al abrir la galería:", error);
+        Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
+    } finally {
+        setIsModalVisible(false); // Cierra el modal al final de la operación
+    }
+};
+
 
   const uploadStory = async (imageUri) => {
     try {

@@ -173,7 +173,7 @@
   "profile": {
     "namePlaceholder": "Nome",
     "surnamePlaceholder": "Sobrenome",
-    "loading": "Carregando...",
+    "loading": "0",
     "privacyChangeSuccess": "Alteração bem-sucedida",
     "privacyChangeMessage": "Seu perfil agora é {{state}}.",
     "private": "privado",

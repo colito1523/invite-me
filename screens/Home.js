@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Platform,
+  onSnapshot
 } from "react-native";
 import { signOut } from "firebase/auth";
 import { Entypo, FontAwesome, FontAwesome6 } from "@expo/vector-icons";
@@ -18,6 +19,7 @@ import {
   ref,
   getDownloadURL,
   database,
+  onSnapshot
 } from "../config/firebase";
 import {
   collection,
@@ -86,6 +88,30 @@ const Home = React.memo(() => {
 
     return () => clearInterval(interval);
   }, []);
+
+
+  const fetchProfileImage = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        if (data.photoUrls && data.photoUrls.length > 0) {
+          setProfileImage(data.photoUrls[0]);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+  const unsubscribe = navigation.addListener('focus', () => {
+    fetchProfileImage(); // Asegúrate de definir esta función para obtener la imagen
+  });
+  return unsubscribe;
+}, [navigation]);
+
+
+
 
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
 
@@ -340,22 +366,22 @@ const Home = React.memo(() => {
   }, [selectedDate, fetchBoxData, fetchPrivateEvents]);
 
   useEffect(() => {
-    const fetchProfileImage = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const userDoc = await getDoc(doc(database, "users", user.uid));
+    const user = auth.currentUser;
+    if (user) {
+      // Escucha en tiempo real los cambios del documento de usuario
+      const unsubscribe = onSnapshot(doc(database, "users", user.uid), (userDoc) => {
         if (userDoc.exists()) {
           const data = userDoc.data();
           if (data.photoUrls && data.photoUrls.length > 0) {
-            setProfileImage(data.photoUrls[0]);
+            setProfileImage(data.photoUrls[0]); // Actualiza la imagen del perfil al recibir cambios
           }
         }
-      }
-    };
-
-    fetchProfileImage();
+      });
+      return () => unsubscribe(); // Limpia la suscripción cuando se desmonta el componente
+    }
   }, []);
-
+  
+  // Función para manejar el evento de clic en el box
   const handleBoxPress = useCallback(
     (box) => {
       navigation.navigate("BoxDetails", {
@@ -534,14 +560,18 @@ const dayStyles = StyleSheet.create({
     color: "black",
     textAlign: "center",
   },
-  tabBar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    padding: 10,
-    backgroundColor: "#f5f5f5",
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
-  },
+
+ tabBar: {
+  flexDirection: "row",
+  justifyContent: "space-around",
+  paddingBottom: Platform.OS === 'ios' ? 40 : 10,
+  paddingTop: Platform.OS === 'ios' ? 15 : 10,
+  backgroundColor:"#f5f5f5",
+  borderTopWidth: 1,
+  borderTopColor: "#e0e0e0",
+  width: "100%", // Asegura que ocupe todo el ancho de la pantalla
+  alignItems: "center", // Centra verticalmente los íconos si es necesario
+},
   emptyText: {
     textAlign: "center",
     color: "black",
@@ -572,10 +602,13 @@ const nightStyles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     justifyContent: "space-around",
-    padding: 10,
-    backgroundColor: "black",
+    paddingBottom: Platform.OS === 'ios' ? 40 : 10,
+    paddingTop: Platform.OS === 'ios' ? 15 : 10,
+    backgroundColor:"black",
     borderTopWidth: 1,
     borderTopColor: "black",
+    width: "100%", // Asegura que ocupe todo el ancho de la pantalla
+    alignItems: "center", // Centra verticalmente los íconos si es necesario
   },
   emptyText: {
     textAlign: "center",
@@ -635,10 +668,10 @@ const styles = StyleSheet.create({
     color: "black",
   },
   profileImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-  },
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+ },
 });
 
 export default Home;

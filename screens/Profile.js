@@ -325,17 +325,19 @@ export default function Profile({ navigation }) {
       try {
         const updatedPhotoUrls = await Promise.all(
           photoUrls.map(async (url, index) => {
-            if (url.startsWith("file://")) {
-              const imageRef = ref(
-                storage,
-                `profileImages/${user.uid}_${index}.jpg`
-              );
-              const response = await fetch(url);
-              const blob = await response.blob();
-              await uploadBytes(imageRef, blob);
-              return await getDownloadURL(imageRef);
+            try {
+              if (url.startsWith("file://")) {
+                const imageRef = ref(storage, `profileImages/${user.uid}_${index}.jpg`);
+                const response = await fetch(url);
+                const blob = await response.blob();
+                await uploadBytes(imageRef, blob);
+                return await getDownloadURL(imageRef);
+              }
+              return url;
+            } catch (error) {
+              console.error("Error al cargar la imagen:", error);
+              throw error; // Propaga el error para que el catch principal lo capture
             }
-            return url;
           })
         );
 
@@ -349,13 +351,13 @@ export default function Profile({ navigation }) {
           firstInterest,
           secondInterest,
         };
-
+      
         await updateDoc(doc(database, "users", user.uid), updatedData);
         setPhotoUrls(updatedPhotoUrls);
         setIsEditing(false);
       } catch (error) {
-        console.error("Error saving changes: ", error);
-        Alert.alert(t('profile.error'), t('profile.saveChangesError'));
+        console.error("Error guardando los datos:", error);
+        Alert.alert("Error", "Ocurrió un problema al guardar los cambios. Intenta nuevamente.");
       } finally {
         setIsLoading(false);
       }
@@ -486,8 +488,8 @@ export default function Profile({ navigation }) {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
-        t('profile.permissionDenied'),
-        t('profile.galleryPermissionMessage')
+        "Permiso denegado",
+        "Se necesita acceso a la galería para subir fotos."
       );
       return;
     }
@@ -502,6 +504,7 @@ export default function Profile({ navigation }) {
       const newPhotoUrls = [...photoUrls];
       newPhotoUrls[index] = result.assets[0].uri;
       setPhotoUrls(newPhotoUrls);
+      console.log("Nueva URL de imagen:", result.assets[0].uri); // Agregar log para revisar el URI
     }
   };
 
@@ -551,7 +554,7 @@ export default function Profile({ navigation }) {
         {photoUrls.map((url, index) => (
           <View key={index} style={styles.photoContainer}>
             {url ? (
-              <Image source={{ uri: url }} style={styles.photoThumbnail} cachePolicy="memory-disk"  />
+              <Image source={{ uri: url }} style={styles.photoThumbnail} cachePolicy="none"   />
             ) : (
               <View style={styles.emptyPhoto} />
             )}
@@ -681,7 +684,7 @@ export default function Profile({ navigation }) {
                     source={{ uri: url }}
                     style={styles.backgroundImage}
                     contentFit="cover"
-                    cachePolicy="memory-disk" 
+                    cachePolicy="none" 
                   />
                   {isElementsVisible && (
                     <View style={styles.overlay}>

@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Dimensions,
   FlatList,
+  Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
@@ -19,8 +20,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useBlockedUsers } from "../src/contexts/BlockContext";
-import { Image } from 'expo-image';
-import { useTranslation } from 'react-i18next';
+import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
@@ -47,11 +48,12 @@ export default function CreateEvent() {
   useEffect(() => {
     (async () => {
       if (Platform.OS !== "web") {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
           Alert.alert(
-            t('createEvent.permissionsError'),
-            t('createEvent.permissionsMessage')
+            t("createEvent.permissionsError"),
+            t("createEvent.permissionsMessage")
           );
         }
       }
@@ -78,14 +80,25 @@ export default function CreateEvent() {
       const userDocRef = doc(database, "users", user.uid);
       const userDocSnapshot = await getDoc(userDocRef);
       const userData = userDocSnapshot.data();
-  
+
       for (const friendDocId of selectedFriends) {
-        const friendDocRef = doc(database, "users", user.uid, "friends", friendDocId);
+        const friendDocRef = doc(
+          database,
+          "users",
+          user.uid,
+          "friends",
+          friendDocId
+        );
         const friendDocSnapshot = await getDoc(friendDocRef);
         const friendData = friendDocSnapshot.data();
-  
+
         if (friendData && friendData.friendId) {
-          const notificationRef = collection(database, "users", friendData.friendId, "notifications");
+          const notificationRef = collection(
+            database,
+            "users",
+            friendData.friendId,
+            "notifications"
+          );
           await addDoc(notificationRef, {
             fromId: user.uid,
             fromName: userData.username,
@@ -107,42 +120,55 @@ export default function CreateEvent() {
 
   const handleSubmit = async () => {
     if (blockedUsers.includes(auth.currentUser.uid)) {
-      Alert.alert(t('createEvent.error'), t('createEvent.blockedError'));
+      Alert.alert(t("createEvent.error"), t("createEvent.blockedError"));
       return;
     }
-  
-    if (!title || !day || !hour || !address || !description || !image || selectedFriends.length === 0) {
+
+    if (
+      !title ||
+      !day ||
+      !hour ||
+      !address ||
+      !description ||
+      !image ||
+      selectedFriends.length === 0
+    ) {
       Alert.alert(
-        t('createEvent.requiredFields'),
-        t('createEvent.fillAllFields')
+        t("createEvent.requiredFields"),
+        t("createEvent.fillAllFields")
       );
       return;
     }
-  
+
     const user = auth.currentUser;
     if (user) {
       try {
         const userDocRef = doc(database, "users", user.uid);
         const userDocSnapshot = await getDoc(userDocRef);
         const userData = userDocSnapshot.data();
-  
+
         const response = await fetch(image);
         const blob = await response.blob();
-        const imageRef = ref(storage, `EventosParaAmigos/${user.uid}_${Date.now()}.jpg`);
+        const imageRef = ref(
+          storage,
+          `EventosParaAmigos/${user.uid}_${Date.now()}.jpg`
+        );
         await uploadBytes(imageRef, blob);
-  
+
         const imageUrl = await getDownloadURL(imageRef);
-  
+
         const eventDateTime = new Date(day);
         eventDateTime.setHours(hour.getHours(), hour.getMinutes());
-  
-        const expirationDate = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
-  
-        const dateText = day.toLocaleDateString(t('locale'), {
+
+        const expirationDate = new Date(
+          eventDateTime.getTime() + 24 * 60 * 60 * 1000
+        );
+
+        const dateText = day.toLocaleDateString(t("locale"), {
           day: "numeric",
           month: "short",
         });
-  
+
         const eventData = {
           userId: user.uid,
           username: userData.username,
@@ -162,29 +188,35 @@ export default function CreateEvent() {
           expirationDate: expirationDate,
           Admin: user.uid,
         };
-  
-        const docRef = await addDoc(collection(database, "EventsPriv"), eventData);
-  
+
+        const docRef = await addDoc(
+          collection(database, "EventsPriv"),
+          eventData
+        );
+
         await sendInvitationNotifications(eventData, docRef.id);
-  
-        Alert.alert(t('createEvent.success'), t('createEvent.eventCreated'));
+
+        Alert.alert(t("createEvent.success"), t("createEvent.eventCreated"));
         navigation.navigate("Home", { selectedCategory: "all" });
       } catch (error) {
         console.error("Error creating event: ", error);
-        Alert.alert(t('createEvent.error'), t('createEvent.eventCreationError'));
+        Alert.alert(
+          t("createEvent.error"),
+          t("createEvent.eventCreationError")
+        );
       }
     }
   };
 
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || day;
-    setShowDatePicker(Platform.OS === "ios");
+    setShowDatePicker(false);
     setDay(currentDate);
   };
 
   const onChangeTime = (event, selectedTime) => {
     const currentTime = selectedTime || hour;
-    setShowTimePicker(Platform.OS === "ios");
+    setShowTimePicker(false);
     setHour(currentTime);
   };
 
@@ -221,24 +253,38 @@ export default function CreateEvent() {
       ]}
       onPress={() => toggleFriendSelection(item.id)}
     >
-      <Image source={{ uri: item.friendImage }} style={styles.friendImage} cachePolicy="memory-disk"/>
+      <Image
+        source={{ uri: item.friendImage }}
+        style={styles.friendImage}
+        cachePolicy="memory-disk"
+      />
       <Text style={styles.friendName}>{item.friendName}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
         <Ionicons name="arrow-back" size={24} color="#333" />
       </TouchableOpacity>
 
       <FlatList
         ListHeaderComponent={
           <>
-            <Text style={styles.title}>{t('createEvent.title')}</Text>
+            <Text style={styles.title}>{t("createEvent.title")}</Text>
             <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
               {image ? (
-                <Image source={{ uri: image }} style={styles.selectedImage} cachePolicy="memory-disk" />
+                <Image
+                  source={{ uri: image }}
+                  style={styles.selectedImage}
+                  cachePolicy="memory-disk"
+                />
               ) : (
                 <View style={styles.placeholderImage}>
                   <Ionicons name="images-outline" size={40} color="#4b4b4b" />
@@ -248,27 +294,44 @@ export default function CreateEvent() {
 
             <TextInput
               style={styles.input}
-              placeholder={t('createEvent.eventTitle')}
+              placeholder={t("createEvent.eventTitle")}
               value={title}
               onChangeText={setTitle}
               placeholderTextColor="white"
             />
 
             <View style={styles.dateTimeContainer}>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateTimeButton}>
-                <Text style={styles.dateTimeLabel}>{t('createEvent.date')}</Text>
-                <Text style={styles.dateTimeText}>{day.toLocaleDateString()}</Text>
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                style={styles.dateTimeButton}
+              >
+                <Text style={styles.dateTimeLabel}>
+                  {t("createEvent.date")}
+                </Text>
+                <Text style={styles.dateTimeText}>
+                  {day.toLocaleDateString()}
+                </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateTimeButton}>
-                <Text style={styles.dateTimeLabel}>{t('createEvent.time')}</Text>
-                <Text style={styles.dateTimeText}>{hour.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</Text>
+              <TouchableOpacity
+                onPress={() => setShowTimePicker(true)}
+                style={styles.dateTimeButton}
+              >
+                <Text style={styles.dateTimeLabel}>
+                  {t("createEvent.time")}
+                </Text>
+                <Text style={styles.dateTimeText}>
+                  {hour.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
               </TouchableOpacity>
             </View>
 
             <TextInput
               style={styles.input}
-              placeholder={t('createEvent.searchFriends')}
+              placeholder={t("createEvent.searchFriends")}
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor="white"
@@ -285,7 +348,7 @@ export default function CreateEvent() {
 
             <TextInput
               style={styles.input}
-              placeholder={t('createEvent.address')}
+              placeholder={t("createEvent.address")}
               value={address}
               onChangeText={setAddress}
               placeholderTextColor="white"
@@ -293,25 +356,56 @@ export default function CreateEvent() {
 
             <TextInput
               style={[styles.input, styles.descriptionInput]}
-              placeholder={t('createEvent.description')}
+              placeholder={t("createEvent.description")}
               value={description}
               onChangeText={setDescription}
               placeholderTextColor="white"
               multiline
             />
 
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>{t('createEvent.createEvent')}</Text>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+            >
+              <Text style={styles.submitButtonText}>
+                {t("createEvent.createEvent")}
+              </Text>
             </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker value={day} mode="date" display="default" minimumDate={today} maximumDate={maxDate} onChange={onChangeDate} />
-            )}
-
-            {showTimePicker && <DateTimePicker value={hour} mode="time" display="default" onChange={onChangeTime} />}
           </>
         }
       />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showDatePicker || showTimePicker}
+        onRequestClose={() => {
+          setShowDatePicker(false);
+          setShowTimePicker(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <DateTimePicker
+              value={showDatePicker ? day : hour}
+              mode={showDatePicker ? "date" : "time"}
+              display="spinner"
+              onChange={showDatePicker ? onChangeDate : onChangeTime}
+              minimumDate={today}
+              maximumDate={maxDate}
+            />
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                setShowDatePicker(false);
+                setShowTimePicker(false);
+              }}
+            >
+              <Text style={styles.modalButtonText}>{t("common.done")}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -408,7 +502,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   selectedFriendItem: {
-    backgroundColor:  "#e0e0e0",
+    backgroundColor: "#e0e0e0",
   },
   friendImage: {
     width: 40,
@@ -438,5 +532,37 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 15,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalButton: {
+    backgroundColor: "black",
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
+    marginTop: 15,
+  },
+  modalButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

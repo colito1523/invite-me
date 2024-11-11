@@ -51,26 +51,14 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   };
 
   const renderItem = ({ item, index }) => {
-    const inputRange = [
-      (index - 1) * ITEM_SIZE,
-      index * ITEM_SIZE,
-      (index + 1) * ITEM_SIZE,
-    ];
-
-    const scale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.8, 1, 0.8],
-      extrapolate: 'clamp',
-    });
-
     return (
       <TouchableOpacity
         onPress={() => handleUserPress(item.uid)}
         style={styles.itemContainer}
       >
-        <Animated.View style={[styles.imageContainer, { transform: [{ scale }] }]}>
+        <View style={styles.imageContainer}>
           <Image cachePolicy="memory-disk" source={{ uri: item.profileImage }} style={styles.profileImage} />
-        </Animated.View>
+        </View>
       </TouchableOpacity>
     );
   };
