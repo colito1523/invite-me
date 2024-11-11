@@ -1,0 +1,498 @@
+{
+  "accessPrivately": "Entrar",
+  "email": "Email",
+  "password": "Senha",
+  "logIn": "Entrar",
+  "forgotPassword": "Esqueceu a senha?",
+  "createNewAccount": "Criar nova conta",
+  "errorTitle": "Erro",
+  "enterBothFields": "Por favor, insira o email e a senha.",
+  "enterValidEmail": "Por favor, insira um endereço de email válido.",
+  "loginError": "Erro de Login",
+  "incorrectCredentials": "Email ou senha incorretos. Por favor, verifique suas informações.",
+  "genericError": "Ocorreu um erro. Por favor, tente novamente.",
+
+  "_comment_complaints.js": "complaints.js",
+
+  "reportUser": "Denunciar usuário",
+  "reportUserConfirmation": "Tem certeza de que deseja denunciar este usuário?",
+  "reportReasons": {
+    "Spam": "Spam",
+    "Contenido inapropiado": "Conteúdo inapropriado",
+    "Acoso o intimidación": "Assédio ou intimidação",
+    "Lenguaje abusivo": "Linguagem abusiva",
+    "Violencia o amenazas": "Violência ou ameaças",
+    "Otros motivos": "Outros motivos"
+  },
+  "describeReasonPlaceholder": "Descreva o motivo (máximo de 100 palavras)",
+  "sendReport": "Enviar denúncia",
+  "selectReasonError": "Por favor, selecione um motivo para a denúncia.",
+
+  "_comment_FriendList.js": "FriendList.js",
+
+  "friendListModal": {
+    "searchPlaceholder": "Pesquisar entre {{count}} amigos",
+    "noFriendsFound": "Nenhum amigo encontrado",
+    "errorFetchingUser": "Erro ao buscar dados do usuário",
+    "userNotFound": "Nenhum detalhe encontrado para este usuário"
+  },
+
+  "_comment_ForgotPassword.js": "ForgotPassword.js",
+
+  "enterEmail": "Por favor, insira seu email.",
+  "enterEmailToReset": "Digite seu email para redefinir sua senha.",
+  "resetPassword": "Redefinir Senha",
+  "resetPasswordEmailSent": "Email de Redefinição de Senha Enviado",
+  "checkEmailForInstructions": "Verifique seu email para obter instruções sobre como redefinir sua senha.",
+  "resetPasswordError": "Erro ao Redefinir Senha",
+  "backToLogin": "Voltar para o Login",
+
+  "_comment_Search.js": "Search.js",
+
+  "anonymousUser": "Usuário Anônimo",
+  "errorSendingFriendRequest": "Erro ao enviar solicitação de amizade",
+  "alreadyFriends": "Já são amigos",
+  "alreadyFriendsMessage": "Você já é amigo deste usuário.",
+  "errorCancelingFriendRequest": "Erro ao cancelar solicitação de amizade",
+  "errorCancelingFriendRequestMessage": "Não foi possível cancelar a solicitação de amizade.",
+  "errorCheckingFriendRequestStatus": "Erro ao verificar o status da solicitação de amizade",
+  "errorLoadingSearchHistory": "Erro ao carregar o histórico de pesquisa",
+  "errorSavingSearchHistory": "Erro ao salvar o histórico de pesquisa",
+  "cannotInteractWithUser": "Você não pode interagir com este usuário.",
+  "recent": "Recentes",
+  "suggestionsForYou": "Sugestões para você",
+  "exampleEvent": "Evento de exemplo",
+  "search": "Pesquisar",
+  "noRecommendationsOrHistory": "Nenhuma recomendação ou histórico disponível no momento.",
+
+  "_comment_PrivateUserProfile.js": "PrivateUserProfile.js",
+
+  "error": "Erro",
+  "cannotReportUser": "Não é possível denunciar este usuário no momento.",
+  "couldNotGetUserInfo": "Não foi possível obter as informações do usuário.",
+  "errorGettingUserData": "Erro ao obter dados do usuário:",
+  "errorAccessingUserData": "Ocorreu um erro ao tentar acessar os dados do usuário.",
+  "anonymous": "Anônimo",
+  "thankYou": "Obrigado",
+  "reportSubmitted": "Sua denúncia foi enviada e será revisada por nossa equipe de moderação.",
+  "errorSubmittingReport": "Erro ao enviar denúncia:",
+  "couldNotSubmitReport": "Não foi possível enviar a denúncia. Por favor, tente novamente.",
+  "anonymousUser": "Usuário Anônimo",
+  "errorSendingFriendRequest": "Erro ao enviar solicitação de amizade:",
+  "couldNotSendFriendRequest": "Não foi possível enviar a solicitação de amizade.",
+  "errorCancelingFriendRequest": "Erro ao cancelar solicitação de amizade:",
+  "actionNotAllowed": "Ação não permitida",
+  "cannotRemoveFriendFromPrivateProfile": "Você não pode remover um amigo de um perfil privado.",
+  "noMutualFriends": "Sem amigos em comum",
+  "andMoreMutualFriends": "e mais {{count}} amigos em comum",
+  "mutualFriends": "amigos em comum",
+  "goBack": "Voltar",
+  "openOptionsMenu": "Abrir menu de opções",
+  "report": "Denunciar",
+
+  "menu": {
+    "searchPlaceholder": "Procure a cidade que você está procurando...",
+    "categories": {
+      "title": "Categorias",
+      "all": "Todos",
+      "restaurantsRooftops": "Restaurantes & Rooftops",
+      "barsClubs": "Bares & Clubes",
+      "events": "Eventos",
+      "createOwnEvent": "Criar Meu Próprio Evento",
+      "suggestSpace": "Sugerir um Espaço"
+    },
+    "cities": {
+      "title": "Cidades"
+    },
+    "signOut": "Sair"
+  },
+
+  "_comment_createEvent.js": "createEvent.js",
+  "createEvent": {
+    "title": "Crie Seu Próprio Evento",
+    "eventTitle": "Título",
+    "date": "Data",
+    "time": "Hora",
+    "searchFriends": "Procurar Amigos",
+    "address": "Endereço",
+    "description": "Descrição",
+    "createEvent": "Criar Evento",
+    "permissionsError": "Permissões Insuficientes",
+    "permissionsMessage": "Precisamos de permissões para acessar sua galeria.",
+    "error": "Erro",
+    "blockedError": "Você não pode criar eventos devido a uma restrição.",
+    "requiredFields": "Campos Obrigatórios",
+    "fillAllFields": "Por favor, preencha todos os campos e selecione pelo menos um amigo.",
+    "success": "Evento Criado",
+    "eventCreated": "Seu evento foi criado com sucesso e os convites foram enviados.",
+    "eventCreationError": "Houve um problema ao criar o evento."
+  },
+  "locale": "pt-PT",
+
+  "_comment_BoxDetails.js": "BoxDetails.js",
+
+  "boxDetails": {
+    "goingButton": "Vou",
+    "notGoingButton": "Não vou",
+    "inviteButton": "Convidar",
+    "scheduleTitle": "Horários",
+    "contactTitle": "Contato",
+    "contactNotAvailable": "Não disponível",
+    "inviteFriendsTitle": "Convidar Amigos",
+    "searchFriendsPlaceholder": "Buscar amigos...",
+    "closeButton": "Fechar",
+    "linkNotAvailable": "Link não disponível",
+    "linkNotAvailableMessage": "Nenhum link de localização foi fornecido.",
+    "invitationSent": "Convite enviado",
+    "invitationSentMessage": "Você convidou seu amigo.",
+    "limitReached": "Limite atingido",
+    "limitReachedMessage": "Você já tem 6 eventos salvos. Exclua um dos seus eventos",
+    "accept": "Aceitar",
+    "error": "Erro",
+    "eventDeletionError": "Houve um problema ao excluir o evento.",
+    "eventSavingError": "Houve um problema ao salvar o evento."
+  },
+
+  "businessHours": {
+    "noHoursFound": "Não foram encontrados horários de funcionamento para este evento.",
+    "customEvent": "Evento Personalizado",
+    "operatingHours": "Horário de Funcionamento",
+    "showLess": "Ver menos",
+    "showMore": "Ver mais"
+  },
+  "days": {
+    "Monday": "Segunda-feira",
+    "Tuesday": "Terça-feira",
+    "Wednesday": "Quarta-feira",
+    "Thursday": "Quinta-feira",
+    "Friday": "Sexta-feira",
+    "Saturday": "Sábado",
+    "Sunday": "Domingo"
+  },
+
+  "profile": {
+    "namePlaceholder": "Nome",
+    "surnamePlaceholder": "Sobrenome",
+    "loading": "Carregando...",
+    "privacyChangeSuccess": "Alteração bem-sucedida",
+    "privacyChangeMessage": "Seu perfil agora é {{state}}.",
+    "private": "privado",
+    "public": "público",
+    "error": "Erro",
+    "privacyUpdateError": "Não foi possível atualizar seu status de privacidade.",
+    "nameValidationError": "Nome e sobrenome só podem conter letras.",
+    "allFieldsRequired": "Todos os campos são obrigatórios.",
+    "saveChangesError": "Não foi possível salvar as alterações.",
+    "noDate": "Sem data",
+    "locale": "pt-BR",
+    "months": ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
+    "limitReached": "Limite atingido",
+    "eventLimitMessage": "Você só pode salvar até 6 eventos. Exclua um para adicionar outro.",
+    "eventSaved": "Evento salvo",
+    "eventSavedMessage": "O evento foi adicionado aos seus favoritos.",
+    "eventAddError": "Não foi possível adicionar o evento.",
+    "permissionDenied": "Permissão negada",
+    "galleryPermissionMessage": "Precisamos de permissão para acessar sua galeria.",
+    "noTitle": "Sem título",
+    "noNumber": "Sem número",
+    "noLocation": "Sem localização especificada",
+    "change": "Alterar",
+    "add": "Adicionar",
+    "editProfile": "Editar meu perfil",
+    "makePublic": "Tornar perfil público",
+    "makePrivate": "Tornar perfil privado",
+    "saveChanges": "Salvar alterações",
+    "hobby1": "Hobby 1",
+    "hobby2": "Hobby 2",
+    "interest1": "Interesse 1",
+    "interest2": "Interesse 2"
+  },
+  
+  "userProfile": {
+    "error": "Erro",
+    "cannotReportUser": "Não é possível denunciar este usuário no momento.",
+    "userInfoError": "Não foi possível obter as informações do usuário.",
+    "userDataAccessError": "Ocorreu um erro ao tentar acessar os dados do usuário.",
+    "anonymous": "Anônimo",
+    "thankYou": "Obrigado",
+    "reportSubmitted": "Sua denúncia foi enviada e será revisada por nossa equipe de moderação.",
+    "reportSubmissionError": "Não foi possível enviar a denúncia. Por favor, tente novamente.",
+    "success": "Sucesso",
+    "willSeeStories": "Agora você verá as histórias deste usuário.",
+    "willNotSeeStories": "As histórias deste usuário serão ocultadas.",
+    "storySettingsUpdateError": "Não foi possível atualizar as configurações das histórias.",
+    "userCanSeeStories": "Este usuário poderá ver suas histórias.",
+    "userCannotSeeStories": "Suas histórias serão ocultadas para este usuário.",
+    "myStorySettingsUpdateError": "Não foi possível atualizar as configurações das suas histórias.",
+    "likedYourProfile": "{{username}} gostou do seu perfil.",
+    "likeProfileError": "Não foi possível curtir este perfil.",
+    "removeLikeError": "Não foi possível remover a curtida deste perfil.",
+    "userBlocked": "Usuário Bloqueado",
+    "userBlockedMessage": "Você bloqueou este usuário.",
+    "cannotSendMessage": "Você não pode enviar mensagens para este usuário.",
+    "noMutualFriends": "Não têm amigos em comum",
+    "andMoreMutualFriends": "e mais {{count}} amigos em comum",
+    "mutualFriends": "amigos em comum",
+    "noTitle": "Sem título",
+    "noNumber": "Sem número",
+    "noLocation": "Sem localização especificada",
+    "noDate": "Sem data",
+    "anonymousUser": "Usuário Anônimo",
+    "backButton": "Voltar",
+    "openOptionsMenu": "Abrir menu de opções",
+    "removeFriend": "Remover amigo",
+    "cancelRequest": "Cancelar solicitação",
+    "addFriend": "Adicionar amigo",
+    "block": "Bloquear",
+    "report": "Denunciar",
+    "seeTheirStories": "Ver suas histórias",
+    "hideTheirStories": "Ocultar suas histórias",
+    "showMyStories": "Mostrar minhas histórias",
+    "hideMyStories": "Ocultar minhas histórias"
+  },
+  "months": ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
+
+  "notifications": {
+    "error": "Erro",
+    "userDetailsNotFound": "Não foram encontrados detalhes para este usuário.",
+    "userDetailsFetchError": "Houve um problema ao obter os detalhes do usuário.",
+    "friendRequestAccepted": "{{name}} aceitou seu pedido de amizade.",
+    "youAreNowFriends": "Você e {{name}} agora são amigos.",
+    "acceptRequestError": "Não foi possível aceitar a solicitação.",
+    "rejectRequestError": "Não foi possível rejeitar a solicitação.",
+    "invalidEventId": "O evento não tem um ID válido.",
+    "userAuthError": "Não foi possível autenticar o usuário.",
+    "eventNotFound": "O evento não foi encontrado.",
+    "acceptedInvitation": "Você aceitou o convite de {{name}}",
+    "eventAddedToProfile": "O evento foi adicionado ao seu perfil e à lista de participantes.",
+    "acceptInvitationError": "Não foi possível aceitar o convite. Por favor, tente novamente.",
+    "invitationAccepted": "Convite Aceito",
+    "invitationRejected": "Convite Rejeitado",
+    "eventInvitationRejected": "Você rejeitou o convite para o evento.",
+    "rejectInvitationError": "Não foi possível rejeitar o convite. Por favor, tente novamente.",
+    "yesterday": "Ontem",
+    "noLocation": "Sem localização",
+    "noNumber": "Sem número",
+    "coordinatesNotAvailable": "As coordenadas do evento não estão disponíveis.",
+    "wantsToBeFriend": "quer ser seu amigo.",
+    "invitedToEvent": "convidou você para o evento: {{eventTitle}}",
+    "nowFriends": "e você agora são amigos.",
+    "rejectedFriendRequest": "rejeitou seu pedido de amizade.",
+    "likedYourStory": "curtiu sua história.",
+    "accept": "Aceitar",
+    "reject": "Rejeitar"
+  },
+
+  "storyViewer": {
+    "error": "Erro",
+    "user": "Usuário",
+    "anonymous": "Anônimo",
+    "userDetailsNotFound": "Nenhum detalhe encontrado para este usuário.",
+    "userDetailsFetchError": "Houve um problema ao buscar os detalhes do usuário.",
+    "likedYourStory": "{{firstName}} {{lastName}} curtiu sua história.",
+    "likeError": "Não foi possível curtir a história.",
+    "sendResponseError": "Não foi possível enviar a resposta. Por favor, tente novamente.",
+    "userAuthError": "Não foi possível autenticar o usuário. Por favor, faça login e tente novamente.",
+    "storyNotFound": "A história não pôde ser encontrada.",
+    "deletePermissionError": "Você não tem permissão para excluir esta história.",
+    "deleteError": "Não foi possível excluir a história. Por favor, tente novamente.",
+    "hoursAgo": "{{hours}}h",
+    "typePlaceholder": "Digite...",
+    "searchPlaceholder": "Pesquisar...",
+    "viewers": "Visualizadores",
+    "pinUnpinError": "Não foi possível fixar/desafixar o visualizador."
+  },
+
+  "notes": {
+    "error": "Erro",
+    "emptyNoteError": "Por favor, insira uma nota antes de enviar.",
+    "postNoteError": "Falha ao compartilhar seu humor. Por favor, tente novamente.",
+    "deleteNoteError": "Não foi possível excluir a nota e os curtidas. Por favor, tente novamente.",
+    "deleteMood": "Excluir humor",
+    "deleteMoodConfirm": "Tem certeza de que deseja excluir seu humor?",
+    "cancel": "Cancelar",
+    "ok": "OK",
+    "likedYourNote": "curtiu sua nota de humor.",
+    "likeToggleError": "Falha ao curtir/descurtir a nota. Por favor, tente novamente.",
+    "anonymous": "Anônimo",
+    "sendResponseError": "Falha ao enviar sua resposta. Por favor, tente novamente.",
+    "success": "Sucesso",
+    "moodShared": "Seu humor foi compartilhado: {{mood}}",
+    "shareMoodError": "Não foi possível compartilhar o humor. Por favor, tente novamente.",
+    "typePlaceholder": "Digite...",
+    "emptyResponseError": "Por favor, insira uma mensagem antes de enviar.",
+    "responseSent": "Sua resposta foi enviada!",
+    "typeMoodPlaceholder": "Digite seu humor...",
+    "shareMoodPlaceholder": "Compartilhe seu humor...",
+    "hideMoodOptions": "Ocultar opções de humor",
+    "showMoodOptions": "Mostrar opções de humor",
+    "respondToNotePlaceholder": "Responder à nota...",
+    "moodOptions": {
+      "Movie night": "Movie night",
+      "Dinner out": "Dinner out",
+      "Wine glass": "Wine glass",
+      "Late night talks": "Late night talks",
+      "Evening Walk": "Evening Walk",
+      "Ice Cream Outing": "Ice Cream Outing",
+      "Cozy night in": "Cozy night in"
+    }
+  },
+
+  "termsAndConditions": {
+    "link": "termos e condições",
+    "title": "Termos e Condições de Uso do Invite Me",
+    "lastUpdated": "Última atualização: {{date}}",
+    "welcome": "Bem-vindo ao Invite Me. Ao se registrar e usar nossa plataforma, você concorda e se compromete a cumprir os seguintes Termos e Condições. Recomendamos que você leia atentamente este documento antes de usar nossos serviços.",
+    "sections": {
+      "generalInfo": {
+        "title": "1. Informações Gerais",
+        "content": "Invite Me é uma rede social projetada para ajudá-lo a compartilhar experiências, conectar-se com amigos e acessar conteúdo personalizado com base em sua localização. Ao usar o Invite Me, você concorda com nossas políticas de privacidade, termos de uso e todas as regulamentações aplicáveis."
+      },
+      "dataCollection": {
+        "title": "2. Coleta e Uso de Dados Pessoais",
+        "content": "Para fornecer a você uma experiência ideal, o Invite Me coleta e processa dados pessoais sob medidas rigorosas de segurança e em conformidade com o Regulamento Geral de Proteção de Dados (RGPD). Ao aceitar estes termos, você autoriza a coleta, armazenamento e uso de seus dados pessoais conforme especificado abaixo:",
+        "bullets": {
+          "registration": "• Dados de registro: Nome, endereço de e-mail, data de nascimento e gênero, necessários para identificação e personalização de sua experiência.",
+          "photos": "• Fotos e acesso à galeria: Solicitamos acesso à sua galeria para permitir que você carregue imagens e compartilhe momentos. Esta permissão pode ser gerenciada nas configurações do seu dispositivo.",
+          "location": "• Localização em tempo real: Solicitamos sua localização para fornecer conteúdo relevante, como eventos, recomendações e conexões próximas. Você pode gerenciar esta permissão a qualquer momento nas configurações do seu dispositivo.",
+          "notifications": "• Notificações: Enviaremos notificações para informá-lo sobre mensagens, eventos e atualizações. Você pode gerenciar suas preferências nas configurações do seu dispositivo."
+        }
+      },
+      "dataProtection": {
+        "title": "3. Proteção e Armazenamento de Dados",
+        "content": "O Invite Me emprega todas as medidas técnicas e organizacionais adequadas para proteger os dados pessoais de nossos usuários. No entanto, não podemos garantir segurança absoluta contra ataques externos ou incidentes imprevistos fora de nosso controle razoável. No caso de uma violação significativa de segurança, agiremos de acordo com as leis aplicáveis, informando os usuários e as autoridades competentes o mais rápido possível."
+      },
+      "acceptableUse": {
+        "title": "4. Uso Aceitável da Aplicação",
+        "content": "O uso do Invite Me deve ser respeitoso e responsável. Reservamo-nos o direito de suspender ou excluir contas que violem nossas normas da comunidade, incluindo:",
+        "bullets": {
+          "language": "• Uso de linguagem ofensiva, inadequada ou intimidadora.",
+          "harassment": "• Uso da plataforma para assediar ou intimidar outros usuários.",
+          "content": "• Publicação de conteúdo ilegal, que infrinja direitos autorais ou que não cumpra nossas normas."
+        }
+      },
+      "reporting": {
+        "title": "5. Sistema de Denúncias e Moderação",
+        "content": "O Invite Me permite que os usuários denunciem comportamentos inadequados de forma anônima. As denúncias serão gerenciadas por nossa equipe de suporte de acordo com nossas políticas de privacidade e de forma confidencial. Denúncias falsas podem resultar em penalidades."
+      },
+      "userRights": {
+        "title": "6. Direitos do Usuário",
+        "content": "De acordo com o RGPD, os usuários do Invite Me têm os seguintes direitos sobre seus dados pessoais:",
+        "bullets": {
+          "access": "• Acesso e Retificação: Você pode revisar e corrigir suas informações a qualquer momento nas configurações do seu perfil.",
+          "deletion": "• Exclusão da conta e dados associados: Você pode solicitar a exclusão de sua conta, o que removerá seus dados pessoais de nossos sistemas, exceto em casos em que seja necessário mantê-los por motivos legais.",
+          "permissions": "• Revogação de permissões: Você pode gerenciar e revogar permissões (como localização e notificações) nas configurações do seu dispositivo."
+        }
+      },
+      "intellectualProperty": {
+        "title": "7. Propriedade Intelectual e Conteúdo do Usuário",
+        "content": "Os direitos de propriedade intelectual sobre o conteúdo que você compartilha no Invite Me pertencem a você. No entanto, ao publicar conteúdo em nossa plataforma, você concede ao Invite Me uma licença não exclusiva para usar, reproduzir e distribuir esse conteúdo para fins operacionais e promocionais, de acordo com nossa Política de Privacidade."
+      },
+      "liability": {
+        "title": "8. Limitação de Responsabilidade",
+        "content": "O Invite Me não garante a disponibilidade ininterrupta de seus serviços. Em nenhum caso seremos responsáveis por danos indiretos ou lucros cessantes decorrentes do uso ou mau uso da plataforma."
+      },
+      "modifications": {
+        "title": "9. Modificações nos Termos e Condições",
+        "content": "O Invite Me pode modificar estes termos a qualquer momento para adaptá-los a mudanças na legislação ou em nossos serviços. Notificaremos os usuários sobre quaisquer alterações significativas e exigiremos sua aceitação para continuar usando a plataforma."
+      },
+      "contact": {
+        "title": "10. Contato e Atendimento ao Cliente",
+        "content": "Para qualquer pergunta ou solicitação relacionada aos seus direitos, você pode entrar em contato com nossa equipe de suporte em: iiinvitee.me@gmail.com."
+      }
+    },
+    "agreement": "Ao aceitar e usar o Invite Me, você confirma que leu e entendeu estes Termos e Condições e concorda em cumpri-los integralmente.",
+    "close": "Fechar"
+  },
+
+  "signup": {
+    "questions": {
+      "account": "Vamos criar sua conta juntos!",
+      "ageGender": "Qual é a sua idade?",
+      "gender": "Qual é o seu gênero?",
+      "about": "Compartilhe um pouco sobre você, seus hobbies, interesses e o que você mais gosta. Isso ajudará a personalizar seu perfil!",
+      "photos": "Escolha 3 fotos que melhor representem você e seu estilo!",
+      "preview1": "Veja como seu perfil está até agora",
+      "preview2": "Veja como seu perfil está com duas fotos",
+      "finalPreview": "Aqui está seu perfil completo",
+      "welcome": "Bem-vindo ao Invite Me!",
+      "hobbies": "Quais são dois dos seus hobbies favoritos?",
+      "interests": "Quais são alguns dos seus interesses?"
+    },
+    "placeholders": {
+      "firstName": "Nome",
+      "lastName": "Sobrenome",
+      "email": "E-mail",
+      "username": "Nome de usuário",
+      "password": "Senha",
+      "hobby1": "Caminhadas matinais",
+      "hobby2": "Fotografia",
+      "interest1": "Viajar",
+      "interest2": "Surfar"
+    },
+    "genders": {
+      "male": "Masculino",
+      "female": "Feminino",
+      "other": "Outro",
+      "prefer not to say": "Prefiro não dizer"
+    },
+    "termsAndConditions": {
+      "acceptText": "Eu aceito os"
+    },
+    "errors": {
+      "emptyName": "Por favor, preencha tanto o nome quanto o sobrenome",
+      "invalidName": "Os nomes só podem conter letras (sem números, símbolos ou espaços)",
+      "invalidEmail": "Por favor, insira um endereço de e-mail válido",
+      "invalidUsername": "O nome de usuário deve ter entre 1 e 30 caracteres e só pode conter letras minúsculas, números, pontos e sublinhados",
+      "invalidPassword": "A senha deve conter pelo menos uma letra maiúscula, um número e um caractere especial",
+      "termsNotAccepted": "Por favor, aceite os termos e condições",
+      "invalidHobbies": "Os hobbies devem ser palavras únicas sem espaços ou números",
+      "invalidInterests": "Os interesses devem ser palavras únicas sem espaços ou números",
+      "emailInUse": "Este e-mail já está em uso.",
+      "weakPassword": "A senha é muito fraca.",
+      "generic": "Ocorreu um erro. Por favor, tente novamente."
+    },
+    "welcome": {
+      "title": "Você está dentro!",
+      "subtitle": "Bem-vindo ao Invite Me, onde grandes experiências o aguardam."
+    }
+  },
+
+  "tutorial": {
+    "skip": "Pular",
+    "understood": "Entendido",
+    "slides": {
+      "1": {
+        "text": "Você está oficialmente convidado, Bem-vindo!",
+        "description": "Deslize para descobrir os recursos do aplicativo e aprender como aproveitar ao máximo sua experiência."
+      },
+      "2": {
+        "topText": "A página inicial é o seu ponto de partida para explorar seus lugares favoritos e os eventos mais quentes da cidade.",
+        "bottomText": "Selecione onde você estará para que seus amigos possam ver facilmente o que você está fazendo enquanto mergulha nos acontecimentos mais legais da cidade!"
+      },
+      "3": {
+        "topText": "Ao selecionar os eventos que você planeja participar na página inicial, seu perfil mostrará para onde você está indo, permitindo que outros se juntem à diversão e vejam seus planos empolgantes!",
+        "bottomText": "Também é tudo sobre seus lugares favoritos - os lugares que você ama e que combinam perfeitamente com sua vibe. Além disso, captura quem você é, celebrando todos os detalhes únicos que fazem você ser você."
+      },
+      "4": {
+        "topText": "Se preferir, você pode configurar sua conta como privada. Outros que não são seus amigos a verão assim.",
+        "bottomText": "Isso também significa que apenas seus amigos poderão ver para onde você está indo, tanto aqui quanto na página inicial."
+      },
+      "5": {
+        "topText": "Na seção de Chat, compartilhe seu humor e veja como os outros estão se sentindo! Responda ou curta as vibrações deles e conecte-se com amigos de uma maneira divertida."
+      },
+      "6": {
+        "topText": "Em Histórias, você pode ver quem está compartilhando seus momentos, e se quiser manter seus favoritos por perto, basta fixar alguém! Eles sempre aparecerão no topo para fácil acesso."
+      },
+      "7": {
+        "topText": "No menu, você pode encontrar exatamente o que está com vontade, seja jantar fora, tomar uma bebida ou ir a uma balada. Você também pode criar seus próprios eventos e explorar muito mais.",
+        "bottomText": "Além disso, você pode pesquisar em outras cidades para ver o que está acontecendo em outros lugares. Seja planejando uma viagem ou apenas curioso sobre o que está acontecendo, você pode conferir eventos com antecedência e ver quem você pode conhecer lá."
+      },
+      "8": {
+        "topText": "Com 'Criar Meu Próprio Evento', você tem a liberdade de organizar seus próprios encontros, seja uma festa privada ou uma celebração especial.",
+        "bottomText": "Você pode personalizar os detalhes do evento e até torná-lo um evento privado convidando apenas as pessoas com quem deseja compartilhar a experiência. É o seu evento, do seu jeito - projetado para reunir as pessoas certas."
+      }
+    }
+  }
+
+}
