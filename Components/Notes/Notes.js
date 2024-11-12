@@ -430,17 +430,17 @@ export default function Notes() {
       Alert.alert(t("notes.error"), t("notes.emptyResponseError"));
       return;
     }
-  
+
     try {
       const senderId = user.uid;
       const receiverId = selectedNoteFullScreen.friendId;
-  
+
       // Asegúrate de que el chat existe o créalo
       const chatId = await createChatIfNotExists(senderId, receiverId);
-  
+
       // Referencia a la colección de mensajes
       const messagesRef = collection(database, "chats", chatId, "messages");
-  
+
       // Crear el mensaje solo con el UID del remitente en 'seen'
       const newMessage = {
         text: responseMessage,
@@ -451,17 +451,17 @@ export default function Notes() {
         isNoteResponse: true,
         noteText: selectedNoteFullScreen.text,
       };
-  
+
       // Agregar el mensaje a la base de datos
       await addDoc(messagesRef, newMessage);
-  
+
       // Actualizar el chat con los detalles del último mensaje
       await updateDoc(doc(database, "chats", chatId), {
         lastMessage: responseMessage,
         lastMessageSenderId: user.uid,
         lastMessageTimestamp: new Date(),
       });
-  
+
       // Resetear el input y cerrar el modal
       setResponseMessage("");
       setShowResponseInput(false);
@@ -471,8 +471,6 @@ export default function Notes() {
       Alert.alert(t("notes.error"), t("notes.sendResponseError"));
     }
   };
-  
-  
 
   const createChatIfNotExists = async (senderId, receiverId) => {
     // Construct chat ID from user IDs
@@ -672,7 +670,7 @@ export default function Notes() {
                           onPress={() => handleSubmitNote()}
                         >
                           <Ionicons
-                            name="message-circle"
+                            name="paper-plane"
                             size={10}
                             color={isNightMode ? "#000" : "#fff"}
                           />

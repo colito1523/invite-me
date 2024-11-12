@@ -90,22 +90,18 @@
   "openOptionsMenu": "Abrir menu de opções",
   "report": "Denunciar",
 
-  "menu": {
-    "searchPlaceholder": "Procure a cidade que você está procurando...",
-    "categories": {
-      "title": "Categorias",
-      "all": "Todos",
-      "restaurantsRooftops": "Restaurantes & Rooftops",
-      "barsClubs": "Bares & Clubes",
-      "events": "Eventos",
-      "createOwnEvent": "Criar Meu Próprio Evento",
-      "suggestSpace": "Sugerir um Espaço"
-    },
-    "cities": {
-      "title": "Cidades"
-    },
-    "signOut": "Sair"
+
+  "categories": {
+    "all": "Todos",
+    "restaurantsBars": "Restaurantes & Rooftops",
+    "clubs": "Bares & Clubes",
+    "events": "Eventos",
+    "createOwnEvent": "Crie meu próprio evento",
+    "suggestSpace": "Sugira um espaço"
   },
+
+  "searchPlaceholder": "Procura...",
+  "signOut": "Sair",
 
   "_comment_createEvent.js": "createEvent.js",
   "createEvent": {

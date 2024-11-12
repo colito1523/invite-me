@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo  } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   FlatList,
   TextInput,
   Linking,
+  TouchableWithoutFeedback 
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome, Entypo } from "@expo/vector-icons";
@@ -30,14 +31,18 @@ import {
   updateDoc,
   deleteField,
   arrayUnion,
+  onSnapshot,
+  arrayRemove
 } from "firebase/firestore";
 import { Image } from "expo-image";
 import DotIndicatorBoxDetails from "../Components/Dots/DotIndicatorBoxDetails";
 import { useTranslation } from "react-i18next";
+import { Ionicons } from '@expo/vector-icons'; // Asegúrate de importar Ionicons
+
 
 const { width } = Dimensions.get("window");
 
-export default function BoxDetails({ route, navigation }) {
+export default memo(function BoxDetails({ route, navigation }) {
   const { t } = useTranslation();
   const { box, selectedDate } = route.params || {};
   const [isEventSaved, setIsEventSaved] = useState(false);
@@ -47,16 +52,27 @@ export default function BoxDetails({ route, navigation }) {
   const [filteredFriends, setFilteredFriends] = useState([]);
   const [isNightMode, setIsNightMode] = useState(false);
   const [attendeesList, setAttendeesList] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
 
   useEffect(() => {
     if (box) {
       checkEventStatus();
       fetchFriends();
       checkNightMode();
-      fetchAttendees();
       checkAndRemoveExpiredEvents();
+  
+      // Llamar a fetchAttendees y guardar la función de desuscripción
+      const unsubscribe = fetchAttendees();
+  
+      // Limpieza de la suscripción al desmontar el componente
+      return () => unsubscribe && unsubscribe();
     }
   }, [box, selectedDate]);
+  
 
   const checkAndRemoveExpiredEvents = async () => {
     const boxRef = doc(database, "GoBoxs", box.title);
@@ -135,32 +151,33 @@ export default function BoxDetails({ route, navigation }) {
     }
   };
 
-  const fetchAttendees = async () => {
+  const fetchAttendees = () => {
     if (box) {
-      let attendees = [];
-      if (box.category === "EventoParaAmigos") {
-        // Fetch attendees for private events
-        const eventRef = doc(database, "EventsPriv", box.id);
-        const eventDoc = await getDoc(eventRef);
-        if (eventDoc.exists()) {
-          const data = eventDoc.data();
-          attendees = data.attendees || [];
+      const eventRef = doc(
+        database,
+        box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
+        box.id || box.title
+      );
+  
+      // Escucha en tiempo real para cambios en los asistentes
+      const unsub = onSnapshot(eventRef, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          const attendees =
+            box.category === "EventoParaAmigos"
+              ? data.attendees
+              : data[selectedDate] || [];
+  
+              const uniqueAttendees = (attendees || []).map((attendee) => ({
+                ...attendee,
+                profileImage: attendee.profileImage || "https://via.placeholder.com/150",
+              }));
+          setAttendeesList(uniqueAttendees);
         }
-      } else {
-        // Fetch attendees for general events
-        const boxRef = doc(database, "GoBoxs", box.title);
-        const boxDoc = await getDoc(boxRef);
-        if (boxDoc.exists()) {
-          const data = boxDoc.data();
-          attendees = data[selectedDate] || [];
-        }
-      }
-      const uniqueAttendees = attendees.map((attendee) => ({
-        ...attendee,
-        profileImage:
-          attendee.profileImage || "https://via.placeholder.com/150",
-      }));
-      setAttendeesList(uniqueAttendees);
+      });
+  
+      // Retornar la función para cancelar la suscripción
+      return unsub;
     }
   };
 
@@ -179,9 +196,7 @@ export default function BoxDetails({ route, navigation }) {
               return {
                 friendId: friendId,
                 friendName: friendData.data().username,
-                profileImage:
-                  friendData.data().profileImage ||
-                  "https://via.placeholder.com/150",
+                friendImage: friendData.data().friendImage || friendDoc.data().friendImage || "https://via.placeholder.com/150",
                 invited: false,
               };
             }
@@ -269,31 +284,49 @@ export default function BoxDetails({ route, navigation }) {
   };
 
   const handleAddEvent = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+  
     const user = auth.currentUser;
-    if (!user || !box) return;
-
+    if (!user || !box) {
+      setIsProcessing(false);
+      return;
+    }
+  
     const eventsRef = collection(database, "users", user.uid, "events");
     const q = query(eventsRef, where("title", "==", box.title));
     const querySnapshot = await getDocs(q);
-
+  
     if (!querySnapshot.empty) {
+      // Lógica para eliminar asistencia
       try {
         const eventDoc = querySnapshot.docs[0];
         await deleteDoc(doc(eventsRef, eventDoc.id));
         setIsEventSaved(false);
-
-        if (box.category !== "EventoParaAmigos") {
+  
+        if (box.category === "EventoParaAmigos") {
+          // Lógica para eventos privados: elimina al usuario de la lista de asistentes
+          const eventRef = doc(database, "EventsPriv", box.id);
+          await updateDoc(eventRef, {
+            attendees: arrayRemove({
+              uid: user.uid,
+            }),
+          });
+        } else {
+          // Lógica para otros eventos
           await handleRemoveFromGoBoxs(box.title, selectedDate);
         }
+  
         await fetchAttendees();
       } catch (error) {
         console.error("Error eliminando el evento: ", error);
         Alert.alert(t("boxDetails.error"), t("boxDetails.eventDeletionError"));
       }
     } else {
+      // Lógica para agregar asistencia si no existe
       const eventsSnapshot = await getDocs(eventsRef);
       const eventCount = eventsSnapshot.size;
-
+  
       if (eventCount >= 6) {
         Alert.alert(
           t("boxDetails.limitReached"),
@@ -308,7 +341,7 @@ export default function BoxDetails({ route, navigation }) {
           const phoneNumber = box.number || "Sin número";
           const locationLink = box.locationLink || "Sin ubicación especificada";
           const hours = box.hours || {};
-
+  
           if (!isPrivateEvent) {
             await saveUserEvent(
               box.title,
@@ -319,9 +352,10 @@ export default function BoxDetails({ route, navigation }) {
               hours
             );
           }
-
+  
           const dateArray = [eventDate];
-
+  
+          // Construye el objeto de datos del evento, agregando las coordenadas solo si están definidas
           const eventData = {
             title: box.title,
             imageUrl: box.imageUrl || "",
@@ -330,14 +364,15 @@ export default function BoxDetails({ route, navigation }) {
             phoneNumber: phoneNumber,
             locationLink: locationLink,
             hours: hours,
+            ...(box.coordinates ? { coordinates: box.coordinates } : {}),
           };
-
+  
           if (daySpecial) {
             eventData.DaySpecial = daySpecial;
           }
-
+  
           await addDoc(eventsRef, eventData);
-
+  
           if (isPrivateEvent) {
             const userDoc = await getDoc(doc(database, "users", user.uid));
             const username = userDoc.exists()
@@ -347,15 +382,15 @@ export default function BoxDetails({ route, navigation }) {
               ? (userDoc.data().photoUrls && userDoc.data().photoUrls[0]) ||
                 "https://via.placeholder.com/150"
               : "https://via.placeholder.com/150";
-
+  
             const attendeeData = {
               uid: user.uid,
               username,
               profileImage,
             };
-
+  
             const eventRef = doc(database, "EventsPriv", box.id);
-
+  
             const eventDoc = await getDoc(eventRef);
             if (!eventDoc.exists()) {
               await setDoc(eventRef, {
@@ -367,12 +402,12 @@ export default function BoxDetails({ route, navigation }) {
                 image: box.image || "",
               });
             }
-
+  
             await updateDoc(eventRef, {
               attendees: arrayUnion(attendeeData),
             });
           }
-
+  
           setIsEventSaved(true);
           await fetchAttendees();
         } catch (error) {
@@ -381,7 +416,13 @@ export default function BoxDetails({ route, navigation }) {
         }
       }
     }
+  
+    setIsProcessing(false);
   };
+  
+  
+  
+  
 
   const handleRemoveFromGoBoxs = async (boxTitle, selectedDate) => {
     try {
@@ -496,7 +537,9 @@ export default function BoxDetails({ route, navigation }) {
       ]}
     >
       <Image
-        source={{ uri: item.profileImage }}
+        source={{
+          uri: item.friendImage || "https://via.placeholder.com/150"
+        }}
         style={styles.friendImage}
         cachePolicy="memory-disk"
       />
@@ -565,6 +608,7 @@ export default function BoxDetails({ route, navigation }) {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.button, isEventSaved && styles.activeButton]}
+                disabled={isProcessing} 
                 onPress={handleAddEvent}
               >
                 <Text style={styles.buttonText}>
@@ -652,7 +696,7 @@ export default function BoxDetails({ route, navigation }) {
                     {t("boxDetails.contactTitle")}
                   </Text>
                   <Text style={styles.contactText}>
-                    {box.number || t("boxDetails.contactNotAvailable")}
+                    {box.number  || box.phoneNumber}
                   </Text>
                 </View>
               </View>
@@ -664,9 +708,11 @@ export default function BoxDetails({ route, navigation }) {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={closeModal}
       >
+         <TouchableWithoutFeedback onPress={closeModal}>
         <View style={styles.modalOverlay}>
+        <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
           <View
             style={[
               styles.friendsModalContent,
@@ -693,28 +739,15 @@ export default function BoxDetails({ route, navigation }) {
               renderItem={renderFriendItem}
               keyExtractor={(item) => item.friendId.toString()}
             />
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={[
-                styles.closeModalButton,
-                isNightMode && styles.closeModalButtonNight,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.closeModalText,
-                  isNightMode && styles.closeModalTextNight,
-                ]}
-              >
-                {t("boxDetails.closeButton")}
-              </Text>
-            </TouchableOpacity>
+           
           </View>
+          </TouchableWithoutFeedback>
         </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -883,7 +916,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     height: 40,
-    borderColor: "#b5a642",
+    borderColor: "black",
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 10,
@@ -910,8 +943,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 15,
-    borderWidth: 2,
-    borderColor: "#b5a642",
   },
   friendName: {
     flex: 1,
@@ -922,9 +953,10 @@ const styles = StyleSheet.create({
     color: "white",
   },
   shareButton: {
-    backgroundColor: "#b5a642",
+    backgroundColor: "black",
     padding: 10,
     borderRadius: 25,
+    marginRight: 10,
   },
   shareButtonNight: {
     backgroundColor: "black",
@@ -934,7 +966,7 @@ const styles = StyleSheet.create({
   },
   closeModalButton: {
     marginTop: 20,
-    backgroundColor: "#b5a642",
+    backgroundColor: "#black",
     padding: 10,
     borderRadius: 10,
     alignItems: "center",

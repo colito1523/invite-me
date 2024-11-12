@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Dimensions,
   Platform,
-  onSnapshot
 } from "react-native";
 import { signOut } from "firebase/auth";
 import { Entypo, FontAwesome, FontAwesome6 } from "@expo/vector-icons";
@@ -19,7 +18,6 @@ import {
   ref,
   getDownloadURL,
   database,
-  onSnapshot
 } from "../config/firebase";
 import {
   collection,
@@ -28,6 +26,7 @@ import {
   getDocs,
   doc,
   getDoc,
+  onSnapshot
 } from "firebase/firestore";
 import Colors from "../constants/Colors";
 import Box from "../Components/Boxs/Box";
@@ -40,6 +39,8 @@ import { Image } from "expo-image";
 
 import boxInfo from "../src/data/boxInfo";
 import Menu from "../Components/Menu/Menu";
+import { useTranslation } from 'react-i18next';
+
 
 const { width } = Dimensions.get("window");
 
@@ -50,7 +51,7 @@ const Home = React.memo(() => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [boxData, setBoxData] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [profileImage, setProfileImage] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -61,6 +62,9 @@ const Home = React.memo(() => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [privateEvents, setPrivateEvents] = useState([]);
+  const { t } = useTranslation();
+  const LazyBoxDetails = lazy(() => import('./BoxDetails'));
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -299,6 +303,11 @@ const Home = React.memo(() => {
     }
   }, [selectedDate]);
 
+  // Coloca aquí el nuevo useEffect para actualizar los datos cuando cambie selectedCategory
+useEffect(() => {
+  fetchBoxData();
+}, [selectedCategory]);
+
   const fetchPrivateEvents = useCallback(async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -338,7 +347,7 @@ const Home = React.memo(() => {
     }
   
     // Filtrado adicional según categoría, ignorando la opción "Todos"
-    if (selectedCategory && selectedCategory !== "Todos") {
+    if (selectedCategory && selectedCategory !== t("categories.all")) {
       filteredData = filteredData.filter((box) => box.category === selectedCategory);
     }
   
@@ -358,7 +367,7 @@ const Home = React.memo(() => {
       { title: "Eventos Privados", data: privateEvents },
       { title: "Eventos Generales", data: generalEvents },
     ];
-  }, [boxData, selectedCity, selectedCategory]);
+  }, [boxData, selectedCity, selectedCategory, t]);
   
   useEffect(() => {
     fetchBoxData();
@@ -591,6 +600,7 @@ const nightStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
+    
   },
   sectionTitle: {
     fontSize: 22,

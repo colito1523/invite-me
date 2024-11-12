@@ -1056,7 +1056,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   viewersModalContainer: {
-    backgroundColor: "rgba(225, 225, 225, 0.8)",
+    backgroundColor: "rgba(225, 225, 225, 0.99)",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 20,

@@ -90,22 +90,17 @@
   "openOptionsMenu": "Open options menu",
   "report": "Report",
 
- "menu": {
-    "searchPlaceholder": "Search for the city you're looking for...",
-    "categories": {
-      "title": "Categories",
-      "all": "All",
-      "restaurantsRooftops": "Restaurants & Rooftops",
-      "barsClubs": "Bars & Clubs",
-      "events": "Events",
-      "createOwnEvent": "Create My Own Event",
-      "suggestSpace": "Suggest a Space"
-    },
-    "cities": {
-      "title": "Cities"
-    },
-    "signOut": "Sign Out"
+  "categories": {
+    "all": "All",
+    "restaurantsBars": "Restaurants & Rooftops",
+    "clubs": "Bars & Clubs",
+    "events": "Events",
+    "createOwnEvent": "Create My Own Event",
+    "suggestSpace": "Suggest a Space"
   },
+
+  "searchPlaceholder": "Search...",
+  "signOut": "Sign Out",
   "_comment_createEvent.js": "createEvent.js",
   "createEvent": {
     "title": "Create Your Own Event",

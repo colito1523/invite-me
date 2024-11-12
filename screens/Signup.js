@@ -403,7 +403,7 @@ export default function SignUp() {
   const pickImage = async (photoNumber) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false, // Habilita la edición para permitir redimensionamiento
+      allowsEditing: true, // Habilita la edición para permitir redimensionamiento
       quality: 1, // Máxima calidad
     });
   

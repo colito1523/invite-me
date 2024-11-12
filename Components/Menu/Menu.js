@@ -4,6 +4,7 @@ import { TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
+import i18n from 'i18next';
 
 export default function Menu({
   isVisible,

@@ -27,6 +27,7 @@ import Complaints from "../Complaints/Complaints";
 import FriendListModal from '../Modals/FriendListModal';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
+import MutualFriendsModal from "../Mutual-Friends-Modal/MutualFriendsModal";
 
 const { width, height } = Dimensions.get("window");
 
@@ -71,6 +72,8 @@ export default function Component({ route, navigation }) {
   const [isFriendListVisible, setIsFriendListVisible] = useState(false);
   const [mutualFriends, setMutualFriends] = useState([]);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [isMutualFriendsModalVisible, setIsMutualFriendsModalVisible] = useState(false);
+
 
   const user = auth.currentUser;
 
@@ -102,6 +105,10 @@ export default function Component({ route, navigation }) {
         t('errorAccessingUserData')
       );
     }
+  };
+
+  const handleMutualFriendsPress = () => {
+    setIsMutualFriendsModalVisible(true);
   };
 
   const handleReportSubmit = async (reason, description) => {
@@ -332,11 +339,12 @@ export default function Component({ route, navigation }) {
         </View>
       );
     }
-
+  
     const containerWidth = mutualFriends.length * 40;
-
+  
     return (
-      <View
+      <TouchableOpacity
+        onPress={handleMutualFriendsPress}
         style={[
           styles.mutualFriendsContainer,
           { flexDirection: "row", alignItems: "center" },
@@ -367,9 +375,10 @@ export default function Component({ route, navigation }) {
             ? t('andMoreMutualFriends', { count: mutualFriends.length - 4 })
             : t('mutualFriends')}
         </Text>
-      </View>
+      </TouchableOpacity>
     );
   };
+  
 
   return (
     <Provider>
@@ -502,7 +511,14 @@ export default function Component({ route, navigation }) {
           onSubmit={handleReportSubmit}
         />
       </LinearGradient>
+
+      <MutualFriendsModal
+  isVisible={isMutualFriendsModalVisible}
+  onClose={() => setIsMutualFriendsModalVisible(false)}
+  friends={mutualFriends}
+/>
     </Provider>
+    
   );
 }
 
