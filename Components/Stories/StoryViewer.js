@@ -40,12 +40,14 @@ export function StoryViewer({
   initialIndex,
   onClose,
   onStoryDeleted,
+  unseenStories, 
   navigation,
 }) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [storyIndex, setStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [localUnseenStories, setLocalUnseenStories] = useState(unseenStories); 
   const [message, setMessage] = useState("");
   const [viewersModalVisible, setViewersModalVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -84,6 +86,10 @@ export function StoryViewer({
     }
   }, [isComplaintsVisible, isOptionsModalVisible, isKeyboardVisible]);
 
+  const handleCloseViewer = () => {
+    onClose(localUnseenStories); // Envía el estado actualizado de `localUnseenStories` a `StorySlider.js`
+  };
+  
   useEffect(() => {
     let timer;
     if (!isPaused && !isKeyboardVisible && !isComplaintsVisible) {
@@ -132,18 +138,24 @@ export function StoryViewer({
 
   useEffect(() => {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
-
-    if (currentStory && auth.currentUser) {
+  
+    // Si `currentStory` no está disponible, no continúes y muestra un indicador de carga
+    if (!currentStory) {
+      return;
+    }
+  
+    if (auth.currentUser) {
       addViewerToStory(currentStory.id, currentStory.uid);
       const userHasLiked = currentStory.likes?.some(
         (like) => like.uid === auth.currentUser.uid
       );
       setHasLiked(userHasLiked || false);
     }
-
-    // Pre-load the next story
+  
+    // Pre-cargar la siguiente historia si existe
     preloadNextStory();
   }, [currentIndex, storyIndex]);
+  
 
   const preloadNextStory = () => {
     let nextStoryUrl = null;
@@ -410,6 +422,23 @@ export function StoryViewer({
   );
 
   const handleNext = () => {
+    const currentStory = stories[currentIndex]?.userStories[storyIndex];
+
+    // Verificar si currentStory es undefined antes de acceder a sus propiedades
+  if (!currentStory) {
+    onClose(localUnseenStories);
+    return;
+  }
+  
+    if (localUnseenStories[currentStory.uid]?.length > 0) {
+      setLocalUnseenStories((prev) => ({
+        ...prev,
+        [currentStory.uid]: prev[currentStory.uid].filter(
+          (story) => story.id !== currentStory.id
+        ),
+      }));
+    }
+  
     if (storyIndex < stories[currentIndex]?.userStories.length - 1) {
       setStoryIndex((prev) => prev + 1);
       setProgress(0);
@@ -418,9 +447,10 @@ export function StoryViewer({
       setStoryIndex(0);
       setProgress(0);
     } else {
-      onClose();
+      onClose(localUnseenStories); // Pasa el estado actualizado de vuelta
     }
   };
+  
 
   const handlePrevious = () => {
     if (storyIndex > 0) {
@@ -526,12 +556,13 @@ export function StoryViewer({
     },
     onPanResponderRelease: (evt, gestureState) => {
       if (gestureState.dy > 50) {
-        onClose();
+        handleCloseViewer(); // Llama a `handleCloseViewer` al deslizar hacia abajo
       } else if (gestureState.dy < -50 && isCurrentUserStory) {
         handleOpenViewersModal();
       }
     },
   });
+  
 
   const handleOpenViewersModal = () => {
     setIsPaused(true);
@@ -976,7 +1007,7 @@ const styles = StyleSheet.create({
   image: {
     width,
     height,
-    resizeMode: "cover",
+    contentFit: "cover",
   },
   userInfo: {
     position: "absolute",

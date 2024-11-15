@@ -53,7 +53,8 @@ export default function ElegantLogin({ navigation }) {
   const [isNightMode, setIsNightMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] = useState(false);
-  const { t } = useTranslation();
+  const [selectedLanguage, setSelectedLanguage] = useState('es');
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const checkTime = () => {
@@ -68,12 +69,14 @@ export default function ElegantLogin({ navigation }) {
 
     return () => clearInterval(interval);
   }, []);
+  
 
   const loadSavedLanguage = async () => {
     try {
       const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
       if (savedLanguage) {
         i18n.changeLanguage(savedLanguage);
+        setSelectedLanguage(savedLanguage);  // Actualiza el selector de idioma
       }
     } catch (error) {
       console.error('Error loading saved language:', error);
@@ -81,7 +84,8 @@ export default function ElegantLogin({ navigation }) {
   };
 
   const changeLanguage = async (lang) => {
-    i18n.changeLanguage(lang);
+    await i18n.changeLanguage(lang);
+    setSelectedLanguage(lang);
     try {
       await AsyncStorage.setItem(LANGUAGE_KEY, lang);
     } catch (error) {
@@ -124,6 +128,12 @@ export default function ElegantLogin({ navigation }) {
 
   const theme = isNightMode ? darkTheme : lightTheme;
 
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' },
+    { code: 'pt', name: 'Português' }
+  ];
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: '#fff' }]}>
       <KeyboardAvoidingView
@@ -137,31 +147,31 @@ export default function ElegantLogin({ navigation }) {
           >
             <View style={styles.languageContainer}>
               <TouchableOpacity
-                style={styles.languageButton}
+                style={styles.languageSelector}
                 onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
               >
-                <Ionicons name="ellipsis-vertical" size={24} color="#000" />
+                <Ionicons name="globe-outline" size={24} color="#000" />
+                <Text style={styles.selectedLanguage}>
+                  {languages.find(lang => lang.code === selectedLanguage)?.name}
+                </Text>
+                <Ionicons name="chevron-down" size={24} color="#000" />
               </TouchableOpacity>
               {isLanguageOptionsVisible && (
                 <View style={styles.languageOptions}>
-                  <TouchableOpacity
-                    style={styles.languageOption}
-                    onPress={() => changeLanguage('es')}
-                  >
-                    <Text style={styles.languageOptionText}>Español</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.languageOption}
-                    onPress={() => changeLanguage('en')}
-                  >
-                    <Text style={styles.languageOptionText}>English</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.languageOption}
-                    onPress={() => changeLanguage('pt')}
-                  >
-                    <Text style={styles.languageOptionText}>Português</Text>
-                  </TouchableOpacity>
+                  {languages.map((lang) => (
+                    <TouchableOpacity
+                      key={lang.code}
+                      style={styles.languageOption}
+                      onPress={() => changeLanguage(lang.code)}
+                    >
+                      <Text style={[
+                        styles.languageOptionText,
+                        selectedLanguage === lang.code && styles.selectedLanguageText
+                      ]}>
+                        {lang.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               )}
             </View>
@@ -341,14 +351,27 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 40,
     right: 20,
-    alignItems: 'flex-end',
+    zIndex: 1,
   },
-  languageButton: {
-    padding: 10,
+  languageSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  selectedLanguage: {
+    marginHorizontal: 10,
+    fontSize: 16,
+    color: '#333',
   },
   languageOptions: {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
     backgroundColor: 'white',
-    borderRadius: 5,
+    borderRadius: 10,
     marginTop: 5,
     shadowColor: '#000',
     shadowOffset: {
@@ -358,13 +381,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    width: 150,
   },
   languageOption: {
-    padding: 10,
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   languageOptionText: {
     fontSize: 16,
     color: '#333',
+  },
+  selectedLanguageText: {
+    fontWeight: 'bold',
+    color: '#000',
   },
 });
 

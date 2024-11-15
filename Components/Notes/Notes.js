@@ -12,6 +12,7 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   FlatList,
+  Keyboard,
 } from "react-native";
 import {
   collection,
@@ -61,6 +62,7 @@ export default function Notes() {
   const [showResponseInput, setShowResponseInput] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
   const [isNightMode, setIsNightMode] = useState(false);
+  const [showMoodToggle, setShowMoodToggle] = useState(false);
 
   const user = auth.currentUser;
   const inputRef = useRef(null);
@@ -202,6 +204,11 @@ export default function Notes() {
       setShowSendButton(false);
       setIsInputActive(false);
       setShowMoodOptions(false);
+      setShowMoodToggle(false);
+      Animated.timing(moodOptionsHeight, {
+        toValue: 0,
+        useNativeDriver: false,
+      }).start();
     } catch (error) {
       console.error("Error posting note:", error);
       Alert.alert(t("notes.error"), t("notes.postNoteError"));
@@ -242,7 +249,7 @@ export default function Notes() {
       setIsEditing(true);
       setShowOptions(true);
       setIsInputActive(true);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setShowMoodToggle(true);
     }
   };
 
@@ -350,14 +357,8 @@ export default function Notes() {
   };
 
   const toggleMoodOptions = () => {
-    if (isInputActive) {
-      setShowMoodOptions(!showMoodOptions);
-      Animated.timing(moodOptionsHeight, {
-        toValue: showMoodOptions ? 0 : 40,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-    }
+    setShowMoodOptions(!showMoodOptions);
+    moodOptionsHeight.setValue(showMoodOptions ? 0 : 40); // Actualiza directamente sin animación
   };
 
   const handleOutsidePress = () => {
@@ -368,18 +369,15 @@ export default function Notes() {
 
   const handleMoodOptionPress = async (mood) => {
     try {
-      const noteRef = doc(database, "users", user.uid, "note", "current");
-      await setDoc(noteRef, {
-        text: mood,
-        createdAt: new Date(),
-        photoUrl: userData ? userData.photoUrls[0] : "",
-      });
+      await handleSubmitNote(mood);
+      setShowMoodOptions(false);
+      setShowMoodToggle(false);
+      moodOptionsHeight.setValue(0); // Actualiza sin animación
     } catch (error) {
       console.error("Error uploading mood:", error);
       Alert.alert(t("notes.error"), t("notes.shareMoodError"));
     }
   };
-
   const renderMoodNote = (note, isUser = false) => (
     <TouchableOpacity
       key={note.id}
@@ -647,14 +645,16 @@ export default function Notes() {
                           { color: isNightMode ? "#fff" : "#000" },
                         ]}
                         placeholder={t("notes.typeMoodPlaceholder")}
-                        placeholderTextColor={isNightMode ? "black" : "black"}
+                        placeholderTextColor={isNightMode ? "#888" : "#888"}
                         value={note}
                         onChangeText={handleNoteChange}
                         multiline
-                        onFocus={() => setIsInputActive(true)}
+                        onFocus={() => {
+                          setIsInputActive(true);
+                          setShowMoodToggle(true);
+                        }}
                         onBlur={() => {
                           setIsInputActive(false);
-                          setShowMoodOptions(false);
                         }}
                       />
                       {showSendButton && (
@@ -691,7 +691,7 @@ export default function Notes() {
         {friendsNotes.map((note) => renderMoodNote(note))}
       </ScrollView>
 
-      {isInputActive && (
+      {showMoodToggle && (
         <TouchableOpacity
           onPress={toggleMoodOptions}
           style={styles.moodToggleButton}

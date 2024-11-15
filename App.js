@@ -3,13 +3,14 @@ import { View, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { onAuthStateChanged } from "firebase/auth";
-import { getDoc, doc } from "firebase/firestore";
+import { getDoc, doc, updateDoc } from "firebase/firestore"; // Añadir updateDoc para actualizar Firestore
 import * as Font from "expo-font";
 import { BlockProvider } from "./src/contexts/BlockContext";
 import { Provider as PaperProvider } from "react-native-paper";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import useNotifications from "./src/hooks/useNotifications"; // Importa el hook personalizado
 
 import Login from "./screens/Login";
 import Signup from "./screens/Signup";
@@ -101,7 +102,7 @@ function RootNavigator() {
       if (authenticatedUser) {
         setUser(authenticatedUser);
         const userDoc = doc(database, "users", authenticatedUser.uid);
-        const userSnapshot = await getDoc(userDoc);
+        await getDoc(userDoc); // Obtener los datos del usuario (puedes agregar lógica según tus necesidades)
       } else {
         setUser(null);
       }
@@ -128,6 +129,8 @@ function RootNavigator() {
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = React.useState(false);
   const [isI18nInitialized, setIsI18nInitialized] = React.useState(false);
+
+  const expoPushToken = useNotifications(); // Usa el hook de notificaciones
 
   React.useEffect(() => {
     const loadFonts = async () => {
@@ -156,13 +159,26 @@ export default function App() {
         setIsI18nInitialized(true);
       } catch (error) {
         console.error('Error initializing i18n:', error);
-        setIsI18nInitialized(true); // Set to true even on error to allow app to continue
+        setIsI18nInitialized(true);
+      }
+    };
+
+    const updatePushTokenInFirestore = async () => {
+      if (auth.currentUser && expoPushToken) {
+        try {
+          const userRef = doc(database, 'users', auth.currentUser.uid);
+          await updateDoc(userRef, { expoPushToken: expoPushToken });
+          console.log("Expo Push Token actualizado en Firestore");
+        } catch (error) {
+          console.error("Error actualizando expoPushToken:", error);
+        }
       }
     };
 
     loadFonts();
     initializeI18n();
-  }, []);
+    updatePushTokenInFirestore();
+  }, [expoPushToken]);
 
   if (!fontsLoaded || !isI18nInitialized) {
     return (

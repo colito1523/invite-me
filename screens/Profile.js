@@ -51,20 +51,20 @@ const NameDisplay = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <View style={styles.nameContainer}>
-      <View style={styles.nameAndSurnameContainer}>
+    <View style={[styles.nameContainer, isEditing && styles.nameContainerEditing]}>
+      <View style={[styles.nameAndSurnameContainer, isEditing && styles.nameAndSurnameContainerEditing]}>
         {isEditing ? (
           <>
             <TextInput
               ref={nameInputRef}
-              style={styles.editableText}
+              style={[styles.editableText, styles.editableTextEditing]}
               value={name}
               onChangeText={setName}
               placeholder={t('profile.namePlaceholder')}
             />
             <TextInput
               ref={surnameInputRef}
-              style={styles.editableText}
+              style={[styles.editableText, styles.editableTextEditing]}
               value={surname}
               onChangeText={setSurname}
               placeholder={t('profile.surnamePlaceholder')}
@@ -76,7 +76,7 @@ const NameDisplay = ({
           </Text>
         )}
       </View>
-      {displayFriendCount && (
+      {!isEditing && displayFriendCount && (
         <TouchableOpacity
           onPress={handleFriendCountClick}
           style={styles.friendCountContainer}
@@ -89,6 +89,8 @@ const NameDisplay = ({
     </View>
   );
 };
+
+
 
 export default function Profile({ navigation }) {
   const { t } = useTranslation();
@@ -631,30 +633,31 @@ export default function Profile({ navigation }) {
             </TouchableOpacity>
           )}
           {isElementsVisible && (
-            <View style={styles.menuContainer}>
-              <Menu
-                visible={menuVisible}
-                onDismiss={() => setMenuVisible(false)}
-                anchor={
-                  <TouchableOpacity onPress={() => setMenuVisible(true)}>
-                    <Ionicons
-                      name="ellipsis-vertical"
-                      size={24}
-                      color="white"
-                    />
-                  </TouchableOpacity>
-                }
-              >
-                <Menu.Item
-                  onPress={handleEditProfile}
-                  title={t('profile.editProfile')}
+        <View style={styles.menuContainer}>
+          <Menu
+            visible={menuVisible}
+            onDismiss={() => setMenuVisible(false)}
+            anchor={
+              <TouchableOpacity onPress={() => setMenuVisible(true)}>
+                <Ionicons
+                  name="ellipsis-vertical"
+                  size={24}
+                  color="white"
                 />
-                <Menu.Item
-                  onPress={handleTogglePrivacy}
-                  title={
-                    isPrivate ? t('profile.makePublic') : t('profile.makePrivate')
-                  }
-                />
+              </TouchableOpacity>
+            }
+            contentStyle={styles.menuContent}
+          >
+            <Menu.Item
+              onPress={handleEditProfile}
+              title={t('profile.editProfile')}
+            />
+            <Menu.Item
+              onPress={handleTogglePrivacy}
+              title={
+                isPrivate ? t('profile.makePublic') : t('profile.makePrivate')
+              }
+            />
                 <Divider />
               </Menu>
             </View>
@@ -859,8 +862,18 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 10,
   },
+  nameContainerEditing: {
+    top: '70%', // Centra verticalmente
+    left: '50%', // Centra horizontalmente
+    transform: [{ translateX: -width * 0.25 }, { translateY: -height * 0.25 }], // Ajuste para centrar completamente
+    alignItems: 'center', // Centra el contenido dentro
+  },
   nameAndSurnameContainer: {
     marginBottom: 10,
+  },
+  nameAndSurnameContainerEditing: {
+    flexDirection: "row", // Muestra nombre y apellido en la misma línea
+    gap: 10, // Espacio entre los campos de nombre y apellido
   },
   friendCountContainer: {
     alignItems: "flex-start",
@@ -876,9 +889,13 @@ const styles = StyleSheet.create({
     color: "white",
     paddingBottom: 5,
   },
+  editableTextEditing: {
+    textAlign: "center", // Alinea el texto en el centro del campo en modo edición
+  },
   friendsText: {
     fontSize: 28,
     color: "#fff",
+    fontWeight: "bold",
   },
   spacer: {
     height: 150,
@@ -915,6 +932,10 @@ const styles = StyleSheet.create({
     top: 40,
     right: 20,
     zIndex: 10,
+  },
+  menuContent: {
+    marginTop: 60, // Ajusta este valor para mover las opciones del menú hacia abajo
+    borderRadius: 10,
   },
   photoEditorContainer: {
     flexDirection: "row",

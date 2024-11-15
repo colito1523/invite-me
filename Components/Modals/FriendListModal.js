@@ -51,7 +51,7 @@ export default function FriendListModal({ isVisible, onClose, userId, updateFrie
       if (!userDoc.empty) {
         const userData = userDoc.docs[0].data();
         userData.id = uid;
-        navigation.navigate('UserProfile', { selectedUser: JSON.stringify(userData) });
+        navigation.navigate('UserProfile', { selectedUser: userData });
       } else {
         console.error(t('friendListModal.userNotFound'));
       }

@@ -71,7 +71,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
         <Animated.FlatList
           data={attendeesList}
           renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item) => item.uid}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.flatListContent}

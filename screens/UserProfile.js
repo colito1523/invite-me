@@ -38,13 +38,18 @@ import { useTranslation } from 'react-i18next';
 
 const { width, height } = Dimensions.get("window");
 
-const NameDisplay = ({ firstName, lastName }) => {
+const NameDisplay = ({ firstName, lastName, friendCount, showFriendCount, onFriendListPress }) => {
   const { t } = useTranslation();
   return (
     <View style={styles.nameContainer}>
       <Text style={styles.name}>
         {firstName} {lastName}
       </Text>
+      {showFriendCount && (
+        <TouchableOpacity onPress={onFriendListPress} style={styles.friendCountContainer}>
+          <Text style={styles.friendCountText}>{friendCount} </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -828,27 +833,20 @@ export default function UserProfile({ route, navigation }) {
                     <NameDisplay
                       firstName={selectedUser.firstName}
                       lastName={selectedUser.lastName}
+                      friendCount={friendCount}
+                      showFriendCount={index === 0}
+                      onFriendListPress={() => setIsFriendListVisible(true)}
                     />
                     <View style={styles.infoContainer}>
                       {index === 0 && (
                         <>
                           <View style={styles.spacer} />
-                          <TouchableOpacity
-                            onPress={() => setIsFriendListVisible(true)}
-                            style={styles.friendCountContainer}
-                          >
-                            <Text style={styles.number}>{friendCount}</Text>
-                          </TouchableOpacity>
                           {renderEvents(0, 4)}
                         </>
                       )}
                       {index === 1 && (
                         <>
                           <View style={styles.spacer} />
-                          <NameDisplay
-                            firstName={selectedUser.firstName}
-                            lastName={selectedUser.lastName}
-                          />
                           <View style={styles.friendCountContainer}>
                             {renderMutualFriends()}
                           </View>
@@ -926,47 +924,47 @@ export default function UserProfile({ route, navigation }) {
                     />
                   </TouchableOpacity>
                 }
-                style={styles.menuStyle}
-              >
-                <Menu.Item
-                  onPress={() => {
-                    toggleUserStatus();
-                    closeMenu();
-                  }}
-                  title={
-                    friendshipStatus
-                      ? t('userProfile.removeFriend')
-                      : pendingRequest
-                      ? t('userProfile.cancelRequest')
-                      : t('userProfile.addFriend')
-                  }
-                />
-                <Menu.Item
-                  onPress={() => {
-                    blockUser(selectedUser.id);
-                    closeMenu();
-                  }}
-                  title={t('userProfile.block')}
-                  titleStyle={{ color: "#FF3B30" }}
-                />
-                <Menu.Item onPress={handleReport} title={t('userProfile.report')} />
-                <Menu.Item
-                  onPress={toggleHideStories}
-                  title={
-                    hideStories ? t('userProfile.seeTheirStories') : t('userProfile.hideTheirStories')
-                  }
-                />
-                <Menu.Item
-                  onPress={toggleHideMyStories}
-                  title={
-                    hideMyStories
-                      ? t('userProfile.showMyStories')
-                      : t('userProfile.hideMyStories')
-                  }
-                />
-                <Divider />
-              </Menu>
-            </View>
+                contentStyle={styles.menuContent}
+             >
+               <Menu.Item
+                 onPress={() => {
+                   toggleUserStatus();
+                   closeMenu();
+                 }}
+                 title={
+                   friendshipStatus
+                     ? t('userProfile.removeFriend')
+                     : pendingRequest
+                     ? t('userProfile.cancelRequest')
+                     : t('userProfile.addFriend')
+                 }
+               />
+               <Menu.Item
+                 onPress={() => {
+                   blockUser('selectedUser.id');
+                   closeMenu();
+                 }}
+                 title={t('userProfile.block')}
+                 titleStyle={{ color: "#FF3B30" }}
+               />
+               <Menu.Item onPress={handleReport} title={t('userProfile.report')} />
+               <Menu.Item
+                 onPress={toggleHideStories}
+                 title={
+                   hideStories ? t('userProfile.seeTheirStories') : t('userProfile.hideTheirStories')
+                 }
+               />
+               <Menu.Item
+                 onPress={toggleHideMyStories}
+                 title={
+                   hideMyStories
+                     ? t('userProfile.showMyStories')
+                     : t('userProfile.hideMyStories')
+                 }
+               />
+               <Divider />
+             </Menu>
+           </View>
           )}
         </View>
       </ScrollView>
@@ -982,10 +980,10 @@ export default function UserProfile({ route, navigation }) {
         onSubmit={handleReportSubmit}
       />
       <MutualFriendsModal
-  isVisible={isMutualFriendsModalVisible}
-  onClose={() => setIsMutualFriendsModalVisible(false)}
-  friends={mutualFriends}
-/>
+        isVisible={isMutualFriendsModalVisible}
+        onClose={() => setIsMutualFriendsModalVisible(false)}
+        friends={mutualFriends}
+      />
     </Provider>
   );
 }
@@ -1035,6 +1033,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
   },
+  friendCountText: {
+    fontSize: 28,
+    color: "white",
+    fontWeight:"bold",
+    marginTop: 5,
+  },
   spacer: {
     height: 150,
   },
@@ -1073,6 +1077,10 @@ const styles = StyleSheet.create({
     top: 50,
     right: 20,
     zIndex: 10,
+  },
+  menuContent: {
+    marginTop: 60, // Ajusta este valor para mover el menú hacia abajo
+    borderRadius: 10,
   },
   menuStyle: {
     borderRadius: 10,

@@ -23,10 +23,7 @@ const AudioPlayer = ({ uri }) => {
     try {
       const { sound: soundObject, status } = await Audio.Sound.createAsync(
         { uri },
-        { 
-          shouldPlay: false, 
-          staysActiveInBackground: true,  // Asegura que el sonido siga activo en segundo plano si necesario
-        },
+        { shouldPlay: false, staysActiveInBackground: true },
         onPlaybackStatusUpdate
       );
       setSound(soundObject);
@@ -40,13 +37,16 @@ const AudioPlayer = ({ uri }) => {
   
 
   const onPlaybackStatusUpdate = (status) => {
-    console.log('Playback Status:', status); // Añade este log para depurar
     if (status.isLoaded) {
       setPosition(status.positionMillis);
-  
+      setDuration(status.durationMillis);
+      
+      // Cambiar el estado de isPlaying según el estado actual de reproducción
       if (status.didJustFinish && !status.isPlaying) {
         setIsPlaying(false);
-        sound.setPositionAsync(0);
+        sound.setPositionAsync(0);  // Reinicia el audio al inicio
+      } else {
+        setIsPlaying(status.isPlaying); // Actualiza si está en reproducción o pausa
       }
     }
   };
@@ -56,25 +56,25 @@ const AudioPlayer = ({ uri }) => {
       console.warn("El sonido aún se está cargando...");
       return;
     }
-
+  
     if (!sound) {
       await loadSound();
     }
-
+  
     if (sound) {
       if (isPlaying) {
         await sound.pauseAsync();
         setIsPlaying(false);
       } else {
-        // Si el audio ha terminado, reinícialo y reprodúcelo desde el principio
         if (position >= duration) {
-          await sound.setPositionAsync(0);
+          await sound.setPositionAsync(0);  // Reinicia el audio si llegó al final
         }
         await sound.playAsync();
         setIsPlaying(true);
       }
     }
   };
+  
 
   const formatTime = (millis) => {
     const totalSeconds = millis / 1000;
@@ -92,19 +92,19 @@ const AudioPlayer = ({ uri }) => {
           <Feather name={isPlaying ? 'pause' : 'play'} size={24} color="#007bff" />
         </TouchableOpacity>
       )}
-      <View style={audioStyles.progressContainer}>
-        <Text style={audioStyles.timeText}>{formatTime(position)}</Text>
-        <View style={audioStyles.progressBar}>
-          <View
-            style={{
-              ...audioStyles.progress,
-              width: duration ? `${(position / duration) * 100}%` : '0%',
-            }}
-          />
-        </View>
-        
-        <Text style={audioStyles.timeText}>{formatTime(duration)}</Text>
-      </View>
+     <View style={audioStyles.progressContainer}>
+  <Text style={audioStyles.timeText}>{formatTime(position)}</Text>
+  <View style={audioStyles.progressBar}>
+    <View
+      style={{
+        ...audioStyles.progress,
+        width: duration ? `${(position / duration) * 100}%` : '0%',
+      }}
+    />
+  </View>
+  <Text style={audioStyles.timeText}>{formatTime(duration)}</Text>
+</View>
+
     </View>
   );
 };

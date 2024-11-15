@@ -358,7 +358,7 @@ export default function Component({ route, navigation }) {
         >
           {mutualFriends.slice(0, 4).map((friend, index) => (
             <Image
-              key={friend.id}
+              key={friend.uid}
               source={{ uri: friend.photoUrls[0] }}
               style={[styles.mutualFriendImage, { left: index * 30 }]}
               cachePolicy="memory-disk"

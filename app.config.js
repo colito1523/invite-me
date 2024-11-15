@@ -1,12 +1,12 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 export default {
   expo: {
     name: "Invite Me",
-    slug: "Invite Me",
+    slug: "ChatApp-Tutorial",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/Logo_Invite_Me.png",
+    icon: "./assets/notification-icon.png",  
     userInterfaceStyle: "light",
     splash: {
       image: "./assets/Logo_Invite_Me.png",
@@ -22,15 +22,19 @@ export default {
       }
     },
     android: {
-      package: "inviteme.androidapp", 
+      package: "com.airesSoft.inviteMe",
       googleServicesFile: "./google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/Logo_Invite_Me.png",
         backgroundColor: "#ffffff"
+      },
+      notification: {
+        icon: "./assets/notification-icon.png",  // Actualiza el ícono de notificación para Android
+        color: "#FFFFFF" // Color de acento para las notificaciones (puedes personalizarlo)
       }
     },
     web: {
-      favicon:"./assets/Logo_Invite_Me.png",
+      favicon: "./assets/Logo_Invite_Me.png"
     },
     extra: {
       apiKey: process.env.API_KEY,
@@ -43,9 +47,8 @@ export default {
         projectId: "7e15b633-dd47-4035-86d3-96443bfdab66"
       }
     },
-    plugins: ["expo-font"], // Configuración del plugin expo-font
+    plugins: ["expo-font"],
 
-    // Configuración de EAS Update (Agregar esto)
     updates: {
       url: "https://u.expo.dev/7e15b633-dd47-4035-86d3-96443bfdab66"
     },

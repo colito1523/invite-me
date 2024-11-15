@@ -93,6 +93,12 @@ const Home = React.memo(() => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (route.params?.selectedCategory) {
+      setSelectedCategory(route.params.selectedCategory);
+    }
+  }, [route.params?.selectedCategory]);
+
 
   const fetchProfileImage = async () => {
     const user = auth.currentUser;

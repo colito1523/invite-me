@@ -20,6 +20,8 @@ export default function StorySlider() {
   const [isNightMode, setIsNightMode] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [unseenStories, setUnseenStories] = useState({});
 
   useEffect(() => {
     const checkTime = () => {
@@ -45,6 +47,10 @@ export default function StorySlider() {
     }));
   };
 
+  const updateUnseenStories = (updatedUnseenStories) => {
+    setUnseenStories(updatedUnseenStories); // Actualiza el estado inmediatamente
+  };
+
   const handleStoryDeleted = (storyIndex, userStoryIndex) => {
     setStories(prevStories => {
       const newStories = [...prevStories];
@@ -62,69 +68,90 @@ export default function StorySlider() {
     try {
       const user = auth.currentUser;
       if (!user) return;
-
+  
       const userDoc = await getDoc(doc(database, 'users', user.uid));
       const userData = userDoc.data();
       const hiddenStories = userData.hiddenStories || [];
       const hideStoriesFrom = userData.hideStoriesFrom || [];
-
+  
       const friendsList = await getFriendsList(user.uid);
       const loadedStories = [];
+      const unseenStoriesTemp = {}; // Temporal para almacenar historias no vistas
       const now = new Date();
-
-      // Load current user's stories
+  
+      // Cargar historias del usuario actual
       const userStoriesRef = collection(database, 'users', user.uid, 'stories');
       const userStoriesSnapshot = await getDocs(userStoriesRef);
       const userStories = userStoriesSnapshot.docs
         .map(doc => doc.data())
         .filter(story => new Date(story.expiresAt.toDate()) > now);
-
+  
       if (userStories.length > 0 || isUploading) {
-        loadedStories.push({
+        loadedStories.unshift({
           uid: user.uid,
           username: userData.firstName || t('storySlider.currentUser'),
           lastName: userData.lastName || '',
           profileImage: userData.photoUrls?.[0] || 'https://via.placeholder.com/150',
-          userStories: userStories
+          userStories: userStories,
+        });
+  
+        unseenStoriesTemp[user.uid] = userStories.filter(
+          (story) => !story.viewers?.some(viewer => viewer.uid === auth.currentUser.uid)
+        );
+      } else {
+        loadedStories.unshift({
+          uid: user.uid,
+          username: userData.firstName || t('storySlider.currentUser'),
+          lastName: userData.lastName || '',
+          profileImage: userData.photoUrls?.[0] || 'https://via.placeholder.com/150',
+          userStories: [] // Espacio para mostrar el indicador de carga
         });
       }
-
-      // Load friends' stories
+  
+      // Cargar historias de amigos
       for (let friend of friendsList) {
         if (hiddenStories.includes(friend.friendId) || hideStoriesFrom.includes(friend.friendId)) {
-          continue; // Skip this friend's stories
+          continue; // Omitir las historias de este amigo
         }
-
+  
         const friendStoriesRef = collection(database, 'users', friend.friendId, 'stories');
         const friendStoriesSnapshot = await getDocs(friendStoriesRef);
         const friendStories = friendStoriesSnapshot.docs
           .map(doc => doc.data())
           .filter(story => new Date(story.expiresAt.toDate()) > now);
-
+  
         if (friendStories.length > 0) {
           const friendDocRef = doc(database, 'users', friend.friendId);
           const friendDoc = await getDoc(friendDocRef);
-
+  
           if (friendDoc.exists()) {
             const friendData = friendDoc.data();
+  
+            // Almacena las historias no vistas de cada amigo en `unseenStoriesTemp`
+            unseenStoriesTemp[friend.friendId] = friendStories.filter(
+              (story) => !story.viewers?.some(viewer => viewer.uid === auth.currentUser.uid)
+            );
+  
             loadedStories.push({
               uid: friend.friendId,
               username: friendData.firstName || t('storySlider.friend'),
               lastName: friendData.lastName || '',
               profileImage: friendData.photoUrls?.[0] || 'https://via.placeholder.com/150',
-              userStories: friendStories
+              userStories: friendStories,
             });
-          } else {
-            console.error(t('storySlider.friendDataNotFound', { friendId: friend.friendId }));
           }
         }
       }
-
-      setStories(loadedStories);
+  
+      setStories(loadedStories); // Establece las historias cargadas
+      setUnseenStories(unseenStoriesTemp); // Establece las historias no vistas
     } catch (error) {
       console.error(t('storySlider.loadStoriesError'), error);
     }
   };
+  
+  
+  
 
   const handleAddStory = () => {
     setIsModalVisible(true);
@@ -156,29 +183,28 @@ export default function StorySlider() {
 };
 
 const handleGallery = async () => {
-    try {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert("Permiso denegado", "Se necesita acceso a la galería para subir historias");
-            return;
-        }
+  try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+          Alert.alert("Permiso denegado", "Se necesita acceso a la galería para subir historias");
+          return;
+      }
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: false,
-            quality: 1,
-        });
+      const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: false,
+          quality: 1,
+      });
 
-        if (!result.canceled && result.assets && result.assets.length > 0) {
-            await uploadStory(result.assets[0].uri);
-        }
-    } catch (error) {
-        console.error("Error al abrir la galería:", error);
-        Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
-    } finally {
-        setIsModalVisible(false); // Cierra el modal al final de la operación
-    }
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+          setSelectedImage(result.assets[0].uri); // Muestra la imagen en el modal
+      }
+  } catch (error) {
+      console.error("Error al abrir la galería:", error);
+      Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
+  }
 };
+
 
 
   const uploadStory = async (imageUri) => {
@@ -247,27 +273,49 @@ const handleGallery = async () => {
     }
   };
 
-  const renderStory = ({ item, index }) => (
-    <TouchableOpacity
-      style={styles.storyCircle}
-      onPress={() => {
-        setSelectedStoryIndex(index);
-        setStoryViewerVisible(true);
-      }}
-    >
-      {isUploading && index === 0 ? (
-        <View style={styles.uploadingStoryContainer}>
-          <Image source={{ uri: item.profileImage }} style={styles.storyImage} cachePolicy="memory-disk"/>
-          <View style={styles.progressCircle}>
-            <Text style={styles.progressText}>{`${Math.round(uploadProgress)}%`}</Text>
+  const renderStory = ({ item, index }) => {
+    const isCurrentUserStory = item.uid === auth.currentUser.uid;
+    const hasStories = item.userStories && item.userStories.length > 0;
+    const hasUnseenStories = unseenStories[item.uid]?.length > 0; // Verifica si hay historias no vistas
+  
+    return (
+      <TouchableOpacity
+        style={[
+          styles.storyCircle,
+          hasUnseenStories && styles.unseenStoryCircle // Aplica borde gris si hay historias no vistas
+        ]}
+        onPress={() => {
+          if (hasStories) {
+            const firstUnseenStoryIndex = hasUnseenStories
+              ? item.userStories.findIndex(story => story.id === unseenStories[item.uid][0].id)
+              : 0;
+            setSelectedStoryIndex(index); // Establece `index` correctamente para StoryViewer
+            setStoryViewerVisible(true);
+          }
+        }}
+      >
+        {isUploading && isCurrentUserStory ? (
+          <View style={styles.uploadingStoryContainer}>
+            {hasStories && (
+              <Image source={{ uri: item.profileImage }} style={styles.storyImage} cachePolicy="memory-disk" />
+            )}
+            <View style={styles.progressCircle}>
+              <Text style={styles.progressText}>{`${Math.round(uploadProgress)}%`}</Text>
+            </View>
           </View>
-        </View>
-      ) : (
-        <Image source={{ uri: item.profileImage }} style={styles.storyImage} cachePolicy="memory-disk"/>
-      )}
-    </TouchableOpacity>
-  );
-
+        ) : (
+          hasStories && (
+            <Image source={{ uri: item.profileImage }} style={styles.storyImage} cachePolicy="memory-disk" />
+          )
+        )}
+      </TouchableOpacity>
+    );
+  };
+  
+  
+  
+  
+  
   return (
     <View style={styles.sliderContainer}>
       <TouchableOpacity onPress={handleAddStory} style={styles.addStoryCircle}>
@@ -284,18 +332,49 @@ const handleGallery = async () => {
         horizontal
         showsHorizontalScrollIndicator={false}
       />
+       <Modal
+            visible={!!selectedImage}
+            transparent={true}
+            onRequestClose={() => setSelectedImage(null)}
+        >
+            <View style={styles.previewContainer}>
+                <Image source={{ uri: selectedImage }} style={styles.previewImage} />
+                <View style={styles.previewActions}>
+                    <TouchableOpacity
+                        style={styles.rejectButton}
+                        onPress={() => setSelectedImage(null)} // Cierra el modal sin subir
+                    >
+                        <Text style={styles.buttonTextReject}>Rechazar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.uploadButton}
+                        onPress={() => {
+                            uploadStory(selectedImage);
+                            setSelectedImage(null); // Sube y cierra el modal
+                        }}
+                    >
+                        <Text style={styles.buttonText}>Subir</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
       <Modal
         visible={storyViewerVisible}
         transparent={false}
         animationType="slide"
       >
-        <StoryViewer
-          stories={stories}
-          initialIndex={selectedStoryIndex}
-          onClose={() => setStoryViewerVisible(false)}
-          onStoryDeleted={handleStoryDeleted}
-          navigation={navigation}
-        />
+    <StoryViewer
+  stories={stories}
+  initialIndex={selectedStoryIndex}
+  onClose={(updatedUnseenStories) => {
+    setStoryViewerVisible(false);
+    updateUnseenStories(updatedUnseenStories); // Sincroniza `unseenStories` en tiempo real
+    loadExistingStories(); // Recarga las historias inmediatamente
+  }}
+  onStoryDeleted={handleStoryDeleted}
+  unseenStories={unseenStories} // Pasa `unseenStories` al visor
+  navigation={navigation}
+/>
       </Modal>
       <Modal
   animationType="slide"
@@ -387,4 +466,46 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  previewContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'black',
+},
+previewImage: {
+    width: '90%',
+    height: '90%',
+    resizeMode: 'contain',
+    marginBottom: 20,
+},
+previewActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '60%',
+},
+rejectButton: {
+    backgroundColor: 'black',
+    padding: 10,
+    borderRadius: 5,
+},
+uploadButton: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 5,
+},
+buttonText: {
+    color: 'black',
+    fontWeight: 'bold',
+    textAlign: 'center',
+},
+buttonTextReject: {
+  color: 'white',
+  fontWeight: 'bold',
+  textAlign: 'center',
+},
+unseenStoryCircle: {
+  borderColor: 'black',
+  borderWidth: 3,
+  borderRadius: 40,
+}
 });

@@ -18,7 +18,7 @@ import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database, storage } from "../config/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDocs, query, where, collection  } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
@@ -26,8 +26,35 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { Image } from "expo-image";
 import TermsAndConditionsModal from "../Components/Terms-And-Conditions/terms-and-conditions-modal";
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import es from '../locales/es.json';
+import en from '../locales/en.json';
+import pt from '../locales/pt.json';
+
+const LANGUAGE_KEY = '@app_language';
+
+i18n
+  .use(initReactI18next)
+  .init({
+    compatibilityJSON: 'v3',
+    resources: {
+      es: { translation: es },
+      en: { translation: en },
+      pt: { translation: pt },
+    },
+    lng: 'es',
+    fallbackLng: 'en',
+    interpolation: {
+      escapeValue: false,
+    },
+  });
 
 const { width, height } = Dimensions.get("window");
+
+
 const ITEM_WIDTH = width / 5;
 const ITEM_HEIGHT = 50;
 const GENDER_ITEM_HEIGHT = 50;
@@ -183,9 +210,43 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const navigation = useNavigation();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loadSavedLanguage = async () => {
+      try {
+        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+        if (savedLanguage) {
+          i18n.changeLanguage(savedLanguage);
+          setSelectedLanguage(savedLanguage);  // Actualiza el selector de idioma
+        }
+      } catch (error) {
+        console.error('Error loading saved language:', error);
+      }
+    };
+    loadSavedLanguage(); // Llama a la función al montar el componente
+  }, []);
+
+  const changeLanguage = async (lang) => {
+    await i18n.changeLanguage(lang);
+    setSelectedLanguage(lang);
+    try {
+      await AsyncStorage.setItem(LANGUAGE_KEY, lang);
+    } catch (error) {
+      console.error('Error saving language:', error);
+    }
+    setIsLanguageOptionsVisible(false);
+  };
+
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' },
+    { code: 'pt', name: 'Português' }
+  ];
 
   const questions = [
     { id: "account", question: t('signup.questions.account') },
@@ -240,7 +301,7 @@ export default function SignUp() {
   };
 
   const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^(?!.*(.)\1{3,})(?!^\d+@)(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:(?!^\d+\.)[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   };
 
@@ -288,6 +349,38 @@ export default function SignUp() {
         Alert.alert(t('signup.errors.termsNotAccepted'));
         return;
       }
+      // Verifica si el email ya está en uso
+    const emailQuery = query(
+      collection(database, "users"),
+      where("email", "==", answers.email.trim().toLowerCase())
+    );
+      try {
+      const emailSnapshot = await getDocs(emailQuery);
+      if (!emailSnapshot.empty) {
+        Alert.alert(t('signup.errors.emailInUse'));
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking email:", error);
+      Alert.alert(t('signup.errors.generic'), error.message);
+      return;
+    }
+    const usernameQuery = query(
+      collection(database, "users"),
+      where("username", "==", answers.username.trim().toLowerCase())
+    );
+
+    try {
+      const usernameSnapshot = await getDocs(usernameQuery);
+      if (!usernameSnapshot.empty) {
+        Alert.alert(t('signup.errors.usernameInUse'));
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking username:", error);
+      Alert.alert(t('signup.errors.generic'), error.message);
+      return;
+    }
     }
 
     if (currentQuestion.id === "about") {
@@ -489,6 +582,36 @@ export default function SignUp() {
           style={styles.logo}
           contentFit="contain"
         />
+        <View style={styles.languageContainer}>
+          <TouchableOpacity
+            style={styles.languageSelector}
+            onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
+          >
+            <Ionicons name="globe-outline" size={24} color="#000" />
+            <Text style={styles.selectedLanguage}>
+              {languages.find(lang => lang.code === selectedLanguage)?.name}
+            </Text>
+            <Ionicons name="chevron-down" size={24} color="#000" />
+          </TouchableOpacity>
+          {isLanguageOptionsVisible && (
+            <View style={styles.languageOptions}>
+              {languages.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={styles.languageOption}
+                  onPress={() => changeLanguage(lang.code)}
+                >
+                  <Text style={[
+                    styles.languageOptionText,
+                    selectedLanguage === lang.code && styles.selectedLanguageText
+                  ]}>
+                    {lang.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
         {currentQuestion.id !== "welcome" && (
           <ProgressBar
             progress={progress}
@@ -1138,5 +1261,54 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#4d4d4d",
     paddingHorizontal: 20,
+  },
+  languageContainer: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 1,
+  },
+  languageSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  selectedLanguage: {
+    marginHorizontal: 10,
+    fontSize: 16,
+    color: '#333',
+  },
+  languageOptions: {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    marginTop: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    width: 150,
+  },
+  languageOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  languageOptionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  selectedLanguageText: {
+    fontWeight: 'bold',
+    color: '#000',
   },
 });

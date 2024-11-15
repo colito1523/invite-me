@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo  } from "react";
+import React, { useState, useEffect, memo } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   FlatList,
   TextInput,
   Linking,
-  TouchableWithoutFeedback 
+  TouchableWithoutFeedback,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome, Entypo } from "@expo/vector-icons";
@@ -32,13 +32,14 @@ import {
   deleteField,
   arrayUnion,
   onSnapshot,
-  arrayRemove
+  arrayRemove,
 } from "firebase/firestore";
 import { Image } from "expo-image";
 import DotIndicatorBoxDetails from "../Components/Dots/DotIndicatorBoxDetails";
 import { useTranslation } from "react-i18next";
-import { Ionicons } from '@expo/vector-icons'; // Asegúrate de importar Ionicons
-
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const { width } = Dimensions.get("window");
 
@@ -53,6 +54,20 @@ export default memo(function BoxDetails({ route, navigation }) {
   const [isNightMode, setIsNightMode] = useState(false);
   const [attendeesList, setAttendeesList] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [boxData, setBoxData] = useState(box || {});
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editedData, setEditedData] = useState({
+    title: "",
+    address: "",
+    description: "",
+    hour: "",
+    day: new Date(),
+  });
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  
 
   const closeModal = () => {
     setModalVisible(false);
@@ -60,19 +75,16 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   useEffect(() => {
     if (box) {
+      fetchEventDetails();
       checkEventStatus();
       fetchFriends();
       checkNightMode();
       checkAndRemoveExpiredEvents();
-  
-      // Llamar a fetchAttendees y guardar la función de desuscripción
+
       const unsubscribe = fetchAttendees();
-  
-      // Limpieza de la suscripción al desmontar el componente
       return () => unsubscribe && unsubscribe();
     }
   }, [box, selectedDate]);
-  
 
   const checkAndRemoveExpiredEvents = async () => {
     const boxRef = doc(database, "GoBoxs", box.title);
@@ -151,6 +163,16 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
+  const fetchEventDetails = async () => {
+    const eventRef = doc(database, "EventsPriv", box.id || box.title);
+    const eventSnapshot = await getDoc(eventRef);
+    if (eventSnapshot.exists()) {
+      const eventData = eventSnapshot.data();
+      setBoxData((prevBox) => ({ ...prevBox, ...eventData }));
+    } else {
+      console.log("El evento no existe en la base de datos");
+    }
+  };
   const fetchAttendees = () => {
     if (box) {
       const eventRef = doc(
@@ -158,8 +180,7 @@ export default memo(function BoxDetails({ route, navigation }) {
         box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
         box.id || box.title
       );
-  
-      // Escucha en tiempo real para cambios en los asistentes
+
       const unsub = onSnapshot(eventRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
@@ -167,17 +188,62 @@ export default memo(function BoxDetails({ route, navigation }) {
             box.category === "EventoParaAmigos"
               ? data.attendees
               : data[selectedDate] || [];
-  
-              const uniqueAttendees = (attendees || []).map((attendee) => ({
-                ...attendee,
-                profileImage: attendee.profileImage || "https://via.placeholder.com/150",
-              }));
+
+          const uniqueAttendees = (attendees || []).map((attendee) => ({
+            ...attendee,
+            profileImage:
+              attendee.profileImage || "https://via.placeholder.com/150",
+          }));
           setAttendeesList(uniqueAttendees);
         }
       });
-  
-      // Retornar la función para cancelar la suscripción
+
       return unsub;
+    }
+  };
+
+  const handleRemoveFromEvent = async () => {
+    const user = auth.currentUser;
+    if (!user || !box) return;
+  
+    try {
+      // 1. Eliminar de EventsPriv
+      const eventRef = doc(database, "EventsPriv", box.id);
+      const eventDoc = await getDoc(eventRef);
+      if (!eventDoc.exists()) {
+        console.error("Event document does not exist");
+        return;
+      }
+  
+      const eventData = eventDoc.data();
+      const currentAttendees = eventData.attendees || [];
+      const updatedAttendees = currentAttendees.filter(
+        (attendee) => attendee.uid !== user.uid
+      );
+  
+      await updateDoc(eventRef, {
+        attendees: updatedAttendees
+      });
+  
+      // 2. Eliminar de la colección de eventos del usuario
+      const userEventsRef = collection(database, "users", user.uid, "events");
+      const q = query(userEventsRef, where("title", "==", box.title));
+      const querySnapshot = await getDocs(q);
+  
+      if (!querySnapshot.empty) {
+        const userEventDoc = querySnapshot.docs[0];
+        await deleteDoc(doc(userEventsRef, userEventDoc.id));
+      }
+  
+      // Actualizar estado local
+      setAttendeesList(updatedAttendees);
+      setIsEventSaved(false);
+  
+      Alert.alert("Has marcado 'No voy'");
+      console.log("Usuario eliminado del evento y de su colección personal correctamente");
+    } catch (error) {
+      console.error("Error al eliminar del evento: ", error);
+      Alert.alert("Error", "No se pudo eliminar del evento");
     }
   };
 
@@ -196,7 +262,10 @@ export default memo(function BoxDetails({ route, navigation }) {
               return {
                 friendId: friendId,
                 friendName: friendData.data().username,
-                friendImage: friendData.data().friendImage || friendDoc.data().friendImage || "https://via.placeholder.com/150",
+                friendImage:
+                  friendData.data().friendImage ||
+                  friendDoc.data().friendImage ||
+                  "https://via.placeholder.com/150",
                 invited: false,
               };
             }
@@ -209,6 +278,180 @@ export default memo(function BoxDetails({ route, navigation }) {
       setFilteredFriends(validFriends);
     }
   };
+
+  const toggleMenu = () => {
+    setMenuVisible(!menuVisible);
+  };
+
+  const handleDeleteEvent = async () => {
+    setMenuVisible(false);
+    Alert.alert(
+      "Eliminar Evento",
+      "¿Estás seguro de que deseas eliminar este evento?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const eventRef = doc(database, "EventsPriv", box.id || box.title);
+              await deleteDoc(eventRef);
+              Alert.alert("Evento eliminado exitosamente");
+              navigation.goBack();
+            } catch (error) {
+              console.error("Error eliminando el evento:", error);
+              Alert.alert("Error", "No se pudo eliminar el evento.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleEditImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+        Alert.alert("Permiso denegado", "Se requieren permisos para acceder a tus fotos.");
+        return;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+    });
+
+    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+        try {
+            setIsProcessing(true);
+
+            // Subir la nueva imagen a Firebase Storage
+            const storage = getStorage();
+            const imageRef = ref(storage, `EventosParaAmigos/${boxData.id || boxData.title}_${Date.now()}.jpg`);
+            const uri = pickerResult.assets[0].uri;
+            const response = await fetch(uri);
+            const blob = await response.blob();
+
+            await uploadBytes(imageRef, blob);
+
+            // Obtener la URL de descarga
+            const downloadURL = await getDownloadURL(imageRef);
+
+            // Actualizar la imagen en Firebase Firestore
+            const eventRef = doc(database, "EventsPriv", boxData.id || boxData.title);
+            await updateDoc(eventRef, { image: downloadURL });
+
+            // Navegar a Home con el parámetro de recarga
+            navigation.navigate("Home", { refresh: true });
+
+            Alert.alert("Éxito", "Imagen actualizada exitosamente");
+        } catch (error) {
+            console.error("Error al subir la imagen:", error);
+            Alert.alert("Error", "Hubo un problema al subir la imagen.");
+        } finally {
+            setIsProcessing(false);
+        }
+    }
+};
+
+
+
+
+
+  const handleEditEvent = () => {
+    setEditedData({
+        title: boxData.title || "",
+        address: boxData.address || "",
+        description: boxData.description || "",
+    });
+    setEditModalVisible(true);
+    setMenuVisible(false);
+};
+
+const handleSaveEdit = async () => {
+  try {
+      setIsProcessing(true);
+
+      const eventRef = doc(database, "EventsPriv", boxData.id || boxData.title);
+      await updateDoc(eventRef, {
+          title: editedData.title,
+          address: editedData.address,
+          description: editedData.description,
+      });
+
+      setBoxData((prevData) => ({
+          ...prevData,
+          title: editedData.title,
+          address: editedData.address,
+          description: editedData.description,
+      }));
+
+      Alert.alert("Éxito", "Evento actualizado exitosamente");
+      setEditModalVisible(false);
+  } catch (error) {
+      console.error("Error al actualizar el evento:", error);
+      Alert.alert("Error", "Hubo un problema al actualizar el evento.");
+  } finally {
+      setIsProcessing(false);
+  }
+};
+
+
+  
+  const renderEditModal = () => (
+    <Modal
+      visible={editModalVisible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setEditModalVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.editModalContent}>
+          <Text style={styles.editModalTitle}>Editar Evento</Text>
+          {/* Inputs para edición */}
+          <TextInput
+            style={styles.input}
+            value={editedData.title}
+            onChangeText={(text) => setEditedData({ ...editedData, title: text })}
+            placeholder="Título"
+          />
+          <TextInput
+            style={styles.input}
+            value={editedData.address}
+            onChangeText={(text) => setEditedData({ ...editedData, address: text })}
+            placeholder="Ubicación"
+          />
+          <TextInput
+            style={styles.input}
+            value={editedData.description}
+            onChangeText={(text) => setEditedData({ ...editedData, description: text })}
+            placeholder="Descripción"
+            multiline
+          />
+          {/* Botones */}
+          <View style={styles.editModalButtons}>
+            <TouchableOpacity
+              style={[styles.editModalButton, styles.cancelButton]}
+              onPress={() => setEditModalVisible(false)}
+            >
+              <Text style={styles.editModalButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.editModalButton, styles.saveButton]}
+              onPress={handleSaveEdit}
+              disabled={isProcessing}
+            >
+              <Text style={styles.editModalButtonText}>
+                {isProcessing ? "Guardando..." : "Guardar"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 
   const handleInvite = async (friendId) => {
     setFriends(
@@ -286,47 +529,43 @@ export default memo(function BoxDetails({ route, navigation }) {
   const handleAddEvent = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
-  
+
     const user = auth.currentUser;
     if (!user || !box) {
       setIsProcessing(false);
       return;
     }
-  
+
     const eventsRef = collection(database, "users", user.uid, "events");
     const q = query(eventsRef, where("title", "==", box.title));
     const querySnapshot = await getDocs(q);
-  
+
     if (!querySnapshot.empty) {
-      // Lógica para eliminar asistencia
       try {
         const eventDoc = querySnapshot.docs[0];
         await deleteDoc(doc(eventsRef, eventDoc.id));
         setIsEventSaved(false);
-  
+
         if (box.category === "EventoParaAmigos") {
-          // Lógica para eventos privados: elimina al usuario de la lista de asistentes
-          const eventRef = doc(database, "EventsPriv", box.id);
-          await updateDoc(eventRef, {
-            attendees: arrayRemove({
-              uid: user.uid,
-            }),
-          });
+            const eventRef = doc(database, "EventsPriv", box.id);
+            await updateDoc(eventRef, {
+                attendees: arrayRemove({
+                    uid: user.uid,
+                }),
+            });
         } else {
-          // Lógica para otros eventos
-          await handleRemoveFromGoBoxs(box.title, selectedDate);
+            await handleRemoveFromGoBoxs(box.title, selectedDate);
         }
-  
+
         await fetchAttendees();
-      } catch (error) {
+    } catch (error) {
         console.error("Error eliminando el evento: ", error);
         Alert.alert(t("boxDetails.error"), t("boxDetails.eventDeletionError"));
-      }
-    } else {
-      // Lógica para agregar asistencia si no existe
+    }
+} else {
       const eventsSnapshot = await getDocs(eventsRef);
       const eventCount = eventsSnapshot.size;
-  
+
       if (eventCount >= 6) {
         Alert.alert(
           t("boxDetails.limitReached"),
@@ -341,7 +580,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           const phoneNumber = box.number || "Sin número";
           const locationLink = box.locationLink || "Sin ubicación especificada";
           const hours = box.hours || {};
-  
+
           if (!isPrivateEvent) {
             await saveUserEvent(
               box.title,
@@ -352,10 +591,9 @@ export default memo(function BoxDetails({ route, navigation }) {
               hours
             );
           }
-  
+
           const dateArray = [eventDate];
-  
-          // Construye el objeto de datos del evento, agregando las coordenadas solo si están definidas
+
           const eventData = {
             title: box.title,
             imageUrl: box.imageUrl || "",
@@ -366,13 +604,13 @@ export default memo(function BoxDetails({ route, navigation }) {
             hours: hours,
             ...(box.coordinates ? { coordinates: box.coordinates } : {}),
           };
-  
+
           if (daySpecial) {
             eventData.DaySpecial = daySpecial;
           }
-  
+
           await addDoc(eventsRef, eventData);
-  
+
           if (isPrivateEvent) {
             const userDoc = await getDoc(doc(database, "users", user.uid));
             const username = userDoc.exists()
@@ -382,15 +620,15 @@ export default memo(function BoxDetails({ route, navigation }) {
               ? (userDoc.data().photoUrls && userDoc.data().photoUrls[0]) ||
                 "https://via.placeholder.com/150"
               : "https://via.placeholder.com/150";
-  
+
             const attendeeData = {
               uid: user.uid,
               username,
               profileImage,
             };
-  
+
             const eventRef = doc(database, "EventsPriv", box.id);
-  
+
             const eventDoc = await getDoc(eventRef);
             if (!eventDoc.exists()) {
               await setDoc(eventRef, {
@@ -402,12 +640,12 @@ export default memo(function BoxDetails({ route, navigation }) {
                 image: box.image || "",
               });
             }
-  
+
             await updateDoc(eventRef, {
               attendees: arrayUnion(attendeeData),
             });
           }
-  
+
           setIsEventSaved(true);
           await fetchAttendees();
         } catch (error) {
@@ -416,13 +654,9 @@ export default memo(function BoxDetails({ route, navigation }) {
         }
       }
     }
-  
+
     setIsProcessing(false);
   };
-  
-  
-  
-  
 
   const handleRemoveFromGoBoxs = async (boxTitle, selectedDate) => {
     try {
@@ -538,7 +772,7 @@ export default memo(function BoxDetails({ route, navigation }) {
     >
       <Image
         source={{
-          uri: item.friendImage || "https://via.placeholder.com/150"
+          uri: item.friendImage || "https://via.placeholder.com/150",
         }}
         style={styles.friendImage}
         cachePolicy="memory-disk"
@@ -576,175 +810,264 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
+  const renderSliderContent = () => (
+    <ScrollView
+      horizontal
+      pagingEnabled
+      showsHorizontalScrollIndicator={false}
+      style={styles.slider}
+    >
+      <View style={styles.sliderPart}>
+        {box.category === "EventoParaAmigos" ? (
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.descriptionText}>
+              {boxData.description || "No hay descripción disponible"}
+            </Text>
+          </View>
+        ) : (
+          box &&
+          box.coordinates &&
+          typeof box.coordinates.latitude === "number" &&
+          typeof box.coordinates.longitude === "number" &&
+          box.coordinates.latitude !== 0 &&
+          box.coordinates.longitude !== 0 && (
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: box.coordinates.latitude,
+                  longitude: box.coordinates.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+                customMapStyle={isNightMode ? nightMapStyle : dayMapStyle}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: box.coordinates.latitude,
+                    longitude: box.coordinates.longitude,
+                  }}
+                  title={box.title || "Evento"}
+                  description={box.description || ""}
+                />
+              </MapView>
+            </View>
+          )
+        )}
+      </View>
+
+      <View style={styles.sliderPart}>
+        <View style={styles.hoursContainer}>
+          <View style={styles.hoursContent}>
+            <View style={styles.column}>
+              {Object.keys(box.hours).map((day, index) => (
+                <Text key={index} style={styles.dayText}>
+                  {day}
+                </Text>
+              ))}
+            </View>
+            <View style={styles.column}>
+              {Object.values(box.hours).map((time, index) => (
+                <Text key={index} style={styles.timeText}>
+                  {time}
+                </Text>
+              ))}
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.sliderPart}>
+        {box.category === "EventoParaAmigos" ? (
+          <View style={styles.addressContainer}>
+            <Text style={styles.addressText}>
+              {boxData.address || "No hay dirección disponible"}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.contactContainer}>
+            <Text style={styles.contactTitle}>
+              {t("boxDetails.contactTitle")}
+            </Text>
+            <Text style={styles.contactText}>
+              {boxData.number ||
+                boxData.phoneNumber ||
+                "Sin número de contacto"}
+            </Text>
+          </View>
+        )}
+      </View>
+    </ScrollView>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <Image 
-    source={box.isPrivate ? { uri: box.imageUrl } : box.imageUrl}
-    style={styles.backgroundImage}
-    cachePolicy="memory-disk"
+  source={box.isPrivate ? { uri: box.imageUrl } : box.imageUrl}
+  style={styles.backgroundImage}
+  cachePolicy="memory-disk"
 />
+
       <LinearGradient
         colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
         style={styles.gradient}
       >
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
+          {/* Contenedor de la flecha de volver y el menú */}
+          <View style={styles.headerContainer}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Entypo
+                name="chevron-left"
+                size={24}
+                color={isNightMode ? "#000" : "#000"}
+              />
+            </TouchableOpacity>
+
+            {boxData.category === "EventoParaAmigos" && (
+              <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
+                <Entypo
+                  name="dots-three-vertical"
+                  size={24}
+                  color={isNightMode ? "#000" : "#000"}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Modal para el menú de eliminación */}
+          <Modal
+            visible={menuVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setMenuVisible(false)}
           >
-            <Entypo
-              name="chevron-left"
-              size={24}
-              color={isNightMode ? "#000" : "#000"}
-            />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalOverlay}
+              onPress={() => setMenuVisible(false)}
+            >
+              <View style={styles.menuContainer}>
+              <TouchableOpacity
+                  onPress={handleEditImage}
+                  style={styles.editEventButton}
+                  disabled={isProcessing}
+                >
+                  <Text style={styles.editEventText}>
+                    {isProcessing ? "Actualizando..." : "Editar Imagen "}
+                    <FontAwesome name="image" size={15} color="black" />
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleEditEvent}
+                  style={styles.editEventButton}
+                >
+                  <Text style={styles.editEventText}>
+                    Editar Evento{" "}
+                    <FontAwesome name="pencil-square-o" size={15} color="black" />
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleDeleteEvent}
+                  style={styles.deleteEventButton}
+                >
+                  <Text style={styles.deleteEventText}>
+                    Eliminar Evento{" "}
+                    <FontAwesome name="trash" size={15} color="white" />
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </Modal>
+
+          {/* Contenido principal */}
           <View style={styles.content}>
-            <Text style={styles.title}>{box.title}</Text>
+            <Text style={styles.title}>{boxData.title}</Text>
 
             <View style={styles.dotIndicatorContainer}>
               <DotIndicatorBoxDetails attendeesList={attendeesList} />
             </View>
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, isEventSaved && styles.activeButton]}
-                disabled={isProcessing} 
-                onPress={handleAddEvent}
-              >
-                <Text style={styles.buttonText}>
-                  {isEventSaved
-                    ? t("boxDetails.notGoingButton")
-                    : t("boxDetails.goingButton")}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setModalVisible(true)}
-              >
-                <Text style={styles.buttonText}>
-                  {t("boxDetails.inviteButton")}
-                </Text>
-              </TouchableOpacity>
-            </View>
+  <TouchableOpacity
+    style={[styles.button, isEventSaved && styles.activeButton]}
+    disabled={isProcessing}
+    onPress={() => {
+      // Verificar si el evento es privado y si ya está guardado (isEventSaved)
+      if (box.category === "EventoParaAmigos" && isEventSaved) {
+        handleRemoveFromEvent(); // Ejecuta la función para eliminar del evento
+      } else {
+        handleAddEvent(); // Ejecuta la función para agregar al evento
+      }
+    }}
+  >
+    <Text style={styles.buttonText}>
+      {isEventSaved
+        ? t("boxDetails.notGoingButton") // Texto para "No voy"
+        : t("boxDetails.goingButton")}  
+    </Text>
+  </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.button}
+    onPress={() => setModalVisible(true)}
+  >
+    <Text style={styles.buttonText}>
+      {t("boxDetails.inviteButton")}
+    </Text>
+  </TouchableOpacity>
+</View>
 
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              style={styles.slider}
-            >
-              <View style={styles.sliderPart}>
-                {box &&
-                  box.coordinates &&
-                  typeof box.coordinates.latitude === "number" &&
-                  typeof box.coordinates.longitude === "number" &&
-                  box.coordinates.latitude !== 0 &&
-                  box.coordinates.longitude !== 0 && (
-                    <View style={styles.mapContainer}>
-                      <MapView
-                        style={styles.map}
-                        initialRegion={{
-                          latitude: box.coordinates.latitude,
-                          longitude: box.coordinates.longitude,
-                          latitudeDelta: 0.01,
-                          longitudeDelta: 0.01,
-                        }}
-                        customMapStyle={
-                          isNightMode ? nightMapStyle : dayMapStyle
-                        }
-                      >
-                        <Marker
-                          coordinate={{
-                            latitude: box.coordinates.latitude,
-                            longitude: box.coordinates.longitude,
-                          }}
-                          title={box.title || "Evento"}
-                          description={box.description || ""}
-                        />
-                      </MapView>
-                    </View>
-                  )}
-              </View>
 
-              <View style={styles.sliderPart}>
-                <View style={styles.hoursContainer}>
-                  <Text style={styles.hoursTitle}>
-                    {t("boxDetails.scheduleTitle")}
-                  </Text>
-                  <View style={styles.hoursContent}>
-                    <View style={styles.column}>
-                      {Object.keys(box.hours).map((day, index) => (
-                        <Text key={index} style={styles.dayText}>
-                          {day}
-                        </Text>
-                      ))}
-                    </View>
-                    <View style={styles.column}>
-                      {Object.values(box.hours).map((time, index) => (
-                        <Text key={index} style={styles.timeText}>
-                          {time}
-                        </Text>
-                      ))}
-                    </View>
-                  </View>
-                </View>
-              </View>
-
-              <View style={styles.sliderPart}>
-                <View style={styles.contactContainer}>
-                  <Text style={styles.contactTitle}>
-                    {t("boxDetails.contactTitle")}
-                  </Text>
-                  <Text style={styles.contactText}>
-                    {box.number  || box.phoneNumber}
-                  </Text>
-                </View>
-              </View>
-            </ScrollView>
+            {renderSliderContent()}
           </View>
         </ScrollView>
       </LinearGradient>
+
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={closeModal}
       >
-         <TouchableWithoutFeedback onPress={closeModal}>
-        <View style={styles.modalOverlay}>
-        <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-          <View
-            style={[
-              styles.friendsModalContent,
-              isNightMode && styles.friendsModalContentNight,
-            ]}
-          >
-            <Text
-              style={[styles.modalTitle, isNightMode && styles.modalTitleNight]}
-            >
-              {t("boxDetails.inviteFriendsTitle")}
-            </Text>
-            <TextInput
-              style={[
-                styles.searchInput,
-                isNightMode && styles.searchInputNight,
-              ]}
-              placeholder={t("boxDetails.searchFriendsPlaceholder")}
-              placeholderTextColor={isNightMode ? "#888" : "#888"}
-              value={searchText}
-              onChangeText={handleSearch}
-            />
-            <FlatList
-              data={filteredFriends}
-              renderItem={renderFriendItem}
-              keyExtractor={(item) => item.friendId.toString()}
-            />
-           
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+              <View
+                style={[
+                  styles.friendsModalContent,
+                  isNightMode && styles.friendsModalContentNight,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.modalTitle,
+                    isNightMode && styles.modalTitleNight,
+                  ]}
+                >
+                  {t("boxDetails.inviteFriendsTitle")}
+                </Text>
+                <TextInput
+                  style={[
+                    styles.searchInput,
+                    isNightMode && styles.searchInputNight,
+                  ]}
+                  placeholder={t("boxDetails.searchFriendsPlaceholder")}
+                  placeholderTextColor={isNightMode ? "#888" : "#888"}
+                  value={searchText}
+                  onChangeText={handleSearch}
+                />
+                <FlatList
+                  data={filteredFriends}
+                  renderItem={renderFriendItem}
+                  keyExtractor={(item) => item.friendId.toString()}
+                />
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-          </TouchableWithoutFeedback>
-        </View>
         </TouchableWithoutFeedback>
       </Modal>
+      {renderEditModal()}
     </SafeAreaView>
   );
 });
@@ -775,13 +1098,14 @@ const styles = StyleSheet.create({
     marginTop: 70,
   },
   title: {
-    fontSize: 48,
+    fontSize: 35,
     fontWeight: "bold",
     color: "white",
     marginBottom: 60,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
+    textAlign: "center",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -883,17 +1207,50 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
   },
-  backButton: {
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 40,
+    width: "100%",
     position: "absolute",
-    top: 50,
-    left: 20,
+    top: 0,
     zIndex: 10,
   },
+  backButton: {
+    paddingLeft: 20,
+  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  menuContainer: {
+    backgroundColor: "transparent",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  deleteEventButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+  },
+  deleteEventText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  editEventButton: {
+    backgroundColor: "white", // Puedes cambiar el color según tu preferencia
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10, // Espacio entre los botones
+  },
+  editEventText: {
+    color: "black",
+    fontWeight: "bold",
   },
   friendsModalContent: {
     backgroundColor: "white",
@@ -989,196 +1346,248 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 60,
   },
+  descriptionContainer: {
+    padding: 15,
+    alignItems: "center",
+    width: "90%",
+  },
+  descriptionTitle: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  descriptionText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  addressContainer: {
+    padding: 15,
+    alignItems: "center",
+    width: "90%",
+  },
+  addressTitle: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  addressText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+  },
+
+  editModalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+  },
+  editModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  datePickerButton: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  editModalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  editModalButton: {
+    padding: 10,
+    borderRadius: 5,
+    width: '45%',
+  },
+  cancelButton: {
+    backgroundColor: '#ccc',
+  },
+  saveButton: {
+    backgroundColor: '#007AFF',
+  },
+  editModalButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
 });
 
 const nightMapStyle = [
   {
     elementType: "geometry",
-    stylers: [{ color: "#212121" }],
-  },
-  {
-    elementType: "labels.icon",
-    stylers: [{ visibility: "off" }],
+    stylers: [
+      {
+        color: "#242f3e",
+      },
+    ],
   },
   {
     elementType: "labels.text.fill",
-    stylers: [{ color: "#757575" }],
+    stylers: [
+      {
+        color: "#746855",
+      },
+    ],
   },
   {
     elementType: "labels.text.stroke",
-    stylers: [{ color: "#212121" }],
-  },
-  {
-    featureType: "administrative",
-    elementType: "geometry",
-    stylers: [{ color: "#757575" }],
-  },
-  {
-    featureType: "administrative.country",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#9e9e9e" }],
-  },
-  {
-    featureType: "administrative.land_parcel",
-    stylers: [{ visibility: "off" }],
+    stylers: [
+      {
+        color: "#242f3e",
+      },
+    ],
   },
   {
     featureType: "administrative.locality",
     elementType: "labels.text.fill",
-    stylers: [{ color: "#bdbdbd" }],
+    stylers: [
+      {
+        color: "#d59563",
+      },
+    ],
   },
   {
     featureType: "poi",
     elementType: "labels.text.fill",
-    stylers: [{ color: "#757575" }],
+    stylers: [
+      {
+        color: "#d59563",
+      },
+    ],
   },
   {
     featureType: "poi.park",
     elementType: "geometry",
-    stylers: [{ color: "#181818" }],
+    stylers: [
+      {
+        color: "#263c3f",
+      },
+    ],
   },
   {
     featureType: "poi.park",
     elementType: "labels.text.fill",
-    stylers: [{ color: "#616161" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.stroke",
-    stylers: [{ color: "#1b1b1b" }],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry.fill",
-    stylers: [{ color: "#2c2c2c" }],
+    stylers: [
+      {
+        color: "#6b9a76",
+      },
+    ],
   },
   {
     featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#8a8a8a" }],
-  },
-  {
-    featureType: "road.arterial",
     elementType: "geometry",
-    stylers: [{ color: "#373737" }],
+    stylers: [
+      {
+        color: "#38414e",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        color: "#212a37",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#9ca5b3",
+      },
+    ],
   },
   {
     featureType: "road.highway",
     elementType: "geometry",
-    stylers: [{ color: "#3c3c3c" }],
+    stylers: [
+      {
+        color: "#746855",
+      },
+    ],
   },
   {
-    featureType: "road.highway.controlled_access",
-    elementType: "geometry",
-    stylers: [{ color: "#4e4e4e" }],
+    featureType: "road.highway",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        color: "#1f2835",
+      },
+    ],
   },
   {
-    featureType: "road.local",
+    featureType: "road.highway",
     elementType: "labels.text.fill",
-    stylers: [{ color: "#616161" }],
+    stylers: [
+      {
+        color: "#f3d19c",
+      },
+    ],
   },
   {
     featureType: "transit",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#757575" }],
-  },
-  {
-    featureType: "water",
     elementType: "geometry",
-    stylers: [{ color: "#000000" }],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#3d3d3d" }],
-  },
-];
-
-const dayMapStyle = [
-  {
-    elementType: "geometry",
-    stylers: [{ color: "#f5f5f5" }],
-  },
-  {
-    elementType: "labels.icon",
-    stylers: [{ visibility: "off" }],
-  },
-  {
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#616161" }],
-  },
-  {
-    elementType: "labels.text.stroke",
-    stylers: [{ color: "#f5f5f5" }],
-  },
-  {
-    featureType: "administrative.land_parcel",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#bdbdbd" }],
-  },
-  {
-    featureType: "poi",
-    elementType: "geometry",
-    stylers: [{ color: "#eeeeee" }],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#757575" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [{ color: "#e5e5e5" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#9e9e9e" }],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ color: "#ffffff" }],
-  },
-  {
-    featureType: "road.arterial",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#757575" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry",
-    stylers: [{ color: "#dadada" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#616161" }],
-  },
-  {
-    featureType: "road.local",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#9e9e9e" }],
-  },
-  {
-    featureType: "transit.line",
-    elementType: "geometry",
-    stylers: [{ color: "#e5e5e5" }],
+    stylers: [
+      {
+        color: "#2f3948",
+      },
+    ],
   },
   {
     featureType: "transit.station",
-    elementType: "geometry",
-    stylers: [{ color: "#eeeeee" }],
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#d59563",
+      },
+    ],
   },
   {
     featureType: "water",
     elementType: "geometry",
-    stylers: [{ color: "#c9c9c9" }],
+    stylers: [
+      {
+        color: "#17263c",
+      },
+    ],
   },
   {
     featureType: "water",
     elementType: "labels.text.fill",
-    stylers: [{ color: "#9e9e9e" }],
+    stylers: [
+      {
+        color: "#515c6d",
+      },
+    ],
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.stroke",
+    stylers: [
+      {
+        color: "#17263c",
+      },
+    ],
   },
 ];
+
+const dayMapStyle = [];

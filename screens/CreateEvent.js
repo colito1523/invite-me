@@ -11,6 +11,7 @@ import {
   Dimensions,
   FlatList,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
@@ -41,6 +42,7 @@ export default function CreateEvent() {
   const [description, setDescription] = useState("");
   const navigation = useNavigation();
   const blockedUsers = useBlockedUsers();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const today = new Date();
   const maxDate = new Date(today.getTime() + 31 * 24 * 60 * 60 * 1000); // Max 1 month from today
@@ -119,6 +121,8 @@ export default function CreateEvent() {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+
     if (blockedUsers.includes(auth.currentUser.uid)) {
       Alert.alert(t("createEvent.error"), t("createEvent.blockedError"));
       return;
@@ -139,6 +143,7 @@ export default function CreateEvent() {
       );
       return;
     }
+    setIsSubmitting(true);
 
     const user = auth.currentUser;
     if (user) {
@@ -197,14 +202,17 @@ export default function CreateEvent() {
         await sendInvitationNotifications(eventData, docRef.id);
 
         Alert.alert(t("createEvent.success"), t("createEvent.eventCreated"));
-        navigation.navigate("Home", { selectedCategory: "all" });
+        navigation.navigate("Home", { 
+          screen: "Home",
+          params: { selectedCategory: "all" }
+        });
       } catch (error) {
         console.error("Error creating event: ", error);
-        Alert.alert(
-          t("createEvent.error"),
-          t("createEvent.eventCreationError")
-        );
+        Alert.alert(t("createEvent.error"), t("createEvent.eventCreationError"));
+      } finally {
+        setIsSubmitting(false);
       }
+      
     }
   };
 
@@ -363,13 +371,18 @@ export default function CreateEvent() {
               multiline
             />
 
-            <TouchableOpacity
-              style={styles.submitButton}
+<TouchableOpacity
+              style={[styles.submitButton, isSubmitting && styles.disabledButton]}
               onPress={handleSubmit}
+              disabled={isSubmitting}
             >
-              <Text style={styles.submitButtonText}>
-                {t("createEvent.createEvent")}
-              </Text>
+              {isSubmitting ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.submitButtonText}>
+                  {t("createEvent.createEvent")}
+                </Text>
+              )}
             </TouchableOpacity>
           </>
         }
@@ -564,5 +577,21 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  submitButton: {
+    backgroundColor: "black",
+    borderRadius: 10,
+    padding: 15,
+    width: "100%",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  disabledButton: {
+    backgroundColor: "gray",
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });

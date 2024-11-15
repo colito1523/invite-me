@@ -1,3 +1,0 @@
-Este archivo contiene el login, apartado principal, de registro, recuperación de contraseña y sala de espera, las validaciones que faltan son cuando una persona que no fue aceptada quiere entrar, fue creado con Expo y tiene de bas de datos a firebase con el panel de administrador
-
-falta el menu en el interior de la aplicación, compras integradas

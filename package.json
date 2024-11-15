@@ -1,5 +1,5 @@
 {
-  "name": "Invite Me",
+  "name": "invite-me",
   "version": "1.0.0",
   "main": "expo/AppEntry.js",
   "scripts": {
@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@babel/preset-env": "^7.26.0",
     "@expo/vector-icons": "^14.0.3",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/datetimepicker": "^8.0.1",
@@ -23,12 +24,13 @@
     "@react-navigation/stack": "^6.4.1",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
-    "expo": "~51.0.20",
+    "expo": "~51.0.39",
     "expo-av": "~14.0.7",
     "expo-blur": "~13.0.2",
     "expo-camera": "~15.0.16",
     "expo-constants": "~16.0.2",
     "expo-device": "~6.0.2",
+    "expo-file-system": "^18.0.2",
     "expo-font": "~12.0.8",
     "expo-image": "~1.13.0",
     "expo-image-manipulator": "~12.0.5",
@@ -37,11 +39,13 @@
     "expo-location": "~17.0.1",
     "expo-notifications": "~0.28.19",
     "expo-permissions": "^14.4.0",
+    "expo-server-sdk": "^3.12.0",
     "expo-status-bar": "~1.12.1",
     "expo-updates": "~0.25.27",
     "expo-video-thumbnails": "~8.0.0",
     "firebase": "^11.0.1",
-    "firebase-functions": "^3.23.0",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.1.0",
     "framer-motion": "^11.8.0",
     "i18next": "^23.16.4",
     "lottie-ios": "^3.1.8",
@@ -66,6 +70,7 @@
     "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "15.2.0",
     "react-native-tab-view": "^3.5.2",
+    "react-native-vector-icons": "^10.2.0",
     "react-native-video": "^6.4.5",
     "react-native-webview": "13.8.6",
     "react-redux": "^9.1.2",
@@ -73,7 +78,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "eslint": "^9.13.0"
+    "@babel/eslint-parser": "^7.25.9",
+    "eslint": "^9.14.0",
+    "eslint-plugin-react": "^7.37.2"
   },
   "private": true
 }
