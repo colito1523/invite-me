@@ -27,7 +27,7 @@ import {
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { format, isToday, isYesterday } from "date-fns";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons} from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 
@@ -67,8 +67,8 @@ export default function NotificationsComponent() {
             onPress={() => navigation.goBack()}
             style={{ marginLeft: 15 }}
           >
-            <AntDesign
-              name="left"
+            <Ionicons
+              name="arrow-back"
               size={20}
               color={isNightMode ? "#fff" : "#000"}
             />
@@ -492,6 +492,10 @@ export default function NotificationsComponent() {
               title: item.eventTitle,
               imageUrl: item.eventImage,
               date: item.eventDate,
+              day: item.day,   
+              description: item.description, // Asegúrate de pasar esto
+              hour: item.hour, // Agrega la hora
+              address: item.address, // Pasar dirección
               location: item.eventLocation || t('notifications.noLocation'),
               coordinates: item.coordinates || { latitude: 0, longitude: 0 },
               hours: item.hours || {},
@@ -499,6 +503,7 @@ export default function NotificationsComponent() {
               isPrivate: item.isPrivate || false,
             },
             selectedDate: item.eventDate,
+            isFromNotification: true, // Indicamos que es desde la notificación
           });
         } else {
           if (!item.coordinates || !item.coordinates.latitude || !item.coordinates.longitude) {
@@ -600,7 +605,7 @@ export default function NotificationsComponent() {
   if (isLoading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="black" />
+        <ActivityIndicator size={50} color="black" />
       </View>
     );
   }

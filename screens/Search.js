@@ -362,11 +362,11 @@ export default function Search() {
           disabled={status === "accepted"}
         >
           {status === "pending" ? (
-            <Feather name="clock" size={20} color="black" />
+            <Ionicons name="time" size={20} color="black" />
           ) : status === "accepted" ? (
-            <Feather name="check" size={20} color="black" />
+            <Ionicons name="checkmark" size={20} color="black" />
           ) : (
-            <AntDesign name="adduser" size={24} color="black" />
+            <Ionicons name="person-add" size={24} color="black" />
           )}
         </TouchableOpacity>
       </TouchableOpacity>
@@ -463,7 +463,7 @@ export default function Search() {
         </Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => removeFromHistory(item.id)}>
-        <Feather name="x" size={20}   color={theme.text} />
+        <Ionicons name="close" size={20}   color={theme.text} />
       </TouchableOpacity>
     </View>
   );

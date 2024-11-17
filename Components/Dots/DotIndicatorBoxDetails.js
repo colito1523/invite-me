@@ -51,6 +51,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   };
 
   const renderItem = ({ item, index }) => {
+    console.log("Renderizando asistente:", item);
     return (
       <TouchableOpacity
         onPress={() => handleUserPress(item.uid)}

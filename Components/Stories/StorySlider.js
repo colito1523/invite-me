@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, FlatList, StyleSheet, Text, Alert, Modal, Platform, TouchableWithoutFeedback} from 'react-native';
+import { View, TouchableOpacity, FlatList, StyleSheet, Text, Alert, Modal, Platform, TouchableWithoutFeedback, RefreshControl, ScrollView} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -7,10 +7,12 @@ import { collection, doc, getDoc, getDocs, query, where, setDoc, serverTimestamp
 import { auth, database, storage } from '../../config/firebase';
 import StoryViewer from './StoryViewer';
 import { useNavigation } from '@react-navigation/native';
-import { Image } from 'expo-image';
+import { Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function StorySlider() {
+  const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const navigation = useNavigation();
   const [stories, setStories] = useState([]);
@@ -22,6 +24,12 @@ export default function StorySlider() {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [unseenStories, setUnseenStories] = useState({});
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadExistingStories(); // Recargar las historias
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     const checkTime = () => {
@@ -151,7 +159,11 @@ export default function StorySlider() {
   };
   
   
-  
+  const handleOpenViewer = async (index) => {
+    setSelectedStoryIndex(index);
+    setStoryViewerVisible(true);
+    await AsyncStorage.setItem('lastViewedStoryIndex', JSON.stringify(index));
+};
 
   const handleAddStory = () => {
     setIsModalVisible(true);
@@ -161,49 +173,56 @@ export default function StorySlider() {
     try {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert("Permiso denegado", "Se necesita acceso a la cámara para subir historias");
+            Alert.alert("Permiso denegado", "Se necesita acceso a la cámara.");
             return;
         }
 
         const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ImagePicker.MediaTypeOptions.Images, // Ajustado
             allowsEditing: false,
             quality: 1,
         });
 
-        if (!result.canceled && result.assets && result.assets.length > 0) {
+        if (!result.canceled && result.assets?.length > 0) {
             await uploadStory(result.assets[0].uri);
         }
     } catch (error) {
         console.error("Error al abrir la cámara:", error);
         Alert.alert("Error", "Hubo un problema al intentar abrir la cámara.");
     } finally {
-        setIsModalVisible(false); // Cierra el modal al final de la operación
+        setIsModalVisible(false);
     }
 };
 
+
 const handleGallery = async () => {
   try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-          Alert.alert("Permiso denegado", "Se necesita acceso a la galería para subir historias");
-          return;
-      }
+    // Solicitar permisos para la galería
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Permiso denegado", "Se necesita acceso a la galería.");
+      return;
+    }
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: false,
-          quality: 1,
-      });
+    // Abrir la galería y seleccionar una imagen
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Ajustado
+      allowsEditing: false,
+      quality: 1,
+    });
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-          setSelectedImage(result.assets[0].uri); // Muestra la imagen en el modal
-      }
+    // Manejar la selección de la imagen
+    if (!result.canceled && result.assets?.length > 0) {
+      setSelectedImage(result.assets[0].uri); // Muestra la imagen en el modal
+    } else {
+      Alert.alert("Operación cancelada", "No se seleccionó ninguna imagen.");
+    }
   } catch (error) {
-      console.error("Error al abrir la galería:", error);
-      Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
+    console.error("Error al abrir la galería:", error);
+    Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
   }
 };
+
 
 
 
@@ -286,11 +305,7 @@ const handleGallery = async () => {
         ]}
         onPress={() => {
           if (hasStories) {
-            const firstUnseenStoryIndex = hasUnseenStories
-              ? item.userStories.findIndex(story => story.id === unseenStories[item.uid][0].id)
-              : 0;
-            setSelectedStoryIndex(index); // Establece `index` correctamente para StoryViewer
-            setStoryViewerVisible(true);
+            handleOpenViewer(index); // Llama directamente a handleOpenViewer
           }
         }}
       >
@@ -311,12 +326,13 @@ const handleGallery = async () => {
       </TouchableOpacity>
     );
   };
-  
-  
-  
-  
-  
   return (
+    <ScrollView
+    refreshControl={
+      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    }
+  >
+    
     <View style={styles.sliderContainer}>
       <TouchableOpacity onPress={handleAddStory} style={styles.addStoryCircle}>
         <Ionicons
@@ -400,6 +416,7 @@ const handleGallery = async () => {
   </TouchableWithoutFeedback>
 </Modal>
     </View>
+     </ScrollView>
   );
 }
 

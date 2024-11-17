@@ -218,7 +218,7 @@ export default function ElegantLogin({ navigation }) {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color="#333" />
+                <ActivityIndicator size={50} color="#333" />
               ) : (
                 <Text style={styles.loginButtonText}>{t('logIn')}</Text>
               )}

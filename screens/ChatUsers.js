@@ -839,7 +839,7 @@ export default function ChatScreen({ route }) {
         <View style={styles.uploadingContainer}>
           {uploadingMedia.map((item) => (
             <View key={item.id} style={styles.uploadingItem}>
-              <ActivityIndicator size="small" color="#0000ff" />
+              <ActivityIndicator size={50} color="#0000ff" />
               <Text style={styles.uploadingText}>
                 Subiendo... {item.progress.toFixed(0)}%
               </Text>

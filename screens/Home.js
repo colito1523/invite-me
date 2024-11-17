@@ -11,7 +11,7 @@ import {
   Platform,
 } from "react-native";
 import { signOut } from "firebase/auth";
-import { Entypo, FontAwesome, FontAwesome6 } from "@expo/vector-icons";
+import { Entypo, FontAwesome, FontAwesome6, Ionicons  } from "@expo/vector-icons";
 import {
   auth,
   storage,
@@ -157,7 +157,7 @@ const Home = React.memo(() => {
       headerTitle: () => (
         <View style={currentStyles.headerContainer}>
           <TouchableOpacity style={{ marginLeft: 10 }} onPress={toggleMenu}>
-            <Entypo
+            <Ionicons
               name="menu"
               size={24}
               color={isNightMode ? "white" : "black"}
@@ -332,7 +332,8 @@ useEffect(() => {
           events.push({
             id: docSnapshot.id,
             ...fullEventData,
-            ...eventData
+            ...eventData,
+            attendees: fullEventData.attendees || [], 
           });
         }
       }
@@ -434,7 +435,7 @@ useEffect(() => {
   if (!locationGranted) {
     return (
       <View style={currentStyles.centeredView}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size={50} color={Colors.primary} />
         <Text style={currentStyles.loadingText}>
           Solicitando permisos de ubicación...
         </Text>
@@ -494,7 +495,7 @@ useEffect(() => {
       {loading && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="black" />
+            <ActivityIndicator size={50} color="black" />
             <Text style={styles.loadingText}>Loading...</Text>
           </View>
         </View>
@@ -502,14 +503,14 @@ useEffect(() => {
 
       <View style={currentStyles.tabBar}>
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-          <FontAwesome6
-            name="house"
+          <Ionicons
+            name="home"
             size={24}
             color={isNightMode ? "white" : "black"}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Search")}>
-          <FontAwesome
+          <Ionicons
             name="search"
             size={24}
             color={isNightMode ? "white" : "black"}
@@ -522,8 +523,8 @@ useEffect(() => {
               style={styles.profileImage}
             />
           ) : (
-            <FontAwesome
-              name="user-circle"
+            <Ionicons 
+              name="person-circle"
               size={24}
               color={isNightMode ? "white" : "black"}
             />
@@ -532,16 +533,16 @@ useEffect(() => {
         <TouchableOpacity
           onPress={() => navigation.navigate("Notifications")}
         >
-          <FontAwesome
-            name="bell"
+          <Ionicons
+            name="notifications"
             size={24}
             color={isNightMode ? "white" : "black"}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
-          <FontAwesome
-            name="envelope"
-            size={24}
+          <Ionicons
+            name="mail"
+            size={25}
             color={isNightMode ? "white" : "black"}
           />
         </TouchableOpacity>

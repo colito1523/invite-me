@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { onAuthStateChanged } from "firebase/auth";
@@ -11,6 +11,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import useNotifications from "./src/hooks/useNotifications"; // Importa el hook personalizado
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from "react-native-gesture-handler"; // Importa esto
+
 
 import Login from "./screens/Login";
 import Signup from "./screens/Signup";
@@ -114,7 +117,7 @@ function RootNavigator() {
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size={50} />
       </View>
     );
   }
@@ -183,16 +186,31 @@ export default function App() {
   if (!fontsLoaded || !isI18nInitialized) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size={50} />
       </View>
     );
   }
 
   return (
+    <GestureHandlerRootView style={styles.container}>
+       <SafeAreaProvider>
     <AuthenticatedUserProvider>
       <PaperProvider>
         <RootNavigator />
       </PaperProvider>
     </AuthenticatedUserProvider>
+    </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

@@ -15,7 +15,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome, Entypo } from "@expo/vector-icons";
+import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
 import MapView, { Marker } from "react-native-maps";
 import { auth, database } from "../config/firebase";
 import {
@@ -45,7 +45,7 @@ const { width } = Dimensions.get("window");
 
 export default memo(function BoxDetails({ route, navigation }) {
   const { t } = useTranslation();
-  const { box, selectedDate } = route.params || {};
+  const { box, selectedDate, isFromNotification  } = route.params || {};
   const [isEventSaved, setIsEventSaved] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [friends, setFriends] = useState([]);
@@ -74,17 +74,38 @@ export default memo(function BoxDetails({ route, navigation }) {
   };
 
   useEffect(() => {
+    if (box && !isFromNotification) {
+      // Solo fetch de datos si no viene de una notificación
+      fetchEventDetails();
+    }
+  }, [box, isFromNotification]);
+
+  useEffect(() => {
+    let unsubscribe;
+  
     if (box) {
+      console.log("Datos del evento al entrar en BoxDetails:", box);
+  
       fetchEventDetails();
       checkEventStatus();
       fetchFriends();
       checkNightMode();
       checkAndRemoveExpiredEvents();
-
-      const unsubscribe = fetchAttendees();
-      return () => unsubscribe && unsubscribe();
+  
+      // Configura el listener en tiempo real para los asistentes
+      unsubscribe = fetchAttendees();
     }
+  
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe(); // Limpia el listener al salir del componente
+      }
+      console.log("Limpiando el efecto en BoxDetails");
+    };
   }, [box, selectedDate]);
+  
+  
+  
 
   const checkAndRemoveExpiredEvents = async () => {
     const boxRef = doc(database, "GoBoxs", box.title);
@@ -173,59 +194,83 @@ export default memo(function BoxDetails({ route, navigation }) {
       console.log("El evento no existe en la base de datos");
     }
   };
+  
   const fetchAttendees = () => {
     if (box) {
       const eventRef = doc(
         database,
         box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
-        box.id || box.title
+        box.eventId || box.id || box.title
       );
-
+  
+      console.log("Referencia al evento:", eventRef.path);
+  
+      // Usa `onSnapshot` para escuchar los cambios en tiempo real
       const unsub = onSnapshot(eventRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
+          console.log("Datos del evento obtenidos:", data);
+  
+          // Selección de asistentes según el tipo de evento
           const attendees =
             box.category === "EventoParaAmigos"
-              ? data.attendees
-              : data[selectedDate] || [];
-
-          const uniqueAttendees = (attendees || []).map((attendee) => ({
+              ? data.attendees || [] // Para eventos privados
+              : data[selectedDate] || []; // Para eventos generales
+  
+          // Procesa los asistentes para asegurar imágenes de perfil
+          const uniqueAttendees = attendees.map((attendee) => ({
             ...attendee,
-            profileImage:
-              attendee.profileImage || "https://via.placeholder.com/150",
+            profileImage: attendee.profileImage || "https://via.placeholder.com/150",
           }));
+  
+          console.log("Asistentes únicos procesados:", uniqueAttendees);
           setAttendeesList(uniqueAttendees);
+        } else {
+          console.error("El evento no existe en la base de datos.");
+          setAttendeesList([]); // Limpia la lista local si no existe
         }
       });
-
-      return unsub;
+  
+      return unsub; // Devuelve la función para limpiar el listener
     }
   };
+  
+  
+  
 
   const handleRemoveFromEvent = async () => {
     const user = auth.currentUser;
     if (!user || !box) return;
   
     try {
-      // 1. Eliminar de EventsPriv
-      const eventRef = doc(database, "EventsPriv", box.id);
-      const eventDoc = await getDoc(eventRef);
-      if (!eventDoc.exists()) {
-        console.error("Event document does not exist");
-        return;
-      }
-  
-      const eventData = eventDoc.data();
-      const currentAttendees = eventData.attendees || [];
-      const updatedAttendees = currentAttendees.filter(
-        (attendee) => attendee.uid !== user.uid
+      const eventRef = doc(
+        database,
+        box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
+        box.eventId || box.id || box.title
       );
   
-      await updateDoc(eventRef, {
-        attendees: updatedAttendees
-      });
+      // Verificar si el documento del evento existe
+      const eventDoc = await getDoc(eventRef);
+      if (eventDoc.exists()) {
+        const eventData = eventDoc.data();
   
-      // 2. Eliminar de la colección de eventos del usuario
+        // Filtrar al usuario actual de la lista de asistentes
+        const updatedAttendees = (eventData.attendees || []).filter(
+          (attendee) => attendee.uid !== user.uid
+        );
+  
+        // Actualizar la lista de asistentes en el documento del evento
+        await updateDoc(eventRef, {
+          attendees: updatedAttendees,
+        });
+  
+        console.log("Usuario eliminado de la lista de asistentes del evento.");
+        setAttendeesList(updatedAttendees); // Actualizar el estado local
+      } else {
+        console.error("El evento no existe en la base de datos.");
+      }
+  
+      // Eliminar el evento de la colección de eventos del usuario
       const userEventsRef = collection(database, "users", user.uid, "events");
       const q = query(userEventsRef, where("title", "==", box.title));
       const querySnapshot = await getDocs(q);
@@ -233,19 +278,18 @@ export default memo(function BoxDetails({ route, navigation }) {
       if (!querySnapshot.empty) {
         const userEventDoc = querySnapshot.docs[0];
         await deleteDoc(doc(userEventsRef, userEventDoc.id));
+        console.log("Evento eliminado de la colección del usuario.");
       }
   
-      // Actualizar estado local
-      setAttendeesList(updatedAttendees);
       setIsEventSaved(false);
-  
       Alert.alert("Has marcado 'No voy'");
-      console.log("Usuario eliminado del evento y de su colección personal correctamente");
     } catch (error) {
       console.error("Error al eliminar del evento: ", error);
       Alert.alert("Error", "No se pudo eliminar del evento");
     }
   };
+  
+  
 
   const fetchFriends = async () => {
     const user = auth.currentUser;
@@ -662,15 +706,15 @@ const handleSaveEdit = async () => {
     try {
       const boxRef = doc(database, "GoBoxs", boxTitle);
       const boxDoc = await getDoc(boxRef);
-
+  
       if (boxDoc.exists()) {
         const existingData = boxDoc.data()[selectedDate];
-
+  
         if (existingData) {
           const updatedData = existingData.filter(
             (user) => user.uid !== auth.currentUser.uid
           );
-
+  
           if (updatedData.length > 0) {
             await updateDoc(boxRef, {
               [selectedDate]: updatedData,
@@ -680,7 +724,7 @@ const handleSaveEdit = async () => {
               [selectedDate]: deleteField(),
             });
           }
-
+  
           console.log("Usuario eliminado de GoBoxs correctamente");
         }
       }
@@ -688,6 +732,7 @@ const handleSaveEdit = async () => {
       console.error("Error eliminando el usuario de GoBoxs:", error);
     }
   };
+  
 
   const saveUserEvent = async (
     boxTitle,
@@ -789,8 +834,8 @@ const handleSaveEdit = async () => {
         onPress={() => handleInvite(item.friendId)}
         disabled={item.invited}
       >
-        <FontAwesome
-          name={item.invited ? "check" : "share"}
+        <Ionicons
+          name={item.invited ? "checkmark-sharp" : "arrow-redo"}
           size={16}
           color={isNightMode ? "black" : "white"}
         />
@@ -817,88 +862,126 @@ const handleSaveEdit = async () => {
       showsHorizontalScrollIndicator={false}
       style={styles.slider}
     >
+      {/* Primer Slider */}
       <View style={styles.sliderPart}>
-        {box.category === "EventoParaAmigos" ? (
+        {box &&
+        box.coordinates &&
+        typeof box.coordinates.latitude === "number" &&
+        typeof box.coordinates.longitude === "number" &&
+        box.coordinates.latitude !== 0 &&
+        box.coordinates.longitude !== 0 ? (
+          <View style={styles.mapContainer}>
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: box.coordinates.latitude,
+                longitude: box.coordinates.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              customMapStyle={isNightMode ? nightMapStyle : dayMapStyle}
+            >
+              <Marker
+                coordinate={{
+                  latitude: box.coordinates.latitude,
+                  longitude: box.coordinates.longitude,
+                }}
+                title={box.title || "Evento"}
+                description={box.description || ""}
+              />
+            </MapView>
+          </View>
+        ) : isFromNotification && box.description ? (
+          // Descripción desde la notificación
           <View style={styles.descriptionContainer}>
             <Text style={styles.descriptionText}>
-              {boxData.description || "No hay descripción disponible"}
+              {box.description || "Descripción no disponible"}
+            </Text>
+          </View>
+        ) : boxData.description ? (
+          // Descripción desde EventsPriv
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.descriptionText}>
+              {boxData.description || "Descripción no disponible"}
             </Text>
           </View>
         ) : (
-          box &&
-          box.coordinates &&
-          typeof box.coordinates.latitude === "number" &&
-          typeof box.coordinates.longitude === "number" &&
-          box.coordinates.latitude !== 0 &&
-          box.coordinates.longitude !== 0 && (
-            <View style={styles.mapContainer}>
-              <MapView
-                style={styles.map}
-                initialRegion={{
-                  latitude: box.coordinates.latitude,
-                  longitude: box.coordinates.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-                customMapStyle={isNightMode ? nightMapStyle : dayMapStyle}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: box.coordinates.latitude,
-                    longitude: box.coordinates.longitude,
-                  }}
-                  title={box.title || "Evento"}
-                  description={box.description || ""}
-                />
-              </MapView>
-            </View>
-          )
+          <View style={styles.addressContainer}>
+            <Text style={styles.addressTitle}>Ubicación:</Text>
+            <Text style={styles.addressText}>
+              {boxData.address || "No hay dirección disponible"}
+            </Text>
+          </View>
         )}
       </View>
-
-      <View style={styles.sliderPart}>
-        <View style={styles.hoursContainer}>
+  
+     {/* Segundo Slider: Horarios */}
+     <View style={styles.sliderPart}>
+      <View style={styles.hoursContainer}>
+        {isFromNotification && (box.hour || box.day) ? (
+          // Mostrar hora y día desde la notificación
+          <View style={styles.notificationHours}>
+            <Text style={styles.hoursText}>
+              {`Hora: ${box.hour || "No disponible"}`}
+            </Text>
+            <Text style={styles.dayText}>
+              {`Día: ${box.day || "No disponible"}`}
+            </Text>
+          </View>
+        ) : (
+          // Mostrar horarios desde EventsPriv
           <View style={styles.hoursContent}>
             <View style={styles.column}>
-              {Object.keys(box.hours).map((day, index) => (
+              {Object.keys(boxData.hours || {}).map((day, index) => (
                 <Text key={index} style={styles.dayText}>
                   {day}
                 </Text>
               ))}
             </View>
             <View style={styles.column}>
-              {Object.values(box.hours).map((time, index) => (
+              {Object.values(boxData.hours || {}).map((time, index) => (
                 <Text key={index} style={styles.timeText}>
                   {time}
                 </Text>
               ))}
             </View>
           </View>
-        </View>
-      </View>
-
-      <View style={styles.sliderPart}>
-        {box.category === "EventoParaAmigos" ? (
-          <View style={styles.addressContainer}>
-            <Text style={styles.addressText}>
-              {boxData.address || "No hay dirección disponible"}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.contactContainer}>
-            <Text style={styles.contactTitle}>
-              {t("boxDetails.contactTitle")}
-            </Text>
-            <Text style={styles.contactText}>
-              {boxData.number ||
-                boxData.phoneNumber ||
-                "Sin número de contacto"}
-            </Text>
-          </View>
         )}
       </View>
-    </ScrollView>
+    </View>
+  
+   {/* Tercer Slider: Ubicación o Contacto */}
+<View style={styles.sliderPart}>
+  {isFromNotification && box.address ? (
+    // Mostrar dirección si proviene de notificación
+    <View style={styles.addressContainer}>
+      <Text style={styles.addressTitle}>Ubicación:</Text>
+      <Text style={styles.addressText}>
+        {box.address || "Ubicación no disponible"}
+      </Text>
+    </View>
+  ) : boxData.address ? (
+    // Mostrar dirección desde la base de datos para eventos privados
+    <View style={styles.addressContainer}>
+      <Text style={styles.addressTitle}>Ubicación:</Text>
+      <Text style={styles.addressText}>
+        {boxData.address || "Ubicación no disponible"}
+      </Text>
+    </View>
+  ) : (
+    // Mostrar contacto para eventos generales
+    <View style={styles.contactContainer}>
+      <Text style={styles.contactTitle}>Contacto:</Text>
+      <Text style={styles.contactText}>
+        {boxData.number || boxData.phoneNumber || "Sin número de contacto"}
+      </Text>
+    </View>
+  )}
+</View>
+
+  </ScrollView>
   );
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -956,7 +1039,7 @@ const handleSaveEdit = async () => {
                 >
                   <Text style={styles.editEventText}>
                     {isProcessing ? "Actualizando..." : "Editar Imagen "}
-                    <FontAwesome name="image" size={15} color="black" />
+                    <Ionicons name="image" size={15} color="black" />
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -965,7 +1048,7 @@ const handleSaveEdit = async () => {
                 >
                   <Text style={styles.editEventText}>
                     Editar Evento{" "}
-                    <FontAwesome name="pencil-square-o" size={15} color="black" />
+                    <Ionicons name="pencil" size={15} color="black" />
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -986,28 +1069,29 @@ const handleSaveEdit = async () => {
             <Text style={styles.title}>{boxData.title}</Text>
 
             <View style={styles.dotIndicatorContainer}>
+            {console.log("Datos enviados a DotIndicatorBoxDetails:", attendeesList)}
               <DotIndicatorBoxDetails attendeesList={attendeesList} />
             </View>
 
             <View style={styles.buttonContainer}>
-  <TouchableOpacity
-    style={[styles.button, isEventSaved && styles.activeButton]}
-    disabled={isProcessing}
-    onPress={() => {
-      // Verificar si el evento es privado y si ya está guardado (isEventSaved)
-      if (box.category === "EventoParaAmigos" && isEventSaved) {
-        handleRemoveFromEvent(); // Ejecuta la función para eliminar del evento
-      } else {
-        handleAddEvent(); // Ejecuta la función para agregar al evento
-      }
-    }}
-  >
-    <Text style={styles.buttonText}>
-      {isEventSaved
-        ? t("boxDetails.notGoingButton") // Texto para "No voy"
-        : t("boxDetails.goingButton")}  
-    </Text>
-  </TouchableOpacity>
+            <TouchableOpacity
+  style={[styles.button, isEventSaved && styles.activeButton]}
+  disabled={isProcessing}
+  onPress={() => {
+    if (isEventSaved) {
+      handleRemoveFromEvent(); // Elimina al usuario del evento
+    } else {
+      handleAddEvent(); // Agrega al usuario al evento
+    }
+  }}
+>
+  <Text style={styles.buttonText}>
+    {isEventSaved
+      ? t("boxDetails.notGoingButton") // Texto para "No voy"
+      : t("boxDetails.goingButton")}
+  </Text>
+</TouchableOpacity>
+
   <TouchableOpacity
     style={styles.button}
     onPress={() => setModalVisible(true)}
@@ -1426,168 +1510,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
+
+  notificationHours: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+  },
+  hoursText: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  dayText: {
+    fontSize: 16,
+    color: "white",
+  },
 });
 
-const nightMapStyle = [
-  {
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#242f3e",
-      },
-    ],
-  },
-  {
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#746855",
-      },
-    ],
-  },
-  {
-    elementType: "labels.text.stroke",
-    stylers: [
-      {
-        color: "#242f3e",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.locality",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#d59563",
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#d59563",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#263c3f",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#6b9a76",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#38414e",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#212a37",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#9ca5b3",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#746855",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#1f2835",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#f3d19c",
-      },
-    ],
-  },
-  {
-    featureType: "transit",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#2f3948",
-      },
-    ],
-  },
-  {
-    featureType: "transit.station",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#d59563",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#17263c",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#515c6d",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.stroke",
-    stylers: [
-      {
-        color: "#17263c",
-      },
-    ],
-  },
-];
+const nightMapStyle = [];
 
 const dayMapStyle = [];

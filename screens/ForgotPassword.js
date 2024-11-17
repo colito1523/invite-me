@@ -100,7 +100,7 @@ export default function ElegantForgotPassword({ navigation }) {
 
     const emailToLower = email.trim().toLowerCase();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^(?!.*(.)\1{3,})(?!^\d+@)(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:(?!^\d+\.)[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
     if (!emailRegex.test(emailToLower)) {
       Alert.alert(t('errorTitle'), t('enterValidEmail'));
       return;
@@ -200,7 +200,7 @@ export default function ElegantForgotPassword({ navigation }) {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color="#333" />
+                <ActivityIndicator size={50} color="#333" />
               ) : (
                 <Text style={styles.resetButtonText}>{t('resetPassword')}</Text>
               )}

@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs,  updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { database, auth, storage } from "../config/firebase";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -43,6 +43,7 @@ export default function CreateEvent() {
   const navigation = useNavigation();
   const blockedUsers = useBlockedUsers();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [eventId, setEventId] = useState(null);
 
   const today = new Date();
   const maxDate = new Date(today.getTime() + 31 * 24 * 60 * 60 * 1000); // Max 1 month from today
@@ -109,6 +110,11 @@ export default function CreateEvent() {
             eventImage: eventData.image,
             eventDate: eventData.timestamp,
             date: eventData.date,
+            day: eventData.day, // Día del evento
+            hour: eventData.hour, // Hora del evento
+            address: eventData.address, // Agregamos el campo dirección
+            description: eventData.description, // Descripción del evento
+            phoneNumber: eventData.phoneNumber || "No disponible", // Número de teléfono
             eventCategory: eventData.category,
             eventId: eventId,
             type: "invitation",
@@ -199,7 +205,14 @@ export default function CreateEvent() {
           eventData
         );
 
-        await sendInvitationNotifications(eventData, docRef.id);
+       // Actualizar el evento para incluir el ID
+       await updateDoc(docRef, { eventId: docRef.id });
+
+       // Enviar las notificaciones con el ID
+       await sendInvitationNotifications(
+           { ...eventData, eventId: docRef.id },
+           docRef.id
+       );
 
         Alert.alert(t("createEvent.success"), t("createEvent.eventCreated"));
         navigation.navigate("Home", { 
@@ -377,7 +390,7 @@ export default function CreateEvent() {
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size={50} color="#fff" />
               ) : (
                 <Text style={styles.submitButtonText}>
                   {t("createEvent.createEvent")}

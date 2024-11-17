@@ -739,7 +739,7 @@ export function StoryViewer({
               }
             />
             {isImageLoading && (
-              <ActivityIndicator size="large" color="#FFFFFF" />
+              <ActivityIndicator size={50} color="#FFFFFF" />
             )}
             <View style={styles.userInfo}>
               <View style={styles.userDetails}>
