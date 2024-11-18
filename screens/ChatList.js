@@ -108,81 +108,49 @@ export default function ChatList() {
           const chatList = await Promise.all(
             querySnapshot.docs.map(async (docSnapshot) => {
               const chatData = docSnapshot.data();
-  
-              // Verificar si el chat fue eliminado para el usuario actual
-              if (chatData.deletedFor && chatData.deletedFor[user.uid]) {
-                const deletedAt = chatData.deletedFor[user.uid].deletedAt;
-                const lastMessageTimestamp =
-                  chatData.lastMessageTimestamp?.toDate();
-  
-                // Si no hay mensaje nuevo después de la eliminación, no mostrar el chat
-                if (
-                  !lastMessageTimestamp ||
-                  lastMessageTimestamp <= new Date(deletedAt)
-                ) {
-                  return null;
-                }
-              }
-  
-              // Obtener el ID del otro usuario
               const otherUserId = chatData.participants.find(
                 (uid) => uid !== user.uid
               );
   
-              // Obtener la información del otro usuario
               const otherUserDoc = await getDoc(
                 doc(database, "users", otherUserId)
               );
               if (!otherUserDoc.exists()) {
-                console.error(`User with ID ${otherUserId} not found`);
                 return null;
               }
   
               const otherUserData = otherUserDoc.data();
   
-              // Obtener el último mensaje de la conversación
               const messagesRef = collection(
                 database,
                 "chats",
                 docSnapshot.id,
                 "messages"
               );
-              const lastMessageQuery = query(
+              const unseenMessagesQuery = query(
                 messagesRef,
-                orderBy("createdAt", "desc"),
-                limit(1)
+                where("seen", "==", false),
+                where("senderId", "!=", user.uid)
               );
-              const lastMessageSnapshot = await getDocs(lastMessageQuery);
-              const lastMessage = lastMessageSnapshot.docs[0]?.data();
+              const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
   
-              // Calcular el número de mensajes no leídos
-              let unreadCount = 0;
-              if (lastMessage && lastMessage.senderId !== user.uid) {
-                const unreadQuery = query(
-                  messagesRef,
-                  where("seen", "not-in", [user.uid]) // Filtra mensajes no vistos por el usuario
-                );
-                const unreadSnapshot = await getDocs(unreadQuery);
-                unreadCount = unreadSnapshot.size;
-              }
+              const unseenMessagesCount = unseenMessagesSnapshot.size;
   
-              // Devolver los datos del chat
               return {
                 id: docSnapshot.id,
-                user: { ...otherUserData, id: otherUserId },
-                lastMessage,
-                unreadCount: unreadCount,
+                user: otherUserData,
+                unseenMessagesCount,
+                lastMessageTimestamp: chatData.lastMessageTimestamp || null,
               };
             })
           );
   
-          // Filtrar valores nulos (chats eliminados) y ordenar los chats
           const sortedChats = chatList
             .filter((chat) => chat !== null)
             .sort(
               (a, b) =>
-                b.lastMessage?.createdAt?.toMillis() -
-                a.lastMessage?.createdAt?.toMillis()
+                new Date(b.lastMessageTimestamp) -
+                new Date(a.lastMessageTimestamp)
             );
   
           setChats(sortedChats);
@@ -194,6 +162,7 @@ export default function ChatList() {
       fetchChats();
     }, [user?.uid])
   );
+  
   
 
   useEffect(() => {
@@ -310,36 +279,27 @@ export default function ChatList() {
 
   const handleChatPress = async (chat) => {
     try {
-      const chatRef = doc(database, "chats", chat.id);
       const messagesRef = collection(database, "chats", chat.id, "messages");
-      const batch = writeBatch(database);
-      const messagesSnapshot = await getDocs(messagesRef);
-  
-      messagesSnapshot.docs.forEach((doc) => {
-        if (doc.data().senderId !== user.uid && !doc.data().seen.includes(user.uid)) {
-          batch.update(doc.ref, { seen: arrayUnion(user.uid) });
-        }
-      });
-  
-      await batch.commit();
-  
-      // Actualizar la lista de chats local para reflejar los mensajes vistos
-      setChats((prevChats) =>
-        prevChats.map((c) =>
-          c.id === chat.id ? { ...c, unreadCount: 0 } : c
-        )
+      const unseenMessagesQuery = query(
+        messagesRef,
+        where("seen", "==", false),
+        where("senderId", "!=", user.uid)
       );
+      const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+  
+      unseenMessagesSnapshot.forEach(async (messageDoc) => {
+        await updateDoc(messageDoc.ref, { seen: true });
+      });
   
       navigation.navigate("ChatUsers", {
         chatId: chat.id,
         recipientUser: chat.user,
-        currentUserId: user.uid,
-        recipientUserId: chat.user.id,
       });
     } catch (error) {
       console.error("Error updating message seen status:", error);
     }
   };
+  
   
   const formatTime = (timestamp) => {
     if (!(timestamp instanceof Timestamp)) {
@@ -453,79 +413,29 @@ export default function ChatList() {
 
   const renderChatItem = ({ item }) => (
     <TouchableOpacity
-      
-      style={[styles.chatItem, { backgroundColor: "transparent" }]}
-      onPress={() =>
-        isSelectionMode ? toggleChatSelection(item.id) : handleChatPress(item)
-      }
-      onLongPress={() => {
-        Alert.alert(
-          "Eliminar chat",
-          "¿Estás seguro de que quieres eliminar este chat?",
-          [
-            {
-              text: "Cancelar",
-              style: "cancel",
-            },
-            {
-              text: "Eliminar",
-              onPress: () => handleDeleteChat(item),
-            },
-          ]
-        );
-      }}
+      style={styles.chatItem}
+      onPress={() => handleChatPress(item)}
     >
-      {isSelectionMode && (
-        <View
-          style={[
-            styles.checkbox,
-            (selectedChats.includes(item.id) || selectAll) &&
-              styles.checkboxSelected,
-          ]}
-        />
-      )}
       <Image
         source={{
           uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
         }}
         style={styles.userImage}
-        cachePolicy="memory-disk"
       />
-
       <View style={styles.chatInfo}>
-        <View style={styles.chatHeader}>
-          <Text
-            style={[
-              styles.chatTitle,
-              { color: theme.text },
-              item.unreadCount > 0 && styles.unseenChatTitle,
-            ]}
-          >
-            {(item.user.firstName || "") + " " + (item.user.lastName || "") ||
-              "Usuario desconocido"}
-          </Text>
-          <View style={styles.timeAndUnreadContainer}>
-            {renderUnreadMessageCount(item)}
-            {item.lastMessage && item.lastMessage.createdAt && (
-              <Text
-                style={[styles.lastMessageTime, { color: theme.textSecondary }]}
-              >
-                {formatTime(item.lastMessage.createdAt)}
-              </Text>
-            )}
-          </View>
-        </View>
-        {item.lastMessage && item.lastMessage.senderId !== user.uid && (
-          <Text
-            style={[styles.lastMessagePreview, { color: theme.textSecondary }]}
-            numberOfLines={1}
-          >
-            {truncateMessage(item.lastMessage.text || "Multimedia")}
-          </Text>
-        )}
+        <Text style={styles.chatTitle}>{item.user.username || "Usuario desconocido"}</Text>
       </View>
+      {item.unseenMessagesCount > 0 && (
+        <View style={styles.unseenCountContainer}>
+          <Text style={styles.unseenCountText}>
+            {item.unseenMessagesCount}
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
+  
+  
 
   return (
     <Provider>
@@ -769,9 +679,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
   },
-  unseenChatTitle: {
+  unseenCountContainer: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  unseenCountText: {
+    color: "white",
+    fontSize: 12,
     fontWeight: "bold",
   },
+
   modalContainer: {
     flex: 1,
     justifyContent: "center",

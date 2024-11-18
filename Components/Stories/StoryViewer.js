@@ -502,7 +502,7 @@ export function StoryViewer({
             senderId: user.uid,
             senderName: user.displayName || t("storyViewer.anonymous"),
             createdAt: new Date(),
-            seen: [user.uid], // Solo agregar el UID del remitente
+            seen: false, // Cambiar de array a boolean
             storyUrl: currentStory.storyUrl,
             isStoryResponse: true, // Indicar que es una respuesta a una historia
           };

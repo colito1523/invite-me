@@ -6,18 +6,14 @@ import {
   FlatList,
   Text,
   StyleSheet,
-  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
   Modal,
   TouchableWithoutFeedback,
-  ImageBackground,
-  ActivityIndicator,
+  Alert,
 } from "react-native";
-import { Image } from "expo-image";
-import { Menu } from "react-native-paper";
-import * as ImagePicker from "expo-image-picker";
-import { Video } from "expo-av";
-import { Feather, Ionicons, FontAwesome, MaterialIcons  } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { auth, database, storage } from "../config/firebase";
 import {
   collection,
   addDoc,
@@ -27,129 +23,123 @@ import {
   doc,
   updateDoc,
   setDoc,
-  deleteDoc,
-  writeBatch,
   getDoc,
+  writeBatch,
   getDocs,
-  where,
-  Timestamp,
-  serverTimestamp,
-  arrayUnion,
 } from "firebase/firestore";
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Video } from "expo-av";
+import { Audio } from "expo-av";
+import AudioPlayer from "./AudioPlayer";
 import { useBlockedUsers } from "../src/contexts/BlockContext";
-import { auth, database, storage } from "../config/firebase";
-import Complaints from "../Components/Complaints/Complaints";
+import { ImageBackground } from "react-native";
+import { Menu } from "react-native-paper";
+import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 
-export default function ChatScreen({ route }) {
-  const { chatId, recipientUser, currentUserId, recipientUserId } = route.params;
+export default function Chat({ route }) {
+  const { chatId: initialChatId, recipientUser } = route.params;
+  const [backgroundImage, setBackgroundImage] = useState(null);
+  const [chatId, setChatId] = useState(initialChatId);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [recipient, setRecipient] = useState(recipientUser);
-  const [selectedMedia, setSelectedMedia] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [uploadingMedia, setUploadingMedia] = useState([]);
-  const [backgroundImage, setBackgroundImage] = useState(null);
-  const [menuVisible, setMenuVisible] = useState(false);
-  const [isChatHidden, setIsChatHidden] = useState(false);
-  const [storyResponses, setStoryResponses] = useState([]);
-  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [noteText, setNoteText] = useState("");
-  const [viewedOnceImages, setViewedOnceImages] = useState(new Set());
-
+  const [recording, setRecording] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [selectedMessageId, setSelectedMessageId] = useState(null);
   const user = auth.currentUser;
   const navigation = useNavigation();
   const flatListRef = useRef(null);
+  const [imageUri, setImageUri] = useState(route.params?.imageUri || null);
   const blockedUsers = useBlockedUsers();
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
+
+
+  // Verificación de usuarios bloqueados
+  useEffect(() => {
+    if (blockedUsers.includes(recipientUser.id)) {
+      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      navigation.goBack();
+      return;
+    }
+  }, [recipientUser, blockedUsers]); // Cierra el primer useEffect aquí
 
   useEffect(() => {
-    if (currentUserId) {
-      const fetchNote = async () => {
-        try {
-          const noteRef = doc(database, "users", currentUserId, "note", "current");
-          const noteSnapshot = await getDoc(noteRef);
-          if (noteSnapshot.exists()) {
-            setNoteText(noteSnapshot.data().text);
-          } else {
-            setNoteText("No hay nota disponible");
-          }
-        } catch (error) {
-          console.error("Error al obtener la nota:", error);
-          setNoteText("Error al obtener la nota");
-        }
-      };
-      fetchNote();
+    if (recipientUser?.photoUrls && recipientUser.photoUrls.length > 0) {
+      setBackgroundImage(recipientUser.photoUrls[0]);
     }
-  }, [currentUserId]);
+  }, [recipientUser]);
 
-  const setupChat = async () => {
-    if (chatId) {
-      try {
+  // Configuración del chat
+  useEffect(() => {
+    const setupChat = async () => {
+      if (chatId) {
         const messagesRef = collection(database, "chats", chatId, "messages");
         const q = query(messagesRef, orderBy("createdAt", "asc"));
-  
+
+        // Escucha los mensajes del chat
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-          const messagesList = querySnapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            .filter((message) => {
-              if (message.deletedFor && user && user.uid) {
-                return !message.deletedFor[user.uid];
-              }
-              return true;
-            });
-  
+          const messagesList = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
           setMessages(messagesList);
-  
-          querySnapshot.docs.forEach((doc) => {
-            const messageData = doc.data();
-            if (messageData.isNoteResponse) {
-              setNoteText(messageData.noteText || "Sin nota");
-            }
-          });
-  
-          const batch = writeBatch(database);
-          querySnapshot.docs.forEach((doc) => {
-            const messageData = doc.data();
-  
-            if (
-              messageData.senderId !== user.uid &&
-              !messageData.seen.includes(user.uid)
-            ) {
-              batch.update(doc.ref, {
-                seen: arrayUnion(user.uid),
-              });
-            }
-          });
-          batch.commit();
         });
-  
-        if (
-          recipientUser &&
-          recipientUser.photoUrls &&
-          recipientUser.photoUrls.length > 0
-        ) {
-          setBackgroundImage(recipientUser.photoUrls[0]);
-        }
-  
+
+        // Lógica para cargar respuestas de historias
         const fetchStoryResponses = async () => {
-          if (recipientUser && recipientUser.id) {
-            const userStoriesRef = collection(
+          const responses = [];
+
+          // Respuestas a las historias del destinatario
+          if (recipientUser?.id) {
+            const recipientStoriesRef = collection(
               database,
               "users",
               recipientUser.id,
               "stories"
             );
+            try {
+              const recipientStoriesSnapshot = await getDocs(
+                recipientStoriesRef
+              );
+              for (const storyDoc of recipientStoriesSnapshot.docs) {
+                const responsesRef = collection(
+                  recipientStoriesRef,
+                  storyDoc.id,
+                  "responses"
+                );
+                const responsesSnapshot = await getDocs(responsesRef);
+                responses.push(
+                  ...responsesSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    storyId: storyDoc.id,
+                    ...doc.data(),
+                    isStoryResponse: true, // Indicador para identificar respuestas de historias
+                  }))
+                );
+              }
+            } catch (error) {
+              console.error(
+                "Error al cargar respuestas de historias del destinatario:",
+                error
+              );
+            }
+          }
+
+          // Respuestas a tus propias historias
+          const userStoriesRef = collection(
+            database,
+            "users",
+            user.uid,
+            "stories"
+          );
+          try {
             const userStoriesSnapshot = await getDocs(userStoriesRef);
-  
-            const responses = [];
             for (const storyDoc of userStoriesSnapshot.docs) {
               const responsesRef = collection(
                 userStoriesRef,
@@ -162,27 +152,55 @@ export default function ChatScreen({ route }) {
                   id: doc.id,
                   storyId: storyDoc.id,
                   ...doc.data(),
-                  isStoryResponse: true,
+                  isStoryResponse: true, // Indicador para identificar respuestas de historias
                 }))
               );
             }
-  
-            setStoryResponses(responses);
+          } catch (error) {
+            console.error(
+              "Error al cargar respuestas de tus propias historias:",
+              error
+            );
           }
+
+          // Agregar las respuestas al estado de mensajes
+          setMessages((prevMessages) => [...prevMessages, ...responses]);
         };
-  
-        fetchStoryResponses();
-  
-        return () => unsubscribe();
+
+
+  // Lógica para cargar respuestas a notas
+  const fetchNote = async () => {
+    if (recipientUser?.id) {
+      try {
+        const noteRef = doc(database, "users", recipientUser.id, "note", "current");
+        const noteSnapshot = await getDoc(noteRef);
+        if (noteSnapshot.exists()) {
+          setNoteText(noteSnapshot.data().text); // Guardar el texto de la nota
+        } else {
+          setNoteText("No hay nota disponible");
+        }
       } catch (error) {
-        console.error("Error in setupChat:", error);
+        console.error("Error al obtener la nota:", error);
+        setNoteText("Error al obtener la nota");
       }
     }
   };
 
-  useEffect(() => {
+  await Promise.all([fetchStoryResponses(), fetchNote()]);
+
+        // Si hay una imagenUri pasada desde ChatList, enviarla automáticamente
+        if (imageUri) {
+          handleSend("image", imageUri);
+          setImageUri(null); // Limpiar después de enviar la imagen
+        }
+
+        // Limpieza
+        return () => unsubscribe();
+      }
+    };
+
     setupChat();
-  }, [chatId, blockedUsers, recipientUser, currentUserId, recipientUserId]);
+  }, [chatId, imageUri, blockedUsers, recipientUser]);
 
   const handleReport = async () => {
     if (!recipientUser || !recipientUser.id) {
@@ -220,7 +238,6 @@ export default function ChatScreen({ route }) {
       );
     }
   };
-
   const handleReportSubmit = async (reason, description) => {
     try {
       const complaintsRef = collection(database, "complaints");
@@ -257,6 +274,7 @@ export default function ChatScreen({ route }) {
       const chatRef = doc(collection(database, "chats"));
       const newChatId = chatRef.id;
 
+      // Validar que los datos no sean undefined
       if (!user || !recipientUser || !newChatId) {
         console.error(
           "Error: Los datos del chat o los usuarios son indefinidos."
@@ -270,152 +288,99 @@ export default function ChatScreen({ route }) {
         lastMessage: "",
       });
 
+      setChatId(newChatId);
       return newChatId;
     }
 
     return chatId;
   };
 
-  const uploadMedia = async (uri, mediaType) => {
-    if (!uri) return null;
-
-    const uploadId = Date.now().toString();
-    setUploadingMedia((prev) => [...prev, { id: uploadId, progress: 0 }]);
-
+  const handleSend = async (
+    messageType = "text",
+    mediaUri = null,
+    isViewOnce = false
+  ) => {
     try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const fileExtension =
-        mediaType === "video"
-          ? ".mp4"
-          : mediaType === "audio"
-          ? ".m4a"
-          : ".jpg";
-      const fileName = `${user.uid}_${new Date().getTime()}${fileExtension}`;
-      const storageRef = ref(storage, `media/${user.uid}/${fileName}`);
+      const chatIdToUse = await createChatIfNotExists();
+      const messagesRef = collection(
+        database,
+        "chats",
+        chatIdToUse,
+        "messages"
+      );
 
-      const uploadTask = uploadBytesResumable(storageRef, blob);
-
-      return new Promise((resolve, reject) => {
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            setUploadingMedia((prev) =>
-              prev.map((item) =>
-                item.id === uploadId ? { ...item, progress } : item
-              )
-            );
-          },
-          (error) => {
-            console.error("Error uploading media:", error);
-            setUploadingMedia((prev) =>
-              prev.filter((item) => item.id !== uploadId)
-            );
-            reject(error);
-          },
-          async () => {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            setUploadingMedia((prev) =>
-              prev.filter((item) => item.id !== uploadId)
-            );
-            resolve(downloadURL);
-          }
-        );
-      });
-    } catch (error) {
-      console.error("Error in uploadMedia:", error);
-      setUploadingMedia((prev) => prev.filter((item) => item.id !== uploadId));
-      return null;
-    }
-  };
-
-  const handleSend = async (messageType = "text", mediaUri = null, isViewOnce = false) => {
-    const chatIdToUse = await createChatIfNotExists();
-    const messagesRef = collection(database, "chats", chatIdToUse, "messages");
-
-    let messageData = {
+      let messageData = {
         senderId: user.uid,
-        senderName: user?.username || user.displayName || "Sin Nombre",
+        senderName: user.displayName || "Anónimo",
         createdAt: new Date(),
-        seen: [user.uid],
-        deletedFor: {},
-        viewedBy: [],
-    };
+        seen: false,
+        viewedBy: [], // Solo aplicable para imágenes privadas
+        isViewOnce,   // Indica si es de una sola vista
+      };
 
-    if (messageType === "text") {
-        messageData.text = message;
-    } else if (["image", "video"].includes(messageType)) {
-        try {
-            const downloadURL = await uploadMedia(mediaUri, messageType);
-            if (downloadURL) {
-                messageData.mediaType = messageType;
-                messageData.mediaUrl = downloadURL;
-                messageData.isViewOnce = isViewOnce; // Usa el valor proporcionado de isViewOnce
-            } else {
-                throw new Error("Failed to upload media");
-            }
-        } catch (error) {
-            console.error("Error uploading media:", error);
-            Alert.alert(
-                "Error",
-                "No se pudo subir el archivo multimedia. Por favor, inténtalo de nuevo."
-            );
-            return;
-        }
-    }
+      if (messageType === "text") {
+        // Asigna el texto del mensaje
+        messageData.text = message.trim();
+      } else if (messageType === "image" || messageType === "video") {
+        // Subir archivo multimedia
+        const mediaUrl = await uploadMedia(mediaUri);
+        messageData.mediaType = messageType;
+        messageData.mediaUrl = mediaUrl;
+        messageData.isViewOnce = isViewOnce; // Define si es de una sola vista
+      }
 
-    await addDoc(messagesRef, messageData);
-    updateLastMessage(chatIdToUse, messageData);
+      // Enviar mensaje a Firestore
+      await addDoc(messagesRef, messageData);
 
-    setMessage("");
-    flatListRef.current?.scrollToEnd({ animated: true });
-};
-
-
-
-  const updateLastMessage = async (chatId, messageData) => {
-    try {
-      const chatDocRef = doc(database, "chats", chatId);
+      // Actualizar información del chat
+      const chatDocRef = doc(database, "chats", chatIdToUse);
       await updateDoc(chatDocRef, {
-        lastMessage: messageData.text || `${messageData.mediaType} enviado`,
+        lastMessage: messageData.text || "Media",
         lastMessageTimestamp: messageData.createdAt,
-        lastMessageSenderId: messageData.senderId,
-        lastMessageSenderName: messageData.senderName,
+        lastMessageSenderId: user.uid,
+        lastMessageSenderName: user.displayName || "Anónimo",
       });
+
+      // Limpiar el campo de texto
+      setMessage("");
+      flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
-      console.error("Error al actualizar el último mensaje:", error);
+      console.error("Error al enviar el mensaje:", error);
+      Alert.alert(
+        "Error",
+        "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
+      );
     }
   };
 
   const handleDeleteChat = async () => {
     try {
-      const batch = writeBatch(database);
+      const batch = writeBatch(database); // Asegúrate de que `database` esté configurado correctamente
       const chatRef = doc(database, "chats", chatId);
       const messagesRef = collection(database, "chats", chatId, "messages");
 
+      // Marcar el chat como eliminado para el usuario actual
       batch.update(chatRef, {
         [`deletedFor.${user.uid}`]: {
-          timestamp: serverTimestamp(),
-          deletedAt: new Date().toISOString(),
+          timestamp: new Date().toISOString(),
         },
       });
 
+      // Marcar todos los mensajes como eliminados para el usuario actual
       const messagesSnapshot = await getDocs(messagesRef);
       messagesSnapshot.forEach((messageDoc) => {
         batch.update(messageDoc.ref, {
           [`deletedFor.${user.uid}`]: {
-            timestamp: serverTimestamp(),
-            deletedAt: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           },
         });
       });
 
+      // Aplica los cambios en Firestore
       await batch.commit();
 
+      // Navegar fuera del chat
       navigation.goBack();
-
       Alert.alert("Éxito", "El chat ha sido eliminado para ti.");
     } catch (error) {
       console.error("Error al eliminar el chat:", error);
@@ -423,6 +388,99 @@ export default function ChatScreen({ route }) {
         "Error",
         "No se pudo eliminar el chat. Por favor, intenta nuevamente."
       );
+    }
+  };
+
+  const uploadMedia = async (uri) => {
+    if (!uri) return null;
+
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storageRef = ref(
+      storage,
+      `media/${user.uid}/${new Date().getTime()}`
+    );
+    await uploadBytes(storageRef, blob);
+
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  };
+
+  const handleCameraLaunch = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permiso denegado",
+        "Se necesita permiso para acceder a la cámara"
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      handleSend("image", asset.uri, true); // Enviar como `isViewOnce: true`
+    }
+  };
+
+  const pickMedia = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const mediaType = result.assets[0].type === "video" ? "video" : "image";
+      handleSend(mediaType, result.assets[0].uri); // Verifica que `handleSend` esté en `ChatUsersParaEditar.js`
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      if (recording) {
+        await recording.stopAndUnloadAsync();
+        setRecording(null);
+      }
+
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permiso de audio no concedido");
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const newRecording = new Audio.Recording();
+      await newRecording.prepareToRecordAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      );
+      await newRecording.startAsync();
+      setRecording(newRecording);
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Error al iniciar la grabación:", err);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      if (recording) {
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        setRecording(null);
+        setIsRecording(false);
+        handleSend("audio", uri);
+      }
+    } catch (err) {
+      console.error("Error al detener la grabación:", err);
     }
   };
 
@@ -442,317 +500,283 @@ export default function ChatScreen({ route }) {
     navigation.navigate("UserProfile", { selectedUser: recipientUser });
   };
 
-  const handleMediaPress = async (mediaUrl, mediaType, messageId, isViewOnce) => {
-    if (!isViewOnce) {
-        setSelectedMedia({ url: mediaUrl, type: mediaType });
-        setIsModalVisible(true);
-        return;
-    }
-
+  const handleMediaPress = async (
+    mediaUrl,
+    mediaType,
+    messageId,
+    isViewOnce
+  ) => {
     try {
-        const messageRef = doc(database, "chats", chatId, "messages", messageId);
-        const messageSnapshot = await getDoc(messageRef);
+      const messageRef = doc(database, "chats", chatId, "messages", messageId);
+      const messageSnapshot = await getDoc(messageRef);
 
-        if (messageSnapshot.exists()) {
-            const messageData = messageSnapshot.data();
-            
-            if (messageData.viewedBy?.includes(user.uid)) {
-                Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista y no está disponible.");
-            } else {
-                // Permitir ver la imagen y añadir el usuario al campo viewedBy
-                setSelectedMedia({ url: mediaUrl, type: mediaType });
-                setIsModalVisible(true);
-                await updateDoc(messageRef, {
-                    viewedBy: arrayUnion(user.uid)
-                });
-            }
+      if (!messageSnapshot.exists()) {
+        Alert.alert("Error", "No se encontró el mensaje.");
+        return;
+      }
+
+      const messageData = messageSnapshot.data();
+
+      if (isViewOnce) {
+        if (messageData.viewedBy?.includes(user.uid)) {
+          Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista.");
+          return;
         }
+
+        await updateDoc(messageRef, {
+          viewedBy: [...(messageData.viewedBy || []), user.uid],
+        });
+
+        setSelectedImage(mediaUrl);
+        setIsModalVisible(true);
+      } else {
+        setSelectedImage(mediaUrl);
+        setIsModalVisible(true);
+      }
     } catch (error) {
-        console.error("Error al actualizar el estado de la visualización:", error);
+      console.error("Error al abrir la imagen:", error);
+      Alert.alert("Error", "No se pudo abrir la imagen.");
     }
-};
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    setSelectedImage(null);
+  };
 
   const handleLongPressMessage = (message) => {
-    const options = [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar para mí",
-        onPress: () => handleDeleteMessageForMe(message),
-      },
-    ];
-
     if (message.senderId === user.uid) {
-      options.push({
-        text: "Eliminar para todos",
-        onPress: () => handleDeleteMessageForEveryone(message),
-      });
-    }
-
-    Alert.alert("Opciones de Mensaje", "¿Qué te gustaría hacer?", options);
-  };
-
-  const handleDeleteMessageForMe = async (message) => {
-    try {
-      const messageRef = doc(database, "chats", chatId, "messages", message.id);
-      await updateDoc(messageRef, {
-        [`deletedFor.${user.uid}`]: true,
-      });
-      setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg.id !== message.id)
-      );
-    } catch (error) {
-      console.error("Error al eliminar el mensaje:", error);
+      // Solo permitir eliminación de mensajes enviados por el usuario actual
+      Alert.alert("Opciones de Mensaje", "¿Qué te gustaría hacer?", [
+        {
+          text: "Cancelar",
+          onPress: () => setSelectedMessageId(null),
+          style: "cancel",
+        },
+        {
+          text: "Eliminar",
+          onPress: () => handleDeleteMessage(message.id),
+          style: "destructive",
+        },
+      ]);
     }
   };
 
-  const handleDeleteMessageForEveryone = async (message) => {
-    try {
-      await deleteDoc(doc(database, "chats", chatId, "messages", message.id));
-
-      if (message.mediaUrl) {
-        const mediaRef = ref(storage, message.mediaUrl);
-        try {
-          await deleteObject(mediaRef);
-        } catch (mediaError) {
-          console.error("Error al eliminar el archivo multimedia:", mediaError);
-        }
-      }
-      setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg.id !== message.id)
-      );
-    } catch (error) {
-      console.error("Error al eliminar el mensaje para todos:", error);
-      Alert.alert(
-        "Error",
-        "No se pudo eliminar el mensaje. Por favor, inténtalo de nuevo."
-      );
-    }
+  const handleDeleteMessage = (messageId) => {
+    setMessages((prevMessages) =>
+      prevMessages.filter((message) => message.id !== messageId)
+    );
+    setSelectedMessageId(null);
   };
 
-  const handleSendMessage = async () => {
-    if (message.trim()) {
-      const chatIdToUse = await createChatIfNotExists();
-      const messagesRef = collection(
-        database,
-        "chats",
-        chatIdToUse,
-        "messages"
-      );
-      try {
-        const userRef = doc(database, "users", user.uid);
-        const userSnapshot = await getDoc(userRef);
-        let senderName = "Sin Nombre";
-        if (userSnapshot.exists()) {
-          senderName =
-            userSnapshot.data().username ||
-            `${userSnapshot.data().firstName} ${
-              userSnapshot.data().lastName
-            }` ||
-            "Sin Nombre";
-        }
-
-        const messageData = {
-          text: message,
-          senderId: user.uid,
-          senderName: senderName,
-          createdAt: new Date(),
-          seen: [user.uid],
-        };
-
-        await addDoc(messagesRef, messageData);
-        updateLastMessage(chatIdToUse, messageData);
-
-        setMessage("");
-      } catch (error) {
-        console.error("Error al enviar el mensaje:", error);
-        Alert.alert(
-          "Error",
-          "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
-        );
-      }
-    }
-  };
-
-  const handleCameraLaunch = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-        Alert.alert(
-            "Permiso denegado",
-            "Se necesita permiso para acceder a la cámara"
-        );
-        return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        quality: 1,
-    });
-
-    if (!result.canceled) {
-        const asset = result.assets[0];
-        const mediaType = asset.type === "video" ? "video" : "image";
-        handleSend(mediaType, asset.uri, true); // isViewOnce: true para cámara
-    }
-};
-
-  const pickMedia = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        quality: 1,
-    });
-
-    if (!result.canceled) {
-        const mediaType = result.assets[0].type === "video" ? "video" : "image";
-        handleSend(mediaType, result.assets[0].uri, false); // isViewOnce: false para galería
-    }
-};
-
-  const truncateNote = (note) => {
-    return note && typeof note === "string"
-      ? note.length > 15
-        ? note.substring(0, 15) + "..."
-        : note
-      : "";
-  };
-
-  const renderMessage = ({ item }) => {
-    const isEmoji = item.text && isOnlyEmojis(item.text);
-    const isOwnMessage = item.senderId === user.uid;
-
-    if (item.isStoryResponse) {
-      return (
-          <View
-              style={[
-                  styles.message,
-                  isOwnMessage ? styles.sent : styles.received,
-                  styles.storyResponseContainer,
-              ]}
-          >
-              {/* Texto indicando la respuesta */}
-              <Text style={styles.storyResponseText}>
-                  {isOwnMessage ? "Respondiste a su historia" : `${item.senderName} respondió a tu historia`}
-              </Text>
-  
-              {/* Imagen de la historia */}
-              <Image
-                  source={{ uri: item.storyUrl }}
-                  style={styles.storyResponseImage}
-                  cachePolicy="memory-disk"
-              />
-  
-              {/* Mensaje de la respuesta */}
-              <TouchableOpacity
-                  onPress={() => navigation.navigate("FullStory", { storyUrl: item.storyUrl })}
-              >
-                  <Text style={styles.messageText}>{item.text}</Text>
-              </TouchableOpacity>
-          </View>
-      );
-  }
-    if (item.isNoteResponse) {
-      return (
-        <View
-          style={[
-            styles.message,
-            isOwnMessage ? styles.sent : styles.received,
-            styles.noteResponseContainer,
-          ]}
-        >
-          <Text style={styles.noteResponseText}>
-            {isOwnMessage ? "Respondiste a su nota" : "Respondió a tu nota"}
-          </Text>
-
-          <Image
-            source={require("../assets/flecha-curva.png")}
-            style={[
-              styles.arrowImage,
-              isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
-            ]}
-            cachePolicy="memory-disk"
-          />
-
-          <View>
-            <Text style={styles.originalNoteText}>{noteText}</Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate("FullNote", { note: item })}
-          >
-            <Text style={styles.messageTextNotas}>{item.text}</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
+  const renderDate = (date) => {
     return (
-      <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-        <View
-          style={[
-            styles.message,
-            item.senderId === user.uid ? styles.sent : styles.received,
-            item.mediaType === "image" && styles.noBackground, // Aplica estilo sin fondo para imágenes
-            isEmoji && styles.emojiMessage,
-          ]}
-        >
-          {item.text && (
-            <Text style={[styles.messageText, isEmoji && styles.emojiText]}>
-              {item.text}
-            </Text>
-          )}
-          {item.mediaType === "image" && (
-    <TouchableOpacity
-        onPress={() => handleMediaPress(item.mediaUrl, "image", item.id, item.isViewOnce)}
-    >
-        {item.isViewOnce ? (
-            <View style={styles.viewOnceImagePlaceholder}>
-                <MaterialIcons name="visibility-off" size={24} color="white" />
-                <Text style={styles.viewOnceText}>
-                    {item.viewedBy?.includes(user.uid) ? "Ya vista" : "Ver una vez"}
-                </Text>
-            </View>
-        ) : (
-            <Image
-                source={{ uri: item.mediaUrl }}
-                style={styles.messageImage}
-                cachePolicy="memory-disk"
-            />
-        )}
-    </TouchableOpacity>
-)}
-          {item.mediaType === "video" && (
-            <TouchableOpacity
-              onPress={() => handleMediaPress(item.mediaUrl, "video", item.id, item.isViewOnce)}
-            >
-              {item.isViewOnce ? (
-                <View style={styles.viewOnceVideoPlaceholder}>
-                  <MaterialIcons name="visibility-off" size={24} color="white" />
-                  <Text style={styles.viewOnceText}>Video de una vez</Text>
-                </View>
-              ) : (
-                <>
-                  <Video
-                    source={{ uri: item.mediaUrl }}
-                    style={styles.messageVideo}
-                    useNativeControls={false}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.playButtonOverlay}>
-                    <Ionicons name="play" size={40} color="white" />
-                  </View>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
-        </View>
-      </TouchableOpacity>
+      <View style={styles.dateContainer}>
+        <Text style={styles.dateText}>
+          {date.toLocaleDateString([], {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </Text>
+      </View>
     );
   };
 
-  const isOnlyEmojis = (text) => {
-    const emojiRegex =
-      /^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|\ud83c[\ude32-\ude3a]|\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff]){1,3}$/;
-    return emojiRegex.test(text);
+  const renderMessage = ({ item, index }) => {
+    const previousMessage = messages[index - 1];
+    const currentMessageDate = new Date(item.createdAt.seconds * 1000);
+    const previousMessageDate =
+      previousMessage && new Date(previousMessage.createdAt.seconds * 1000);
+
+    const isSameDay =
+      previousMessageDate &&
+      currentMessageDate.toDateString() === previousMessageDate.toDateString();
+
+      const isOwnMessage = item.senderId === user.uid;
+
+    if (item.isStoryResponse) {
+      return (
+        <>
+          {!isSameDay && renderDate(currentMessageDate)}
+
+          {/* Renderizar respuesta de historia */}
+          <View
+            style={[
+              styles.message,
+              item.senderId === user.uid
+                ? styles.sent // A la derecha si el remitente eres tú
+                : styles.received, // A la izquierda si el remitente es el destinatario
+              styles.storyResponseContainer,
+            ]}
+          >
+            <Text style={styles.storyResponseText}>
+              {item.senderId === user.uid
+                ? `Respondiste a su historia`
+                : `Respondió a tu historia`}
+            </Text>
+            <Image
+              source={{ uri: item.storyUrl }}
+              style={styles.storyResponseImage}
+            />
+            <Text style={styles.messageText}>{item.text}</Text>
+            {item.senderId === user.uid && item.seen && (
+              <View style={styles.messageFooter}>
+                <Text style={styles.timeText}>
+                  {currentMessageDate.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+                {item.senderId === user.uid && item.seen && (
+                  <Ionicons
+                    name="checkmark-done-sharp"
+                    size={16}
+                    color="blue"
+                    style={styles.seenIcon}
+                  />
+                )}
+              </View>
+            )}
+          </View>
+        </>
+      );
+    }
+      // Renderizar respuesta de nota
+      if (item.isNoteResponse) {
+        return (
+          <>
+            {!isSameDay && renderDate(currentMessageDate)}
+    
+            <View
+              style={[
+                styles.message,
+                isOwnMessage ? styles.sent : styles.received,
+                styles.noteResponseContainer,
+              ]}
+            >
+              <Text style={styles.noteResponseText}>
+                {isOwnMessage ? "Respondiste a su nota" : "Respondió a tu nota"}
+              </Text>
+    
+              <Image
+                source={require("../assets/flecha-curva.png")}
+                style={[
+                  styles.arrowImage,
+                  isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
+                ]}
+              />
+              <View>
+                <Text style={styles.originalNoteText}>
+                  {item.noteText || "Nota no disponible"}
+                </Text>
+              </View>
+    
+              <TouchableOpacity
+                onPress={() => navigation.navigate("FullNote", { note: item })}
+              >
+                <Text style={styles.messageTextNotas}>{item.text}</Text>
+              </TouchableOpacity>
+              <View style={styles.messageFooter}>
+                <Text style={styles.timeText}>
+                  {currentMessageDate.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+                {isOwnMessage && item.seen && (
+                  <Ionicons
+                    name="checkmark-done-sharp"
+                    size={16}
+                    color="blue"
+                    style={styles.seenIcon}
+                  />
+                )}
+              </View>
+            </View>
+          </>
+        );
+      }
+      
+
+      return (
+        <>
+          {!isSameDay && renderDate(currentMessageDate)}
+      
+          <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
+            <View
+              style={[
+                styles.message,
+                item.senderId === user.uid ? styles.sent : styles.received,
+              ]}
+            >
+              {item.text && <Text style={styles.messageText}>{item.text}</Text>}
+      
+              {item.mediaType === "image" && (
+                item.isViewOnce ? (
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleMediaPress(item.mediaUrl, "image", item.id, item.isViewOnce)
+                    }
+                    style={[
+                      styles.viewOnceImagePlaceholder,
+                      item.viewedBy?.includes(user.uid)
+                        ? styles.imageViewed
+                        : styles.imageNotViewed,
+                    ]}
+                    disabled={item.viewedBy?.includes(user.uid)} // Desactivar si ya fue vista
+                  >
+                    <Text style={styles.imageStatusText}>
+                      {item.viewedBy?.includes(user.uid) ? "Ya Vista" : "Ver"}
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleMediaPress(item.mediaUrl, "image", item.id, false)
+                    }
+                    style={styles.normalImageContainer}
+                  >
+                    <Image
+                      source={{ uri: item.mediaUrl }}
+                      style={styles.messageImage}
+                    />
+                  </TouchableOpacity>
+                )
+              )}
+      
+              {item.mediaType === "video" && (
+                <Video
+                  source={{ uri: item.mediaUrl }}
+                  style={styles.messageVideo}
+                  useNativeControls
+                  resizeMode="contain"
+                />
+              )}
+      
+              {item.mediaType === "audio" && <AudioPlayer uri={item.mediaUrl} />}
+      
+              <View style={styles.messageFooter}>
+                <Text style={styles.timeText}>
+                  {currentMessageDate.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+                {item.senderId === user.uid && item.seen && (
+                  <Ionicons
+                    name="checkmark-done-sharp"
+                    size={16}
+                    color="blue"
+                    style={styles.seenIcon}
+                  />
+                )}
+              </View>
+            </View>
+          </TouchableOpacity>
+        </>
+      );
+      
   };
 
   return (
@@ -825,28 +849,10 @@ export default function ChatScreen({ route }) {
 
       <FlatList
         ref={flatListRef}
-        data={[...messages, ...storyResponses].sort(
-          (a, b) => a.createdAt - b.createdAt
-        )}
+        data={messages}
         keyExtractor={(item) => item.id}
         renderItem={renderMessage}
-        onContentSizeChange={() =>
-          flatListRef.current.scrollToEnd({ animated: true })
-        }
       />
-
-      {uploadingMedia.length > 0 && (
-        <View style={styles.uploadingContainer}>
-          {uploadingMedia.map((item) => (
-            <View key={item.id} style={styles.uploadingItem}>
-              <ActivityIndicator size={50} color="#0000ff" />
-              <Text style={styles.uploadingText}>
-                Subiendo... {item.progress.toFixed(0)}%
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
 
       <View style={styles.containerIg}>
         <TouchableOpacity
@@ -864,58 +870,40 @@ export default function ChatScreen({ route }) {
         />
         {message.trim() ? (
           <TouchableOpacity
-            onPress={handleSendMessage}
+            onPress={() => handleSend("text")}
             style={styles.sendButton}
           >
             <FontAwesome name="send" size={20} color="white" />
           </TouchableOpacity>
         ) : (
-          <>
-            <TouchableOpacity
-              onPress={pickMedia}
-              style={styles.iconButtonGaleria}
-            >
-              <Ionicons name="image-outline" size={30} color="#000" />
-            </TouchableOpacity>
-          </>
+          <TouchableOpacity
+            onPress={pickMedia}
+            style={styles.iconButtonGaleria}
+          >
+            <Ionicons name="image-outline" size={30} color="#000" />
+          </TouchableOpacity>
         )}
       </View>
 
       <Modal
         visible={isModalVisible}
         transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}
+        onRequestClose={closeModal}
       >
-        <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
+        <TouchableWithoutFeedback onPress={closeModal}>
           <View style={styles.modalBackground}>
-            {selectedMedia && selectedMedia.type === "image" && (
+            {selectedImage && (
               <Image
-                source={{ uri: selectedMedia.url }}
+                source={{ uri: selectedImage }}
                 style={styles.fullscreenMedia}
-                cachePolicy="memory-disk"
-              />
-            )}
-            {selectedMedia && selectedMedia.type === "video" && (
-              <Video
-                source={{ uri: selectedMedia.url }}
-                style={styles.fullscreenMedia}
-                useNativeControls
-                resizeMode="contain"
-                shouldPlay
               />
             )}
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      <Complaints
-        isVisible={isReportModalVisible}
-        onClose={() => setIsReportModalVisible(false)}
-        onSubmit={handleReportSubmit}
-      />
     </ImageBackground>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -948,9 +936,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginVertical: 8,
     maxWidth: "80%",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 10,
+    flexDirection: "column",
+    alignSelf: "flex-start", // Cambia dinámicamente con sent/received
+    backgroundColor: "rgba(240, 240, 240, 1)",
   },
   iconButtonGaleria: {
     marginRight: 10,
@@ -963,20 +951,35 @@ const styles = StyleSheet.create({
   },
   sent: {
     alignSelf: "flex-end",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "transparent",
     fontWeight: "bold",
   },
+  timeText: {
+    fontSize: 10, // Reduce el tamaño
+    color: "#888", // Color más tenue
+    fontWeight: "bold",
+  },
+
   received: {
     alignSelf: "flex-start",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "transparent",
     fontWeight: "bold",
+  },
+  messageFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end", // Alinea el contenido hacia la derecha
+    marginTop: 5,
   },
   emojiMessage: {
     backgroundColor: "transparent",
     padding: 0,
   },
+  seenIcon: {
+    marginLeft: 7, // Ajusta el espacio entre el horario y el ícono
+  },
   messageText: {
-    marginTop:20,
+    marginTop: 20,
     color: "#262626",
     fontSize: 14,
     padding: 10,
@@ -998,8 +1001,7 @@ const styles = StyleSheet.create({
   messageImage: {
     width: 200,
     height: 150,
-    borderRadius: 10, 
-
+    borderRadius: 10,
   },
   messageVideo: {
     width: 200,
@@ -1150,27 +1152,74 @@ const styles = StyleSheet.create({
   menuItemContainer: {
     marginVertical: 0,
   },
+  normalImageContainer: {
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+
   viewOnceImagePlaceholder: {
-    padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
+    width: 200,
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
   viewOnceVideoPlaceholder: {
     width: 200,
     height: 150,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 10,
   },
+
+  imageNotViewed: {
+    backgroundColor: "rgba(0, 0, 0, 0.8)", // Fondo oscuro para imágenes no vistas
+  },
+  imageViewed: {
+    backgroundColor: "rgba(50, 50, 50, 0.8)", // Fondo gris más claro para imágenes vistas
+  },
+
+  imageStatusText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
   viewOnceText: {
-    color: 'white',
+    color: "white",
     marginTop: 5,
     fontSize: 12,
   },
   noBackground: {
-    backgroundColor: 'transparent', // Fondo transparente para imágenes
-},
+    backgroundColor: "transparent", // Fondo transparente para imágenes
+  },
+  dateContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  dateText: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    color: "#000",
+    fontWeight: "bold",
+    padding: 5,
+    borderRadius: 10,
+  },
+
+  imageUnavailableContainer: {
+    width: 200,
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 10,
+  },
+  imageUnavailableText: {
+    color: "white",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
 });

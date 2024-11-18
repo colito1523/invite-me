@@ -243,31 +243,30 @@ export default memo(function BoxDetails({ route, navigation }) {
     if (!user || !box) return;
   
     try {
-      const eventRef = doc(
-        database,
-        box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
-        box.eventId || box.id || box.title
-      );
+      if (box.category === "EventoParaAmigos") {
+        // Eliminar del evento privado
+        const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
+        const eventDoc = await getDoc(eventRef);
   
-      // Verificar si el documento del evento existe
-      const eventDoc = await getDoc(eventRef);
-      if (eventDoc.exists()) {
-        const eventData = eventDoc.data();
+        if (eventDoc.exists()) {
+          const eventData = eventDoc.data();
   
-        // Filtrar al usuario actual de la lista de asistentes
-        const updatedAttendees = (eventData.attendees || []).filter(
-          (attendee) => attendee.uid !== user.uid
-        );
+          // Filtrar al usuario actual de la lista de asistentes
+          const updatedAttendees = (eventData.attendees || []).filter(
+            (attendee) => attendee.uid !== user.uid
+          );
   
-        // Actualizar la lista de asistentes en el documento del evento
-        await updateDoc(eventRef, {
-          attendees: updatedAttendees,
-        });
+          // Actualizar la lista de asistentes en el documento del evento
+          await updateDoc(eventRef, {
+            attendees: updatedAttendees,
+          });
   
-        console.log("Usuario eliminado de la lista de asistentes del evento.");
-        setAttendeesList(updatedAttendees); // Actualizar el estado local
+          console.log("Usuario eliminado de la lista de asistentes del evento privado.");
+          setAttendeesList(updatedAttendees);
+        }
       } else {
-        console.error("El evento no existe en la base de datos.");
+        // Eliminar del evento general
+        await handleRemoveFromGoBoxs(box.title, selectedDate);
       }
   
       // Eliminar el evento de la colección de eventos del usuario
@@ -288,6 +287,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       Alert.alert("Error", "No se pudo eliminar del evento");
     }
   };
+  
   
   
 
@@ -354,6 +354,13 @@ export default memo(function BoxDetails({ route, navigation }) {
   };
 
   const handleEditImage = async () => {
+    const user = auth.currentUser;
+  
+    if (!user || user.uid !== boxData.Admin) {
+      Alert.alert("Acceso denegado", "Solo el administrador puede editar la imagen.");
+      return;
+    }
+  
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
         Alert.alert("Permiso denegado", "Se requieren permisos para acceder a tus fotos.");
@@ -404,14 +411,21 @@ export default memo(function BoxDetails({ route, navigation }) {
 
 
 
-  const handleEditEvent = () => {
-    setEditedData({
-        title: boxData.title || "",
-        address: boxData.address || "",
-        description: boxData.description || "",
-    });
-    setEditModalVisible(true);
-    setMenuVisible(false);
+const handleEditEvent = () => {
+  const user = auth.currentUser;
+  
+  if (!user || user.uid !== boxData.Admin) {
+    Alert.alert("Acceso denegado", "Solo el administrador puede editar este evento.");
+    return;
+  }
+
+  setEditedData({
+    title: boxData.title || "",
+    address: boxData.address || "",
+    description: boxData.description || "",
+  });
+  setEditModalVisible(true);
+  setMenuVisible(false);
 };
 
 const handleSaveEdit = async () => {
@@ -1008,6 +1022,8 @@ const handleSaveEdit = async () => {
                 color={isNightMode ? "#000" : "#000"}
               />
             </TouchableOpacity>
+            {boxData.Admin === auth.currentUser?.uid && (
+  <>
 
             {boxData.category === "EventoParaAmigos" && (
               <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
@@ -1018,6 +1034,8 @@ const handleSaveEdit = async () => {
                 />
               </TouchableOpacity>
             )}
+             </>
+              )}
           </View>
 
           {/* Modal para el menú de eliminación */}
@@ -1032,25 +1050,27 @@ const handleSaveEdit = async () => {
               onPress={() => setMenuVisible(false)}
             >
               <View style={styles.menuContainer}>
-              <TouchableOpacity
-                  onPress={handleEditImage}
-                  style={styles.editEventButton}
-                  disabled={isProcessing}
-                >
-                  <Text style={styles.editEventText}>
-                    {isProcessing ? "Actualizando..." : "Editar Imagen "}
-                    <Ionicons name="image" size={15} color="black" />
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleEditEvent}
-                  style={styles.editEventButton}
-                >
-                  <Text style={styles.editEventText}>
-                    Editar Evento{" "}
-                    <Ionicons name="pencil" size={15} color="black" />
-                  </Text>
-                </TouchableOpacity>
+        
+    <TouchableOpacity
+      onPress={handleEditImage}
+      style={styles.editEventButton}
+      disabled={isProcessing}
+    >
+      <Text style={styles.editEventText}>
+        {isProcessing ? "Actualizando..." : "Editar Imagen "}
+        <Ionicons name="image" size={15} color="black" />
+      </Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+      onPress={handleEditEvent}
+      style={styles.editEventButton}
+    >
+      <Text style={styles.editEventText}>
+        Editar Evento{" "}
+        <Ionicons name="pencil" size={15} color="black" />
+      </Text>
+    </TouchableOpacity>
+
                 <TouchableOpacity
                   onPress={handleDeleteEvent}
                   style={styles.deleteEventButton}
@@ -1062,6 +1082,7 @@ const handleSaveEdit = async () => {
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
+            
           </Modal>
 
           {/* Contenido principal */}

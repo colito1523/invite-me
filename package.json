@@ -12,7 +12,7 @@
   "dependencies": {
     "@babel/preset-env": "^7.26.0",
     "@expo/vector-icons": "^14.0.4",
-    "@react-native-async-storage/async-storage": "^1.23.1",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/datetimepicker": "^8.2.0",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-community/viewpager": "^5.0.11",
@@ -30,6 +30,7 @@
     "expo-blur": "~14.0.1",
     "expo-camera": "~16.0.5",
     "expo-constants": "~17.0.3",
+    "expo-crypto": "~14.0.1",
     "expo-device": "~7.0.1",
     "expo-file-system": "^18.0.2",
     "expo-font": "~13.0.1",
@@ -76,8 +77,7 @@
     "react-native-video": "^6.4.5",
     "react-native-webview": "^13.12.2",
     "react-redux": "^9.1.2",
-    "typescript": "~5.3.3",
-    "expo-crypto": "~14.0.1"
+    "typescript": "~5.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -323,7 +323,7 @@ export default function Notes() {
           senderId: user.uid,
           senderName: user.displayName || t("notes.anonymous"),
           createdAt: new Date(),
-          seen: [], // Inicializar seen como un array vacío
+          seen: false, // Cambiar de array a boolean
           isNoteResponse: true, // Mark as a note response
           noteText: selectedNoteFullScreen.text, // Include the note text
         };
@@ -445,7 +445,7 @@ export default function Notes() {
         senderId: user.uid,
         senderName: user.displayName || t("notes.anonymous"),
         createdAt: new Date(),
-        seen: [user.uid], // Inicializar solo con el UID del remitente
+        seen: false, // Cambiar de array a boolean
         isNoteResponse: true,
         noteText: selectedNoteFullScreen.text,
       };
