@@ -338,35 +338,40 @@ export default function ChatList() {
   const handleDeleteSelectedChats = async () => {
     try {
       const batch = writeBatch(database);
-
+  
       for (const chatId of selectedChats) {
         const chatRef = doc(database, "chats", chatId);
         const messagesRef = collection(database, "chats", chatId, "messages");
-
-        batch.update(chatRef, { [`deletedFor.${user.uid}`]: true });
-
+  
+        batch.update(chatRef, {
+          [`deletedFor.${user.uid}`]: true,
+          [`isHidden.${user.uid}`]: true,
+        });
+  
         const messagesSnapshot = await getDocs(messagesRef);
         messagesSnapshot.forEach((messageDoc) => {
           batch.update(messageDoc.ref, { [`deletedFor.${user.uid}`]: true });
         });
       }
-
+  
       await batch.commit();
-
+  
       setChats((prevChats) =>
         prevChats.filter((chat) => !selectedChats.includes(chat.id))
       );
       setSelectedChats([]);
-
-      Alert.alert("Success", "Selected chats have been deleted for you.");
+      setIsSelectionMode(false);
+  
+      Alert.alert("Éxito", "Los chats seleccionados han sido eliminados.");
     } catch (error) {
-      console.error("Error deleting chats:", error);
+      console.error("Error al eliminar los chats seleccionados:", error);
       Alert.alert(
         "Error",
-        "Failed to delete the selected chats. Please try again."
+        "No se pudieron eliminar los chats seleccionados. Intenta de nuevo."
       );
     }
   };
+  
 
   const handleMuteSelectedChats = (hours) => {
     selectedChats.forEach((chatId) => {
@@ -400,41 +405,47 @@ export default function ChatList() {
 
   const renderChatItem = ({ item }) => (
     <TouchableOpacity
-        style={styles.chatItem}
-        onPress={() => handleChatPress(item)}
-        onLongPress={() =>
-            Alert.alert(
-                "Eliminar Chat",
-                "¿Estás seguro de que deseas eliminar este chat?",
-                [
-                    { text: "Cancelar", style: "cancel" },
-                    {
-                        text: "Eliminar",
-                        onPress: () => handleDeleteChat(item),
-                    },
-                ]
-            )
-        }
+      style={styles.chatItem}
+      onPress={() => isSelectionMode ? toggleChatSelection(item.id) : handleChatPress(item)}
+      onLongPress={() =>
+        !isSelectionMode &&
+        Alert.alert(
+          "Eliminar Chat",
+          "¿Estás seguro de que deseas eliminar este chat?",
+          [
+            { text: "Cancelar", style: "cancel" },
+            { text: "Eliminar", onPress: () => handleDeleteChat(item) },
+          ]
+        )
+      }
     >
-        <Image
-            source={{
-                uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
-            }}
-            style={styles.userImage}
+      {isSelectionMode && (
+        <View
+          style={[
+            styles.checkbox,
+            selectedChats.includes(item.id) && styles.checkboxSelected,
+          ]}
         />
-        <View style={styles.chatInfo}>
-            <Text style={styles.chatTitle}>{item.user.username || "Usuario desconocido"}</Text>
+      )}
+      <Image
+        source={{
+          uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
+        }}
+        style={styles.userImage}
+      />
+      <View style={styles.chatInfo}>
+        <Text style={styles.chatTitle}>{item.user.username || "Usuario desconocido"}</Text>
+      </View>
+      {item.unseenMessagesCount > 0 && (
+        <View style={styles.unseenCountContainer}>
+          <Text style={styles.unseenCountText}>
+            {item.unseenMessagesCount}
+          </Text>
         </View>
-        {item.unseenMessagesCount > 0 && (
-            <View style={styles.unseenCountContainer}>
-                <Text style={styles.unseenCountText}>
-                    {item.unseenMessagesCount}
-                </Text>
-            </View>
-        )}
+      )}
     </TouchableOpacity>
-);
-
+  );
+  
   
   
 
