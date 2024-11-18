@@ -144,16 +144,25 @@ export default function ChatList() {
               };
             })
           );
-  
+
+          console.log("Lista de chats antes de ordenar:", chatList);
           const sortedChats = chatList
-            .filter((chat) => chat !== null)
-            .sort(
-              (a, b) =>
-                new Date(b.lastMessageTimestamp) -
-                new Date(a.lastMessageTimestamp)
-            );
-  
-          setChats(sortedChats);
+          .filter((chat) => chat !== null)
+          .sort((a, b) => {
+            const timeA = a.lastMessageTimestamp?.toDate ? a.lastMessageTimestamp.toDate() : new Date(0);
+            const timeB = b.lastMessageTimestamp?.toDate ? b.lastMessageTimestamp.toDate() : new Date(0);
+        
+            const timestampDiff = timeB - timeA;
+        
+            if (timestampDiff !== 0) {
+              return timestampDiff; // Ordena por lastMessageTimestamp si son diferentes.
+            }
+        
+            // Orden secundario: alfabetizar por lastMessageSenderId si es necesario.
+            return b.lastMessageSenderId.localeCompare(a.lastMessageSenderId);
+          });
+        
+        setChats(sortedChats);
         });
   
         return () => unsubscribe();
