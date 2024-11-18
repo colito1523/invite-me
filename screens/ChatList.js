@@ -95,82 +95,66 @@ export default function ChatList() {
 
   useFocusEffect(
     useCallback(() => {
-      const fetchChats = async () => {
-        if (!user) return;
-  
-        const chatsRef = collection(database, "chats");
-        const q = query(
-          chatsRef,
-          where("participants", "array-contains", user.uid)
-        );
-  
-        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-          const chatList = await Promise.all(
-            querySnapshot.docs.map(async (docSnapshot) => {
-              const chatData = docSnapshot.data();
-              const otherUserId = chatData.participants.find(
-                (uid) => uid !== user.uid
-              );
-  
-              const otherUserDoc = await getDoc(
-                doc(database, "users", otherUserId)
-              );
-              if (!otherUserDoc.exists()) {
-                return null;
-              }
-  
-              const otherUserData = otherUserDoc.data();
-  
-              const messagesRef = collection(
-                database,
-                "chats",
-                docSnapshot.id,
-                "messages"
-              );
-              const unseenMessagesQuery = query(
-                messagesRef,
-                where("seen", "==", false),
-                where("senderId", "!=", user.uid)
-              );
-              const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
-  
-              const unseenMessagesCount = unseenMessagesSnapshot.size;
-  
-              return {
-                id: docSnapshot.id,
-                user: otherUserData,
-                unseenMessagesCount,
-                lastMessageTimestamp: chatData.lastMessageTimestamp || null,
-              };
-            })
-          );
+        const fetchChats = async () => {
+            if (!user) return;
 
-          console.log("Lista de chats antes de ordenar:", chatList);
-          const sortedChats = chatList
-          .filter((chat) => chat !== null)
-          .sort((a, b) => {
-            const timeA = a.lastMessageTimestamp?.toDate ? a.lastMessageTimestamp.toDate() : new Date(0);
-            const timeB = b.lastMessageTimestamp?.toDate ? b.lastMessageTimestamp.toDate() : new Date(0);
-        
-            const timestampDiff = timeB - timeA;
-        
-            if (timestampDiff !== 0) {
-              return timestampDiff; // Ordena por lastMessageTimestamp si son diferentes.
-            }
-        
-            // Orden secundario: alfabetizar por lastMessageSenderId si es necesario.
-            return b.lastMessageSenderId.localeCompare(a.lastMessageSenderId);
-          });
-        
-        setChats(sortedChats);
-        });
-  
-        return () => unsubscribe();
-      };
-  
-      fetchChats();
+            const chatsRef = collection(database, "chats");
+            const q = query(
+                chatsRef,
+                where("participants", "array-contains", user.uid)
+            );
+
+            const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+                const chatList = await Promise.all(
+                    querySnapshot.docs.map(async (docSnapshot) => {
+                        const chatData = docSnapshot.data();
+
+                        // Excluir chats ocultos
+                        if (chatData.isHidden?.[user.uid]) {
+                            return null;
+                        }
+
+                        const otherUserId = chatData.participants.find(
+                            (uid) => uid !== user.uid
+                        );
+
+                        const otherUserDoc = await getDoc(
+                            doc(database, "users", otherUserId)
+                        );
+                        if (!otherUserDoc.exists()) {
+                            return null;
+                        }
+
+                        const otherUserData = otherUserDoc.data();
+
+                        return {
+                            id: docSnapshot.id,
+                            user: otherUserData,
+                            lastMessageTimestamp: chatData.lastMessageTimestamp || null,
+                        };
+                    })
+                );
+
+                const sortedChats = chatList
+                    .filter((chat) => chat !== null)
+                    .sort(
+                        (a, b) =>
+                            new Date(b.lastMessageTimestamp) -
+                            new Date(a.lastMessageTimestamp)
+                    );
+
+                setChats(sortedChats);
+            });
+
+            return () => unsubscribe();
+        };
+
+        fetchChats();
     }, [user?.uid])
-  );
+);
+
+
+
   
   
 
@@ -183,46 +167,40 @@ export default function ChatList() {
 
   const handleDeleteChat = async (chat) => {
     try {
-      const batch = writeBatch(database);
-      const chatRef = doc(database, "chats", chat.id);
-      const messagesRef = collection(database, "chats", chat.id, "messages");
+        const batch = writeBatch(database);
+        const chatRef = doc(database, "chats", chat.id);
+        const messagesRef = collection(database, "chats", chat.id, "messages");
 
-      // Get the current timestamp
-      const currentTimestamp = serverTimestamp();
-
-      // Update the deletedFor field for the chat
-      batch.update(chatRef, {
-        [`deletedFor.${user.uid}`]: {
-          timestamp: currentTimestamp,
-          deletedAt: new Date().toISOString(), // Store the client-side timestamp as well
-        },
-      });
-
-      // Mark each message individually for the user
-      const messagesSnapshot = await getDocs(messagesRef);
-      messagesSnapshot.forEach((messageDoc) => {
-        batch.update(messageDoc.ref, {
-          [`deletedFor.${user.uid}`]: {
-            timestamp: currentTimestamp,
-            deletedAt: new Date().toISOString(),
-          },
+        // Actualizar isHidden y deletedFor en el documento del chat
+        batch.update(chatRef, {
+            [`isHidden.${user.uid}`]: true,
+            [`deletedFor.${user.uid}`]: true,
         });
-      });
 
-      await batch.commit();
+        // Actualizar todos los mensajes como eliminados para el usuario actual
+        const messagesSnapshot = await getDocs(messagesRef);
+        messagesSnapshot.forEach((messageDoc) => {
+            batch.update(messageDoc.ref, {
+                [`deletedFor.${user.uid}`]: true,
+            });
+        });
 
-      // Update the local state
-      setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
+        // Confirmar los cambios en Firebase
+        await batch.commit();
 
-      Alert.alert("Éxito", "El chat ha sido eliminado para ti.");
+        // Actualizar el estado local para ocultar el chat
+        setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
+
+        Alert.alert("Éxito", "El chat ha sido eliminado y ocultado para ti.");
     } catch (error) {
-      console.error("Error al eliminar el chat:", error);
-      Alert.alert(
-        "Error",
-        "No se pudo eliminar el chat. Por favor, intenta nuevamente."
-      );
+        console.error("Error al eliminar el chat:", error);
+        Alert.alert("Error", "No se pudo eliminar el chat. Por favor, intenta nuevamente.");
     }
-  };
+};
+
+
+
+
 
   const handleHideChat = (chat) => {
     if (Platform.OS === "ios") {
@@ -422,27 +400,41 @@ export default function ChatList() {
 
   const renderChatItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.chatItem}
-      onPress={() => handleChatPress(item)}
+        style={styles.chatItem}
+        onPress={() => handleChatPress(item)}
+        onLongPress={() =>
+            Alert.alert(
+                "Eliminar Chat",
+                "¿Estás seguro de que deseas eliminar este chat?",
+                [
+                    { text: "Cancelar", style: "cancel" },
+                    {
+                        text: "Eliminar",
+                        onPress: () => handleDeleteChat(item),
+                    },
+                ]
+            )
+        }
     >
-      <Image
-        source={{
-          uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
-        }}
-        style={styles.userImage}
-      />
-      <View style={styles.chatInfo}>
-        <Text style={styles.chatTitle}>{item.user.username || "Usuario desconocido"}</Text>
-      </View>
-      {item.unseenMessagesCount > 0 && (
-        <View style={styles.unseenCountContainer}>
-          <Text style={styles.unseenCountText}>
-            {item.unseenMessagesCount}
-          </Text>
+        <Image
+            source={{
+                uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
+            }}
+            style={styles.userImage}
+        />
+        <View style={styles.chatInfo}>
+            <Text style={styles.chatTitle}>{item.user.username || "Usuario desconocido"}</Text>
         </View>
-      )}
+        {item.unseenMessagesCount > 0 && (
+            <View style={styles.unseenCountContainer}>
+                <Text style={styles.unseenCountText}>
+                    {item.unseenMessagesCount}
+                </Text>
+            </View>
+        )}
     </TouchableOpacity>
-  );
+);
+
   
   
 

@@ -299,95 +299,97 @@ export default function Chat({ route }) {
     messageType = "text",
     mediaUri = null,
     isViewOnce = false
-  ) => {
+) => {
     try {
-      const chatIdToUse = await createChatIfNotExists();
-      const messagesRef = collection(
-        database,
-        "chats",
-        chatIdToUse,
-        "messages"
-      );
+        const chatIdToUse = await createChatIfNotExists();
+        const messagesRef = collection(
+            database,
+            "chats",
+            chatIdToUse,
+            "messages"
+        );
 
-      let messageData = {
-        senderId: user.uid,
-        senderName: user.displayName || "Anónimo",
-        createdAt: new Date(),
-        seen: false,
-        viewedBy: [], // Solo aplicable para imágenes privadas
-        isViewOnce,   // Indica si es de una sola vista
-      };
+        let messageData = {
+            senderId: user.uid,
+            senderName: user.displayName || "Anónimo",
+            createdAt: new Date(),
+            seen: false,
+            viewedBy: [],
+            isViewOnce,
+        };
 
-      if (messageType === "text") {
-        // Asigna el texto del mensaje
-        messageData.text = message.trim();
-      } else if (messageType === "image" || messageType === "video") {
-        // Subir archivo multimedia
-        const mediaUrl = await uploadMedia(mediaUri);
-        messageData.mediaType = messageType;
-        messageData.mediaUrl = mediaUrl;
-        messageData.isViewOnce = isViewOnce; // Define si es de una sola vista
-      }
+        if (messageType === "text") {
+            messageData.text = message.trim();
+        } else if (messageType === "image" || messageType === "video") {
+            const mediaUrl = await uploadMedia(mediaUri);
+            messageData.mediaType = messageType;
+            messageData.mediaUrl = mediaUrl;
+        }
 
-      // Enviar mensaje a Firestore
-      await addDoc(messagesRef, messageData);
+        // Enviar mensaje a Firestore
+        await addDoc(messagesRef, messageData);
 
-      // Actualizar información del chat
-      const chatDocRef = doc(database, "chats", chatIdToUse);
-      await updateDoc(chatDocRef, {
-        lastMessage: messageData.text || "Media",
-        lastMessageTimestamp: messageData.createdAt,
-        lastMessageSenderId: user.uid,
-        lastMessageSenderName: user.displayName || "Anónimo",
-      });
+        // Actualizar información del chat
+        const chatDocRef = doc(database, "chats", chatIdToUse);
+        const chatDoc = await getDoc(chatDocRef);
 
-      // Limpiar el campo de texto
-      setMessage("");
-      flatListRef.current?.scrollToEnd({ animated: true });
+        if (chatDoc.exists()) {
+            const chatData = chatDoc.data();
+            const otherParticipantId = chatData.participants.find(
+                (participant) => participant !== user.uid
+            );
+
+            // Establecer isHidden a false para el receptor
+            await updateDoc(chatDocRef, {
+                lastMessage: messageData.text || "Media",
+                lastMessageTimestamp: messageData.createdAt,
+                lastMessageSenderId: user.uid,
+                lastMessageSenderName: user.displayName || "Anónimo",
+                [`isHidden.${otherParticipantId}`]: false,
+            });
+        }
+
+        // Limpiar el campo de texto
+        setMessage("");
+        flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
-      console.error("Error al enviar el mensaje:", error);
-      Alert.alert(
-        "Error",
-        "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
-      );
+        console.error("Error al enviar el mensaje:", error);
+        Alert.alert(
+            "Error",
+            "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
+        );
     }
-  };
+};
+
 
   const handleDeleteChat = async () => {
     try {
-      const batch = writeBatch(database); // Asegúrate de que `database` esté configurado correctamente
+      const batch = writeBatch(database);
       const chatRef = doc(database, "chats", chatId);
       const messagesRef = collection(database, "chats", chatId, "messages");
-
-      // Marcar el chat como eliminado para el usuario actual
+  
+      // Mark the chat as deleted for the current user
       batch.update(chatRef, {
-        [`deletedFor.${user.uid}`]: {
-          timestamp: new Date().toISOString(),
-        },
+        [`deletedFor.${user.uid}`]: true
       });
-
-      // Marcar todos los mensajes como eliminados para el usuario actual
+  
+      // Mark all messages as deleted for the current user
       const messagesSnapshot = await getDocs(messagesRef);
       messagesSnapshot.forEach((messageDoc) => {
         batch.update(messageDoc.ref, {
-          [`deletedFor.${user.uid}`]: {
-            timestamp: new Date().toISOString(),
-          },
+          [`deletedFor.${user.uid}`]: true
         });
       });
-
-      // Aplica los cambios en Firestore
+  
+      // Commit the batch
       await batch.commit();
-
-      // Navegar fuera del chat
+  
+      // Navigate back
       navigation.goBack();
       Alert.alert("Éxito", "El chat ha sido eliminado para ti.");
     } catch (error) {
       console.error("Error al eliminar el chat:", error);
-      Alert.alert(
-        "Error",
-        "No se pudo eliminar el chat. Por favor, intenta nuevamente."
-      );
+      Alert.alert("Error", "No se pudo eliminar el chat. Por favor, intenta nuevamente.");
     }
   };
 
@@ -594,6 +596,10 @@ export default function Chat({ route }) {
       currentMessageDate.toDateString() === previousMessageDate.toDateString();
 
       const isOwnMessage = item.senderId === user.uid;
+
+      if (item.deletedFor && item.deletedFor[user.uid]) {
+        return null;
+      }
 
     if (item.isStoryResponse) {
       return (
