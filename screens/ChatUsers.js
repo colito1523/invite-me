@@ -499,6 +499,11 @@ export default function Chat({ route }) {
   };
 
   const handleUserPress = () => {
+    console.log("Recipient User:", recipientUser); // Verifica los datos del usuario
+    if (!recipientUser) {
+      Alert.alert("Error", "No se puede navegar al perfil. Datos incompletos.");
+      return;
+    }
     navigation.navigate("UserProfile", { selectedUser: recipientUser });
   };
 

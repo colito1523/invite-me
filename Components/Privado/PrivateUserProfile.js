@@ -319,6 +319,29 @@ export default function Component({ route, navigation }) {
   const toggleUserStatus = async () => {
     if (!user || !selectedUser) return;
 
+    // Verificar si ya hay una solicitud pendiente de la otra persona
+  const currentUserRequestsRef = collection(
+    database,
+    "users",
+    user.uid,
+    "friendRequests"
+  );
+  const existingRequestFromThemQuery = query(
+    currentUserRequestsRef,
+    where("fromId", "==", selectedUser.id)
+  );
+  const existingRequestFromThemSnapshot = await getDocs(
+    existingRequestFromThemQuery
+  );
+
+  if (!existingRequestFromThemSnapshot.empty) {
+    Alert.alert(
+      "Solicitud pendiente",
+      "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
+    );
+    return;
+  }
+
     const friendsRef = collection(database, "users", user.uid, "friends");
     const q = query(friendsRef, where("friendId", "==", selectedUser.id));
     const friendSnapshot = await getDocs(q);

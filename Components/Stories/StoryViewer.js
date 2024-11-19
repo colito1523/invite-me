@@ -13,7 +13,7 @@ import {
   Alert,
   Keyboard,
   SafeAreaView,
-  ActivityIndicator,
+  ActivityIndicator, 
 } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../config/firebase";
@@ -66,10 +66,61 @@ export function StoryViewer({
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [isHideStoryModalVisible, setIsHideStoryModalVisible] = useState(false);
-
-
+  const [selectedViewer, setSelectedViewer] = useState(null); // Para almacenar el espectador seleccionado
 
   const user = auth.currentUser;
+
+  const toggleHideMyStories = async (viewer) => {
+    if (!user || !viewer) return;
+  
+    const viewerRef = doc(database, "users", viewer.uid); // Referencia al usuario que verá la historia
+  
+    try {
+      // Obtener el documento del usuario para verificar si el campo `hiddenStories` ya existe
+      const viewerDoc = await getDoc(viewerRef);
+      const viewerData = viewerDoc.data();
+      const hiddenStories = viewerData.hiddenStories || []; // Si no existe, inicializa como un array vacío
+  
+      if (hiddenStories.includes(user.uid)) {
+        // Si el `uid` ya está en `hiddenStories`, eliminarlo
+        await updateDoc(viewerRef, {
+          hiddenStories: arrayRemove(user.uid),
+        });
+        Alert.alert(
+          t("storyViewer.success"),
+          t("storyViewer.viewerCanSeeStories")
+        );
+      } else {
+        // Si no está oculto, agregar el `uid` del usuario actual a `hiddenStories`
+        await updateDoc(viewerRef, {
+          hiddenStories: arrayUnion(user.uid),
+        });
+        Alert.alert(
+          t("storyViewer.success"),
+          t("storyViewer.viewerCannotSeeStories")
+        );
+      }
+    } catch (error) {
+      console.error("Error updating story visibility:", error);
+      Alert.alert(
+        t("storyViewer.error"),
+        t("storyViewer.storySettingsUpdateError")
+      );
+    }
+  };
+  
+
+
+
+  const handleThreeDotsPress = (viewer) => {
+    setSelectedViewer(viewer); // Almacenar el espectador actual
+    setIsHideStoryModalVisible(true);
+  };
+
+  const handleHideMyStories = () => {
+    toggleHideMyStories(selectedViewer);
+    setIsHideStoryModalVisible(false);
+  };
 
   const getChatId = async (user1Id, user2Id) => {
     const user1Doc = await getDoc(doc(database, "users", user1Id));
@@ -91,46 +142,6 @@ export function StoryViewer({
     }
   }, [isComplaintsVisible, isOptionsModalVisible, isKeyboardVisible]);
 
-  const toggleHideMyStories = async (viewer) => {
-    if (!user || !viewer) return;
-  
-    const userRef = doc(database, "users", user.uid);
-    const viewerRef = doc(database, "users", viewer.uid);
-  
-    try {
-      if (viewer.hiddenStories?.includes(user.uid)) {
-        // Quitar al espectador de la lista de ocultos
-        await updateDoc(userRef, {
-          hideStoriesFrom: arrayRemove(viewer.uid),
-        });
-        await updateDoc(viewerRef, {
-          hiddenStories: arrayRemove(user.uid),
-        });
-        Alert.alert(
-          t("storyViewer.success"),
-          t("storyViewer.viewerCanSeeStories")
-        );
-      } else {
-        // Agregar al espectador a la lista de ocultos
-        await updateDoc(userRef, {
-          hideStoriesFrom: arrayUnion(viewer.uid),
-        });
-        await updateDoc(viewerRef, {
-          hiddenStories: arrayUnion(user.uid),
-        });
-        Alert.alert(
-          t("storyViewer.success"),
-          t("storyViewer.viewerCannotSeeStories")
-        );
-      }
-    } catch (error) {
-      console.error("Error updating story visibility:", error);
-      Alert.alert(
-        t("storyViewer.error"),
-        t("storyViewer.storySettingsUpdateError")
-      );
-    }
-  };
   
 
   const handleCloseViewer = () => {
@@ -749,9 +760,9 @@ export function StoryViewer({
           color={isPinned ? "#007AFF" : "#000"}
         />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => setIsHideStoryModalVisible(true)}>
-  <Entypo name="dots-three-horizontal" size={18} color="#000" />
-</TouchableOpacity>
+      <TouchableOpacity onPress={() => handleThreeDotsPress(item)}>
+          <Entypo name="dots-three-horizontal" size={18} color="#000" />
+        </TouchableOpacity>
 
     </TouchableOpacity>
     );
@@ -1042,21 +1053,30 @@ export function StoryViewer({
 />
 
 <Modal
-  animationType="fade"
-  transparent={true}
-  visible={isHideStoryModalVisible}
-  onRequestClose={() => setIsHideStoryModalVisible(false)}
->
-  <TouchableWithoutFeedback onPress={() => setIsHideStoryModalVisible(false)}>
-    <View style={styles.modalOverlay2}>
-      <TouchableWithoutFeedback>
-        <View style={styles.simpleModalContainer}>
-          <Text style={styles.simpleModalText}>Ocultar mis historias</Text>
-        </View>
-      </TouchableWithoutFeedback>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+        animationType="fade"
+        transparent={true}
+        visible={isHideStoryModalVisible}
+        onRequestClose={() => setIsHideStoryModalVisible(false)}
+      >
+        <TouchableWithoutFeedback
+          onPress={() => setIsHideStoryModalVisible(false)}
+        >
+          <View style={styles.modalOverlay2}>
+            <TouchableWithoutFeedback>
+              <View style={styles.simpleModalContainer}>
+                <TouchableOpacity onPress={handleHideMyStories}>
+                  <Text style={styles.simpleModalText}>
+                    {selectedViewer?.uid &&
+                    user?.hideStoriesFrom?.includes(selectedViewer.uid)
+                      ? "Mostrar mis historias"
+                      : "Ocultar mis historias"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
 
 
@@ -1315,12 +1335,25 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   modalOverlay2: {
-  flex: 1,
-  backgroundColor: "rgba(0, 0, 0, 0.5)",
-  justifyContent: "center",
-  alignItems: "center",
-},
-
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  simpleModalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    width: "80%",
+  },
+  simpleModalText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+  },
   
 });
 

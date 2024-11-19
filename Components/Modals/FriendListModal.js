@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { View, Text, TextInput, FlatList, TouchableOpacity, Modal, StyleSheet, Alert } from 'react-native';
+import { collection, query, where, getDocs, doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { database } from "../../config/firebase";
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
@@ -11,29 +11,27 @@ export default function FriendListModal({ isVisible, onClose, userId, updateFrie
   const [searchQuery, setSearchQuery] = useState('');
   const [totalFriends, setTotalFriends] = useState(0);
   const [blockedUsers, setBlockedUsers] = useState([]);
- 
+
   const navigation = useNavigation();
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const fetchBlockedUsers = async () => {
-      try {
-        const userRef = doc(database, "users", userId);
-        const userSnapshot = await getDoc(userRef);
-        const blockedList = userSnapshot.data()?.blockedUsers || [];
-        setBlockedUsers(blockedList);
-      } catch (error) {
-        console.error("Error fetching blocked users:", error);
-      }
-    };
-  
-    if (isVisible) {
-      fetchBlockedUsers();
+  // Fetch usuarios bloqueados
+  const fetchBlockedUsers = async () => {
+    try {
+      const userRef = doc(database, "users", userId);
+      const userSnapshot = await getDoc(userRef);
+      const blockedList = userSnapshot.data()?.blockedUsers || [];
+      setBlockedUsers(blockedList);
+    } catch (error) {
+      console.error("Error fetching blocked users:", error);
     }
-  }, [isVisible, userId]);
+  };
 
-  useEffect(() => {
-    const fetchFriends = async () => {
+  // Fetch amigos, asegurándonos de que primero obtengamos los usuarios bloqueados
+  const fetchFriends = async () => {
+    try {
+      await fetchBlockedUsers(); // Asegurar que primero se obtienen los usuarios bloqueados
+
       const friendsRef = collection(database, 'users', userId, 'friends');
       const friendsSnapshot = await getDocs(friendsRef);
       const friendsList = friendsSnapshot.docs.map((doc) => {
@@ -46,37 +44,44 @@ export default function FriendListModal({ isVisible, onClose, userId, updateFrie
       });
       setFriends(friendsList);
       setTotalFriends(friendsList.length);
-    };
-  
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+    }
+  };
+
+  // UseEffect para cargar la lista de amigos cuando el modal está visible
+  useEffect(() => {
     if (isVisible) {
       fetchFriends();
     }
   }, [isVisible]);
-  
+
+  // Actualizar la cuenta de amigos después de cerrar el modal
   useEffect(() => {
     if (!isVisible && updateFriendCount) {
       updateFriendCount(totalFriends);
     }
   }, [isVisible, totalFriends]);
 
+  // Filtrar amigos bloqueados
   const filteredFriends = friends.filter(
     (friend) =>
       friend.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
       !blockedUsers.includes(friend.id) // Excluir amigos bloqueados
   );
 
+  // Manejar la selección de un amigo
   const handleUserPress = async (uid) => {
+    // Verificar si el usuario está bloqueado antes de proceder
     if (blockedUsers.includes(uid)) {
-      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      Alert.alert("Error", t("friendListModal.userBlocked"));
       return;
     }
-  
+
     try {
-      const userDoc = await getDocs(
-        query(collection(database, "users"), where("id", "==", uid))
-      );
-      if (!userDoc.empty) {
-        const userData = userDoc.docs[0].data();
+      const userDoc = await getDoc(doc(database, "users", uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
         userData.id = uid;
         navigation.navigate("UserProfile", { selectedUser: userData });
       } else {
@@ -88,6 +93,25 @@ export default function FriendListModal({ isVisible, onClose, userId, updateFrie
     onClose();
   };
 
+  // Bloquear un usuario y actualizar la lista de amigos
+  const handleBlockUser = async (uid) => {
+    try {
+      const currentUserRef = doc(database, "users", userId);
+      await updateDoc(currentUserRef, {
+        blockedUsers: arrayUnion(uid),
+      });
+
+      Alert.alert(t("friendListModal.userBlockedSuccess"), t("friendListModal.userHasBeenBlocked"));
+
+      // Actualizar la lista de usuarios bloqueados y amigos después de bloquear
+      await fetchFriends();
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      Alert.alert(t("friendListModal.error"), t("friendListModal.blockError"));
+    }
+  };
+
+  // Renderizar cada amigo
   const renderFriendItem = ({ item }) => (
     <TouchableOpacity
       style={styles.friendItem}
