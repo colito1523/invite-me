@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { doc, getDoc } from "firebase/firestore";
-import { database } from "../../config/firebase";
+import { database, auth } from "../../config/firebase";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -25,6 +25,34 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   const [filteredAttendees, setFilteredAttendees] = useState(attendeesList);
   const navigation = useNavigation();
   const [isNightMode, setIsNightMode] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState([]);
+  const [filteredImages, setFilteredImages] = useState(profileImages);
+
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+        const userRef = doc(database, "users", auth.currentUser.uid);
+        const userSnapshot = await getDoc(userRef);
+        const blockedList = userSnapshot.data()?.blockedUsers || [];
+        setBlockedUsers(blockedList);
+      } catch (error) {
+        console.error("Error fetching blocked users:", error);
+      }
+    };
+  
+    fetchBlockedUsers();
+  }, []);
+
+  useEffect(() => {
+    const updateFilteredImages = () => {
+      const filtered = profileImages.filter(
+        (_, index) => !blockedUsers.includes(attendeesList[index]?.uid) // Filtra imágenes asociadas a usuarios bloqueados
+      );
+      setFilteredImages(filtered);
+    };
+  
+    updateFilteredImages();
+  }, [profileImages, blockedUsers, attendeesList]);
 
   useEffect(() => {
     const checkTime = () => {
@@ -39,20 +67,32 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
-      setFilteredAttendees(attendeesList);
+      setFilteredAttendees(
+        attendeesList.filter(
+          (attendee) => !blockedUsers.includes(attendee.uid) // Excluir usuarios bloqueados
+        )
+      );
     } else {
-      const filtered = attendeesList.filter(attendee => 
-        attendee.username.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = attendeesList.filter(
+        (attendee) =>
+          !blockedUsers.includes(attendee.uid) && // Excluir usuarios bloqueados
+          attendee.username.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredAttendees(filtered);
     }
-  }, [searchTerm, attendeesList]);
+  }, [searchTerm, attendeesList, blockedUsers]);
+  
 
   const handlePress = () => {
     setModalVisible(true);
   };
 
   const handleUserPress = async (uid) => {
+    if (blockedUsers.includes(uid)) {
+      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      return;
+    }
+  
     try {
       const userDoc = await getDoc(doc(database, "users", uid));
       if (userDoc.exists()) {
@@ -74,34 +114,36 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       );
     }
   };
+  
 
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 
   return (
     <View style={currentStyles.container}>
-      <TouchableOpacity
-        onPress={handlePress}
-        style={currentStyles.imageContainer}
-      >
-        {profileImages.slice(0, 6).map((imageUrl, index) => (
-  <Image
-    key={index}
-    source={{ uri: imageUrl }}
-    style={[
-      currentStyles.profileImage,
-      { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
-    ]}
-    cachePolicy="memory-disk" // Opcional: mejora la carga de imágenes
-  />
-))}
-{profileImages.length > 6 && (
-  <View style={currentStyles.moreContainer}>
-    <Text style={currentStyles.moreText}>
-      +{profileImages.length - 6}
-    </Text>
-  </View>
-        )}
-      </TouchableOpacity>
+     <TouchableOpacity
+  onPress={handlePress}
+  style={currentStyles.imageContainer}
+>
+  {filteredImages.slice(0, 6).map((imageUrl, index) => (
+    <Image
+      key={index}
+      source={{ uri: imageUrl }}
+      style={[
+        currentStyles.profileImage,
+        { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
+      ]}
+      cachePolicy="memory-disk" // Opcional: mejora la carga de imágenes
+    />
+  ))}
+  {filteredImages.length > 6 && (
+    <View style={currentStyles.moreContainer}>
+      <Text style={currentStyles.moreText}>
+        +{filteredImages.length - 6}
+      </Text>
+    </View>
+  )}
+</TouchableOpacity>
+
 
       <Modal visible={modalVisible} transparent={true} animationType="fade">
         <TouchableOpacity

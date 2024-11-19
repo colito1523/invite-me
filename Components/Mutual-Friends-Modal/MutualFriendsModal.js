@@ -2,28 +2,74 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
+import { doc, getDoc } from 'firebase/firestore';
+import { database, auth } from '../../config/firebase'; // Asegúrate de importar correctamente `auth`
 
 const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [blockedUsers, setBlockedUsers] = useState([]);
   const { t } = useTranslation();
 
+  // Cargar usuarios bloqueados
   useEffect(() => {
-    if (!isVisible) {
-      setSearchQuery(''); // Restablecer el campo de búsqueda cuando se cierre el modal
+    const fetchBlockedUsers = async () => {
+      try {
+        if (!auth.currentUser) {
+          console.error("El usuario no está autenticado.");
+          return;
+        }
+
+        const userRef = doc(database, "users", auth.currentUser.uid);
+        const userSnapshot = await getDoc(userRef);
+        const blockedList = userSnapshot.data()?.blockedUsers || [];
+        setBlockedUsers(blockedList);
+      } catch (error) {
+        console.error("Error fetching blocked users:", error);
+      }
+    };
+
+    if (isVisible) {
+      fetchBlockedUsers();
     }
   }, [isVisible]);
 
-  const filteredFriends = friends.filter(friend =>
-    friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+  // Restablecer búsqueda al cerrar el modal
+  useEffect(() => {
+    if (!isVisible) {
+      setSearchQuery('');
+    }
+  }, [isVisible]);
+
+  // Filtrar amigos visibles
+  const filteredFriends = friends.filter(
+    (friend) =>
+      friend.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !blockedUsers.includes(friend.id) // Excluir amigos bloqueados
   );
 
+  const handleUserPress = (friendId) => {
+    if (blockedUsers.includes(friendId)) {
+      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      return;
+    }
+    // Aquí puedes manejar la navegación o interacción con el usuario
+    console.log("Interacción con:", friendId);
+  };
+
   const renderFriendItem = ({ item }) => (
-    <TouchableOpacity style={styles.friendItem}>
-      <Image source={{ uri: item.photoUrls[0] || 'https://via.placeholder.com/150' }} style={styles.friendImage} cachePolicy="memory-disk" />
+    <TouchableOpacity
+      style={styles.friendItem}
+      onPress={() => handleUserPress(item.id)}
+    >
+      <Image
+        source={{ uri: item.photoUrls[0] || 'https://via.placeholder.com/150' }}
+        style={styles.friendImage}
+        cachePolicy="memory-disk"
+      />
       <Text style={styles.friendName}>{item.username}</Text>
     </TouchableOpacity>
   );
-
+  
   return (
     <Modal
       visible={isVisible}

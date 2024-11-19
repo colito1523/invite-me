@@ -21,6 +21,8 @@ import {
   addDoc,
   deleteDoc,
   Timestamp,
+  updateDoc,
+  arrayUnion,
 } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 import Complaints from "../Complaints/Complaints";
@@ -79,6 +81,70 @@ export default function Component({ route, navigation }) {
 
   const openMenu = () => setMenuVisible(true);
   const closeMenu = () => setMenuVisible(false);
+
+  const handleBlockUser = async () => {
+    if (!user || !selectedUser) return;
+  
+    try {
+      // Eliminar relaciones de amistad
+      const currentUserFriendRef = collection(
+        database,
+        "users",
+        user.uid,
+        "friends"
+      );
+      const currentFriendQuery = query(
+        currentUserFriendRef,
+        where("friendId", "==", selectedUser.id)
+      );
+  
+      const selectedUserFriendRef = collection(
+        database,
+        "users",
+        selectedUser.id,
+        "friends"
+      );
+      const selectedFriendQuery = query(
+        selectedUserFriendRef,
+        where("friendId", "==", user.uid)
+      );
+  
+      const [currentFriendSnapshot, selectedFriendSnapshot] = await Promise.all([
+        getDocs(currentFriendQuery),
+        getDocs(selectedFriendQuery),
+      ]);
+  
+      currentFriendSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+  
+      selectedFriendSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+  
+      // Agregar el usuario bloqueado a la lista de bloqueados del usuario actual
+      const currentUserRef = doc(database, "users", user.uid);
+      await updateDoc(currentUserRef, {
+        blockedUsers: arrayUnion(selectedUser.id),
+        manuallyBlocked: arrayUnion(selectedUser.id), // Campo adicional para diferenciar bloqueos manuales
+      });
+  
+      // Agregar al usuario actual a la lista de bloqueados del usuario seleccionado
+      const selectedUserRef = doc(database, "users", selectedUser.id);
+      await updateDoc(selectedUserRef, {
+        blockedUsers: arrayUnion(user.uid),
+      });
+  
+      Alert.alert(
+        t("userProfile.userBlocked"),
+        `${selectedUser.firstName} ${t("userProfile.isBlocked")}`
+      );
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      Alert.alert(t("userProfile.error"), t("userProfile.blockError"));
+    }
+  };
+  
 
   const handleReport = async () => {
     if (!selectedUser || !selectedUser.id) {
@@ -495,6 +561,14 @@ export default function Component({ route, navigation }) {
                 </TouchableOpacity>
               }
             >
+              <Menu.Item
+    onPress={() => {
+      handleBlockUser(); // Llama a la nueva función
+      closeMenu();
+    }}
+    title={t("userProfile.block")}
+    titleStyle={{ color: "#FF3B30" }}
+  />
               <Menu.Item onPress={handleReport} title={t('report')} />
             </Menu>
           </View>

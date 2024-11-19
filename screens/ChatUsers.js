@@ -39,6 +39,8 @@ import { ImageBackground } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 
+import Complaints from '../Components/Complaints/Complaints';
+
 export default function Chat({ route }) {
   const { chatId: initialChatId, recipientUser } = route.params;
   const [backgroundImage, setBackgroundImage] = useState(null);
@@ -57,6 +59,9 @@ export default function Chat({ route }) {
   const [imageUri, setImageUri] = useState(route.params?.imageUri || null);
   const blockedUsers = useBlockedUsers();
   const [menuVisible, setMenuVisible] = useState(false);
+  const [isComplaintVisible, setIsComplaintVisible] = useState(false);
+  
+
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
 
 
@@ -68,6 +73,7 @@ export default function Chat({ route }) {
       return;
     }
   }, [recipientUser, blockedUsers]); // Cierra el primer useEffect aquí
+  
 
   useEffect(() => {
     if (recipientUser?.photoUrls && recipientUser.photoUrls.length > 0) {
@@ -203,71 +209,65 @@ export default function Chat({ route }) {
   }, [chatId, imageUri, blockedUsers, recipientUser]);
 
   const handleReport = async () => {
-    if (!recipientUser || !recipientUser.id) {
-      Alert.alert(
-        "Error",
-        "No se puede denunciar a este usuario en este momento."
-      );
-      return;
-    }
-
     try {
-      const chatDoc = await getDoc(doc(database, "chats", chatId));
-
-      if (chatDoc.exists()) {
-        const chatData = chatDoc.data();
-
-        if (!chatData.participants.includes(recipientUser.id)) {
-          Alert.alert(
-            "Error",
-            "No puedes denunciar a este usuario ya que no es parte de este chat."
-          );
-          return;
-        }
-
-        setIsReportModalVisible(true);
-        setMenuVisible(false);
-      } else {
-        Alert.alert("Error", "No se pudo obtener la información del chat.");
-      }
+      console.log("Datos del usuario reportado al abrir el modal:", recipient);
+      setIsComplaintVisible(true);
     } catch (error) {
-      console.error("Error al obtener los datos del chat:", error);
-      Alert.alert(
-        "Error",
-        "Ocurrió un error al intentar acceder a los datos del chat."
-      );
+      console.error("Error al abrir el modal de denuncia:", error);
     }
   };
+  
+
+
   const handleReportSubmit = async (reason, description) => {
     try {
+      const chatRef = doc(database, "chats", chatId);
+      const chatSnapshot = await getDoc(chatRef);
+  
+      if (!chatSnapshot.exists()) {
+        console.error("El chat no existe.");
+        Alert.alert("Error", "No se pudo encontrar el chat.");
+        return;
+      }
+  
+      const chatData = chatSnapshot.data();
+      const participants = chatData.participants || [];
+  
+      const recipientId = participants.find((participant) => participant !== user.uid);
+  
+      if (!recipientId) {
+        console.error("No se encontró un ID válido para el usuario reportado.");
+        Alert.alert("Error", "No se pudo identificar al usuario reportado.");
+        return;
+      }
+  
+      console.log("Datos de la denuncia:", { reason, description, recipientId });
+  
       const complaintsRef = collection(database, "complaints");
       const newComplaint = {
         reporterId: user.uid,
         reporterName: user.displayName || "Anónimo",
-        reporterUsername: user.email ? user.email.split("@")[0] : "unknown",
-        reportedId: recipientUser.id || "unknown",
-        reportedName: recipientUser
-          ? `${recipientUser.firstName} ${recipientUser.lastName}`
-          : "Usuario Desconocido",
-        reportedUsername: recipientUser?.username || "unknown",
-        reason: reason,
-        description: description,
-        timestamp: Timestamp.now(),
+        reportedId: recipientId,
+        reportedName: `${recipientUser?.firstName || "Usuario"} ${recipientUser?.lastName || "desconocido"}`,
+        reason,
+        description: description || "",
+        timestamp: new Date(),
       };
+  
+      console.log("Enviando denuncia:", newComplaint);
       await addDoc(complaintsRef, newComplaint);
-      Alert.alert(
-        "Gracias",
-        "Tu denuncia ha sido enviada y será revisada por nuestro equipo de moderadores."
-      );
+  
+      Alert.alert("Gracias", "Tu denuncia ha sido enviada.");
+      setIsComplaintVisible(false);
     } catch (error) {
-      console.error("Error submitting report:", error);
-      Alert.alert(
-        "Error",
-        "No se pudo enviar la denuncia. Por favor, inténtalo de nuevo."
-      );
+      console.error("Error al enviar la denuncia:", error);
+      Alert.alert("Error", "No se pudo enviar la denuncia.");
     }
-    setIsReportModalVisible(false);
   };
+  
+  
+
+
 
   const createChatIfNotExists = async () => {
     if (!chatId) {
@@ -844,12 +844,7 @@ export default function Chat({ route }) {
             titleStyle={styles.menuItemText}
             style={styles.menuItemContainer}
           />
-          <Menu.Item
-            onPress={handleHideChat}
-            title="Bloquear"
-            titleStyle={styles.menuItemText}
-            style={styles.menuItemContainer}
-          />
+         
         </Menu>
       </View>
 
@@ -907,7 +902,20 @@ export default function Chat({ route }) {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      <Complaints
+  isVisible={isComplaintVisible}
+  onClose={() => setIsComplaintVisible(false)}
+  onSubmit={(reason, description) => {
+    console.log("Razón y descripción enviadas:", { reason, description });
+    handleReportSubmit(reason, description);
+    setIsComplaintVisible(false);
+  }}
+/>
+
+
     </ImageBackground>
+
+    
   );
 }
 const styles = StyleSheet.create({

@@ -218,7 +218,7 @@
     "userCanSeeStories": "This user will be able to see your stories.",
     "userCannotSeeStories": "Your stories will be hidden from this user.",
     "myStorySettingsUpdateError": "Could not update your story settings.",
-    "likedYourProfile": "{{username}} liked your profile.",
+    "likedYourProfile": "liked your profile.",
     "likeProfileError": "Could not like this profile.",
     "removeLikeError": "Could not remove like from this profile.",
     "userBlocked": "User Blocked",

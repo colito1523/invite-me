@@ -76,13 +76,21 @@ export default function Search() {
   const fetchUsers = useCallback(async () => {
     if (searchTerm.trim().length > 0) {
       try {
+        const user = auth.currentUser;
+        if (!user) return;
+  
+        // Cargar usuarios bloqueados
+        const userRef = doc(database, "users", user.uid);
+        const userSnapshot = await getDoc(userRef);
+        const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+  
         const normalizedSearchTerm = searchTerm.toLowerCase();
         const q = query(
           collection(database, "users"),
           where("username", ">=", normalizedSearchTerm),
           where("username", "<=", normalizedSearchTerm + "\uf8ff")
         );
-
+  
         const querySnapshot = await getDocs(q);
         const userList = querySnapshot.docs
           .map((doc) => {
@@ -99,9 +107,9 @@ export default function Search() {
           .filter(
             (user) =>
               user.id !== auth.currentUser.uid &&
-              !blockedUsers.includes(user.id)
+              !blockedUsers.includes(user.id) // Excluir usuarios bloqueados
           );
-
+  
         setResults(userList);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -109,18 +117,24 @@ export default function Search() {
     } else {
       setResults([]);
     }
-  }, [searchTerm, blockedUsers]);
+  }, [searchTerm]);
+  
 
   const fetchRecommendations = useCallback(async () => {
     if (!user) return;
-
+  
     try {
+      // Cargar usuarios bloqueados
+      const userRef = doc(database, "users", user.uid);
+      const userSnapshot = await getDoc(userRef);
+      const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+  
       const friendsRef = collection(database, "users", user.uid, "friends");
       const friendsSnapshot = await getDocs(friendsRef);
       const friendsList = friendsSnapshot.docs.map(
         (doc) => doc.data().friendId
       );
-
+  
       let potentialFriends = [];
       for (const friendId of friendsList) {
         const friendFriendsRef = collection(
@@ -134,16 +148,16 @@ export default function Search() {
           ...friendFriendsSnapshot.docs.map((doc) => doc.data().friendId)
         );
       }
-
+  
       potentialFriends = potentialFriends.filter(
         (id) =>
           id !== user.uid &&
           !friendsList.includes(id) &&
-          !blockedUsers.includes(id)
+          !blockedUsers.includes(id) // Excluir usuarios bloqueados
       );
-
+  
       const uniquePotentialFriends = [...new Set(potentialFriends)];
-
+  
       const recommendedUsers = [];
       for (const friendId of uniquePotentialFriends) {
         const userDoc = await getDoc(doc(database, "users", friendId));
@@ -159,12 +173,13 @@ export default function Search() {
           });
         }
       }
-
+  
       setRecommendations(recommendedUsers);
     } catch (error) {
       console.error("Error fetching friend recommendations:", error);
     }
-  }, [user, blockedUsers]);
+  }, [user]);
+  
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

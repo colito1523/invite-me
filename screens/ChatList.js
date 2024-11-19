@@ -78,14 +78,14 @@ export default function ChatList() {
   useEffect(() => {
     navigation.setOptions({
       headerStyle: {
-        backgroundColor: isNightMode ? '#1a1a1a' : '#fff',
+        backgroundColor: isNightMode ? "#1a1a1a" : "#fff",
       },
-      headerTintColor: isNightMode ? '#fff' : '#000',
+      headerTintColor: isNightMode ? "#fff" : "#000",
       headerLeft: () => (
         <Ionicons
           name="arrow-back"
           size={24}
-          color={isNightMode ? '#fff' : '#000'}
+          color={isNightMode ? "#fff" : "#000"}
           style={{ marginLeft: 10 }}
           onPress={() => navigation.goBack()}
         />
@@ -95,67 +95,93 @@ export default function ChatList() {
 
   useFocusEffect(
     useCallback(() => {
-        const fetchChats = async () => {
-            if (!user) return;
-
-            const chatsRef = collection(database, "chats");
-            const q = query(
-                chatsRef,
-                where("participants", "array-contains", user.uid)
-            );
-
-            const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-                const chatList = await Promise.all(
-                    querySnapshot.docs.map(async (docSnapshot) => {
-                        const chatData = docSnapshot.data();
-
-                        // Excluir chats ocultos
-                        if (chatData.isHidden?.[user.uid]) {
-                            return null;
-                        }
-
-                        const otherUserId = chatData.participants.find(
-                            (uid) => uid !== user.uid
-                        );
-
-                        const otherUserDoc = await getDoc(
-                            doc(database, "users", otherUserId)
-                        );
-                        if (!otherUserDoc.exists()) {
-                            return null;
-                        }
-
-                        const otherUserData = otherUserDoc.data();
-
-                        return {
-                            id: docSnapshot.id,
-                            user: otherUserData,
-                            lastMessageTimestamp: chatData.lastMessageTimestamp || null,
-                        };
-                    })
+      const fetchChats = async () => {
+        if (!user) return;
+      
+        try {
+          const userRef = doc(database, "users", user.uid);
+          const userSnapshot = await getDoc(userRef);
+          const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+      
+          const chatsRef = collection(database, "chats");
+          const q = query(
+            chatsRef,
+            where("participants", "array-contains", user.uid)
+          );
+      
+          const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+            const chatList = await Promise.all(
+              querySnapshot.docs.map(async (docSnapshot) => {
+                const chatData = docSnapshot.data();
+      
+                if (
+                  chatData.isHidden?.[user.uid] ||
+                  blockedUsers.some((blockedUid) =>
+                    chatData.participants.includes(blockedUid)
+                  )
+                ) {
+                  return null;
+                }
+      
+                const otherUserId = chatData.participants.find(
+                  (uid) => uid !== user.uid
                 );
-
-                const sortedChats = chatList
-                    .filter((chat) => chat !== null)
-                    .sort(
-                        (a, b) =>
-                            new Date(b.lastMessageTimestamp) -
-                            new Date(a.lastMessageTimestamp)
-                    );
-
-                setChats(sortedChats);
-            });
-
-            return () => unsubscribe();
-        };
-
-        fetchChats();
-    }, [user?.uid])
-);
-
-
-
+      
+                const otherUserDoc = await getDoc(
+                  doc(database, "users", otherUserId)
+                );
+                if (!otherUserDoc.exists()) {
+                  return null;
+                }
+      
+                const otherUserData = otherUserDoc.data();
+      
+                // Cálculo de mensajes no leídos
+                const messagesRef = collection(
+                  database,
+                  "chats",
+                  docSnapshot.id,
+                  "messages"
+                );
+                const unseenMessagesQuery = query(
+                  messagesRef,
+                  where("seen", "==", false),
+                  where("senderId", "!=", user.uid)
+                );
+                const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+      
+                const unseenMessagesCount = unseenMessagesSnapshot.size;
+      
+                return {
+                  id: docSnapshot.id,
+                  user: otherUserData,
+                  unseenMessagesCount, // Agregar el conteo
+                  lastMessageTimestamp: chatData.lastMessageTimestamp || null,
+                };
+              })
+            );
+      
+            const sortedChats = chatList
+              .filter((chat) => chat !== null)
+              .sort(
+                (a, b) =>
+                  new Date(b.lastMessageTimestamp) -
+                  new Date(a.lastMessageTimestamp)
+              );
+      
+            setChats(sortedChats);
+          });
+      
+          return () => unsubscribe();
+        } catch (error) {
+          console.error("Error al obtener los chats:", error);
+        }
+      };
+      
   
+      fetchChats();
+    }, [user?.uid])
+  );
   
 
   useEffect(() => {
@@ -167,40 +193,39 @@ export default function ChatList() {
 
   const handleDeleteChat = async (chat) => {
     try {
-        const batch = writeBatch(database);
-        const chatRef = doc(database, "chats", chat.id);
-        const messagesRef = collection(database, "chats", chat.id, "messages");
+      const batch = writeBatch(database);
+      const chatRef = doc(database, "chats", chat.id);
+      const messagesRef = collection(database, "chats", chat.id, "messages");
 
-        // Actualizar isHidden y deletedFor en el documento del chat
-        batch.update(chatRef, {
-            [`isHidden.${user.uid}`]: true,
-            [`deletedFor.${user.uid}`]: true,
+      // Actualizar isHidden y deletedFor en el documento del chat
+      batch.update(chatRef, {
+        [`isHidden.${user.uid}`]: true,
+        [`deletedFor.${user.uid}`]: true,
+      });
+
+      // Actualizar todos los mensajes como eliminados para el usuario actual
+      const messagesSnapshot = await getDocs(messagesRef);
+      messagesSnapshot.forEach((messageDoc) => {
+        batch.update(messageDoc.ref, {
+          [`deletedFor.${user.uid}`]: true,
         });
+      });
 
-        // Actualizar todos los mensajes como eliminados para el usuario actual
-        const messagesSnapshot = await getDocs(messagesRef);
-        messagesSnapshot.forEach((messageDoc) => {
-            batch.update(messageDoc.ref, {
-                [`deletedFor.${user.uid}`]: true,
-            });
-        });
+      // Confirmar los cambios en Firebase
+      await batch.commit();
 
-        // Confirmar los cambios en Firebase
-        await batch.commit();
+      // Actualizar el estado local para ocultar el chat
+      setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
 
-        // Actualizar el estado local para ocultar el chat
-        setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
-
-        Alert.alert("Éxito", "El chat ha sido eliminado y ocultado para ti.");
+      Alert.alert("Éxito", "El chat ha sido eliminado y ocultado para ti.");
     } catch (error) {
-        console.error("Error al eliminar el chat:", error);
-        Alert.alert("Error", "No se pudo eliminar el chat. Por favor, intenta nuevamente.");
+      console.error("Error al eliminar el chat:", error);
+      Alert.alert(
+        "Error",
+        "No se pudo eliminar el chat. Por favor, intenta nuevamente."
+      );
     }
-};
-
-
-
-
+  };
 
   const handleHideChat = (chat) => {
     if (Platform.OS === "ios") {
@@ -273,11 +298,11 @@ export default function ChatList() {
         where("senderId", "!=", user.uid)
       );
       const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
-  
+
       unseenMessagesSnapshot.forEach(async (messageDoc) => {
         await updateDoc(messageDoc.ref, { seen: true });
       });
-  
+
       navigation.navigate("ChatUsers", {
         chatId: chat.id,
         recipientUser: chat.user,
@@ -286,8 +311,7 @@ export default function ChatList() {
       console.error("Error updating message seen status:", error);
     }
   };
-  
-  
+
   const formatTime = (timestamp) => {
     if (!(timestamp instanceof Timestamp)) {
       console.error("Invalid timestamp:", timestamp);
@@ -338,30 +362,30 @@ export default function ChatList() {
   const handleDeleteSelectedChats = async () => {
     try {
       const batch = writeBatch(database);
-  
+
       for (const chatId of selectedChats) {
         const chatRef = doc(database, "chats", chatId);
         const messagesRef = collection(database, "chats", chatId, "messages");
-  
+
         batch.update(chatRef, {
           [`deletedFor.${user.uid}`]: true,
           [`isHidden.${user.uid}`]: true,
         });
-  
+
         const messagesSnapshot = await getDocs(messagesRef);
         messagesSnapshot.forEach((messageDoc) => {
           batch.update(messageDoc.ref, { [`deletedFor.${user.uid}`]: true });
         });
       }
-  
+
       await batch.commit();
-  
+
       setChats((prevChats) =>
         prevChats.filter((chat) => !selectedChats.includes(chat.id))
       );
       setSelectedChats([]);
       setIsSelectionMode(false);
-  
+
       Alert.alert("Éxito", "Los chats seleccionados han sido eliminados.");
     } catch (error) {
       console.error("Error al eliminar los chats seleccionados:", error);
@@ -371,7 +395,6 @@ export default function ChatList() {
       );
     }
   };
-  
 
   const handleMuteSelectedChats = (hours) => {
     selectedChats.forEach((chatId) => {
@@ -406,7 +429,9 @@ export default function ChatList() {
   const renderChatItem = ({ item }) => (
     <TouchableOpacity
       style={styles.chatItem}
-      onPress={() => isSelectionMode ? toggleChatSelection(item.id) : handleChatPress(item)}
+      onPress={() =>
+        isSelectionMode ? toggleChatSelection(item.id) : handleChatPress(item)
+      }
       onLongPress={() =>
         !isSelectionMode &&
         Alert.alert(
@@ -434,7 +459,15 @@ export default function ChatList() {
         style={styles.userImage}
       />
       <View style={styles.chatInfo}>
-        <Text style={styles.chatTitle}>{item.user.username || "Usuario desconocido"}</Text>
+        <Text
+          style={[
+            styles.chatTitle,
+            { fontWeight: item.unseenMessagesCount > 0 ? "bold" : "normal" },
+            { color: isNightMode ? "white" : "black" },
+          ]}
+        >
+          {item.user.username || "Usuario desconocido"}
+        </Text>
       </View>
       {item.unseenMessagesCount > 0 && (
         <View style={styles.unseenCountContainer}>
@@ -445,8 +478,6 @@ export default function ChatList() {
       )}
     </TouchableOpacity>
   );
-  
-  
   
 
   return (
@@ -513,7 +544,10 @@ export default function ChatList() {
 
           {isSelectionMode && (
             <TouchableOpacity
-              style={[styles.selectAllButton, { backgroundColor: theme.buttonBackground }]}
+              style={[
+                styles.selectAllButton,
+                { backgroundColor: theme.buttonBackground },
+              ]}
               onPress={handleSelectAll}
             >
               <Text style={[styles.selectAllText, { color: theme.buttonText }]}>
@@ -523,14 +557,29 @@ export default function ChatList() {
           )}
 
           {showMuteOptions && (
-            <View style={[styles.muteOptionsContainer, { backgroundColor: theme.muteOptionsBackground }]}>
+            <View
+              style={[
+                styles.muteOptionsContainer,
+                { backgroundColor: theme.muteOptionsBackground },
+              ]}
+            >
               {muteOptions.map((option) => (
                 <TouchableOpacity
                   key={option.value}
-                  style={[styles.muteOption, { backgroundColor: theme.muteOptionBackground }]}
+                  style={[
+                    styles.muteOption,
+                    { backgroundColor: theme.muteOptionBackground },
+                  ]}
                   onPress={() => handleMuteSelectedChats(option.value)}
                 >
-                  <Text style={[styles.muteOptionText, { color: theme.muteOptionText }]}>{option.label}</Text>
+                  <Text
+                    style={[
+                      styles.muteOptionText,
+                      { color: theme.muteOptionText },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -543,86 +592,62 @@ export default function ChatList() {
           />
 
           {isSelectionMode && (
-            <View style={[styles.selectionModeContainer, { backgroundColor: theme.selectionModeBackground }]}>
+            <View
+              style={[
+                styles.selectionModeContainer,
+                { backgroundColor: theme.selectionModeBackground },
+              ]}
+            >
               <TouchableOpacity
-                style={[styles.selectionModeButton, { backgroundColor: theme.selectionModeButtonBackground }]}
+                style={[
+                  styles.selectionModeButton,
+                  { backgroundColor: theme.selectionModeButtonBackground },
+                ]}
                 onPress={handleDeleteSelectedChats}
               >
-                <Text style={[styles.selectionModeButtonText, { color: theme.selectionModeButtonText }]}>Borrar</Text>
+                <Text
+                  style={[
+                    styles.selectionModeButtonText,
+                    { color: theme.selectionModeButtonText },
+                  ]}
+                >
+                  Borrar
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.selectionModeButton, { backgroundColor: theme.selectionModeButtonBackground }]}
+                style={[
+                  styles.selectionModeButton,
+                  { backgroundColor: theme.selectionModeButtonBackground },
+                ]}
                 onPress={() => setShowMuteOptions(true)}
               >
-                <Text style={[styles.selectionModeButtonText, { color: theme.selectionModeButtonText }]}>Silenciar</Text>
+                <Text
+                  style={[
+                    styles.selectionModeButtonText,
+                    { color: theme.selectionModeButtonText },
+                  ]}
+                >
+                  Silenciar
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.selectionModeButton, { backgroundColor: theme.selectionModeButtonBackground }]}
+                style={[
+                  styles.selectionModeButton,
+                  { backgroundColor: theme.selectionModeButtonBackground },
+                ]}
                 onPress={() => setIsSelectionMode(false)}
               >
-                <Text style={[styles.selectionModeButtonText, { color: theme.selectionModeButtonText }]}>Cancelar</Text>
+                <Text
+                  style={[
+                    styles.selectionModeButtonText,
+                    { color: theme.selectionModeButtonText },
+                  ]}
+                >
+                  Cancelar
+                </Text>
               </TouchableOpacity>
             </View>
           )}
-
-          <Modal
-            visible={passwordModalVisible}
-            transparent={true}
-            animationType="slide"
-          >
-            <View style={styles.modalContainer}>
-              <View
-                style={[
-                  styles.modalContent,
-                  { backgroundColor: theme.modalBackground },
-                ]}
-              >
-                <Text style={[styles.modalTitle, { color: theme.text }]}>
-                  Ingresa la contraseña
-                </Text>
-                <TextInput
-                  style={[
-                    styles.passwordInput,
-                    { color: theme.text, borderColor: theme.borderColor },
-                  ]}
-                  secureTextEntry
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="Contraseña"
-                  placeholderTextColor={theme.placeholder}
-                />
-                <TouchableOpacity
-                  style={[
-                    styles.submitButton,
-                    { backgroundColor: theme.submitButtonBackground },
-                  ]}
-                  onPress={handlePasswordSubmit}
-                >
-                  <Text
-                    style={[
-                      styles.submitButtonText,
-                      { color: theme.submitButtonText },
-                    ]}
-                  >
-                    Enviar
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => setPasswordModalVisible(false)}
-                >
-                  <Text
-                    style={[
-                      styles.cancelButtonText,
-                      { color: theme.cancelButtonText },
-                    ]}
-                  >
-                    Cancelar
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
         </LinearGradient>
       </SafeAreaView>
     </Provider>
@@ -687,10 +712,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  chatTitle: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
+
   unseenCountContainer: {
     width: 20,
     height: 20,

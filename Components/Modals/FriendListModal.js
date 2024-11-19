@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { database } from "../../config/firebase";
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
@@ -10,9 +10,27 @@ export default function FriendListModal({ isVisible, onClose, userId, updateFrie
   const [friends, setFriends] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalFriends, setTotalFriends] = useState(0);
+  const [blockedUsers, setBlockedUsers] = useState([]);
  
   const navigation = useNavigation();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+        const userRef = doc(database, "users", userId);
+        const userSnapshot = await getDoc(userRef);
+        const blockedList = userSnapshot.data()?.blockedUsers || [];
+        setBlockedUsers(blockedList);
+      } catch (error) {
+        console.error("Error fetching blocked users:", error);
+      }
+    };
+  
+    if (isVisible) {
+      fetchBlockedUsers();
+    }
+  }, [isVisible, userId]);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -41,22 +59,31 @@ export default function FriendListModal({ isVisible, onClose, userId, updateFrie
     }
   }, [isVisible, totalFriends]);
 
-  const filteredFriends = friends.filter(friend =>
-    friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredFriends = friends.filter(
+    (friend) =>
+      friend.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !blockedUsers.includes(friend.id) // Excluir amigos bloqueados
   );
 
   const handleUserPress = async (uid) => {
+    if (blockedUsers.includes(uid)) {
+      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      return;
+    }
+  
     try {
-      const userDoc = await getDocs(query(collection(database, 'users'), where('id', '==', uid)));
+      const userDoc = await getDocs(
+        query(collection(database, "users"), where("id", "==", uid))
+      );
       if (!userDoc.empty) {
         const userData = userDoc.docs[0].data();
         userData.id = uid;
-        navigation.navigate('UserProfile', { selectedUser: userData });
+        navigation.navigate("UserProfile", { selectedUser: userData });
       } else {
-        console.error(t('friendListModal.userNotFound'));
+        console.error(t("friendListModal.userNotFound"));
       }
     } catch (error) {
-      console.error(t('friendListModal.errorFetchingUser'), error);
+      console.error(t("friendListModal.errorFetchingUser"), error);
     }
     onClose();
   };

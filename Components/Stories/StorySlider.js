@@ -24,6 +24,24 @@ export default function StorySlider() {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [unseenStories, setUnseenStories] = useState({});
+  const [blockedUsers, setBlockedUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+  
+        const userDoc = await getDoc(doc(database, "users", user.uid));
+        const blockedList = userDoc.data()?.blockedUsers || [];
+        setBlockedUsers(blockedList);
+      } catch (error) {
+        console.error("Error fetching blocked users:", error);
+      }
+    };
+  
+    fetchBlockedUsers();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -77,7 +95,7 @@ export default function StorySlider() {
       const user = auth.currentUser;
       if (!user) return;
   
-      const userDoc = await getDoc(doc(database, 'users', user.uid));
+      const userDoc = await getDoc(doc(database, "users", user.uid));
       const userData = userDoc.data();
       const hiddenStories = userData.hiddenStories || [];
       const hideStoriesFrom = userData.hideStoriesFrom || [];
@@ -88,75 +106,79 @@ export default function StorySlider() {
       const now = new Date();
   
       // Cargar historias del usuario actual
-      const userStoriesRef = collection(database, 'users', user.uid, 'stories');
+      const userStoriesRef = collection(database, "users", user.uid, "stories");
       const userStoriesSnapshot = await getDocs(userStoriesRef);
       const userStories = userStoriesSnapshot.docs
-        .map(doc => doc.data())
-        .filter(story => new Date(story.expiresAt.toDate()) > now);
+        .map((doc) => doc.data())
+        .filter((story) => new Date(story.expiresAt.toDate()) > now);
   
       if (userStories.length > 0 || isUploading) {
         loadedStories.unshift({
           uid: user.uid,
-          username: userData.firstName || t('storySlider.currentUser'),
-          lastName: userData.lastName || '',
-          profileImage: userData.photoUrls?.[0] || 'https://via.placeholder.com/150',
+          username: userData.firstName || t("storySlider.currentUser"),
+          lastName: userData.lastName || "",
+          profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
           userStories: userStories,
         });
   
         unseenStoriesTemp[user.uid] = userStories.filter(
-          (story) => !story.viewers?.some(viewer => viewer.uid === auth.currentUser.uid)
+          (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
         );
       } else {
         loadedStories.unshift({
           uid: user.uid,
-          username: userData.firstName || t('storySlider.currentUser'),
-          lastName: userData.lastName || '',
-          profileImage: userData.photoUrls?.[0] || 'https://via.placeholder.com/150',
-          userStories: [] // Espacio para mostrar el indicador de carga
+          username: userData.firstName || t("storySlider.currentUser"),
+          lastName: userData.lastName || "",
+          profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+          userStories: [],
         });
       }
   
       // Cargar historias de amigos
       for (let friend of friendsList) {
-        if (hiddenStories.includes(friend.friendId) || hideStoriesFrom.includes(friend.friendId)) {
-          continue; // Omitir las historias de este amigo
+        if (
+          hiddenStories.includes(friend.friendId) ||
+          hideStoriesFrom.includes(friend.friendId) ||
+          blockedUsers.includes(friend.friendId) // Excluir amigos bloqueados
+        ) {
+          continue;
         }
   
-        const friendStoriesRef = collection(database, 'users', friend.friendId, 'stories');
+        const friendStoriesRef = collection(database, "users", friend.friendId, "stories");
         const friendStoriesSnapshot = await getDocs(friendStoriesRef);
         const friendStories = friendStoriesSnapshot.docs
-          .map(doc => doc.data())
-          .filter(story => new Date(story.expiresAt.toDate()) > now);
+          .map((doc) => doc.data())
+          .filter((story) => new Date(story.expiresAt.toDate()) > now);
   
         if (friendStories.length > 0) {
-          const friendDocRef = doc(database, 'users', friend.friendId);
+          const friendDocRef = doc(database, "users", friend.friendId);
           const friendDoc = await getDoc(friendDocRef);
   
           if (friendDoc.exists()) {
             const friendData = friendDoc.data();
   
-            // Almacena las historias no vistas de cada amigo en `unseenStoriesTemp`
             unseenStoriesTemp[friend.friendId] = friendStories.filter(
-              (story) => !story.viewers?.some(viewer => viewer.uid === auth.currentUser.uid)
+              (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
             );
   
             loadedStories.push({
               uid: friend.friendId,
-              username: friendData.firstName || t('storySlider.friend'),
-              lastName: friendData.lastName || '',
-              profileImage: friendData.photoUrls?.[0] || 'https://via.placeholder.com/150',
+              username: friendData.firstName || t("storySlider.friend"),
+              lastName: friendData.lastName || "",
+              profileImage: friendData.photoUrls?.[0] || "https://via.placeholder.com/150",
               userStories: friendStories,
             });
           }
         }
       }
   
-      setStories(loadedStories); // Establece las historias cargadas
-      setUnseenStories(unseenStoriesTemp); // Establece las historias no vistas
+      setStories(loadedStories);
+      setUnseenStories(unseenStoriesTemp);
     } catch (error) {
-      console.error(t('storySlider.loadStoriesError'), error);
+      console.error(t("storySlider.loadStoriesError"), error);
     }
   };
+  
   
   
   const handleOpenViewer = async (index) => {

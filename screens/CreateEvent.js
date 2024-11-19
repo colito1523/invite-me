@@ -67,64 +67,94 @@ export default function CreateEvent() {
   const fetchFriends = async () => {
     const user = auth.currentUser;
     if (user) {
-      const friendsRef = collection(database, "users", user.uid, "friends");
-      const friendsSnapshot = await getDocs(friendsRef);
-      const friendsList = friendsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setFriends(friendsList);
-    }
-  };
-
-  const sendInvitationNotifications = async (eventData, eventId) => {
-    const user = auth.currentUser;
-    if (user) {
-      const userDocRef = doc(database, "users", user.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
-      const userData = userDocSnapshot.data();
-
-      for (const friendDocId of selectedFriends) {
-        const friendDocRef = doc(
-          database,
-          "users",
-          user.uid,
-          "friends",
-          friendDocId
-        );
-        const friendDocSnapshot = await getDoc(friendDocRef);
-        const friendData = friendDocSnapshot.data();
-
-        if (friendData && friendData.friendId) {
-          const notificationRef = collection(
-            database,
-            "users",
-            friendData.friendId,
-            "notifications"
-          );
-          await addDoc(notificationRef, {
-            fromId: user.uid,
-            fromName: userData.username,
-            fromImage: eventData.image,
-            eventTitle: eventData.title,
-            eventImage: eventData.image,
-            eventDate: eventData.timestamp,
-            date: eventData.date,
-            day: eventData.day, // Día del evento
-            hour: eventData.hour, // Hora del evento
-            address: eventData.address, // Agregamos el campo dirección
-            description: eventData.description, // Descripción del evento
-            phoneNumber: eventData.phoneNumber || "No disponible", // Número de teléfono
-            eventCategory: eventData.category,
-            eventId: eventId,
-            type: "invitation",
-            status: "pending",
-            timestamp: new Date(),
-          });
-        }
+      try {
+        // Referencia a la colección de amigos
+        const friendsRef = collection(database, "users", user.uid, "friends");
+        const friendsSnapshot = await getDocs(friendsRef);
+  
+        // Obtener usuarios bloqueados
+        const userDocRef = doc(database, "users", user.uid);
+        const userDocSnapshot = await getDoc(userDocRef);
+        const blockedUsers = userDocSnapshot.data()?.blockedUsers || [];
+  
+        // Filtrar amigos bloqueados
+        const friendsList = friendsSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((friend) => !blockedUsers.includes(friend.friendId));
+  
+        setFriends(friendsList);
+      } catch (error) {
+        console.error("Error al cargar los amigos:", error);
       }
     }
   };
+  
+  const sendInvitationNotifications = async (eventData, eventId) => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        // Obtener datos del usuario actual
+        const userDocRef = doc(database, "users", user.uid);
+        const userDocSnapshot = await getDoc(userDocRef);
+        const userData = userDocSnapshot.data();
+  
+        // Obtener lista de usuarios bloqueados
+        const blockedUsers = userData?.blockedUsers || [];
+  
+        for (const friendDocId of selectedFriends) {
+          // Verificar si el amigo está bloqueado
+          if (blockedUsers.includes(friendDocId)) {
+            continue; // Saltar usuarios bloqueados
+          }
+  
+          // Obtener datos del amigo
+          const friendDocRef = doc(
+            database,
+            "users",
+            user.uid,
+            "friends",
+            friendDocId
+          );
+          const friendDocSnapshot = await getDoc(friendDocRef);
+          const friendData = friendDocSnapshot.data();
+  
+          if (friendData && friendData.friendId) {
+            const notificationRef = collection(
+              database,
+              "users",
+              friendData.friendId,
+              "notifications"
+            );
+            await addDoc(notificationRef, {
+              fromId: user.uid,
+              fromName: userData.username,
+              fromImage: eventData.image,
+              eventTitle: eventData.title,
+              eventImage: eventData.image,
+              eventDate: eventData.timestamp,
+              date: eventData.date,
+              day: eventData.day,
+              hour: eventData.hour,
+              address: eventData.address,
+              description: eventData.description,
+              phoneNumber: eventData.phoneNumber || "No disponible",
+              eventCategory: eventData.category,
+              eventId: eventId,
+              type: "invitation",
+              status: "pending",
+              timestamp: new Date(),
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error al enviar notificaciones:", error);
+      }
+    }
+  };
+  
 
   const handleSubmit = async () => {
     if (isSubmitting) return;

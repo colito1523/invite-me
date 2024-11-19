@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from "react";
 import {
   View,
   Text,
@@ -55,7 +55,8 @@ const Home = React.memo(() => {
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [profileImage, setProfileImage] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(dayjs().format("D MMM"));
+  const selectedDateRef = useRef(dayjs().format("D MMM"));
+  const [selectedDate, setSelectedDate] = useState(selectedDateRef.current);
   const [locationGranted, setLocationGranted] = useState(false);
   const [country, setCountry] = useState(null);
   const [isNightMode, setIsNightMode] = useState(false);
@@ -175,6 +176,7 @@ const Home = React.memo(() => {
   }, [navigation, isNightMode]);
 
   const handleDateChange = useCallback(async (date) => {
+    selectedDateRef.current = date;
     setSelectedDate(date);
     setLoading(true);
     await fetchBoxData();
@@ -183,7 +185,8 @@ const Home = React.memo(() => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([fetchBoxData(), fetchPrivateEvents()]);
+    await fetchBoxData(); // Usa selectedDateRef.current dentro de fetchBoxData
+    await fetchPrivateEvents();
     setRefreshing(false);
   }, []);
 
@@ -225,6 +228,13 @@ const Home = React.memo(() => {
   const fetchBoxData = useCallback(async () => {
     try {
       const user = auth.currentUser;
+      let blockedUsers = [];
+    if (user) {
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      if (userDoc.exists()) {
+        blockedUsers = userDoc.data()?.blockedUsers || [];
+      }
+    }
       const data = await Promise.all(
         boxInfo.map(
           async ({
@@ -249,11 +259,16 @@ const Home = React.memo(() => {
             let attendees = [];
   
             if (boxDoc.exists()) {
-              attendees = Array.isArray(boxDoc.data()[selectedDate])
-                ? boxDoc.data()[selectedDate]
+              attendees = Array.isArray(boxDoc.data()[selectedDateRef.current])
+                ? boxDoc.data()[selectedDateRef.current]
                 : [];
             }
-  
+
+             // Filtrar asistentes bloqueados
+          const filteredAttendees = attendees.filter(
+            (attendee) => !blockedUsers.includes(attendee.uid)
+          );
+            
             return {
               imageUrl: url,
               title,
@@ -281,6 +296,9 @@ const Home = React.memo(() => {
   
         querySnapshot.forEach((doc) => {
           const eventData = doc.data();
+          const filteredAttendees = (eventData.attendees || []).filter(
+            (attendee) => !blockedUsers.includes(attendee.uid)
+          );
           userEvents.push({
             id: doc.id,
             imageUrl: eventData.image,
@@ -317,6 +335,12 @@ useEffect(() => {
   const fetchPrivateEvents = useCallback(async () => {
     const user = auth.currentUser;
     if (!user) return;
+
+    let blockedUsers = [];
+  const userDoc = await getDoc(doc(database, "users", user.uid));
+  if (userDoc.exists()) {
+    blockedUsers = userDoc.data()?.blockedUsers || [];
+  }
 
     const eventsRef = collection(database, 'users', user.uid, 'events');
     const eventsSnapshot = await getDocs(eventsRef);
@@ -607,6 +631,7 @@ const nightStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
+
     
   },
   sectionTitle: {
@@ -652,6 +677,7 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     width: "100%",
+    marginTop: 30
   },
   boxContainer: {
     marginBottom: 15,

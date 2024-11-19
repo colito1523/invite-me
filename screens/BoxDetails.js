@@ -206,7 +206,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       console.log("Referencia al evento:", eventRef.path);
   
       // Usa `onSnapshot` para escuchar los cambios en tiempo real
-      const unsub = onSnapshot(eventRef, (docSnapshot) => {
+      const unsub = onSnapshot(eventRef, async (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
           console.log("Datos del evento obtenidos:", data);
@@ -217,14 +217,29 @@ export default memo(function BoxDetails({ route, navigation }) {
               ? data.attendees || [] // Para eventos privados
               : data[selectedDate] || []; // Para eventos generales
   
-          // Procesa los asistentes para asegurar imágenes de perfil
-          const uniqueAttendees = attendees.map((attendee) => ({
-            ...attendee,
-            profileImage: attendee.profileImage || "https://via.placeholder.com/150",
-          }));
+          try {
+            // Obtener la lista de usuarios bloqueados
+            const userRef = doc(database, "users", auth.currentUser.uid);
+            const userSnapshot = await getDoc(userRef);
+            const blockedUsers = userSnapshot.data()?.blockedUsers || [];
   
-          console.log("Asistentes únicos procesados:", uniqueAttendees);
-          setAttendeesList(uniqueAttendees);
+            // Filtrar los usuarios bloqueados
+            const filteredAttendees = attendees.filter(
+              (attendee) => !blockedUsers.includes(attendee.uid)
+            );
+  
+            // Procesa los asistentes para asegurar imágenes de perfil
+            const uniqueAttendees = filteredAttendees.map((attendee) => ({
+              ...attendee,
+              profileImage:
+                attendee.profileImage || "https://via.placeholder.com/150",
+            }));
+  
+            console.log("Asistentes únicos procesados:", uniqueAttendees);
+            setAttendeesList(uniqueAttendees);
+          } catch (error) {
+            console.error("Error al filtrar usuarios bloqueados:", error);
+          }
         } else {
           console.error("El evento no existe en la base de datos.");
           setAttendeesList([]); // Limpia la lista local si no existe
@@ -234,6 +249,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       return unsub; // Devuelve la función para limpiar el listener
     }
   };
+  
   
   
   

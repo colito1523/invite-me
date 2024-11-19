@@ -63,6 +63,11 @@ export function StoryViewer({
   const [isComplaintsVisible, setIsComplaintsVisible] = useState(false);
   const [hideStories, setHideStories] = useState(false);
   const [showSendConfirmation, setShowSendConfirmation] = useState(false);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState([]);
+  const [isHideStoryModalVisible, setIsHideStoryModalVisible] = useState(false);
+
+
 
   const user = auth.currentUser;
 
@@ -86,9 +91,68 @@ export function StoryViewer({
     }
   }, [isComplaintsVisible, isOptionsModalVisible, isKeyboardVisible]);
 
+  const toggleHideMyStories = async (viewer) => {
+    if (!user || !viewer) return;
+  
+    const userRef = doc(database, "users", user.uid);
+    const viewerRef = doc(database, "users", viewer.uid);
+  
+    try {
+      if (viewer.hiddenStories?.includes(user.uid)) {
+        // Quitar al espectador de la lista de ocultos
+        await updateDoc(userRef, {
+          hideStoriesFrom: arrayRemove(viewer.uid),
+        });
+        await updateDoc(viewerRef, {
+          hiddenStories: arrayRemove(user.uid),
+        });
+        Alert.alert(
+          t("storyViewer.success"),
+          t("storyViewer.viewerCanSeeStories")
+        );
+      } else {
+        // Agregar al espectador a la lista de ocultos
+        await updateDoc(userRef, {
+          hideStoriesFrom: arrayUnion(viewer.uid),
+        });
+        await updateDoc(viewerRef, {
+          hiddenStories: arrayUnion(user.uid),
+        });
+        Alert.alert(
+          t("storyViewer.success"),
+          t("storyViewer.viewerCannotSeeStories")
+        );
+      }
+    } catch (error) {
+      console.error("Error updating story visibility:", error);
+      Alert.alert(
+        t("storyViewer.error"),
+        t("storyViewer.storySettingsUpdateError")
+      );
+    }
+  };
+  
+
   const handleCloseViewer = () => {
     onClose(localUnseenStories); // Envía el estado actualizado de `localUnseenStories` a `StorySlider.js`
   };
+
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+  
+        const userDoc = await getDoc(doc(database, "users", user.uid));
+        const blockedList = userDoc.data()?.blockedUsers || [];
+        setBlockedUsers(blockedList);
+      } catch (error) {
+        console.error("Error fetching blocked users:", error);
+      }
+    };
+  
+    fetchBlockedUsers();
+  }, []);
   
   useEffect(() => {
     let timer;
@@ -679,16 +743,17 @@ export function StoryViewer({
           style={styles.viewerEditButton}
           onPress={() => handlePinViewer(item)}
         >
-          <AntDesign
-            name="pushpino"
-            size={18}
-            color={isPinned ? "#007AFF" : "#000"}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.viewerMenuButton}>
-          <Entypo name="dots-three-horizontal" size={18} color="#000" />
-        </TouchableOpacity>
+        <AntDesign
+          name="pushpino"
+          size={18}
+          color={isPinned ? "#007AFF" : "#000"}
+        />
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => setIsHideStoryModalVisible(true)}>
+  <Entypo name="dots-three-horizontal" size={18} color="#000" />
+</TouchableOpacity>
+
+    </TouchableOpacity>
     );
   };
 
@@ -941,34 +1006,61 @@ export function StoryViewer({
       </Modal>
 
       <Complaints
-        isVisible={isComplaintsVisible}
-        onClose={() => setIsComplaintsVisible(false)}
-        onSubmit={async (reason, description) => {
-          try {
-            const currentStory = stories[currentIndex]?.userStories[storyIndex];
-            if (!currentStory) return;
+  isVisible={isComplaintsVisible}
+  onClose={() => setIsComplaintsVisible(false)}
+  onSubmit={async (reason, description) => {
+    setIsSubmittingReport(true);
+    try {
+      const currentStory = stories[currentIndex]?.userStories[storyIndex];
+      
+      // Validación para asegurar que `currentStory` y sus datos están disponibles
+      if (!currentStory || !currentStory.uid || !currentStory.id) {
+        Alert.alert("Error", "No se encontró la historia o los datos necesarios.");
+        setIsSubmittingReport(false);
+        return;
+      }
 
-            const reportData = {
-              reason,
-              description,
-              reportedBy: auth.currentUser.uid,
-              storyOwner: currentStory.uid,
-              storyId: currentStory.id,
-              timestamp: new Date(),
-            };
+      const reportData = {
+        reason,
+        description: description || "Sin descripción",
+        reportedBy: auth.currentUser.uid,
+        storyOwner: currentStory.uid,
+        storyId: currentStory.id,
+        timestamp: new Date(),
+      };
 
-            await addDoc(collection(database, "reports"), reportData);
-            Alert.alert("Denuncia enviada", "Gracias por tu reporte.");
-            setIsComplaintsVisible(false);
-          } catch (error) {
-            console.error("Error al enviar la denuncia:", error);
-            Alert.alert(
-              "Error",
-              "No se pudo enviar la denuncia. Intenta de nuevo."
-            );
-          }
-        }}
-      />
+      await addDoc(collection(database, "reports"), reportData);
+      Alert.alert("Denuncia enviada", "Gracias por tu reporte.");
+      setIsComplaintsVisible(false);
+    } catch (error) {
+      console.error("Error al enviar la denuncia:", error);
+      Alert.alert("Error", "No se pudo enviar la denuncia.");
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  }}
+/>
+
+<Modal
+  animationType="fade"
+  transparent={true}
+  visible={isHideStoryModalVisible}
+  onRequestClose={() => setIsHideStoryModalVisible(false)}
+>
+  <TouchableWithoutFeedback onPress={() => setIsHideStoryModalVisible(false)}>
+    <View style={styles.modalOverlay2}>
+      <TouchableWithoutFeedback>
+        <View style={styles.simpleModalContainer}>
+          <Text style={styles.simpleModalText}>Ocultar mis historias</Text>
+        </View>
+      </TouchableWithoutFeedback>
+    </View>
+  </TouchableWithoutFeedback>
+</Modal>
+
+
+
+
     </SafeAreaView>
   );
 }
@@ -1208,6 +1300,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
+  simpleModalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    width: "80%",
+  },
+  simpleModalText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  modalOverlay2: {
+  flex: 1,
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+  
 });
 
 export default StoryViewer;

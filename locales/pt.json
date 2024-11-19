@@ -220,7 +220,7 @@
     "userCanSeeStories": "Este usuário poderá ver suas histórias.",
     "userCannotSeeStories": "Suas histórias serão ocultadas para este usuário.",
     "myStorySettingsUpdateError": "Não foi possível atualizar as configurações das suas histórias.",
-    "likedYourProfile": "{{username}} gostou do seu perfil.",
+    "likedYourProfile": "gostou do seu perfil.",
     "likeProfileError": "Não foi possível curtir este perfil.",
     "removeLikeError": "Não foi possível remover a curtida deste perfil.",
     "userBlocked": "Usuário Bloqueado",

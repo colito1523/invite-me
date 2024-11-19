@@ -10,7 +10,7 @@ import {
   Alert,
   Pressable,
 } from "react-native";
-import { Image } from 'expo-image';
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { auth, database, storage } from "../config/firebase";
 import {
@@ -25,14 +25,16 @@ import {
   query,
   where,
   Timestamp,
-  addDoc
+  addDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { Menu, Divider, Provider } from "react-native-paper";
 import FriendListModal from "../Components/Modals/FriendListModal";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
+import BlockedListModal from "../Components/BlockedUsers/BlockedUsers";
+
 
 
 const { width, height } = Dimensions.get("window");
@@ -51,8 +53,15 @@ const NameDisplay = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <View style={[styles.nameContainer, isEditing && styles.nameContainerEditing]}>
-      <View style={[styles.nameAndSurnameContainer, isEditing && styles.nameAndSurnameContainerEditing]}>
+    <View
+      style={[styles.nameContainer, isEditing && styles.nameContainerEditing]}
+    >
+      <View
+        style={[
+          styles.nameAndSurnameContainer,
+          isEditing && styles.nameAndSurnameContainerEditing,
+        ]}
+      >
         {isEditing ? (
           <>
             <TextInput
@@ -60,14 +69,14 @@ const NameDisplay = ({
               style={[styles.editableText, styles.editableTextEditing]}
               value={name}
               onChangeText={setName}
-              placeholder={t('profile.namePlaceholder')}
+              placeholder={t("profile.namePlaceholder")}
             />
             <TextInput
               ref={surnameInputRef}
               style={[styles.editableText, styles.editableTextEditing]}
               value={surname}
               onChangeText={setSurname}
-              placeholder={t('profile.surnamePlaceholder')}
+              placeholder={t("profile.surnamePlaceholder")}
             />
           </>
         ) : (
@@ -82,15 +91,13 @@ const NameDisplay = ({
           style={styles.friendCountContainer}
         >
           <Text style={styles.friendsText}>
-            {friendCount > 0 ? friendCount : t('profile.loading')} 
+            {friendCount > 0 ? friendCount : t("profile.loading")}
           </Text>
         </TouchableOpacity>
       )}
     </View>
   );
 };
-
-
 
 export default function Profile({ navigation }) {
   const { t } = useTranslation();
@@ -115,6 +122,8 @@ export default function Profile({ navigation }) {
   const [isElementsVisible, setIsElementsVisible] = useState(true);
   const [heartCount, setHeartCount] = useState(0);
   const [isHearted, setIsHearted] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState([]);
+  const [isBlockedListVisible, setIsBlockedListVisible] = useState(false);
 
   const nameInputRef = useRef(null);
   const surnameInputRef = useRef(null);
@@ -127,6 +136,29 @@ export default function Profile({ navigation }) {
     setIsElementsVisible(true);
   };
 
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+  
+        const userDoc = await getDoc(doc(database, "users", user.uid));
+        const blockedList = userDoc.data()?.blockedUsers || [];
+        const manuallyBlockedList = userDoc.data()?.manuallyBlocked || []; // Obtén los bloqueos manuales
+  
+        // Filtrar usuarios manualmente bloqueados
+        const filteredBlockedUsers = blockedList.filter((uid) => manuallyBlockedList.includes(uid));
+  
+        setBlockedUsers(filteredBlockedUsers);
+      } catch (error) {
+        console.error("Error fetching blocked users:", error);
+      }
+    };
+  
+    fetchBlockedUsers();
+  }, []);
+  
+
   const handleTogglePrivacy = async () => {
     const user = auth.currentUser;
     if (user) {
@@ -137,42 +169,71 @@ export default function Profile({ navigation }) {
         });
         setIsPrivate(newPrivacyState);
         Alert.alert(
-          t('profile.privacyChangeSuccess'),
-          t('profile.privacyChangeMessage', { state: newPrivacyState ? t('profile.private') : t('profile.public') })
+          t("profile.privacyChangeSuccess"),
+          t("profile.privacyChangeMessage", {
+            state: newPrivacyState ? t("profile.private") : t("profile.public"),
+          })
         );
       } catch (error) {
         console.error("Error updating privacy state:", error);
-        Alert.alert(t('profile.error'), t('profile.privacyUpdateError'));
+        Alert.alert(t("profile.error"), t("profile.privacyUpdateError"));
       }
+    }
+  };
+
+  const handleFriendCountClick = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      const blockedUsers = userDoc.data()?.blockedUsers || [];
+
+      const friendsSnapshot = await getDocs(
+        collection(database, "users", user.uid, "friends")
+      );
+
+      const filteredFriends = friendsSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((friend) => !blockedUsers.includes(friend.friendId));
+
+      navigation.navigate("FriendList", { friends: filteredFriends });
+      setIsFriendListVisible(true);
+    } catch (error) {
+      console.error("Error al cargar la lista de amigos:", error);
     }
   };
 
   const handleHeartPress = async () => {
     const user = auth.currentUser;
     if (!user) return;
-  
+
     try {
       const likesRef = collection(database, "users", user.uid, "likes");
       const likeQuery = query(likesRef, where("userId", "==", user.uid));
       const likeSnapshot = await getDocs(likeQuery);
-  
+
       if (likeSnapshot.empty) {
         // Añadir un nuevo like si no existe
         try {
           const userDoc = await getDoc(doc(database, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            const profileImage = userData.photoUrls && userData.photoUrls.length > 0
-              ? userData.photoUrls[0]
-              : ""; // Usa la primera URL de imagen o una cadena vacía si no hay imágenes disponibles.
-  
+            const profileImage =
+              userData.photoUrls && userData.photoUrls.length > 0
+                ? userData.photoUrls[0]
+                : ""; // Usa la primera URL de imagen o una cadena vacía si no hay imágenes disponibles.
+
             await addDoc(collection(database, "users", user.uid, "likes"), {
               userId: user.uid,
               username: userData.username,
               profileImage: profileImage,
               likedAt: Timestamp.now(),
             });
-  
+
             // Actualizar el estado local
             setHeartCount(heartCount + 1);
             setIsHearted(true);
@@ -186,7 +247,7 @@ export default function Profile({ navigation }) {
           likeSnapshot.forEach(async (doc) => {
             await deleteDoc(doc.ref);
           });
-  
+
           // Actualizar el estado local
           setHeartCount(heartCount - 1);
           setIsHearted(false);
@@ -207,7 +268,7 @@ export default function Profile({ navigation }) {
           const likesRef = collection(database, "users", user.uid, "likes");
           const likeQuery = query(likesRef, where("userId", "==", user.uid));
           const likeSnapshot = await getDocs(likeQuery);
-  
+
           if (!likeSnapshot.empty) {
             setIsHearted(true);
           } else {
@@ -218,10 +279,10 @@ export default function Profile({ navigation }) {
         console.error("Error verificando el estado del like:", error);
       }
     };
-  
+
     checkLikeStatus();
   }, [auth.currentUser]);
- 
+
   useEffect(() => {
     const fetchFriendCount = async () => {
       console.log("fetchFriendCount running");
@@ -240,10 +301,10 @@ export default function Profile({ navigation }) {
         console.error("Error fetching friend count:", error);
       }
     };
-  
+
     fetchFriendCount();
   }, [auth.currentUser]);
-  
+
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
@@ -261,7 +322,7 @@ export default function Profile({ navigation }) {
           const friendsSnapshot = await getDocs(
             collection(database, "users", user.uid, "friends")
           );
-          setFriendCount(friendsSnapshot.size); 
+          setFriendCount(friendsSnapshot.size);
           setFirstHobby(data.firstHobby || "");
           setSecondHobby(data.secondHobby || "");
           setRelationshipStatus(data.relationshipStatus || "");
@@ -286,7 +347,7 @@ export default function Profile({ navigation }) {
         console.error("Error obteniendo la cantidad de likes:", error);
       }
     };
-    
+
     fetchHeartCount();
   }, [auth.currentUser]);
 
@@ -311,12 +372,12 @@ export default function Profile({ navigation }) {
 
   const handleSaveChanges = async () => {
     if (!validateInput(name) || !validateInput(surname)) {
-      Alert.alert(t('profile.error'), t('profile.nameValidationError'));
+      Alert.alert(t("profile.error"), t("profile.nameValidationError"));
       return;
     }
 
     if (!name.trim() || !surname.trim()) {
-      Alert.alert(t('profile.error'), t('profile.allFieldsRequired'));
+      Alert.alert(t("profile.error"), t("profile.allFieldsRequired"));
       return;
     }
 
@@ -329,7 +390,10 @@ export default function Profile({ navigation }) {
           photoUrls.map(async (url, index) => {
             try {
               if (url.startsWith("file://")) {
-                const imageRef = ref(storage, `profileImages/${user.uid}_${index}.jpg`);
+                const imageRef = ref(
+                  storage,
+                  `profileImages/${user.uid}_${index}.jpg`
+                );
                 const response = await fetch(url);
                 const blob = await response.blob();
                 await uploadBytes(imageRef, blob);
@@ -353,13 +417,16 @@ export default function Profile({ navigation }) {
           firstInterest,
           secondInterest,
         };
-      
+
         await updateDoc(doc(database, "users", user.uid), updatedData);
         setPhotoUrls(updatedPhotoUrls);
         setIsEditing(false);
       } catch (error) {
         console.error("Error guardando los datos:", error);
-        Alert.alert("Error", "Ocurrió un problema al guardar los cambios. Intenta nuevamente.");
+        Alert.alert(
+          "Error",
+          "Ocurrió un problema al guardar los cambios. Intenta nuevamente."
+        );
       } finally {
         setIsLoading(false);
       }
@@ -375,17 +442,19 @@ export default function Profile({ navigation }) {
           (snapshot) => {
             const eventsList = snapshot.docs.map((doc) => {
               const data = doc.data();
-              let formattedDate = t('profile.noDate');
-              
+              let formattedDate = t("profile.noDate");
+
               if (data.date?.seconds) {
-                formattedDate = new Date(data.date.seconds * 1000).toLocaleDateString(t('locale'), {
+                formattedDate = new Date(
+                  data.date.seconds * 1000
+                ).toLocaleDateString(t("locale"), {
                   day: "numeric",
                   month: "short",
                 });
-              } else if (typeof data.date === 'string') {
+              } else if (typeof data.date === "string") {
                 formattedDate = data.date;
               }
-  
+
               return {
                 id: doc.id,
                 ...data,
@@ -403,7 +472,7 @@ export default function Profile({ navigation }) {
     };
     fetchEvents();
   }, []);
-  
+
   const checkAndRemoveExpiredEvents = (eventsList) => {
     const currentDate = new Date();
     const user = auth.currentUser;
@@ -415,7 +484,9 @@ export default function Profile({ navigation }) {
       if (hoursPassed >= 24) {
         deleteDoc(doc(database, "users", user.uid, "events", event.id))
           .then(() => console.log(`Event ${event.id} removed successfully`))
-          .catch((error) => console.error(`Error removing event ${event.id}:`, error));
+          .catch((error) =>
+            console.error(`Error removing event ${event.id}:`, error)
+          );
         return false;
       }
       return true;
@@ -426,11 +497,11 @@ export default function Profile({ navigation }) {
 
   const parseEventDate = (dateString) => {
     let dateToParse;
-  
-    if (typeof dateString === 'string') {
+
+    if (typeof dateString === "string") {
       dateToParse = dateString;
     } else if (dateString?.toDate) {
-      dateToParse = dateString.toDate().toLocaleDateString(t('locale'), {
+      dateToParse = dateString.toDate().toLocaleDateString(t("locale"), {
         day: "numeric",
         month: "short",
       });
@@ -438,11 +509,13 @@ export default function Profile({ navigation }) {
       console.error("Invalid date format:", dateString);
       return new Date();
     }
-  
-    const [day, month] = dateToParse.split(' ');
+
+    const [day, month] = dateToParse.split(" ");
     const currentYear = new Date().getFullYear();
-    const monthIndex = t('months', { returnObjects: true }).indexOf(month.toLowerCase());
-  
+    const monthIndex = t("months", { returnObjects: true }).indexOf(
+      month.toLowerCase()
+    );
+
     return new Date(currentYear, monthIndex, parseInt(day));
   };
 
@@ -461,10 +534,7 @@ export default function Profile({ navigation }) {
       const eventCount = eventsSnapshot.size;
 
       if (eventCount >= 6) {
-        Alert.alert(
-          t('profile.limitReached'),
-          t('profile.eventLimitMessage')
-        );
+        Alert.alert(t("profile.limitReached"), t("profile.eventLimitMessage"));
         return;
       }
 
@@ -475,13 +545,10 @@ export default function Profile({ navigation }) {
           imageUrl: event.imageUrl,
         });
         setEvents([...events, event]);
-        Alert.alert(
-          t('profile.eventSaved'),
-          t('profile.eventSavedMessage')
-        );
+        Alert.alert(t("profile.eventSaved"), t("profile.eventSavedMessage"));
       } catch (error) {
         console.error("Error adding event: ", error);
-        Alert.alert(t('profile.error'), t('profile.eventAddError'));
+        Alert.alert(t("profile.error"), t("profile.eventAddError"));
       }
     }
   };
@@ -511,21 +578,20 @@ export default function Profile({ navigation }) {
   };
 
   const handleBoxPress = (event) => {
-  const coordinates = event.coordinates || { latitude: 0, longitude: 0 };
-  navigation.navigate("BoxDetails", {
-    box: {
-      title: event.title || t('profile.noTitle'),
-      imageUrl: event.imageUrl || "https://via.placeholder.com/150",
-      dateArray: event.dateArray || [],
-      hours: event.hours || {},
-      phoneNumber: event.phoneNumber || t('profile.noNumber'), // Asegura que se pase phoneNumber
-      locationLink: event.locationLink || t('profile.noLocation'),
-      coordinates: coordinates,
-    },
-    selectedDate: event.date || t('profile.noDate'),
-  });
-};
-
+    const coordinates = event.coordinates || { latitude: 0, longitude: 0 };
+    navigation.navigate("BoxDetails", {
+      box: {
+        title: event.title || t("profile.noTitle"),
+        imageUrl: event.imageUrl || "https://via.placeholder.com/150",
+        dateArray: event.dateArray || [],
+        hours: event.hours || {},
+        phoneNumber: event.phoneNumber || t("profile.noNumber"), // Asegura que se pase phoneNumber
+        locationLink: event.locationLink || t("profile.noLocation"),
+        coordinates: coordinates,
+      },
+      selectedDate: event.date || t("profile.noDate"),
+    });
+  };
 
   const renderEditableField = (
     field,
@@ -557,7 +623,11 @@ export default function Profile({ navigation }) {
         {photoUrls.map((url, index) => (
           <View key={index} style={styles.photoContainer}>
             {url ? (
-              <Image source={{ uri: url }} style={styles.photoThumbnail} cachePolicy="none"   />
+              <Image
+                source={{ uri: url }}
+                style={styles.photoThumbnail}
+                cachePolicy="none"
+              />
             ) : (
               <View style={styles.emptyPhoto} />
             )}
@@ -566,7 +636,7 @@ export default function Profile({ navigation }) {
               style={styles.photoButton}
             >
               <Text style={styles.photoButtonText}>
-                {url ? t('profile.change') : t('profile.add')}
+                {url ? t("profile.change") : t("profile.add")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -575,9 +645,24 @@ export default function Profile({ navigation }) {
     );
   };
 
-  const handleFriendSelect = (friend) => {
-    navigation.navigate("UserProfile", { selectedUser: friend });
-    setIsFriendListVisible(false);
+  const handleFriendSelect = async (friend) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      const blockedUsers = userDoc.data()?.blockedUsers || [];
+
+      if (blockedUsers.includes(friend.id)) {
+        Alert.alert("Error", "No puedes interactuar con este usuario.");
+        return;
+      }
+
+      navigation.navigate("UserProfile", { selectedUser: friend });
+      setIsFriendListVisible(false);
+    } catch (error) {
+      console.error("Error al seleccionar amigo:", error);
+    }
   };
 
   const renderEditableOval = (value, setValue, placeholder) => {
@@ -608,8 +693,12 @@ export default function Profile({ navigation }) {
           onPress={() => handleBoxPress(event)}
         >
           <Text style={styles.buttonText}>
-            {event.title.length > 9 ? event.title.substring(0, 5) + "..." : event.title}{" "}
-            {event.category === "EventoParaAmigos" ? event.date : event.formattedDate || t('profile.noDate')}
+            {event.title.length > 9
+              ? event.title.substring(0, 5) + "..."
+              : event.title}{" "}
+            {event.category === "EventoParaAmigos"
+              ? event.date
+              : event.formattedDate || t("profile.noDate")}
           </Text>
         </TouchableOpacity>
       ))}
@@ -633,32 +722,38 @@ export default function Profile({ navigation }) {
             </TouchableOpacity>
           )}
           {isElementsVisible && (
-        <View style={styles.menuContainer}>
-          <Menu
-            visible={menuVisible}
-            onDismiss={() => setMenuVisible(false)}
-            anchor={
-              <TouchableOpacity onPress={() => setMenuVisible(true)}>
-                <Ionicons
-                  name="ellipsis-vertical"
-                  size={24}
-                  color="white"
+            <View style={styles.menuContainer}>
+              <Menu
+                visible={menuVisible}
+                onDismiss={() => setMenuVisible(false)}
+                anchor={
+                  <TouchableOpacity onPress={() => setMenuVisible(true)}>
+                    <Ionicons
+                      name="ellipsis-vertical"
+                      size={24}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                }
+                contentStyle={styles.menuContent}
+              >
+                <Menu.Item
+                  onPress={handleEditProfile}
+                  title={t("profile.editProfile")}
                 />
-              </TouchableOpacity>
-            }
-            contentStyle={styles.menuContent}
-          >
-            <Menu.Item
-              onPress={handleEditProfile}
-              title={t('profile.editProfile')}
-            />
-            <Menu.Item
-              onPress={handleTogglePrivacy}
-              title={
-                isPrivate ? t('profile.makePublic') : t('profile.makePrivate')
-              }
-            />
-                <Divider />
+                <Menu.Item
+                  onPress={() => setIsBlockedListVisible(true)}
+                  title="Usuarios bloqueados"
+                  disabled={blockedUsers.length === 0} // Deshabilitar si no hay usuarios bloqueados
+                />
+                <Menu.Item
+                  onPress={handleTogglePrivacy}
+                  title={
+                    isPrivate
+                      ? t("profile.makePublic")
+                      : t("profile.makePrivate")
+                  }
+                />
               </Menu>
             </View>
           )}
@@ -688,7 +783,7 @@ export default function Profile({ navigation }) {
                     source={{ uri: url }}
                     style={styles.backgroundImage}
                     contentFit="cover"
-                    cachePolicy="none" 
+                    cachePolicy="none"
                   />
                   {isElementsVisible && (
                     <View style={styles.overlay}>
@@ -701,7 +796,9 @@ export default function Profile({ navigation }) {
                         setSurname={setSurname}
                         nameInputRef={nameInputRef}
                         surnameInputRef={surnameInputRef}
-                        handleFriendCountClick={() => setIsFriendListVisible(true)}
+                        handleFriendCountClick={() =>
+                          setIsFriendListVisible(true)
+                        }
                         displayFriendCount={index === 0}
                       />
                       <View style={styles.infoContainer}>
@@ -716,7 +813,7 @@ export default function Profile({ navigation }) {
                                   onPress={handleSaveChanges}
                                 >
                                   <Text style={styles.saveButtonText}>
-                                    {t('profile.saveChanges')}
+                                    {t("profile.saveChanges")}
                                   </Text>
                                 </TouchableOpacity>
                               </>
@@ -740,25 +837,25 @@ export default function Profile({ navigation }) {
                                     {renderEditableOval(
                                       firstHobby,
                                       setFirstHobby,
-                                      t('profile.hobby1')
+                                      t("profile.hobby1")
                                     )}
                                     {renderEditableOval(
                                       secondHobby,
                                       setSecondHobby,
-                                      t('profile.hobby2')
+                                      t("profile.hobby2")
                                     )}
                                   </View>
-                                 
+
                                   <View style={styles.ovalContainer}>
                                     {renderEditableOval(
                                       firstInterest,
                                       setFirstInterest,
-                                      t('profile.interest1')
+                                      t("profile.interest1")
                                     )}
                                     {renderEditableOval(
                                       secondInterest,
                                       setSecondInterest,
-                                      t('profile.interest2')
+                                      t("profile.interest2")
                                     )}
                                   </View>
                                 </View>
@@ -799,7 +896,7 @@ export default function Profile({ navigation }) {
                                 onPress={handleSaveChanges}
                               >
                                 <Text style={styles.saveButtonText}>
-                                  {t('profile.saveChanges')}
+                                  {t("profile.saveChanges")}
                                 </Text>
                               </TouchableOpacity>
                             )}
@@ -819,6 +916,11 @@ export default function Profile({ navigation }) {
         userId={auth.currentUser.uid}
         onFriendSelect={handleFriendSelect}
         updateFriendCount={(count) => setFriendCount(count)}
+      />
+      <BlockedListModal
+        isVisible={isBlockedListVisible}
+        onClose={() => setIsBlockedListVisible(false)}
+        blockedUsers={blockedUsers}
       />
     </Provider>
   );
@@ -863,10 +965,10 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   nameContainerEditing: {
-    top: '70%', // Centra verticalmente
-    left: '50%', // Centra horizontalmente
+    top: "70%", // Centra verticalmente
+    left: "50%", // Centra horizontalmente
     transform: [{ translateX: -width * 0.25 }, { translateY: -height * 0.25 }], // Ajuste para centrar completamente
-    alignItems: 'center', // Centra el contenido dentro
+    alignItems: "center", // Centra el contenido dentro
   },
   nameAndSurnameContainer: {
     marginBottom: 10,

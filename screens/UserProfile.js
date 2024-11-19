@@ -33,12 +33,18 @@ import FriendListModal from "../Components/Modals/FriendListModal";
 import Complaints from "../Components/Complaints/Complaints";
 import MutualFriendsModal from "../Components/Mutual-Friends-Modal/MutualFriendsModal";
 
-import { Image } from 'expo-image';
-import { useTranslation } from 'react-i18next';
+import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
 
-const NameDisplay = ({ firstName, lastName, friendCount, showFriendCount, onFriendListPress }) => {
+const NameDisplay = ({
+  firstName,
+  lastName,
+  friendCount,
+  showFriendCount,
+  onFriendListPress,
+}) => {
   const { t } = useTranslation();
   return (
     <View style={styles.nameContainer}>
@@ -46,7 +52,10 @@ const NameDisplay = ({ firstName, lastName, friendCount, showFriendCount, onFrie
         {firstName} {lastName}
       </Text>
       {showFriendCount && (
-        <TouchableOpacity onPress={onFriendListPress} style={styles.friendCountContainer}>
+        <TouchableOpacity
+          onPress={onFriendListPress}
+          style={styles.friendCountContainer}
+        >
           <Text style={styles.friendCountText}>{friendCount} </Text>
         </TouchableOpacity>
       )}
@@ -81,7 +90,24 @@ export default function UserProfile({ route, navigation }) {
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [heartCount, setHeartCount] = useState(0);
   const [isHearted, setIsHearted] = useState(false);
-  const [isMutualFriendsModalVisible, setIsMutualFriendsModalVisible] = useState(false);
+  const [isMutualFriendsModalVisible, setIsMutualFriendsModalVisible] =
+    useState(false);
+  const [blockedUsers, setBlockedUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+        const userRef = doc(database, "users", user.uid);
+        const userSnapshot = await getDoc(userRef);
+        const blockedList = userSnapshot.data()?.blockedUsers || [];
+        setBlockedUsers(blockedList);
+      } catch (error) {
+        console.error("Error fetching blocked users:", error);
+      }
+    };
+
+    fetchBlockedUsers();
+  }, [user]);
 
   const user = auth.currentUser;
 
@@ -103,13 +129,122 @@ export default function UserProfile({ route, navigation }) {
   const handleMutualFriendsPress = () => {
     setIsMutualFriendsModalVisible(true);
   };
+  const handleBlockUser = async () => {
+    if (!user || !selectedUser) return;
+  
+    try {
+      // Referencias a los documentos de amistad en ambas direcciones
+      const currentUserFriendRef = collection(
+        database,
+        "users",
+        user.uid,
+        "friends"
+      );
+      const currentFriendQuery = query(
+        currentUserFriendRef,
+        where("friendId", "==", selectedUser.id)
+      );
+  
+      const selectedUserFriendRef = collection(
+        database,
+        "users",
+        selectedUser.id,
+        "friends"
+      );
+      const selectedFriendQuery = query(
+        selectedUserFriendRef,
+        where("friendId", "==", user.uid)
+      );
+  
+      // Obtener y eliminar las relaciones de amistad
+      const [currentFriendSnapshot, selectedFriendSnapshot] = await Promise.all([
+        getDocs(currentFriendQuery),
+        getDocs(selectedFriendQuery),
+      ]);
+  
+      currentFriendSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+  
+      selectedFriendSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+  
+      // Eliminar solicitudes de amistad pendientes entre ambos usuarios
+      const currentUserRequestsRef = collection(
+        database,
+        "users",
+        selectedUser.id,
+        "friendRequests"
+      );
+      const requestQuery = query(
+        currentUserRequestsRef,
+        where("fromId", "==", user.uid)
+      );
+      const requestSnapshot = await getDocs(requestQuery);
+      requestSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+  
+      const reverseRequestQuery = query(
+        collection(database, "users", user.uid, "friendRequests"),
+        where("fromId", "==", selectedUser.id)
+      );
+      const reverseRequestSnapshot = await getDocs(reverseRequestQuery);
+      reverseRequestSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+  
+      // Agregar el usuario bloqueado a la lista de bloqueados del usuario actual
+      const currentUserRef = doc(database, "users", user.uid);
+      await updateDoc(currentUserRef, {
+        blockedUsers: arrayUnion(selectedUser.id),
+        manuallyBlocked: arrayUnion(selectedUser.id), // Campo nuevo para bloqueos manuales
+      });
+  
+      // Agregar al usuario actual a la lista de bloqueados del usuario seleccionado
+      const selectedUserRef = doc(database, "users", selectedUser.id);
+      await updateDoc(selectedUserRef, {
+        blockedUsers: arrayUnion(user.uid),
+      });
+  
+      Alert.alert(
+        t("userProfile.userBlocked"),
+        `${selectedUser.firstName} ${t("userProfile.isBlocked")}`
+      );
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      Alert.alert(t("userProfile.error"), t("userProfile.blockError"));
+    }
+  };
+  
+  
+
+  const handleUnblockUser = async () => {
+    if (!user || !selectedUser) return;
+
+    try {
+      // Referencia al documento del usuario actual
+      const currentUserRef = doc(database, "users", user.uid);
+
+      // Eliminar el UID del usuario seleccionado del array de bloqueados
+      await updateDoc(currentUserRef, {
+        blockedUsers: arrayRemove(selectedUser.id),
+      });
+
+      Alert.alert(
+        t("userProfile.userUnblocked"),
+        `${selectedUser.firstName} ${t("userProfile.isUnblocked")}`
+      );
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+      Alert.alert(t("userProfile.error"), t("userProfile.unblockError"));
+    }
+  };
 
   const handleReport = async () => {
     if (!selectedUser || !selectedUser.id) {
-      Alert.alert(
-        t('userProfile.error'),
-        t('userProfile.cannotReportUser')
-      );
+      Alert.alert(t("userProfile.error"), t("userProfile.cannotReportUser"));
       return;
     }
 
@@ -120,14 +255,11 @@ export default function UserProfile({ route, navigation }) {
         setIsReportModalVisible(true);
         setMenuVisible(false);
       } else {
-        Alert.alert(t('userProfile.error'), t('userProfile.userInfoError'));
+        Alert.alert(t("userProfile.error"), t("userProfile.userInfoError"));
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      Alert.alert(
-        t('userProfile.error'),
-        t('userProfile.userDataAccessError')
-      );
+      Alert.alert(t("userProfile.error"), t("userProfile.userDataAccessError"));
     }
   };
 
@@ -146,7 +278,7 @@ export default function UserProfile({ route, navigation }) {
       const complaintsRef = collection(database, "complaints");
       const newComplaint = {
         reporterId: user.uid,
-        reporterName: user.displayName || t('userProfile.anonymous'),
+        reporterName: user.displayName || t("userProfile.anonymous"),
         reporterUsername: user.email ? user.email.split("@")[0] : "unknown",
         reportedId: selectedUser.id,
         reportedName: `${selectedUser.firstName} ${selectedUser.lastName}`,
@@ -156,15 +288,12 @@ export default function UserProfile({ route, navigation }) {
         timestamp: Timestamp.now(),
       };
       await addDoc(complaintsRef, newComplaint);
-      Alert.alert(
-        t('userProfile.thankYou'),
-        t('userProfile.reportSubmitted')
-      );
+      Alert.alert(t("userProfile.thankYou"), t("userProfile.reportSubmitted"));
     } catch (error) {
       console.error("Error submitting report:", error);
       Alert.alert(
-        t('userProfile.error'),
-        t('userProfile.reportSubmissionError')
+        t("userProfile.error"),
+        t("userProfile.reportSubmissionError")
       );
     }
     setIsReportModalVisible(false);
@@ -202,14 +331,17 @@ export default function UserProfile({ route, navigation }) {
       }
       setHideStories(!hideStories);
       Alert.alert(
-        t('userProfile.success'),
+        t("userProfile.success"),
         hideStories
-          ? t('userProfile.willSeeStories')
-          : t('userProfile.willNotSeeStories')
+          ? t("userProfile.willSeeStories")
+          : t("userProfile.willNotSeeStories")
       );
     } catch (error) {
       console.error("Error updating story visibility:", error);
-      Alert.alert(t('userProfile.error'), t('userProfile.storySettingsUpdateError'));
+      Alert.alert(
+        t("userProfile.error"),
+        t("userProfile.storySettingsUpdateError")
+      );
     }
   };
 
@@ -238,18 +370,29 @@ export default function UserProfile({ route, navigation }) {
 
       setHideMyStories(!hideMyStories);
       Alert.alert(
-        t('userProfile.success'),
+        t("userProfile.success"),
         hideMyStories
-          ? t('userProfile.userCanSeeStories')
-          : t('userProfile.userCannotSeeStories')
+          ? t("userProfile.userCanSeeStories")
+          : t("userProfile.userCannotSeeStories")
       );
     } catch (error) {
       console.error("Error updating my stories visibility:", error);
-      Alert.alert(t('userProfile.error'), t('userProfile.myStorySettingsUpdateError'));
+      Alert.alert(
+        t("userProfile.error"),
+        t("userProfile.myStorySettingsUpdateError")
+      );
     }
   };
+  
 
   const handleLikeProfile = async () => {
+    if (blockedUsers.includes(selectedUser.id)) {
+      Alert.alert(
+        t("userProfile.userBlocked"),
+        t("userProfile.cannotLikeProfile")
+      );
+      return;
+    }
     if (!user || !selectedUser) return;
 
     const likesRef = collection(database, "users", selectedUser.id, "likes");
@@ -274,14 +417,26 @@ export default function UserProfile({ route, navigation }) {
         });
 
         // Add like to the current user's Likes category
-        const currentUserLikesRef = doc(database, "users", user.uid, "categories", "Likes");
-        await setDoc(currentUserLikesRef, {
-          [selectedUser.id]: {
-            uid: selectedUser.id,
-            image: selectedUser.photoUrls ? selectedUser.photoUrls[0] : "https://via.placeholder.com/150",
-            timestamp: serverTimestamp(),
-          }
-        }, { merge: true });
+        const currentUserLikesRef = doc(
+          database,
+          "users",
+          user.uid,
+          "categories",
+          "Likes"
+        );
+        await setDoc(
+          currentUserLikesRef,
+          {
+            [selectedUser.id]: {
+              uid: selectedUser.id,
+              image: selectedUser.photoUrls
+                ? selectedUser.photoUrls[0]
+                : "https://via.placeholder.com/150",
+              timestamp: serverTimestamp(),
+            },
+          },
+          { merge: true }
+        );
 
         // Increment like count
         const newLikeCount = likeCount + 1;
@@ -289,7 +444,7 @@ export default function UserProfile({ route, navigation }) {
 
         // Update like count in the user's document
         await updateDoc(doc(database, "users", selectedUser.id), {
-          likeCount: newLikeCount
+          likeCount: newLikeCount,
         });
 
         const notificationsRef = collection(
@@ -303,14 +458,17 @@ export default function UserProfile({ route, navigation }) {
           fromId: user.uid,
           fromName: userData.username,
           fromImage: profileImage,
-          message: t('userProfile.likedYourProfile', { username: userData.username }),
+          message: t("userProfile.likedYourProfile", {
+            username: userData.username, // Esto debe ser el nombre del remitente
+          }),
           timestamp: serverTimestamp(),
         });
+        
 
         setIsLiked(true);
       } catch (error) {
         console.error("Error liking profile:", error);
-        Alert.alert(t('userProfile.error'), t('userProfile.likeProfileError'));
+        Alert.alert(t("userProfile.error"), t("userProfile.likeProfileError"));
       }
     } else {
       try {
@@ -320,10 +478,20 @@ export default function UserProfile({ route, navigation }) {
         );
 
         // Remove like from the current user's Likes category
-        const currentUserLikesRef = doc(database, "users", user.uid, "categories", "Likes");
-        await setDoc(currentUserLikesRef, {
-          [selectedUser.id]: deleteField()
-        }, { merge: true });
+        const currentUserLikesRef = doc(
+          database,
+          "users",
+          user.uid,
+          "categories",
+          "Likes"
+        );
+        await setDoc(
+          currentUserLikesRef,
+          {
+            [selectedUser.id]: deleteField(),
+          },
+          { merge: true }
+        );
 
         // Decrement like count
         const newLikeCount = Math.max(0, likeCount - 1);
@@ -331,13 +499,13 @@ export default function UserProfile({ route, navigation }) {
 
         // Update like count in the user's document
         await updateDoc(doc(database, "users", selectedUser.id), {
-          likeCount: newLikeCount
+          likeCount: newLikeCount,
         });
 
         setIsLiked(false);
       } catch (error) {
         console.error("Error removing like from profile:", error);
-        Alert.alert(t('userProfile.error'), t('userProfile.removeLikeError'));
+        Alert.alert(t("userProfile.error"), t("userProfile.removeLikeError"));
       }
     }
   };
@@ -423,7 +591,6 @@ export default function UserProfile({ route, navigation }) {
         setFriendCount(friendSnapshot.size);
       }
     };
-
     const fetchEvents = async () => {
       if (selectedUser && selectedUser.id) {
         const eventsRef = collection(
@@ -437,8 +604,14 @@ export default function UserProfile({ route, navigation }) {
           id: doc.id,
           ...doc.data(),
         }));
-        const filteredEvents = checkAndRemoveExpiredEvents(userEvents);
-        setEvents(filteredEvents);
+
+        // Filtrar eventos si el usuario está bloqueado
+        if (blockedUsers.includes(selectedUser.id)) {
+          setEvents([]);
+        } else {
+          const filteredEvents = checkAndRemoveExpiredEvents(userEvents);
+          setEvents(filteredEvents);
+        }
       }
     };
 
@@ -470,7 +643,7 @@ export default function UserProfile({ route, navigation }) {
           user.uid,
           "friends"
         );
-        
+
         const selectedUserFriendsRef = collection(
           database,
           "users",
@@ -520,7 +693,9 @@ export default function UserProfile({ route, navigation }) {
         // Remove the expired event from Firestore
         deleteDoc(doc(database, "users", selectedUser.id, "events", event.id))
           .then(() => console.log(`Event ${event.id} removed successfully`))
-          .catch((error) => console.error(`Error removing event ${event.id}:`, error));
+          .catch((error) =>
+            console.error(`Error removing event ${event.id}:`, error)
+          );
         return false;
       }
       return true;
@@ -530,27 +705,12 @@ export default function UserProfile({ route, navigation }) {
   };
 
   const parseEventDate = (dateString) => {
-    const [day, month] = dateString.split(' ');
+    const [day, month] = dateString.split(" ");
     const currentYear = new Date().getFullYear();
-    const monthIndex = t('months', { returnObjects: true }).indexOf(month.toLowerCase());
+    const monthIndex = t("months", { returnObjects: true }).indexOf(
+      month.toLowerCase()
+    );
     return new Date(currentYear, monthIndex, parseInt(day));
-  };
-
-  const blockUser = async (blockedUserId) => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const blockRef = collection(database, "users", user.uid, "blockedUsers");
-
-    try {
-      await addDoc(blockRef, {
-        blockedId: blockedUserId,
-        blockedAt: new Date(),
-      });
-      Alert.alert(t('userProfile.userBlocked'), t('userProfile.userBlockedMessage'));
-    } catch (error) {
-      console.error("Error blocking user:", error);
-    }
   };
 
   const isUserBlocked = async () => {
@@ -562,14 +722,14 @@ export default function UserProfile({ route, navigation }) {
   };
 
   const handleSendMessage = async () => {
-    const blocked = await isUserBlocked();
-    if (blocked) {
+    if (blockedUsers.includes(selectedUser.id)) {
       Alert.alert(
-        t('userProfile.userBlocked'),
-        t('userProfile.cannotSendMessage')
+        t("userProfile.userBlocked"),
+        t("userProfile.cannotSendMessage")
       );
       return;
     }
+
     const chatId = await getChatId(user.uid, selectedUser.id);
     const chatRef = doc(database, "chats", chatId);
     const chatDoc = await getDoc(chatRef);
@@ -605,14 +765,14 @@ export default function UserProfile({ route, navigation }) {
       return (
         <View style={styles.mutualFriendsContainer}>
           <Text style={styles.noMutualFriendsText}>
-            {t('userProfile.noMutualFriends')}
+            {t("userProfile.noMutualFriends")}
           </Text>
         </View>
       );
     }
-  
+
     const containerWidth = mutualFriends.length * 40;
-  
+
     return (
       <TouchableOpacity
         onPress={handleMutualFriendsPress}
@@ -638,27 +798,28 @@ export default function UserProfile({ route, navigation }) {
         </View>
         <Text style={[styles.mutualFriendMoreText, { marginLeft: 10 }]}>
           {mutualFriends.length > 4
-            ? t('userProfile.andMoreMutualFriends', { count: mutualFriends.length - 4 })
-            : t('userProfile.mutualFriends')}
+            ? t("userProfile.andMoreMutualFriends", {
+                count: mutualFriends.length - 4,
+              })
+            : t("userProfile.mutualFriends")}
         </Text>
       </TouchableOpacity>
     );
   };
-  
 
   const handleBoxPress = (box) => {
     const coordinates = box.coordinates || { latitude: 0, longitude: 0 };
     navigation.navigate("BoxDetails", {
       box: {
-        title: box.title || t('userProfile.noTitle'),
+        title: box.title || t("userProfile.noTitle"),
         imageUrl: box.imageUrl || "https://via.placeholder.com/150",
         dateArray: box.dateArray || [],
         hours: box.hours || {},
-        phoneNumber: box.phoneNumber || t('userProfile.noNumber'),
-        locationLink: box.locationLink || t('userProfile.noLocation'),
+        phoneNumber: box.phoneNumber || t("userProfile.noNumber"),
+        locationLink: box.locationLink || t("userProfile.noLocation"),
         coordinates: coordinates,
       },
-      selectedDate: box.date || t('userProfile.noDate'),
+      selectedDate: box.date || t("userProfile.noDate"),
     });
   };
 
@@ -668,6 +829,31 @@ export default function UserProfile({ route, navigation }) {
     const friendsRef = collection(database, "users", user.uid, "friends");
     const q = query(friendsRef, where("friendId", "==", selectedUser.id));
     const friendSnapshot = await getDocs(q);
+
+    // Verificar si el usuario seleccionado ya envió una solicitud de amistad
+  const currentUserRequestsRef = collection(
+    database,
+    "users",
+    user.uid,
+    "friendRequests"
+  );
+  const existingRequestFromThemQuery = query(
+    currentUserRequestsRef,
+    where("fromId", "==", selectedUser.id)
+  );
+  const existingRequestFromThemSnapshot = await getDocs(
+    existingRequestFromThemQuery
+  );
+
+  if (!existingRequestFromThemSnapshot.empty) {
+    Alert.alert(
+      "Solicitud pendiente",
+      "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
+    );
+    return;
+  }
+
+
 
     if (friendSnapshot.empty) {
       const requestRef = collection(
@@ -688,7 +874,7 @@ export default function UserProfile({ route, navigation }) {
       const currentUser = userDocSnapshot.exists()
         ? userDocSnapshot.data()
         : {
-            username: t('userProfile.anonymousUser'),
+            username: t("userProfile.anonymousUser"),
             profileImage: "https://via.placeholder.com/150",
           };
 
@@ -764,7 +950,7 @@ export default function UserProfile({ route, navigation }) {
             {event.title.length > 9
               ? event.title.substring(0, 5) + "..."
               : event.title}{" "}
-            {event.date || t('userProfile.noTitle')}
+            {event.date || t("userProfile.noTitle")}
           </Text>
         </TouchableOpacity>
       ))}
@@ -793,7 +979,7 @@ export default function UserProfile({ route, navigation }) {
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => navigation.goBack()}
-              accessibilityLabel={t('userProfile.backButton')}
+              accessibilityLabel={t("userProfile.backButton")}
             >
               <Ionicons
                 name="arrow-back"
@@ -862,14 +1048,17 @@ export default function UserProfile({ route, navigation }) {
                                   {renderOval(firstHobby)}
                                   {renderOval(secondHobby)}
                                 </View>
-                               
+
                                 <View style={styles.ovalContainer}>
                                   {renderOval(firstInterest)}
                                   {renderOval(secondInterest)}
                                 </View>
                               </View>
                               <View style={styles.iconsContainer}>
-                                <TouchableOpacity style={styles.iconButton} onPress={toggleUserStatus}>
+                                <TouchableOpacity
+                                  style={styles.iconButton}
+                                  onPress={toggleUserStatus}
+                                >
                                   <AntDesign
                                     name={
                                       friendshipStatus
@@ -882,9 +1071,18 @@ export default function UserProfile({ route, navigation }) {
                                     color="white"
                                   />
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.iconButton} onPress={handleLikeProfile}>
-                                  <AntDesign name={isLiked ? "heart" : "hearto"} size={24} color="white" />
-                                  <Text style={styles.heartCountText}>{likeCount}</Text> 
+                                <TouchableOpacity
+                                  style={styles.iconButton}
+                                  onPress={handleLikeProfile}
+                                >
+                                  <AntDesign
+                                    name={isLiked ? "heart" : "hearto"}
+                                    size={24}
+                                    color="white"
+                                  />
+                                  <Text style={styles.heartCountText}>
+                                    {likeCount}
+                                  </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                   style={styles.iconButton}
@@ -915,7 +1113,7 @@ export default function UserProfile({ route, navigation }) {
                 anchor={
                   <TouchableOpacity
                     onPress={openMenu}
-                    accessibilityLabel={t('userProfile.openOptionsMenu')}
+                    accessibilityLabel={t("userProfile.openOptionsMenu")}
                   >
                     <Ionicons
                       name="ellipsis-vertical"
@@ -925,46 +1123,57 @@ export default function UserProfile({ route, navigation }) {
                   </TouchableOpacity>
                 }
                 contentStyle={styles.menuContent}
-             >
+              >
                <Menu.Item
-                 onPress={() => {
-                   toggleUserStatus();
-                   closeMenu();
-                 }}
-                 title={
-                   friendshipStatus
-                     ? t('userProfile.removeFriend')
-                     : pendingRequest
-                     ? t('userProfile.cancelRequest')
-                     : t('userProfile.addFriend')
-                 }
-               />
-               <Menu.Item
-                 onPress={() => {
-                   blockUser('selectedUser.id');
-                   closeMenu();
-                 }}
-                 title={t('userProfile.block')}
-                 titleStyle={{ color: "#FF3B30" }}
-               />
-               <Menu.Item onPress={handleReport} title={t('userProfile.report')} />
-               <Menu.Item
-                 onPress={toggleHideStories}
-                 title={
-                   hideStories ? t('userProfile.seeTheirStories') : t('userProfile.hideTheirStories')
-                 }
-               />
-               <Menu.Item
-                 onPress={toggleHideMyStories}
-                 title={
-                   hideMyStories
-                     ? t('userProfile.showMyStories')
-                     : t('userProfile.hideMyStories')
-                 }
-               />
-               <Divider />
-             </Menu>
-           </View>
+  onPress={() => {
+    if (!blockedUsers.includes(selectedUser.id)) {
+      toggleUserStatus();
+    } else {
+      Alert.alert(
+        t('userProfile.userBlocked'),
+        t('userProfile.cannotAddFriend')
+      );
+    }
+    closeMenu();
+  }}
+  title={
+    friendshipStatus
+      ? t('userProfile.removeFriend')
+      : pendingRequest
+      ? t('userProfile.cancelRequest')
+      : t('userProfile.addFriend')
+  }
+/>
+                <Menu.Item
+                  onPress={() => {
+                    handleBlockUser(); // Llamar a la nueva función
+                    closeMenu();
+                  }}
+                  title={t("userProfile.block")}
+                  titleStyle={{ color: "#FF3B30" }}
+                />
+                <Menu.Item
+                  onPress={handleReport}
+                  title={t("userProfile.report")}
+                />
+                <Menu.Item
+                  onPress={toggleHideStories}
+                  title={
+                    hideStories
+                      ? t("userProfile.seeTheirStories")
+                      : t("userProfile.hideTheirStories")
+                  }
+                />
+                <Menu.Item
+                  onPress={toggleHideMyStories}
+                  title={
+                    hideMyStories
+                      ? t("userProfile.showMyStories")
+                      : t("userProfile.hideMyStories")
+                  }
+                />
+              </Menu>
+            </View>
           )}
         </View>
       </ScrollView>
@@ -1036,7 +1245,7 @@ const styles = StyleSheet.create({
   friendCountText: {
     fontSize: 28,
     color: "white",
-    fontWeight:"bold",
+    fontWeight: "bold",
     marginTop: 5,
   },
   spacer: {
@@ -1046,7 +1255,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     marginTop: 20,
     marginBottom: 20,
-  
   },
   number: {
     fontSize: 24,
@@ -1168,6 +1376,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     marginTop: 5,
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
 });

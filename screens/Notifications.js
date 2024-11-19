@@ -83,6 +83,7 @@ export default function NotificationsComponent() {
       const userRef = doc(database, "users", user.uid);
       const userDoc = await getDoc(userRef);
       const hiddenNotifications = userDoc.data()?.hiddenNotifications || [];
+      const blockedUsers = userDoc.data()?.blockedUsers || [];
   
       const notificationsRef = collection(database, "users", user.uid, "notifications");
       const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
@@ -97,7 +98,11 @@ export default function NotificationsComponent() {
             ...doc.data(),
             type: doc.data().type || "notification",
           }))
-          .filter((notif) => !hiddenNotifications.includes(notif.id)); // Filtrar las ocultas
+          .filter(
+            (notif) =>
+              !hiddenNotifications.includes(notif.id) &&
+              !blockedUsers.includes(notif.fromId) // Excluir notificaciones de usuarios bloqueados
+          );
         updateNotifications(notifList);
       });
   
@@ -108,13 +113,16 @@ export default function NotificationsComponent() {
             ...doc.data(),
             type: "friendRequest",
           }))
-          .filter((notif) => !hiddenNotifications.includes(notif.id)); // Filtrar las ocultas
+          .filter(
+            (notif) =>
+              !hiddenNotifications.includes(notif.id) &&
+              !blockedUsers.includes(notif.fromId) // Excluir solicitudes de usuarios bloqueados
+          );
         updateNotifications(requestList);
       });
   
       setIsLoading(false);
   
-      // Encapsula las funciones de limpieza en una sola función que se retorne correctamente
       return () => {
         unsubscribeNotifications();
         unsubscribeFriendRequests();
@@ -194,27 +202,32 @@ export default function NotificationsComponent() {
 
   const handleUserPress = async (uid) => {
     try {
-      const userDoc = await getDoc(doc(database, "users", uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        userData.id = uid;
-        userData.profileImage =
-          userData.photoUrls && userData.photoUrls.length > 0
-            ? userData.photoUrls[0]
+      const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
+      const blockedUsers = userDoc.data()?.blockedUsers || [];
+  
+      if (blockedUsers.includes(uid)) {
+        Alert.alert("Error", "No puedes interactuar con este usuario.");
+        return;
+      }
+  
+      const selectedUserDoc = await getDoc(doc(database, "users", uid));
+      if (selectedUserDoc.exists()) {
+        const selectedUserData = selectedUserDoc.data();
+        selectedUserData.id = uid;
+        selectedUserData.profileImage =
+          selectedUserData.photoUrls && selectedUserData.photoUrls.length > 0
+            ? selectedUserData.photoUrls[0]
             : "https://via.placeholder.com/150";
-        navigation.navigate("UserProfile", { selectedUser: userData });
+        navigation.navigate("UserProfile", { selectedUser: selectedUserData });
       } else {
-        Alert.alert(t('notifications.error'), t('notifications.userDetailsNotFound'));
+        Alert.alert(t("notifications.error"), t("notifications.userDetailsNotFound"));
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      Alert.alert(
-        t('notifications.error'),
-        t('notifications.userDetailsFetchError')
-      );
+      Alert.alert(t("notifications.error"), t("notifications.userDetailsFetchError"));
     }
   };
-
+  
   const handleAcceptRequest = async (request) => {
     try {
       const user = auth.currentUser;
@@ -352,9 +365,11 @@ export default function NotificationsComponent() {
   };
 
   const handleAcceptEventInvitation = async (notif) => {
-    if (!notif.eventId) {
-      console.error("Error: eventId is undefined");
-      Alert.alert(t('notifications.error'), t('notifications.invalidEventId'));
+    const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
+    const blockedUsers = userDoc.data()?.blockedUsers || [];
+  
+    if (blockedUsers.includes(notif.fromId)) {
+      Alert.alert("Error", "No puedes aceptar invitaciones de este usuario.");
       return;
     }
     
@@ -428,22 +443,36 @@ export default function NotificationsComponent() {
   };
   
   const handleRejectEventInvitation = async (notif) => {
-    const notifRef = doc(
-      database,
-      "users",
-      user.uid,
-      "notifications",
-      notif.id
-    );
-
     try {
+      // Verificar si el remitente de la invitación está bloqueado
+      const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
+      const blockedUsers = userDoc.data()?.blockedUsers || [];
+  
+      if (blockedUsers.includes(notif.fromId)) {
+        Alert.alert(
+          "Error",
+          "No puedes rechazar invitaciones de este usuario bloqueado."
+        );
+        return;
+      }
+  
+      // Referencia a la notificación
+      const notifRef = doc(
+        database,
+        "users",
+        auth.currentUser.uid,
+        "notifications",
+        notif.id
+      );
+  
+      // Actualizar el estado de la invitación como "rechazada"
       await updateDoc(notifRef, { status: "rejected" });
-
-      // Remove the notification directly, without a delay
+  
+      // Remover la notificación del estado local sin un delay
       setNotifications((prevNotifications) =>
         prevNotifications.filter((n) => n.id !== notif.id)
       );
-
+  
       Alert.alert(
         t('notifications.invitationRejected'),
         t('notifications.eventInvitationRejected')
@@ -456,6 +485,7 @@ export default function NotificationsComponent() {
       );
     }
   };
+  
 
   const renderNotificationItem = ({ item }) => {
     const isFriendRequest =
