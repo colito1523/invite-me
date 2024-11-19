@@ -12,6 +12,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Alert,
+  ActivityIndicator
 } from "react-native";
 import { auth, database, storage } from "../config/firebase";
 import {
@@ -60,6 +61,7 @@ export default function Chat({ route }) {
   const blockedUsers = useBlockedUsers();
   const [menuVisible, setMenuVisible] = useState(false);
   const [isComplaintVisible, setIsComplaintVisible] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
@@ -300,6 +302,11 @@ export default function Chat({ route }) {
     mediaUri = null,
     isViewOnce = false
 ) => {
+    if (isUploading) {
+        Alert.alert("Cargando", "Por favor espera a que termine la subida actual.");
+        return;
+    }
+
     try {
         const chatIdToUse = await createChatIfNotExists();
         const messagesRef = collection(
@@ -321,9 +328,15 @@ export default function Chat({ route }) {
         if (messageType === "text") {
             messageData.text = message.trim();
         } else if (messageType === "image" || messageType === "video") {
+            setIsUploading(true); // Inicia el estado de carga
             const mediaUrl = await uploadMedia(mediaUri);
+            if (!mediaUrl) {
+                setIsUploading(false); // Asegúrate de terminar el estado de carga en caso de error
+                return; // Detener si falla la subida
+            }
             messageData.mediaType = messageType;
             messageData.mediaUrl = mediaUrl;
+            setIsUploading(false); // Finaliza el estado de carga
         }
 
         // Enviar mensaje a Firestore
@@ -358,8 +371,10 @@ export default function Chat({ route }) {
             "Error",
             "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
         );
+        setIsUploading(false); // Finaliza el estado de carga en caso de error
     }
 };
+
 
 
   const handleDeleteChat = async () => {
@@ -395,17 +410,25 @@ export default function Chat({ route }) {
 
   const uploadMedia = async (uri) => {
     if (!uri) return null;
-
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const storageRef = ref(
-      storage,
-      `media/${user.uid}/${new Date().getTime()}`
-    );
-    await uploadBytes(storageRef, blob);
-
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
+  
+    try {
+      setIsUploading(true); // Inicia la carga
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const storageRef = ref(
+        storage,
+        `media/${user.uid}/${new Date().getTime()}`
+      );
+      await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(storageRef);
+      return downloadURL;
+    } catch (error) {
+      console.error("Error al subir el archivo:", error);
+      Alert.alert("Error", "No se pudo subir el archivo.");
+      return null;
+    } finally {
+      setIsUploading(false); // Finaliza la carga
+    }
   };
 
   const handleCameraLaunch = async () => {
@@ -792,6 +815,12 @@ export default function Chat({ route }) {
 
   return (
     <ImageBackground source={{ uri: backgroundImage }} style={styles.container}>
+       {isUploading && (
+    <View style={styles.uploadingContainer}>
+      <ActivityIndicator size="large" color="black" />
+      <Text style={styles.uploadingText}>Enviando ...</Text>
+    </View>
+  )}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -1074,14 +1103,11 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: 10,
-  },
-  uploadingItem: {
-    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
+    zIndex: 1,
   },
   uploadingText: {
-    marginLeft: 10,
+    marginTop: 10,
     fontSize: 14,
     color: "#333",
   },
