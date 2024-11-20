@@ -504,10 +504,78 @@ export default function NotificationsComponent() {
       );
     }
   };
+
+  const handleGeneralEventInvite = async (friendId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+  
+    try {
+      // Referencia al evento general
+      const eventRef = doc(database, "GoBoxs", box.title);
+      const eventDoc = await getDoc(eventRef);
+  
+      if (!eventDoc.exists()) {
+        Alert.alert("Error", "El evento no existe.");
+        return;
+      }
+  
+      // Datos del evento
+      const eventData = eventDoc.data();
+      const eventImage = box.imageUrl || eventData.image || "https://via.placeholder.com/150";
+      const eventDate = selectedDate || eventData.date || "Fecha no disponible";
+      const eventTitle = box.title || "Evento General";
+  
+      // Enviar notificación al amigo invitado
+      const notificationRef = collection(database, "users", friendId, "notifications");
+      await addDoc(notificationRef, {
+        fromId: user.uid,
+        fromName: user.displayName || "Usuario Desconocido",
+        eventTitle: eventTitle,
+        eventImage: eventImage, // Asegurarse de que sea un enlace válido
+        eventDate: eventDate,
+        type: "generalEventInvitation",
+        status: "pendiente",
+        timestamp: new Date(),
+      });
+  
+      Alert.alert("Invitación enviada", `Has invitado a un amigo al evento ${eventTitle}.`);
+    } catch (error) {
+      console.error("Error al invitar al evento general:", error);
+      Alert.alert("Error", "No se pudo enviar la invitación.");
+    }
+  };
+  
   
   
 
   const renderNotificationItem = ({ item }) => {
+    if (item.type === "generalEventInvitation") {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("BoxDetails", {
+              box: {
+                title: item.eventTitle,
+                imageUrl: item.eventImage,
+                date: item.eventDate,
+                isPrivate: false,
+              },
+              selectedDate: item.eventDate,
+              isFromNotification: true,
+            });
+          }}
+        >
+          <View style={styles.notificationContainer}>
+            <Image
+              source={{ uri: item.eventImage }}
+              style={styles.notificationImage}
+            />
+            <Text>{`Fuiste invitado al evento ${item.eventTitle}`}</Text>
+            <Text>{`Fecha: ${item.eventDate}`}</Text>
+          </View>
+        </TouchableOpacity>
+      );
+    }
     const isFriendRequest =
       item.type === "friendRequest" &&
       item.status !== "accepted" &&

@@ -250,6 +250,48 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
   
+
+  const handleGeneralEventInvite = async (friendId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+  
+    try {
+      // Referencia al evento general
+      const eventRef = doc(database, "GoBoxs", box.title);
+      const eventDoc = await getDoc(eventRef);
+  
+      if (!eventDoc.exists()) {
+        Alert.alert("Error", "El evento no existe.");
+        return;
+      }
+  
+      // Datos del evento
+      const eventData = eventDoc.data();
+      const eventImage = box.imageUrl || eventData.image || "https://via.placeholder.com/150";
+      const eventDate = selectedDate || eventData.date || "Fecha no disponible";
+      const eventTitle = box.title || "Evento General";
+  
+      // Enviar notificación al amigo invitado
+      const notificationRef = collection(database, "users", friendId, "notifications");
+      await addDoc(notificationRef, {
+        fromId: user.uid,
+        fromName: user.displayName || "Usuario Desconocido",
+        eventTitle: eventTitle,
+        eventImage: eventImage,
+        eventDate: eventDate,
+        type: "generalEventInvitation",
+        status: "pendiente",
+        timestamp: new Date(),
+      });
+  
+      Alert.alert("Invitación enviada", `Has invitado a un amigo al evento ${eventTitle}.`);
+    } catch (error) {
+      console.error("Error al invitar al evento general:", error);
+      Alert.alert("Error", "No se pudo enviar la invitación.");
+    }
+  };
+  
+  
   
   
   
@@ -881,23 +923,42 @@ const handleSaveEdit = async () => {
       <Text style={[styles.friendName, isNightMode && styles.friendNameNight]}>
         {item.friendName}
       </Text>
-      <TouchableOpacity
-        style={[
-          styles.shareButton,
-          item.invited && styles.invitedButton,
-          isNightMode && styles.shareButtonNight,
-        ]}
-        onPress={() => handleInvite(item.friendId)}
-        disabled={item.invited}
-      >
-        <Ionicons
-          name={item.invited ? "checkmark-sharp" : "arrow-redo"}
-          size={16}
-          color={isNightMode ? "black" : "white"}
-        />
-      </TouchableOpacity>
+      {box.category !== "EventoParaAmigos" ? (
+        <TouchableOpacity
+          style={[
+            styles.shareButton,
+            item.invited && styles.invitedButton,
+            isNightMode && styles.shareButtonNight,
+          ]}
+          onPress={() => handleGeneralEventInvite(item.friendId)}
+          disabled={item.invited}
+        >
+          <Ionicons
+            name={item.invited ? "checkmark-sharp" : "arrow-redo"}
+            size={16}
+            color={isNightMode ? "black" : "white"}
+          />
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={[
+            styles.shareButton,
+            item.invited && styles.invitedButton,
+            isNightMode && styles.shareButtonNight,
+          ]}
+          onPress={() => handleInvite(item.friendId)}
+          disabled={item.invited}
+        >
+          <Ionicons
+            name={item.invited ? "checkmark-sharp" : "arrow-redo"}
+            size={16}
+            color={isNightMode ? "black" : "white"}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
+  
 
   const handleSearch = (text) => {
     setSearchText(text);
