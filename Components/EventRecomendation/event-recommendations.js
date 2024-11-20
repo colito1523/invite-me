@@ -7,12 +7,21 @@ import {
   Image,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView
+
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from "@expo/vector-icons"; // Asegúrate de importar Ionicons
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { database, storage } from '../../config/firebase';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
+
 
 export default function EventRecommendationForm() {
   const [title, setTitle] = useState('');
@@ -20,6 +29,9 @@ export default function EventRecommendationForm() {
   const [address, setAddress] = useState('');
   const [image, setImage] = useState(null);
   const [isNightMode, setIsNightMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigation = useNavigation();
 
   // Verificar la hora para cambiar el tema
   useEffect(() => {
@@ -54,6 +66,8 @@ export default function EventRecommendationForm() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       // Subir imagen a Firebase Storage
       const response = await fetch(image);
@@ -78,58 +92,115 @@ export default function EventRecommendationForm() {
       setPlaceName('');
       setAddress('');
       setImage(null);
+
+      // Redirigir al usuario al home
+      navigation.navigate('Home');
     } catch (error) {
       console.error('Error al enviar la recomendación:', error);
       Alert.alert('Error', 'No se pudo enviar la recomendación.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <LinearGradient
-      colors={theme.gradient}
-      style={styles.container}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Text style={[styles.title, { color: theme.text }]}>Sugerir un Espacio</Text>
+       
+        {/* Header */}
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: 90,
+            left: 20,
+            zIndex: 1,
+          }}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
+        </TouchableOpacity>
+        
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <LinearGradient colors={theme.gradient} style={styles.container}>
+          <Text style={[styles.title, { color: theme.text }]}>
+            Sugerir un Espacio
+          </Text>
 
-      <TouchableOpacity onPress={pickImage} style={[styles.imagePicker, { backgroundColor: theme.inputBackground }]}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.selectedImage} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Text style={{ color: theme.placeholder }}>Seleccionar Imagen</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+          <TouchableOpacity
+            onPress={pickImage}
+            style={[
+              styles.imagePicker,
+              { backgroundColor: theme.inputBackground },
+            ]}
+          >
+            {image ? (
+              <Image source={{ uri: image }} style={styles.selectedImage} />
+            ) : (
+              <View style={styles.placeholderImage}>
+                <Text style={{ color: theme.placeholder }}>
+                  Seleccionar Imagen
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
 
-      <TextInput
-        style={[styles.input, { backgroundColor: theme.inputBackground, color: theme.text }]}
-        placeholder="Título"
-        value={title}
-        onChangeText={setTitle}
-        placeholderTextColor={theme.placeholder}
-      />
-      <TextInput
-        style={[styles.input, { backgroundColor: theme.inputBackground, color: theme.text }]}
-        placeholder="Nombre del Lugar"
-        value={placeName}
-        onChangeText={setPlaceName}
-        placeholderTextColor={theme.placeholder}
-      />
-      <TextInput
-        style={[styles.input, { backgroundColor: theme.inputBackground, color: theme.text }]}
-        placeholder="Dirección"
-        value={address}
-        onChangeText={setAddress}
-        placeholderTextColor={theme.placeholder}
-      />
+          <TextInput
+            style={[
+              styles.input,
+              { backgroundColor: theme.inputBackground, color: theme.text },
+            ]}
+            placeholder="Título"
+            value={title}
+            onChangeText={setTitle}
+            placeholderTextColor={theme.placeholder}
+          />
+          <TextInput
+            style={[
+              styles.input,
+              { backgroundColor: theme.inputBackground, color: theme.text },
+            ]}
+            placeholder="Nombre del Lugar"
+            value={placeName}
+            onChangeText={setPlaceName}
+            placeholderTextColor={theme.placeholder}
+          />
+          <TextInput
+            style={[
+              styles.input,
+              { backgroundColor: theme.inputBackground, color: theme.text },
+            ]}
+            placeholder="Dirección"
+            value={address}
+            onChangeText={setAddress}
+            placeholderTextColor={theme.placeholder}
+          />
 
-      <TouchableOpacity
-        style={[styles.submitButton, { backgroundColor: theme.buttonBackground }]}
-        onPress={handleSubmit}
-      >
-        <Text style={{ color: theme.text }}>Enviar Recomendación</Text>
-      </TouchableOpacity>
-    </LinearGradient>
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              { backgroundColor: theme.buttonBackground },
+            ]}
+            onPress={isLoading ? null : handleSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={isNightMode ? theme.text : '#fff'} />
+            ) : (
+              <Text
+                style={{
+                  color: isNightMode ? theme.text : '#fff',
+                  fontWeight: 'bold',
+                }}
+              >
+                Enviar Recomendación
+              </Text>
+            )}
+          </TouchableOpacity>
+        </LinearGradient>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -141,7 +212,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 30,
+    marginTop: 65,
     textAlign: 'center',
   },
   imagePicker: {
@@ -149,7 +221,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 50,
   },
   selectedImage: {
     width: '100%',
@@ -165,8 +237,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 30,
     paddingHorizontal: 15,
-    marginBottom: 15,
-    borderWidth: 1,
+    marginBottom: 30,
   },
   submitButton: {
     borderRadius: 10,
@@ -180,7 +251,7 @@ const lightTheme = {
   text: '#000',
   inputBackground: '#fff',
   placeholder: '#999',
-  buttonBackground: '#4CAF50',
+  buttonBackground: '#444',
 };
 
 const darkTheme = {
