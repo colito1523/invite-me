@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     borderRadius: 20,
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 5,
   },
   selectedLanguage: {
     marginHorizontal: 10,

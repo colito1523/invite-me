@@ -385,9 +385,12 @@ export default function Notes() {
       style={styles.storyContainer}
     >
       <Text
-        style={[styles.usernameText, { color: isNightMode ? "#fff" : "black" }]}
+        style={[
+          styles.usernameText,
+          { color: isNightMode ? "#fff" : "black" },
+        ]}
       >
-        {isUser ? userData?.username : note.friendName}
+        {isUser ? " " : note.friendName}
       </Text>
       <View style={styles.imageContainer}>
         <Image
@@ -422,6 +425,7 @@ export default function Notes() {
       </View>
     </TouchableOpacity>
   );
+  
 
   const handleSendResponse = async () => {
     if (responseMessage.trim() === "") {
