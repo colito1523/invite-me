@@ -30,6 +30,7 @@ import ChatUsers from "./screens/ChatUsers";
 import ChatList from "./screens/ChatList";
 import AudioPlayer from "./screens/AudioPlayer";
 import Tutorial from './screens/Tutorial';
+import EventRecommendations from './Components/EventRecomendation/event-recommendations';
 
 import { auth, database } from "./config/firebase";
 
@@ -75,6 +76,7 @@ function ChatStack() {
         <Stack.Screen name="Notifications" component={Notifications} />
         <Stack.Screen name="UserProfile" component={UserProfile} options={{ headerShown: false }} />
         <Stack.Screen name="CreateEvent" component={CreateEvent} options={{ headerShown: false }} />
+        <Stack.Screen name="EventRecommendations" component={EventRecommendations} />
         <Stack.Screen name="BoxDetails" component={BoxDetails} options={{ headerShown: false }} />
         <Stack.Screen name="ChatUsers" component={ChatUsers} options={{ headerShown: false }} />
         <Stack.Screen name="ChatList" component={ChatList} options={{ headerTitle: "" }} />

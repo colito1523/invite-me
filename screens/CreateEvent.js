@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { addDoc, collection, doc, getDoc, getDocs,  updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { database, auth, storage } from "../config/firebase";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -23,6 +23,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useBlockedUsers } from "../src/contexts/BlockContext";
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 
@@ -43,16 +44,26 @@ export default function CreateEvent() {
   const navigation = useNavigation();
   const blockedUsers = useBlockedUsers();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [eventId, setEventId] = useState(null);
+  const [isNightMode, setIsNightMode] = useState(false);
 
   const today = new Date();
   const maxDate = new Date(today.getTime() + 31 * 24 * 60 * 60 * 1000); // Max 1 month from today
 
   useEffect(() => {
+    const checkTime = () => {
+      const currentHour = new Date().getHours();
+      setIsNightMode(currentHour >= 19 || currentHour < 6);
+    };
+
+    checkTime();
+    const interval = setInterval(checkTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     (async () => {
       if (Platform.OS !== "web") {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
           Alert.alert(
             t("createEvent.permissionsError"),
@@ -64,20 +75,19 @@ export default function CreateEvent() {
     fetchFriends();
   }, []);
 
+  const theme = isNightMode ? darkTheme : lightTheme;
+
   const fetchFriends = async () => {
     const user = auth.currentUser;
     if (user) {
       try {
-        // Referencia a la colección de amigos
         const friendsRef = collection(database, "users", user.uid, "friends");
         const friendsSnapshot = await getDocs(friendsRef);
   
-        // Obtener usuarios bloqueados
         const userDocRef = doc(database, "users", user.uid);
         const userDocSnapshot = await getDoc(userDocRef);
         const blockedUsers = userDocSnapshot.data()?.blockedUsers || [];
   
-        // Filtrar amigos bloqueados
         const friendsList = friendsSnapshot.docs
           .map((doc) => ({
             id: doc.id,
@@ -91,26 +101,22 @@ export default function CreateEvent() {
       }
     }
   };
-  
+
   const sendInvitationNotifications = async (eventData, eventId) => {
     const user = auth.currentUser;
     if (user) {
       try {
-        // Obtener datos del usuario actual
         const userDocRef = doc(database, "users", user.uid);
         const userDocSnapshot = await getDoc(userDocRef);
         const userData = userDocSnapshot.data();
   
-        // Obtener lista de usuarios bloqueados
         const blockedUsers = userData?.blockedUsers || [];
   
         for (const friendDocId of selectedFriends) {
-          // Verificar si el amigo está bloqueado
           if (blockedUsers.includes(friendDocId)) {
-            continue; // Saltar usuarios bloqueados
+            continue;
           }
   
-          // Obtener datos del amigo
           const friendDocRef = doc(
             database,
             "users",
@@ -154,7 +160,6 @@ export default function CreateEvent() {
       }
     }
   };
-  
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
@@ -235,14 +240,12 @@ export default function CreateEvent() {
           eventData
         );
 
-       // Actualizar el evento para incluir el ID
-       await updateDoc(docRef, { eventId: docRef.id });
+        await updateDoc(docRef, { eventId: docRef.id });
 
-       // Enviar las notificaciones con el ID
-       await sendInvitationNotifications(
-           { ...eventData, eventId: docRef.id },
-           docRef.id
-       );
+        await sendInvitationNotifications(
+          { ...eventData, eventId: docRef.id },
+          docRef.id
+        );
 
         Alert.alert(t("createEvent.success"), t("createEvent.eventCreated"));
         navigation.navigate("Home", { 
@@ -255,7 +258,6 @@ export default function CreateEvent() {
       } finally {
         setIsSubmitting(false);
       }
-      
     }
   };
 
@@ -309,7 +311,7 @@ export default function CreateEvent() {
         style={styles.friendImage}
         cachePolicy="memory-disk"
       />
-      <Text style={styles.friendName}>{item.friendName}</Text>
+      <Text style={[styles.friendName, { color: theme.text }]}>{item.friendName}</Text>
     </TouchableOpacity>
   );
 
@@ -318,150 +320,160 @@ export default function CreateEvent() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
+      <LinearGradient
+        colors={isNightMode ? ["#1a1a1a", "#000"] : ["#fff", "#f0f0f0"]}
+        style={styles.gradientContainer}
       >
-        <Ionicons name="arrow-back" size={24} color="#333" />
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
+        </TouchableOpacity>
 
-      <FlatList
-        ListHeaderComponent={
-          <>
-            <Text style={styles.title}>{t("createEvent.title")}</Text>
-            <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-              {image ? (
-                <Image
-                  source={{ uri: image }}
-                  style={styles.selectedImage}
-                  cachePolicy="memory-disk"
-                />
-              ) : (
-                <View style={styles.placeholderImage}>
-                  <Ionicons name="images-outline" size={40} color="#4b4b4b" />
-                </View>
-              )}
-            </TouchableOpacity>
-
-            <TextInput
-              style={styles.input}
-              placeholder={t("createEvent.eventTitle")}
-              value={title}
-              onChangeText={setTitle}
-              placeholderTextColor="white"
-            />
-
-            <View style={styles.dateTimeContainer}>
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                style={styles.dateTimeButton}
-              >
-                <Text style={styles.dateTimeLabel}>
-                  {t("createEvent.date")}
-                </Text>
-                <Text style={styles.dateTimeText}>
-                  {day.toLocaleDateString()}
-                </Text>
+        <FlatList
+          ListHeaderComponent={
+            <>
+              <Text style={[styles.title, { color: theme.text }]}>{t("createEvent.title")}</Text>
+              <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+                {image ? (
+                  <Image
+                    source={{ uri: image }}
+                    style={styles.selectedImage}
+                    cachePolicy="memory-disk"
+                  />
+                ) : (
+                  <View style={styles.placeholderImage}>
+                    <Ionicons name="images-outline" size={40} color={theme.icon} />
+                  </View>
+                )}
               </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => setShowTimePicker(true)}
-                style={styles.dateTimeButton}
-              >
-                <Text style={styles.dateTimeLabel}>
-                  {t("createEvent.time")}
-                </Text>
-                <Text style={styles.dateTimeText}>
-                  {hour.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <TextInput
-              style={styles.input}
-              placeholder={t("createEvent.searchFriends")}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="white"
-            />
-
-            <View style={styles.friendsContainer}>
-              <FlatList
-                data={filteredFriends}
-                renderItem={renderFriendItem}
-                keyExtractor={(item) => item.id}
-                style={styles.friendsList}
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBackground, color: theme.text }]}
+                placeholder={t("createEvent.eventTitle")}
+                value={title}
+                onChangeText={setTitle}
+                placeholderTextColor={theme.placeholder}
               />
+
+              <View style={styles.dateTimeContainer}>
+                <TouchableOpacity
+                  onPress={() => setShowDatePicker(true)}
+                  style={[styles.dateTimeButton, { backgroundColor: theme.buttonBackground }]}
+                >
+                  <Text style={[styles.dateTimeLabel, { color: theme.text }]}>
+                    {t("createEvent.date")}
+                  </Text>
+                  <Text style={[styles.dateTimeText, { color: theme.text }]}>
+                    {day.toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setShowTimePicker(true)}
+                  style={[styles.dateTimeButton, { backgroundColor: theme.buttonBackground }]}
+                >
+                  <Text style={[styles.dateTimeLabel, { color: theme.text }]}>
+                    {t("createEvent.time")}
+                  </Text>
+                  <Text style={[styles.dateTimeText, { color: theme.text }]}>
+                    {hour.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBackground, color: theme.text }]}
+                placeholder={t("createEvent.searchFriends")}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor={theme.placeholder}
+              />
+
+              <View style={[styles.friendsContainer, { backgroundColor: theme.background }]}>
+                <FlatList
+                  data={filteredFriends}
+                  renderItem={renderFriendItem}
+                  keyExtractor={(item) => item.id}
+                  style={styles.friendsList}
+                />
+              </View>
+
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBackground, color: theme.text }]}
+                placeholder={t("createEvent.address")}
+                value={address}
+                onChangeText={setAddress}
+                placeholderTextColor={theme.placeholder}
+              />
+
+              <TextInput
+                style={[styles.input, styles.descriptionInput, { backgroundColor: theme.inputBackground, color: theme.text }]}
+                placeholder={t("createEvent.description")}
+                value={description}
+                onChangeText={setDescription}
+                placeholderTextColor={theme.placeholder}
+                multiline
+              />
+
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  isSubmitting && styles.disabledButton,
+                  { backgroundColor: theme.buttonBackground }
+                ]}
+                onPress={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator size={50} color={theme.text} />
+                ) : (
+                  <Text style={[styles.submitButtonText, { color: theme.text }]}>
+                    {t("createEvent.createEvent")}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </>
+          }
+        />
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showDatePicker || showTimePicker}
+          onRequestClose={() => {
+            setShowDatePicker(false);
+            setShowTimePicker(false);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={[styles.modalView, { backgroundColor: theme.background }]}>
+              <DateTimePicker
+                value={showDatePicker ? day : hour}
+                mode={showDatePicker ? "date" : "time"}
+                display="spinner"
+                onChange={showDatePicker ? onChangeDate : onChangeTime}
+                minimumDate={today}
+                maximumDate={maxDate}
+                textColor={theme.text}
+              />
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: theme.buttonBackground }]}
+                onPress={() => {
+                  setShowDatePicker(false);
+                  setShowTimePicker(false);
+                }}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.text }]}>{t("common.done")}</Text>
+              </TouchableOpacity>
             </View>
-
-            <TextInput
-              style={styles.input}
-              placeholder={t("createEvent.address")}
-              value={address}
-              onChangeText={setAddress}
-              placeholderTextColor="white"
-            />
-
-            <TextInput
-              style={[styles.input, styles.descriptionInput]}
-              placeholder={t("createEvent.description")}
-              value={description}
-              onChangeText={setDescription}
-              placeholderTextColor="white"
-              multiline
-            />
-
-<TouchableOpacity
-              style={[styles.submitButton, isSubmitting && styles.disabledButton]}
-              onPress={handleSubmit}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <ActivityIndicator size={50} color="#fff" />
-              ) : (
-                <Text style={styles.submitButtonText}>
-                  {t("createEvent.createEvent")}
-                </Text>
-              )}
-            </TouchableOpacity>
-          </>
-        }
-      />
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showDatePicker || showTimePicker}
-        onRequestClose={() => {
-          setShowDatePicker(false);
-          setShowTimePicker(false);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <DateTimePicker
-              value={showDatePicker ? day : hour}
-              mode={showDatePicker ? "date" : "time"}
-              display="spinner"
-              onChange={showDatePicker ? onChangeDate : onChangeTime}
-              minimumDate={today}
-              maximumDate={maxDate}
-            />
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                setShowDatePicker(false);
-                setShowTimePicker(false);
-              }}
-            >
-              <Text style={styles.modalButtonText}>{t("common.done")}</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      </LinearGradient>
     </KeyboardAvoidingView>
   );
 }
@@ -469,27 +481,27 @@ export default function CreateEvent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
-    alignSelf: "center",
-    paddingTop: 60,
+  },
+  gradientContainer: {
+    flex: 1,
+    paddingTop: 90,
+    paddingHorizontal: 20,
   },
   backButton: {
     position: "absolute",
-    top: 65,
+    top: 50,
     left: 10,
     zIndex: 1,
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
-    marginBottom: 70,
+    marginBottom: 20,
     textAlign: "center",
   },
   imagePicker: {
     width: width * 0.9,
     height: width * 0.6,
-    backgroundColor: "#fff",
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
@@ -510,7 +522,6 @@ const styles = StyleSheet.create({
   input: {
     width: "100%",
     height: 50,
-    backgroundColor: "#d8d8d8",
     borderRadius: 30,
     paddingHorizontal: 15,
     marginBottom: 15,
@@ -537,13 +548,11 @@ const styles = StyleSheet.create({
   },
   dateTimeLabel: {
     fontSize: 14,
-    color: "black",
     fontWeight: "bold",
     marginBottom: 5,
   },
   dateTimeText: {
     fontSize: 16,
-    color: "#333",
   },
   friendsList: {
     width: "100%",
@@ -553,7 +562,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#fff",
     borderRadius: 10,
     marginBottom: 5,
   },
@@ -568,23 +576,22 @@ const styles = StyleSheet.create({
   },
   friendName: {
     fontSize: 16,
-    color: "#333",
   },
   submitButton: {
-    backgroundColor: "black",
     borderRadius: 10,
     padding: 15,
     width: "100%",
     alignItems: "center",
     marginTop: 20,
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
   submitButtonText: {
-    color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
   },
   friendsContainer: {
-    backgroundColor: "white",
     borderRadius: 10,
     padding: 10,
     marginBottom: 15,
@@ -596,7 +603,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalView: {
-    backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
     alignItems: "center",
@@ -610,31 +616,39 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalButton: {
-    backgroundColor: "black",
     borderRadius: 10,
     padding: 10,
     elevation: 2,
     marginTop: 15,
+    
   },
   modalButtonText: {
-    color: "white",
     fontWeight: "bold",
     textAlign: "center",
   },
-  submitButton: {
-    backgroundColor: "black",
-    borderRadius: 10,
-    padding: 15,
-    width: "100%",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  disabledButton: {
-    backgroundColor: "gray",
-  },
-  submitButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
 });
+
+const lightTheme = {
+  background: "#fff",
+  text: "black",
+  textSecondary: "#666",
+  inputBackground: "white",
+  placeholder: "#999",
+  icon: "black",
+  buttonBackground: "white",
+};
+
+const darkTheme = {
+  background: "#000",
+  text: "#fff",
+  textSecondary: "#ccc",
+  inputBackground: "#1a1a1a",
+  placeholder: "#666",
+  icon: "white",
+  buttonBackground: "#333",
+  
+  
+
+  
+
+};

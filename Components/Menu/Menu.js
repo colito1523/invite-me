@@ -27,7 +27,7 @@ export default function Menu({
   useEffect(() => {
     const updateNightMode = () => {
       const currentHour = new Date().getHours();
-      setIsNightMode(currentHour >= 24 || currentHour < 6);
+      setIsNightMode(currentHour >= 18 || currentHour < 6);
     };
 
     updateNightMode();
@@ -72,12 +72,15 @@ export default function Menu({
 
   const handleCategorySelect = (category) => {
     if (category === t('categories.createOwnEvent')) {
-      onClose();
-      navigation.navigate('CreateEvent');
+        onClose();
+        navigation.navigate('CreateEvent');
+    } else if (category === t('categories.suggestSpace')) {
+        onClose();
+        navigation.navigate('EventRecommendations'); // Cambiar a 'EventRecommendations'
     } else {
-      onCategorySelect(category);
+        onCategorySelect(category);
     }
-  };
+};
 
   return (
     <Modal
