@@ -191,7 +191,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       const eventData = eventSnapshot.data();
       setBoxData((prevBox) => ({ ...prevBox, ...eventData }));
     } else {
-      console.log("El evento no existe en la base de datos");
     }
   };
   
@@ -241,7 +240,6 @@ export default memo(function BoxDetails({ route, navigation }) {
             console.error("Error al filtrar usuarios bloqueados:", error);
           }
         } else {
-          console.error("El evento no existe en la base de datos.");
           setAttendeesList([]); // Limpia la lista local si no existe
         }
       });
@@ -526,79 +524,124 @@ const handleSaveEdit = async () => {
       </View>
     </Modal>
   );
-
   const handleInvite = async (friendId) => {
     setFriends(
       friends.map((friend) =>
         friend.friendId === friendId ? { ...friend, invited: true } : friend
       )
     );
-
+  
     const user = auth.currentUser;
-    if (user) {
-      let fromName = user.displayName || "Usuario Desconocido";
-      let fromImage = user.photoURL || "";
-
-      const userDocRef = doc(database, "users", user.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-        fromName = userData.username || fromName;
-      }
-
-      const eventDateTimestamp = box.date || new Date();
-      let eventDateFormatted = "Fecha no disponible";
-
-      if (eventDateTimestamp instanceof Date) {
-        eventDateFormatted = eventDateTimestamp.toLocaleDateString("es-ES", {
-          day: "numeric",
-          month: "short",
+    if (!user) return;
+  
+    try {
+      // Determinar si es un evento privado
+      const isPrivateEvent = box.category === "EventoParaAmigos";
+  
+      if (isPrivateEvent) {
+        // Lógica para eventos privados
+        let fromName = user.displayName || "Usuario Desconocido";
+        let fromImage = user.photoURL || "";
+  
+        const userDocRef = doc(database, "users", user.uid);
+        const userDocSnapshot = await getDoc(userDocRef);
+        if (userDocSnapshot.exists()) {
+          const userData = userDocSnapshot.data();
+          fromName = userData.username || fromName;
+        }
+  
+        const eventDateTimestamp = box.date || new Date();
+        let eventDateFormatted = "Fecha no disponible";
+  
+        if (eventDateTimestamp instanceof Date) {
+          eventDateFormatted = eventDateTimestamp.toLocaleDateString("es-ES", {
+            day: "numeric",
+            month: "short",
+          });
+        } else if (
+          eventDateTimestamp &&
+          typeof eventDateTimestamp === "object" &&
+          "seconds" in eventDateTimestamp
+        ) {
+          const dateObject = new Date(eventDateTimestamp.seconds * 1000);
+          eventDateFormatted = dateObject.toLocaleDateString("es-ES", {
+            day: "numeric",
+            month: "short",
+          });
+        } else if (typeof eventDateTimestamp === "string") {
+          eventDateFormatted = eventDateTimestamp;
+        }
+  
+        const eventImage = box.imageUrl;
+        const eventCategory = box.category || "Sin categoría";
+  
+        const notificationRef = collection(
+          database,
+          "users",
+          friendId,
+          "notifications"
+        );
+  
+        await addDoc(notificationRef, {
+          fromId: user.uid,
+          fromName: fromName,
+          fromImage: eventImage,
+          eventId: box.id,
+          eventTitle: box.title,
+          eventImage: eventImage,
+          eventDate: eventDateTimestamp,
+          date: eventDateFormatted,
+          eventCategory: eventCategory,
+          type: "invitation",
+          status: "pendiente",
+          timestamp: new Date(),
         });
-      } else if (
-        eventDateTimestamp &&
-        typeof eventDateTimestamp === "object" &&
-        "seconds" in eventDateTimestamp
-      ) {
-        const dateObject = new Date(eventDateTimestamp.seconds * 1000);
-        eventDateFormatted = dateObject.toLocaleDateString("es-ES", {
-          day: "numeric",
-          month: "short",
+  
+        Alert.alert(
+          t("boxDetails.invitationSent"),
+          t("boxDetails.invitationSentMessage")
+        );
+      } else {
+        // Lógica para eventos generales
+        const eventRef = doc(database, "GoBoxs", box.title);
+        const eventSnapshot = await getDoc(eventRef);
+  
+        if (!eventSnapshot.exists()) {
+          Alert.alert("Error", "El evento general no existe.");
+          return;
+        }
+  
+        const selectedDate = box.selectedDate || new Date().toISOString().split("T")[0];
+        const attendees = eventSnapshot.data()[selectedDate] || [];
+  
+        const isAlreadyInvited = attendees.some(
+          (attendee) => attendee.uid === friendId
+        );
+  
+        if (isAlreadyInvited) {
+          Alert.alert("Advertencia", "La persona ya está registrada para este evento general.");
+          return;
+        }
+  
+        await updateDoc(eventRef, {
+          [selectedDate]: arrayUnion({
+            uid: friendId,
+            invitedBy: user.uid,
+            invitedOn: new Date(),
+          }),
         });
-      } else if (typeof eventDateTimestamp === "string") {
-        eventDateFormatted = eventDateTimestamp;
+  
+        Alert.alert(
+          "Invitación enviada",
+          "La invitación al evento general se envió exitosamente."
+        );
       }
-
-      const eventImage = box.imageUrl;
-      const eventCategory = box.category || "Sin categoría";
-
-      const notificationRef = collection(
-        database,
-        "users",
-        friendId,
-        "notifications"
-      );
-
-      await addDoc(notificationRef, {
-        fromId: user.uid,
-        fromName: fromName,
-        fromImage: eventImage,
-        eventId: box.id,
-        eventTitle: box.title,
-        eventImage: eventImage,
-        eventDate: eventDateTimestamp,
-        date: eventDateFormatted,
-        eventCategory: eventCategory,
-        type: "invitation",
-        status: "pendiente",
-        timestamp: new Date(),
-      });
-
-      Alert.alert(
-        t("boxDetails.invitationSent"),
-        t("boxDetails.invitationSentMessage")
-      );
+    } catch (error) {
+      console.error("Error al invitar:", error);
+      Alert.alert("Error", "No se pudo enviar la invitación.");
     }
   };
+  
 
   const handleAddEvent = async () => {
     if (isProcessing) return;
