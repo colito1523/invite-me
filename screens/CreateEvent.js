@@ -215,6 +215,20 @@ export default function CreateEvent() {
           month: "short",
         });
 
+        const realFriendIds = await Promise.all(
+          selectedFriends.map(async (friendDocId) => {
+            const friendDocRef = doc(
+              database,
+              "users",
+              user.uid,
+              "friends",
+              friendDocId
+            );
+            const friendDocSnapshot = await getDoc(friendDocRef);
+            return friendDocSnapshot.exists() ? friendDocSnapshot.data().friendId : null;
+          })
+        );
+        
         const eventData = {
           userId: user.uid,
           username: userData.username,
@@ -230,10 +244,11 @@ export default function CreateEvent() {
           description,
           image: imageUrl,
           timestamp: new Date(),
-          invitedFriends: selectedFriends,
+          invitedFriends: realFriendIds.filter((id) => id !== null), // Guardar solo UID válidos
           expirationDate: expirationDate,
           Admin: user.uid,
         };
+        
 
         const docRef = await addDoc(
           collection(database, "EventsPriv"),

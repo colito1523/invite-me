@@ -444,8 +444,14 @@ export default function NotificationsComponent() {
   
   const handleRejectEventInvitation = async (notif) => {
     try {
+      const user = auth.currentUser;
+      if (!user) {
+        Alert.alert(t('notifications.error'), t('notifications.userAuthError'));
+        return;
+      }
+  
       // Verificar si el remitente de la invitación está bloqueado
-      const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
+      const userDoc = await getDoc(doc(database, "users", user.uid));
       const blockedUsers = userDoc.data()?.blockedUsers || [];
   
       if (blockedUsers.includes(notif.fromId)) {
@@ -460,7 +466,7 @@ export default function NotificationsComponent() {
       const notifRef = doc(
         database,
         "users",
-        auth.currentUser.uid,
+        user.uid,
         "notifications",
         notif.id
       );
@@ -468,7 +474,20 @@ export default function NotificationsComponent() {
       // Actualizar el estado de la invitación como "rechazada"
       await updateDoc(notifRef, { status: "rejected" });
   
-      // Remover la notificación del estado local sin un delay
+      // Remover el UID del usuario de invitedFriends en EventsPriv
+      const eventRef = doc(database, "EventsPriv", notif.eventId);
+      const eventDoc = await getDoc(eventRef);
+  
+      if (eventDoc.exists()) {
+        const eventData = eventDoc.data();
+        const updatedInvitedFriends = (eventData.invitedFriends || []).filter(
+          (uid) => uid !== user.uid
+        );
+  
+        await updateDoc(eventRef, { invitedFriends: updatedInvitedFriends });
+      }
+  
+      // Remover la notificación del estado local
       setNotifications((prevNotifications) =>
         prevNotifications.filter((n) => n.id !== notif.id)
       );
@@ -485,6 +504,7 @@ export default function NotificationsComponent() {
       );
     }
   };
+  
   
 
   const renderNotificationItem = ({ item }) => {

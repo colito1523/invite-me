@@ -482,8 +482,10 @@ export default function SignUp() {
       navigation.navigate("Tutorial");
     } catch (error) {
       setIsSubmitting(false);
-    
-      if (error.code === "auth/weak-password") {
+
+      if (error.code === "auth/email-already-in-use") {
+        Alert.alert(t('signup.errors.emailInUse'));
+      } else if (error.code === "auth/weak-password") {
         Alert.alert(t('signup.errors.weakPassword'));
       } else {
         Alert.alert(t('signup.errors.generic'), error.message);

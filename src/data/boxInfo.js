@@ -743,12 +743,7 @@ const boxInfo = [
     city: "Madrid", // Cambiado a Madrid
     isPrivate: false, // Evento general
   },
-  {
-    path: require("../../assets/Madrid/Istar.jpg"),
-    title: "Private Event",
-    category: "private",
-    isPrivate: true,
-  },
+  
   {
     path: require("../../assets/Madrid/Giselle.jpg"),
     title: "Giselle",
