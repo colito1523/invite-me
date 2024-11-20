@@ -32,6 +32,8 @@ import { ref, deleteObject } from "firebase/storage";
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 import Complaints from "../Complaints/Complaints";
+import { KeyboardAvoidingView, Platform } from "react-native";
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -774,6 +776,11 @@ export function StoryViewer({
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // Ajusta según la interfaz
+    >
       <View style={styles.container} {...panResponder.panHandlers}>
         <TouchableWithoutFeedback
           onPressIn={handleLongPressIn}
@@ -924,13 +931,13 @@ export function StoryViewer({
                         <Ionicons
                           name="search"
                           size={20}
-                          color="#4d4d4d"
+                          color="black"
                           style={styles.searchIcon}
                         />
                         <TextInput
                           style={styles.searchInput}
                           placeholder={t("storyViewer.searchPlaceholder")}
-                          placeholderTextColor="gray"
+                          placeholderTextColor="black"
                           value={searchQuery}
                           onChangeText={handleSearch}
                         />
@@ -943,7 +950,7 @@ export function StoryViewer({
                         style={styles.deleteButton}
                         onPress={deleteStory}
                       >
-                        <Ionicons name="trash-outline" size={20} color="#000" />
+                        <Ionicons name="trash-outline" size={20} color="black" />
                       </TouchableOpacity>
                     </View>
                     <Text style={styles.viewersTitle}>
@@ -1077,10 +1084,7 @@ export function StoryViewer({
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
-
-
-
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -1219,7 +1223,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#7D7B7B",
+    borderColor: "black",
     borderRadius: 20,
     marginRight: 10,
     paddingHorizontal: 10,
@@ -1235,20 +1239,20 @@ const styles = StyleSheet.create({
   searchInputDivider: {
     width: 1,
     height: "60%",
-    backgroundColor: "#7D7B7B",
+    backgroundColor: "black",
     marginHorizontal: 8,
   },
   searchInputCount: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#4d4d4d",
+    color: "black",
   },
   deleteButton: {
     padding: 4,
     marginBottom: 10,
   },
   viewersTitle: {
-    color: "#4d4d4d",
+    color: "black",
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 10,
