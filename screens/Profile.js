@@ -21,25 +21,26 @@ import {
   updateDoc,
   getDocs,
   deleteDoc,
-  setDoc,
   query,
   where,
-  Timestamp,
   addDoc,
+  writeBatch,
+  serverTimestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import { Menu, Divider, Provider } from "react-native-paper";
+import { Provider } from "react-native-paper";
 import FriendListModal from "../Components/Modals/FriendListModal";
 import { useTranslation } from "react-i18next";
 import BlockedListModal from "../Components/BlockedUsers/BlockedUsers";
-
-
+import MenuSection from "./ProfileComponents/MenuSection";
+import EventsSection from "./ProfileComponents/EventsSection";
+import { FlatList } from "react-native-gesture-handler";
 
 const { width, height } = Dimensions.get("window");
 
-const NameDisplay = ({
+const NameDisplay = React.memo(({
   name,
   surname,
   friendCount,
@@ -52,16 +53,14 @@ const NameDisplay = ({
   displayFriendCount,
 }) => {
   const { t } = useTranslation();
+
   return (
-    <View
-      style={[styles.nameContainer, isEditing && styles.nameContainerEditing]}
-    >
-      <View
-        style={[
+    <View style={[styles.nameContainer, isEditing && styles.nameContainerEditing]}>
+      {/* Condicional para modo edición o visualización */}
+      <View style={[
           styles.nameAndSurnameContainer,
           isEditing && styles.nameAndSurnameContainerEditing,
-        ]}
-      >
+        ]}>
         {isEditing ? (
           <>
             <TextInput
@@ -70,6 +69,7 @@ const NameDisplay = ({
               value={name}
               onChangeText={setName}
               placeholder={t("profile.namePlaceholder")}
+              placeholderTextColor="#bbb"
             />
             <TextInput
               ref={surnameInputRef}
@@ -77,6 +77,7 @@ const NameDisplay = ({
               value={surname}
               onChangeText={setSurname}
               placeholder={t("profile.surnamePlaceholder")}
+              placeholderTextColor="#bbb"
             />
           </>
         ) : (
@@ -85,11 +86,10 @@ const NameDisplay = ({
           </Text>
         )}
       </View>
+
+      {/* Condicional para mostrar cantidad de amigos */}
       {!isEditing && displayFriendCount && (
-        <TouchableOpacity
-          onPress={handleFriendCountClick}
-          style={styles.friendCountContainer}
-        >
+        <TouchableOpacity onPress={handleFriendCountClick} style={styles.friendCountContainer}>
           <Text style={styles.friendsText}>
             {friendCount > 0 ? friendCount : t("profile.loading")}
           </Text>
@@ -97,7 +97,7 @@ const NameDisplay = ({
       )}
     </View>
   );
-};
+});
 
 export default function Profile({ navigation }) {
   const { t } = useTranslation();
@@ -124,6 +124,7 @@ export default function Profile({ navigation }) {
   const [isHearted, setIsHearted] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [isBlockedListVisible, setIsBlockedListVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const nameInputRef = useRef(null);
   const surnameInputRef = useRef(null);
@@ -137,27 +138,27 @@ export default function Profile({ navigation }) {
   };
 
   useEffect(() => {
-    const fetchBlockedUsers = async () => {
+    const fetchUserData = async () => {
       try {
         const user = auth.currentUser;
         if (!user) return;
   
         const userDoc = await getDoc(doc(database, "users", user.uid));
-        const blockedList = userDoc.data()?.blockedUsers || [];
-        const manuallyBlockedList = userDoc.data()?.manuallyBlocked || []; // Obtén los bloqueos manuales
+        if (userDoc.exists()) {
+          const data = userDoc.data();
   
-        // Filtrar usuarios manualmente bloqueados
-        const filteredBlockedUsers = blockedList.filter((uid) => manuallyBlockedList.includes(uid));
-  
-        setBlockedUsers(filteredBlockedUsers);
+          // Otros estados relevantes
+          setBlockedUsers(data.blockedUsers || []); // Asegúrate de que blockedUsers se actualice
+          setUserData(data);
+        }
       } catch (error) {
-        console.error("Error fetching blocked users:", error);
+        console.error("Error fetching user data:", error);
       }
     };
   
-    fetchBlockedUsers();
+    fetchUserData();
   }, []);
-  
+
 
   const handleTogglePrivacy = async () => {
     const user = auth.currentUser;
@@ -180,7 +181,7 @@ export default function Profile({ navigation }) {
       }
     }
   };
-
+/*
   const handleFriendCountClick = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -206,57 +207,72 @@ export default function Profile({ navigation }) {
       console.error("Error al cargar la lista de amigos:", error);
     }
   };
-
+*/
   const handleHeartPress = async () => {
     const user = auth.currentUser;
     if (!user) return;
+
+    // Actualización optimista del estado local
+    const newIsHearted = !isHearted;
+    const newHeartCount = isHearted ? heartCount - 1 : heartCount + 1;
+    setIsHearted(newIsHearted);
+    setHeartCount(newHeartCount);
 
     try {
       const likesRef = collection(database, "users", user.uid, "likes");
       const likeQuery = query(likesRef, where("userId", "==", user.uid));
       const likeSnapshot = await getDocs(likeQuery);
 
+      const batch = writeBatch(database);
+
       if (likeSnapshot.empty) {
-        // Añadir un nuevo like si no existe
-        try {
-          const userDoc = await getDoc(doc(database, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            const profileImage =
-              userData.photoUrls && userData.photoUrls.length > 0
-                ? userData.photoUrls[0]
-                : ""; // Usa la primera URL de imagen o una cadena vacía si no hay imágenes disponibles.
+        // Añadir un nuevo "like"
+        const userDoc = await getDoc(doc(database, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const profileImage =
+            userData.photoUrls && userData.photoUrls.length > 0
+              ? userData.photoUrls[0]
+              : "https://via.placeholder.com/150";
 
-            await addDoc(collection(database, "users", user.uid, "likes"), {
-              userId: user.uid,
-              username: userData.username,
-              profileImage: profileImage,
-              likedAt: Timestamp.now(),
-            });
-
-            // Actualizar el estado local
-            setHeartCount(heartCount + 1);
-            setIsHearted(true);
-          }
-        } catch (error) {
-          console.error("Error añadiendo el like:", error);
-        }
-      } else {
-        // Si ya existe, eliminar el like
-        try {
-          likeSnapshot.forEach(async (doc) => {
-            await deleteDoc(doc.ref);
+          // Añadir "like" al usuario
+          const newLikeRef = doc(collection(database, "users", user.uid, "likes"));
+          batch.set(newLikeRef, {
+            userId: user.uid,
+            username: userData.username || "Usuario",
+            profileImage,
+            likedAt: serverTimestamp(),
           });
 
-          // Actualizar el estado local
-          setHeartCount(heartCount - 1);
-          setIsHearted(false);
-        } catch (error) {
-          console.error("Error eliminando el like:", error);
+          // Actualizar contador de "likes"
+          const userRef = doc(database, "users", user.uid);
+          batch.update(userRef, {
+            likeCount: newHeartCount,
+          });
         }
+      } else {
+        // Eliminar "like" existente
+        const likeDoc = likeSnapshot.docs[0];
+
+        // Eliminar el "like"
+        batch.delete(doc(database, "users", user.uid, "likes", likeDoc.id));
+
+        // Actualizar contador de "likes"
+        const userRef = doc(database, "users", user.uid);
+        batch.update(userRef, {
+          likeCount: newHeartCount,
+        });
       }
+
+      await batch.commit();
     } catch (error) {
-      console.error("Error verificando el estado del like:", error);
+      console.error("Error handling heart press:", error);
+
+      // Revertir el estado local si ocurre un error
+      setIsHearted(!newIsHearted);
+      setHeartCount(isHearted ? heartCount + 1 : heartCount - 1);
+
+      Alert.alert("Error", "Ocurrió un error al procesar tu acción. Intenta de nuevo.");
     }
   };
 
@@ -721,195 +737,169 @@ export default function Profile({ navigation }) {
               />
             </TouchableOpacity>
           )}
+
           {isElementsVisible && (
-            <View style={styles.menuContainer}>
-              <Menu
-                visible={menuVisible}
-                onDismiss={() => setMenuVisible(false)}
-                anchor={
-                  <TouchableOpacity onPress={() => setMenuVisible(true)}>
-                    <Ionicons
-                      name="ellipsis-vertical"
-                      size={24}
-                      color="white"
-                    />
-                  </TouchableOpacity>
-                }
-                contentStyle={styles.menuContent}
-              >
-                <Menu.Item
-                  onPress={handleEditProfile}
-                  title={t("profile.editProfile")}
-                />
-                <Menu.Item
-                  onPress={() => setIsBlockedListVisible(true)}
-                  title="Usuarios bloqueados"
-                  disabled={blockedUsers.length === 0} // Deshabilitar si no hay usuarios bloqueados
-                />
-                <Menu.Item
-                  onPress={handleTogglePrivacy}
-                  title={
-                    isPrivate
-                      ? t("profile.makePublic")
-                      : t("profile.makePrivate")
-                  }
-                />
-              </Menu>
-            </View>
+            <MenuSection
+              menuVisible={menuVisible}
+              setMenuVisible={setMenuVisible}
+              handleEditProfile={handleEditProfile}
+              handleTogglePrivacy={handleTogglePrivacy}
+              isPrivate={isPrivate}
+              t={t}
+              blockedUsers={blockedUsers}
+              setIsBlockedListVisible={setIsBlockedListVisible}
+            />
           )}
-          <ScrollView
+
+          {/* FlatList en lugar de ScrollView */}
+          <FlatList
+            data={photoUrls.filter((url) => url)} // Filtra URLs válidas
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.scrollViewHorizontal}
             onScroll={(event) => {
               const contentOffset = event.nativeEvent.contentOffset;
               const viewSize = event.nativeEvent.layoutMeasurement;
-              const pageNum = Math.floor(contentOffset.x / viewSize.width);
-              setCurrentImageIndex(pageNum);
+              setCurrentImageIndex(Math.floor(contentOffset.x / viewSize.width));
             }}
-            scrollEventThrottle={16}
-          >
-            {photoUrls
-              .filter((url) => url)
-              .map((url, index) => (
-                <Pressable
-                  key={index}
-                  style={styles.imageContainer}
-                  onLongPress={handleLongPress}
-                  onPressOut={handlePressOut}
-                >
-                  <Image
-                    source={{ uri: url }}
-                    style={styles.backgroundImage}
-                    contentFit="cover"
-                    cachePolicy="none"
-                  />
-                  {isElementsVisible && (
-                    <View style={styles.overlay}>
-                      <NameDisplay
-                        name={name}
-                        surname={surname}
-                        friendCount={friendCount}
-                        isEditing={isEditing}
-                        setName={setName}
-                        setSurname={setSurname}
-                        nameInputRef={nameInputRef}
-                        surnameInputRef={surnameInputRef}
-                        handleFriendCountClick={() =>
-                          setIsFriendListVisible(true)
-                        }
-                        displayFriendCount={index === 0}
+            keyExtractor={(item, index) => `photo-${index}`}
+            renderItem={({ item, index }) => (
+              <Pressable
+                style={styles.imageContainer}
+                onLongPress={handleLongPress}
+                onPressOut={handlePressOut}
+              >
+                <Image
+                  source={{ uri: item }}
+                  style={styles.backgroundImage}
+                  contentFit="cover"
+                  cachePolicy="none"
+                  placeholder={{ uri: "placeholder-image-url" }} // Placeholder
+                />
+                {isElementsVisible && (
+                  <View style={styles.overlay}>
+                    <NameDisplay
+                      name={name}
+                      surname={surname}
+                      friendCount={friendCount}
+                      isEditing={isEditing}
+                      setName={setName}
+                      setSurname={setSurname}
+                      nameInputRef={nameInputRef}
+                      surnameInputRef={surnameInputRef}
+                      handleFriendCountClick={() => setIsFriendListVisible(true)}
+                      displayFriendCount={index === 0}
+                    />
+                    {index === 0 && !isEditing && (
+                      <EventsSection
+                        events={events.slice(0, 4)}
+                        handleBoxPress={handleBoxPress}
+                        t={t}
                       />
-                      <View style={styles.infoContainer}>
-                        {index === 0 && (
-                          <>
-                            <View style={styles.spacer} />
-                            {isEditing ? (
-                              <>
-                                {renderPhotoEditor()}
-                                <TouchableOpacity
-                                  style={styles.saveButton}
-                                  onPress={handleSaveChanges}
-                                >
-                                  <Text style={styles.saveButtonText}>
-                                    {t("profile.saveChanges")}
-                                  </Text>
-                                </TouchableOpacity>
-                              </>
-                            ) : (
-                              renderEvents(0, 4)
-                            )}
-                          </>
-                        )}
-                        {index === 1 && (
-                          <>
-                            <View style={styles.spacer} />
-                            {renderEvents(4, 6)}
-                          </>
-                        )}
-                        {index === 2 && (
-                          <>
-                            <View style={styles.contentWrapper}>
-                              <View style={styles.ovalAndIconsContainer}>
-                                <View style={styles.ovalWrapper}>
-                                  <View style={styles.ovalContainer}>
-                                    {renderEditableOval(
-                                      firstHobby,
-                                      setFirstHobby,
-                                      t("profile.hobby1")
-                                    )}
-                                    {renderEditableOval(
-                                      secondHobby,
-                                      setSecondHobby,
-                                      t("profile.hobby2")
-                                    )}
-                                  </View>
+                    )}
+                    {index === 0 && isEditing && (
+                      <>
+                        {renderPhotoEditor()}
+                        <TouchableOpacity
+                          style={styles.saveButton}
+                          onPress={handleSaveChanges}
+                        >
+                          <Text style={styles.saveButtonText}>
+                            {t("profile.saveChanges")}
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                    {index === 1 && (
+                      <EventsSection
+                        events={events.slice(4, 6)}
+                        handleBoxPress={handleBoxPress}
+                        t={t}
+                      />
+                    )}
+                    {index === 2 && (
+                      <>
+                        <View style={styles.contentWrapper}>
+                          <View style={styles.ovalAndIconsContainer}>
+                            <View style={styles.ovalWrapper}>
+                              <View style={styles.ovalContainer}>
+                                {renderEditableOval(
+                                  firstHobby,
+                                  setFirstHobby,
+                                  t("profile.hobby1")
+                                )}
+                                {renderEditableOval(
+                                  secondHobby,
+                                  setSecondHobby,
+                                  t("profile.hobby2")
+                                )}
+                              </View>
 
-                                  <View style={styles.ovalContainer}>
-                                    {renderEditableOval(
-                                      firstInterest,
-                                      setFirstInterest,
-                                      t("profile.interest1")
-                                    )}
-                                    {renderEditableOval(
-                                      secondInterest,
-                                      setSecondInterest,
-                                      t("profile.interest2")
-                                    )}
-                                  </View>
-                                </View>
-                                <View style={styles.iconsContainer}>
-                                  <TouchableOpacity style={styles.iconButton}>
-                                    <AntDesign
-                                      name="adduser"
-                                      size={24}
-                                      color="white"
-                                    />
-                                  </TouchableOpacity>
-                                  <TouchableOpacity
-                                    style={styles.iconButton}
-                                    onPress={handleHeartPress}
-                                  >
-                                    <AntDesign
-                                      name={isHearted ? "heart" : "hearto"}
-                                      size={24}
-                                      color="white"
-                                    />
-                                    <Text style={styles.heartCountText}>
-                                      {heartCount}
-                                    </Text>
-                                  </TouchableOpacity>
-                                  <TouchableOpacity style={styles.iconButton}>
-                                    <AntDesign
-                                      name="message1"
-                                      size={24}
-                                      color="white"
-                                    />
-                                  </TouchableOpacity>
-                                </View>
+                              <View style={styles.ovalContainer}>
+                                {renderEditableOval(
+                                  firstInterest,
+                                  setFirstInterest,
+                                  t("profile.interest1")
+                                )}
+                                {renderEditableOval(
+                                  secondInterest,
+                                  setSecondInterest,
+                                  t("profile.interest2")
+                                )}
                               </View>
                             </View>
-                            {isEditing && (
+
+                            <View style={styles.iconsContainer}>
+                              <TouchableOpacity style={styles.iconButton}>
+                                <AntDesign
+                                  name="adduser"
+                                  size={24}
+                                  color="white"
+                                />
+                              </TouchableOpacity>
                               <TouchableOpacity
-                                style={styles.saveButton}
-                                onPress={handleSaveChanges}
+                                style={styles.iconButton}
+                                onPress={handleHeartPress}
                               >
-                                <Text style={styles.saveButtonText}>
-                                  {t("profile.saveChanges")}
+                                <AntDesign
+                                  name={isHearted ? "heart" : "hearto"}
+                                  size={24}
+                                  color="white"
+                                />
+                                <Text style={styles.heartCountText}>
+                                  {heartCount}
                                 </Text>
                               </TouchableOpacity>
-                            )}
-                          </>
+                              <TouchableOpacity style={styles.iconButton}>
+                                <AntDesign
+                                  name="message1"
+                                  size={24}
+                                  color="white"
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        </View>
+                        {isEditing && (
+                          <TouchableOpacity
+                            style={styles.saveButton}
+                            onPress={handleSaveChanges}
+                          >
+                            <Text style={styles.saveButtonText}>
+                              {t("profile.saveChanges")}
+                            </Text>
+                          </TouchableOpacity>
                         )}
-                      </View>
-                    </View>
-                  )}
-                </Pressable>
-              ))}
-          </ScrollView>
+                      </>
+                    )}
+                  </View>
+                )}
+              </Pressable>
+            )}
+          />
         </View>
       </ScrollView>
+
       <FriendListModal
         isVisible={isFriendListVisible}
         onClose={() => setIsFriendListVisible(false)}
@@ -917,11 +907,13 @@ export default function Profile({ navigation }) {
         onFriendSelect={handleFriendSelect}
         updateFriendCount={(count) => setFriendCount(count)}
       />
+
       <BlockedListModal
         isVisible={isBlockedListVisible}
         onClose={() => setIsBlockedListVisible(false)}
         blockedUsers={blockedUsers}
       />
+
     </Provider>
   );
 }

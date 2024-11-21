@@ -10,7 +10,7 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
-import { Menu, Divider, Provider } from "react-native-paper";
+import { Menu, Provider } from "react-native-paper";
 import { auth, database } from "../config/firebase";
 import {
   collection,
@@ -27,7 +27,7 @@ import {
   arrayUnion,
   arrayRemove,
   serverTimestamp,
-  deleteField,
+  writeBatch,
 } from "firebase/firestore";
 import FriendListModal from "../Components/Modals/FriendListModal";
 import Complaints from "../Components/Complaints/Complaints";
@@ -36,7 +36,7 @@ import MutualFriendsModal from "../Components/Mutual-Friends-Modal/MutualFriends
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const NameDisplay = ({
   firstName,
@@ -131,7 +131,7 @@ export default function UserProfile({ route, navigation }) {
   };
   const handleBlockUser = async () => {
     if (!user || !selectedUser) return;
-  
+
     try {
       // Referencias a los documentos de amistad en ambas direcciones
       const currentUserFriendRef = collection(
@@ -144,7 +144,7 @@ export default function UserProfile({ route, navigation }) {
         currentUserFriendRef,
         where("friendId", "==", selectedUser.id)
       );
-  
+
       const selectedUserFriendRef = collection(
         database,
         "users",
@@ -155,21 +155,21 @@ export default function UserProfile({ route, navigation }) {
         selectedUserFriendRef,
         where("friendId", "==", user.uid)
       );
-  
+
       // Obtener y eliminar las relaciones de amistad
       const [currentFriendSnapshot, selectedFriendSnapshot] = await Promise.all([
         getDocs(currentFriendQuery),
         getDocs(selectedFriendQuery),
       ]);
-  
+
       currentFriendSnapshot.forEach(async (doc) => {
         await deleteDoc(doc.ref);
       });
-  
+
       selectedFriendSnapshot.forEach(async (doc) => {
         await deleteDoc(doc.ref);
       });
-  
+
       // Eliminar solicitudes de amistad pendientes entre ambos usuarios
       const currentUserRequestsRef = collection(
         database,
@@ -185,7 +185,7 @@ export default function UserProfile({ route, navigation }) {
       requestSnapshot.forEach(async (doc) => {
         await deleteDoc(doc.ref);
       });
-  
+
       const reverseRequestQuery = query(
         collection(database, "users", user.uid, "friendRequests"),
         where("fromId", "==", selectedUser.id)
@@ -194,20 +194,20 @@ export default function UserProfile({ route, navigation }) {
       reverseRequestSnapshot.forEach(async (doc) => {
         await deleteDoc(doc.ref);
       });
-  
+
       // Agregar el usuario bloqueado a la lista de bloqueados del usuario actual
       const currentUserRef = doc(database, "users", user.uid);
       await updateDoc(currentUserRef, {
         blockedUsers: arrayUnion(selectedUser.id),
         manuallyBlocked: arrayUnion(selectedUser.id), // Campo nuevo para bloqueos manuales
       });
-  
+
       // Agregar al usuario actual a la lista de bloqueados del usuario seleccionado
       const selectedUserRef = doc(database, "users", selectedUser.id);
       await updateDoc(selectedUserRef, {
         blockedUsers: arrayUnion(user.uid),
       });
-  
+
       Alert.alert(
         t("userProfile.userBlocked"),
         `${selectedUser.firstName} ${t("userProfile.isBlocked")}`
@@ -217,8 +217,8 @@ export default function UserProfile({ route, navigation }) {
       Alert.alert(t("userProfile.error"), t("userProfile.blockError"));
     }
   };
-  
-  
+
+
 
   const handleUnblockUser = async () => {
     if (!user || !selectedUser) return;
@@ -383,7 +383,7 @@ export default function UserProfile({ route, navigation }) {
       );
     }
   };
-  
+
 
   const handleLikeProfile = async () => {
     if (blockedUsers.includes(selectedUser.id)) {
@@ -393,14 +393,23 @@ export default function UserProfile({ route, navigation }) {
       );
       return;
     }
-    if (!user || !selectedUser) return;
 
-    const likesRef = collection(database, "users", selectedUser.id, "likes");
-    const likeQuery = query(likesRef, where("userId", "==", user.uid));
-    const likeSnapshot = await getDocs(likeQuery);
+    // Actualización optimista del estado local
+    const newIsLiked = !isLiked;
+    const newLikeCount = isLiked ? likeCount - 1 : likeCount + 1;
+    setIsLiked(newIsLiked);
+    setLikeCount(newLikeCount);
 
-    if (likeSnapshot.empty) {
-      try {
+    // Sincronización con Firestore
+    try {
+      const likesRef = collection(database, "users", selectedUser.id, "likes");
+      const likeQuery = query(likesRef, where("userId", "==", user.uid));
+      const likeSnapshot = await getDocs(likeQuery);
+
+      const batch = writeBatch(database); // Usa consistentemente writeBatch
+
+      if (likeSnapshot.empty) {
+        // Agregar un "like"
         const userDoc = await getDoc(doc(database, "users", user.uid));
         const userData = userDoc.data();
         const profileImage =
@@ -408,105 +417,60 @@ export default function UserProfile({ route, navigation }) {
             ? userData.photoUrls[0]
             : "https://via.placeholder.com/150";
 
-        // Add like to the selectedUser's likes collection
-        await addDoc(likesRef, {
+        // Agregar a la colección de "likes"
+        const newLikeRef = doc(
+          collection(database, "users", selectedUser.id, "likes")
+        );
+        batch.set(newLikeRef, {
           userId: user.uid,
           username: userData.username,
           userImage: profileImage,
           timestamp: serverTimestamp(),
         });
 
-        // Add like to the current user's Likes category
-        const currentUserLikesRef = doc(
-          database,
-          "users",
-          user.uid,
-          "categories",
-          "Likes"
-        );
-        await setDoc(
-          currentUserLikesRef,
-          {
-            [selectedUser.id]: {
-              uid: selectedUser.id,
-              image: selectedUser.photoUrls
-                ? selectedUser.photoUrls[0]
-                : "https://via.placeholder.com/150",
-              timestamp: serverTimestamp(),
-            },
-          },
-          { merge: true }
-        );
-
-        // Increment like count
-        const newLikeCount = likeCount + 1;
-        setLikeCount(newLikeCount);
-
-        // Update like count in the user's document
-        await updateDoc(doc(database, "users", selectedUser.id), {
+        // Incrementar contador de "likes"
+        const userRef = doc(database, "users", selectedUser.id);
+        batch.update(userRef, {
           likeCount: newLikeCount,
         });
 
-        const notificationsRef = collection(
-          database,
-          "users",
-          selectedUser.id,
-          "notifications"
+        // Notificación al usuario
+        const notificationsRef = doc(
+          collection(database, "users", selectedUser.id, "notifications")
         );
-        await addDoc(notificationsRef, {
+        batch.set(notificationsRef, {
           type: "like",
           fromId: user.uid,
           fromName: userData.username,
           fromImage: profileImage,
           message: t("userProfile.likedYourProfile", {
-            username: userData.username, // Esto debe ser el nombre del remitente
+            username: userData.username,
           }),
           timestamp: serverTimestamp(),
         });
-        
-
-        setIsLiked(true);
-      } catch (error) {
-        console.error("Error liking profile:", error);
-        Alert.alert(t("userProfile.error"), t("userProfile.likeProfileError"));
-      }
-    } else {
-      try {
+      } else {
+        // Eliminar "like"
         const likeDoc = likeSnapshot.docs[0];
-        await deleteDoc(
-          doc(database, "users", selectedUser.id, "likes", likeDoc.id)
-        );
 
-        // Remove like from the current user's Likes category
-        const currentUserLikesRef = doc(
-          database,
-          "users",
-          user.uid,
-          "categories",
-          "Likes"
-        );
-        await setDoc(
-          currentUserLikesRef,
-          {
-            [selectedUser.id]: deleteField(),
-          },
-          { merge: true }
-        );
+        // Eliminar de la colección de "likes"
+        batch.delete(doc(database, "users", selectedUser.id, "likes", likeDoc.id));
 
-        // Decrement like count
-        const newLikeCount = Math.max(0, likeCount - 1);
-        setLikeCount(newLikeCount);
-
-        // Update like count in the user's document
-        await updateDoc(doc(database, "users", selectedUser.id), {
+        // Decrementar contador de "likes"
+        const userRef = doc(database, "users", selectedUser.id);
+        batch.update(userRef, {
           likeCount: newLikeCount,
         });
-
-        setIsLiked(false);
-      } catch (error) {
-        console.error("Error removing like from profile:", error);
-        Alert.alert(t("userProfile.error"), t("userProfile.removeLikeError"));
       }
+
+      await batch.commit(); // Ejecuta el batch una vez
+    } catch (error) {
+      console.error("Error liking profile:", error);
+
+      // Revertir el estado local si ocurre un error
+      setIsLiked(!newIsLiked);
+      setLikeCount(isLiked ? likeCount + 1 : likeCount - 1);
+
+      Alert.alert(t("userProfile.error"), t("userProfile.likeProfileError"));
     }
   };
 
@@ -565,11 +529,7 @@ export default function UserProfile({ route, navigation }) {
             return;
           }
 
-          if (userData.photoUrls && userData.photoUrls.length > 0) {
-            setPhotoUrls(userData.photoUrls);
-          } else {
-            setPhotoUrls(["https://via.placeholder.com/400"]);
-          }
+          setPhotoUrls(userData.photoUrls || ["https://via.placeholder.com/400"]);
           setFirstHobby(userData.firstHobby || "");
           setSecondHobby(userData.secondHobby || "");
           setRelationshipStatus(userData.relationshipStatus || "");
@@ -664,14 +624,14 @@ export default function UserProfile({ route, navigation }) {
           .map((doc) => doc.data().friendId)
           .filter((id) => userFriendIds.has(id));
 
-        const mutualFriendsData = await Promise.all(
-          mutualFriendIds.map(async (id) => {
-            const friendDoc = await getDoc(doc(database, "users", id));
-            return friendDoc.data();
-          })
-        );
+          const mutualFriendsData = await Promise.all(
+            mutualFriendIds.map(async (id) => {
+              const friendDoc = await getDoc(doc(database, "users", id));
+              return friendDoc.exists() ? friendDoc.data() : null; // Validar si existe
+            })
+          );
 
-        setMutualFriends(mutualFriendsData);
+          setMutualFriends(mutualFriendsData.filter((friend) => friend !== null)); // Filtrar valores nulos
       }
     };
 
@@ -787,10 +747,10 @@ export default function UserProfile({ route, navigation }) {
             { width: containerWidth },
           ]}
         >
-          {mutualFriends.slice(0, 4).map((friend, index) => (
+          {Array.isArray(mutualFriends) && mutualFriends.slice(0, 4).map((friend, index) => (
             <Image
-              key={friend.id}
-              source={{ uri: friend.photoUrls[0] }}
+              key={friend?.id || index}
+              source={{ uri: friend?.photoUrls?.[0] || "https://via.placeholder.com/150" }}
               style={[styles.mutualFriendImage, { left: index * 30 }]}
               cachePolicy="memory-disk"
             />

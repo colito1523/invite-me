@@ -36,37 +36,36 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
 
   const handleUnblockUser = async (uid) => {
     const currentUser = auth.currentUser;
-  
+
     if (!currentUser) {
       Alert.alert("Error", "No estás autenticado.");
       return;
     }
-  
+
     try {
       const currentUserRef = doc(database, "users", currentUser.uid);
       const blockedUserRef = doc(database, "users", uid);
-  
+
       // Eliminar del array de bloqueados del usuario actual
       await updateDoc(currentUserRef, {
         blockedUsers: arrayRemove(uid),
-        manuallyBlocked: arrayRemove(uid), // También eliminar de los bloqueos manuales
+        manuallyBlocked: arrayRemove(uid), // También eliminar de los bloqueos manuales si corresponde
       });
-  
+
       // Eliminar al usuario actual del array de bloqueados del otro usuario
       await updateDoc(blockedUserRef, {
         blockedUsers: arrayRemove(currentUser.uid),
       });
-  
+
       // Actualizar la lista localmente
       setUserDetails((prev) => prev.filter((user) => user.uid !== uid));
-  
+
       Alert.alert("Éxito", "El usuario ha sido desbloqueado.");
     } catch (error) {
       console.error("Error al desbloquear al usuario:", error);
       Alert.alert("Error", "No se pudo desbloquear al usuario.");
     }
   };
-  
 
   return (
     <Modal visible={isVisible} animationType="slide" transparent={true} onRequestClose={onClose}>
