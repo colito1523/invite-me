@@ -21,7 +21,6 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification }) => {
         longitudeDelta: 0.01,
       };
 
-      console.log("Actualizando región del mapa con nuevas coordenadas:", newRegion);
       setMapRegion(newRegion); // Actualiza la región del mapa
     } else {
       console.warn("Coordenadas inválidas o no disponibles para este evento.");
@@ -124,26 +123,9 @@ const styles = StyleSheet.create({
       flex: 1,
       position: "relative",
     },
-    backgroundImage: {
-      ...StyleSheet.absoluteFillObject,
-      width: null,
-      height: null,
-      contentFit: "cover",
-    },
-    gradient: {
-      flex: 1,
-      justifyContent: "flex-start",
-    },
-    scrollViewContent: {
-      flexGrow: 1,
-      justifyContent: "flex-start",
-      paddingHorizontal: 20,
-      paddingVertical: 20,
-    },
-    content: {
-      alignItems: "center",
-      marginTop: 70,
-    },
+
+
+  
     title: {
       fontSize: 35,
       fontWeight: "bold",
@@ -154,27 +136,9 @@ const styles = StyleSheet.create({
       textShadowRadius: 10,
       textAlign: "center",
     },
-    buttonContainer: {
-      flexDirection: "row",
-      justifyContent: "center",
-      marginTop: 80,
-      marginBottom: 70,
-    },
-    button: {
-      backgroundColor: "rgba(255, 255, 255, 0.3)",
-      paddingVertical: 10,
-      paddingHorizontal: 30,
-      borderRadius: 25,
-      marginHorizontal: 10,
-    },
-    activeButton: {
-      backgroundColor: "rgba(255, 255, 255, 0.6)",
-    },
-    buttonText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "bold",
-    },
+
+
+
     slider: {
       width: width,
       height: 250,
@@ -231,14 +195,7 @@ const styles = StyleSheet.create({
       textAlign: "left",
       paddingLeft: 0,
     },
-    hoursTitle: {
-      color: "white",
-      fontSize: 18,
-      fontWeight: "bold",
-      marginBottom: 10,
-      textAlign: "center",
-      width: "100%",
-    },
+
     contactContainer: {
       padding: 15,
       alignItems: "center",
@@ -254,155 +211,10 @@ const styles = StyleSheet.create({
       color: "white",
       fontSize: 16,
     },
-    headerContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingTop: 40,
-      width: "100%",
-      position: "absolute",
-      top: 0,
-      zIndex: 10,
-    },
-    backButton: {
-      paddingLeft: 20,
-    },
-
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    menuContainer: {
-      backgroundColor: "transparent",
-      padding: 20,
-      borderRadius: 10,
-      alignItems: "center",
-    },
-    deleteEventButton: {
-      backgroundColor: "red",
-      padding: 10,
-      borderRadius: 5,
-    },
-    deleteEventText: {
-      color: "white",
-      fontWeight: "bold",
-    },
-    editEventButton: {
-      backgroundColor: "white", // Puedes cambiar el color según tu preferencia
-      padding: 10,
-      borderRadius: 5,
-      marginBottom: 10, // Espacio entre los botones
-    },
-    editEventText: {
-      color: "black",
-      fontWeight: "bold",
-    },
-    friendsModalContent: {
-      backgroundColor: "white",
-      padding: 20,
-      borderRadius: 15,
-      width: "90%",
-    },
-    friendsModalContentNight: {
-      backgroundColor: "#1a1a1a",
-    },
-    modalTitle: {
-      color: "black",
-      fontSize: 24,
-      fontWeight: "bold",
-      marginBottom: 20,
-      textAlign: "center",
-    },
-    modalTitleNight: {
-      color: "white",
-    },
-    searchInput: {
-      height: 40,
-      borderColor: "black",
-      borderWidth: 1,
-      borderRadius: 8,
-      marginBottom: 10,
-      paddingHorizontal: 10,
-      color: "#333",
-    },
-    searchInputNight: {
-      borderColor: "black",
-      color: "white",
-      backgroundColor: "#333",
-    },
-    friendContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingVertical: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: "#ddd",
-    },
-    friendContainerNight: {
-      borderBottomColor: "#444",
-    },
-    friendImage: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      marginRight: 15,
-    },
-    friendName: {
-      flex: 1,
-      fontSize: 16,
-      color: "#333",
-    },
-    friendNameNight: {
-      color: "white",
-    },
-    shareButton: {
-      backgroundColor: "black",
-      padding: 10,
-      borderRadius: 25,
-      marginRight: 10,
-    },
-    shareButtonNight: {
-      backgroundColor: "black",
-    },
-    invitedButton: {
-      backgroundColor: "gray",
-    },
-    closeModalButton: {
-      marginTop: 20,
-      backgroundColor: "#black",
-      padding: 10,
-      borderRadius: 10,
-      alignItems: "center",
-    },
-    closeModalButtonNight: {
-      backgroundColor: "black",
-    },
-    closeModalText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    closeModalTextNight: {
-      color: "black",
-    },
-    dotIndicatorContainer: {
-      flexDirection: "row",
-      paddingHorizontal: 10,
-      marginVertical: 20,
-      alignItems: "center",
-      height: 60,
-    },
     descriptionContainer: {
       padding: 15,
       alignItems: "center",
       width: "90%",
-    },
-    descriptionTitle: {
-      color: "white",
-      fontSize: 18,
-      fontWeight: "bold",
-      marginBottom: 10,
     },
     descriptionText: {
       color: "white",
@@ -426,54 +238,6 @@ const styles = StyleSheet.create({
       textAlign: "center",
     },
 
-    editModalContent: {
-      backgroundColor: 'white',
-      padding: 20,
-      borderRadius: 10,
-      width: '90%',
-    },
-    editModalTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 15,
-      textAlign: 'center',
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 5,
-      padding: 10,
-      marginBottom: 10,
-    },
-    datePickerButton: {
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 5,
-      padding: 10,
-      marginBottom: 10,
-    },
-    editModalButtons: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 15,
-    },
-    editModalButton: {
-      padding: 10,
-      borderRadius: 5,
-      width: '45%',
-    },
-    cancelButton: {
-      backgroundColor: '#ccc',
-    },
-    saveButton: {
-      backgroundColor: '#007AFF',
-    },
-    editModalButtonText: {
-      color: 'white',
-      textAlign: 'center',
-      fontWeight: 'bold',
-    },
-
     notificationHours: {
       alignItems: "center",
       justifyContent: "center",
@@ -485,10 +249,7 @@ const styles = StyleSheet.create({
       fontWeight: "bold",
       marginBottom: 5,
     },
-    dayText: {
-      fontSize: 16,
-      color: "white",
-    },
+ 
 });
 
 export default SliderContent;

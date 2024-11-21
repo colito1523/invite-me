@@ -88,7 +88,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     let unsubscribe;
 
     if (box) {
-      console.log("Datos del evento al entrar en BoxDetails:", box);
 
       fetchEventDetails();
       checkEventStatus();
@@ -104,7 +103,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       if (typeof unsubscribe === "function") {
         unsubscribe(); // Limpia el listener al salir del componente
       }
-      console.log("Limpiando el efecto en BoxDetails");
     };
   }, [box, selectedDate]);
 
@@ -135,7 +133,6 @@ export default memo(function BoxDetails({ route, navigation }) {
             await updateDoc(boxRef, {
               [dateKey]: deleteField(),
             });
-            console.log(`Evento del ${dateKey} eliminado correctamente`);
           } catch (error) {
             console.error(`Error al eliminar el evento del ${dateKey}:`, error);
           }
@@ -195,7 +192,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       const eventData = eventSnapshot.data();
       setBoxData((prevBox) => ({ ...prevBox, ...eventData }));
     } else {
-      console.log("El evento no existe en la base de datos");
+   
     }
   };
 
@@ -207,13 +204,10 @@ export default memo(function BoxDetails({ route, navigation }) {
         box.eventId || box.id || box.title
       );
 
-      console.log("Referencia al evento:", eventRef.path);
-
       // Usa `onSnapshot` para escuchar los cambios en tiempo real
       const unsub = onSnapshot(eventRef, async (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-          console.log("Datos del evento obtenidos:", data);
 
           // Selección de asistentes según el tipo de evento
           const attendees =
@@ -239,13 +233,12 @@ export default memo(function BoxDetails({ route, navigation }) {
                 attendee.profileImage || "https://via.placeholder.com/150",
             }));
 
-            console.log("Asistentes únicos procesados:", uniqueAttendees);
+       
             setAttendeesList(uniqueAttendees);
           } catch (error) {
             console.error("Error al filtrar usuarios bloqueados:", error);
           }
         } else {
-          console.error("El evento no existe en la base de datos.");
           setAttendeesList([]); // Limpia la lista local si no existe
         }
       });
@@ -302,12 +295,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
-
-
-
-
-
-
   const handleRemoveFromEvent = async () => {
     const user = auth.currentUser;
     if (!user || !box) return;
@@ -323,7 +310,6 @@ export default memo(function BoxDetails({ route, navigation }) {
         querySnapshot.forEach((doc) => batch.delete(doc.ref));
         await batch.commit();
 
-        console.log("Evento eliminado de la colección del usuario.");
       }
 
       // Eliminar del evento privado (EventsPriv)
@@ -343,8 +329,6 @@ export default memo(function BoxDetails({ route, navigation }) {
           await updateDoc(eventRef, {
             attendees: updatedAttendees,
           });
-
-          console.log("Usuario eliminado de la lista de asistentes del evento privado.");
         }
       } else {
         // Eliminar del evento general (GoBoxs)
@@ -713,8 +697,6 @@ const handleSaveEdit = async () => {
         } else {
           await handleRemoveFromGoBoxs(box.title, selectedDate);
         }
-
-        console.log("Evento eliminado correctamente.");
       } else {
         // Si el evento no existe, agregarlo
         const eventsSnapshot = await getDocs(eventsRef);
@@ -777,7 +759,7 @@ const handleSaveEdit = async () => {
         });
 
         setIsEventSaved(true);
-        console.log("Evento agregado correctamente.");
+
       }
     } catch (error) {
       console.error("Error al manejar el evento:", error);
@@ -810,7 +792,6 @@ const handleSaveEdit = async () => {
             });
           }
 
-          console.log("Usuario eliminado de GoBoxs correctamente");
         }
       }
     } catch (error) {
@@ -873,8 +854,6 @@ const handleSaveEdit = async () => {
       await updateDoc(boxRef, {
         [selectedDate]: [...existingData, userDataToSave],
       });
-
-      console.log("Evento guardado exitosamente en Firebase");
     } catch (error) {
       console.error("Error al guardar el evento: ", error);
     }
@@ -959,133 +938,7 @@ const handleSaveEdit = async () => {
     }
   };
 
-  const renderSliderContent = () => (
-    <ScrollView
-      horizontal
-      pagingEnabled
-      showsHorizontalScrollIndicator={false}
-      style={styles.slider}
-    >
-      {/* Primer Slider */}
-      <View style={styles.sliderPart}>
-        {box &&
-        box.coordinates &&
-        typeof box.coordinates.latitude === "number" &&
-        typeof box.coordinates.longitude === "number" &&
-        box.coordinates.latitude !== 0 &&
-        box.coordinates.longitude !== 0 ? (
-          <View style={styles.mapContainer}>
-            <MapView
-              style={styles.map}
-              initialRegion={{
-                latitude: box.coordinates.latitude,
-                longitude: box.coordinates.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-              customMapStyle={isNightMode ? nightMapStyle : dayMapStyle}
-            >
-              <Marker
-                coordinate={{
-                  latitude: box.coordinates.latitude,
-                  longitude: box.coordinates.longitude,
-                }}
-                title={box.title || "Evento"}
-                description={box.description || ""}
-              />
-            </MapView>
-          </View>
-        ) : isFromNotification && box.description ? (
-          // Descripción desde la notificación
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionText}>
-              {box.description || "Descripción no disponible"}
-            </Text>
-          </View>
-        ) : boxData.description ? (
-          // Descripción desde EventsPriv
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionText}>
-              {boxData.description || "Descripción no disponible"}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.addressContainer}>
-            <Text style={styles.addressTitle}>Ubicación:</Text>
-            <Text style={styles.addressText}>
-              {boxData.address || "No hay dirección disponible"}
-            </Text>
-          </View>
-        )}
-      </View>
-
-     {/* Segundo Slider: Horarios */}
-     <View style={styles.sliderPart}>
-      <View style={styles.hoursContainer}>
-        {isFromNotification && (box.hour || box.day) ? (
-          // Mostrar hora y día desde la notificación
-          <View style={styles.notificationHours}>
-            <Text style={styles.hoursText}>
-              {`Hora: ${box.hour || "No disponible"}`}
-            </Text>
-            <Text style={styles.dayText}>
-              {`Día: ${box.day || "No disponible"}`}
-            </Text>
-          </View>
-        ) : (
-          // Mostrar horarios desde EventsPriv
-          <View style={styles.hoursContent}>
-            <View style={styles.column}>
-              {Object.keys(boxData.hours || {}).map((day, index) => (
-                <Text key={index} style={styles.dayText}>
-                  {day}
-                </Text>
-              ))}
-            </View>
-            <View style={styles.column}>
-              {Object.values(boxData.hours || {}).map((time, index) => (
-                <Text key={index} style={styles.timeText}>
-                  {time}
-                </Text>
-              ))}
-            </View>
-          </View>
-        )}
-      </View>
-    </View>
-
-   {/* Tercer Slider: Ubicación o Contacto */}
-<View style={styles.sliderPart}>
-  {isFromNotification && box.address ? (
-    // Mostrar dirección si proviene de notificación
-    <View style={styles.addressContainer}>
-      <Text style={styles.addressTitle}>Ubicación:</Text>
-      <Text style={styles.addressText}>
-        {box.address || "Ubicación no disponible"}
-      </Text>
-    </View>
-  ) : boxData.address ? (
-    // Mostrar dirección desde la base de datos para eventos privados
-    <View style={styles.addressContainer}>
-      <Text style={styles.addressTitle}>Ubicación:</Text>
-      <Text style={styles.addressText}>
-        {boxData.address || "Ubicación no disponible"}
-      </Text>
-    </View>
-  ) : (
-    // Mostrar contacto para eventos generales
-    <View style={styles.contactContainer}>
-      <Text style={styles.contactTitle}>Contacto:</Text>
-      <Text style={styles.contactText}>
-        {boxData.number || boxData.phoneNumber || "Sin número de contacto"}
-      </Text>
-    </View>
-  )}
-</View>
-
-  </ScrollView>
-  );
-
+ 
 
   return (
     <SafeAreaView style={styles.container}>
@@ -1123,10 +976,6 @@ const handleSaveEdit = async () => {
 
             {/* Indicador de asistentes */}
             <View style={styles.dotIndicatorContainer}>
-              {console.log(
-                "Datos enviados a DotIndicatorBoxDetails:",
-                attendeesList
-              )}
               <DotIndicatorBoxDetails attendeesList={attendeesList} />
             </View>
 
@@ -1426,8 +1275,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
   },
   friendContainerNight: {
     borderBottomColor: "#444",
