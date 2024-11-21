@@ -123,9 +123,6 @@ const styles = StyleSheet.create({
       flex: 1,
       position: "relative",
     },
-
-
-  
     title: {
       fontSize: 35,
       fontWeight: "bold",
@@ -136,9 +133,6 @@ const styles = StyleSheet.create({
       textShadowRadius: 10,
       textAlign: "center",
     },
-
-
-
     slider: {
       width: width,
       height: 250,
