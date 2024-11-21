@@ -267,17 +267,24 @@ export default memo(function BoxDetails({ route, navigation }) {
   
       // Datos del evento
       const eventData = eventDoc.data();
-      const eventImage = box.imageUrl || eventData.image || "https://via.placeholder.com/150";
+      const eventImage = eventData.image || "https://via.placeholder.com/150"; // URL predeterminada si no hay imagen
       const eventDate = selectedDate || eventData.date || "Fecha no disponible";
-      const eventTitle = box.title || "Evento General";
+      const eventTitle = box.title || eventData.title || "Evento General";
+  
+      // Obtener nombre de usuario
+      const userDocRef = doc(database, "users", user.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
+      const fromName = userDocSnapshot.exists()
+        ? userDocSnapshot.data().username || "Usuario Desconocido"
+        : "Usuario Desconocido";
   
       // Enviar notificación al amigo invitado
       const notificationRef = collection(database, "users", friendId, "notifications");
       await addDoc(notificationRef, {
         fromId: user.uid,
-        fromName: user.displayName || "Usuario Desconocido",
+        fromName: fromName, // Nombre de usuario
         eventTitle: eventTitle,
-        eventImage: eventImage,
+        eventImage: eventImage, // URL válida de la imagen
         eventDate: eventDate,
         type: "generalEventInvitation",
         status: "pendiente",
@@ -290,6 +297,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       Alert.alert("Error", "No se pudo enviar la invitación.");
     }
   };
+  
   
   
   

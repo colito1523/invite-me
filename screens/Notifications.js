@@ -10,7 +10,7 @@ import {
   SafeAreaView,
   RefreshControl,
 } from "react-native";
-import { Image } from 'expo-image';
+import { Image } from "expo-image";
 import { database, auth } from "../config/firebase";
 import {
   collection,
@@ -23,13 +23,13 @@ import {
   addDoc,
   getDoc,
   setDoc,
-  arrayUnion, 
+  arrayUnion,
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { format, isToday, isYesterday } from "date-fns";
-import { Ionicons} from "@expo/vector-icons";
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTranslation } from 'react-i18next';
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 
 export default function NotificationsComponent() {
   const { t } = useTranslation();
@@ -84,53 +84,70 @@ export default function NotificationsComponent() {
       const userDoc = await getDoc(userRef);
       const hiddenNotifications = userDoc.data()?.hiddenNotifications || [];
       const blockedUsers = userDoc.data()?.blockedUsers || [];
-  
-      const notificationsRef = collection(database, "users", user.uid, "notifications");
-      const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
-  
+
+      const notificationsRef = collection(
+        database,
+        "users",
+        user.uid,
+        "notifications"
+      );
+      const friendRequestsRef = collection(
+        database,
+        "users",
+        user.uid,
+        "friendRequests"
+      );
+
       const notificationsQuery = query(notificationsRef);
-      const friendRequestsQuery = query(friendRequestsRef, where("status", "==", "pending"));
-  
-      const unsubscribeNotifications = onSnapshot(notificationsQuery, (querySnapshot) => {
-        const notifList = querySnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            type: doc.data().type || "notification",
-          }))
-          .filter(
-            (notif) =>
-              !hiddenNotifications.includes(notif.id) &&
-              !blockedUsers.includes(notif.fromId) // Excluir notificaciones de usuarios bloqueados
-          );
-        updateNotifications(notifList);
-      });
-  
-      const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
-        const requestList = querySnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            type: "friendRequest",
-          }))
-          .filter(
-            (notif) =>
-              !hiddenNotifications.includes(notif.id) &&
-              !blockedUsers.includes(notif.fromId) // Excluir solicitudes de usuarios bloqueados
-          );
-        updateNotifications(requestList);
-      });
-  
+      const friendRequestsQuery = query(
+        friendRequestsRef,
+        where("status", "==", "pending")
+      );
+
+      const unsubscribeNotifications = onSnapshot(
+        notificationsQuery,
+        (querySnapshot) => {
+          const notifList = querySnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+              type: doc.data().type || "notification",
+            }))
+            .filter(
+              (notif) =>
+                !hiddenNotifications.includes(notif.id) &&
+                !blockedUsers.includes(notif.fromId) // Excluir notificaciones de usuarios bloqueados
+            );
+          updateNotifications(notifList);
+        }
+      );
+
+      const unsubscribeFriendRequests = onSnapshot(
+        friendRequestsQuery,
+        (querySnapshot) => {
+          const requestList = querySnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+              type: "friendRequest",
+            }))
+            .filter(
+              (notif) =>
+                !hiddenNotifications.includes(notif.id) &&
+                !blockedUsers.includes(notif.fromId) // Excluir solicitudes de usuarios bloqueados
+            );
+          updateNotifications(requestList);
+        }
+      );
+
       setIsLoading(false);
-  
+
       return () => {
         unsubscribeNotifications();
         unsubscribeFriendRequests();
       };
     }
   }, [user]);
-  
-  
 
   const handleDeleteNotification = (notificationId) => {
     Alert.alert(
@@ -153,10 +170,16 @@ export default function NotificationsComponent() {
               setNotifications((prevNotifications) =>
                 prevNotifications.filter((notif) => notif.id !== notificationId)
               );
-              Alert.alert("Notificación oculta", "La notificación ha sido oculta.");
+              Alert.alert(
+                "Notificación oculta",
+                "La notificación ha sido oculta."
+              );
             } catch (error) {
               console.error("Error al ocultar la notificación:", error);
-              Alert.alert("Error", "No se pudo ocultar la notificación. Inténtalo de nuevo.");
+              Alert.alert(
+                "Error",
+                "No se pudo ocultar la notificación. Inténtalo de nuevo."
+              );
             }
           },
         },
@@ -164,8 +187,6 @@ export default function NotificationsComponent() {
       { cancelable: true }
     );
   };
-  
-  
 
   useEffect(() => {
     const unsubscribe = fetchNotifications();
@@ -173,7 +194,7 @@ export default function NotificationsComponent() {
       if (typeof unsubscribe === "function") unsubscribe();
     };
   }, [fetchNotifications]);
-  
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchNotifications();
@@ -202,14 +223,16 @@ export default function NotificationsComponent() {
 
   const handleUserPress = async (uid) => {
     try {
-      const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
+      const userDoc = await getDoc(
+        doc(database, "users", auth.currentUser.uid)
+      );
       const blockedUsers = userDoc.data()?.blockedUsers || [];
-  
+
       if (blockedUsers.includes(uid)) {
         Alert.alert("Error", "No puedes interactuar con este usuario.");
         return;
       }
-  
+
       const selectedUserDoc = await getDoc(doc(database, "users", uid));
       if (selectedUserDoc.exists()) {
         const selectedUserData = selectedUserDoc.data();
@@ -220,14 +243,20 @@ export default function NotificationsComponent() {
             : "https://via.placeholder.com/150";
         navigation.navigate("UserProfile", { selectedUser: selectedUserData });
       } else {
-        Alert.alert(t("notifications.error"), t("notifications.userDetailsNotFound"));
+        Alert.alert(
+          t("notifications.error"),
+          t("notifications.userDetailsNotFound")
+        );
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      Alert.alert(t("notifications.error"), t("notifications.userDetailsFetchError"));
+      Alert.alert(
+        t("notifications.error"),
+        t("notifications.userDetailsFetchError")
+      );
     }
   };
-  
+
   const handleAcceptRequest = async (request) => {
     try {
       const user = auth.currentUser;
@@ -283,7 +312,9 @@ export default function NotificationsComponent() {
         fromId: user.uid,
         fromName: userData.firstName,
         fromImage: profileImage,
-        message: t('notifications.friendRequestAccepted', { name: userData.firstName }),
+        message: t("notifications.friendRequestAccepted", {
+          name: userData.firstName,
+        }),
         timestamp: new Date(),
       });
 
@@ -300,7 +331,9 @@ export default function NotificationsComponent() {
         fromId: request.fromId,
         fromName: request.fromName,
         fromImage: request.fromImage,
-        message: t('notifications.youAreNowFriends', { name: request.fromName }),
+        message: t("notifications.youAreNowFriends", {
+          name: request.fromName,
+        }),
         timestamp: new Date(),
       });
 
@@ -324,7 +357,10 @@ export default function NotificationsComponent() {
       }, 5000);
     } catch (error) {
       console.error("Error accepting request:", error);
-      Alert.alert(t('notifications.error'), t('notifications.acceptRequestError'));
+      Alert.alert(
+        t("notifications.error"),
+        t("notifications.acceptRequestError")
+      );
     }
   };
 
@@ -360,40 +396,49 @@ export default function NotificationsComponent() {
       }, 5000);
     } catch (error) {
       console.error("Error rejecting request:", error);
-      Alert.alert(t('notifications.error'), t('notifications.rejectRequestError'));
+      Alert.alert(
+        t("notifications.error"),
+        t("notifications.rejectRequestError")
+      );
     }
   };
 
   const handleAcceptEventInvitation = async (notif) => {
     const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
     const blockedUsers = userDoc.data()?.blockedUsers || [];
-  
+
     if (blockedUsers.includes(notif.fromId)) {
       Alert.alert("Error", "No puedes aceptar invitaciones de este usuario.");
       return;
     }
-    
+
     const user = auth.currentUser;
     if (!user) {
-      Alert.alert(t('notifications.error'), t('notifications.userAuthError'));
+      Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
       return;
     }
 
-    const notifRef = doc(database, "users", user.uid, "notifications", notif.id);
+    const notifRef = doc(
+      database,
+      "users",
+      user.uid,
+      "notifications",
+      notif.id
+    );
     const eventsRef = collection(database, "users", user.uid, "events");
     const eventRef = doc(database, "EventsPriv", notif.eventId);
-  
+
     try {
       // 1. Get event data from `EventsPriv`
       const eventDoc = await getDoc(eventRef);
       if (!eventDoc.exists()) {
         console.error("Event not found in EventsPriv");
-        Alert.alert(t('notifications.error'), t('notifications.eventNotFound'));
+        Alert.alert(t("notifications.error"), t("notifications.eventNotFound"));
         return;
       }
-  
+
       const eventData = eventDoc.data();
-  
+
       // 2. Add the event to the user's `events` collection
       await addDoc(eventsRef, {
         title: eventData.title,
@@ -404,56 +449,71 @@ export default function NotificationsComponent() {
         eventId: notif.eventId,
         category: eventData.category,
       });
-  
+
       // 3. Get updated user data
       const userDoc = await getDoc(doc(database, "users", user.uid));
       const userData = userDoc.data();
-      
+
       // 4. Add the user to the `attendees` list in `EventsPriv`
       await updateDoc(eventRef, {
         attendees: arrayUnion({
           uid: user.uid,
           username: userData.username || user.displayName,
-          profileImage: userData.photoUrls && userData.photoUrls.length > 0 
-            ? userData.photoUrls[0] 
-            : "https://via.placeholder.com/150",
+          profileImage:
+            userData.photoUrls && userData.photoUrls.length > 0
+              ? userData.photoUrls[0]
+              : "https://via.placeholder.com/150",
         }),
       });
-  
+
       // 5. Update the notification status
       await updateDoc(notifRef, {
         status: "accepted",
-        message: t('notifications.acceptedInvitation', { name: notif.fromName }),
+        message: t("notifications.acceptedInvitation", {
+          name: notif.fromName,
+        }),
       });
-  
+
       // Update local notification state
       setNotifications((prevNotifications) =>
         prevNotifications.map((n) =>
           n.id === notif.id
-            ? { ...n, status: "accepted", message: t('notifications.acceptedInvitation', { name: notif.fromName }) }
+            ? {
+                ...n,
+                status: "accepted",
+                message: t("notifications.acceptedInvitation", {
+                  name: notif.fromName,
+                }),
+              }
             : n
         )
       );
-  
-      Alert.alert(t('notifications.invitationAccepted'), t('notifications.eventAddedToProfile'));
+
+      Alert.alert(
+        t("notifications.invitationAccepted"),
+        t("notifications.eventAddedToProfile")
+      );
     } catch (error) {
       console.error("Error accepting invitation:", error);
-      Alert.alert(t('notifications.error'), t('notifications.acceptInvitationError'));
+      Alert.alert(
+        t("notifications.error"),
+        t("notifications.acceptInvitationError")
+      );
     }
   };
-  
+
   const handleRejectEventInvitation = async (notif) => {
     try {
       const user = auth.currentUser;
       if (!user) {
-        Alert.alert(t('notifications.error'), t('notifications.userAuthError'));
+        Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
         return;
       }
-  
+
       // Verificar si el remitente de la invitación está bloqueado
       const userDoc = await getDoc(doc(database, "users", user.uid));
       const blockedUsers = userDoc.data()?.blockedUsers || [];
-  
+
       if (blockedUsers.includes(notif.fromId)) {
         Alert.alert(
           "Error",
@@ -461,7 +521,7 @@ export default function NotificationsComponent() {
         );
         return;
       }
-  
+
       // Referencia a la notificación
       const notifRef = doc(
         database,
@@ -470,37 +530,37 @@ export default function NotificationsComponent() {
         "notifications",
         notif.id
       );
-  
+
       // Actualizar el estado de la invitación como "rechazada"
       await updateDoc(notifRef, { status: "rejected" });
-  
+
       // Remover el UID del usuario de invitedFriends en EventsPriv
       const eventRef = doc(database, "EventsPriv", notif.eventId);
       const eventDoc = await getDoc(eventRef);
-  
+
       if (eventDoc.exists()) {
         const eventData = eventDoc.data();
         const updatedInvitedFriends = (eventData.invitedFriends || []).filter(
           (uid) => uid !== user.uid
         );
-  
+
         await updateDoc(eventRef, { invitedFriends: updatedInvitedFriends });
       }
-  
+
       // Remover la notificación del estado local
       setNotifications((prevNotifications) =>
         prevNotifications.filter((n) => n.id !== notif.id)
       );
-  
+
       Alert.alert(
-        t('notifications.invitationRejected'),
-        t('notifications.eventInvitationRejected')
+        t("notifications.invitationRejected"),
+        t("notifications.eventInvitationRejected")
       );
     } catch (error) {
       console.error("Error rejecting invitation:", error);
       Alert.alert(
-        t('notifications.error'),
-        t('notifications.rejectInvitationError')
+        t("notifications.error"),
+        t("notifications.rejectInvitationError")
       );
     }
   };
@@ -508,25 +568,31 @@ export default function NotificationsComponent() {
   const handleGeneralEventInvite = async (friendId) => {
     const user = auth.currentUser;
     if (!user) return;
-  
+
     try {
       // Referencia al evento general
       const eventRef = doc(database, "GoBoxs", box.title);
       const eventDoc = await getDoc(eventRef);
-  
+
       if (!eventDoc.exists()) {
         Alert.alert("Error", "El evento no existe.");
         return;
       }
-  
+
       // Datos del evento
       const eventData = eventDoc.data();
-      const eventImage = box.imageUrl || eventData.image || "https://via.placeholder.com/150";
+      const eventImage =
+        box.imageUrl || eventData.image || "https://via.placeholder.com/150";
       const eventDate = selectedDate || eventData.date || "Fecha no disponible";
       const eventTitle = box.title || "Evento General";
-  
+
       // Enviar notificación al amigo invitado
-      const notificationRef = collection(database, "users", friendId, "notifications");
+      const notificationRef = collection(
+        database,
+        "users",
+        friendId,
+        "notifications"
+      );
       await addDoc(notificationRef, {
         fromId: user.uid,
         fromName: user.displayName || "Usuario Desconocido",
@@ -537,16 +603,16 @@ export default function NotificationsComponent() {
         status: "pendiente",
         timestamp: new Date(),
       });
-  
-      Alert.alert("Invitación enviada", `Has invitado a un amigo al evento ${eventTitle}.`);
+
+      Alert.alert(
+        "Invitación enviada",
+        `Has invitado a un amigo al evento ${eventTitle}.`
+      );
     } catch (error) {
       console.error("Error al invitar al evento general:", error);
       Alert.alert("Error", "No se pudo enviar la invitación.");
     }
   };
-  
-  
-  
 
   const renderNotificationItem = ({ item }) => {
     if (item.type === "generalEventInvitation") {
@@ -564,18 +630,59 @@ export default function NotificationsComponent() {
               isFromNotification: true,
             });
           }}
+          style={[styles.notificationContainer]}
         >
-          <View style={styles.notificationContainer}>
+          <View style={styles.notificationContent}>
+            {/* Imagen del evento */}
             <Image
-              source={{ uri: item.eventImage }}
-              style={styles.notificationImage}
+              source={{
+                uri: item.eventImage
+                  ? item.eventImage
+                  : "https://via.placeholder.com/150", // Imagen por defecto
+              }}
+              style={styles.profileImage}
             />
-            <Text>{`Fuiste invitado al evento ${item.eventTitle}`}</Text>
-            <Text>{`Fecha: ${item.eventDate}`}</Text>
+            <View style={styles.textContainer}>
+              {/* Texto principal de la invitación */}
+              <Text style={[styles.notificationText, { color: "black" }]}>
+                <Text style={[styles.boldText]}>{item.fromName}</Text>{' '}
+                te ha invitado a{' '}
+                <Text style={[styles.boldText]}>{item.eventTitle}</Text>{' '}
+                el día{' '}
+                <Text style={[styles.boldText]}>{item.eventDate}</Text>
+              </Text>
+              {/* Botones de aceptar y rechazar */}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  onPress={() => handleAcceptEventInvitation(item)}
+                  style={[
+                    styles.acceptButton,
+                    { backgroundColor: isNightMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(128, 128, 128, 0.3)' },
+                  ]}
+                >
+                  <Text style={[styles.buttonText, { color: isNightMode ? '#fff' : '#000' }]}>
+                    Aceptar
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleRejectEventInvitation(item)}
+                  style={[
+                    styles.rejectButton,
+                    { backgroundColor: isNightMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(128, 128, 128, 0.3)' },
+                  ]}
+                >
+                  <Text style={[styles.buttonText, { color: isNightMode ? '#fff' : '#000' }]}>
+                    Rechazar
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </TouchableOpacity>
+  
       );
     }
+
     const isFriendRequest =
       item.type === "friendRequest" &&
       item.status !== "accepted" &&
@@ -587,21 +694,23 @@ export default function NotificationsComponent() {
     const isFriendRequestResponse = item.type === "friendRequestResponse";
     const isLikeNotification = item.type === "like";
     const isNoteLikeNotification = item.type === "noteLike";
-  
-    const timestamp = item.timestamp?.toDate ? item.timestamp.toDate() : new Date(item.timestamp);
-  
+
+    const timestamp = item.timestamp?.toDate
+      ? item.timestamp.toDate()
+      : new Date(item.timestamp);
+
     let formattedTime = "";
-  
+
     if (timestamp) {
       if (isToday(timestamp)) {
         formattedTime = format(timestamp, "HH:mm");
       } else if (isYesterday(timestamp)) {
-        formattedTime = t('notifications.yesterday');
+        formattedTime = t("notifications.yesterday");
       } else {
         formattedTime = format(timestamp, "dd/MM/yyyy");
       }
     }
-  
+
     const handleNotificationPress = () => {
       if (isEventInvitation) {
         if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
@@ -610,34 +719,41 @@ export default function NotificationsComponent() {
               title: item.eventTitle,
               imageUrl: item.eventImage,
               date: item.eventDate,
-              day: item.day,   
+              day: item.day,
               description: item.description, // Asegúrate de pasar esto
               hour: item.hour, // Agrega la hora
               address: item.address, // Pasar dirección
-              location: item.eventLocation || t('notifications.noLocation'),
+              location: item.eventLocation || t("notifications.noLocation"),
               coordinates: item.coordinates || { latitude: 0, longitude: 0 },
               hours: item.hours || {},
-              number: item.phoneNumber || t('notifications.noNumber'),
+              number: item.phoneNumber || t("notifications.noNumber"),
               isPrivate: item.isPrivate || false,
             },
             selectedDate: item.eventDate,
             isFromNotification: true, // Indicamos que es desde la notificación
           });
         } else {
-          if (!item.coordinates || !item.coordinates.latitude || !item.coordinates.longitude) {
-            Alert.alert(t('notifications.error'), t('notifications.coordinatesNotAvailable'));
+          if (
+            !item.coordinates ||
+            !item.coordinates.latitude ||
+            !item.coordinates.longitude
+          ) {
+            Alert.alert(
+              t("notifications.error"),
+              t("notifications.coordinatesNotAvailable")
+            );
             return;
           }
-  
+
           navigation.navigate("BoxDetails", {
             box: {
               title: item.eventTitle,
               imageUrl: item.eventImage,
               date: item.eventDate,
-              location: item.eventLocation || t('notifications.noLocation'),
+              location: item.eventLocation || t("notifications.noLocation"),
               coordinates: item.coordinates || { latitude: 0, longitude: 0 },
               hours: item.hours || {},
-              number: item.phoneNumber || t('notifications.noNumber'),
+              number: item.phoneNumber || t("notifications.noNumber"),
               isPrivate: item.isPrivate || false,
             },
             selectedDate: item.eventDate,
@@ -647,46 +763,79 @@ export default function NotificationsComponent() {
         handleUserPress(item.fromId);
       }
     };
-  
+
     return (
       item.status !== "rejected" && (
-        <TouchableOpacity onPress={handleNotificationPress} onLongPress={() => handleDeleteNotification(item.id)} >
-          <View style={[styles.notificationContainer, { borderColor: isNightMode ? '#444' : '#ccc' }]}>
+        <TouchableOpacity
+          onPress={handleNotificationPress}
+          onLongPress={() => handleDeleteNotification(item.id)}
+        >
+          <View
+            style={[
+              styles.notificationContainer,
+              { borderColor: isNightMode ? "#444" : "#ccc" },
+            ]}
+          >
             {item.status !== "rejected" && (
               <View style={styles.timeContainer}>
-                <Text style={[styles.timeText, { color: isNightMode ? '#888' : '#666' }]}>{formattedTime}</Text>
+                <Text
+                  style={[
+                    styles.timeText,
+                    { color: isNightMode ? "#888" : "#666" },
+                  ]}
+                >
+                  {formattedTime}
+                </Text>
               </View>
             )}
             <View style={styles.notificationContent}>
               <Image
                 source={{
-                  uri: item.fromImage && item.fromImage.length > 0
-                    ? item.fromImage
-                    : "https://via.placeholder.com/150",
+                  uri:
+                    item.fromImage && item.fromImage.length > 0
+                      ? item.fromImage
+                      : "https://via.placeholder.com/150",
                 }}
                 cachePolicy="memory-disk"
                 style={styles.profileImage}
               />
               <View style={styles.textContainer}>
-                <Text style={[styles.notificationText, { color: isNightMode ? '#fff' : '#333' }]}>
-                  {item.type === "invitation" && item.status === "accepted"
-                    ? t('notifications.acceptedInvitation', { name: item.fromName })
-                    : (
-                      <>
-                        <Text style={[styles.boldText, { color: isNightMode ? '#fff' : '#000' }]}>
-                          {item.fromName} {item.fromLastName || ''}
-                        </Text>{' '}
-                        {isFriendRequest && t('notifications.wantsToBeFriend')}
-                        {isEventInvitation && t('notifications.invitedToEvent', { eventTitle: item.eventTitle })}
-                        {isFriendRequestResponse &&
-                          (item.response === 'accepted'
-                            ? t('notifications.nowFriends')
-                            : t('notifications.rejectedFriendRequest'))}
-                        {isLikeNotification && item.message} {/* Mostrar el mensaje de like */}
-                        {item.type === 'storyLike' && t('notifications.likedYourStory')}
-                        {isNoteLikeNotification && item.message}
-                      </>
-                    )}
+                <Text
+                  style={[
+                    styles.notificationText,
+                    { color: isNightMode ? "#fff" : "#333" },
+                  ]}
+                >
+                  {item.type === "invitation" && item.status === "accepted" ? (
+                    t("notifications.acceptedInvitation", {
+                      name: item.fromName,
+                    })
+                  ) : (
+                    <>
+                      <Text
+                        style={[
+                          styles.boldText,
+                          { color: isNightMode ? "#fff" : "#000" },
+                        ]}
+                      >
+                        {item.fromName} {item.fromLastName || ""}
+                      </Text>{" "}
+                      {isFriendRequest && t("notifications.wantsToBeFriend")}
+                      {isEventInvitation &&
+                        t("notifications.invitedToEvent", {
+                          eventTitle: item.eventTitle,
+                        })}
+                      {isFriendRequestResponse &&
+                        (item.response === "accepted"
+                          ? t("notifications.nowFriends")
+                          : t("notifications.rejectedFriendRequest"))}
+                      {isLikeNotification && item.message}{" "}
+                      {/* Mostrar el mensaje de like */}
+                      {item.type === "storyLike" &&
+                        t("notifications.likedYourStory")}
+                      {isNoteLikeNotification && item.message}
+                    </>
+                  )}
                 </Text>
                 {(isFriendRequest || isEventInvitation) && (
                   <View style={styles.buttonContainer}>
@@ -696,9 +845,23 @@ export default function NotificationsComponent() {
                           ? handleAcceptRequest(item)
                           : handleAcceptEventInvitation(item)
                       }
-                      style={[styles.acceptButton, { backgroundColor: isNightMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(128, 128, 128, 0.3)' }]}
+                      style={[
+                        styles.acceptButton,
+                        {
+                          backgroundColor: isNightMode
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(128, 128, 128, 0.3)",
+                        },
+                      ]}
                     >
-                      <Text style={[styles.buttonText, { color: isNightMode ? '#fff' : '#000' }]}>{t('notifications.accept')}</Text>
+                      <Text
+                        style={[
+                          styles.buttonText,
+                          { color: isNightMode ? "#fff" : "#000" },
+                        ]}
+                      >
+                        {t("notifications.accept")}
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() =>
@@ -706,9 +869,23 @@ export default function NotificationsComponent() {
                           ? handleRejectRequest(item)
                           : handleRejectEventInvitation(item)
                       }
-                      style={[styles.rejectButton, { backgroundColor: isNightMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(128, 128, 128, 0.3)' }]}
+                      style={[
+                        styles.rejectButton,
+                        {
+                          backgroundColor: isNightMode
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(128, 128, 128, 0.3)",
+                        },
+                      ]}
                     >
-                      <Text style={[styles.buttonText, { color: isNightMode ? '#fff' : '#000' }]}>{t('notifications.reject')}</Text>
+                      <Text
+                        style={[
+                          styles.buttonText,
+                          { color: isNightMode ? "#fff" : "#000" },
+                        ]}
+                      >
+                        {t("notifications.reject")}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -719,7 +896,7 @@ export default function NotificationsComponent() {
       )
     );
   };
-  
+
   if (isLoading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
@@ -731,7 +908,7 @@ export default function NotificationsComponent() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient
-        colors={isNightMode ? ['#1a1a1a', '#000'] : ['#fff', '#f0f0f0']}
+        colors={isNightMode ? ["#1a1a1a", "#000"] : ["#fff", "#f0f0f0"]}
         style={styles.container}
       >
         <FlatList
@@ -772,6 +949,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 12,
     borderBottomWidth: 2,
+    borderBottomColor: "#ccc",
   },
   timeContainer: {
     alignItems: "center",
@@ -800,6 +978,7 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontWeight: "bold",
+    marginBottom: 4,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -820,5 +999,11 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: "bold",
     textAlign: "center",
+  },
+  notificationImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 10,
   },
 });
