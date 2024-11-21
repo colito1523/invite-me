@@ -315,74 +315,31 @@ export default function UserProfile({ route, navigation }) {
     checkHiddenStatus();
   }, [user, selectedUser]);
 
-  const toggleHideStories = async () => {
-    if (!user || !selectedUser) return;
-
-    const userRef = doc(database, "users", user.uid);
-    try {
-      if (hideStories) {
-        await updateDoc(userRef, {
-          hiddenStories: arrayRemove(selectedUser.id),
-        });
-      } else {
-        await updateDoc(userRef, {
-          hiddenStories: arrayUnion(selectedUser.id),
-        });
+  useEffect(() => {
+    const checkHideMyStoriesStatus = async () => {
+      if (!user || !selectedUser) return;
+  
+      const selectedUserRef = doc(database, "users", selectedUser.id);
+  
+      try {
+        const selectedUserDoc = await getDoc(selectedUserRef);
+        if (!selectedUserDoc.exists()) return;
+  
+        const selectedUserData = selectedUserDoc.data();
+        const isHidden = selectedUserData.hideStoriesFrom?.includes(user.uid) || false;
+  
+        setHideMyStories(isHidden);
+      } catch (error) {
+        console.error("Error fetching hideStoriesFrom status:", error);
       }
-      setHideStories(!hideStories);
-      Alert.alert(
-        t("userProfile.success"),
-        hideStories
-          ? t("userProfile.willSeeStories")
-          : t("userProfile.willNotSeeStories")
-      );
-    } catch (error) {
-      console.error("Error updating story visibility:", error);
-      Alert.alert(
-        t("userProfile.error"),
-        t("userProfile.storySettingsUpdateError")
-      );
-    }
-  };
+    };
+  
+    checkHideMyStoriesStatus();
+  }, [user, selectedUser]);
 
-  const toggleHideMyStories = async () => {
-    if (!user || !selectedUser) return;
 
-    const userRef = doc(database, "users", user.uid);
-    const selectedUserRef = doc(database, "users", selectedUser.id);
 
-    try {
-      if (hideMyStories) {
-        await updateDoc(userRef, {
-          hideStoriesFrom: arrayRemove(selectedUser.id),
-        });
-        await updateDoc(selectedUserRef, {
-          hiddenStories: arrayRemove(user.uid),
-        });
-      } else {
-        await updateDoc(userRef, {
-          hideStoriesFrom: arrayUnion(selectedUser.id),
-        });
-        await updateDoc(selectedUserRef, {
-          hiddenStories: arrayUnion(user.uid),
-        });
-      }
-
-      setHideMyStories(!hideMyStories);
-      Alert.alert(
-        t("userProfile.success"),
-        hideMyStories
-          ? t("userProfile.userCanSeeStories")
-          : t("userProfile.userCannotSeeStories")
-      );
-    } catch (error) {
-      console.error("Error updating my stories visibility:", error);
-      Alert.alert(
-        t("userProfile.error"),
-        t("userProfile.myStorySettingsUpdateError")
-      );
-    }
-  };
+ 
 
 
   const handleLikeProfile = async () => {
@@ -783,6 +740,102 @@ export default function UserProfile({ route, navigation }) {
     });
   };
 
+  const handleToggleHiddenStories = async () => {
+    if (!user || !selectedUser) return;
+  
+    const userRef = doc(database, "users", user.uid);
+  
+    try {
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+      const currentHiddenStories = userData.hiddenStories || [];
+  
+      if (currentHiddenStories.includes(selectedUser.id)) {
+        // Si el UID ya está en la lista, lo eliminamos
+        await updateDoc(userRef, {
+          hiddenStories: arrayRemove(selectedUser.id),
+        });
+        Alert.alert(
+          t("userProfile.success"),
+          t("userProfile.removedFromHiddenStories")
+        );
+      } else {
+        // Si no está en la lista, lo añadimos
+        await updateDoc(userRef, {
+          hiddenStories: arrayUnion(selectedUser.id),
+        });
+        Alert.alert(
+          t("userProfile.success"),
+          t("userProfile.addedToHiddenStories")
+        );
+      }
+  
+      // Actualizamos el estado local para reflejar el cambio
+      setHideStories(!hideStories);
+    } catch (error) {
+      console.error("Error updating hidden stories:", error);
+      Alert.alert(
+        t("userProfile.error"),
+        t("userProfile.hiddenStoriesUpdateError")
+      );
+    }
+  };
+
+  const toggleHideMyStories = async () => {
+    if (!user || !selectedUser) return;
+  
+    const selectedUserRef = doc(database, "users", selectedUser.id);
+  
+    try {
+      // Obtener los datos actuales del usuario seleccionado
+      const selectedUserDoc = await getDoc(selectedUserRef);
+      if (!selectedUserDoc.exists()) {
+        Alert.alert(
+          t("userProfile.error"),
+          t("userProfile.userNotFound")
+        );
+        return;
+      }
+  
+      const selectedUserData = selectedUserDoc.data();
+      const currentHideStoriesFrom = selectedUserData.hideStoriesFrom || [];
+  
+      if (currentHideStoriesFrom.includes(user.uid)) {
+        // Si nuestro UID ya está en su lista, lo eliminamos
+        await updateDoc(selectedUserRef, {
+          hideStoriesFrom: arrayRemove(user.uid),
+        });
+        Alert.alert(
+          t("userProfile.success"),
+          t("userProfile.removedFromHideStories")
+        );
+      } else {
+        // Si nuestro UID no está en su lista, lo añadimos
+        await updateDoc(selectedUserRef, {
+          hideStoriesFrom: arrayUnion(user.uid),
+        });
+        Alert.alert(
+          t("userProfile.success"),
+          t("userProfile.addedToHideStories")
+        );
+      }
+  
+      // Actualizar el estado local para reflejar el cambio
+      setHideMyStories(!hideMyStories);
+    } catch (error) {
+      console.error("Error updating hide stories:", error);
+      Alert.alert(
+        t("userProfile.error"),
+        t("userProfile.hideStoriesUpdateError")
+      );
+    }
+  };
+  
+  
+  
+
+  
+
   const toggleUserStatus = async () => {
     if (!user || !selectedUser) return;
 
@@ -1117,7 +1170,7 @@ export default function UserProfile({ route, navigation }) {
                   title={t("userProfile.report")}
                 />
                 <Menu.Item
-                  onPress={toggleHideStories}
+                  onPress={handleToggleHiddenStories}
                   title={
                     hideStories
                       ? t("userProfile.seeTheirStories")

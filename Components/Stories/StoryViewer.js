@@ -13,7 +13,7 @@ import {
   Alert,
   Keyboard,
   SafeAreaView,
-  ActivityIndicator, 
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../config/firebase";
@@ -34,7 +34,6 @@ import { useTranslation } from "react-i18next";
 import Complaints from "../Complaints/Complaints";
 import { KeyboardAvoidingView, Platform } from "react-native";
 
-
 const { width, height } = Dimensions.get("window");
 
 export function StoryViewer({
@@ -42,14 +41,14 @@ export function StoryViewer({
   initialIndex,
   onClose,
   onStoryDeleted,
-  unseenStories, 
+  unseenStories,
   navigation,
 }) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [storyIndex, setStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [localUnseenStories, setLocalUnseenStories] = useState(unseenStories); 
+  const [localUnseenStories, setLocalUnseenStories] = useState(unseenStories);
   const [message, setMessage] = useState("");
   const [viewersModalVisible, setViewersModalVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -74,54 +73,53 @@ export function StoryViewer({
 
   const toggleHideMyStories = async (viewer) => {
     if (!user || !viewer) return;
-  
-    const viewerRef = doc(database, "users", viewer.uid); // Referencia al usuario que verá la historia
-  
+
+    const viewerRef = doc(database, "users", viewer.uid);
+
     try {
-      // Obtener el documento del usuario para verificar si el campo `hiddenStories` ya existe
       const viewerDoc = await getDoc(viewerRef);
       const viewerData = viewerDoc.data();
-      const hiddenStories = viewerData.hiddenStories || []; // Si no existe, inicializa como un array vacío
-  
-      if (hiddenStories.includes(user.uid)) {
-        // Si el `uid` ya está en `hiddenStories`, eliminarlo
+      const hideStoriesFrom = viewerData.hideStoriesFrom || [];
+
+      let updatedHideStoriesFrom;
+      if (hideStoriesFrom.includes(user.uid)) {
+        updatedHideStoriesFrom = hideStoriesFrom.filter(
+          (uid) => uid !== user.uid
+        );
         await updateDoc(viewerRef, {
-          hiddenStories: arrayRemove(user.uid),
+          hideStoriesFrom: updatedHideStoriesFrom,
         });
         Alert.alert(
           t("storyViewer.success"),
           t("storyViewer.viewerCanSeeStories")
         );
       } else {
-        // Si no está oculto, agregar el `uid` del usuario actual a `hiddenStories`
+        updatedHideStoriesFrom = [...hideStoriesFrom, user.uid];
         await updateDoc(viewerRef, {
-          hiddenStories: arrayUnion(user.uid),
+          hideStoriesFrom: updatedHideStoriesFrom,
         });
         Alert.alert(
           t("storyViewer.success"),
           t("storyViewer.viewerCannotSeeStories")
         );
       }
+
+      setSelectedViewer((prev) => ({
+        ...prev,
+        hideStoriesFrom: updatedHideStoriesFrom,
+      }));
     } catch (error) {
-      console.error("Error updating story visibility:", error);
+      console.error("Error updating hideStoriesFrom:", error);
       Alert.alert(
         t("storyViewer.error"),
         t("storyViewer.storySettingsUpdateError")
       );
     }
   };
-  
-
-
 
   const handleThreeDotsPress = (viewer) => {
     setSelectedViewer(viewer); // Almacenar el espectador actual
     setIsHideStoryModalVisible(true);
-  };
-
-  const handleHideMyStories = () => {
-    toggleHideMyStories(selectedViewer);
-    setIsHideStoryModalVisible(false);
   };
 
   const getChatId = async (user1Id, user2Id) => {
@@ -144,8 +142,6 @@ export function StoryViewer({
     }
   }, [isComplaintsVisible, isOptionsModalVisible, isKeyboardVisible]);
 
-  
-
   const handleCloseViewer = () => {
     onClose(localUnseenStories); // Envía el estado actualizado de `localUnseenStories` a `StorySlider.js`
   };
@@ -155,7 +151,7 @@ export function StoryViewer({
       try {
         const user = auth.currentUser;
         if (!user) return;
-  
+
         const userDoc = await getDoc(doc(database, "users", user.uid));
         const blockedList = userDoc.data()?.blockedUsers || [];
         setBlockedUsers(blockedList);
@@ -163,10 +159,10 @@ export function StoryViewer({
         console.error("Error fetching blocked users:", error);
       }
     };
-  
+
     fetchBlockedUsers();
   }, []);
-  
+
   useEffect(() => {
     let timer;
     if (!isPaused && !isKeyboardVisible && !isComplaintsVisible) {
@@ -215,12 +211,12 @@ export function StoryViewer({
 
   useEffect(() => {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
-  
+
     // Si `currentStory` no está disponible, no continúes y muestra un indicador de carga
     if (!currentStory) {
       return;
     }
-  
+
     if (auth.currentUser) {
       addViewerToStory(currentStory.id, currentStory.uid);
       const userHasLiked = currentStory.likes?.some(
@@ -228,11 +224,10 @@ export function StoryViewer({
       );
       setHasLiked(userHasLiked || false);
     }
-  
+
     // Pre-cargar la siguiente historia si existe
     preloadNextStory();
   }, [currentIndex, storyIndex]);
-  
 
   const preloadNextStory = () => {
     let nextStoryUrl = null;
@@ -296,29 +291,33 @@ export function StoryViewer({
     if (!user || !currentStory) return;
 
     const userRef = doc(database, "users", user.uid);
+
     try {
-      if (hideStories) {
-        await updateDoc(userRef, {
-          hiddenStories: arrayRemove(currentStory.uid),
-        });
+      // Obtener el documento del usuario actual
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+      const hiddenStories = userData.hiddenStories || [];
+
+      // Verificar si el UID ya está en la lista
+      if (hiddenStories.includes(currentStory.uid)) {
+        Alert.alert(t("storyViewer.info"), t("storyViewer.alreadyHidden"));
       } else {
+        // Agregar el UID al campo `hiddenStories`
         await updateDoc(userRef, {
           hiddenStories: arrayUnion(currentStory.uid),
         });
+
+        Alert.alert(
+          t("storyViewer.success"),
+          t("storyViewer.hiddenSuccessfully")
+        );
+
+        // Cerrar el visor de historias después de agregar el UID
+        onClose(localUnseenStories); // Llama a la función `onClose` para cerrar el visor
       }
-      setHideStories(!hideStories);
-      Alert.alert(
-        t("userProfile.success"),
-        hideStories
-          ? t("userProfile.willSeeStories")
-          : t("userProfile.willNotSeeStories")
-      );
     } catch (error) {
-      console.error("Error updating story visibility:", error);
-      Alert.alert(
-        t("userProfile.error"),
-        t("userProfile.storySettingsUpdateError")
-      );
+      console.error("Error updating hidden stories:", error);
+      Alert.alert(t("storyViewer.error"), t("storyViewer.hideError"));
     }
   };
 
@@ -502,11 +501,11 @@ export function StoryViewer({
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
 
     // Verificar si currentStory es undefined antes de acceder a sus propiedades
-  if (!currentStory) {
-    onClose(localUnseenStories);
-    return;
-  }
-  
+    if (!currentStory) {
+      onClose(localUnseenStories);
+      return;
+    }
+
     if (localUnseenStories[currentStory.uid]?.length > 0) {
       setLocalUnseenStories((prev) => ({
         ...prev,
@@ -515,7 +514,7 @@ export function StoryViewer({
         ),
       }));
     }
-  
+
     if (storyIndex < stories[currentIndex]?.userStories.length - 1) {
       setStoryIndex((prev) => prev + 1);
       setProgress(0);
@@ -527,7 +526,6 @@ export function StoryViewer({
       onClose(localUnseenStories); // Pasa el estado actualizado de vuelta
     }
   };
-  
 
   const handlePrevious = () => {
     if (storyIndex > 0) {
@@ -557,12 +555,12 @@ export function StoryViewer({
           // Obtener los IDs de usuario
           const senderId = user.uid;
           const receiverId = currentStory.uid;
-          
+
           // Verificar si ya existe un chat entre estos dos usuarios
           const chatId = await getChatId(senderId, receiverId);
           const chatRef = doc(database, "chats", chatId);
           const chatDoc = await getDoc(chatRef);
-  
+
           if (!chatDoc.exists()) {
             // Crear un nuevo chat si no existe
             await setDoc(chatRef, {
@@ -571,7 +569,7 @@ export function StoryViewer({
               lastMessage: "",
             });
           }
-  
+
           // Crear el mensaje de respuesta a la historia
           const messagesRef = collection(database, "chats", chatId, "messages");
           const newMessage = {
@@ -583,17 +581,17 @@ export function StoryViewer({
             storyUrl: currentStory.storyUrl,
             isStoryResponse: true, // Indicar que es una respuesta a una historia
           };
-  
+
           // Guardar el mensaje en la colección de chats
           await addDoc(messagesRef, newMessage);
-  
+
           // Actualizar el último mensaje en la referencia del chat
           await updateDoc(chatRef, {
             lastMessage: message,
             lastMessageSenderId: user.uid,
             lastMessageTimestamp: new Date(),
           });
-  
+
           // Vaciar el campo de mensaje, cerrar el teclado y continuar la historia
           setMessage("");
           Keyboard.dismiss(); // Cerrar el teclado
@@ -610,9 +608,6 @@ export function StoryViewer({
       }
     }
   };
-  
-  
-  
 
   const handleLongPressIn = () => {
     longPressTimeout.current = setTimeout(() => {
@@ -639,7 +634,6 @@ export function StoryViewer({
       }
     },
   });
-  
 
   const handleOpenViewersModal = () => {
     setIsPaused(true);
@@ -756,17 +750,16 @@ export function StoryViewer({
           style={styles.viewerEditButton}
           onPress={() => handlePinViewer(item)}
         >
-        <AntDesign
-          name="pushpino"
-          size={18}
-          color={isPinned ? "#007AFF" : "#000"}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleThreeDotsPress(item)}>
+          <AntDesign
+            name="pushpino"
+            size={18}
+            color={isPinned ? "#007AFF" : "#000"}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleThreeDotsPress(item)}>
           <Entypo name="dots-three-horizontal" size={18} color="#000" />
         </TouchableOpacity>
-
-    </TouchableOpacity>
+      </TouchableOpacity>
     );
   };
 
@@ -777,313 +770,325 @@ export function StoryViewer({
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // Ajusta según la interfaz
-    >
-      <View style={styles.container} {...panResponder.panHandlers}>
-        <TouchableWithoutFeedback
-          onPressIn={handleLongPressIn}
-          onPressOut={handleLongPressOut}
-          onPress={handleTap}
-        >
-          <View style={styles.storyContainer}>
-            <View style={styles.progressContainer}>
-              {stories[currentIndex]?.userStories.map((_, index) => (
-                <View key={index} style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progress,
-                      {
-                        width:
-                          index === storyIndex
-                            ? `${progress * 100}%`
-                            : index < storyIndex
-                            ? "100%"
-                            : "0%",
-                      },
-                    ]}
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // Ajusta según la interfaz
+      >
+        <View style={styles.container} {...panResponder.panHandlers}>
+          <TouchableWithoutFeedback
+            onPressIn={handleLongPressIn}
+            onPressOut={handleLongPressOut}
+            onPress={handleTap}
+          >
+            <View style={styles.storyContainer}>
+              <View style={styles.progressContainer}>
+                {stories[currentIndex]?.userStories.map((_, index) => (
+                  <View key={index} style={styles.progressBar}>
+                    <View
+                      style={[
+                        styles.progress,
+                        {
+                          width:
+                            index === storyIndex
+                              ? `${progress * 100}%`
+                              : index < storyIndex
+                              ? "100%"
+                              : "0%",
+                        },
+                      ]}
+                    />
+                  </View>
+                ))}
+              </View>
+              <Image
+                cachePolicy="memory-disk"
+                key={currentStory.id}
+                source={{ uri: currentStory.storyUrl }}
+                style={styles.image}
+                onLoadStart={() => setIsImageLoading(true)}
+                onLoadEnd={() => setIsImageLoading(false)}
+                onLoad={() =>
+                  setLoadedImages((prev) => ({
+                    ...prev,
+                    [currentStory.storyUrl]: true,
+                  }))
+                }
+              />
+              {isImageLoading && (
+                <ActivityIndicator size={50} color="#FFFFFF" />
+              )}
+              <View style={styles.userInfo}>
+                <View style={styles.userDetails}>
+                  <Image
+                    source={{ uri: stories[currentIndex]?.profileImage }}
+                    style={styles.avatar}
+                    cachePolicy="memory-disk"
                   />
+                  <Text style={styles.username}>
+                    {`${stories[currentIndex]?.username} ${
+                      stories[currentIndex]?.lastName || ""
+                    }`}
+                  </Text>
                 </View>
-              ))}
-            </View>
-            <Image
-              cachePolicy="memory-disk"
-              key={currentStory.id}
-              source={{ uri: currentStory.storyUrl }}
-              style={styles.image}
-              onLoadStart={() => setIsImageLoading(true)}
-              onLoadEnd={() => setIsImageLoading(false)}
-              onLoad={() =>
-                setLoadedImages((prev) => ({
-                  ...prev,
-                  [currentStory.storyUrl]: true,
-                }))
-              }
-            />
-            {isImageLoading && (
-              <ActivityIndicator size={50} color="#FFFFFF" />
-            )}
-            <View style={styles.userInfo}>
-              <View style={styles.userDetails}>
-                <Image
-                  source={{ uri: stories[currentIndex]?.profileImage }}
-                  style={styles.avatar}
-                  cachePolicy="memory-disk"
-                />
-                <Text style={styles.username}>
-                  {`${stories[currentIndex]?.username} ${
-                    stories[currentIndex]?.lastName || ""
-                  }`}
-                </Text>
+                <View style={styles.rightInfo}>
+                  <Text style={styles.timeAgo}>
+                    {t("storyViewer.hoursAgo", { hours: hoursAgo })}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setIsOptionsModalVisible(true)}
+                  >
+                    <Ionicons
+                      name="ellipsis-horizontal"
+                      size={24}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={styles.rightInfo}>
-                <Text style={styles.timeAgo}>
-                  {t("storyViewer.hoursAgo", { hours: hoursAgo })}
-                </Text>
+            </View>
+          </TouchableWithoutFeedback>
+
+          {showSendConfirmation && (
+            <View style={styles.sendConfirmation}>
+              <Text style={styles.sendConfirmationText}>Mensaje enviado</Text>
+            </View>
+          )}
+
+          {!isFirstStory && (
+            <TouchableOpacity
+              style={[styles.navButton, styles.leftButton]}
+              onPress={handlePrevious}
+            ></TouchableOpacity>
+          )}
+
+          {!isLastStory && (
+            <TouchableOpacity
+              style={[styles.navButton, styles.rightButton]}
+              onPress={handleNext}
+            ></TouchableOpacity>
+          )}
+
+          {!isCurrentUserStory && (
+            <View style={styles.messageContainer}>
+              <TextInput
+                style={styles.messageInput}
+                placeholder={t("storyViewer.typePlaceholder")}
+                placeholderTextColor="#FFFFFF"
+                value={message}
+                onChangeText={(text) => setMessage(text)}
+                onFocus={() => setIsPaused(true)}
+                onBlur={() => setIsPaused(false)}
+              />
+              {message.trim().length > 0 && (
                 <TouchableOpacity
-                  onPress={() => setIsOptionsModalVisible(true)}
+                  style={styles.iconButton}
+                  onPress={handleSendMessage}
                 >
-                  <Ionicons
-                    name="ellipsis-horizontal"
-                    size={24}
-                    color="white"
-                  />
+                  <Ionicons name="send" size={24} color="#FFFFFF" />
                 </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-
-        {showSendConfirmation && (
-      <View style={styles.sendConfirmation}>
-        <Text style={styles.sendConfirmationText}>Mensaje enviado</Text>
-      </View>
-    )}
-
-        {!isFirstStory && (
-          <TouchableOpacity
-            style={[styles.navButton, styles.leftButton]}
-            onPress={handlePrevious}
-          ></TouchableOpacity>
-        )}
-
-        {!isLastStory && (
-          <TouchableOpacity
-            style={[styles.navButton, styles.rightButton]}
-            onPress={handleNext}
-          ></TouchableOpacity>
-        )}
-
-        {!isCurrentUserStory && (
-          <View style={styles.messageContainer}>
-            <TextInput
-              style={styles.messageInput}
-              placeholder={t("storyViewer.typePlaceholder")}
-              placeholderTextColor="#FFFFFF"
-              value={message}
-              onChangeText={(text) => setMessage(text)}
-              onFocus={() => setIsPaused(true)}
-              onBlur={() => setIsPaused(false)}
-            />
-            {message.trim().length > 0 && (
+              )}
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={handleSendMessage}
+                onPress={handleLikeStory}
               >
-                <Ionicons name="send" size={24} color="#FFFFFF" />
+                <Ionicons
+                  name={hasLiked ? "heart" : "heart-outline"}
+                  size={24}
+                  color={hasLiked ? "red" : "#FFFFFF"}
+                />
               </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={handleLikeStory}
-            >
-              <Ionicons
-                name={hasLiked ? "heart" : "heart-outline"}
-                size={24}
-                color={hasLiked ? "red" : "#FFFFFF"}
-              />
-            </TouchableOpacity>
-          </View>
-        )}
+            </View>
+          )}
 
-        {isCurrentUserStory && (
-          <TouchableOpacity
-            style={styles.viewersButton}
-            onPress={handleOpenViewersModal}
+          {isCurrentUserStory && (
+            <TouchableOpacity
+              style={styles.viewersButton}
+              onPress={handleOpenViewersModal}
+            >
+              <Entypo name="chevron-thin-up" size={24} color="white" />
+            </TouchableOpacity>
+          )}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={viewersModalVisible}
+            onRequestClose={handleCloseViewersModal}
           >
-            <Entypo name="chevron-thin-up" size={24} color="white" />
-          </TouchableOpacity>
-        )}
+            <TouchableWithoutFeedback onPress={handleCloseViewersModal}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.viewersModalContainer}>
+                    <View style={styles.viewersModalContent}>
+                      <View style={styles.viewersModalHeader}>
+                        <View style={styles.searchContainer}>
+                          <Ionicons
+                            name="search"
+                            size={20}
+                            color="black"
+                            style={styles.searchIcon}
+                          />
+                          <TextInput
+                            style={styles.searchInput}
+                            placeholder={t("storyViewer.searchPlaceholder")}
+                            placeholderTextColor="black"
+                            value={searchQuery}
+                            onChangeText={handleSearch}
+                          />
+                          <View style={styles.searchInputDivider} />
+                          <Text style={styles.searchInputCount}>
+                            {filteredViewers.length}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          style={styles.deleteButton}
+                          onPress={deleteStory}
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={20}
+                            color="black"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      <Text style={styles.viewersTitle}>
+                        {t("storyViewer.viewers")}
+                      </Text>
+                      <FlatList
+                        data={filteredViewers}
+                        renderItem={renderViewerItem}
+                        keyExtractor={(item) => item.uid}
+                      />
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </View>
+
         <Modal
           animationType="slide"
           transparent={true}
-          visible={viewersModalVisible}
-          onRequestClose={handleCloseViewersModal}
+          visible={isOptionsModalVisible}
+          onRequestClose={() => setIsOptionsModalVisible(false)}
         >
-          <TouchableWithoutFeedback onPress={handleCloseViewersModal}>
+          <TouchableWithoutFeedback
+            onPress={() => setIsOptionsModalVisible(false)}
+          >
             <View style={styles.modalOverlay}>
               <TouchableWithoutFeedback>
-                <View style={styles.viewersModalContainer}>
-                  <View style={styles.viewersModalContent}>
-                    <View style={styles.viewersModalHeader}>
-                      <View style={styles.searchContainer}>
-                        <Ionicons
-                          name="search"
-                          size={20}
-                          color="black"
-                          style={styles.searchIcon}
-                        />
-                        <TextInput
-                          style={styles.searchInput}
-                          placeholder={t("storyViewer.searchPlaceholder")}
-                          placeholderTextColor="black"
-                          value={searchQuery}
-                          onChangeText={handleSearch}
-                        />
-                        <View style={styles.searchInputDivider} />
-                        <Text style={styles.searchInputCount}>
-                          {filteredViewers.length}
-                        </Text>
-                      </View>
+                <View style={styles.optionsModalContainer}>
+                  {isCurrentUserStory ? (
+                    // Opción solo para el dueño
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => {
+                        setIsOptionsModalVisible(false);
+                        deleteStory(); // Llamamos a la función de eliminar historia
+                      }}
+                    >
+                      <Text style={styles.deleteButtonText}>Eliminar</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    // Opciones para otros usuarios
+                    <>
                       <TouchableOpacity
-                        style={styles.deleteButton}
-                        onPress={deleteStory}
+                        style={styles.optionButton}
+                        onPress={() => {
+                          setIsOptionsModalVisible(false);
+                          toggleHideStories(); // Llama a la función para ocultar historias y cerrar el visor
+                        }}
                       >
-                        <Ionicons name="trash-outline" size={20} color="black" />
+                        <Text style={styles.optionButtonText}>
+                          No ver mas historias
+                        </Text>
                       </TouchableOpacity>
-                    </View>
-                    <Text style={styles.viewersTitle}>
-                      {t("storyViewer.viewers")}
-                    </Text>
-                    <FlatList
-                      data={filteredViewers}
-                      renderItem={renderViewerItem}
-                      keyExtractor={(item) => item.uid}
-                    />
-                  </View>
+                      <TouchableOpacity
+                        style={styles.optionButton}
+                        onPress={() => {
+                          setIsOptionsModalVisible(false);
+                          setIsComplaintsVisible(true); // Abre el modal de denuncias
+                        }}
+                      >
+                        <Text style={styles.optionButtonText}>Denunciar</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
                 </View>
               </TouchableWithoutFeedback>
             </View>
           </TouchableWithoutFeedback>
         </Modal>
-      </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isOptionsModalVisible}
-        onRequestClose={() => setIsOptionsModalVisible(false)}
-      >
-        <TouchableWithoutFeedback
-          onPress={() => setIsOptionsModalVisible(false)}
+        <Complaints
+          isVisible={isComplaintsVisible}
+          onClose={() => setIsComplaintsVisible(false)}
+          onSubmit={async (reason, description) => {
+            setIsSubmittingReport(true);
+            try {
+              const currentStory =
+                stories[currentIndex]?.userStories[storyIndex];
+
+              // Validación para asegurar que `currentStory` y sus datos están disponibles
+              if (!currentStory || !currentStory.uid || !currentStory.id) {
+                Alert.alert(
+                  "Error",
+                  "No se encontró la historia o los datos necesarios."
+                );
+                setIsSubmittingReport(false);
+                return;
+              }
+
+              const reportData = {
+                reason,
+                description: description || "Sin descripción",
+                reportedBy: auth.currentUser.uid,
+                storyOwner: currentStory.uid,
+                storyId: currentStory.id,
+                timestamp: new Date(),
+              };
+
+              await addDoc(collection(database, "reports"), reportData);
+              Alert.alert("Denuncia enviada", "Gracias por tu reporte.");
+              setIsComplaintsVisible(false);
+            } catch (error) {
+              console.error("Error al enviar la denuncia:", error);
+              Alert.alert("Error", "No se pudo enviar la denuncia.");
+            } finally {
+              setIsSubmittingReport(false);
+            }
+          }}
+        />
+
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={isHideStoryModalVisible}
+          onRequestClose={() => setIsHideStoryModalVisible(false)}
         >
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={styles.optionsModalContainer}>
-                {isCurrentUserStory ? (
-                  // Opción solo para el dueño
+          <TouchableWithoutFeedback
+            onPress={() => setIsHideStoryModalVisible(false)}
+          >
+            <View style={styles.modalOverlay2}>
+              <TouchableWithoutFeedback>
+                <View style={styles.simpleModalContainer}>
                   <TouchableOpacity
-                    style={styles.deleteButton}
                     onPress={() => {
-                      setIsOptionsModalVisible(false);
-                      deleteStory(); // Llamamos a la función de eliminar historia
+                      toggleHideMyStories(selectedViewer);
+                      setIsHideStoryModalVisible(false);
                     }}
                   >
-                    <Text style={styles.deleteButtonText}>Eliminar</Text>
+                    <Text style={styles.simpleModalText}>
+                      {selectedViewer?.hideStoriesFrom?.includes(user.uid)
+                        ? "Mostrar mis historias"
+                        : "Ocultar mis historias"}
+                    </Text>
                   </TouchableOpacity>
-                ) : (
-                  // Opciones para otros usuarios
-                  <>
-                    <TouchableOpacity
-                      style={styles.optionButton}
-                      onPress={() => {
-                        setIsOptionsModalVisible(false);
-                        toggleHideStories(); // Llama a la función para ocultar historias
-                      }}
-                    >
-                      <Text style={styles.optionButtonText}>
-                        No ver más historias
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.optionButton}
-                      onPress={() => {
-                        setIsOptionsModalVisible(false);
-                        setIsComplaintsVisible(true); // Abre el modal de denuncias
-                      }}
-                    >
-                      <Text style={styles.optionButtonText}>Denunciar</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-
-      <Complaints
-  isVisible={isComplaintsVisible}
-  onClose={() => setIsComplaintsVisible(false)}
-  onSubmit={async (reason, description) => {
-    setIsSubmittingReport(true);
-    try {
-      const currentStory = stories[currentIndex]?.userStories[storyIndex];
-      
-      // Validación para asegurar que `currentStory` y sus datos están disponibles
-      if (!currentStory || !currentStory.uid || !currentStory.id) {
-        Alert.alert("Error", "No se encontró la historia o los datos necesarios.");
-        setIsSubmittingReport(false);
-        return;
-      }
-
-      const reportData = {
-        reason,
-        description: description || "Sin descripción",
-        reportedBy: auth.currentUser.uid,
-        storyOwner: currentStory.uid,
-        storyId: currentStory.id,
-        timestamp: new Date(),
-      };
-
-      await addDoc(collection(database, "reports"), reportData);
-      Alert.alert("Denuncia enviada", "Gracias por tu reporte.");
-      setIsComplaintsVisible(false);
-    } catch (error) {
-      console.error("Error al enviar la denuncia:", error);
-      Alert.alert("Error", "No se pudo enviar la denuncia.");
-    } finally {
-      setIsSubmittingReport(false);
-    }
-  }}
-/>
-
-<Modal
-        animationType="fade"
-        transparent={true}
-        visible={isHideStoryModalVisible}
-        onRequestClose={() => setIsHideStoryModalVisible(false)}
-      >
-        <TouchableWithoutFeedback
-          onPress={() => setIsHideStoryModalVisible(false)}
-        >
-          <View style={styles.modalOverlay2}>
-            <TouchableWithoutFeedback>
-              <View style={styles.simpleModalContainer}>
-                <TouchableOpacity onPress={handleHideMyStories}>
-                  <Text style={styles.simpleModalText}>
-                    {selectedViewer?.uid &&
-                    user?.hideStoriesFrom?.includes(selectedViewer.uid)
-                      ? "Mostrar mis historias"
-                      : "Ocultar mis historias"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -1358,7 +1363,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
   },
-  
 });
 
 export default StoryViewer;

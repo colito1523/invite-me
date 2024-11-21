@@ -99,13 +99,14 @@ export default function StorySlider() {
       const userData = userDoc.data();
       const hiddenStories = userData.hiddenStories || [];
       const hideStoriesFrom = userData.hideStoriesFrom || [];
+      const blockedUsers = userData.blockedUsers || [];
   
       const friendsList = await getFriendsList(user.uid);
       const loadedStories = [];
-      const unseenStoriesTemp = {}; // Temporal para almacenar historias no vistas
+      const unseenStoriesTemp = {};
       const now = new Date();
   
-      // Cargar historias del usuario actual
+      // Filtrar historias propias
       const userStoriesRef = collection(database, "users", user.uid, "stories");
       const userStoriesSnapshot = await getDocs(userStoriesRef);
       const userStories = userStoriesSnapshot.docs
@@ -124,24 +125,16 @@ export default function StorySlider() {
         unseenStoriesTemp[user.uid] = userStories.filter(
           (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
         );
-      } else {
-        loadedStories.unshift({
-          uid: user.uid,
-          username: userData.firstName || t("storySlider.currentUser"),
-          lastName: userData.lastName || "",
-          profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-          userStories: [],
-        });
       }
   
-      // Cargar historias de amigos
+      // Filtrar historias de amigos
       for (let friend of friendsList) {
         if (
           hiddenStories.includes(friend.friendId) ||
           hideStoriesFrom.includes(friend.friendId) ||
-          blockedUsers.includes(friend.friendId) // Excluir amigos bloqueados
+          blockedUsers.includes(friend.friendId)
         ) {
-          continue;
+          continue; // Excluir a usuarios en estas listas
         }
   
         const friendStoriesRef = collection(database, "users", friend.friendId, "stories");
@@ -178,6 +171,7 @@ export default function StorySlider() {
       console.error(t("storySlider.loadStoriesError"), error);
     }
   };
+  
   
   
   
