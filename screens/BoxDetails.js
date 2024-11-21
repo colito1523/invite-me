@@ -33,6 +33,7 @@ import {
   arrayUnion,
   onSnapshot,
   arrayRemove,
+  writeBatch,
 } from "firebase/firestore";
 import { Image } from "expo-image";
 import DotIndicatorBoxDetails from "../Components/Dots/DotIndicatorBoxDetails";
@@ -40,6 +41,9 @@ import { useTranslation } from "react-i18next";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Header from "./BoxDetailsComponents/Header";
+import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
+import SliderContent from "./BoxDetailsComponents/SliderContent";
 
 const { width } = Dimensions.get("window");
 
@@ -67,7 +71,7 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  
+
 
   const closeModal = () => {
     setModalVisible(false);
@@ -82,20 +86,20 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   useEffect(() => {
     let unsubscribe;
-  
+
     if (box) {
       console.log("Datos del evento al entrar en BoxDetails:", box);
-  
+
       fetchEventDetails();
       checkEventStatus();
       fetchFriends();
       checkNightMode();
       checkAndRemoveExpiredEvents();
-  
+
       // Configura el listener en tiempo real para los asistentes
       unsubscribe = fetchAttendees();
     }
-  
+
     return () => {
       if (typeof unsubscribe === "function") {
         unsubscribe(); // Limpia el listener al salir del componente
@@ -103,9 +107,9 @@ export default memo(function BoxDetails({ route, navigation }) {
       console.log("Limpiando el efecto en BoxDetails");
     };
   }, [box, selectedDate]);
-  
-  
-  
+
+
+
 
   const checkAndRemoveExpiredEvents = async () => {
     const boxRef = doc(database, "GoBoxs", box.title);
@@ -194,7 +198,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       console.log("El evento no existe en la base de datos");
     }
   };
-  
+
   const fetchAttendees = () => {
     if (box) {
       const eventRef = doc(
@@ -202,39 +206,39 @@ export default memo(function BoxDetails({ route, navigation }) {
         box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
         box.eventId || box.id || box.title
       );
-  
+
       console.log("Referencia al evento:", eventRef.path);
-  
+
       // Usa `onSnapshot` para escuchar los cambios en tiempo real
       const unsub = onSnapshot(eventRef, async (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
           console.log("Datos del evento obtenidos:", data);
-  
+
           // Selección de asistentes según el tipo de evento
           const attendees =
             box.category === "EventoParaAmigos"
               ? data.attendees || [] // Para eventos privados
               : data[selectedDate] || []; // Para eventos generales
-  
+
           try {
             // Obtener la lista de usuarios bloqueados
             const userRef = doc(database, "users", auth.currentUser.uid);
             const userSnapshot = await getDoc(userRef);
             const blockedUsers = userSnapshot.data()?.blockedUsers || [];
-  
+
             // Filtrar los usuarios bloqueados
             const filteredAttendees = attendees.filter(
               (attendee) => !blockedUsers.includes(attendee.uid)
             );
-  
+
             // Procesa los asistentes para asegurar imágenes de perfil
             const uniqueAttendees = filteredAttendees.map((attendee) => ({
               ...attendee,
               profileImage:
                 attendee.profileImage || "https://via.placeholder.com/150",
             }));
-  
+
             console.log("Asistentes únicos procesados:", uniqueAttendees);
             setAttendeesList(uniqueAttendees);
           } catch (error) {
@@ -245,39 +249,39 @@ export default memo(function BoxDetails({ route, navigation }) {
           setAttendeesList([]); // Limpia la lista local si no existe
         }
       });
-  
+
       return unsub; // Devuelve la función para limpiar el listener
     }
   };
-  
+
 
   const handleGeneralEventInvite = async (friendId) => {
     const user = auth.currentUser;
     if (!user) return;
-  
+
     try {
       // Referencia al evento general
       const eventRef = doc(database, "GoBoxs", box.title);
       const eventDoc = await getDoc(eventRef);
-  
+
       if (!eventDoc.exists()) {
         Alert.alert("Error", "El evento no existe.");
         return;
       }
-  
+
       // Datos del evento
       const eventData = eventDoc.data();
       const eventImage = eventData.image || "https://via.placeholder.com/150"; // URL predeterminada si no hay imagen
       const eventDate = selectedDate || eventData.date || "Fecha no disponible";
       const eventTitle = box.title || eventData.title || "Evento General";
-  
+
       // Obtener nombre de usuario
       const userDocRef = doc(database, "users", user.uid);
       const userDocSnapshot = await getDoc(userDocRef);
       const fromName = userDocSnapshot.exists()
         ? userDocSnapshot.data().username || "Usuario Desconocido"
         : "Usuario Desconocido";
-  
+
       // Enviar notificación al amigo invitado
       const notificationRef = collection(database, "users", friendId, "notifications");
       await addDoc(notificationRef, {
@@ -290,72 +294,71 @@ export default memo(function BoxDetails({ route, navigation }) {
         status: "pendiente",
         timestamp: new Date(),
       });
-  
+
       Alert.alert("Invitación enviada", `Has invitado a un amigo al evento ${eventTitle}.`);
     } catch (error) {
       console.error("Error al invitar al evento general:", error);
       Alert.alert("Error", "No se pudo enviar la invitación.");
     }
   };
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 
   const handleRemoveFromEvent = async () => {
     const user = auth.currentUser;
     if (!user || !box) return;
-  
+
     try {
-      if (box.category === "EventoParaAmigos") {
-        // Eliminar del evento privado
-        const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
-        const eventDoc = await getDoc(eventRef);
-  
-        if (eventDoc.exists()) {
-          const eventData = eventDoc.data();
-  
-          // Filtrar al usuario actual de la lista de asistentes
-          const updatedAttendees = (eventData.attendees || []).filter(
-            (attendee) => attendee.uid !== user.uid
-          );
-  
-          // Actualizar la lista de asistentes en el documento del evento
-          await updateDoc(eventRef, {
-            attendees: updatedAttendees,
-          });
-  
-          console.log("Usuario eliminado de la lista de asistentes del evento privado.");
-          setAttendeesList(updatedAttendees);
-        }
-      } else {
-        // Eliminar del evento general
-        await handleRemoveFromGoBoxs(box.title, selectedDate);
-      }
-  
-      // Eliminar el evento de la colección de eventos del usuario
+      // Eliminar de la colección del usuario
       const userEventsRef = collection(database, "users", user.uid, "events");
       const q = query(userEventsRef, where("title", "==", box.title));
       const querySnapshot = await getDocs(q);
-  
+
       if (!querySnapshot.empty) {
-        const userEventDoc = querySnapshot.docs[0];
-        await deleteDoc(doc(userEventsRef, userEventDoc.id));
+        const batch = writeBatch(database);
+        querySnapshot.forEach((doc) => batch.delete(doc.ref));
+        await batch.commit();
+
         console.log("Evento eliminado de la colección del usuario.");
       }
-  
+
+      // Eliminar del evento privado (EventsPriv)
+      if (box.category === "EventoParaAmigos") {
+        const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
+
+        // Obtén el documento del evento para identificar al usuario en la lista de attendees
+        const eventSnapshot = await getDoc(eventRef);
+        if (eventSnapshot.exists()) {
+          const eventData = eventSnapshot.data();
+
+          const updatedAttendees = eventData.attendees.filter(
+            (attendee) => attendee.uid !== user.uid
+          );
+
+          // Actualiza la lista de asistentes sin el usuario
+          await updateDoc(eventRef, {
+            attendees: updatedAttendees,
+          });
+
+          console.log("Usuario eliminado de la lista de asistentes del evento privado.");
+        }
+      } else {
+        // Eliminar del evento general (GoBoxs)
+        await handleRemoveFromGoBoxs(box.title, selectedDate);
+      }
+
+      // Actualizamos el estado local para reflejar los cambios
       setIsEventSaved(false);
-      Alert.alert("Has marcado 'No voy'");
+      setAttendeesList((prev) => prev.filter((attendee) => attendee.uid !== user.uid));
     } catch (error) {
-      console.error("Error al eliminar del evento: ", error);
-      Alert.alert("Error", "No se pudo eliminar del evento");
+      console.error("Error al eliminar del evento:", error);
+      Alert.alert("Error", "No se pudo eliminar del evento, por favor intente más tarde.");
     }
   };
-  
-  
-  
 
   const fetchFriends = async () => {
     const user = auth.currentUser;
@@ -421,12 +424,12 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   const handleEditImage = async () => {
     const user = auth.currentUser;
-  
+
     if (!user || user.uid !== boxData.Admin) {
       Alert.alert("Acceso denegado", "Solo el administrador puede editar la imagen.");
       return;
     }
-  
+
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
         Alert.alert("Permiso denegado", "Se requieren permisos para acceder a tus fotos.");
@@ -479,7 +482,7 @@ export default memo(function BoxDetails({ route, navigation }) {
 
 const handleEditEvent = () => {
   const user = auth.currentUser;
-  
+
   if (!user || user.uid !== boxData.Admin) {
     Alert.alert("Acceso denegado", "Solo el administrador puede editar este evento.");
     return;
@@ -523,7 +526,7 @@ const handleSaveEdit = async () => {
 };
 
 
-  
+
   const renderEditModal = () => (
     <Modal
       visible={editModalVisible}
@@ -580,7 +583,7 @@ const handleSaveEdit = async () => {
   const handleInvite = async (friendId) => {
     const user = auth.currentUser;
     if (!user) return;
-  
+
     try {
       // Actualizar el estado local para marcar al usuario como invitado
       setFriends(
@@ -588,25 +591,25 @@ const handleSaveEdit = async () => {
           friend.friendId === friendId ? { ...friend, invited: true } : friend
         )
       );
-  
+
       // Obtener referencia del evento en Firestore
       const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
       const eventDoc = await getDoc(eventRef);
-  
+
       if (!eventDoc.exists()) {
         Alert.alert("Error", "El evento no existe.");
         return;
       }
-  
+
       const eventData = eventDoc.data();
       const invitedFriends = eventData.invitedFriends || [];
-  
+
       // Verificar si el usuario ya ha sido invitado
       if (invitedFriends.includes(friendId)) {
         Alert.alert("Este usuario ya ha sido invitado.");
         return;
       }
-  
+
       // Preparar datos del usuario que envía la invitación
       let fromName = user.displayName || "Usuario Desconocido";
       const userDocRef = doc(database, "users", user.uid);
@@ -615,10 +618,10 @@ const handleSaveEdit = async () => {
         const userData = userDocSnapshot.data();
         fromName = userData.username || fromName;
       }
-  
+
       const eventDateTimestamp = box.date || new Date();
       let eventDateFormatted = "Fecha no disponible";
-  
+
       // Formatear la fecha del evento
       if (eventDateTimestamp instanceof Date) {
         eventDateFormatted = eventDateTimestamp.toLocaleDateString("es-ES", {
@@ -638,12 +641,12 @@ const handleSaveEdit = async () => {
       } else if (typeof eventDateTimestamp === "string") {
         eventDateFormatted = eventDateTimestamp;
       }
-  
+
       // Datos adicionales de la notificación
       const eventImage = box.imageUrl;
       const eventCategory = box.category || "Sin categoría";
       const notificationRef = collection(database, "users", friendId, "notifications");
-  
+
       // Crear la notificación
       await addDoc(notificationRef, {
         fromId: user.uid,
@@ -659,12 +662,12 @@ const handleSaveEdit = async () => {
         status: "pendiente",
         timestamp: new Date(),
       });
-  
+
       // Actualizar la lista de invitados en el evento
       await updateDoc(eventRef, {
         invitedFriends: arrayUnion(friendId),
       });
-  
+
       Alert.alert(
         t("boxDetails.invitationSent"),
         t("boxDetails.invitationSentMessage")
@@ -674,7 +677,7 @@ const handleSaveEdit = async () => {
       Alert.alert("Error", "No se pudo enviar la invitación.");
     }
   };
-  
+
 
   const handleAddEvent = async () => {
     if (isProcessing) return;
@@ -686,141 +689,117 @@ const handleSaveEdit = async () => {
       return;
     }
 
-    const eventsRef = collection(database, "users", user.uid, "events");
-    const q = query(eventsRef, where("title", "==", box.title));
-    const querySnapshot = await getDocs(q);
+    try {
+      const eventsRef = collection(database, "users", user.uid, "events");
+      const q = query(eventsRef, where("title", "==", box.title));
+      const querySnapshot = await getDocs(q);
 
-    if (!querySnapshot.empty) {
-      try {
+      if (!querySnapshot.empty) {
+        // Si el evento ya existe, eliminarlo
         const eventDoc = querySnapshot.docs[0];
-        await deleteDoc(doc(eventsRef, eventDoc.id));
+        await deleteDoc(eventDoc.ref);
         setIsEventSaved(false);
 
+        const eventRef = doc(
+          database,
+          box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
+          box.id || box.title
+        );
+
         if (box.category === "EventoParaAmigos") {
-            const eventRef = doc(database, "EventsPriv", box.id);
-            await updateDoc(eventRef, {
-                attendees: arrayRemove({
-                    uid: user.uid,
-                }),
-            });
+          await updateDoc(eventRef, {
+            attendees: arrayRemove({ uid: user.uid }),
+          });
         } else {
-            await handleRemoveFromGoBoxs(box.title, selectedDate);
+          await handleRemoveFromGoBoxs(box.title, selectedDate);
         }
 
-        await fetchAttendees();
-    } catch (error) {
-        console.error("Error eliminando el evento: ", error);
-        Alert.alert(t("boxDetails.error"), t("boxDetails.eventDeletionError"));
-    }
-} else {
-      const eventsSnapshot = await getDocs(eventsRef);
-      const eventCount = eventsSnapshot.size;
-
-      if (eventCount >= 6) {
-        Alert.alert(
-          t("boxDetails.limitReached"),
-          t("boxDetails.limitReachedMessage"),
-          [{ text: t("boxDetails.accept"), style: "default" }]
-        );
+        console.log("Evento eliminado correctamente.");
       } else {
-        try {
-          const isPrivateEvent = box.category === "EventoParaAmigos";
-          const eventDate = isPrivateEvent ? box.date : selectedDate;
-          const daySpecial = isPrivateEvent && box.day ? box.day : undefined;
-          const phoneNumber = box.number || "Sin número";
-          const locationLink = box.locationLink || "Sin ubicación especificada";
-          const hours = box.hours || {};
+        // Si el evento no existe, agregarlo
+        const eventsSnapshot = await getDocs(eventsRef);
+        if (eventsSnapshot.size >= 6) {
+          Alert.alert(
+            t("boxDetails.limitReached"),
+            t("boxDetails.limitReachedMessage"),
+            [{ text: t("boxDetails.accept"), style: "default" }]
+          );
+          setIsProcessing(false);
+          return;
+        }
 
-          if (!isPrivateEvent) {
-            await saveUserEvent(
-              box.title,
-              eventDate,
-              daySpecial,
-              phoneNumber,
-              locationLink,
-              hours
-            );
-          }
+        const isPrivateEvent = box.category === "EventoParaAmigos";
+        const eventDate = isPrivateEvent ? box.date : selectedDate;
+        const eventRef = doc(
+          database,
+          isPrivateEvent ? "EventsPriv" : "GoBoxs",
+          box.id || box.title
+        );
 
-          const dateArray = [eventDate];
+        const eventData = {
+          title: box.title,
+          imageUrl: box.imageUrl || "",
+          date: eventDate,
+          phoneNumber: box.number || "Sin número",
+          locationLink: box.locationLink || "Sin ubicación especificada",
+          hours: box.hours || {},
+          ...(box.coordinates ? { coordinates: box.coordinates } : {}),
+        };
 
-          const eventData = {
-            title: box.title,
-            imageUrl: box.imageUrl || "",
-            date: eventDate,
-            dateArray: dateArray,
-            phoneNumber: phoneNumber,
-            locationLink: locationLink,
-            hours: hours,
-            ...(box.coordinates ? { coordinates: box.coordinates } : {}),
-          };
+        if (isPrivateEvent) {
+          const userDoc = await getDoc(doc(database, "users", user.uid));
+          const username = userDoc.exists() ? userDoc.data().username || "Anónimo" : "Anónimo";
+          const profileImage = userDoc.exists()
+            ? userDoc.data().photoUrls?.[0] || "https://via.placeholder.com/150"
+            : "https://via.placeholder.com/150";
 
-          if (daySpecial) {
-            eventData.DaySpecial = daySpecial;
-          }
+          const attendeeData = { uid: user.uid, username, profileImage };
 
-          await addDoc(eventsRef, eventData);
-
-          if (isPrivateEvent) {
-            const userDoc = await getDoc(doc(database, "users", user.uid));
-            const username = userDoc.exists()
-              ? userDoc.data().username
-              : "Anónimo";
-            const profileImage = userDoc.exists()
-              ? (userDoc.data().photoUrls && userDoc.data().photoUrls[0]) ||
-                "https://via.placeholder.com/150"
-              : "https://via.placeholder.com/150";
-
-            const attendeeData = {
-              uid: user.uid,
-              username,
-              profileImage,
-            };
-
-            const eventRef = doc(database, "EventsPriv", box.id);
-
-            const eventDoc = await getDoc(eventRef);
-            if (!eventDoc.exists()) {
-              await setDoc(eventRef, {
-                attendees: [],
-                title: box.title,
-                date: box.date || "",
-                hour: box.hour || "",
-                description: box.description || "",
-                image: box.image || "",
-              });
-            }
-
+          const eventSnapshot = await getDoc(eventRef);
+          if (!eventSnapshot.exists()) {
+            await setDoc(eventRef, {
+              attendees: [attendeeData],
+              ...eventData,
+            });
+          } else {
             await updateDoc(eventRef, {
               attendees: arrayUnion(attendeeData),
             });
           }
-
-          setIsEventSaved(true);
-          await fetchAttendees();
-        } catch (error) {
-          console.error("Error guardando el evento: ", error);
-          Alert.alert(t("boxDetails.error"), t("boxDetails.eventSavingError"));
+        } else {
+          await saveUserEvent(box.title, eventDate, box.day, eventData.phoneNumber, eventData.locationLink, eventData.hours);
         }
-      }
-    }
 
-    setIsProcessing(false);
+        // Guardar el evento en la colección del usuario
+        await addDoc(eventsRef, {
+          ...eventData,
+          dateArray: [eventDate],
+        });
+
+        setIsEventSaved(true);
+        console.log("Evento agregado correctamente.");
+      }
+    } catch (error) {
+      console.error("Error al manejar el evento:", error);
+      Alert.alert(t("boxDetails.error"), t("boxDetails.eventSavingError"));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleRemoveFromGoBoxs = async (boxTitle, selectedDate) => {
     try {
       const boxRef = doc(database, "GoBoxs", boxTitle);
       const boxDoc = await getDoc(boxRef);
-  
+
       if (boxDoc.exists()) {
         const existingData = boxDoc.data()[selectedDate];
-  
+
         if (existingData) {
           const updatedData = existingData.filter(
             (user) => user.uid !== auth.currentUser.uid
           );
-  
+
           if (updatedData.length > 0) {
             await updateDoc(boxRef, {
               [selectedDate]: updatedData,
@@ -830,7 +809,7 @@ const handleSaveEdit = async () => {
               [selectedDate]: deleteField(),
             });
           }
-  
+
           console.log("Usuario eliminado de GoBoxs correctamente");
         }
       }
@@ -838,7 +817,7 @@ const handleSaveEdit = async () => {
       console.error("Error eliminando el usuario de GoBoxs:", error);
     }
   };
-  
+
 
   const saveUserEvent = async (
     boxTitle,
@@ -966,7 +945,7 @@ const handleSaveEdit = async () => {
       )}
     </View>
   );
-  
+
 
   const handleSearch = (text) => {
     setSearchText(text);
@@ -1039,7 +1018,7 @@ const handleSaveEdit = async () => {
           </View>
         )}
       </View>
-  
+
      {/* Segundo Slider: Horarios */}
      <View style={styles.sliderPart}>
       <View style={styles.hoursContainer}>
@@ -1074,7 +1053,7 @@ const handleSaveEdit = async () => {
         )}
       </View>
     </View>
-  
+
    {/* Tercer Slider: Ubicación o Contacto */}
 <View style={styles.sliderPart}>
   {isFromNotification && box.address ? (
@@ -1106,140 +1085,75 @@ const handleSaveEdit = async () => {
 
   </ScrollView>
   );
-  
+
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image 
-  source={box.isPrivate ? { uri: box.imageUrl } : box.imageUrl}
-  style={styles.backgroundImage}
-  cachePolicy="memory-disk"
-/>
+      {/* Imagen de fondo */}
+      <Image
+        source={box.isPrivate ? { uri: box.imageUrl } : box.imageUrl}
+        style={styles.backgroundImage}
+        cachePolicy="memory-disk"
+      />
 
+      {/* Gradiente de fondo */}
       <LinearGradient
         colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
         style={styles.gradient}
       >
+        {/* Contenedor principal */}
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          {/* Contenedor de la flecha de volver y el menú */}
-          <View style={styles.headerContainer}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Entypo
-                name="chevron-left"
-                size={24}
-                color={isNightMode ? "#000" : "#000"}
-              />
-            </TouchableOpacity>
-            {boxData.Admin === auth.currentUser?.uid && (
-  <>
-
-            {boxData.category === "EventoParaAmigos" && (
-              <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
-                <Entypo
-                  name="dots-three-vertical"
-                  size={24}
-                  color={isNightMode ? "#000" : "#000"}
-                />
-              </TouchableOpacity>
-            )}
-             </>
-              )}
-          </View>
-
-          {/* Modal para el menú de eliminación */}
-          <Modal
-            visible={menuVisible}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setMenuVisible(false)}
-          >
-            <TouchableOpacity
-              style={styles.modalOverlay}
-              onPress={() => setMenuVisible(false)}
-            >
-              <View style={styles.menuContainer}>
-        
-    <TouchableOpacity
-      onPress={handleEditImage}
-      style={styles.editEventButton}
-      disabled={isProcessing}
-    >
-      <Text style={styles.editEventText}>
-        {isProcessing ? "Actualizando..." : "Editar Imagen "}
-        <Ionicons name="image" size={15} color="black" />
-      </Text>
-    </TouchableOpacity>
-    <TouchableOpacity
-      onPress={handleEditEvent}
-      style={styles.editEventButton}
-    >
-      <Text style={styles.editEventText}>
-        Editar Evento{" "}
-        <Ionicons name="pencil" size={15} color="black" />
-      </Text>
-    </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={handleDeleteEvent}
-                  style={styles.deleteEventButton}
-                >
-                  <Text style={styles.deleteEventText}>
-                    Eliminar Evento{" "}
-                    <FontAwesome name="trash" size={15} color="white" />
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-            
-          </Modal>
+          {/* Header */}
+          <Header
+            navigation={navigation}
+            boxData={boxData}
+            isNightMode={isNightMode}
+            menuVisible={menuVisible}
+            toggleMenu={() => setMenuVisible(!menuVisible)}
+            handleEditImage={handleEditImage}
+            handleEditEvent={handleEditEvent}
+            handleDeleteEvent={handleDeleteEvent}
+            isProcessing={isProcessing}
+          />
 
           {/* Contenido principal */}
           <View style={styles.content}>
+            {/* Título del evento */}
             <Text style={styles.title}>{boxData.title}</Text>
 
+            {/* Indicador de asistentes */}
             <View style={styles.dotIndicatorContainer}>
-            {console.log("Datos enviados a DotIndicatorBoxDetails:", attendeesList)}
+              {console.log(
+                "Datos enviados a DotIndicatorBoxDetails:",
+                attendeesList
+              )}
               <DotIndicatorBoxDetails attendeesList={attendeesList} />
             </View>
 
-            <View style={styles.buttonContainer}>
-            <TouchableOpacity
-  style={[styles.button, isEventSaved && styles.activeButton]}
-  disabled={isProcessing}
-  onPress={() => {
-    if (isEventSaved) {
-      handleRemoveFromEvent(); // Elimina al usuario del evento
-    } else {
-      handleAddEvent(); // Agrega al usuario al evento
-    }
-  }}
->
-  <Text style={styles.buttonText}>
-    {isEventSaved
-      ? t("boxDetails.notGoingButton") // Texto para "No voy"
-      : t("boxDetails.goingButton")}
-  </Text>
-</TouchableOpacity>
+            {/* Sección de botones */}
+            <ButtonsSection
+              isEventSaved={isEventSaved}
+              isProcessing={isProcessing}
+              handleAddEvent={handleAddEvent}
+              handleRemoveFromEvent={handleRemoveFromEvent}
+              setModalVisible={setModalVisible}
+              t={t}
+            />
 
-  <TouchableOpacity
-    style={styles.button}
-    onPress={() => setModalVisible(true)}
-  >
-    <Text style={styles.buttonText}>
-      {t("boxDetails.inviteButton")}
-    </Text>
-  </TouchableOpacity>
-</View>
+            {/* Slider de contenido */}
+            <SliderContent
+              key={box?.id || box?.title}
+              box={box}
+              boxData={boxData}
+              isNightMode={isNightMode}
+              isFromNotification={isFromNotification}
+            />
 
-
-            {renderSliderContent()}
           </View>
         </ScrollView>
       </LinearGradient>
 
+      {/* Modal para invitar amigos */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -1255,6 +1169,7 @@ const handleSaveEdit = async () => {
                   isNightMode && styles.friendsModalContentNight,
                 ]}
               >
+                {/* Título del modal */}
                 <Text
                   style={[
                     styles.modalTitle,
@@ -1263,6 +1178,8 @@ const handleSaveEdit = async () => {
                 >
                   {t("boxDetails.inviteFriendsTitle")}
                 </Text>
+
+                {/* Barra de búsqueda */}
                 <TextInput
                   style={[
                     styles.searchInput,
@@ -1273,6 +1190,8 @@ const handleSaveEdit = async () => {
                   value={searchText}
                   onChangeText={handleSearch}
                 />
+
+                {/* Lista de amigos */}
                 <FlatList
                   data={filteredFriends}
                   renderItem={renderFriendItem}
@@ -1283,6 +1202,8 @@ const handleSaveEdit = async () => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
+      {/* Modal para editar el evento */}
       {renderEditModal()}
     </SafeAreaView>
   );
