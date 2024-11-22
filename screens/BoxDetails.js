@@ -118,6 +118,12 @@ export default memo(function BoxDetails({ route, navigation }) {
       const currentDate = new Date();
 
       for (const [dateKey, attendees] of Object.entries(data)) {
+        // Verificar si la clave parece ser una fecha
+        if (!isValidDateKey(dateKey)) {
+          console.warn(`La clave ${dateKey} no representa una fecha válida. Omitiendo.`);
+          continue;
+        }
+
         let eventDate = parseCustomDate(dateKey);
 
         if (!eventDate) {
@@ -139,6 +145,13 @@ export default memo(function BoxDetails({ route, navigation }) {
         }
       }
     }
+  };
+
+  // Función para validar si una clave parece ser una fecha
+  const isValidDateKey = (key) => {
+    // Asegúrate de que la clave sea una cadena y siga el formato esperado (por ejemplo, "12 Nov")
+    const datePattern = /^\d{1,2} [A-Za-z]{3}$/; // Día (1 o 2 dígitos) y mes abreviado (3 letras)
+    return typeof key === "string" && datePattern.test(key);
   };
 
   const parseCustomDate = (dateStr) => {
@@ -192,7 +205,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       const eventData = eventSnapshot.data();
       setBoxData((prevBox) => ({ ...prevBox, ...eventData }));
     } else {
-   
+
     }
   };
 
@@ -233,7 +246,7 @@ export default memo(function BoxDetails({ route, navigation }) {
                 attendee.profileImage || "https://via.placeholder.com/150",
             }));
 
-       
+
             setAttendeesList(uniqueAttendees);
           } catch (error) {
             console.error("Error al filtrar usuarios bloqueados:", error);
@@ -253,42 +266,101 @@ export default memo(function BoxDetails({ route, navigation }) {
     if (!user) return;
 
     try {
-      // Referencia al evento general
+      // Actualizar el estado local para marcar al usuario como invitado
+      setFriends(
+        friends.map((friend) =>
+          friend.friendId === friendId ? { ...friend, invited: true } : friend
+        )
+      );
+
+      // Obtener referencia del evento en Firestore
       const eventRef = doc(database, "GoBoxs", box.title);
       const eventDoc = await getDoc(eventRef);
 
       if (!eventDoc.exists()) {
-        Alert.alert("Error", "El evento no existe.");
+        Alert.alert(
+          "Participación requerida",
+          "Debes participar en el evento antes de poder invitar a un amigo."
+        );
         return;
       }
 
-      // Datos del evento
       const eventData = eventDoc.data();
-      const eventImage = eventData.image || "https://via.placeholder.com/150"; // URL predeterminada si no hay imagen
-      const eventDate = selectedDate || eventData.date || "Fecha no disponible";
-      const eventTitle = box.title || eventData.title || "Evento General";
+      const attendees = eventData[selectedDate] || []; // Asistentes del evento para la fecha seleccionada
 
-      // Obtener nombre de usuario
+      // Verificar si el usuario está participando en el evento
+      const isParticipating = attendees.some((attendee) => attendee.uid === user.uid);
+
+      if (!isParticipating) {
+        Alert.alert(
+          "Participación requerida",
+          "Debes participar en el evento antes de poder invitar a un amigo."
+        );
+        return;
+      }
+
+      const invitedFriends = eventData.invitedFriends || [];
+
+      // Verificar si la combinación de invitador e invitado ya existe
+      const isAlreadyInvited = invitedFriends.some(
+        (entry) => entry.invitedBy === user.uid && entry.friendId === friendId
+      );
+
+      if (isAlreadyInvited) {
+        Alert.alert(
+          "Invitación no permitida",
+          "Este amigo ya ha sido invitado por ti."
+        );
+        return;
+      }
+
+      // Preparar datos del usuario que envía la invitación
+      let fromName = user.displayName || "Usuario Desconocido";
       const userDocRef = doc(database, "users", user.uid);
       const userDocSnapshot = await getDoc(userDocRef);
-      const fromName = userDocSnapshot.exists()
-        ? userDocSnapshot.data().username || "Usuario Desconocido"
-        : "Usuario Desconocido";
+      if (userDocSnapshot.exists()) {
+        const userData = userDocSnapshot.data();
+        fromName = userData.username || fromName;
+      }
 
-      // Enviar notificación al amigo invitado
-      const notificationRef = collection(database, "users", friendId, "notifications");
+      const eventDateFormatted = selectedDate || "Fecha no disponible";
+
+      // Datos adicionales de la notificación
+      const eventImage = eventData.image || "https://via.placeholder.com/150";
+      const eventCategory = "Evento General";
+      const notificationRef = collection(
+        database,
+        "users",
+        friendId,
+        "notifications"
+      );
+
+      // Crear la notificación
       await addDoc(notificationRef, {
         fromId: user.uid,
-        fromName: fromName, // Nombre de usuario
-        eventTitle: eventTitle,
-        eventImage: eventImage, // URL válida de la imagen
-        eventDate: eventDate,
+        fromName: fromName,
+        eventId: box.title,
+        eventTitle: box.title,
+        eventImage: eventImage,
+        eventDate: eventDateFormatted,
+        eventCategory: eventCategory,
         type: "generalEventInvitation",
         status: "pendiente",
         timestamp: new Date(),
       });
 
-      Alert.alert("Invitación enviada", `Has invitado a un amigo al evento ${eventTitle}.`);
+      // Actualizar la lista de invitados en el evento general con invitador e invitado
+      await updateDoc(eventRef, {
+        invitedFriends: arrayUnion({
+          invitedBy: user.uid,
+          friendId: friendId,
+        }),
+      });
+
+      Alert.alert(
+        t("boxDetails.invitationSent"),
+        t("boxDetails.invitationSentMessage")
+      );
     } catch (error) {
       console.error("Error al invitar al evento general:", error);
       Alert.alert("Error", "No se pudo enviar la invitación.");
@@ -581,7 +653,10 @@ const handleSaveEdit = async () => {
       const eventDoc = await getDoc(eventRef);
 
       if (!eventDoc.exists()) {
-        Alert.alert("Error", "El evento no existe.");
+        Alert.alert(
+          "Participación requerida",
+          "Debes participar en el evento antes de poder invitar a un amigo."
+        );
         return;
       }
 
@@ -590,7 +665,7 @@ const handleSaveEdit = async () => {
 
       // Verificar si el usuario ya ha sido invitado
       if (invitedFriends.includes(friendId)) {
-        Alert.alert("Este usuario ya ha sido invitado.");
+        Alert.alert("Invitación no permitida", "Este amigo ya ha sido invitado.");
         return;
       }
 
@@ -906,21 +981,21 @@ const handleSaveEdit = async () => {
           />
         </TouchableOpacity>
       ) : (
-        <TouchableOpacity
-          style={[
-            styles.shareButton,
-            item.invited && styles.invitedButton,
-            isNightMode && styles.shareButtonNight,
-          ]}
-          onPress={() => handleInvite(item.friendId)}
-          disabled={item.invited}
-        >
-          <Ionicons
-            name={item.invited ? "checkmark-sharp" : "arrow-redo"}
-            size={16}
-            color={isNightMode ? "black" : "white"}
-          />
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.shareButton,
+          item.invited && styles.invitedButton,
+          isNightMode && styles.shareButtonNight,
+        ]}
+        onPress={() => handleInvite(item.friendId)}
+        disabled={item.invited}
+      >
+        <Ionicons
+          name={item.invited ? "checkmark-sharp" : "arrow-redo"}
+          size={16}
+          color={isNightMode ? "black" : "white"}
+        />
+      </TouchableOpacity>
       )}
     </View>
   );
@@ -938,7 +1013,7 @@ const handleSaveEdit = async () => {
     }
   };
 
- 
+
 
   return (
     <SafeAreaView style={styles.container}>
