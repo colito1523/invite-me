@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, Modal, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Modal, FlatList, Linking, Alert } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -45,6 +45,7 @@ export default function Menu({
     t('categories.events'),
     t('categories.createOwnEvent'),
     t('categories.suggestSpace'),
+    t('categories.support'), // Nueva entrada para soporte
   ];
 
   const cities = ['Lisboa', 'Madrid']; // Lista de ciudades disponibles para el autocompletado
@@ -77,10 +78,27 @@ export default function Menu({
     } else if (category === t('categories.suggestSpace')) {
         onClose();
         navigation.navigate('EventRecommendations'); // Cambiar a 'EventRecommendations'
+      } else if (category === t('categories.support')) {
+        onClose();
+        handleSupportPress(); // Función para abrir el correo de soporte
     } else {
         onCategorySelect(category);
     }
-};
+  };
+
+  const handleSupportPress = async () => {
+    const email = "info@invitemembers.com"; // Cambiar por el correo de soporte
+    const subject = "User support";
+    const body = "Hi, I need help with..."; // Texto predefinido del mensaje
+    const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  
+    const supported = await Linking.canOpenURL(emailUrl);
+    if (supported) {
+      await Linking.openURL(emailUrl);
+    } else {
+      Alert.alert("Error", "No se pudo abrir el cliente de correo.");
+    }
+  };
 
   return (
     <Modal

@@ -14,6 +14,7 @@
   "incorrectCredentials": "Correo electrónico o contraseña incorrectos. Por favor, verifique su información.",
   "genericError": "Se ha producido un error. Inténtalo de nuevo.",
 
+  
   "menu": {
     "searchPlaceholder": "Busca la ciudad que buscas...",
     "categories": {
@@ -23,7 +24,8 @@
       "barsClubs": "Bares & Clubs",
       "events": "Eventos",
       "createOwnEvent": "Crear mi propio evento",
-      "suggestSpace": "Sugerir un Espacio"
+      "suggestSpace": "Sugerir un Espacio",
+      "support": "Soporte"
     },
     "cities": {
       "title": "Ciudades"
@@ -130,7 +132,8 @@
     "clubs": "Clubes",
     "events": "Eventos",
     "createOwnEvent": "Crea tu propio evento",
-    "suggestSpace": "Sugerir un espacio"
+    "suggestSpace": "Sugerir un espacio",
+     "support": "Soporte"
   },
   "searchPlaceholder": "Busca la ciudad que buscas...",
   "signOut": "Terminar Sesión",
