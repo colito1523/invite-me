@@ -644,13 +644,14 @@ export default function NotificationsComponent() {
             />
             <View style={styles.textContainer}>
               {/* Texto principal de la invitación */}
-              <Text style={[styles.notificationText, { color: "black" }]}>
-                <Text style={[styles.boldText]}>{item.fromName}</Text>{' '}
-                te ha invitado a{' '}
-                <Text style={[styles.boldText]}>{item.eventTitle}</Text>{' '}
-                el día{' '}
-                <Text style={[styles.boldText]}>{item.eventDate}</Text>
-              </Text>
+              <Text style={[styles.notificationText, { color: isNightMode ? '#fff' : '#000' }]}>
+  <Text style={[styles.boldText]}>{item.fromName}</Text>{' '}
+  te ha invitado a{' '}
+  <Text style={[styles.boldText]}>{item.eventTitle}</Text>{' '}
+  el día{' '}
+  <Text style={[styles.boldText]}>{formattedTime}</Text> {/* Muestra la fecha y hora aquí */}
+</Text>
+
               {/* Botones de aceptar y rechazar */}
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
@@ -696,20 +697,21 @@ export default function NotificationsComponent() {
     const isNoteLikeNotification = item.type === "noteLike";
 
     const timestamp = item.timestamp?.toDate
-      ? item.timestamp.toDate()
-      : new Date(item.timestamp);
-
-    let formattedTime = "";
-
-    if (timestamp) {
-      if (isToday(timestamp)) {
-        formattedTime = format(timestamp, "HH:mm");
-      } else if (isYesterday(timestamp)) {
-        formattedTime = t("notifications.yesterday");
-      } else {
-        formattedTime = format(timestamp, "dd/MM/yyyy");
-      }
+    ? item.timestamp.toDate()
+    : new Date(item.timestamp);
+  
+  let formattedTime = "";
+  
+  if (timestamp) {
+    if (isToday(timestamp)) {
+      formattedTime = format(timestamp, "HH:mm"); // Hora y minutos para hoy
+    } else if (isYesterday(timestamp)) {
+      formattedTime = `${t("notifications.yesterday")} ${format(timestamp, "HH:mm")}`; // Ayer con hora
+    } else {
+      formattedTime = format(timestamp, "dd/MM/yyyy HH:mm"); // Fecha completa con hora
     }
+  }
+  
 
     const handleNotificationPress = () => {
       if (isEventInvitation) {
@@ -773,7 +775,7 @@ export default function NotificationsComponent() {
           <View
             style={[
               styles.notificationContainer,
-              { borderColor: isNightMode ? "#444" : "#ccc" },
+              { borderColor: isNightMode ? "white" : "#ccc" },
             ]}
           >
             {item.status !== "rejected" && (
