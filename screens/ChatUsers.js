@@ -63,7 +63,7 @@ export default function Chat({ route }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [isComplaintVisible, setIsComplaintVisible] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  
+
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
 
@@ -76,7 +76,7 @@ export default function Chat({ route }) {
       return;
     }
   }, [recipientUser, blockedUsers]); // Cierra el primer useEffect aquí
-  
+
 
   useEffect(() => {
     if (recipientUser?.photoUrls && recipientUser.photoUrls.length > 0) {
@@ -219,33 +219,33 @@ export default function Chat({ route }) {
       console.error("Error al abrir el modal de denuncia:", error);
     }
   };
-  
+
 
 
   const handleReportSubmit = async (reason, description) => {
     try {
       const chatRef = doc(database, "chats", chatId);
       const chatSnapshot = await getDoc(chatRef);
-  
+
       if (!chatSnapshot.exists()) {
         console.error("El chat no existe.");
         Alert.alert("Error", "No se pudo encontrar el chat.");
         return;
       }
-  
+
       const chatData = chatSnapshot.data();
       const participants = chatData.participants || [];
-  
+
       const recipientId = participants.find((participant) => participant !== user.uid);
-  
+
       if (!recipientId) {
         console.error("No se encontró un ID válido para el usuario reportado.");
         Alert.alert("Error", "No se pudo identificar al usuario reportado.");
         return;
       }
-  
+
       console.log("Datos de la denuncia:", { reason, description, recipientId });
-  
+
       const complaintsRef = collection(database, "complaints");
       const newComplaint = {
         reporterId: user.uid,
@@ -256,10 +256,10 @@ export default function Chat({ route }) {
         description: description || "",
         timestamp: new Date(),
       };
-  
+
       console.log("Enviando denuncia:", newComplaint);
       await addDoc(complaintsRef, newComplaint);
-  
+
       Alert.alert("Gracias", "Tu denuncia ha sido enviada.");
       setIsComplaintVisible(false);
     } catch (error) {
@@ -267,8 +267,8 @@ export default function Chat({ route }) {
       Alert.alert("Error", "No se pudo enviar la denuncia.");
     }
   };
-  
-  
+
+
 
 
 
@@ -383,12 +383,12 @@ export default function Chat({ route }) {
       const batch = writeBatch(database);
       const chatRef = doc(database, "chats", chatId);
       const messagesRef = collection(database, "chats", chatId, "messages");
-  
+
       // Mark the chat as deleted for the current user
       batch.update(chatRef, {
         [`deletedFor.${user.uid}`]: true
       });
-  
+
       // Mark all messages as deleted for the current user
       const messagesSnapshot = await getDocs(messagesRef);
       messagesSnapshot.forEach((messageDoc) => {
@@ -396,10 +396,10 @@ export default function Chat({ route }) {
           [`deletedFor.${user.uid}`]: true
         });
       });
-  
+
       // Commit the batch
       await batch.commit();
-  
+
       // Navigate back
       navigation.goBack();
       Alert.alert("Éxito", "El chat ha sido eliminado para ti.");
@@ -411,7 +411,7 @@ export default function Chat({ route }) {
 
   const uploadMedia = async (uri) => {
     if (!uri) return null;
-  
+
     try {
       setIsUploading(true); // Inicia la carga
       const response = await fetch(uri);
@@ -522,13 +522,40 @@ export default function Chat({ route }) {
     setMenuVisible(false);
   };
 
-  const handleUserPress = () => {
-    console.log("Recipient User:", recipientUser); // Verifica los datos del usuario
-    if (!recipientUser) {
-      Alert.alert("Error", "No se puede navegar al perfil. Datos incompletos.");
-      return;
+  const handleUserPress = async () => {
+    try {
+      if (!chatId) {
+        Alert.alert("Error", "No se puede identificar el chat.");
+        return;
+      }
+
+      const chatRef = doc(database, "chats", chatId);
+      const chatSnapshot = await getDoc(chatRef);
+
+      if (!chatSnapshot.exists()) {
+        console.error("El documento del chat no existe.");
+        Alert.alert("Error", "El chat no existe.");
+        return;
+      }
+
+      const chatData = chatSnapshot.data();
+
+      // Obtener el ID del destinatario desde los participantes
+      const otherParticipantId = chatData.participants.find(
+        (participantId) => participantId !== user.uid
+      );
+
+      if (!otherParticipantId) {
+        console.error("No se encontró un ID válido para el destinatario.");
+        Alert.alert("Error", "No se pudo identificar al destinatario.");
+        return;
+      }
+
+      navigation.navigate("UserProfile", { selectedUser: { id: otherParticipantId, ...recipientUser } });
+    } catch (error) {
+      console.error("Error navegando al perfil del usuario:", error);
+      Alert.alert("Error", "No se pudo navegar al perfil del usuario.");
     }
-    navigation.navigate("UserProfile", { selectedUser: recipientUser });
   };
 
   const handleMediaPress = async (
@@ -682,7 +709,7 @@ export default function Chat({ route }) {
         return (
           <>
             {!isSameDay && renderDate(currentMessageDate)}
-    
+
             <View
               style={[
                 styles.message,
@@ -693,7 +720,7 @@ export default function Chat({ route }) {
               <Text style={styles.noteResponseText}>
                 {isOwnMessage ? "Respondiste a su nota" : "Respondió a tu nota"}
               </Text>
-    
+
               <Image
                 source={require("../assets/flecha-curva.png")}
                 style={[
@@ -706,7 +733,7 @@ export default function Chat({ route }) {
                   {item.noteText || "Nota no disponible"}
                 </Text>
               </View>
-    
+
               <TouchableOpacity
                 onPress={() => navigation.navigate("FullNote", { note: item })}
               >
@@ -732,12 +759,12 @@ export default function Chat({ route }) {
           </>
         );
       }
-      
+
 
       return (
         <>
           {!isSameDay && renderDate(currentMessageDate)}
-      
+
           <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
             <View
               style={[
@@ -746,7 +773,7 @@ export default function Chat({ route }) {
               ]}
             >
               {item.text && <Text style={styles.messageText}>{item.text}</Text>}
-      
+
               {item.mediaType === "image" && (
                 item.isViewOnce ? (
                   <TouchableOpacity
@@ -779,7 +806,7 @@ export default function Chat({ route }) {
                   </TouchableOpacity>
                 )
               )}
-      
+
               {item.mediaType === "video" && (
                 <Video
                   source={{ uri: item.mediaUrl }}
@@ -788,9 +815,9 @@ export default function Chat({ route }) {
                   resizeMode="contain"
                 />
               )}
-      
+
               {item.mediaType === "audio" && <AudioPlayer uri={item.mediaUrl} />}
-      
+
               <View style={styles.messageFooter}>
                 <Text style={styles.timeText}>
                   {currentMessageDate.toLocaleTimeString([], {
@@ -811,7 +838,7 @@ export default function Chat({ route }) {
           </TouchableOpacity>
         </>
       );
-      
+
   };
 
   return (
@@ -879,7 +906,7 @@ export default function Chat({ route }) {
             titleStyle={styles.menuItemText}
             style={styles.menuItemContainer}
           />
-         
+
         </Menu>
       </View>
 
@@ -950,7 +977,7 @@ export default function Chat({ route }) {
 
     </ImageBackground>
 
-    
+
   );
 }
 const styles = StyleSheet.create({
