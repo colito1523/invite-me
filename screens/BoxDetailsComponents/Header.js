@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   editEventText: { color: "black", fontWeight: "bold" },
-  deleteEventButton: { backgroundColor: "red", padding: 10, borderRadius: 5 },
+  deleteEventButton: { backgroundColor: "black", padding: 10, borderRadius: 5 },
   deleteEventText: { color: "white", fontWeight: "bold" },
 });
 

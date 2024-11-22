@@ -117,10 +117,35 @@ export function StoryViewer({
     }
   };
 
-  const handleThreeDotsPress = (viewer) => {
-    setSelectedViewer(viewer); // Almacenar el espectador actual
-    setIsHideStoryModalVisible(true);
+  const handleThreeDotsPress = async (viewer) => {
+    try {
+      // Obtener los datos del espectador desde Firestore
+      const viewerRef = doc(database, "users", viewer.uid);
+      const viewerDoc = await getDoc(viewerRef);
+  
+      if (viewerDoc.exists()) {
+        const viewerData = viewerDoc.data();
+  
+        // Actualizar el estado de `selectedViewer` con los datos más recientes
+        setSelectedViewer({ ...viewer, ...viewerData });
+  
+        // Verificar si el campo `hideStoriesFrom` incluye el UID del usuario actual
+        if (viewerData.hideStoriesFrom && viewerData.hideStoriesFrom.includes(user.uid)) {
+          console.log("El usuario actual está en la lista de `hideStoriesFrom` del espectador.");
+        } else {
+          console.log("El usuario actual NO está en la lista de `hideStoriesFrom` del espectador.");
+        }
+  
+        // Mostrar el modal para ocultar o mostrar historias
+        setIsHideStoryModalVisible(true);
+      } else {
+        console.error("No se encontró el documento del espectador.");
+      }
+    } catch (error) {
+      console.error("Error al obtener el documento del espectador:", error);
+    }
   };
+  
 
   const getChatId = async (user1Id, user2Id) => {
     const user1Doc = await getDoc(doc(database, "users", user1Id));
