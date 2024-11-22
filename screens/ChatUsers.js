@@ -694,7 +694,7 @@ export default function Chat({ route }) {
                   <Ionicons
                     name="checkmark-done-sharp"
                     size={16}
-                    color="blue"
+                    color="#828282"
                     style={styles.seenIcon}
                   />
                 )}
@@ -1231,11 +1231,11 @@ const styles = StyleSheet.create({
   },
 
   viewOnceImagePlaceholder: {
-    width: 200,
-    height: 150,
+    width: 70,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: 30,
     backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
   viewOnceVideoPlaceholder: {
@@ -1256,7 +1256,7 @@ const styles = StyleSheet.create({
 
   imageStatusText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
   },

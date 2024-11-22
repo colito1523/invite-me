@@ -273,10 +273,11 @@ export default function SignUp() {
 
   const handleAnswer = (id, value) => {
     if (id === "firstName" || id === "lastName") {
+      // Solo letras y espacios
       const validValue = value
         .replace(/[^\p{L}\p{Zs}]/gu, "")
         .slice(0, 15);
-
+  
       setAnswers((prev) => ({ ...prev, [id]: validValue }));
     } else if (
       id === "hobby1" ||
@@ -284,16 +285,24 @@ export default function SignUp() {
       id === "interest1" ||
       id === "interest2"
     ) {
-      const validValue = value.replace(/[^\p{L}\p{Zs}]/gu, "").slice(0, 15);
-
+      // Letras, espacios y emojis
+      const validValue = value
+        .replace(
+          /[^\p{L}\p{Zs}\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{1F000}-\u{1F02F}]/gu,
+          ""
+        )
+        .slice(0, 15);
+  
       setAnswers((prev) => ({ ...prev, [id]: validValue }));
     } else if (id === "username") {
+      // Eliminar espacios al inicio o final
       const trimmedValue = value.trim();
       setAnswers((prev) => ({ ...prev, [id]: trimmedValue }));
     } else {
       setAnswers((prev) => ({ ...prev, [id]: value }));
     }
   };
+  
 
   const validateName = (name) => {
     const nameRegex = /^[a-zA-ZÀ-ÿãÃçÇñÑ ]+$/;
@@ -317,9 +326,11 @@ export default function SignUp() {
   };
 
   const validateSingleWord = (word) => {
-    const hobbyInterestRegex = /^[\p{L}\p{N}\p{P}\p{Zs}\p{Emoji}]+$/u;
-    return hobbyInterestRegex.test(word) && word.length <= 15;
+    const hobbyInterestRegex = /^[\p{L}\p{N}\p{P}\p{Zs}\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F700-\u1F77F]+$/u;
+    return hobbyInterestRegex.test(word) && [...word].length <= 15; // Contar correctamente caracteres compuestos
   };
+  
+  
 
   const handleNext = async () => {
     const currentQuestion = questions[currentQuestionIndex];

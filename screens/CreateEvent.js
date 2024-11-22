@@ -47,7 +47,8 @@ export default function CreateEvent() {
   const [isNightMode, setIsNightMode] = useState(false);
 
   const today = new Date();
-  const maxDate = new Date(today.getTime() + 31 * 24 * 60 * 60 * 1000); // Max 1 month from today
+  const maxDate = new Date(today.getTime() + 2 * 30 * 24 * 60 * 60 * 1000); // Max 2 months from today
+
 
   useEffect(() => {
     const checkTime = () => {

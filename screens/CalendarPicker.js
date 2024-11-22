@@ -23,7 +23,7 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   }, []);
 
   const today = dayjs().format("YYYY-MM-DD");
-  const maxDate = dayjs().add(31, "day").format("YYYY-MM-DD");
+  const maxDate = dayjs().add(2, "month").format("YYYY-MM-DD");
 
   const handleDayPress = (day) => {
     const formattedDate = dayjs(day.dateString).format("D MMM");
