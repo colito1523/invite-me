@@ -46,7 +46,13 @@ export function StoryViewer({
 }) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [storyIndex, setStoryIndex] = useState(0);
+  const [storyIndex, setStoryIndex] = useState(() => {
+    const userStories = stories[initialIndex]?.userStories || [];
+    const unseenIndex = userStories.findIndex(
+      (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
+    );
+    return unseenIndex !== -1 ? unseenIndex : 0;
+  });
   const [progress, setProgress] = useState(0);
   const [localUnseenStories, setLocalUnseenStories] = useState(unseenStories);
   const [message, setMessage] = useState("");

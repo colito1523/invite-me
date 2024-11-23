@@ -65,6 +65,7 @@ const Home = React.memo(() => {
   const [privateEvents, setPrivateEvents] = useState([]);
   const { t } = useTranslation();
   const LazyBoxDetails = lazy(() => import('./BoxDetails'));
+  const [unreadMessages, setUnreadMessages] = useState(false);
 
 
   useEffect(() => {
@@ -456,6 +457,38 @@ useEffect(() => {
 
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      if (!auth.currentUser) return;
+      const user = auth.currentUser;
+      const chatsRef = collection(database, "chats");
+      const q = query(chatsRef, where("participants", "array-contains", user.uid));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        let hasUnreadMessages = false;
+        querySnapshot.forEach((docSnapshot) => {
+          const chatData = docSnapshot.data();
+          const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
+          const unseenMessagesQuery = query(
+            messagesRef,
+            where("seen", "==", false),
+            where("senderId", "!=", user.uid)
+          );
+          onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
+            if (!unseenMessagesSnapshot.empty) {
+              hasUnreadMessages = true;
+              setUnreadMessages(true);
+            } else {
+              setUnreadMessages(false);
+            }
+          });
+        });
+      });
+      return () => unsubscribe();
+    };
+  
+    fetchUnreadMessages();
+  }, [navigation]);
+
   if (!locationGranted) {
     return (
       <View style={currentStyles.centeredView}>
@@ -554,9 +587,7 @@ useEffect(() => {
             />
           )}
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Notifications")}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
           <Ionicons
             name="notifications"
             size={24}
@@ -569,6 +600,12 @@ useEffect(() => {
             size={25}
             color={isNightMode ? "white" : "black"}
           />
+          {unreadMessages && (
+            <View style={[
+              styles.unreadIndicator,
+              { backgroundColor: isNightMode ? "red" : "green" }
+            ]} />
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -715,6 +752,14 @@ const styles = StyleSheet.create({
     height: 35,
     borderRadius: 20,
  },
+ unreadIndicator: {
+  position: "absolute",
+  top: -5,
+  right: -5,
+  width: 10,
+  height: 10,
+  borderRadius: 5,
+},
 });
 
 export default Home;

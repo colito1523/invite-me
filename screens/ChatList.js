@@ -469,13 +469,19 @@ export default function ChatList() {
           {item.user.username || "Usuario desconocido"}
         </Text>
       </View>
-      {item.unseenMessagesCount > 0 && (
-        <View style={styles.unseenCountContainer}>
-          <Text style={styles.unseenCountText}>
-            {item.unseenMessagesCount}
+      <View style={styles.timeAndUnreadContainer}>
+        {item.unseenMessagesCount > 0 ? (
+          <View style={styles.unseenCountContainer}>
+            <Text style={styles.unseenCountText}>
+              {item.unseenMessagesCount}
+            </Text>
+          </View>
+        ) : (
+          <Text style={[styles.lastMessageTime, { color: isNightMode ? "white" : "black" }]}>
+            {formatTime(item.lastMessageTimestamp)}
           </Text>
-        </View>
-      )}
+        )}
+      </View>
     </TouchableOpacity>
   );
 

@@ -694,7 +694,7 @@ export default function Chat({ route }) {
                   <Ionicons
                     name="checkmark-done-sharp"
                     size={16}
-                    color="#828282"
+                    color="black"
                     style={styles.seenIcon}
                   />
                 )}
@@ -750,7 +750,7 @@ export default function Chat({ route }) {
                   <Ionicons
                     name="checkmark-done-sharp"
                     size={16}
-                    color="blue"
+                    color="black"
                     style={styles.seenIcon}
                   />
                 )}
@@ -829,7 +829,7 @@ export default function Chat({ route }) {
                   <Ionicons
                     name="checkmark-done-sharp"
                     size={16}
-                    color="blue"
+                    color="black"
                     style={styles.seenIcon}
                   />
                 )}

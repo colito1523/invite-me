@@ -174,11 +174,16 @@ export default function StorySlider() {
   
   
   
-  
-  const handleOpenViewer = async (index) => {
-    setSelectedStoryIndex(index);
-    setStoryViewerVisible(true);
-    await AsyncStorage.setItem('lastViewedStoryIndex', JSON.stringify(index));
+const handleOpenViewer = async (index) => {
+  const userStories = stories[index].userStories;
+  const unseenIndex = userStories.findIndex(
+    (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
+  );
+
+  setSelectedStoryIndex(index);
+  setStoryViewerVisible(true);
+  await AsyncStorage.setItem('lastViewedStoryIndex', JSON.stringify(index));
+  setSelectedStoryIndex(index); // Ensure the correct story index is set
 };
 
   const handleAddStory = () => {
