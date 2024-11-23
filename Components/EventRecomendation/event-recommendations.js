@@ -49,7 +49,7 @@ export default function EventRecommendationForm() {
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypec.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,

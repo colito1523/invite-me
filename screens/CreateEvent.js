@@ -110,6 +110,7 @@ export default function CreateEvent() {
         const userDocRef = doc(database, "users", user.uid);
         const userDocSnapshot = await getDoc(userDocRef);
         const userData = userDocSnapshot.data();
+        const profileImage = userData.photoUrls ? userData.photoUrls[0] : null;
   
         const blockedUsers = userData?.blockedUsers || [];
   
@@ -138,7 +139,7 @@ export default function CreateEvent() {
             await addDoc(notificationRef, {
               fromId: user.uid,
               fromName: userData.username,
-              fromImage: eventData.image,
+              fromImage: profileImage,
               eventTitle: eventData.title,
               eventImage: eventData.image,
               eventDate: eventData.timestamp,

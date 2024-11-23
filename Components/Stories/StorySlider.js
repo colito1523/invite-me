@@ -199,7 +199,8 @@ const handleOpenViewer = async (index) => {
         }
 
         const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images, // Ajustado
+            mediaTypes: ImagePicker.MediaType.Images, // Ajustado
+            
             allowsEditing: false,
             quality: 1,
         });
@@ -227,7 +228,7 @@ const handleGallery = async () => {
 
     // Abrir la galería y seleccionar una imagen
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Ajustado
+      mediaTypes: ImagePicker.MediaType.Images, // Ajustado
       allowsEditing: false,
       quality: 1,
     });
