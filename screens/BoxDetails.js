@@ -253,6 +253,21 @@ export default memo(function BoxDetails({ route, navigation }) {
     if (!user) return;
 
     try {
+      // Obtener referencia del usuario actual
+      const userDocRef = doc(database, "users", user.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
+
+      if (!userDocSnapshot.exists()) {
+        Alert.alert("Error", "No se pudo obtener la información del usuario.");
+        return;
+      }
+
+      const userData = userDocSnapshot.data();
+      const fromName = userData.username || "Usuario Desconocido";
+      const fromImage = userData.photoUrls && userData.photoUrls.length > 0
+        ? userData.photoUrls[0]
+        : "https://via.placeholder.com/150";
+
       // Referencia al evento general
       const eventRef = doc(database, "GoBoxs", box.title);
       const eventDoc = await getDoc(eventRef);
@@ -268,20 +283,14 @@ export default memo(function BoxDetails({ route, navigation }) {
       const eventDate = selectedDate || eventData.date || "Fecha no disponible";
       const eventTitle = box.title || eventData.title || "Evento General";
 
-      // Obtener nombre de usuario
-      const userDocRef = doc(database, "users", user.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
-      const fromName = userDocSnapshot.exists()
-        ? userDocSnapshot.data().username || "Usuario Desconocido"
-        : "Usuario Desconocido";
-
       // Enviar notificación al amigo invitado
       const notificationRef = collection(database, "users", friendId, "notifications");
       await addDoc(notificationRef, {
         fromId: user.uid,
         fromName: fromName, // Nombre de usuario
+        fromImage: fromImage, // Imagen de perfil del usuario
         eventTitle: eventTitle,
-        eventImage: eventImage, // URL válida de la imagen
+        eventImage: eventImage, // URL válida de la imagen del evento
         eventDate: eventDate,
         type: "generalEventInvitation",
         status: "pendiente",

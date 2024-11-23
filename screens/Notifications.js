@@ -621,92 +621,95 @@ export default function NotificationsComponent() {
       const eventImage = matchedBox
         ? matchedBox.path
         : "https://via.placeholder.com/150"; // Utiliza la imagen si se encuentra, o la predeterminada
-        return (
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("BoxDetails", {
-                box: {
-                  title: item.eventTitle,
-                  imageUrl: eventImage,
-                  date: item.eventDate,
-                  isPrivate: false,
-                },
-                selectedDate: item.eventDate,
-                isFromNotification: true,
-              });
-            }}
-            style={[styles.notificationContainer]}
-          >
-            <View style={styles.notificationContent}>
-              {/* Imagen del evento */}
-              <Image
-                source={{
-                  uri: eventImage,
-                }}
-                style={styles.profileImage}
-              />
-              <View style={styles.textContainer}>
-                {/* Texto principal de la invitación */}
-                <Text
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("BoxDetails", {
+              box: {
+                title: item.eventTitle,
+                imageUrl: eventImage,
+                date: item.eventDate,
+                isPrivate: false,
+              },
+              selectedDate: item.eventDate,
+              isFromNotification: true,
+            });
+          }}
+          style={[styles.notificationContainer]}
+        >
+          <View style={styles.notificationContent}>
+            {/* Imagen del evento */}
+            <Image
+              source={{
+                uri: item.fromImage,
+              }}
+              style={styles.profileImage}
+            />
+            <View style={styles.textContainer}>
+              {/* Texto principal de la invitación */}
+              <Text
+                style={[
+                  styles.notificationText,
+                  { color: isNightMode ? "#fff" : "#000" },
+                ]}
+              >
+                <Text style={[styles.boldText]}>{item.fromName}</Text> te ha
+                invitado a{" "}
+                <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
+                <Text style={[styles.boldText]}>{formattedTime}</Text>{" "}
+                <Text style={[styles.eventDateText, { color: isNightMode ? "#fff" : "#000" }]}>
+                  {item.eventDate}
+                </Text>
+              </Text>
+
+              {/* Botones de aceptar y rechazar */}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  onPress={() => handleAcceptEventInvitation(item)}
                   style={[
-                    styles.notificationText,
-                    { color: isNightMode ? "#fff" : "#000" },
+                    styles.acceptButton,
+                    {
+                      backgroundColor: isNightMode
+                        ? "rgba(255, 255, 255, 0.2)"
+                        : "rgba(128, 128, 128, 0.3)",
+                    },
                   ]}
                 >
-                  <Text style={[styles.boldText]}>{item.fromName}</Text> te ha
-                  invitado a{" "}
-                  <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
-                  <Text style={[styles.boldText]}>{formattedTime}</Text>{" "}
-                </Text>
-    
-                {/* Botones de aceptar y rechazar */}
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    onPress={() => handleAcceptEventInvitation(item)}
+                  <Text
                     style={[
-                      styles.acceptButton,
-                      {
-                        backgroundColor: isNightMode
-                          ? "rgba(255, 255, 255, 0.2)"
-                          : "rgba(128, 128, 128, 0.3)",
-                      },
+                      styles.buttonText,
+                      { color: isNightMode ? "#fff" : "#000" },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.buttonText,
-                        { color: isNightMode ? "#fff" : "#000" },
-                      ]}
-                    >
-                      Aceptar
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleRejectEventInvitation(item)}
+                    Aceptar
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleRejectEventInvitation(item)}
+                  style={[
+                    styles.rejectButton,
+                    {
+                      backgroundColor: isNightMode
+                        ? "rgba(255, 255, 255, 0.2)"
+                        : "rgba(128, 128, 128, 0.3)",
+                    },
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.rejectButton,
-                      {
-                        backgroundColor: isNightMode
-                          ? "rgba(255, 255, 255, 0.2)"
-                          : "rgba(128, 128, 128, 0.3)",
-                      },
+                      styles.buttonText,
+                      { color: isNightMode ? "#fff" : "#000" },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.buttonText,
-                        { color: isNightMode ? "#fff" : "#000" },
-                      ]}
-                    >
-                      Rechazar
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                    Rechazar
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
-          </TouchableOpacity>
-        );
-      }
+          </View>
+        </TouchableOpacity>
+      );
+    }
 
     const isFriendRequest =
       item.type === "friendRequest" &&
@@ -1033,5 +1036,10 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 8,
     marginRight: 10,
+  },
+  eventDateText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginLeft: 10,
   },
 });
