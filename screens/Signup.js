@@ -491,7 +491,7 @@ export default function SignUp() {
       setIsSubmitting(false);
 
       navigation.navigate("Tutorial");
-    } catch (error) {
+  } catch (error) {
       setIsSubmitting(false);
 
       if (error.code === "auth/email-already-in-use") {

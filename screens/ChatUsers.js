@@ -1236,8 +1236,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 30,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(0, 0, 0, 0.8)", // Background color for view once images
   },
+  imageNotViewed: {
+    backgroundColor: "rgba(240, 240, 240, 1)",
+  },
+  imageViewed: {
+    backgroundColor: "rgba(240, 240, 240, 1)",
+  },
+
   viewOnceVideoPlaceholder: {
     width: 200,
     height: 150,
@@ -1247,15 +1254,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
-  imageNotViewed: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)", // Fondo oscuro para imágenes no vistas
-  },
-  imageViewed: {
-    backgroundColor: "rgba(50, 50, 50, 0.8)", // Fondo gris más claro para imágenes vistas
-  },
-
   imageStatusText: {
-    color: "white",
+    color: "black",
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
