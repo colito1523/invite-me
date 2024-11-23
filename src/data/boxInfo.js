@@ -361,7 +361,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Bairro alto.jpg"),
+    path: require("../../assets/Lisboa/Bairro alto.webp"),
     title: "Bairro Alto",
     category: "Bars & Clubs",
     hours: {

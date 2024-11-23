@@ -156,6 +156,7 @@ export default function ChatList() {
                   id: docSnapshot.id,
                   user: otherUserData,
                   unseenMessagesCount, // Agregar el conteo
+                  lastMessage: chatData.lastMessage || "", // Agregar el último mensaje
                   lastMessageTimestamp: chatData.lastMessageTimestamp || null,
                 };
               })
@@ -341,7 +342,7 @@ export default function ChatList() {
     }
   };
 
-  const truncateMessage = (message, maxLength = 20) => {
+  const truncateMessage = (message, maxLength = 10) => {
     if (message.length <= maxLength) return message;
     return message.substring(0, maxLength) + "...";
   };
@@ -468,6 +469,16 @@ export default function ChatList() {
         >
           {item.user.username || "Usuario desconocido"}
         </Text>
+        {item.unseenMessagesCount === 0 && (
+          <Text
+            style={[
+              styles.lastMessagePreview,
+              { color: isNightMode ? "white" : "black" },
+            ]}
+          >
+            {truncateMessage(item.lastMessage || "")}
+          </Text>
+        )}
       </View>
       <View style={styles.timeAndUnreadContainer}>
         {item.unseenMessagesCount > 0 ? (

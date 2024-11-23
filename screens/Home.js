@@ -603,7 +603,7 @@ useEffect(() => {
           {unreadMessages && (
             <View style={[
               styles.unreadIndicator,
-              { backgroundColor: isNightMode ? "red" : "green" }
+              { backgroundColor: isNightMode ? "white" : "black" }
             ]} />
           )}
         </TouchableOpacity>
