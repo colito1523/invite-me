@@ -41,6 +41,7 @@ export default function NotificationsComponent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isNightMode, setIsNightMode] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingEventId, setLoadingEventId] = useState(null);
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -646,9 +647,11 @@ export default function NotificationsComponent() {
 
   const handleAcceptPrivateEvent = async (item) => {
     try {
+      setLoadingEventId(item.id);
       const user = auth.currentUser;
       if (!user) {
         Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
+        setLoadingEventId(null);
         return;
       }
   
@@ -656,11 +659,26 @@ export default function NotificationsComponent() {
       const userDoc = await getDoc(doc(database, "users", user.uid));
       const userData = userDoc.data();
   
-      // Add user to attendees in EventsPriv
+      // Check if user is already an attendee
       const eventRef = doc(database, "EventsPriv", item.eventId);
       const eventDoc = await getDoc(eventRef);
       if (eventDoc.exists()) {
         const eventData = eventDoc.data();
+        const attendees = eventData.attendees || [];
+        const isAlreadyAttendee = attendees.some(
+          (attendee) => attendee.uid === user.uid
+        );
+  
+        if (isAlreadyAttendee) {
+          Alert.alert(
+            t("notifications.alreadyParticipant"),
+            t("notifications.alreadyInEvent")
+          );
+          setLoadingEventId(null);
+          return;
+        }
+  
+        // Add user to attendees
         await updateDoc(eventRef, {
           attendees: arrayUnion({
             uid: user.uid,
@@ -707,6 +725,8 @@ export default function NotificationsComponent() {
         t("notifications.error"),
         t("notifications.acceptInvitationError")
       );
+    } finally {
+      setLoadingEventId(null);
     }
   };
 
@@ -736,33 +756,50 @@ export default function NotificationsComponent() {
 
   const handleAcceptGeneralEvent = async (item) => {
     try {
+      setLoadingEventId(item.id);
       const user = auth.currentUser;
       if (!user) {
         Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
+        setLoadingEventId(null);
         return;
       }
-
+  
       // Get user data
       const userDoc = await getDoc(doc(database, "users", user.uid));
       const userData = userDoc.data();
-
-      // Add user as participant in the specific date array within GoBoxs/{eventTitle}
+  
+      // Check if user is already a participant
       const eventRef = doc(database, "GoBoxs", item.eventTitle);
       const eventDoc = await getDoc(eventRef);
       if (eventDoc.exists()) {
         const eventData = eventDoc.data();
-        const updatedParticipants = (eventData[item.eventDate] || []).concat({
+        const participants = eventData[item.eventDate] || [];
+        const isAlreadyParticipant = participants.some(
+          (participant) => participant.uid === user.uid
+        );
+  
+        if (isAlreadyParticipant) {
+          Alert.alert(
+            t("notifications.alreadyParticipant"),
+            t("notifications.alreadyInEvent")
+          );
+          setLoadingEventId(null);
+          return;
+        }
+  
+        // Add user as participant
+        const updatedParticipants = participants.concat({
           uid: user.uid,
           username: userData.username || user.displayName,
           profileImage: userData.photoUrls && userData.photoUrls.length > 0
             ? userData.photoUrls[0]
             : "https://via.placeholder.com/150",
         });
-
+  
         await updateDoc(eventRef, {
           [item.eventDate]: updatedParticipants,
         });
-
+  
         // Add event data to user's database
         const userEventsRef = collection(database, "users", user.uid, "events");
         await addDoc(userEventsRef, {
@@ -777,16 +814,16 @@ export default function NotificationsComponent() {
           status: "accepted",
         });
       }
-
+  
       // Delete the notification from the database
       const notifRef = doc(database, "users", user.uid, "notifications", item.id);
       await deleteDoc(notifRef);
-
+  
       // Update local notification state
       setNotifications((prevNotifications) =>
         prevNotifications.filter((n) => n.id !== item.id)
       );
-
+  
       Alert.alert(
         t("notifications.invitationAccepted"),
         t("notifications.eventAddedToProfile")
@@ -797,8 +834,11 @@ export default function NotificationsComponent() {
         t("notifications.error"),
         t("notifications.acceptInvitationError")
       );
+    } finally {
+      setLoadingEventId(null);
     }
   };
+  
 
   const handleRejectGeneralEvent = async (item) => {
     try {
@@ -873,8 +913,13 @@ export default function NotificationsComponent() {
               <TouchableOpacity
                 style={[styles.button, styles.acceptButton]}
                 onPress={() => handleAcceptPrivateEvent(item)}
+                disabled={loadingEventId === item.id}
               >
-                <Text style={styles.buttonText}>Aceptar</Text>
+                {loadingEventId === item.id ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Aceptar</Text>
+                )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.rejectButton]}
@@ -926,8 +971,13 @@ export default function NotificationsComponent() {
               <TouchableOpacity
                 style={[styles.button, styles.acceptButton]}
                 onPress={() => handleAcceptGeneralEvent(item)}
+                disabled={loadingEventId === item.id}
               >
-                <Text style={styles.buttonText}>Aceptar</Text>
+                {loadingEventId === item.id ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Aceptar</Text>
+                )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.rejectButton]}
