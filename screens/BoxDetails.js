@@ -172,7 +172,7 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   const checkNightMode = () => {
     const currentHour = new Date().getHours();
-    setIsNightMode(currentHour >= 24 || currentHour < 6);
+    setIsNightMode(currentHour >= 19 || currentHour < 6);
   };
 
   const checkEventStatus = async () => {

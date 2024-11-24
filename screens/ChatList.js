@@ -67,7 +67,7 @@ export default function ChatList() {
   useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
-      setIsNightMode(currentHour >= 18 || currentHour < 6);
+      setIsNightMode(currentHour >= 19 || currentHour < 6);
     };
 
     checkTime();

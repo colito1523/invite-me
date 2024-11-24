@@ -27,7 +27,7 @@ export default function Menu({
   useEffect(() => {
     const updateNightMode = () => {
       const currentHour = new Date().getHours();
-      setIsNightMode(currentHour >= 18 || currentHour < 6);
+      setIsNightMode(currentHour >= 19 || currentHour < 6);
     };
 
     updateNightMode();
