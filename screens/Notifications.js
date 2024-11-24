@@ -120,7 +120,9 @@ export default function NotificationsComponent() {
             .filter(
               (notif) =>
                 !hiddenNotifications.includes(notif.id) &&
-                !blockedUsers.includes(notif.fromId) // Excluir notificaciones de usuarios bloqueados
+                !blockedUsers.includes(notif.fromId) &&
+                notif.status !== "accepted" &&
+                notif.status !== "rejected"
             );
           updateNotifications(notifList);
         }
@@ -138,7 +140,9 @@ export default function NotificationsComponent() {
             .filter(
               (notif) =>
                 !hiddenNotifications.includes(notif.id) &&
-                !blockedUsers.includes(notif.fromId) // Excluir solicitudes de usuarios bloqueados
+                !blockedUsers.includes(notif.fromId) &&
+                notif.status !== "accepted" &&
+                notif.status !== "rejected"
             );
           updateNotifications(requestList);
         }
@@ -156,33 +160,31 @@ export default function NotificationsComponent() {
   const handleDeleteNotification = (notificationId) => {
     Alert.alert(
       "Eliminar notificación",
-      "¿Estás seguro de que deseas ocultar esta notificación?",
+      "¿Estás seguro de que deseas eliminar esta notificación?",
       [
         {
           text: "Cancelar",
           style: "cancel",
         },
         {
-          text: "Ocultar",
+          text: "Eliminar",
           style: "destructive",
           onPress: async () => {
             try {
-              const userRef = doc(database, "users", auth.currentUser.uid);
-              await updateDoc(userRef, {
-                hiddenNotifications: arrayUnion(notificationId),
-              });
+              const userRef = doc(database, "users", auth.currentUser.uid, "notifications", notificationId);
+              await deleteDoc(userRef);
               setNotifications((prevNotifications) =>
                 prevNotifications.filter((notif) => notif.id !== notificationId)
               );
               Alert.alert(
-                "Notificación oculta",
-                "La notificación ha sido oculta."
+                "Notificación eliminada",
+                "La notificación ha sido eliminada."
               );
             } catch (error) {
-              console.error("Error al ocultar la notificación:", error);
+              console.error("Error al eliminar la notificación:", error);
               Alert.alert(
                 "Error",
-                "No se pudo ocultar la notificación. Inténtalo de nuevo."
+                "No se pudo eliminar la notificación. Inténtalo de nuevo."
               );
             }
           },
@@ -342,23 +344,13 @@ export default function NotificationsComponent() {
       });
 
       setNotifications((prevNotifications) =>
-        prevNotifications.map((notif) =>
-          notif.id === request.id
-            ? {
-                ...notif,
-                status: "accepted",
-                type: "friendRequestResponse",
-                response: "accepted",
-              }
-            : notif
-        )
+        prevNotifications.filter((notif) => notif.id !== request.id)
       );
 
-      setTimeout(() => {
-        setNotifications((prevNotifications) =>
-          prevNotifications.filter((notif) => notif.id !== request.id)
-        );
-      }, 5000);
+      Alert.alert(
+        t("notifications.invitationAccepted"),
+        t("notifications.eventAddedToProfile")
+      );
     } catch (error) {
       console.error("Error accepting request:", error);
       Alert.alert(
@@ -378,26 +370,16 @@ export default function NotificationsComponent() {
         "friendRequests",
         request.id
       );
-      await deleteDoc(requestRef);
+      await updateDoc(requestRef, { status: "rejected" });
 
       setNotifications((prevNotifications) =>
-        prevNotifications.map((notif) =>
-          notif.id === request.id
-            ? {
-                ...notif,
-                status: "rejected",
-                type: "friendRequestResponse",
-                response: "rejected",
-              }
-            : notif
-        )
+        prevNotifications.filter((notif) => notif.id !== request.id)
       );
 
-      setTimeout(() => {
-        setNotifications((prevNotifications) =>
-          prevNotifications.filter((notif) => notif.id !== request.id)
-        );
-      }, 5000);
+      Alert.alert(
+        t("notifications.invitationRejected"),
+        t("notifications.eventInvitationRejected")
+      );
     } catch (error) {
       console.error("Error rejecting request:", error);
       Alert.alert(
@@ -480,17 +462,7 @@ export default function NotificationsComponent() {
 
       // Update local notification state
       setNotifications((prevNotifications) =>
-        prevNotifications.map((n) =>
-          n.id === notif.id
-            ? {
-                ...n,
-                status: "accepted",
-                message: t("notifications.acceptedInvitation", {
-                  name: notif.fromName,
-                }),
-              }
-            : n
-        )
+        prevNotifications.filter((n) => n.id !== notif.id)
       );
 
       Alert.alert(
