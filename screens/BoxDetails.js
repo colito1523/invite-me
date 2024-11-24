@@ -181,7 +181,13 @@ export default memo(function BoxDetails({ route, navigation }) {
       const eventsRef = collection(database, "users", user.uid, "events");
       const q = query(eventsRef, where("title", "==", box.title));
       const querySnapshot = await getDocs(q);
-      setIsEventSaved(!querySnapshot.empty);
+
+      const isPrivateEvent = box.category === "EventoParaAmigos";
+      const eventDate = isPrivateEvent ? box.date : selectedDate;
+
+      // Check if the event for the selected date already exists
+      const existingEvent = querySnapshot.docs.find(doc => doc.data().dateArray.includes(eventDate));
+      setIsEventSaved(!!existingEvent);
     }
   };
 
@@ -732,34 +738,39 @@ const handleSaveEdit = async () => {
   };
 
 
-  const handleAddEvent = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+// ...existing code...
+const handleAddEvent = async () => {
+  if (isProcessing) return;
+  setIsProcessing(true);
 
-    const user = auth.currentUser;
-    if (!user || !box) {
-      setIsProcessing(false);
-      return;
-    }
+  const user = auth.currentUser;
+  if (!user || !box) {
+    setIsProcessing(false);
+    return;
+  }
 
-    try {
-      const eventsRef = collection(database, "users", user.uid, "events");
-      const q = query(eventsRef, where("title", "==", box.title));
-      const querySnapshot = await getDocs(q);
+  try {
+    const eventsRef = collection(database, "users", user.uid, "events");
+    const q = query(eventsRef, where("title", "==", box.title));
+    const querySnapshot = await getDocs(q);
 
-      if (!querySnapshot.empty) {
-        // Si el evento ya existe, eliminarlo
-        const eventDoc = querySnapshot.docs[0];
-        await deleteDoc(eventDoc.ref);
+    const isPrivateEvent = box.category === "EventoParaAmigos";
+    const eventDate = isPrivateEvent ? box.date : selectedDate;
+    const eventRef = doc(
+      database,
+      isPrivateEvent ? "EventsPriv" : "GoBoxs",
+      box.id || box.title
+    );
+
+    if (!querySnapshot.empty) {
+      // Check if the event for the selected date already exists
+      const existingEvent = querySnapshot.docs.find(doc => doc.data().dateArray.includes(eventDate));
+      if (existingEvent) {
+        // If the event for the selected date exists, remove it
+        await deleteDoc(existingEvent.ref);
         setIsEventSaved(false);
 
-        const eventRef = doc(
-          database,
-          box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
-          box.id || box.title
-        );
-
-        if (box.category === "EventoParaAmigos") {
+        if (isPrivateEvent) {
           await updateDoc(eventRef, {
             attendees: arrayRemove({ uid: user.uid }),
           });
@@ -767,76 +778,75 @@ const handleSaveEdit = async () => {
           await handleRemoveFromGoBoxs(box.title, selectedDate);
         }
       } else {
-        // Si el evento no existe, agregarlo
-        const eventsSnapshot = await getDocs(eventsRef);
-        if (eventsSnapshot.size >= 6) {
-          Alert.alert(
-            t("boxDetails.limitReached"),
-            t("boxDetails.limitReachedMessage"),
-            [{ text: t("boxDetails.accept"), style: "default" }]
-          );
-          setIsProcessing(false);
-          return;
-        }
-
-        const isPrivateEvent = box.category === "EventoParaAmigos";
-        const eventDate = isPrivateEvent ? box.date : selectedDate;
-        const eventRef = doc(
-          database,
-          isPrivateEvent ? "EventsPriv" : "GoBoxs",
-          box.id || box.title
-        );
-
-        const eventData = {
-          title: box.title,
-          imageUrl: box.imageUrl || "",
-          date: eventDate,
-          phoneNumber: box.number || "Sin número",
-          locationLink: box.locationLink || "Sin ubicación especificada",
-          hours: box.hours || {},
-          ...(box.coordinates ? { coordinates: box.coordinates } : {}),
-        };
-
-        if (isPrivateEvent) {
-          const userDoc = await getDoc(doc(database, "users", user.uid));
-          const username = userDoc.exists() ? userDoc.data().username || "Anónimo" : "Anónimo";
-          const profileImage = userDoc.exists()
-            ? userDoc.data().photoUrls?.[0] || "https://via.placeholder.com/150"
-            : "https://via.placeholder.com/150";
-
-          const attendeeData = { uid: user.uid, username, profileImage };
-
-          const eventSnapshot = await getDoc(eventRef);
-          if (!eventSnapshot.exists()) {
-            await setDoc(eventRef, {
-              attendees: [attendeeData],
-              ...eventData,
-            });
-          } else {
-            await updateDoc(eventRef, {
-              attendees: arrayUnion(attendeeData),
-            });
-          }
-        } else {
-          await saveUserEvent(box.title, eventDate, box.day, eventData.phoneNumber, eventData.locationLink, eventData.hours);
-        }
-
-        // Guardar el evento en la colección del usuario
-        await addDoc(eventsRef, {
-          ...eventData,
-          dateArray: [eventDate],
-        });
-
-        setIsEventSaved(true);
-
+        // If the event for the selected date does not exist, add it
+        await addEventToUser(eventsRef, eventDate, eventRef, isPrivateEvent);
       }
-    } catch (error) {
-      console.error("Error al manejar el evento:", error);
-      Alert.alert(t("boxDetails.error"), t("boxDetails.eventSavingError"));
-    } finally {
-      setIsProcessing(false);
+    } else {
+      // If no events exist, add the new event
+      await addEventToUser(eventsRef, eventDate, eventRef, isPrivateEvent);
     }
+
+    setIsEventSaved(true);
+  } catch (error) {
+    console.error("Error al manejar el evento:", error);
+    Alert.alert(t("boxDetails.error"), t("boxDetails.eventSavingError"));
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
+const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) => {
+  const eventsSnapshot = await getDocs(eventsRef);
+  if (eventsSnapshot.size >= 6) {
+    Alert.alert(
+      t("boxDetails.limitReached"),
+      t("boxDetails.limitReachedMessage"),
+      [{ text: t("boxDetails.accept"), style: "default" }]
+    );
+    setIsProcessing(false);
+    return;
+  }
+
+  const eventData = {
+    title: box.title,
+    imageUrl: box.imageUrl || "",
+    date: eventDate,
+    phoneNumber: box.number || "Sin número",
+    locationLink: box.locationLink || "Sin ubicación especificada",
+    hours: box.hours || {},
+    ...(box.coordinates ? { coordinates: box.coordinates } : {}),
   };
+
+  if (isPrivateEvent) {
+    const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
+    const username = userDoc.exists() ? userDoc.data().username || "Anónimo" : "Anónimo";
+    const profileImage = userDoc.exists()
+      ? userDoc.data().photoUrls?.[0] || "https://via.placeholder.com/150"
+      : "https://via.placeholder.com/150";
+
+    const attendeeData = { uid: auth.currentUser.uid, username, profileImage };
+
+    const eventSnapshot = await getDoc(eventRef);
+    if (!eventSnapshot.exists()) {
+      await setDoc(eventRef, {
+        attendees: [attendeeData],
+        ...eventData,
+      });
+    } else {
+      await updateDoc(eventRef, {
+        attendees: arrayUnion(attendeeData),
+      });
+    }
+  } else {
+    await saveUserEvent(box.title, eventDate, box.day, eventData.phoneNumber, eventData.locationLink, eventData.hours);
+  }
+
+  await addDoc(eventsRef, {
+    ...eventData,
+    dateArray: [eventDate],
+  });
+};
+// ...existing code...
 
   const handleRemoveFromGoBoxs = async (boxTitle, selectedDate) => {
     try {
