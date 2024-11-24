@@ -148,18 +148,20 @@ function GenderSelector({ onGenderChange, initialGender }) {
   };
 
   const renderGenderItem = (gender, index) => {
+    // Check if the current gender is selected
     const isSelected = gender === selectedGender;
+
     return (
       <View
-        key={`${gender}-${index}`}
+        key={`${gender}-${index}`} // Unique key for each item
         style={[
-          styles.genderItem,
-          isSelected && styles.selectedGenderItem,
-          { flex: 1, justifyContent: "center", alignItems: "center" },
+          styles.genderItem, // Base style for gender item
+          isSelected && styles.selectedGenderItem, // Additional style if selected
+          { flex: 1, justifyContent: "center", alignItems: "center" }, // Center the content
         ]}
       >
         <Text style={[styles.genderText, isSelected && styles.selectedText]}>
-          {t(`signup.genders.${gender.toLowerCase()}`)}
+          {t(`signup.genders.${gender.toLowerCase()}`)} 
         </Text>
       </View>
     );
@@ -196,7 +198,7 @@ export default function SignUp() {
     email: "",
     username: "",
     password: "",
-    age: "25",
+    age: "18",
     gender: "Prefer not to say",
     about: "",
     hobby1: "",
@@ -321,7 +323,7 @@ export default function SignUp() {
   };
 
   const validateUsername = (username) => {
-    const usernameRegex = /^[a-z0-9._]+$/;
+    const usernameRegex = /^[a-zA-Z0-9._]+$/; // Allow uppercase letters
     return usernameRegex.test(username);
   };
 
@@ -378,7 +380,7 @@ export default function SignUp() {
     }
     const usernameQuery = query(
       collection(database, "users"),
-      where("username", "==", answers.username.trim().toLowerCase())
+      where("username", "==", answers.username.trim().toLowerCase()) // Transform to lowercase
     );
 
     try {
@@ -456,6 +458,7 @@ export default function SignUp() {
     setIsSubmitting(true);
     try {
       const emailToLower = answers.email.trim().toLowerCase();
+      const usernameToLower = answers.username.trim().toLowerCase(); // Transform username to lowercase
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         emailToLower,
@@ -482,7 +485,7 @@ export default function SignUp() {
         firstInterest: answers.interest1,
         secondInterest: answers.interest2,
         photoUrls: photoUrls,
-        username: answers.username,
+        username: usernameToLower, // Save username in lowercase
       };
 
       await setDoc(doc(database, "users", user.uid), userData);
