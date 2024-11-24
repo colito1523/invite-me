@@ -258,13 +258,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   
     try {
-      // Actualizar el estado local para marcar al usuario como invitado
-      setFriends(
-        friends.map((friend) =>
-          friend.friendId === friendId ? { ...friend, invited: true } : friend
-        )
-      );
-  
       // Obtener referencia del evento en Firestore
       const eventRef = doc(database, "GoBoxs", box.title);
       const eventDoc = await getDoc(eventRef);

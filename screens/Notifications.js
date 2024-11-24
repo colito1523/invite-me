@@ -510,11 +510,11 @@ export default function NotificationsComponent() {
         Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
         return;
       }
-
+  
       // Verificar si el remitente de la invitación está bloqueado
       const userDoc = await getDoc(doc(database, "users", user.uid));
       const blockedUsers = userDoc.data()?.blockedUsers || [];
-
+  
       if (blockedUsers.includes(notif.fromId)) {
         Alert.alert(
           "Error",
@@ -522,7 +522,7 @@ export default function NotificationsComponent() {
         );
         return;
       }
-
+  
       // Referencia a la notificación
       const notifRef = doc(
         database,
@@ -531,28 +531,55 @@ export default function NotificationsComponent() {
         "notifications",
         notif.id
       );
-
-      // Actualizar el estado de la invitación como "rechazada"
-      await updateDoc(notifRef, { status: "rejected" });
-
+  
       // Remover el UID del usuario de invitedFriends en EventsPriv
-      const eventRef = doc(database, "EventsPriv", notif.eventId);
-      const eventDoc = await getDoc(eventRef);
-
-      if (eventDoc.exists()) {
-        const eventData = eventDoc.data();
-        const updatedInvitedFriends = (eventData.invitedFriends || []).filter(
-          (uid) => uid !== user.uid
-        );
-
-        await updateDoc(eventRef, { invitedFriends: updatedInvitedFriends });
+      if (notif.eventId) {
+        const eventRef = doc(database, "EventsPriv", notif.eventId);
+        const eventDoc = await getDoc(eventRef);
+  
+        if (eventDoc.exists()) {
+          const eventData = eventDoc.data();
+          const updatedInvitedFriends = (eventData.invitedFriends || []).filter(
+            (uid) => uid !== user.uid
+          );
+  
+          await updateDoc(eventRef, { invitedFriends: updatedInvitedFriends });
+        }
       }
-
+  
+      // Remover la invitación de GoBoxs
+      if (notif.eventTitle) {
+        const goBoxRef = doc(database, "GoBoxs", notif.eventTitle);
+        const goBoxDoc = await getDoc(goBoxRef);
+  
+        if (goBoxDoc.exists()) {
+          const goBoxData = goBoxDoc.data();
+          const updatedInvitations = (goBoxData[notif.eventDate] || []).map((entry) => {
+            if (entry.uid === notif.fromId) {
+              return {
+                ...entry,
+                invitations: (entry.invitations || []).filter(
+                  (inv) => inv.invitedTo !== user.uid
+                ),
+              };
+            }
+            return entry;
+          });
+  
+          await updateDoc(goBoxRef, {
+            [notif.eventDate]: updatedInvitations,
+          });
+        }
+      }
+  
+      // Eliminar la notificación de Firestore
+      await deleteDoc(notifRef);
+  
       // Remover la notificación del estado local
       setNotifications((prevNotifications) =>
         prevNotifications.filter((n) => n.id !== notif.id)
       );
-
+  
       Alert.alert(
         t("notifications.invitationRejected"),
         t("notifications.eventInvitationRejected")
