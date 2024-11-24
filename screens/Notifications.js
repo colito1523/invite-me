@@ -673,9 +673,71 @@ export default function NotificationsComponent() {
     }
   };
 
-  const handleAcceptGeneralEvent = (item) => {
-    // Lógica para aceptar la invitación a un evento general
-    console.log("Aceptar invitación a un evento general:", item);
+  const handleAcceptGeneralEvent = async (item) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
+        return;
+      }
+
+      // Get user data
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      const userData = userDoc.data();
+
+      // Add user as participant in the specific date array within GoBoxs/{eventTitle}
+      const eventRef = doc(database, "GoBoxs", item.eventTitle);
+      const eventDoc = await getDoc(eventRef);
+      if (eventDoc.exists()) {
+        const eventData = eventDoc.data();
+        const updatedParticipants = (eventData[item.eventDate] || []).concat({
+          uid: user.uid,
+          username: userData.username || user.displayName,
+          profileImage: userData.photoUrls && userData.photoUrls.length > 0
+            ? userData.photoUrls[0]
+            : "https://via.placeholder.com/150",
+        });
+
+        await updateDoc(eventRef, {
+          [item.eventDate]: updatedParticipants,
+        });
+      }
+
+      // Update the notification status
+      const notifRef = doc(database, "users", user.uid, "notifications", item.id);
+      await updateDoc(notifRef, {
+        status: "accepted",
+        message: t("notifications.acceptedInvitation", {
+          name: item.fromName,
+        }),
+      });
+
+      // Update local notification state
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((n) =>
+          n.id === item.id
+            ? {
+                ...n,
+                status: "accepted",
+                message: t("notifications.acceptedInvitation", {
+                  name: item.fromName,
+                }),
+              }
+            : n
+        )
+      );
+
+      Alert.alert(
+        t("notifications.invitationAccepted"),
+        t("notifications.eventAddedToProfile")
+      );
+    } catch (error) {
+      console.error("Error accepting general event invitation:", error);
+      Alert.alert(
+        t("notifications.error"),
+        t("notifications.acceptInvitationError")
+      );
+    }
   };
 
   const handleRejectGeneralEvent = async (item) => {
