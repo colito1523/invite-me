@@ -1062,6 +1062,7 @@ const handleSaveEdit = async () => {
               boxData={boxData}
               isNightMode={isNightMode}
               isFromNotification={isFromNotification}
+              showDescription={box.category === "EventoParaAmigos"} // Add this prop to control the display
             />
 
           </View>

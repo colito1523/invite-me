@@ -323,7 +323,7 @@ export default function SignUp() {
   };
 
   const validateUsername = (username) => {
-    const usernameRegex = /^[a-zA-Z0-9._]+$/; // Allow uppercase letters
+    const usernameRegex = /^[a-z0-9._]+$/;
     return usernameRegex.test(username);
   };
 
@@ -380,7 +380,7 @@ export default function SignUp() {
     }
     const usernameQuery = query(
       collection(database, "users"),
-      where("username", "==", answers.username.trim().toLowerCase()) // Transform to lowercase
+      where("username", "==", answers.username.trim().toLowerCase())
     );
 
     try {
@@ -458,7 +458,6 @@ export default function SignUp() {
     setIsSubmitting(true);
     try {
       const emailToLower = answers.email.trim().toLowerCase();
-      const usernameToLower = answers.username.trim().toLowerCase(); // Transform username to lowercase
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         emailToLower,
@@ -485,7 +484,7 @@ export default function SignUp() {
         firstInterest: answers.interest1,
         secondInterest: answers.interest2,
         photoUrls: photoUrls,
-        username: usernameToLower, // Save username in lowercase
+        username: answers.username,
       };
 
       await setDoc(doc(database, "users", user.uid), userData);

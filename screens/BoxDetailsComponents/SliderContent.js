@@ -4,7 +4,7 @@ import MapView, { Marker } from "react-native-maps";
 
 const { width } = Dimensions.get("window");
 
-const SliderContent = ({ box, boxData, isNightMode, isFromNotification }) => {
+const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDescription }) => {
   const [mapRegion, setMapRegion] = useState(null);
 
   useEffect(() => {
@@ -37,7 +37,12 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification }) => {
     >
       {/* Primer Slider: Mapa o Descripción */}
       <View style={styles.sliderPart}>
-        {mapRegion ? (
+        {showDescription ? (
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.descriptionTitle}>Descripción</Text>
+            <Text style={styles.descriptionText}>{boxData.description}</Text>
+          </View>
+        ) : mapRegion ? (
           <View style={styles.mapContainer}>
             <MapView
               style={styles.map}
@@ -73,6 +78,15 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification }) => {
               </Text>
               <Text style={styles.dayText}>
                 {`Día: ${box.day || "No disponible"}`}
+              </Text>
+            </View>
+          ) : box.category === "EventoParaAmigos" ? (
+            <View style={styles.notificationHours}>
+              <Text style={styles.hoursText}>
+                {`Hora: ${boxData.hour || "No disponible"}`}
+              </Text>
+              <Text style={styles.dayText}>
+                {`Día: ${boxData.day || "No disponible"}`}
               </Text>
             </View>
           ) : (
@@ -243,7 +257,12 @@ const styles = StyleSheet.create({
       fontWeight: "bold",
       marginBottom: 5,
     },
- 
+    descriptionTitle: {
+      color: 'white',
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 10,
+    },
 });
 
 export default SliderContent;
