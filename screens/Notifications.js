@@ -955,7 +955,7 @@ export default function NotificationsComponent() {
               date: eventDate,
               isPrivate: false,
               hours: item.hours,
-              number: item.phoneNumber,
+              number: item.number,
               coordinates: item.coordinates,
             },
             selectedDate: eventDate,
