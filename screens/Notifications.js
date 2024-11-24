@@ -644,9 +644,70 @@ export default function NotificationsComponent() {
     }
   };
 
-  const handleAcceptPrivateEvent = (item) => {
-    // Lógica para aceptar la invitación a un evento privado
-    console.log("Aceptar invitación a evento privado:", item);
+  const handleAcceptPrivateEvent = async (item) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
+        return;
+      }
+  
+      // Get user data
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      const userData = userDoc.data();
+  
+      // Add user to attendees in EventsPriv
+      const eventRef = doc(database, "EventsPriv", item.eventId);
+      const eventDoc = await getDoc(eventRef);
+      if (eventDoc.exists()) {
+        const eventData = eventDoc.data();
+        await updateDoc(eventRef, {
+          attendees: arrayUnion({
+            uid: user.uid,
+            username: userData.username || user.displayName,
+            profileImage: userData.photoUrls && userData.photoUrls.length > 0
+              ? userData.photoUrls[0]
+              : "https://via.placeholder.com/150",
+          }),
+        });
+  
+        // Add event data to user's database
+        const userEventsRef = collection(database, "users", user.uid, "events");
+        await addDoc(userEventsRef, {
+          title: eventData.title,
+          imageUrl: eventData.image,
+          date: eventData.date,
+          address: eventData.address,
+          category: eventData.category,
+          day: eventData.day,
+          description: eventData.description,
+          eventId: eventData.eventId,
+          expirationDate: eventData.expirationDate,
+          hour: eventData.hour,
+          status: "accepted",
+        });
+      }
+  
+      // Delete the notification from the database
+      const notifRef = doc(database, "users", user.uid, "notifications", item.id);
+      await deleteDoc(notifRef);
+  
+      // Update local notification state
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter((n) => n.id !== item.id)
+      );
+  
+      Alert.alert(
+        t("notifications.invitationAccepted"),
+        t("notifications.eventAddedToProfile")
+      );
+    } catch (error) {
+      console.error("Error accepting private event invitation:", error);
+      Alert.alert(
+        t("notifications.error"),
+        t("notifications.acceptInvitationError")
+      );
+    }
   };
 
   const handleRejectPrivateEvent = async (item) => {
@@ -701,30 +762,29 @@ export default function NotificationsComponent() {
         await updateDoc(eventRef, {
           [item.eventDate]: updatedParticipants,
         });
+
+        // Add event data to user's database
+        const userEventsRef = collection(database, "users", user.uid, "events");
+        await addDoc(userEventsRef, {
+          title: eventData.title || item.eventTitle,
+          imageUrl: eventData.imageUrl || item.eventImage,
+          date: item.eventDate,
+          coordinates: eventData.coordinates || {},
+          dateArray: eventData.dateArray || [],
+          hours: eventData.hours || {},
+          locationLink: eventData.locationLink || "Sin ubicación especificada",
+          phoneNumber: eventData.phoneNumber || "",
+          status: "accepted",
+        });
       }
 
-      // Update the notification status
+      // Delete the notification from the database
       const notifRef = doc(database, "users", user.uid, "notifications", item.id);
-      await updateDoc(notifRef, {
-        status: "accepted",
-        message: t("notifications.acceptedInvitation", {
-          name: item.fromName,
-        }),
-      });
+      await deleteDoc(notifRef);
 
       // Update local notification state
       setNotifications((prevNotifications) =>
-        prevNotifications.map((n) =>
-          n.id === item.id
-            ? {
-                ...n,
-                status: "accepted",
-                message: t("notifications.acceptedInvitation", {
-                  name: item.fromName,
-                }),
-              }
-            : n
-        )
+        prevNotifications.filter((n) => n.id !== item.id)
       );
 
       Alert.alert(
@@ -781,9 +841,7 @@ export default function NotificationsComponent() {
   };
 
   const renderPrivateEventNotification = ({ item }) => {
-    const eventDate = typeof item.eventDate === 'object' && item.eventDate.seconds
-      ? new Date(item.eventDate.seconds * 1000).toLocaleString()
-      : item.eventDate; // Convert timestamp to string if necessary
+    const eventDate = item.date; // Use the date field instead of timestamp
     return (
       <TouchableOpacity
         onPress={() => {
@@ -812,8 +870,18 @@ export default function NotificationsComponent() {
               <Text style={[styles.boldText]}>{eventDate}</Text>
             </Text>
             <View style={styles.buttonContainer}>
-              <Button title="Aceptar" onPress={() => handleAcceptPrivateEvent(item)} />
-              <Button title="Rechazar" onPress={() => handleRejectPrivateEvent(item)} />
+              <TouchableOpacity
+                style={[styles.button, styles.acceptButton]}
+                onPress={() => handleAcceptPrivateEvent(item)}
+              >
+                <Text style={styles.buttonText}>Aceptar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.rejectButton]}
+                onPress={() => handleRejectPrivateEvent(item)}
+              >
+                <Text style={styles.buttonText}>Rechazar</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -855,8 +923,18 @@ export default function NotificationsComponent() {
               <Text style={[styles.boldText]}>{eventDate}</Text>
             </Text>
             <View style={styles.buttonContainer}>
-              <Button title="Aceptar" onPress={() => handleAcceptGeneralEvent(item)} />
-              <Button title="Rechazar" onPress={() => handleRejectGeneralEvent(item)} />
+              <TouchableOpacity
+                style={[styles.button, styles.acceptButton]}
+                onPress={() => handleAcceptGeneralEvent(item)}
+              >
+                <Text style={styles.buttonText}>Aceptar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.rejectButton]}
+                onPress={() => handleRejectGeneralEvent(item)}
+              >
+                <Text style={styles.buttonText}>Rechazar</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -989,5 +1067,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginLeft: 10,
+  },
+  button: {
+    backgroundColor: "#d3d3d3",
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginRight: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
