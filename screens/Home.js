@@ -489,6 +489,19 @@ useEffect(() => {
     fetchUnreadMessages();
   }, [navigation]);
 
+  const memoizedMenu = useMemo(() => (
+    <Menu
+      isVisible={menuVisible}
+      onClose={toggleMenu}
+      onCategorySelect={handleCategorySelect}
+      onCitySelect={handleCitySelect}
+      onSignOut={onSignOut}
+      isNightMode={isNightMode}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+    />
+  ), [menuVisible, toggleMenu, handleCategorySelect, handleCitySelect, onSignOut, isNightMode, searchQuery, setSearchQuery]);
+
   if (!locationGranted) {
     return (
       <View style={currentStyles.centeredView}>
@@ -505,16 +518,7 @@ useEffect(() => {
 
   return (
     <View style={currentStyles.container}>
-      <Menu
-        isVisible={menuVisible}
-        onClose={toggleMenu}
-        onCategorySelect={handleCategorySelect}
-        onCitySelect={handleCitySelect}
-        onSignOut={onSignOut}
-        isNightMode={isNightMode}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-      />
+      {memoizedMenu}
       <FlatList
         data={filteredBoxData.flatMap(group => group.data)}
         renderItem={renderItem}

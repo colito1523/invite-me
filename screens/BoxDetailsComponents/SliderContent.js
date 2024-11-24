@@ -6,6 +6,7 @@ const { width } = Dimensions.get("window");
 
 const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDescription }) => {
   const [mapRegion, setMapRegion] = useState(null);
+  const [markerCoordinate, setMarkerCoordinate] = useState(null);
 
   useEffect(() => {
     // Reinicia el mapa al cambiar las coordenadas del evento
@@ -22,9 +23,14 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
       };
 
       setMapRegion(newRegion); // Actualiza la región del mapa
+      setMarkerCoordinate({
+        latitude: box.coordinates.latitude,
+        longitude: box.coordinates.longitude,
+      }); // Actualiza la coordenada del marcador
     } else {
       console.warn("Coordenadas inválidas o no disponibles para este evento.");
       setMapRegion(null); // Limpia el mapa si no hay coordenadas
+      setMarkerCoordinate(null); // Limpia el marcador si no hay coordenadas
     }
   }, [box]); // Escucha cambios en todo el objeto `box`
 
@@ -49,14 +55,13 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
               region={mapRegion}
               onRegionChangeComplete={(region) => setMapRegion(region)}
             >
-              <Marker
-                coordinate={{
-                  latitude: mapRegion.latitude,
-                  longitude: mapRegion.longitude,
-                }}
-                title={box?.title || "Evento"}
-                description={box?.description || ""}
-              />
+              {markerCoordinate && (
+                <Marker
+                  coordinate={markerCoordinate}
+                  title={box?.title || "Evento"}
+                  description={box?.description || ""}
+                />
+              )}
             </MapView>
           </View>
         ) : (

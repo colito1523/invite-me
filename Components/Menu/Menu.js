@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, Modal, FlatList, Linking, Alert } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,7 +36,7 @@ export default function Menu({
     return () => clearInterval(interval);
   }, []);
 
-  const currentStyles = isNightMode ? nightStyles : dayStyles;
+  const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
 
   const categories = [
     t('categories.all'),
@@ -51,7 +51,7 @@ export default function Menu({
   const cities = ['Lisboa', 'Madrid']; // Lista de ciudades disponibles para el autocompletado
 
   // Función para manejar cambios en el campo de búsqueda y actualizar sugerencias
-  const handleSearchChange = (text) => {
+  const handleSearchChange = useCallback((text) => {
     setSearchQuery(text);
 
     // Filtrar las ciudades que coincidan con el texto ingresado
@@ -61,17 +61,17 @@ export default function Menu({
     } else {
       setFilteredCities([]); // Limpiar sugerencias si no hay texto
     }
-  };
+  }, [cities]);
 
   // Función para seleccionar una ciudad de la lista de autocompletado
-  const handleCitySelect = (city) => {
+  const handleCitySelect = useCallback((city) => {
     setSelectedCity(city); // Actualizar la ciudad seleccionada
     onCitySelect(city); // Llama a la función para actualizar los datos de la ciudad
     setSearchQuery(city); // Muestra la ciudad seleccionada en el campo de búsqueda
     setFilteredCities([]); // Ocultar sugerencias después de seleccionar una ciudad
-  };
+  }, [onCitySelect]);
 
-  const handleCategorySelect = (category) => {
+  const handleCategorySelect = useCallback((category) => {
     if (category === t('categories.createOwnEvent')) {
         onClose();
         navigation.navigate('CreateEvent');
@@ -84,9 +84,9 @@ export default function Menu({
     } else {
         onCategorySelect(category);
     }
-  };
+  }, [onClose, navigation, onCategorySelect]);
 
-  const handleSupportPress = async () => {
+  const handleSupportPress = useCallback(async () => {
     const email = "info@invitemembers.com"; // Cambiar por el correo de soporte
     const subject = "User support";
     const body = "Hi, I need help with..."; // Texto predefinido del mensaje
@@ -98,7 +98,7 @@ export default function Menu({
     } else {
       Alert.alert("Error", "No se pudo abrir el cliente de correo.");
     }
-  };
+  }, []);
 
   return (
     <Modal
