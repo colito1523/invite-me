@@ -335,6 +335,9 @@ export default memo(function BoxDetails({ route, navigation }) {
         type: "generalEventInvitation",
         status: "pendiente",
         timestamp: new Date(),
+        hours: box.hours || {},
+        number: box.number || "Sin número",
+        coordinates: box.coordinates || {},
       });
   
       Alert.alert(
