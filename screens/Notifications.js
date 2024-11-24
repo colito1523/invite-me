@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   RefreshControl,
+  Button,
 } from "react-native";
 import { Image } from "expo-image";
 import { database, auth } from "../config/firebase";
@@ -24,6 +25,7 @@ import {
   getDoc,
   setDoc,
   arrayUnion,
+  arrayRemove
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { format, isToday, isYesterday } from "date-fns";
@@ -642,317 +644,174 @@ export default function NotificationsComponent() {
     }
   };
 
+  const handleAcceptPrivateEvent = (item) => {
+    // Lógica para aceptar la invitación a un evento privado
+    console.log("Aceptar invitación a evento privado:", item);
+  };
+
+  const handleRejectPrivateEvent = async (item) => {
+    try {
+      // Eliminar la notificación
+      const notificationRef = doc(database, "users", auth.currentUser.uid, "notifications", item.id);
+      await deleteDoc(notificationRef);
+  
+      // Eliminar el valor del array invitedFriends en /EventsPriv/{eventId}
+      const eventRef = doc(database, "EventsPriv", item.eventId);
+      await updateDoc(eventRef, {
+        invitedFriends: arrayRemove(auth.currentUser.uid)
+      });
+  
+      // Remover la notificación del estado local
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter((notif) => notif.id !== item.id)
+      );
+  
+      Alert.alert("Rechazado", "Has rechazado la invitación al evento privado.");
+    } catch (error) {
+      console.error("Error al rechazar la invitación al evento privado:", error);
+      Alert.alert("Error", "No se pudo rechazar la invitación.");
+    }
+  };
+
+  const handleAcceptGeneralEvent = (item) => {
+    // Lógica para aceptar la invitación a un evento general
+    console.log("Aceptar invitación a un evento general:", item);
+  };
+
+  const handleRejectGeneralEvent = async (item) => {
+    try {
+      // Eliminar la notificación
+      const notificationRef = doc(database, "users", auth.currentUser.uid, "notifications", item.id);
+      await deleteDoc(notificationRef);
+  
+      // Eliminar los datos del array invitations en /GoBoxs/{eventTitle}
+      const eventRef = doc(database, "GoBoxs", item.eventTitle);
+      const eventDoc = await getDoc(eventRef);
+      if (eventDoc.exists()) {
+        const eventData = eventDoc.data();
+        const updatedInvitations = (eventData[item.eventDate] || []).map((entry) => {
+          if (entry.uid === item.fromId) {
+            return {
+              ...entry,
+              invitations: (entry.invitations || []).filter(
+                (inv) => inv.invitedTo !== auth.currentUser.uid
+              ),
+            };
+          }
+          return entry;
+        });
+  
+        await updateDoc(eventRef, {
+          [item.eventDate]: updatedInvitations,
+        });
+      }
+  
+      // Remover la notificación del estado local
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter((notif) => notif.id !== item.id)
+      );
+  
+      Alert.alert("Rechazado", "Has rechazado la invitación al evento general.");
+    } catch (error) {
+      console.error("Error al rechazar la invitación al evento general:", error);
+      Alert.alert("Error", "No se pudo rechazar la invitación.");
+    }
+  };
+
+  const renderPrivateEventNotification = ({ item }) => {
+    const eventDate = typeof item.eventDate === 'object' && item.eventDate.seconds
+      ? new Date(item.eventDate.seconds * 1000).toLocaleString()
+      : item.eventDate; // Convert timestamp to string if necessary
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("BoxDetails", {
+            box: {
+              title: item.eventTitle,
+              imageUrl: item.eventImage,
+              date: eventDate,
+              isPrivate: true,
+            },
+            selectedDate: eventDate,
+            isFromNotification: true,
+          });
+        }}
+        style={[styles.notificationContainer]}
+      >
+        <View style={styles.notificationContent}>
+          <Image
+            source={{ uri: item.fromImage }}
+            style={styles.profileImage}
+          />
+          <View style={styles.textContainer}>
+            <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
+              <Text style={[styles.boldText]}>{item.fromName}</Text> te ha invitado a{" "}
+              <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
+              <Text style={[styles.boldText]}>{eventDate}</Text>
+            </Text>
+            <View style={styles.buttonContainer}>
+              <Button title="Aceptar" onPress={() => handleAcceptPrivateEvent(item)} />
+              <Button title="Rechazar" onPress={() => handleRejectPrivateEvent(item)} />
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderGeneralEventNotification = ({ item }) => {
+    const eventDate = typeof item.eventDate === 'object' && item.eventDate.seconds
+      ? new Date(item.eventDate.seconds * 1000).toLocaleString()
+      : item.eventDate; // Convert timestamp to string if necessary
+    const matchedBox = boxInfo.find((box) => box.title === item.eventTitle);
+    const eventImage = matchedBox ? matchedBox.path : "https://via.placeholder.com/150";
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("BoxDetails", {
+            box: {
+              title: item.eventTitle,
+              imageUrl: eventImage,
+              date: eventDate,
+              isPrivate: false,
+            },
+            selectedDate: eventDate,
+            isFromNotification: true,
+          });
+        }}
+        style={[styles.notificationContainer]}
+      >
+        <View style={styles.notificationContent}>
+          <Image
+            source={{ uri: item.fromImage }}
+            style={styles.profileImage}
+          />
+          <View style={styles.textContainer}>
+            <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
+              <Text style={[styles.boldText]}>{item.fromName}</Text> te ha invitado a{" "}
+              <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
+              <Text style={[styles.boldText]}>{eventDate}</Text>
+            </Text>
+            <View style={styles.buttonContainer}>
+              <Button title="Aceptar" onPress={() => handleAcceptGeneralEvent(item)} />
+              <Button title="Rechazar" onPress={() => handleRejectGeneralEvent(item)} />
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   const renderNotificationItem = ({ item }) => {
     if (item.type === "generalEventInvitation") {
-      const matchedBox = boxInfo.find((box) => box.title === item.eventTitle);
-      const eventImage = matchedBox
-        ? matchedBox.path
-        : "https://via.placeholder.com/150"; // Utiliza la imagen si se encuentra, o la predeterminada
-      return (
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("BoxDetails", {
-              box: {
-                title: item.eventTitle,
-                imageUrl: eventImage,
-                date: item.eventDate,
-                isPrivate: false,
-              },
-              selectedDate: item.eventDate,
-              isFromNotification: true,
-            });
-          }}
-          style={[styles.notificationContainer]}
-        >
-          <View style={styles.notificationContent}>
-            {/* Imagen del evento */}
-            <Image
-              source={{
-                uri: item.fromImage,
-              }}
-              style={styles.profileImage}
-            />
-            <View style={styles.textContainer}>
-              {/* Texto principal de la invitación */}
-              <Text
-                style={[
-                  styles.notificationText,
-                  { color: isNightMode ? "#fff" : "#000" },
-                ]}
-              >
-                <Text style={[styles.boldText]}>{item.fromName}</Text> te ha
-                invitado a{" "}
-                <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
-                <Text style={[styles.boldText]}>{formattedTime}</Text>{" "}
-                <Text style={[styles.eventDateText, { color: isNightMode ? "#fff" : "#000" }]}>
-                  {item.eventDate}
-                </Text>
-              </Text>
-
-              {/* Botones de aceptar y rechazar */}
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  onPress={() => handleAcceptEventInvitation(item)}
-                  style={[
-                    styles.acceptButton,
-                    {
-                      backgroundColor: isNightMode
-                        ? "rgba(255, 255, 255, 0.2)"
-                        : "rgba(128, 128, 128, 0.3)",
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.buttonText,
-                      { color: isNightMode ? "#fff" : "#000" },
-                    ]}
-                  >
-                    Aceptar
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleRejectEventInvitation(item)}
-                  style={[
-                    styles.rejectButton,
-                    {
-                      backgroundColor: isNightMode
-                        ? "rgba(255, 255, 255, 0.2)"
-                        : "rgba(128, 128, 128, 0.3)",
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.buttonText,
-                      { color: isNightMode ? "#fff" : "#000" },
-                    ]}
-                  >
-                    Rechazar
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-      );
+      return renderGeneralEventNotification({ item });
     }
-
-    const isFriendRequest =
-      item.type === "friendRequest" &&
-      item.status !== "accepted" &&
-      item.status !== "rejected";
-    const isEventInvitation =
-      item.type === "invitation" &&
-      item.status !== "accepted" &&
-      item.status !== "rejected";
-    const isFriendRequestResponse = item.type === "friendRequestResponse";
-    const isLikeNotification = item.type === "like";
-    const isNoteLikeNotification = item.type === "noteLike";
-
-    const timestamp = item.timestamp?.toDate
-      ? item.timestamp.toDate()
-      : new Date(item.timestamp);
-
-    let formattedTime = "";
-
-    if (timestamp) {
-      if (isToday(timestamp)) {
-        formattedTime = format(timestamp, "HH:mm"); // Hora y minutos para hoy
-      } else if (isYesterday(timestamp)) {
-        formattedTime = `${t("notifications.yesterday")} ${format(
-          timestamp,
-          "HH:mm"
-        )}`; // Ayer con hora
-      } else {
-        formattedTime = format(timestamp, "dd/MM/yyyy HH:mm"); // Fecha completa con hora
-      }
+  
+    if (item.type === "invitation") {
+      return renderPrivateEventNotification({ item });
     }
-
-    const handleNotificationPress = () => {
-      if (isEventInvitation) {
-        if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: item.eventImage,
-              date: item.eventDate,
-              day: item.day,
-              description: item.description, // Asegúrate de pasar esto
-              hour: item.hour, // Agrega la hora
-              address: item.address, // Pasar dirección
-              location: item.eventLocation || t("notifications.noLocation"),
-              coordinates: item.coordinates || { latitude: 0, longitude: 0 },
-              hours: item.hours || {},
-              number: item.phoneNumber || t("notifications.noNumber"),
-              isPrivate: item.isPrivate || false,
-            },
-            selectedDate: item.eventDate,
-            isFromNotification: true, // Indicamos que es desde la notificación
-          });
-        } else {
-          if (
-            !item.coordinates ||
-            !item.coordinates.latitude ||
-            !item.coordinates.longitude
-          ) {
-            Alert.alert(
-              t("notifications.error"),
-              t("notifications.coordinatesNotAvailable")
-            );
-            return;
-          }
-
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: item.eventImage,
-              date: item.eventDate,
-              location: item.eventLocation || t("notifications.noLocation"),
-              coordinates: item.coordinates || { latitude: 0, longitude: 0 },
-              hours: item.hours || {},
-              number: item.phoneNumber || t("notifications.noNumber"),
-              isPrivate: item.isPrivate || false,
-            },
-            selectedDate: item.eventDate,
-          });
-        }
-      } else {
-        handleUserPress(item.fromId);
-      }
-    };
-
-    return (
-      item.status !== "rejected" && (
-        <TouchableOpacity
-          onPress={handleNotificationPress}
-          onLongPress={() => handleDeleteNotification(item.id)}
-        >
-          <View
-            style={[
-              styles.notificationContainer,
-              { borderColor: isNightMode ? "white" : "#ccc" },
-            ]}
-          >
-            {item.status !== "rejected" && (
-              <View style={styles.timeContainer}>
-                <Text
-                  style={[
-                    styles.timeText,
-                    { color: isNightMode ? "#888" : "#666" },
-                  ]}
-                >
-                  {formattedTime}
-                </Text>
-              </View>
-            )}
-            <View style={styles.notificationContent}>
-              <Image
-                source={{
-                  uri:
-                    item.fromImage && item.fromImage.length > 0
-                      ? item.fromImage
-                      : "https://via.placeholder.com/150",
-                }}
-                cachePolicy="memory-disk"
-                style={styles.profileImage}
-              />
-              <View style={styles.textContainer}>
-                <Text
-                  style={[
-                    styles.notificationText,
-                    { color: isNightMode ? "#fff" : "#333" },
-                  ]}
-                >
-                  {item.type === "invitation" && item.status === "accepted" ? (
-                    t("notifications.acceptedInvitation", {
-                      name: item.fromName,
-                    })
-                  ) : (
-                    <>
-                      <Text
-                        style={[
-                          styles.boldText,
-                          { color: isNightMode ? "#fff" : "#000" },
-                        ]}
-                      >
-                        {item.fromName} {item.fromLastName || ""}
-                      </Text>{" "}
-                      {isFriendRequest && t("notifications.wantsToBeFriend")}
-                      {isEventInvitation &&
-                        t("notifications.invitedToEvent", {
-                          eventTitle: item.eventTitle,
-                        })}
-                      {isFriendRequestResponse &&
-                        (item.response === "accepted"
-                          ? t("notifications.nowFriends")
-                          : t("notifications.rejectedFriendRequest"))}
-                      {isLikeNotification && item.message}{" "}
-                      {/* Mostrar el mensaje de like */}
-                      {item.type === "storyLike" &&
-                        t("notifications.likedYourStory")}
-                      {isNoteLikeNotification && item.message}
-                    </>
-                  )}
-                </Text>
-                {(isFriendRequest || isEventInvitation) && (
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        isFriendRequest
-                          ? handleAcceptRequest(item)
-                          : handleAcceptEventInvitation(item)
-                      }
-                      style={[
-                        styles.acceptButton,
-                        {
-                          backgroundColor: isNightMode
-                            ? "rgba(255, 255, 255, 0.2)"
-                            : "rgba(128, 128, 128, 0.3)",
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.buttonText,
-                          { color: isNightMode ? "#fff" : "#000" },
-                        ]}
-                      >
-                        {t("notifications.accept")}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() =>
-                        isFriendRequest
-                          ? handleRejectRequest(item)
-                          : handleRejectEventInvitation(item)
-                      }
-                      style={[
-                        styles.rejectButton,
-                        {
-                          backgroundColor: isNightMode
-                            ? "rgba(255, 255, 255, 0.2)"
-                            : "rgba(128, 128, 128, 0.3)",
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.buttonText,
-                          { color: isNightMode ? "#fff" : "#000" },
-                        ]}
-                      >
-                        {t("notifications.reject")}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-      )
-    );
+  
+    return null;
   };
 
   if (isLoading) {
