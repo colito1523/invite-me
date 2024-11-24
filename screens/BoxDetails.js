@@ -254,108 +254,224 @@ export default memo(function BoxDetails({ route, navigation }) {
   };
 
 
-  const handleGeneralEventInvite = async (friendId) => {
-    const user = auth.currentUser;
-    if (!user) return;
-  
-    if (!isEventSaved) {
-      Alert.alert("Error", "Debes unirte al evento antes de invitar a otros.");
+// ...existing code...
+
+const handleGeneralEventInvite = async (friendId) => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  if (!isEventSaved) {
+    Alert.alert("Error", "Debes unirte al evento antes de invitar a otros.");
+    return;
+  }
+
+  try {
+    // Obtener referencia del evento en Firestore
+    const eventRef = doc(database, "GoBoxs", box.title);
+    const eventDoc = await getDoc(eventRef);
+
+    if (!eventDoc.exists()) {
+      Alert.alert("Error", "El evento no existe.");
       return;
     }
-  
-    try {
-      // Obtener referencia del evento en Firestore
-      const eventRef = doc(database, "GoBoxs", box.title);
-      const eventDoc = await getDoc(eventRef);
-  
-      if (!eventDoc.exists()) {
-        Alert.alert("Error", "El evento no existe.");
-        return;
-      }
-  
-      const eventData = eventDoc.data();
-      const dayData = eventData[selectedDate] || [];
-  
-      // Verificar si ya existe una invitación para este amigo
-      const existingInvitation = dayData.some(
-        (entry) =>
-          entry.uid === user.uid &&
-          entry.invitations &&
-          entry.invitations.some((inv) => inv.invitedTo === friendId)
-      );
-  
-      if (existingInvitation) {
-        Alert.alert("Error", "Ya has enviado una solicitud a esta persona.");
-        return;
-      }
-  
-      // Obtener referencia del usuario actual
-      const userDocRef = doc(database, "users", user.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
-  
-      if (!userDocSnapshot.exists()) {
-        Alert.alert("Error", "No se pudo obtener la información del usuario.");
-        return;
-      }
-  
-      const userData = userDocSnapshot.data();
-      const fromName = userData.username || "Usuario Desconocido";
-      const fromImage =
-        userData.photoUrls && userData.photoUrls.length > 0
-          ? userData.photoUrls[0]
-          : "https://via.placeholder.com/150";
-  
-      // Preparar los datos de la invitación
-      const invitationData = {
-        invitedBy: user.uid,
-        invitedTo: friendId,
-        timestamp: new Date(),
-      };
-  
-      // Actualizar el objeto correspondiente del usuario dentro del día
-      const updatedDayData = dayData.map((entry) => {
-        if (entry.uid === user.uid) {
-          return {
-            ...entry,
-            invitations: entry.invitations
-              ? [...entry.invitations, invitationData] // Agregar invitación si ya existe el campo
-              : [invitationData], // Crear el campo si no existe
-          };
-        }
-        return entry;
-      });
-  
-      await updateDoc(eventRef, {
-        [selectedDate]: updatedDayData,
-      });
-  
-      // Notificar al amigo invitado
-      const notificationRef = collection(database, "users", friendId, "notifications");
-      await addDoc(notificationRef, {
-        fromId: user.uid,
-        fromName: fromName,
-        fromImage: fromImage,
-        eventTitle: box.title || "Evento General",
-        eventImage: eventData.image || "https://via.placeholder.com/150",
-        eventDate: selectedDate,
-        type: "generalEventInvitation",
-        status: "pendiente",
-        timestamp: new Date(),
-        hours: box.hours || {},
-        number: box.number || "Sin número",
-        coordinates: box.coordinates || {},
-      });
-  
-      Alert.alert(
-        "Invitación enviada",
-        `Has invitado a un amigo al evento ${box.title} el día ${selectedDate}.`
-      );
-    } catch (error) {
-      console.error("Error al invitar al evento general:", error);
-      Alert.alert("Error", "No se pudo enviar la invitación.");
+
+    const eventData = eventDoc.data();
+    const dayData = eventData[selectedDate] || [];
+
+    // Verificar si ya existe una invitación para este amigo o si ya está asistiendo
+    const existingInvitationOrAttendee = dayData.some(
+      (entry) =>
+        entry.uid === friendId ||
+        (entry.invitations && entry.invitations.some((inv) => inv.invitedTo === friendId))
+    );
+
+    if (existingInvitationOrAttendee) {
+      Alert.alert("Error", "Esta persona ya está invitada o asistiendo al evento.");
+      return;
     }
-  };
-  
+
+    // Obtener referencia del usuario actual
+    const userDocRef = doc(database, "users", user.uid);
+    const userDocSnapshot = await getDoc(userDocRef);
+
+    if (!userDocSnapshot.exists()) {
+      Alert.alert("Error", "No se pudo obtener la información del usuario.");
+      return;
+    }
+
+    const userData = userDocSnapshot.data();
+    const fromName = userData.username || "Usuario Desconocido";
+    const fromImage =
+      userData.photoUrls && userData.photoUrls.length > 0
+        ? userData.photoUrls[0]
+        : "https://via.placeholder.com/150";
+
+    // Preparar los datos de la invitación
+    const invitationData = {
+      invitedBy: user.uid,
+      invitedTo: friendId,
+      timestamp: new Date(),
+    };
+
+    // Actualizar el objeto correspondiente del usuario dentro del día
+    const updatedDayData = dayData.map((entry) => {
+      if (entry.uid === user.uid) {
+        return {
+          ...entry,
+          invitations: entry.invitations
+            ? [...entry.invitations, invitationData] // Agregar invitación si ya existe el campo
+            : [invitationData], // Crear el campo si no existe
+        };
+      }
+      return entry;
+    });
+
+    await updateDoc(eventRef, {
+      [selectedDate]: updatedDayData,
+    });
+
+    // Notificar al amigo invitado
+    const notificationRef = collection(database, "users", friendId, "notifications");
+    await addDoc(notificationRef, {
+      fromId: user.uid,
+      fromName: fromName,
+      fromImage: fromImage,
+      eventTitle: box.title || "Evento General",
+      eventImage: eventData.image || "https://via.placeholder.com/150",
+      eventDate: selectedDate,
+      type: "generalEventInvitation",
+      status: "pendiente",
+      timestamp: new Date(),
+      hours: box.hours || {},
+      number: box.number || "Sin número",
+      coordinates: box.coordinates || {},
+    });
+
+    Alert.alert(
+      "Invitación enviada",
+      `Has invitado a un amigo al evento ${box.title} el día ${selectedDate}.`
+    );
+  } catch (error) {
+    console.error("Error al invitar al evento general:", error);
+    Alert.alert("Error", "No se pudo enviar la invitación.");
+  }
+};
+
+// ...existing code...
+
+const handleInvite = async (friendId) => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  if (!isEventSaved) {
+    Alert.alert("Error", "Debes unirte al evento antes de invitar a otros.");
+    return;
+  }
+
+  try {
+    // Actualizar el estado local para marcar al usuario como invitado
+    setFriends(
+      friends.map((friend) =>
+        friend.friendId === friendId ? { ...friend, invited: true } : friend
+      )
+    );
+
+    // Obtener referencia del evento en Firestore
+    const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
+    const eventDoc = await getDoc(eventRef);
+
+    if (!eventDoc.exists()) {
+      Alert.alert("Error", "El evento no existe.");
+      return;
+    }
+
+    const eventData = eventDoc.data();
+    const invitedFriends = eventData.invitedFriends || [];
+    const attendees = eventData.attendees || [];
+
+    // Verificar si el usuario ya ha sido invitado o si ya está asistiendo
+    if (invitedFriends.includes(friendId) || attendees.some(attendee => attendee.uid === friendId)) {
+      Alert.alert("Error", "Esta persona ya está invitada o asistiendo al evento.");
+      return;
+    }
+
+    // Preparar datos del usuario que envía la invitación
+    let fromName = user.displayName || "Usuario Desconocido";
+    const userDocRef = doc(database, "users", user.uid);
+    const userDocSnapshot = await getDoc(userDocRef);
+    if (userDocSnapshot.exists()) {
+      const userData = userDocSnapshot.data();
+      fromName = userData.username || fromName;
+    }
+
+    const eventDateTimestamp = box.date || new Date();
+    let eventDateFormatted = "Fecha no disponible";
+
+    // Formatear la fecha del evento
+    if (eventDateTimestamp instanceof Date) {
+      eventDateFormatted = eventDateTimestamp.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "short",
+      });
+    } else if (
+      eventDateTimestamp &&
+      typeof eventDateTimestamp === "object" &&
+      "seconds" in eventDateTimestamp
+    ) {
+      const dateObject = new Date(eventDateTimestamp.seconds * 1000);
+      eventDateFormatted = dateObject.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "short",
+      });
+    } else if (typeof eventDateTimestamp === "string") {
+      eventDateFormatted = eventDateTimestamp;
+    }
+
+    // Datos adicionales de la notificación
+    const eventImage = box.imageUrl;
+    const eventCategory = box.category || "Sin categoría";
+    const notificationRef = collection(database, "users", friendId, "notifications");
+
+    // Crear la notificación
+    await addDoc(notificationRef, {
+      fromId: user.uid,
+      fromName: fromName,
+      fromImage: eventImage,
+      eventId: box.id,
+      eventTitle: box.title,
+      eventImage: eventImage,
+      eventDate: eventDateTimestamp,
+      date: eventDateFormatted,
+      eventCategory: eventCategory,
+      type: "invitation",
+      status: "pendiente",
+      timestamp: new Date(),
+    });
+
+    // Actualizar la lista de invitados en el evento
+    await updateDoc(eventRef, {
+      invitedFriends: arrayUnion(friendId),
+    });
+
+    // Crear una nueva colección para las invitaciones
+    const invitationsRef = collection(eventRef, "invitations");
+    await addDoc(invitationsRef, {
+      invitedBy: user.uid,
+      invitedTo: friendId,
+      timestamp: new Date(),
+    });
+
+    Alert.alert(
+      t("boxDetails.invitationSent"),
+      `${t("boxDetails.invitationSentMessage")} el día ${selectedDate}.`
+    );
+  } catch (error) {
+    console.error("Error al invitar al usuario:", error);
+    Alert.alert("Error", "No se pudo enviar la invitación.");
+  }
+};
+
+// ...existing code...
 
   const handleRemoveFromEvent = async () => {
     const user = auth.currentUser;
@@ -625,117 +741,6 @@ const handleSaveEdit = async () => {
       </View>
     </Modal>
   );
-
-  const handleInvite = async (friendId) => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    if (!isEventSaved) {
-      Alert.alert("Error", "Debes unirte al evento antes de invitar a otros.");
-      return;
-    }
-
-    try {
-      // Actualizar el estado local para marcar al usuario como invitado
-      setFriends(
-        friends.map((friend) =>
-          friend.friendId === friendId ? { ...friend, invited: true } : friend
-        )
-      );
-
-      // Obtener referencia del evento en Firestore
-      const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
-      const eventDoc = await getDoc(eventRef);
-
-      if (!eventDoc.exists()) {
-        Alert.alert("Error", "El evento no existe.");
-        return;
-      }
-
-      const eventData = eventDoc.data();
-      const invitedFriends = eventData.invitedFriends || [];
-
-      // Verificar si el usuario ya ha sido invitado
-      if (invitedFriends.includes(friendId)) {
-        Alert.alert("Este usuario ya ha sido invitado.");
-        return;
-      }
-
-      // Preparar datos del usuario que envía la invitación
-      let fromName = user.displayName || "Usuario Desconocido";
-      const userDocRef = doc(database, "users", user.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-        fromName = userData.username || fromName;
-      }
-
-      const eventDateTimestamp = box.date || new Date();
-      let eventDateFormatted = "Fecha no disponible";
-
-      // Formatear la fecha del evento
-      if (eventDateTimestamp instanceof Date) {
-        eventDateFormatted = eventDateTimestamp.toLocaleDateString("es-ES", {
-          day: "numeric",
-          month: "short",
-        });
-      } else if (
-        eventDateTimestamp &&
-        typeof eventDateTimestamp === "object" &&
-        "seconds" in eventDateTimestamp
-      ) {
-        const dateObject = new Date(eventDateTimestamp.seconds * 1000);
-        eventDateFormatted = dateObject.toLocaleDateString("es-ES", {
-          day: "numeric",
-          month: "short",
-        });
-      } else if (typeof eventDateTimestamp === "string") {
-        eventDateFormatted = eventDateTimestamp;
-      }
-
-      // Datos adicionales de la notificación
-      const eventImage = box.imageUrl;
-      const eventCategory = box.category || "Sin categoría";
-      const notificationRef = collection(database, "users", friendId, "notifications");
-
-      // Crear la notificación
-      await addDoc(notificationRef, {
-        fromId: user.uid,
-        fromName: fromName,
-        fromImage: eventImage,
-        eventId: box.id,
-        eventTitle: box.title,
-        eventImage: eventImage,
-        eventDate: eventDateTimestamp,
-        date: eventDateFormatted,
-        eventCategory: eventCategory,
-        type: "invitation",
-        status: "pendiente",
-        timestamp: new Date(),
-      });
-
-      // Actualizar la lista de invitados en el evento
-      await updateDoc(eventRef, {
-        invitedFriends: arrayUnion(friendId),
-      });
-
-      // Crear una nueva colección para las invitaciones
-      const invitationsRef = collection(eventRef, "invitations");
-      await addDoc(invitationsRef, {
-        invitedBy: user.uid,
-        invitedTo: friendId,
-        timestamp: new Date(),
-      });
-
-      Alert.alert(
-        t("boxDetails.invitationSent"),
-        `${t("boxDetails.invitationSentMessage")} el día ${selectedDate}.`
-      );
-    } catch (error) {
-      console.error("Error al invitar al usuario:", error);
-      Alert.alert("Error", "No se pudo enviar la invitación.");
-    }
-  };
 
 
 // ...existing code...
