@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   SafeAreaView,
   RefreshControl,
-  Button,
 } from "react-native";
 import { Image } from "expo-image";
 import { database, auth } from "../config/firebase";
@@ -25,7 +24,6 @@ import {
   getDoc,
   setDoc,
   arrayUnion,
-  arrayRemove
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { format, isToday, isYesterday } from "date-fns";
@@ -41,7 +39,6 @@ export default function NotificationsComponent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isNightMode, setIsNightMode] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [loadingEventId, setLoadingEventId] = useState(null);
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -645,354 +642,102 @@ export default function NotificationsComponent() {
     }
   };
 
-  const handleAcceptPrivateEvent = async (item) => {
-    try {
-      setLoadingEventId(item.id);
-      const user = auth.currentUser;
-      if (!user) {
-        Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
-        setLoadingEventId(null);
-        return;
-      }
-  
-      // Get user data
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      const userData = userDoc.data();
-  
-      // Check if user is already an attendee
-      const eventRef = doc(database, "EventsPriv", item.eventId);
-      const eventDoc = await getDoc(eventRef);
-      if (eventDoc.exists()) {
-        const eventData = eventDoc.data();
-        const attendees = eventData.attendees || [];
-        const isAlreadyAttendee = attendees.some(
-          (attendee) => attendee.uid === user.uid
-        );
-  
-        if (isAlreadyAttendee) {
-          Alert.alert(
-            t("notifications.alreadyParticipant"),
-            t("notifications.alreadyInEvent")
-          );
-          setLoadingEventId(null);
-          return;
-        }
-  
-        // Add user to attendees
-        await updateDoc(eventRef, {
-          attendees: arrayUnion({
-            uid: user.uid,
-            username: userData.username || user.displayName,
-            profileImage: userData.photoUrls && userData.photoUrls.length > 0
-              ? userData.photoUrls[0]
-              : "https://via.placeholder.com/150",
-          }),
-        });
-  
-        // Add event data to user's database
-        const userEventsRef = collection(database, "users", user.uid, "events");
-        await addDoc(userEventsRef, {
-          title: eventData.title,
-          imageUrl: eventData.image,
-          date: eventData.date,
-          address: eventData.address,
-          category: eventData.category,
-          day: eventData.day,
-          description: eventData.description,
-          eventId: eventData.eventId,
-          expirationDate: eventData.expirationDate,
-          hour: eventData.hour,
-          status: "accepted",
-        });
-      }
-  
-      // Delete the notification from the database
-      const notifRef = doc(database, "users", user.uid, "notifications", item.id);
-      await deleteDoc(notifRef);
-  
-      // Update local notification state
-      setNotifications((prevNotifications) =>
-        prevNotifications.filter((n) => n.id !== item.id)
-      );
-  
-      Alert.alert(
-        t("notifications.invitationAccepted"),
-        t("notifications.eventAddedToProfile")
-      );
-    } catch (error) {
-      console.error("Error accepting private event invitation:", error);
-      Alert.alert(
-        t("notifications.error"),
-        t("notifications.acceptInvitationError")
-      );
-    } finally {
-      setLoadingEventId(null);
-    }
-  };
-
-  const handleRejectPrivateEvent = async (item) => {
-    try {
-      // Eliminar la notificación
-      const notificationRef = doc(database, "users", auth.currentUser.uid, "notifications", item.id);
-      await deleteDoc(notificationRef);
-  
-      // Eliminar el valor del array invitedFriends en /EventsPriv/{eventId}
-      const eventRef = doc(database, "EventsPriv", item.eventId);
-      await updateDoc(eventRef, {
-        invitedFriends: arrayRemove(auth.currentUser.uid)
-      });
-  
-      // Remover la notificación del estado local
-      setNotifications((prevNotifications) =>
-        prevNotifications.filter((notif) => notif.id !== item.id)
-      );
-  
-      Alert.alert("Rechazado", "Has rechazado la invitación al evento privado.");
-    } catch (error) {
-      console.error("Error al rechazar la invitación al evento privado:", error);
-      Alert.alert("Error", "No se pudo rechazar la invitación.");
-    }
-  };
-
-  const handleAcceptGeneralEvent = async (item) => {
-    try {
-      setLoadingEventId(item.id);
-      const user = auth.currentUser;
-      if (!user) {
-        Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
-        setLoadingEventId(null);
-        return;
-      }
-  
-      // Get user data
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      const userData = userDoc.data();
-  
-      // Check if user is already a participant
-      const eventRef = doc(database, "GoBoxs", item.eventTitle);
-      const eventDoc = await getDoc(eventRef);
-      if (eventDoc.exists()) {
-        const eventData = eventDoc.data();
-        const participants = eventData[item.eventDate] || [];
-        const isAlreadyParticipant = participants.some(
-          (participant) => participant.uid === user.uid
-        );
-  
-        if (isAlreadyParticipant) {
-          Alert.alert(
-            t("notifications.alreadyParticipant"),
-            t("notifications.alreadyInEvent")
-          );
-          setLoadingEventId(null);
-          return;
-        }
-  
-        // Add user as participant
-        const updatedParticipants = participants.concat({
-          uid: user.uid,
-          username: userData.username || user.displayName,
-          profileImage: userData.photoUrls && userData.photoUrls.length > 0
-            ? userData.photoUrls[0]
-            : "https://via.placeholder.com/150",
-        });
-  
-        await updateDoc(eventRef, {
-          [item.eventDate]: updatedParticipants,
-        });
-  
-        // Add event data to user's database
-        const userEventsRef = collection(database, "users", user.uid, "events");
-        await addDoc(userEventsRef, {
-          title: eventData.title || item.eventTitle,
-          imageUrl: eventData.imageUrl || item.eventImage,
-          date: item.eventDate,
-          coordinates: eventData.coordinates || {},
-          dateArray: eventData.dateArray || [],
-          hours: eventData.hours || {},
-          locationLink: eventData.locationLink || "Sin ubicación especificada",
-          phoneNumber: eventData.phoneNumber || "",
-          status: "accepted",
-        });
-      }
-  
-      // Delete the notification from the database
-      const notifRef = doc(database, "users", user.uid, "notifications", item.id);
-      await deleteDoc(notifRef);
-  
-      // Update local notification state
-      setNotifications((prevNotifications) =>
-        prevNotifications.filter((n) => n.id !== item.id)
-      );
-  
-      Alert.alert(
-        t("notifications.invitationAccepted"),
-        t("notifications.eventAddedToProfile")
-      );
-    } catch (error) {
-      console.error("Error accepting general event invitation:", error);
-      Alert.alert(
-        t("notifications.error"),
-        t("notifications.acceptInvitationError")
-      );
-    } finally {
-      setLoadingEventId(null);
-    }
-  };
-  
-
-  const handleRejectGeneralEvent = async (item) => {
-    try {
-      // Eliminar la notificación
-      const notificationRef = doc(database, "users", auth.currentUser.uid, "notifications", item.id);
-      await deleteDoc(notificationRef);
-  
-      // Eliminar los datos del array invitations en /GoBoxs/{eventTitle}
-      const eventRef = doc(database, "GoBoxs", item.eventTitle);
-      const eventDoc = await getDoc(eventRef);
-      if (eventDoc.exists()) {
-        const eventData = eventDoc.data();
-        const updatedInvitations = (eventData[item.eventDate] || []).map((entry) => {
-          if (entry.uid === item.fromId) {
-            return {
-              ...entry,
-              invitations: (entry.invitations || []).filter(
-                (inv) => inv.invitedTo !== auth.currentUser.uid
-              ),
-            };
-          }
-          return entry;
-        });
-  
-        await updateDoc(eventRef, {
-          [item.eventDate]: updatedInvitations,
-        });
-      }
-  
-      // Remover la notificación del estado local
-      setNotifications((prevNotifications) =>
-        prevNotifications.filter((notif) => notif.id !== item.id)
-      );
-  
-      Alert.alert("Rechazado", "Has rechazado la invitación al evento general.");
-    } catch (error) {
-      console.error("Error al rechazar la invitación al evento general:", error);
-      Alert.alert("Error", "No se pudo rechazar la invitación.");
-    }
-  };
-
-  const renderPrivateEventNotification = ({ item }) => {
-    const eventDate = item.date; // Use the date field instead of timestamp
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: item.eventImage,
-              date: eventDate,
-              isPrivate: true,
-            },
-            selectedDate: eventDate,
-            isFromNotification: true,
-          });
-        }}
-        style={[styles.notificationContainer]}
-      >
-        <View style={styles.notificationContent}>
-          <Image
-            source={{ uri: item.fromImage }}
-            style={styles.profileImage}
-          />
-          <View style={styles.textContainer}>
-            <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
-              <Text style={[styles.boldText]}>{item.fromName}</Text> te ha invitado a{" "}
-              <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
-              <Text style={[styles.boldText]}>{eventDate}</Text>
-            </Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, styles.acceptButton]}
-                onPress={() => handleAcceptPrivateEvent(item)}
-                disabled={loadingEventId === item.id}
-              >
-                {loadingEventId === item.id ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={styles.buttonText}>Aceptar</Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.rejectButton]}
-                onPress={() => handleRejectPrivateEvent(item)}
-              >
-                <Text style={styles.buttonText}>Rechazar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderGeneralEventNotification = ({ item }) => {
-    const eventDate = typeof item.eventDate === 'object' && item.eventDate.seconds
-      ? new Date(item.eventDate.seconds * 1000).toLocaleString()
-      : item.eventDate; // Convert timestamp to string if necessary
-    const matchedBox = boxInfo.find((box) => box.title === item.eventTitle);
-    const eventImage = matchedBox ? matchedBox.path : "https://via.placeholder.com/150";
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: eventImage,
-              date: eventDate,
-              isPrivate: false,
-            },
-            selectedDate: eventDate,
-            isFromNotification: true,
-          });
-        }}
-        style={[styles.notificationContainer]}
-      >
-        <View style={styles.notificationContent}>
-          <Image
-            source={{ uri: item.fromImage }}
-            style={styles.profileImage}
-          />
-          <View style={styles.textContainer}>
-            <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
-              <Text style={[styles.boldText]}>{item.fromName}</Text> te ha invitado a{" "}
-              <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
-              <Text style={[styles.boldText]}>{eventDate}</Text>
-            </Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, styles.acceptButton]}
-                onPress={() => handleAcceptGeneralEvent(item)}
-                disabled={loadingEventId === item.id}
-              >
-                {loadingEventId === item.id ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={styles.buttonText}>Aceptar</Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.rejectButton]}
-                onPress={() => handleRejectGeneralEvent(item)}
-              >
-                <Text style={styles.buttonText}>Rechazar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   const renderNotificationItem = ({ item }) => {
+    if (item.type === "generalEventInvitation") {
+      const matchedBox = boxInfo.find((box) => box.title === item.eventTitle);
+      const eventImage = matchedBox
+        ? matchedBox.path
+        : "https://via.placeholder.com/150"; // Utiliza la imagen si se encuentra, o la predeterminada
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("BoxDetails", {
+              box: {
+                title: item.eventTitle,
+                imageUrl: eventImage,
+                date: item.eventDate,
+                isPrivate: false,
+              },
+              selectedDate: item.eventDate,
+              isFromNotification: true,
+            });
+          }}
+          style={[styles.notificationContainer]}
+        >
+          <View style={styles.notificationContent}>
+            {/* Imagen del evento */}
+            <Image
+              source={{
+                uri: item.fromImage,
+              }}
+              style={styles.profileImage}
+            />
+            <View style={styles.textContainer}>
+              {/* Texto principal de la invitación */}
+              <Text
+                style={[
+                  styles.notificationText,
+                  { color: isNightMode ? "#fff" : "#000" },
+                ]}
+              >
+                <Text style={[styles.boldText]}>{item.fromName}</Text> te ha
+                invitado a{" "}
+                <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
+                <Text style={[styles.boldText]}>{formattedTime}</Text>{" "}
+                <Text style={[styles.eventDateText, { color: isNightMode ? "#fff" : "#000" }]}>
+                  {item.eventDate}
+                </Text>
+              </Text>
+
+              {/* Botones de aceptar y rechazar */}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  onPress={() => handleAcceptEventInvitation(item)}
+                  style={[
+                    styles.acceptButton,
+                    {
+                      backgroundColor: isNightMode
+                        ? "rgba(255, 255, 255, 0.2)"
+                        : "rgba(128, 128, 128, 0.3)",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      { color: isNightMode ? "#fff" : "#000" },
+                    ]}
+                  >
+                    Aceptar
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleRejectEventInvitation(item)}
+                  style={[
+                    styles.rejectButton,
+                    {
+                      backgroundColor: isNightMode
+                        ? "rgba(255, 255, 255, 0.2)"
+                        : "rgba(128, 128, 128, 0.3)",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      { color: isNightMode ? "#fff" : "#000" },
+                    ]}
+                  >
+                    Rechazar
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
     const isFriendRequest =
       item.type === "friendRequest" &&
       item.status !== "accepted" &&
@@ -1004,13 +749,13 @@ export default function NotificationsComponent() {
     const isFriendRequestResponse = item.type === "friendRequestResponse";
     const isLikeNotification = item.type === "like";
     const isNoteLikeNotification = item.type === "noteLike";
-  
+
     const timestamp = item.timestamp?.toDate
       ? item.timestamp.toDate()
       : new Date(item.timestamp);
-  
+
     let formattedTime = "";
-  
+
     if (timestamp) {
       if (isToday(timestamp)) {
         formattedTime = format(timestamp, "HH:mm"); // Hora y minutos para hoy
@@ -1023,7 +768,7 @@ export default function NotificationsComponent() {
         formattedTime = format(timestamp, "dd/MM/yyyy HH:mm"); // Fecha completa con hora
       }
     }
-  
+
     const handleNotificationPress = () => {
       if (isEventInvitation) {
         if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
@@ -1057,7 +802,7 @@ export default function NotificationsComponent() {
             );
             return;
           }
-  
+
           navigation.navigate("BoxDetails", {
             box: {
               title: item.eventTitle,
@@ -1076,15 +821,7 @@ export default function NotificationsComponent() {
         handleUserPress(item.fromId);
       }
     };
-  
-    if (item.type === "generalEventInvitation") {
-      return renderGeneralEventNotification({ item });
-    }
-  
-    if (item.type === "invitation") {
-      return renderPrivateEventNotification({ item });
-    }
-  
+
     return (
       item.status !== "rejected" && (
         <TouchableOpacity
@@ -1331,17 +1068,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginLeft: 10,
-  },
-  button: {
-    backgroundColor: "#d3d3d3",
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    marginRight: 8,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
   },
 });
