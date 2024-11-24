@@ -251,58 +251,109 @@ export default memo(function BoxDetails({ route, navigation }) {
   const handleGeneralEventInvite = async (friendId) => {
     const user = auth.currentUser;
     if (!user) return;
-
+  
+    if (!isEventSaved) {
+      Alert.alert("Error", "Debes unirte al evento antes de invitar a otros.");
+      return;
+    }
+  
     try {
-      // Obtener referencia del usuario actual
-      const userDocRef = doc(database, "users", user.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
-
-      if (!userDocSnapshot.exists()) {
-        Alert.alert("Error", "No se pudo obtener la información del usuario.");
-        return;
-      }
-
-      const userData = userDocSnapshot.data();
-      const fromName = userData.username || "Usuario Desconocido";
-      const fromImage = userData.photoUrls && userData.photoUrls.length > 0
-        ? userData.photoUrls[0]
-        : "https://via.placeholder.com/150";
-
-      // Referencia al evento general
+      // Actualizar el estado local para marcar al usuario como invitado
+      setFriends(
+        friends.map((friend) =>
+          friend.friendId === friendId ? { ...friend, invited: true } : friend
+        )
+      );
+  
+      // Obtener referencia del evento en Firestore
       const eventRef = doc(database, "GoBoxs", box.title);
       const eventDoc = await getDoc(eventRef);
-
+  
       if (!eventDoc.exists()) {
         Alert.alert("Error", "El evento no existe.");
         return;
       }
-
-      // Datos del evento
+  
       const eventData = eventDoc.data();
-      const eventImage = eventData.image || "https://via.placeholder.com/150"; // URL predeterminada si no hay imagen
-      const eventDate = selectedDate || eventData.date || "Fecha no disponible";
-      const eventTitle = box.title || eventData.title || "Evento General";
-
-      // Enviar notificación al amigo invitado
+      const dayData = eventData[selectedDate] || [];
+  
+      // Verificar si ya existe una invitación para este amigo
+      const existingInvitation = dayData.some(
+        (entry) =>
+          entry.uid === user.uid &&
+          entry.invitations &&
+          entry.invitations.some((inv) => inv.invitedTo === friendId)
+      );
+  
+      if (existingInvitation) {
+        Alert.alert("Error", "Ya has enviado una solicitud a esta persona.");
+        return;
+      }
+  
+      // Obtener referencia del usuario actual
+      const userDocRef = doc(database, "users", user.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
+  
+      if (!userDocSnapshot.exists()) {
+        Alert.alert("Error", "No se pudo obtener la información del usuario.");
+        return;
+      }
+  
+      const userData = userDocSnapshot.data();
+      const fromName = userData.username || "Usuario Desconocido";
+      const fromImage =
+        userData.photoUrls && userData.photoUrls.length > 0
+          ? userData.photoUrls[0]
+          : "https://via.placeholder.com/150";
+  
+      // Preparar los datos de la invitación
+      const invitationData = {
+        invitedBy: user.uid,
+        invitedTo: friendId,
+        timestamp: new Date(),
+      };
+  
+      // Actualizar el objeto correspondiente del usuario dentro del día
+      const updatedDayData = dayData.map((entry) => {
+        if (entry.uid === user.uid) {
+          return {
+            ...entry,
+            invitations: entry.invitations
+              ? [...entry.invitations, invitationData] // Agregar invitación si ya existe el campo
+              : [invitationData], // Crear el campo si no existe
+          };
+        }
+        return entry;
+      });
+  
+      await updateDoc(eventRef, {
+        [selectedDate]: updatedDayData,
+      });
+  
+      // Notificar al amigo invitado
       const notificationRef = collection(database, "users", friendId, "notifications");
       await addDoc(notificationRef, {
         fromId: user.uid,
-        fromName: fromName, // Nombre de usuario
-        fromImage: fromImage, // Imagen de perfil del usuario
-        eventTitle: eventTitle,
-        eventImage: eventImage, // URL válida de la imagen del evento
-        eventDate: eventDate,
+        fromName: fromName,
+        fromImage: fromImage,
+        eventTitle: box.title || "Evento General",
+        eventImage: eventData.image || "https://via.placeholder.com/150",
+        eventDate: selectedDate,
         type: "generalEventInvitation",
         status: "pendiente",
         timestamp: new Date(),
       });
-
-      Alert.alert("Invitación enviada", `Has invitado a un amigo al evento ${eventTitle}.`);
+  
+      Alert.alert(
+        "Invitación enviada",
+        `Has invitado a un amigo al evento ${box.title} el día ${selectedDate}.`
+      );
     } catch (error) {
       console.error("Error al invitar al evento general:", error);
       Alert.alert("Error", "No se pudo enviar la invitación.");
     }
   };
+  
 
   const handleRemoveFromEvent = async () => {
     const user = auth.currentUser;
@@ -577,6 +628,11 @@ const handleSaveEdit = async () => {
     const user = auth.currentUser;
     if (!user) return;
 
+    if (!isEventSaved) {
+      Alert.alert("Error", "Debes unirte al evento antes de invitar a otros.");
+      return;
+    }
+
     try {
       // Actualizar el estado local para marcar al usuario como invitado
       setFriends(
@@ -661,9 +717,17 @@ const handleSaveEdit = async () => {
         invitedFriends: arrayUnion(friendId),
       });
 
+      // Crear una nueva colección para las invitaciones
+      const invitationsRef = collection(eventRef, "invitations");
+      await addDoc(invitationsRef, {
+        invitedBy: user.uid,
+        invitedTo: friendId,
+        timestamp: new Date(),
+      });
+
       Alert.alert(
         t("boxDetails.invitationSent"),
-        t("boxDetails.invitationSentMessage")
+        `${t("boxDetails.invitationSentMessage")} el día ${selectedDate}.`
       );
     } catch (error) {
       console.error("Error al invitar al usuario:", error);
