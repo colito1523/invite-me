@@ -23,6 +23,7 @@ import {
   getDoc,
   deleteDoc,
   doc,
+  or,
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -79,16 +80,24 @@ export default function Search() {
         const user = auth.currentUser;
         if (!user) return;
   
-        // Cargar usuarios bloqueados
+        // Load blocked users
         const userRef = doc(database, "users", user.uid);
         const userSnapshot = await getDoc(userRef);
         const blockedUsers = userSnapshot.data()?.blockedUsers || [];
   
         const normalizedSearchTerm = searchTerm.toLowerCase();
+        
+        // Create compound query for username, firstName, and lastName
         const q = query(
           collection(database, "users"),
-          where("username", ">=", normalizedSearchTerm),
-          where("username", "<=", normalizedSearchTerm + "\uf8ff")
+          or(
+            where("username", ">=", normalizedSearchTerm),
+            where("username", "<=", normalizedSearchTerm + "\uf8ff"),
+            where("firstName", ">=", normalizedSearchTerm),
+            where("firstName", "<=", normalizedSearchTerm + "\uf8ff"),
+            where("lastName", ">=", normalizedSearchTerm),
+            where("lastName", "<=", normalizedSearchTerm + "\uf8ff")
+          )
         );
   
         const querySnapshot = await getDocs(q);
@@ -104,11 +113,22 @@ export default function Search() {
                   : "https://via.placeholder.com/150",
             };
           })
-          .filter(
-            (user) =>
-              user.id !== auth.currentUser.uid &&
-              !blockedUsers.includes(user.id) // Excluir usuarios bloqueados
-          );
+          .filter((user) => {
+            // Filter out blocked users and current user
+            if (user.id === auth.currentUser.uid || blockedUsers.includes(user.id)) {
+              return false;
+            }
+            
+            // Check if search term matches any of the fields
+            const searchLower = normalizedSearchTerm;
+            const usernameLower = user.username?.toLowerCase() || '';
+            const firstNameLower = user.firstName?.toLowerCase() || '';
+            const lastNameLower = user.lastName?.toLowerCase() || '';
+            
+            return usernameLower.includes(searchLower) ||
+                   firstNameLower.includes(searchLower) ||
+                   lastNameLower.includes(searchLower);
+          });
   
         setResults(userList);
       } catch (error) {
