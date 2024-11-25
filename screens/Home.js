@@ -66,7 +66,29 @@ const Home = React.memo(() => {
   const { t } = useTranslation();
   const LazyBoxDetails = lazy(() => import('./BoxDetails'));
   const [unreadMessages, setUnreadMessages] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(false);
 
+ useEffect(() => {
+    const fetchUnreadNotifications = async () => {
+      if (auth.currentUser) {
+        const user = auth.currentUser;
+        const notificationsRef = collection(database, "users", user.uid, "notifications");
+        const q = query(notificationsRef, where("seen", "==", false));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          if (!querySnapshot.empty) {
+            setUnreadNotifications(true);
+          } else {
+            setUnreadNotifications(false);
+          }
+        });
+  
+        return () => unsubscribe();
+      }
+    };
+   
+    fetchUnreadNotifications();
+  }, [navigation]);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -592,12 +614,18 @@ useEffect(() => {
           )}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
-          <Ionicons
-            name="notifications"
-            size={24}
-            color={isNightMode ? "white" : "black"}
-          />
-        </TouchableOpacity>
+  <Ionicons
+    name="notifications"
+    size={24}
+    color={isNightMode ? "white" : "black"}
+  />
+  {unreadNotifications && (
+    <View style={[
+      styles.unreadIndicator,
+      { backgroundColor: isNightMode ? "white" : "black" }
+    ]} />
+  )}
+</TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Ionicons
             name="mail"

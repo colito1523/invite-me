@@ -25,7 +25,9 @@ import {
   getDoc,
   setDoc,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  writeBatch,
+  getDocs
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { format, isToday, isYesterday } from "date-fns";
@@ -84,23 +86,40 @@ export default function NotificationsComponent() {
 
   useFocusEffect(
     useCallback(() => {
-      const markNotificationsAsRead = async () => {
+      const markNotificationsAsSeen = async () => {
         if (user) {
           const notificationsRef = collection(database, "users", user.uid, "notifications");
-          const q = query(notificationsRef, where("status", "==", "unread"));
-          const snapshot = await getDocs(q);
-          
-          const batch = writeBatch(database);
-          snapshot.forEach((doc) => {
-            batch.update(doc.ref, { status: "read" });
-          });
-          await batch.commit();
+          const unseenQuery = query(notificationsRef, where("seen", "==", false));
+          const snapshot = await getDocs(unseenQuery);
+  
+          if (!snapshot.empty) {
+            const batch = writeBatch(database);
+            const updatedNotifications = [...notifications];
+  
+            snapshot.forEach((doc) => {
+              batch.update(doc.ref, { seen: true });
+  
+              // Actualiza la notificación en el estado local para reflejar el cambio de `seen` a `true`
+              const index = updatedNotifications.findIndex((n) => n.id === doc.id);
+              if (index !== -1) {
+                updatedNotifications[index] = {
+                  ...updatedNotifications[index],
+                  seen: true,
+                };
+              }
+            });
+  
+            await batch.commit();
+            setNotifications(updatedNotifications);
+          }
         }
       };
   
-      markNotificationsAsRead();
-    }, [user])
+      markNotificationsAsSeen();
+    }, [user, notifications])
   );
+  
+  
 
   const fetchNotifications = useCallback(async () => {
     if (user) {
@@ -144,9 +163,10 @@ export default function NotificationsComponent() {
                 notif.status !== "accepted" &&
                 notif.status !== "rejected"
             );
-          updateNotifications(notifList);
+          setNotifications(notifList);
         }
       );
+      
 
       const unsubscribeFriendRequests = onSnapshot(
         friendRequestsQuery,
