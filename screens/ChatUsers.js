@@ -65,6 +65,7 @@ export default function Chat({ route }) {
   const [isUploading, setIsUploading] = useState(false);
 
 
+
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
 
 
@@ -98,6 +99,9 @@ export default function Chat({ route }) {
             ...doc.data(),
           }));
           setMessages(messagesList);
+          if (messagesList.length > 0) {
+            markMessagesAsRead(messagesList);
+          }
         });
 
         // Lógica para cargar respuestas de historias
@@ -210,6 +214,24 @@ export default function Chat({ route }) {
 
     setupChat();
   }, [chatId, imageUri, blockedUsers, recipientUser]);
+
+  const markMessagesAsRead = async (messages) => {
+    const batch = writeBatch(database);
+    messages.forEach((message) => {
+      if (message.senderId !== user.uid && !message.viewedBy?.includes(user.uid)) {
+        const messageRef = doc(database, "chats", chatId, "messages", message.id);
+        batch.update(messageRef, {
+          viewedBy: [...(message.viewedBy || []), user.uid],
+        });
+      }
+    });
+    try {
+      await batch.commit();
+      console.log('Todos los mensajes visibles han sido marcados como leídos.');
+    } catch (error) {
+      console.error('Error al marcar los mensajes como leídos:', error);
+    }
+  };
 
   const handleReport = async () => {
     try {
@@ -371,6 +393,65 @@ export default function Chat({ route }) {
         setIsUploading(false);
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
