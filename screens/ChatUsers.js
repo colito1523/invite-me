@@ -326,22 +326,18 @@ export default function Chat({ route }) {
             isViewOnce,
         };
 
+        // Añade la lógica para tipo de mensaje:
         if (messageType === "text") {
-            messageData.text = message.trim();
-        } else if (messageType === "image" || messageType === "video") {
-            setIsUploading(true); // Inicia el estado de carga
-            const mediaUrl = await uploadMedia(mediaUri);
-            if (!mediaUrl) {
-                setIsUploading(false); // Asegúrate de terminar el estado de carga en caso de error
-                return; // Detener si falla la subida
-            }
-            messageData.mediaType = messageType;
-            messageData.mediaUrl = mediaUrl;
-            setIsUploading(false); // Finaliza el estado de carga
-        }
-
-        // Enviar mensaje a Firestore
-        await addDoc(messagesRef, messageData);
+          messageData.text = message.trim();
+      } else if (messageType === "image" || messageType === "video") {
+          setIsUploading(true);
+          const mediaUrl = await uploadMedia(mediaUri);
+          if (!mediaUrl) return;
+          messageData.mediaType = messageType;
+          messageData.mediaUrl = mediaUrl;
+          setIsUploading(false);
+      }
+      await addDoc(messagesRef, messageData);
 
         // Actualizar información del chat
         const chatDocRef = doc(database, "chats", chatIdToUse);
@@ -372,7 +368,7 @@ export default function Chat({ route }) {
             "Error",
             "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
         );
-        setIsUploading(false); // Finaliza el estado de carga en caso de error
+        setIsUploading(false);
     }
 };
 
