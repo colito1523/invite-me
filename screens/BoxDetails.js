@@ -44,6 +44,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Header from "./BoxDetailsComponents/Header";
 import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
 import SliderContent from "./BoxDetailsComponents/SliderContent";
+import InviteFriendsModal from "./BoxDetailsComponents/InviteFriendsModal";
+
 
 const { width } = Dimensions.get("window");
 
@@ -68,9 +70,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     hour: "",
     day: new Date(),
   });
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
 
 
   const closeModal = () => {
@@ -943,18 +942,7 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
     }
   };
 
-  const openGoogleMaps = () => {
-    if (box.locationLink) {
-      Linking.openURL(box.locationLink).catch((err) =>
-        console.error("Error al abrir Google Maps:", err)
-      );
-    } else {
-      Alert.alert(
-        t("boxDetails.linkNotAvailable"),
-        t("boxDetails.linkNotAvailableMessage")
-      );
-    }
-  };
+
 
   const renderFriendItem = ({ item }) => (
     <View
@@ -1087,55 +1075,17 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
         </ScrollView>
       </LinearGradient>
 
-      {/* Modal para invitar amigos */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-              <View
-                style={[
-                  styles.friendsModalContent,
-                  isNightMode && styles.friendsModalContentNight,
-                ]}
-              >
-                {/* Título del modal */}
-                <Text
-                  style={[
-                    styles.modalTitle,
-                    isNightMode && styles.modalTitleNight,
-                  ]}
-                >
-                  {t("boxDetails.inviteFriendsTitle")}
-                </Text>
-
-                {/* Barra de búsqueda */}
-                <TextInput
-                  style={[
-                    styles.searchInput,
-                    isNightMode && styles.searchInputNight,
-                  ]}
-                  placeholder={t("boxDetails.searchFriendsPlaceholder")}
-                  placeholderTextColor={isNightMode ? "#888" : "#888"}
-                  value={searchText}
-                  onChangeText={handleSearch}
-                />
-
-                {/* Lista de amigos */}
-                <FlatList
-                  data={filteredFriends}
-                  renderItem={renderFriendItem}
-                  keyExtractor={(item) => item.friendId.toString()}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+     {/* Modal para invitar amigos */}
+     <InviteFriendsModal
+        modalVisible={modalVisible}
+        closeModal={closeModal}
+        isNightMode={isNightMode}
+        searchText={searchText}
+        handleSearch={handleSearch}
+        filteredFriends={filteredFriends}
+        renderFriendItem={renderFriendItem}
+        styles={styles}
+      />
 
       {/* Modal para editar el evento */}
       {renderEditModal()}
@@ -1323,15 +1273,6 @@ const styles = StyleSheet.create({
     color: "black",
     fontWeight: "bold",
   },
-  friendsModalContent: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 15,
-    width: "90%",
-  },
-  friendsModalContentNight: {
-    backgroundColor: "#1a1a1a",
-  },
   modalTitle: {
     color: "black",
     fontSize: 24,
@@ -1341,20 +1282,6 @@ const styles = StyleSheet.create({
   },
   modalTitleNight: {
     color: "white",
-  },
-  searchInput: {
-    height: 40,
-    borderColor: "black",
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    color: "#333",
-  },
-  searchInputNight: {
-    borderColor: "black",
-    color: "white",
-    backgroundColor: "#333",
   },
   friendContainer: {
     flexDirection: "row",

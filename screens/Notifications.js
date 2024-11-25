@@ -82,6 +82,26 @@ export default function NotificationsComponent() {
     }, [isNightMode, navigation])
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      const markNotificationsAsRead = async () => {
+        if (user) {
+          const notificationsRef = collection(database, "users", user.uid, "notifications");
+          const q = query(notificationsRef, where("status", "==", "unread"));
+          const snapshot = await getDocs(q);
+          
+          const batch = writeBatch(database);
+          snapshot.forEach((doc) => {
+            batch.update(doc.ref, { status: "read" });
+          });
+          await batch.commit();
+        }
+      };
+  
+      markNotificationsAsRead();
+    }, [user])
+  );
+
   const fetchNotifications = useCallback(async () => {
     if (user) {
       const userRef = doc(database, "users", user.uid);
