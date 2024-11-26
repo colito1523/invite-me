@@ -647,20 +647,7 @@ export default function UserProfile({ route, navigation }) {
       return;
     }
   
-    const chatId = await getChatId(user.uid, selectedUser.id);
-    const chatRef = doc(database, "chats", chatId);
-    const chatDoc = await getDoc(chatRef);
-  
-    if (!chatDoc.exists()) {
-      await setDoc(chatRef, {
-        participants: [user.uid, selectedUser.id],
-        createdAt: new Date(),
-        lastMessage: "",
-      });
-    }
-  
     const params = {
-      chatId,
       recipientUser: selectedUser,
     };
   
@@ -670,18 +657,6 @@ export default function UserProfile({ route, navigation }) {
     }
   
     navigation.navigate("ChatUsers", params);
-  };
-
-  const getChatId = async (user1Id, user2Id) => {
-    const user1Doc = await getDoc(doc(database, "users", user1Id));
-    const user2Doc = await getDoc(doc(database, "users", user2Id));
-
-    const user1Name = user1Doc.data().username;
-    const user2Name = user2Doc.data().username;
-
-    return user1Name > user2Name
-      ? `${user1Name}_${user2Name}`
-      : `${user2Name}_${user1Name}`;
   };
 
   const renderMutualFriends = () => {
