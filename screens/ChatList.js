@@ -163,14 +163,18 @@ export default function ChatList() {
             );
       
             const sortedChats = chatList
-              .filter((chat) => chat !== null)
-              .sort(
-                (a, b) =>
-                  new Date(b.lastMessageTimestamp) -
-                  new Date(a.lastMessageTimestamp)
-              );
+            .filter((chat) => chat !== null)
+            .sort((a, b) => {
+              const dateA = a.lastMessageTimestamp
+                ? a.lastMessageTimestamp.toDate().getTime()
+                : 0;
+              const dateB = b.lastMessageTimestamp
+                ? b.lastMessageTimestamp.toDate().getTime()
+                : 0;
+              return dateB - dateA; // Orden descendente
+            });
       
-            setChats(sortedChats);
+              setChats(sortedChats);
           });
       
           return () => unsubscribe();
