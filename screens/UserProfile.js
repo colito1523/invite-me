@@ -404,6 +404,7 @@ export default function UserProfile({ route, navigation }) {
             username: userData.username,
           }),
           timestamp: serverTimestamp(),
+          seen: false,
         });
       } else {
         // Eliminar "like"
@@ -883,6 +884,7 @@ export default function UserProfile({ route, navigation }) {
             fromImage: profileImage,
             status: "pending",
             timestamp: Timestamp.now(),
+            
           });
   
           setPendingRequest(true);

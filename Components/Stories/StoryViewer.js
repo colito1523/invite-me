@@ -442,6 +442,7 @@ export function StoryViewer({
           lastName: userData.lastName,
         }),
         timestamp: new Date(),
+        seen: false, // Campo añadido
       });
     } catch (error) {
       console.error("Error liking story:", error);

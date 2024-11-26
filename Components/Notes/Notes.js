@@ -289,6 +289,7 @@ export default function Notes() {
           message: t("notes.likedYourNote"),
           timestamp: new Date(),
           noteText: note.text,
+          seen: false,
         });
       }
 
