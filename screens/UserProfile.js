@@ -850,6 +850,28 @@ export default function UserProfile({ route, navigation }) {
     const q = query(friendsRef, where("friendId", "==", selectedUser.id));
     const friendSnapshot = await getDocs(q);
   
+    const currentUserRequestsRef = collection(
+      database,
+      "users",
+      user.uid,
+      "friendRequests"
+    );
+    const existingRequestFromThemQuery = query(
+      currentUserRequestsRef,
+      where("fromId", "==", selectedUser.id)
+    );
+    const existingRequestFromThemSnapshot = await getDocs(
+      existingRequestFromThemQuery
+    );
+  
+    if (!existingRequestFromThemSnapshot.empty) {
+      Alert.alert(
+        "Solicitud pendiente",
+        "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
+      );
+      return;
+    }
+  
     if (friendSnapshot.empty) {
       const requestRef = collection(
         database,
@@ -877,21 +899,6 @@ export default function UserProfile({ route, navigation }) {
         currentUser.photoUrls && currentUser.photoUrls.length > 0
           ? currentUser.photoUrls[0]
           : "https://via.placeholder.com/150";
-  
-      // Verificar si ya existe una solicitud pendiente de la persona seleccionada
-      const reverseRequestQuery = query(
-        collection(database, "users", user.uid, "friendRequests"),
-        where("fromId", "==", selectedUser.id)
-      );
-      const reverseRequestSnapshot = await getDocs(reverseRequestQuery);
-  
-      if (!reverseRequestSnapshot.empty) {
-        Alert.alert(
-          t("userProfile.pendingRequest"),
-          t("userProfile.pendingRequestMessage", { name: selectedUser.firstName })
-        );
-        return;
-      }
   
       if (existingRequestSnapshot.empty) {
         try {
@@ -961,12 +968,6 @@ export default function UserProfile({ route, navigation }) {
   
         setFriendshipStatus(false);
         setFriendCount(friendCount - 1);
-
-        // Mostrar alerta
-        Alert.alert(
-          t("userProfile.friendshipEnded"),
-          t("userProfile.noLongerFriends", { name: selectedUser.firstName })
-        );
       } catch (error) {
         console.error("Error removing friendship:", error);
       }
