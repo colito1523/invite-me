@@ -845,36 +845,11 @@ export default function UserProfile({ route, navigation }) {
 
   const toggleUserStatus = async () => {
     if (!user || !selectedUser) return;
-
+  
     const friendsRef = collection(database, "users", user.uid, "friends");
     const q = query(friendsRef, where("friendId", "==", selectedUser.id));
     const friendSnapshot = await getDocs(q);
-
-    // Verificar si el usuario seleccionado ya envió una solicitud de amistad
-  const currentUserRequestsRef = collection(
-    database,
-    "users",
-    user.uid,
-    "friendRequests"
-  );
-  const existingRequestFromThemQuery = query(
-    currentUserRequestsRef,
-    where("fromId", "==", selectedUser.id)
-  );
-  const existingRequestFromThemSnapshot = await getDocs(
-    existingRequestFromThemQuery
-  );
-
-  if (!existingRequestFromThemSnapshot.empty) {
-    Alert.alert(
-      "Solicitud pendiente",
-      "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
-    );
-    return;
-  }
-
-
-
+  
     if (friendSnapshot.empty) {
       const requestRef = collection(
         database,
@@ -887,22 +862,22 @@ export default function UserProfile({ route, navigation }) {
         where("fromId", "==", user.uid)
       );
       const existingRequestSnapshot = await getDocs(existingRequestQuery);
-
+  
       const userDocRef = doc(database, "users", user.uid);
       const userDocSnapshot = await getDoc(userDocRef);
-
+  
       const currentUser = userDocSnapshot.exists()
         ? userDocSnapshot.data()
         : {
             username: t("userProfile.anonymousUser"),
             profileImage: "https://via.placeholder.com/150",
           };
-
+  
       const profileImage =
         currentUser.photoUrls && currentUser.photoUrls.length > 0
           ? currentUser.photoUrls[0]
           : "https://via.placeholder.com/150";
-
+  
       if (existingRequestSnapshot.empty) {
         try {
           await addDoc(requestRef, {
@@ -912,7 +887,7 @@ export default function UserProfile({ route, navigation }) {
             status: "pending",
             timestamp: Timestamp.now(),
           });
-
+  
           setPendingRequest(true);
         } catch (error) {
           console.error("Error sending friend request:", error);
@@ -922,7 +897,7 @@ export default function UserProfile({ route, navigation }) {
           existingRequestSnapshot.forEach(async (doc) => {
             await deleteDoc(doc.ref);
           });
-
+  
           setPendingRequest(false);
         } catch (error) {
           console.error("Error canceling friend request:", error);
@@ -933,7 +908,7 @@ export default function UserProfile({ route, navigation }) {
         friendSnapshot.forEach(async (doc) => {
           await deleteDoc(doc.ref);
         });
-
+  
         const reverseFriendSnapshot = await getDocs(
           query(
             collection(database, "users", selectedUser.id, "friends"),
@@ -943,14 +918,46 @@ export default function UserProfile({ route, navigation }) {
         reverseFriendSnapshot.forEach(async (doc) => {
           await deleteDoc(doc.ref);
         });
-
+  
+        // Eliminar solicitudes de amistad pendientes entre ambos usuarios
+        const currentUserRequestsRef = collection(
+          database,
+          "users",
+          selectedUser.id,
+          "friendRequests"
+        );
+        const requestQuery = query(
+          currentUserRequestsRef,
+          where("fromId", "==", user.uid)
+        );
+        const requestSnapshot = await getDocs(requestQuery);
+        requestSnapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+        });
+  
+        const reverseRequestQuery = query(
+          collection(database, "users", user.uid, "friendRequests"),
+          where("fromId", "==", selectedUser.id)
+        );
+        const reverseRequestSnapshot = await getDocs(reverseRequestQuery);
+        reverseRequestSnapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+        });
+  
         setFriendshipStatus(false);
         setFriendCount(friendCount - 1);
+
+        // Mostrar alerta
+        Alert.alert(
+          t("userProfile.friendshipEnded"),
+          t("userProfile.noLongerFriends", { name: selectedUser.firstName })
+        );
       } catch (error) {
         console.error("Error removing friendship:", error);
       }
     }
   };
+  
 
   const renderOval = (value) => (
     <View style={styles.oval}>
