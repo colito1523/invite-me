@@ -878,6 +878,21 @@ export default function UserProfile({ route, navigation }) {
           ? currentUser.photoUrls[0]
           : "https://via.placeholder.com/150";
   
+      // Verificar si ya existe una solicitud pendiente de la persona seleccionada
+      const reverseRequestQuery = query(
+        collection(database, "users", user.uid, "friendRequests"),
+        where("fromId", "==", selectedUser.id)
+      );
+      const reverseRequestSnapshot = await getDocs(reverseRequestQuery);
+  
+      if (!reverseRequestSnapshot.empty) {
+        Alert.alert(
+          t("userProfile.pendingRequest"),
+          t("userProfile.pendingRequestMessage", { name: selectedUser.firstName })
+        );
+        return;
+      }
+  
       if (existingRequestSnapshot.empty) {
         try {
           await addDoc(requestRef, {
