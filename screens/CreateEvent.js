@@ -154,6 +154,7 @@ export default function CreateEvent() {
               type: "invitation",
               status: "pending",
               timestamp: new Date(),
+              seen: false, // Campo añadido
             });
           }
         }

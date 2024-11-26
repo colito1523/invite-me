@@ -884,6 +884,7 @@ export default function UserProfile({ route, navigation }) {
             fromImage: profileImage,
             status: "pending",
             timestamp: Timestamp.now(),
+            seen: false,
             
           });
   

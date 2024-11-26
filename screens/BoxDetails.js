@@ -344,6 +344,7 @@ const handleGeneralEventInvite = async (friendId) => {
       hours: box.hours || {},
       number: box.number || "Sin número",
       coordinates: box.coordinates || {},
+      seen: false, // Campo añadido
     });
 
     Alert.alert(
@@ -445,6 +446,7 @@ const handleInvite = async (friendId) => {
       type: "invitation",
       status: "pendiente",
       timestamp: new Date(),
+      seen: false, // Campo añadido
     });
 
     // Actualizar la lista de invitados en el evento
