@@ -413,7 +413,7 @@ export default function Chat({ route }) {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
     });
 
@@ -424,8 +424,17 @@ export default function Chat({ route }) {
   };
 
   const pickMedia = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permiso denegado",
+        "Se necesita permiso para acceder a la galería"
+      );
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       quality: 1,
     });
@@ -434,7 +443,7 @@ export default function Chat({ route }) {
       const mediaType = result.assets[0].type === "video" ? "video" : "image";
       handleSend(mediaType, result.assets[0].uri); // Verifica que `handleSend` esté en `ChatUsersParaEditar.js`
     }
-  };
+};
 
   const startRecording = async () => {
     try {
@@ -1051,7 +1060,7 @@ const styles = StyleSheet.create({
   },
   messageVideo: {
     width: 200,
-    height: 150,
+    height: 200,
     borderRadius: 10,
   },
   containerIg: {
