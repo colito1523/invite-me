@@ -44,8 +44,8 @@ import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import Complaints from '../Components/Complaints/Complaints';
 
 export default function Chat({ route }) {
-  const { chatId: initialChatId, recipientUser } = route.params;
-  const [backgroundImage, setBackgroundImage] = useState(null);
+  const { chatId: initialChatId, recipientUser, imageUri } = route.params;
+  const [backgroundImage, setBackgroundImage] = useState(imageUri || null);
   const [chatId, setChatId] = useState(initialChatId);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -58,7 +58,6 @@ export default function Chat({ route }) {
   const user = auth.currentUser;
   const navigation = useNavigation();
   const flatListRef = useRef(null);
-  const [imageUri, setImageUri] = useState(route.params?.imageUri || null);
   const blockedUsers = useBlockedUsers();
   const [menuVisible, setMenuVisible] = useState(false);
   const [isComplaintVisible, setIsComplaintVisible] = useState(false);
@@ -99,113 +98,7 @@ export default function Chat({ route }) {
             ...doc.data(),
           }));
           setMessages(messagesList);
-          if (messagesList.length > 0) {
-            markMessagesAsRead(messagesList);
-          }
         });
-
-        // Lógica para cargar respuestas de historias
-        const fetchStoryResponses = async () => {
-          const responses = [];
-
-          // Respuestas a las historias del destinatario
-          if (recipientUser?.id) {
-            const recipientStoriesRef = collection(
-              database,
-              "users",
-              recipientUser.id,
-              "stories"
-            );
-            try {
-              const recipientStoriesSnapshot = await getDocs(
-                recipientStoriesRef
-              );
-              for (const storyDoc of recipientStoriesSnapshot.docs) {
-                const responsesRef = collection(
-                  recipientStoriesRef,
-                  storyDoc.id,
-                  "responses"
-                );
-                const responsesSnapshot = await getDocs(responsesRef);
-                responses.push(
-                  ...responsesSnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    storyId: storyDoc.id,
-                    ...doc.data(),
-                    isStoryResponse: true, // Indicador para identificar respuestas de historias
-                  }))
-                );
-              }
-            } catch (error) {
-              console.error(
-                "Error al cargar respuestas de historias del destinatario:",
-                error
-              );
-            }
-          }
-
-          // Respuestas a tus propias historias
-          const userStoriesRef = collection(
-            database,
-            "users",
-            user.uid,
-            "stories"
-          );
-          try {
-            const userStoriesSnapshot = await getDocs(userStoriesRef);
-            for (const storyDoc of userStoriesSnapshot.docs) {
-              const responsesRef = collection(
-                userStoriesRef,
-                storyDoc.id,
-                "responses"
-              );
-              const responsesSnapshot = await getDocs(responsesRef);
-              responses.push(
-                ...responsesSnapshot.docs.map((doc) => ({
-                  id: doc.id,
-                  storyId: storyDoc.id,
-                  ...doc.data(),
-                  isStoryResponse: true, // Indicador para identificar respuestas de historias
-                }))
-              );
-            }
-          } catch (error) {
-            console.error(
-              "Error al cargar respuestas de tus propias historias:",
-              error
-            );
-          }
-
-          // Agregar las respuestas al estado de mensajes
-          setMessages((prevMessages) => [...prevMessages, ...responses]);
-        };
-
-
-  // Lógica para cargar respuestas a notas
-  const fetchNote = async () => {
-    if (recipientUser?.id) {
-      try {
-        const noteRef = doc(database, "users", recipientUser.id, "note", "current");
-        const noteSnapshot = await getDoc(noteRef);
-        if (noteSnapshot.exists()) {
-          setNoteText(noteSnapshot.data().text); // Guardar el texto de la nota
-        } else {
-          setNoteText("No hay nota disponible");
-        }
-      } catch (error) {
-        console.error("Error al obtener la nota:", error);
-        setNoteText("Error al obtener la nota");
-      }
-    }
-  };
-
-  await Promise.all([fetchStoryResponses(), fetchNote()]);
-
-        // Si hay una imagenUri pasada desde ChatList, enviarla automáticamente
-        if (imageUri) {
-          handleSend("image", imageUri);
-          setImageUri(null); // Limpiar después de enviar la imagen
-        }
 
         // Limpieza
         return () => unsubscribe();
@@ -213,7 +106,7 @@ export default function Chat({ route }) {
     };
 
     setupChat();
-  }, [chatId, imageUri, blockedUsers, recipientUser]);
+  }, [chatId]);
 
   const markMessagesAsRead = async (messages) => {
     const batch = writeBatch(database);

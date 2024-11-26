@@ -466,7 +466,7 @@ export default function Search() {
       saveSearchHistory(updatedHistory);
     }
 
-    navigation.navigate("UserProfile", { selectedUser: user });
+    navigation.navigate("UserProfile", { selectedUser: user, imageUri: user.profileImage });
   };
 
   const removeFromHistory = (userId) => {

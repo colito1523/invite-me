@@ -646,11 +646,11 @@ export default function UserProfile({ route, navigation }) {
       );
       return;
     }
-
+  
     const chatId = await getChatId(user.uid, selectedUser.id);
     const chatRef = doc(database, "chats", chatId);
     const chatDoc = await getDoc(chatRef);
-
+  
     if (!chatDoc.exists()) {
       await setDoc(chatRef, {
         participants: [user.uid, selectedUser.id],
@@ -658,11 +658,18 @@ export default function UserProfile({ route, navigation }) {
         lastMessage: "",
       });
     }
-
-    navigation.navigate("ChatUsers", {
+  
+    const params = {
       chatId,
       recipientUser: selectedUser,
-    });
+    };
+  
+    // Solo pasar imageUri si es necesario
+    if (selectedUser.profileImage) {
+      params.imageUri = selectedUser.profileImage;
+    }
+  
+    navigation.navigate("ChatUsers", params);
   };
 
   const getChatId = async (user1Id, user2Id) => {
