@@ -44,6 +44,28 @@ const boxInfo = [
     isPrivate: false, // Evento general
   },
   {
+    path: require("../../assets/Lisboa/palacio Chaiado.jpg"),
+    title: "Casa de Joaco",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "8:00 AM - 8:00 PM",
+      Martes: "8:00 AM - 8:00 PM",
+      Miércoles: "8:00 AM - 8:00 PM",
+      Jueves: "8:00 AM - 8:00 PM",
+      Viernes: "8:00 AM - 10:00 PM",
+      Sábado: "10:00 AM - 10:00 PM",
+      Domingo: "Cerrado",
+    },
+    number: "1160419607",
+    coordinates: {
+      latitude: 38.7096823,
+      longitude: -9.143029,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+    isPrivate: false, // Evento general
+  },
+  {
     path: require("../../assets/Lisboa/mama shelter.jpg"),
     title: "Mama Shelter",
     category: "Restaurants & Rooftops",
