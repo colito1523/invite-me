@@ -91,15 +91,17 @@ export default function NotificationsComponent() {
           const notificationsRef = collection(database, "users", user.uid, "notifications");
           const unseenQuery = query(notificationsRef, where("seen", "==", false));
           const snapshot = await getDocs(unseenQuery);
-  
-          if (!snapshot.empty) {
+
+          const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
+          const unseenFriendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
+          const friendRequestsSnapshot = await getDocs(unseenFriendRequestsQuery);
+
+          if (!snapshot.empty || !friendRequestsSnapshot.empty) {
             const batch = writeBatch(database);
             const updatedNotifications = [...notifications];
-  
+
             snapshot.forEach((doc) => {
               batch.update(doc.ref, { seen: true });
-  
-              // Actualiza la notificación en el estado local para reflejar el cambio de `seen` a `true`
               const index = updatedNotifications.findIndex((n) => n.id === doc.id);
               if (index !== -1) {
                 updatedNotifications[index] = {
@@ -108,13 +110,24 @@ export default function NotificationsComponent() {
                 };
               }
             });
-  
+
+            friendRequestsSnapshot.forEach((doc) => {
+              batch.update(doc.ref, { seen: true });
+              const index = updatedNotifications.findIndex((n) => n.id === doc.id);
+              if (index !== -1) {
+                updatedNotifications[index] = {
+                  ...updatedNotifications[index],
+                  seen: true,
+                };
+              }
+            });
+
             await batch.commit();
             setNotifications(updatedNotifications);
           }
         }
       };
-  
+
       markNotificationsAsSeen();
     }, [user, notifications])
   );

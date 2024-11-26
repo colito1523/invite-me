@@ -74,6 +74,9 @@ const Home = React.memo(() => {
         const user = auth.currentUser;
         const notificationsRef = collection(database, "users", user.uid, "notifications");
         const q = query(notificationsRef, where("seen", "==", false));
+        const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
+        const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
+
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
           if (!querySnapshot.empty) {
             setUnreadNotifications(true);
@@ -81,11 +84,22 @@ const Home = React.memo(() => {
             setUnreadNotifications(false);
           }
         });
-  
-        return () => unsubscribe();
+
+        const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
+          if (!querySnapshot.empty) {
+            setUnreadNotifications(true);
+          } else {
+            setUnreadNotifications(false);
+          }
+        });
+
+        return () => {
+          unsubscribe();
+          unsubscribeFriendRequests();
+        };
       }
     };
-   
+
     fetchUnreadNotifications();
   }, [navigation]);
   
