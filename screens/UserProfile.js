@@ -840,7 +840,7 @@ export default function UserProfile({ route, navigation }) {
       existingRequestFromThemQuery
     );
   
-    if (!existingRequestFromThemSnapshot.empty) {
+    if (!existingRequestFromThemSnapshot.empty && friendSnapshot.empty) {
       Alert.alert(
         "Solicitud pendiente",
         "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
@@ -875,6 +875,7 @@ export default function UserProfile({ route, navigation }) {
         currentUser.photoUrls && currentUser.photoUrls.length > 0
           ? currentUser.photoUrls[0]
           : "https://via.placeholder.com/150";
+          
   
       if (existingRequestSnapshot.empty) {
         try {
