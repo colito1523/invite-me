@@ -246,11 +246,21 @@ export default function Chat({ route }) {
           messageData.text = message.trim();
       } else if (messageType === "image" || messageType === "video") {
           setIsUploading(true);
+          const tempId = `temp-${new Date().getTime()}`;
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { id: tempId, mediaType: messageType, isUploading: true },
+          ]);
           const mediaUrl = await uploadMedia(mediaUri);
           if (!mediaUrl) return;
           messageData.mediaType = messageType;
           messageData.mediaUrl = mediaUrl;
           setIsUploading(false);
+          setMessages((prevMessages) =>
+            prevMessages.map((message) =>
+              message.id === tempId ? { ...messageData, id: tempId } : message
+            )
+          );
       }
       await addDoc(messagesRef, messageData);
 
@@ -622,19 +632,19 @@ export default function Chat({ route }) {
 
   const renderMessage = ({ item, index }) => {
     const previousMessage = messages[index - 1];
-    const currentMessageDate = new Date(item.createdAt.seconds * 1000);
+    const currentMessageDate = item.createdAt ? new Date(item.createdAt.seconds * 1000) : new Date();
     const previousMessageDate =
-      previousMessage && new Date(previousMessage.createdAt.seconds * 1000);
+      previousMessage && previousMessage.createdAt ? new Date(previousMessage.createdAt.seconds * 1000) : null;
 
     const isSameDay =
       previousMessageDate &&
       currentMessageDate.toDateString() === previousMessageDate.toDateString();
 
-      const isOwnMessage = item.senderId === user.uid;
+    const isOwnMessage = item.senderId === user.uid;
 
-      if (item.deletedFor && item.deletedFor[user.uid]) {
-        return null;
-      }
+    if (item.deletedFor && item.deletedFor[user.uid]) {
+      return null;
+    }
 
     if (item.isStoryResponse) {
       return (
@@ -683,151 +693,152 @@ export default function Chat({ route }) {
         </>
       );
     }
-      // Renderizar respuesta de nota
-      if (item.isNoteResponse) {
-        return (
-          <>
-            {!isSameDay && renderDate(currentMessageDate)}
-
-            <View
-              style={[
-                styles.message,
-                isOwnMessage ? styles.sent : styles.received,
-                styles.noteResponseContainer,
-              ]}
-            >
-              <Text style={styles.noteResponseText}>
-                {isOwnMessage ? "Respondiste a su nota" : "Respondió a tu nota"}
-              </Text>
-
-              <Image
-                source={require("../assets/flecha-curva.png")}
-                style={[
-                  styles.arrowImage,
-                  isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
-                ]}
-              />
-              <View>
-                <Text style={styles.originalNoteText}>
-                  {item.noteText || "Nota no disponible"}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => navigation.navigate("FullNote", { note: item })}
-              >
-                <Text style={styles.messageTextNotas}>{item.text}</Text>
-              </TouchableOpacity>
-              <View style={styles.messageFooter}>
-                <Text style={styles.timeText}>
-                  {currentMessageDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-                {isOwnMessage && item.seen && (
-                  <Ionicons
-                    name="checkmark-done-sharp"
-                    size={16}
-                    color="black"
-                    style={styles.seenIcon}
-                  />
-                )}
-              </View>
-            </View>
-          </>
-        );
-      }
-
-
+    // Renderizar respuesta de nota
+    if (item.isNoteResponse) {
       return (
         <>
           {!isSameDay && renderDate(currentMessageDate)}
 
-          <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-            <View
+          <View
+            style={[
+              styles.message,
+              isOwnMessage ? styles.sent : styles.received,
+              styles.noteResponseContainer,
+            ]}
+          >
+            <Text style={styles.noteResponseText}>
+              {isOwnMessage ? "Respondiste a su nota" : "Respondió a tu nota"}
+            </Text>
+
+            <Image
+              source={require("../assets/flecha-curva.png")}
               style={[
-                styles.message,
-                item.senderId === user.uid ? styles.sent : styles.received,
+                styles.arrowImage,
+                isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
               ]}
+            />
+            <View>
+              <Text style={styles.originalNoteText}>
+                {item.noteText || "Nota no disponible"}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("FullNote", { note: item })}
             >
-              {item.text && <Text style={styles.messageText}>{item.text}</Text>}
-
-              {item.mediaType === "image" && (
-                item.isViewOnce ? (
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleMediaPress(item.mediaUrl, "image", item.id, item.isViewOnce)
-                    }
-                    style={[
-                      styles.viewOnceImagePlaceholder,
-                      item.viewedBy?.includes(user.uid)
-                        ? styles.imageViewed
-                        : styles.imageNotViewed,
-                    ]}
-                    disabled={item.viewedBy?.includes(user.uid)} // Desactivar si ya fue vista
-                  >
-                    <Text style={styles.imageStatusText}>
-                      {item.viewedBy?.includes(user.uid) ? "Ya Vista" : "Ver"}
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleMediaPress(item.mediaUrl, "image", item.id, false)
-                    }
-                    style={styles.normalImageContainer}
-                  >
-                    <Image
-                      source={{ uri: item.mediaUrl }}
-                      style={styles.messageImage}
-                    />
-                  </TouchableOpacity>
-                )
-              )}
-
-              {item.mediaType === "video" && (
-                <Video
-                  source={{ uri: item.mediaUrl }}
-                  style={styles.messageVideo}
-                  useNativeControls
-                  resizeMode="contain"
+              <Text style={styles.messageTextNotas}>{item.text}</Text>
+            </TouchableOpacity>
+            <View style={styles.messageFooter}>
+              <Text style={styles.timeText}>
+                {currentMessageDate.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+              {isOwnMessage && item.seen && (
+                <Ionicons
+                  name="checkmark-done-sharp"
+                  size={16}
+                  color="black"
+                  style={styles.seenIcon}
                 />
               )}
-
-              {item.mediaType === "audio" && <AudioPlayer uri={item.mediaUrl} />}
-
-              <View style={styles.messageFooter}>
-                <Text style={styles.timeText}>
-                  {currentMessageDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-                {item.senderId === user.uid && item.seen && (
-                  <Ionicons
-                    name="checkmark-done-sharp"
-                    size={16}
-                    color="black"
-                    style={styles.seenIcon}
-                  />
-                )}
-              </View>
             </View>
-          </TouchableOpacity>
+          </View>
         </>
       );
+    }
 
-  };
+    if (item.isUploading) {
+      return (
+        <View style={[styles.message, styles.sent, styles.uploadingMessage]}>
+          <ActivityIndicator size="large" color="black" />
+        </View>
+      );
+    }
+
+    return (
+      <>
+        {!isSameDay && renderDate(currentMessageDate)}
+
+        <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
+          <View
+            style={[
+              styles.message,
+              item.senderId === user.uid ? styles.sent : styles.received,
+            ]}
+          >
+            {item.text && <Text style={styles.messageText}>{item.text}</Text>}
+
+            {item.mediaType === "image" && (
+              item.isViewOnce ? (
+                <TouchableOpacity
+                  onPress={() =>
+                    handleMediaPress(item.mediaUrl, "image", item.id, item.isViewOnce)
+                  }
+                  style={[
+                    styles.viewOnceImagePlaceholder,
+                    item.viewedBy?.includes(user.uid)
+                      ? styles.imageViewed
+                      : styles.imageNotViewed,
+                  ]}
+                  disabled={item.viewedBy?.includes(user.uid)} // Desactivar si ya fue vista
+                >
+                  <Text style={styles.imageStatusText}>
+                    {item.viewedBy?.includes(user.uid) ? "Ya Vista" : "Ver"}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={() =>
+                    handleMediaPress(item.mediaUrl, "image", item.id, false)
+                  }
+                  style={styles.normalImageContainer}
+                >
+                  <Image
+                    source={{ uri: item.mediaUrl }}
+                    style={styles.messageImage}
+                  />
+                </TouchableOpacity>
+              )
+            )}
+
+            {item.mediaType === "video" && (
+              <Video
+                source={{ uri: item.mediaUrl }}
+                style={styles.messageVideo}
+                useNativeControls
+                resizeMode="contain"
+              />
+            )}
+
+            {item.mediaType === "audio" && <AudioPlayer uri={item.mediaUrl} />}
+
+            <View style={styles.messageFooter}>
+              <Text style={styles.timeText}>
+                {currentMessageDate.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+              {item.senderId === user.uid && item.seen && (
+                <Ionicons
+                  name="checkmark-done-sharp"
+                  size={16}
+                  color="black"
+                  style={styles.seenIcon}
+                />
+              )}
+            </View>
+          </View>
+        </TouchableOpacity>
+      </>
+    );
+
+};
 
   return (
     <ImageBackground source={{ uri: backgroundImage }} style={styles.container}>
-       {isUploading && (
-    <View style={styles.uploadingContainer}>
-      <ActivityIndicator size="large" color="black" />
-      <Text style={styles.uploadingText}>Enviando ...</Text>
-    </View>
-  )}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -1009,6 +1020,9 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     fontWeight: "bold",
   },
+  uploadingMessage:{
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+  },
   timeText: {
     fontSize: 10, // Reduce el tamaño
     color: "#888", // Color más tenue
@@ -1104,14 +1118,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.3)",
   },
   uploadingContainer: {
-    position: "absolute",
-    top: 60,
-    left: 0,
-    right: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: 10,
     alignItems: "center",
-    zIndex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 10,
+    marginVertical: 8,
   },
   uploadingText: {
     marginTop: 10,

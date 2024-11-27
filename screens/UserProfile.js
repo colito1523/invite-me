@@ -44,6 +44,8 @@ const NameDisplay = ({
   friendCount,
   showFriendCount,
   onFriendListPress,
+  showMutualFriends, 
+  renderMutualFriends,
 }) => {
   const { t } = useTranslation();
   return (
@@ -58,6 +60,11 @@ const NameDisplay = ({
         >
           <Text style={styles.friendCountText}>{friendCount} </Text>
         </TouchableOpacity>
+      )}
+      {showMutualFriends && renderMutualFriends && (
+        <View style={styles.mutualFriendsContainer}>
+          {renderMutualFriends()}
+        </View>
       )}
     </View>
   );
@@ -1044,6 +1051,8 @@ export default function UserProfile({ route, navigation }) {
                       friendCount={friendCount}
                       showFriendCount={index === 0}
                       onFriendListPress={() => setIsFriendListVisible(true)}
+                      showMutualFriends={index === 1} // Added prop
+                      renderMutualFriends={renderMutualFriends} // Added prop
                     />
                     <View style={styles.infoContainer}>
                       {index === 0 && (
@@ -1055,9 +1064,6 @@ export default function UserProfile({ route, navigation }) {
                       {index === 1 && (
                         <>
                           <View style={styles.spacer} />
-                          <View style={styles.friendCountContainer}>
-                            {renderMutualFriends()}
-                          </View>
                           {renderEvents(4, 6)}
                         </>
                       )}
@@ -1278,6 +1284,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
   },
+  mutualFriendsContainer: {
+    alignItems: "flex-start",
+    marginTop: 15,
+    marginBottom: 20,
+  },
   number: {
     fontSize: 24,
     color: "#fff",
@@ -1368,11 +1379,6 @@ const styles = StyleSheet.create({
     marginRight: -15,
     borderWidth: 2,
     borderColor: "white",
-  },
-  mutualFriendsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
   },
   mutualFriendImagesContainer: {
     flexDirection: "row",

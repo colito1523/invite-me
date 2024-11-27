@@ -90,7 +90,7 @@ const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
             <FlatList
               data={filteredFriends}
               renderItem={renderFriendItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => item.id || index.toString()}
               showsVerticalScrollIndicator={false}
             />
           ) : (

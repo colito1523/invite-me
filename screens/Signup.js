@@ -214,6 +214,7 @@ export default function SignUp() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -323,7 +324,7 @@ export default function SignUp() {
   };
 
   const validateUsername = (username) => {
-    const usernameRegex = /^[a-z0-9._]+$/;
+    const usernameRegex = /^[a-zA-Z0-9._]+$/; // Allow uppercase letters in the regex
     return usernameRegex.test(username);
   };
 
@@ -335,31 +336,38 @@ export default function SignUp() {
   
 
   const handleNext = async () => {
+    setIsLoading(true);
     const currentQuestion = questions[currentQuestionIndex];
 
     if (currentQuestion.id === "account") {
       if (!answers.firstName || !answers.lastName) {
         Alert.alert(t('signup.errors.emptyName'));
+        setIsLoading(false);
         return;
       }
       if (!validateName(answers.firstName) || !validateName(answers.lastName)) {
         Alert.alert(t('signup.errors.invalidName'));
+        setIsLoading(false);
         return;
       }
       if (!answers.email || !validateEmail(answers.email)) {
         Alert.alert(t('signup.errors.invalidEmail'));
+        setIsLoading(false);
         return;
       }
       if (!answers.username || !validateUsername(answers.username)) {
         Alert.alert(t('signup.errors.invalidUsername'));
+        setIsLoading(false);
         return;
       }
       if (!answers.password || !validatePassword(answers.password)) {
         Alert.alert(t('signup.errors.invalidPassword'));
+        setIsLoading(false);
         return;
       }
       if (!acceptedTerms) {
         Alert.alert(t('signup.errors.termsNotAccepted'));
+        setIsLoading(false);
         return;
       }
       // Verifica si el email ya está en uso
@@ -371,11 +379,13 @@ export default function SignUp() {
       const emailSnapshot = await getDocs(emailQuery);
       if (!emailSnapshot.empty) {
         Alert.alert(t('signup.errors.emailInUse'));
+        setIsLoading(false);
         return;
       }
     } catch (error) {
       console.error("Error checking email:", error);
       Alert.alert(t('signup.errors.generic'), error.message);
+      setIsLoading(false);
       return;
     }
     const usernameQuery = query(
@@ -387,11 +397,13 @@ export default function SignUp() {
       const usernameSnapshot = await getDocs(usernameQuery);
       if (!usernameSnapshot.empty) {
         Alert.alert(t('signup.errors.usernameInUse'));
+        setIsLoading(false);
         return;
       }
     } catch (error) {
       console.error("Error checking username:", error);
       Alert.alert(t('signup.errors.generic'), error.message);
+      setIsLoading(false);
       return;
     }
     }
@@ -402,6 +414,7 @@ export default function SignUp() {
         !validateSingleWord(answers.hobby2)
       ) {
         Alert.alert(t('signup.errors.invalidHobbies'));
+        setIsLoading(false);
         return;
       }
       if (
@@ -409,17 +422,21 @@ export default function SignUp() {
         !validateSingleWord(answers.interest2)
       ) {
         Alert.alert(t('signup.errors.invalidInterests'));
+        setIsLoading(false);
         return;
       }
     }
 
     if (currentQuestion.id === "photos" && !answers.photo1) {
+      setIsLoading(false);
       return;
     }
     if (currentQuestion.id === "photos2" && !answers.photo2) {
+      setIsLoading(false);
       return;
     }
     if (currentQuestion.id === "photos3" && !answers.photo3) {
+      setIsLoading(false);
       return;
     }
 
@@ -428,6 +445,7 @@ export default function SignUp() {
     } else if (currentQuestionIndex === questions.length - 2) {
       await handleSubmit();
     }
+    setIsLoading(false);
   };
 
   const handleBack = () => {
@@ -458,6 +476,7 @@ export default function SignUp() {
     setIsSubmitting(true);
     try {
       const emailToLower = answers.email.trim().toLowerCase();
+      const usernameToLower = answers.username.trim().toLowerCase();
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         emailToLower,
@@ -484,7 +503,7 @@ export default function SignUp() {
         firstInterest: answers.interest1,
         secondInterest: answers.interest2,
         photoUrls: photoUrls,
-        username: answers.username,
+        username: usernameToLower,
       };
 
       await setDoc(doc(database, "users", user.uid), userData);
@@ -887,13 +906,25 @@ export default function SignUp() {
           }
         >
           {currentQuestionIndex > 0 && currentQuestion.id !== "welcome" && (
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              disabled={isLoading}
+            >
               <AntDesign name="left" size={24} color="black" />
             </TouchableOpacity>
           )}
           {currentQuestionIndex < questions.length - 1 && (
-            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-              <AntDesign name="right" size={24} color="black" />
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={handleNext}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#000" />
+              ) : (
+                <AntDesign name="right" size={24} color="black" />
+              )}
             </TouchableOpacity>
           )}
         </View>
