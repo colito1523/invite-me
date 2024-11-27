@@ -1,37 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, Modal, StyleSheet, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
-import { doc, getDoc } from 'firebase/firestore';
-import { database, auth } from '../../config/firebase'; // Asegúrate de importar correctamente `auth`
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { database } from '../../config/firebase';
+import { useNavigation } from '@react-navigation/native';
 
 const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [blockedUsers, setBlockedUsers] = useState([]);
   const { t } = useTranslation();
-
-  // Cargar usuarios bloqueados
-  useEffect(() => {
-    const fetchBlockedUsers = async () => {
-      try {
-        if (!auth.currentUser) {
-          console.error("El usuario no está autenticado.");
-          return;
-        }
-
-        const userRef = doc(database, "users", auth.currentUser.uid);
-        const userSnapshot = await getDoc(userRef);
-        const blockedList = userSnapshot.data()?.blockedUsers || [];
-        setBlockedUsers(blockedList);
-      } catch (error) {
-        console.error("Error fetching blocked users:", error);
-      }
-    };
-
-    if (isVisible) {
-      fetchBlockedUsers();
-    }
-  }, [isVisible]);
+  const navigation = useNavigation();
 
   // Restablecer búsqueda al cerrar el modal
   useEffect(() => {
@@ -40,26 +18,42 @@ const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
     }
   }, [isVisible]);
 
-  // Filtrar amigos visibles
-  const filteredFriends = friends.filter(
-    (friend) =>
-      friend.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !blockedUsers.includes(friend.id) // Excluir amigos bloqueados
-  );
+  // Filtrar amigos visibles por nombre de usuario
+  const filteredFriends = Array.isArray(friends) && friends.length > 0
+    ? friends.filter((friend) =>
+        friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
-  const handleUserPress = (friendId) => {
-    if (blockedUsers.includes(friendId)) {
-      Alert.alert("Error", "No puedes interactuar con este usuario.");
+  const handleUserPress = async (username) => {
+    if (!username) {
+      Alert.alert("Error", "Usuario no válido.");
       return;
     }
-    // Aquí puedes manejar la navegación o interacción con el usuario
-    console.log("Interacción con:", friendId);
+    try {
+      const usersQuery = query(
+        collection(database, "users"),
+        where("username", "==", username)
+      );
+      const querySnapshot = await getDocs(usersQuery);
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        const userData = { id: userDoc.id, ...userDoc.data() };
+        navigation.navigate("UserProfile", { selectedUser: userData });
+      } else {
+        Alert.alert("Error", "Usuario no encontrado.");
+      }
+    } catch (error) {
+      console.error("Error al obtener datos del usuario:", error);
+      Alert.alert("Error", "Hubo un problema al obtener los datos del usuario.");
+    }
+    onClose();
   };
 
   const renderFriendItem = ({ item }) => (
     <TouchableOpacity
       style={styles.friendItem}
-      onPress={() => handleUserPress(item.id)}
+      onPress={() => handleUserPress(item.username)}
     >
       <Image
         source={{ uri: item.photoUrls[0] || 'https://via.placeholder.com/150' }}
@@ -69,7 +63,7 @@ const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
       <Text style={styles.friendName}>{item.username}</Text>
     </TouchableOpacity>
   );
-  
+
   return (
     <Modal
       visible={isVisible}
@@ -90,7 +84,7 @@ const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
             <FlatList
               data={filteredFriends}
               renderItem={renderFriendItem}
-              keyExtractor={(item, index) => item.id || index.toString()}
+              keyExtractor={(item) => item.username} // Usamos `username` como clave
               showsVerticalScrollIndicator={false}
             />
           ) : (
@@ -142,17 +136,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
-  },
-  closeButton: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#007AFF',
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
   },
 });
 

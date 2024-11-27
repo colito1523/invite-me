@@ -275,7 +275,7 @@ export default function Search() {
       const currentUserData = userDocSnapshot.exists()
         ? userDocSnapshot.data()
         : {
-            username: t('anonymousUser'),
+            username: "Anonymous User",
             photoUrls: ["https://via.placeholder.com/150"],
           };
   
@@ -291,20 +291,23 @@ export default function Search() {
             fromId: currentUser.uid,
             fromImage: profileImage,
             status: "pending",
-            createdAt: new Date(),
+            seen: false, // Agregando este campo como en UserProfile.js
+            timestamp: new Date(), // Marca de tiempo válida
+            createdAt: new Date(), // Compatibilidad con Search.js
           });
   
           setStatus("pending");
         } catch (error) {
-          console.error(t('errorSendingFriendRequest'), error);
+          console.error("Error sending friend request:", error);
         }
       } else {
         // Request already exists
       }
     } else {
-      Alert.alert(t('alreadyFriends'), t('alreadyFriendsMessage'));
+      Alert.alert("Already friends", "You are already friends with this user.");
     }
   };
+  
 
   const cancelFriendRequest = async (user, setStatus) => {
     if (!auth.currentUser || !user) return;
@@ -332,22 +335,14 @@ export default function Search() {
   
   const renderRecommendationItem = ({ item, index }) => {
     const [status, setStatus] = useState(null);
-
+  
     useEffect(() => {
       const fetchFriendRequestStatus = async () => {
         try {
-          const requestRef = collection(
-            database,
-            "users",
-            item.id,
-            "friendRequests"
-          );
-          const existingRequestQuery = query(
-            requestRef,
-            where("fromId", "==", auth.currentUser.uid)
-          );
+          const requestRef = collection(database, "users", item.id, "friendRequests");
+          const existingRequestQuery = query(requestRef, where("fromId", "==", auth.currentUser.uid));
           const existingRequestSnapshot = await getDocs(existingRequestQuery);
-
+  
           if (!existingRequestSnapshot.empty) {
             const existingRequest = existingRequestSnapshot.docs[0].data();
             setStatus(existingRequest.status);
@@ -355,13 +350,21 @@ export default function Search() {
             setStatus(null);
           }
         } catch (error) {
-          console.error(t('errorCheckingFriendRequestStatus'), error);
+          console.error("Error checking friend request status:", error);
         }
       };
-
+  
       fetchFriendRequestStatus();
     }, [item]);
-
+  
+    const toggleFriendRequest = async () => {
+      if (status === "pending") {
+        await cancelFriendRequest(item, setStatus);
+      } else {
+        await sendFriendRequest(item, setStatus);
+      }
+    };
+  
     return (
       <TouchableOpacity
         key={`recommendation-${item.id}-${index}`}
@@ -369,31 +372,21 @@ export default function Search() {
         onPress={() => handleUserPress(item)}
       >
         <Image
-          key={`recommendation-image-${item.id}`}
           source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
           style={styles.userImage}
           cachePolicy="memory-disk"
         />
         <View style={styles.textContainer}>
-          <Text style={[styles.resultText, { color: theme.text }]}>
-            {item.username}
-          </Text>
+          <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
           {item.firstName && item.lastName && (
-            <Text
-              style={[styles.fullName, { color: theme.textSecondary }]}
-            >{`${item.firstName} ${item.lastName}`}</Text>
+            <Text style={[styles.fullName, { color: theme.textSecondary }]}>
+              {`${item.firstName} ${item.lastName}`}
+            </Text>
           )}
         </View>
         <TouchableOpacity
-          style={[
-            styles.addFriendButton,
-            { backgroundColor: theme.buttonBackground },
-          ]}
-          onPress={() =>
-            status === "pending"
-              ? cancelFriendRequest(item, setStatus)
-              : sendFriendRequest(item, setStatus)
-          }
+          style={[styles.addFriendButton, { backgroundColor: theme.buttonBackground }]}
+          onPress={toggleFriendRequest}
           disabled={status === "accepted"}
         >
           {status === "pending" ? (
@@ -407,6 +400,7 @@ export default function Search() {
       </TouchableOpacity>
     );
   };
+  
 
   useEffect(() => {
     const loadSearchHistory = async () => {
