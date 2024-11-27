@@ -580,7 +580,7 @@ export default function Profile({ navigation }) {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
       quality: 1,
     });
@@ -589,9 +589,9 @@ export default function Profile({ navigation }) {
       const newPhotoUrls = [...photoUrls];
       newPhotoUrls[index] = result.assets[0].uri;
       setPhotoUrls(newPhotoUrls);
-      console.log("Nueva URL de imagen:", result.assets[0].uri); // Agregar log para revisar el URI
+      console.log("Nueva URL de imagen:", result.assets[0].uri);
     }
-  };
+};
 
   const handleBoxPress = (event) => {
     const coordinates = event.coordinates || { latitude: 0, longitude: 0 };
