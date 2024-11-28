@@ -237,7 +237,8 @@ export default function NotificationsComponent() {
                 onPress={() => handleAcceptPrivateEvent({
                   item,
                   setNotifications,
-                  setLoadingEventId
+                  setLoadingEventId,
+                  t
                 })}
                 disabled={loadingEventId === item.id}
               >
@@ -305,7 +306,8 @@ export default function NotificationsComponent() {
                 onPress={() => handleAcceptGeneralEvent({
                   item,
                   setNotifications,
-                  setLoadingEventId
+                  setLoadingEventId,
+                  t
                 })}
                 disabled={loadingEventId === item.id}
               >
@@ -415,7 +417,8 @@ export default function NotificationsComponent() {
       } else {
         handleUserPress({
           uid: item.fromId,
-          navigation
+          navigation,
+          t
         });
       }
     };
@@ -513,11 +516,13 @@ export default function NotificationsComponent() {
                           ? handleAcceptRequest({
                             request: item,
                             setLoadingEventId,
-                            setNotifications
+                            setNotifications,
+                            t
                           })
                           : handleAcceptEventInvitation({
                             notif: item,
-                            setNotifications
+                            setNotifications,
+                            t
                           })
                       }
                       style={[
@@ -545,11 +550,13 @@ export default function NotificationsComponent() {
                           ? handleRejectRequest({
                             request: item,
                             setLoadingEventId,
-                            setNotifications
+                            setNotifications,
+                            t
                           })
                           : handleRejectEventInvitation({
                             notif: item,
-                            setNotifications
+                            setNotifications,
+                            t
                           })
                       }
                       style={[

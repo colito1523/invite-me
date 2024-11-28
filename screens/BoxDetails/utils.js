@@ -1,9 +1,6 @@
 import { addDoc, arrayUnion, collection, deleteDoc, deleteField, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
 import { Alert } from "react-native";
-import { useTranslation } from "react-i18next";
-
-const { t } = useTranslation()
 
 
 export const checkAndRemoveExpiredEvents = async (title) => {
@@ -13,10 +10,10 @@ export const checkAndRemoveExpiredEvents = async (title) => {
 
     if (boxDoc.exists()) {
       const data = boxDoc.data();
-      const currentDate: any = new Date();
+      const currentDate = new Date();
 
       for (const [dateKey, attendees] of Object.entries(data)) {
-        let eventDate: any = parseCustomDate(dateKey);
+        let eventDate = parseCustomDate(dateKey);
 
         if (!eventDate) {
           console.error(`El valor ${dateKey} no se pudo convertir a fecha.`);
@@ -273,6 +270,7 @@ export const handleInvite = async (params) => {
   const friends = params.friends
   const box = params.box
   const selectedDate = params.selectedDate
+  const t = params.t
 
   const user = auth.currentUser;
   if (!user) return;

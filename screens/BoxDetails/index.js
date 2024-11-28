@@ -3,10 +3,8 @@ import React, { useState, useEffect, memo } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
   SafeAreaView,
   Alert,
   Modal,
@@ -37,8 +35,7 @@ import DotIndicatorBoxDetails from "../../Components/Dots/DotIndicatorBoxDetails
 import { useTranslation } from "react-i18next";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from 'expo-image-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Header from "./BoxDetailsComponents/Header";
+import Header from "./BoxDetailsComponents/Header"
 import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
 import SliderContent from "./BoxDetailsComponents/SliderContent";
 import InviteFriendsModal from "./BoxDetailsComponents/InviteFriendsModal";
@@ -639,6 +636,7 @@ export default memo(function BoxDetails({ route, navigation }) {
             selectedDate,
             friendId: item.friendId,
             setFriends,
+            t
           })}
           disabled={item.invited}
         >

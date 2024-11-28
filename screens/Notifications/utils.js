@@ -1,9 +1,6 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
 import { Alert } from "react-native";
 import { auth, database } from "../../config/firebase";
-import { useTranslation } from "react-i18next";
-
-const { t } = useTranslation()
 
 
 export const markNotificationsAsSeen = async (params) => {
@@ -123,6 +120,7 @@ export const updateNotifications = (params) => {
 export const handleUserPress = async (params) => {
   const uid = params.uid
   const navigation = params.navigation
+  const t = params.t
   try {
     const userDoc = await getDoc(
       doc(database, "users", auth.currentUser.uid)
@@ -162,6 +160,7 @@ export const handleAcceptRequest = async (params) => {
   const request = params.request
   const setLoadingEventId = params.setLoadingEventId
   const setNotifications = params.setNotifications
+  const t = params.t
 
   setLoadingEventId(request.id)
   try {
@@ -264,6 +263,7 @@ export const handleRejectRequest = async (params) => {
   const request = params.request
   const setLoadingEventId = params.setLoadingEventId
   const setNotifications = params.setNotifications
+  const t = params.t
 
   setLoadingEventId(request.id)
   try {
@@ -298,6 +298,7 @@ export const handleRejectRequest = async (params) => {
 export const handleAcceptEventInvitation = async (params) => {
   const notif = params.notif
   const setNotifications = params.setNotifications
+  const t = params.t
 
   const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
   const blockedUsers = userDoc.data()?.blockedUsers || [];
@@ -390,6 +391,7 @@ export const handleAcceptEventInvitation = async (params) => {
 export const handleRejectEventInvitation = async (params) => {
   const notif = params.notif
   const setNotifications = params.setNotifications
+  const t = params.t
 
   try {
     const user = auth.currentUser;
@@ -484,6 +486,7 @@ export const handleAcceptPrivateEvent = async (params) => {
   const setNotifications = params.setNotifications
   const setLoadingEventId = params.setLoadingEventId
   const item = params.item
+  const t = params.t
 
   try {
     setLoadingEventId(item.id);
@@ -600,6 +603,7 @@ export const handleAcceptGeneralEvent = async (params) => {
   const item = params.item
   const setLoadingEventId = params.setLoadingEventId
   const setNotifications = params.setNotifications
+  const t = params.t
 
   try {
     setLoadingEventId(item.id);

@@ -41,10 +41,10 @@ import { useTranslation } from "react-i18next";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Header from "./BoxDetailsComponents/Header";
-import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
-import SliderContent from "./BoxDetailsComponents/SliderContent";
-import InviteFriendsModal from "./BoxDetailsComponents/InviteFriendsModal";
+import Header from "./BoxDetails/BoxDetailsComponents/Header";
+import ButtonsSection from "./BoxDetails/BoxDetailsComponents/ButtonsSection";
+import SliderContent from "./BoxDetails/BoxDetailsComponents/SliderContent";
+import InviteFriendsModal from "./BoxDetails/BoxDetailsComponents/InviteFriendsModal";
 
 
 const { width } = Dimensions.get("window");
