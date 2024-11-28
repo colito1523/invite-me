@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { Entypo, Ionicons, FontAwesome } from "@expo/vector-icons";
-import { auth } from "../../config/firebase";
+import { auth } from "../../../config/firebase";
 
 const Header = ({
   navigation,

@@ -25,7 +25,7 @@ import Notifications from "./screens/Notifications/index";
 import UserProfile from "./screens/UserProfile";
 import PrivateUserProfile from "./Components/Privado/PrivateUserProfile";
 import CreateEvent from "./screens/CreateEvent";
-import BoxDetails from "./screens/BoxDetails";
+import BoxDetails from "./screens/BoxDetails/index";
 import ChatUsers from "./screens/ChatUsers";
 import ChatList from "./screens/ChatList";
 import AudioPlayer from "./screens/AudioPlayer";
