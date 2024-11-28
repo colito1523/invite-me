@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   unblockButton: {
     paddingVertical: 5,
     paddingHorizontal: 10,
-    backgroundColor: "#FF3B30",
+    backgroundColor: "black",
     borderRadius: 5,
   },
   unblockButtonText: {
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: "#007AFF",
+    backgroundColor: "black",
     borderRadius: 5,
   },
   closeButtonText: {
