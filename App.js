@@ -18,7 +18,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"; // Import
 import Login from "./screens/Login";
 import Signup from "./screens/Signup";
 import Home from "./screens/Home";
-import Search from "./screens/Search";
+import Search from "./screens/SearchComponents/index";
 import ForgotPassword from "./screens/ForgotPassword";
 import Profile from "./screens/Profile";
 import Notifications from "./screens/Notifications/index";
