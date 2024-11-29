@@ -15,9 +15,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Importa esto
 
 
-import Login from "./screens/Login";
-import Signup from "./screens/Signup";
-import Home from "./screens/Home";
+import Login from "./screens/LoginComponents/index";
+import Signup from "./screens/SignUpComponents/index";
+import Home from "./screens/HomeComponents/index";
 import Search from "./screens/SearchComponents/index";
 import ForgotPassword from "./screens/ForgotPassword";
 import Profile from "./screens/Profile/index";
