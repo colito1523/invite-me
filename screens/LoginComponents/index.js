@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -21,14 +20,17 @@ import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import validator from 'validator'; // Importar la biblioteca validator
+
 
 import es from '../../locales/es.json';
 import en from '../../locales/en.json';
 import pt from '../../locales/pt.json';
 import { styles, lightTheme, darkTheme } from './styles';
 
-const LANGUAGE_KEY = '@app_language';
+
+const LANGUAGE_KEY = 'app_language'; 
 
 i18n
   .use(initReactI18next)
@@ -74,58 +76,66 @@ export default function ElegantLogin({ navigation }) {
 
   const loadSavedLanguage = async () => {
     try {
-      const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+      const savedLanguage = await SecureStore.getItemAsync(LANGUAGE_KEY);
       if (savedLanguage) {
         i18n.changeLanguage(savedLanguage);
-        setSelectedLanguage(savedLanguage);  // Actualiza el selector de idioma
+        setSelectedLanguage(savedLanguage); // Actualiza el selector de idioma
       }
     } catch (error) {
       console.error('Error loading saved language:', error);
     }
   };
-
+  
   const changeLanguage = async (lang) => {
     await i18n.changeLanguage(lang);
     setSelectedLanguage(lang);
     try {
-      await AsyncStorage.setItem(LANGUAGE_KEY, lang);
+      await SecureStore.setItemAsync(LANGUAGE_KEY, lang);
     } catch (error) {
       console.error('Error saving language:', error);
     }
     setIsLanguageOptionsVisible(false);
   };
 
-  const onHandleLogin = () => {
+
+  const onHandleLogin = async () => {
     if (email.trim() === '' || password === '') {
       Alert.alert(t('errorTitle'), t('enterBothFields'));
       return;
     }
-  
+
     const emailToLower = email.trim().toLowerCase();
   
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailToLower)) {
-      Alert.alert(t('errorTitle'), t('enterValidEmail'));
+    // Sanitización y validación con validator.js
+    const emailSanitized = validator.normalizeEmail(email.trim()); // Normaliza el email
+    const passwordSanitized = validator.escape(password); // Escapa caracteres peligrosos
+  
+    // Validación con RegEx y validator.js
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // RegEx para validar email
+    if (!emailRegex.test(emailSanitized) || !validator.isEmail(emailSanitized)) {
+      Alert.alert(t('errorTitle'), t('invalidCredentials')); // Mensaje genérico
       return;
     }
   
     setIsLoading(true);
   
-    signInWithEmailAndPassword(auth, emailToLower, password)
-      .then(() => {
-        setIsLoading(false);
-        navigation.navigate('Home');
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        Alert.alert(
-          t('loginError'),
-          err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password'
-            ? t('incorrectCredentials')
-            : t('genericError')
-        );
-      });
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, emailSanitized, passwordSanitized);
+  
+      // Elimina la contraseña de la memoria después de autenticación exitosa
+      setPassword(null);
+  
+      setIsLoading(false);
+      navigation.navigate('Home');
+    } catch (error) {
+      setIsLoading(false);
+      setPassword(null);
+  
+      Alert.alert(t('errorTitle'), t('invalidCredentials')); // Mensaje genérico
+    }
   };
+  
+  
 
   const theme = isNightMode ? darkTheme : lightTheme;
 

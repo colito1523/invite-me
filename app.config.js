@@ -11,7 +11,7 @@ export default {
     splash: {
       image: "./assets/Logo_Invite_Me.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
     },
     ios: {
       supportsTablet: true,
@@ -47,7 +47,10 @@ export default {
         projectId: "7e15b633-dd47-4035-86d3-96443bfdab66"
       }
     },
-    plugins: ["expo-font"],
+    plugins: [
+      "expo-secure-store", // Mantén esto aquí
+      "expo-font"
+    ],
 
     updates: {
       url: "https://u.expo.dev/7e15b633-dd47-4035-86d3-96443bfdab66"

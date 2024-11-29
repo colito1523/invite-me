@@ -11,6 +11,7 @@
   "loginError": "Login Error",
   "incorrectCredentials": "Incorrect email or password. Please verify your information.",
   "genericError": "An error occurred. Please try again.",
+   "invalidCredentials": "invalid Data",
 
   "_comment_complaints.js": "complaints.js",
 

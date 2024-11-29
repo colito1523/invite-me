@@ -11,6 +11,7 @@
   "loginError": "Erro de Login",
   "incorrectCredentials": "Email ou senha incorretos. Por favor, verifique suas informações.",
   "genericError": "Ocorreu um erro. Por favor, tente novamente.",
+  "invalidCredentials": "Dados incorretos",
 
   "_comment_complaints.js": "complaints.js",
 

@@ -13,6 +13,7 @@
   "loginError": "Error de inicio de sesión",
   "incorrectCredentials": "Correo electrónico o contraseña incorrectos. Por favor, verifique su información.",
   "genericError": "Se ha producido un error. Inténtalo de nuevo.",
+  "invalidCredentials": "Datos incorrectos",
 
   
   "menu": {
