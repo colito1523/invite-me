@@ -20,7 +20,7 @@ import Signup from "./screens/Signup";
 import Home from "./screens/Home";
 import Search from "./screens/SearchComponents/index";
 import ForgotPassword from "./screens/ForgotPassword";
-import Profile from "./screens/Profile";
+import Profile from "./screens/Profile/index";
 import Notifications from "./screens/Notifications/index";
 import UserProfile from "./screens/UserProfile/index";
 import PrivateUserProfile from "./Components/Privado/PrivateUserProfile";
