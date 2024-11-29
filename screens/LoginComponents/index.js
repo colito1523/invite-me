@@ -29,6 +29,25 @@ import en from '../../locales/en.json';
 import pt from '../../locales/pt.json';
 import { styles, lightTheme, darkTheme } from './styles';
 
+const storeSessionToken = async (token) => {
+  try {
+    await SecureStore.setItemAsync('session_token', token);
+    console.log('Token almacenado de manera segura');
+  } catch (error) {
+    console.error('Error al almacenar el token:', error);
+  }
+};
+// Función para recuperar el token de sesión
+const getSessionToken = async () => {
+  try {
+    const token = await SecureStore.getItemAsync('session_token');
+    return token;
+  } catch (error) {
+    console.error('Error al recuperar el token:', error);
+    return null;
+  }
+};
+
 
 const LANGUAGE_KEY = 'app_language'; 
 
@@ -60,17 +79,31 @@ export default function ElegantLogin({ navigation }) {
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const token = await getSessionToken(); // Recupera el token del almacenamiento seguro
+        if (token) {
+          console.log('Sesión activa. Token:', token);
+          navigation.navigate('Home'); // Redirige al usuario si el token es válido
+        }
+      } catch (error) {
+        console.error('Error al verificar el token de sesión:', error);
+      }
+    };
+  
+    checkSession(); // Verifica el token al montar el componente
+  
     const checkTime = () => {
       const currentHour = new Date().getHours();
       setIsNightMode(currentHour >= 19 || currentHour < 6);
     };
-
+  
     checkTime();
     const interval = setInterval(checkTime, 60000);
-
+  
     loadSavedLanguage();
-
-    return () => clearInterval(interval);
+  
+    return () => clearInterval(interval); // Limpia el intervalo cuando se desmonta
   }, []);
   
 
@@ -121,7 +154,13 @@ export default function ElegantLogin({ navigation }) {
   
     try {
       const userCredential = await signInWithEmailAndPassword(auth, emailSanitized, passwordSanitized);
-  
+      
+       // Obtén el token de sesión desde Firebase
+    const token = await userCredential.user.getIdToken();
+
+     // Almacena el token de sesión de manera segura
+     await storeSessionToken(token);
+
       // Elimina la contraseña de la memoria después de autenticación exitosa
       setPassword(null);
   

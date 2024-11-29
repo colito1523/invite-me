@@ -35,6 +35,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import dayjs from "dayjs";
 import * as Location from "expo-location";
 import { Image } from "expo-image";
+import * as SecureStore from 'expo-secure-store';
 
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
@@ -249,13 +250,16 @@ const Home = React.memo(() => {
     setMenuVisible(false);
   }, []);
 
-  const onSignOut = useCallback(() => {
-    signOut(auth)
-      .then(() => {
-        console.log("Sign-out successful.");
-        navigation.navigate("Login");
-      })
-      .catch((error) => console.log("Sign-out error:", error));
+  const onSignOut = useCallback(async () => {
+    try {
+      await signOut(auth); // Cierra la sesión de Firebase
+      await SecureStore.deleteItemAsync('session_token'); // Elimina el token de sesión
+      console.log("Sign-out successful and session token cleared.");
+      navigation.navigate("Login");
+    } catch (error) {
+      console.log("Sign-out error:", error);
+      Alert.alert("Error", "No se pudo cerrar la sesión correctamente.");
+    }
   }, [navigation]);
 
   const navigateToProfile = useCallback(() => {
