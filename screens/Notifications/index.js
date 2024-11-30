@@ -141,6 +141,8 @@ export default function NotificationsComponent() {
     checkTime();
     const interval = setInterval(checkTime, 60000);
 
+    fetchNotifications()
+
     return () => clearInterval(interval);
 
   }, []);
