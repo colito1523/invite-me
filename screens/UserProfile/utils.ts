@@ -372,7 +372,7 @@ export const fetchEvents = async (params) => {
     if (blockedUsers.includes(selectedUser.id)) {
       setEvents([]);
     } else {
-      const filteredEvents = checkAndRemoveExpiredEvents({userEvents, selectedUser});
+      const filteredEvents = checkAndRemoveExpiredEvents({userEvents, selectedUser, parseEventDate});
       setEvents(filteredEvents);
     }
   }
@@ -496,7 +496,8 @@ export const handleSendMessage = async (params) => {
   navigation.navigate("ChatUsers", currentParams);
 };
 
-export const handleBoxPress = (box, navigation, t) => {
+export const handleBoxPress = (params) => {
+  const { box, navigation, t } = params;
   const coordinates = box.coordinates || { latitude: 0, longitude: 0 };
   navigation.navigate("BoxDetails", {
     box: {
