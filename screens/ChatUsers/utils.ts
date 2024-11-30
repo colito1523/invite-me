@@ -3,7 +3,7 @@ import { database, ref } from "../../config/firebase";
 import { Alert } from "react-native";
 import { getDownloadURL, uploadBytes } from "firebase/storage";
 
-export const setupChat = async ({chatId}) => {
+export const setupChat = async ({chatId, setMessages}) => {
     if (chatId) {
       const messagesRef = collection(database, "chats", chatId, "messages");
       const q = query(messagesRef, orderBy("createdAt", "asc"));
@@ -14,7 +14,7 @@ export const setupChat = async ({chatId}) => {
           id: doc.id,
           ...doc.data(),
         }));
-        postMessage(messagesList);
+        setMessages(messagesList);
       });
 
       // Limpieza
@@ -128,6 +128,7 @@ export const handleSend = async (
     params
 ) => {
     const {isUploading, user, message, setIsUploading, setMessages, storage, flatListRef, chatId, recipientUser, setChatId} = params
+    console.log("llega la data", message, "usuario", user)
     if (isUploading) {
         Alert.alert("Cargando", "Por favor espera a que termine la subida actual.");
         return;

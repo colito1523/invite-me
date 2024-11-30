@@ -14,17 +14,18 @@ import {
   Alert,
   ActivityIndicator
 } from "react-native";
-import { auth } from "../config/firebase";
+import { addDoc, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { auth, database } from "../../config/firebase";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { Video } from "expo-av";
-import AudioPlayer from "./AudioPlayer";
-import { useBlockedUsers } from "../src/contexts/BlockContext";
+import AudioPlayer from "../AudioPlayer";
+import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { ImageBackground } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
-import { setupChat, handleReport, handleReportSubmit, handleSend, handleCameraLaunch, pickMedia, handleHideChat, handleUserPress, handleMediaPress } from "./utils";
+import { setupChat, handleReport, handleReportSubmit, handleCameraLaunch, pickMedia, handleHideChat, handleUserPress, handleMediaPress } from "./utils";
 
 
 import Complaints from '../../Components/Complaints/Complaints';
@@ -73,7 +74,7 @@ export default function Chat({ route }) {
 
   // Configuración del chat
   useEffect(() => {
-    setupChat({chatId});
+    setupChat({chatId, setMessages});
   }, [chatId]);
 
   const closeModal = () => {
@@ -176,7 +177,7 @@ export default function Chat({ route }) {
             </Text>
 
             <Image
-              source={require("../assets/flecha-curva.png")}
+              source={require("../../assets/flecha-curva.png")}
               style={[
                 styles.arrowImage,
                 isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
@@ -302,6 +303,116 @@ export default function Chat({ route }) {
 
 };
 
+const handleSend = async (
+  messageType = "text",
+  mediaUri = null,
+  isViewOnce = false
+) => {
+  if (isUploading) {
+      Alert.alert("Cargando", "Por favor espera a que termine la subida actual.");
+      return;
+  }
+
+  const createChatIfNotExists = async () => {
+    if (!chatId) {
+      const chatRef = doc(collection(database, "chats"));
+      const newChatId = chatRef.id;
+
+      // Validar que los datos no sean undefined
+      if (!user || !recipientUser || !newChatId) {
+        console.error(
+          "Error: Los datos del chat o los usuarios son indefinidos."
+        );
+        return null;
+      }
+
+      await setDoc(chatRef, {
+        participants: [user.uid, recipientUser.id],
+        createdAt: new Date(),
+        lastMessage: "",
+      });
+
+      setChatId(newChatId);
+      return newChatId;
+    }
+
+    return chatId;
+  };
+
+  try {
+      const chatIdToUse = await createChatIfNotExists();
+      const messagesRef = collection(
+          database,
+          "chats",
+          chatIdToUse,
+          "messages"
+      );
+
+      let messageData = {
+          senderId: user.uid,
+          senderName: user.displayName || "Anónimo",
+          createdAt: new Date(),
+          seen: false,
+          viewedBy: [],
+          isViewOnce,
+      };
+
+      // Añade la lógica para tipo de mensaje:
+      if (messageType === "text") {
+        messageData.text = message.trim();
+    } else if (messageType === "image" || messageType === "video") {
+        setIsUploading(true);
+        const tempId = `temp-${new Date().getTime()}`;
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { id: tempId, mediaType: messageType, isUploading: true },
+        ]);
+        const mediaUrl = await uploadMedia(mediaUri);
+        if (!mediaUrl) return;
+        messageData.mediaType = messageType;
+        messageData.mediaUrl = mediaUrl;
+        setIsUploading(false);
+        setMessages((prevMessages) =>
+          prevMessages.map((message) =>
+            message.id === tempId ? { ...messageData, id: tempId } : message
+          )
+        );
+    }
+    await addDoc(messagesRef, messageData);
+
+      // Actualizar información del chat
+      const chatDocRef = doc(database, "chats", chatIdToUse);
+      const chatDoc = await getDoc(chatDocRef);
+
+      if (chatDoc.exists()) {
+          const chatData = chatDoc.data();
+          const otherParticipantId = chatData.participants.find(
+              (participant) => participant !== user.uid
+          );
+
+          // Establecer isHidden a false para el receptor
+          await updateDoc(chatDocRef, {
+              lastMessage: messageData.text || "Media",
+              lastMessageTimestamp: messageData.createdAt,
+              lastMessageSenderId: user.uid,
+              lastMessageSenderName: user.displayName || "Anónimo",
+              [`isHidden.${otherParticipantId}`]: false,
+          });
+      }
+
+      // Limpiar el campo de texto
+      setMessage("");
+      flatListRef.current?.scrollToEnd({ animated: true });
+  } catch (error) {
+      console.error("Error al enviar el mensaje:", error);
+      Alert.alert(
+          "Error",
+          "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
+      );
+      setIsUploading(false);
+  }
+};
+
   return (
     <ImageBackground source={{ uri: backgroundImage }} style={styles.container}>
       <View style={styles.header}>
@@ -374,7 +485,7 @@ export default function Chat({ route }) {
 
       <View style={styles.containerIg}>
         <TouchableOpacity
-          onPress={() = > handleCameraLaunch({ImagePicker, handleSend})}
+          onPress={() => handleCameraLaunch({ImagePicker, handleSend})}
           style={styles.iconButtonCamera}
         >
           <Ionicons name="camera-outline" size={20} color="white" />
@@ -388,7 +499,7 @@ export default function Chat({ route }) {
         />
         {message.trim() ? (
           <TouchableOpacity
-            onPress={() => handleSend({messageType: "text", params: {isUploading, createChatIfNotExists, user, message, setIsUploading, setMessages, storage, flatListRef, chatId, recipientUser, setChatId}})}
+            onPress={() => {console.log("está entrando"), handleSend("text")}}
             style={styles.sendButton}
           >
             <FontAwesome name="send" size={20} color="white" />
@@ -435,3 +546,4 @@ export default function Chat({ route }) {
 
   );
 }
+

@@ -26,7 +26,7 @@ import UserProfile from "./screens/UserProfile/index";
 import PrivateUserProfile from "./Components/Privado/PrivateUserProfile";
 import CreateEvent from ".//screens/CreateEventComponents/index";
 import BoxDetails from "./screens/BoxDetails/index";
-import ChatUsers from "./screens/ChatUsers";
+import ChatUsers from "./screens/ChatUsers/index";
 import ChatList from "./screens/ChatList/index";
 import AudioPlayer from "./screens/AudioPlayer";
 import Tutorial from './screens/Tutorial';
