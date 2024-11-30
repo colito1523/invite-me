@@ -181,15 +181,8 @@ export default function NotificationsComponent() {
         notifications,
         setNotifications
       });
-    }, [user])
+    }, [notifications])
   );
-
-  useEffect(() => {
-    const unsubscribe = fetchNotifications();
-    return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
-    };
-  }, [fetchNotifications]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

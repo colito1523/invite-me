@@ -41,9 +41,7 @@ import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
-
-
-const { width } = Dimensions.get("window");
+import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages} from "./utils";
 
 const Home = React.memo(() => {
   const navigation = useNavigation();
@@ -70,62 +68,20 @@ const Home = React.memo(() => {
   const [unreadNotifications, setUnreadNotifications] = useState(false);
 
  useEffect(() => {
-    const fetchUnreadNotifications = async () => {
-      if (auth.currentUser) {
-        const user = auth.currentUser;
-        const notificationsRef = collection(database, "users", user.uid, "notifications");
-        const q = query(notificationsRef, where("seen", "==", false));
-        const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
-        const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
-
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-          if (!querySnapshot.empty) {
-            setUnreadNotifications(true);
-          } else {
-            setUnreadNotifications(false);
-          }
-        });
-
-        const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
-          if (!querySnapshot.empty) {
-            setUnreadNotifications(true);
-          } else {
-            setUnreadNotifications(false);
-          }
-        });
-
-        return () => {
-          unsubscribe();
-          unsubscribeFriendRequests();
-        };
-      }
-    };
-
     fetchUnreadNotifications();
   }, [navigation]);
   
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        await Promise.all([fetchBoxData(), fetchPrivateEvents()]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchData({setLoading, fetchBoxData, fetchPrivateEvents});
   }, []);
 
-  useEffect(() => {
-    const checkTime = () => {
-      const currentHour = new Date().getHours();
-      setIsNightMode(currentHour >= 19 || currentHour < 6);
-    };
+  const checkTime = () => {
+    const currentHour = new Date().getHours();
+    setIsNightMode(currentHour >= 19 || currentHour < 6);
+  };
 
+  useEffect(() => {
     checkTime();
     const interval = setInterval(checkTime, 60000);
 
@@ -138,23 +94,9 @@ const Home = React.memo(() => {
     }
   }, [route.params?.selectedCategory]);
 
-
-  const fetchProfileImage = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        if (data.photoUrls && data.photoUrls.length > 0) {
-          setProfileImage(data.photoUrls[0]);
-        }
-      }
-    }
-  };
-
   useEffect(() => {
   const unsubscribe = navigation.addListener('focus', () => {
-    fetchProfileImage(); // Asegúrate de definir esta función para obtener la imagen
+    fetchProfileImage({setProfileImage}); // Asegúrate de definir esta función para obtener la imagen
   });
   return unsubscribe;
 }, [navigation]);
@@ -498,35 +440,8 @@ useEffect(() => {
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
   useEffect(() => {
-    const fetchUnreadMessages = async () => {
-      if (!auth.currentUser) return;
-      const user = auth.currentUser;
-      const chatsRef = collection(database, "chats");
-      const q = query(chatsRef, where("participants", "array-contains", user.uid));
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        let hasUnreadMessages = false;
-        querySnapshot.forEach((docSnapshot) => {
-          const chatData = docSnapshot.data();
-          const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
-          const unseenMessagesQuery = query(
-            messagesRef,
-            where("seen", "==", false),
-            where("senderId", "!=", user.uid)
-          );
-          onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
-            if (!unseenMessagesSnapshot.empty) {
-              hasUnreadMessages = true;
-              setUnreadMessages(true);
-            } else {
-              setUnreadMessages(false);
-            }
-          });
-        });
-      });
-      return () => unsubscribe();
-    };
   
-    fetchUnreadMessages();
+    fetchUnreadMessages({setUnreadMessages});
   }, [navigation]);
 
   const memoizedMenu = useMemo(() => (
