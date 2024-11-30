@@ -619,15 +619,14 @@ export const handleAcceptGeneralEvent = async (params) => {
       // Add event data to user's database
       const userEventsRef = collection(database, "users", user.uid, "events");
       await addDoc(userEventsRef, {
-        title: eventData.title || item.eventTitle,
-        imageUrl: eventData.imageUrl || item.eventImage,
+        title: item.eventTitle,
+        imageUrl: item.eventImage,
         date: item.eventDate,
-        coordinates: eventData.coordinates || {},
-        dateArray: eventData.dateArray || [],
-        hours: eventData.hours || {},
-        locationLink: eventData.locationLink || "Sin ubicación especificada",
-        phoneNumber: eventData.phoneNumber || "",
-        status: "accepted",
+        coordinates: item.coordinates,
+        dateArray: [item.eventDate],
+        hours: item.hours,
+        locationLink: "Sin ubicación especificada",
+        phoneNumber: item.number,
       });
     }
 

@@ -619,7 +619,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           <Ionicons
             name={item.invited ? "checkmark-sharp" : "arrow-redo"}
             size={16}
-            color={isNightMode ? "black" : "white"}
+            color={isNightMode ? "black" : "red"}
           />
         </TouchableOpacity>
       ) : (
@@ -643,7 +643,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           <Ionicons
             name={item.invited ? "checkmark-sharp" : "arrow-redo"}
             size={16}
-            color={isNightMode ? "black" : "white"}
+            color={isNightMode ? "black" : "green"}
           />
         </TouchableOpacity>
       )}
