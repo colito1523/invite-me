@@ -248,7 +248,7 @@ export const handleGeneralEventInvite = async (params) => {
 
     Alert.alert(
       "Invitación enviada",
-      `Has invitado a un amigo al evento ${box.title} el día ${selectedDate}.`
+      `Has invitado a un amigo al evento ${box.title} el día ${selectedDate}. alerta`
     );
   } catch (error) {
     console.error("Error al invitar al evento general:", error);
