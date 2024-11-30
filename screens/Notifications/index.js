@@ -183,7 +183,7 @@ export default function NotificationsComponent() {
         notifications,
         setNotifications
       });
-    }, [notifications])
+    }, [user, notifications])
   );
 
   const onRefresh = useCallback(async () => {

@@ -106,6 +106,7 @@ export const updateNotifications = (params) => {
       );
       if (index !== -1) {
         updatedNotifications[index] = {
+          ...updatedNotifications[index],
           ...newNotif,
         };
       } else {
