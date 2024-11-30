@@ -400,7 +400,11 @@ useEffect(() => {
           }
         }
       });
-      return () => unsubscribe(); // Limpia la suscripción cuando se desmonta el componente
+      return () => {
+        if (typeof unsubscribe === 'function') {
+          unsubscribe();
+        }
+      };
     }
   }, []);
   
@@ -459,7 +463,11 @@ useEffect(() => {
 
   useEffect(() => {
     const unsubscribe = fetchUnreadNotifications({ setUnreadNotifications });
-    return () => unsubscribe();
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, [navigation]);
 
   if (!locationGranted) {

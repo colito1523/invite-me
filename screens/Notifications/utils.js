@@ -697,3 +697,29 @@ export const handleRejectGeneralEvent = async (params) => {
     Alert.alert("Error", "No se pudo rechazar la invitación.");
   }
 };
+
+export const handleCancelFriendRequestNotification = async (params) => {
+  const notificationId = params.notificationId;
+  const targetUserId = params.targetUserId; // Add targetUserId parameter
+  const setNotifications = params.setNotifications;
+
+  try {
+    // Delete the notification from the current user's notifications
+    const userRef = doc(database, "users", auth.currentUser.uid, "notifications", notificationId);
+    await deleteDoc(userRef);
+
+    // Delete the friend request notification from the target user's notifications
+    const targetUserNotificationRef = doc(database, "users", targetUserId, "notifications", notificationId);
+    await deleteDoc(targetUserNotificationRef);
+
+    // Update local notification state immediately
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((notif) => notif.id !== notificationId)
+    );
+
+    Alert.alert("Notificación eliminada", "La notificación ha sido eliminada.");
+  } catch (error) {
+    console.error("Error deleting friend request cancellation notification:", error);
+    Alert.alert("Error", "No se pudo eliminar la notificación. Inténtalo de nuevo.");
+  }
+};

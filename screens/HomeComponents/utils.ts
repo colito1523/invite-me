@@ -30,6 +30,7 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
       unsubscribeFriendRequests();
     };
   }
+  return () => {}; // Return a no-op function if auth.currentUser is not set
 };
 
 export const fetchData = async ({setLoading, fetchBoxData, fetchPrivateEvents }) => {

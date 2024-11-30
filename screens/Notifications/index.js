@@ -443,7 +443,8 @@ export default function NotificationsComponent() {
           onPress={handleNotificationPress}
           onLongPress={() => handleDeleteNotification({
             notificationId: item.id,
-            setNotifications
+            setNotifications,
+            targetUserId: item.fromId // Pass the targetUserId parameter
           })}
         >
           <View
