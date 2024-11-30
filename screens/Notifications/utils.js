@@ -4,11 +4,8 @@ import { auth, database } from "../../config/firebase";
 
 
 export const markNotificationsAsSeen = async (params) => {
-  const user = params.user
-  const database = params.database
-  const notifications = params.notifications
-  const setNotifications = params.setNotifications
-
+  const user = params.user;
+  const database = params.database;
 
   if (user) {
     const notificationsRef = collection(database, "users", user.uid, "notifications");
@@ -19,37 +16,18 @@ export const markNotificationsAsSeen = async (params) => {
     const unseenFriendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
     const friendRequestsSnapshot = await getDocs(unseenFriendRequestsQuery);
 
-
     if (!snapshot.empty || !friendRequestsSnapshot.empty) {
       const batch = writeBatch(database);
-      const updatedNotifications = [...notifications];
 
       snapshot.forEach((doc) => {
         batch.update(doc.ref, { seen: true });
-
-        const index = updatedNotifications.findIndex((n) => n.id === doc.id);
-        if (index !== -1) {
-          updatedNotifications[index] = {
-            ...updatedNotifications[index],
-            seen: true,
-          };
-        }
       });
 
       friendRequestsSnapshot.forEach((doc) => {
         batch.update(doc.ref, { seen: true });
-        const index = updatedNotifications.findIndex((n) => n.id === doc.id);
-        if (index !== -1) {
-          updatedNotifications[index] = {
-            ...updatedNotifications[index],
-            seen: true,
-          };
-        }
       });
 
       await batch.commit();
-
-      setNotifications(updatedNotifications);
     }
   }
 };
@@ -157,24 +135,18 @@ export const handleUserPress = async (params) => {
 };
 
 export const handleAcceptRequest = async (params) => {
-  const request = params.request
-  const setLoadingEventId = params.setLoadingEventId
-  const setNotifications = params.setNotifications
-  const t = params.t
+  const request = params.request;
+  const setLoadingEventId = params.setLoadingEventId;
+  const setNotifications = params.setNotifications;
+  const t = params.t;
 
-  setLoadingEventId(request.id)
+  setLoadingEventId(request.id);
   try {
     const user = auth.currentUser;
     const userFriendsRef = collection(database, "users", user.uid, "friends");
-    const senderFriendsRef = collection(
-      database,
-      "users",
-      request.fromId,
-      "friends"
-    );
+    const senderFriendsRef = collection(database, "users", request.fromId, "friends");
 
-    const friendImage =
-      request.fromImage || "https://via.placeholder.com/150";
+    const friendImage = request.fromImage || "https://via.placeholder.com/150";
 
     await addDoc(userFriendsRef, {
       friendId: request.fromId,
@@ -195,23 +167,12 @@ export const handleAcceptRequest = async (params) => {
       friendImage: profileImage,
     });
 
-    const requestRef = doc(
-      database,
-      "users",
-      user.uid,
-      "friendRequests",
-      request.id
-    );
+    const requestRef = doc(database, "users", user.uid, "friendRequests", request.id);
     await updateDoc(requestRef, { status: "accepted" });
 
-    const senderNotificationsRef = collection(
-      database,
-      "users",
-      request.fromId,
-      "notifications"
-    );
+    const senderNotificationsRef = collection(database, "users", request.fromId, "notifications");
 
-    await addDoc(senderNotificationsRef, {
+    const newNotification = {
       type: "friendRequestResponse",
       response: "accepted",
       fromId: user.uid,
@@ -221,15 +182,11 @@ export const handleAcceptRequest = async (params) => {
         name: userData.firstName,
       }),
       timestamp: new Date(),
-    });
+    };
 
-    const userNotificationsRef = doc(
-      database,
-      "users",
-      user.uid,
-      "notifications",
-      request.id
-    );
+    await addDoc(senderNotificationsRef, newNotification);
+
+    const userNotificationsRef = doc(database, "users", user.uid, "notifications", request.id);
     await setDoc(userNotificationsRef, {
       type: "friendRequestResponse",
       response: "accepted",
@@ -242,20 +199,29 @@ export const handleAcceptRequest = async (params) => {
       timestamp: new Date(),
     });
 
-    setNotifications((prevNotifications) =>
-      prevNotifications.filter((notif) => notif.id !== request.id)
-    );
+    setNotifications((prevNotifications) => {
+      const updatedNotifications = prevNotifications.filter((notif) => notif.id !== request.id);
+      updatedNotifications.push({
+        id: request.id,
+        type: "friendRequestResponse",
+        response: "accepted",
+        fromId: request.fromId,
+        fromName: request.fromName,
+        fromImage: request.fromImage,
+        message: t("notifications.youAreNowFriends", {
+          name: request.fromName,
+        }),
+        timestamp: new Date(),
+      });
+      return updatedNotifications.sort((a, b) => b.timestamp - a.timestamp);
+    });
 
-    Alert.alert(
-      t("notifications.invitationAccepted"),
-      t("notifications.eventAddedToProfile")
-    );
+    Alert.alert(t("notifications.invitationAccepted"), t("notifications.eventAddedToProfile"));
   } catch (error) {
     console.error("Error accepting request:", error);
-    Alert.alert(
-      t("notifications.error"),
-      t("notifications.acceptRequestError")
-    );
+    Alert.alert(t("notifications.error"), t("notifications.acceptRequestError"));
+  } finally {
+    setLoadingEventId(null);
   }
 };
 

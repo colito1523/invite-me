@@ -7,6 +7,7 @@ import {
   TextInput,
   Alert,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -162,9 +163,21 @@ export default function Profile({ navigation }) {
   useEffect(() => {
     checkLikeStatus({setIsHearted});
     fetchFriendCount({setFriendCount});
-    setFetchUserData({setName, setSurname, setIsPrivate, setPhotoUrls, setUsername, setFriendCount, setFirstHobby, setSecondHobby, setFirstInterest, setSecondInterest});
+    setFetchUserData({
+        setName, 
+        setSurname, 
+        setIsPrivate, 
+        setPhotoUrls, 
+        setUsername, 
+        setFriendCount, 
+        setFirstHobby, 
+        setSecondHobby, 
+        setRelationshipStatus, 
+        setFirstInterest, 
+        setSecondInterest
+    });
     fetchHeartCount({setHeartCount});
-  }, [auth.currentUser]);
+}, [auth.currentUser]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -248,6 +261,24 @@ export default function Profile({ navigation }) {
     }
   };
 
+  const renderSaveButton = () => {
+    return (
+        <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSaveChanges}
+            disabled={isLoading}
+        >
+            {isLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+            ) : (
+                <Text style={styles.saveButtonText}>
+                    {t("profile.saveChanges")}
+                </Text>
+            )}
+        </TouchableOpacity>
+    );
+};
+
   useEffect(() => {
     const fetchEvents = async () => {
       const user = auth.currentUser;
@@ -296,31 +327,31 @@ export default function Profile({ navigation }) {
 
   const renderPhotoEditor = () => {
     return (
-      <View style={styles.photoEditorContainer}>
-        {photoUrls.map((url, index) => (
-          <View key={index} style={styles.photoContainer}>
-            {url ? (
-              <Image
-                source={{ uri: url }}
-                style={styles.photoThumbnail}
-                cachePolicy="none"
-              />
-            ) : (
-              <View style={styles.emptyPhoto} />
-            )}
-            <TouchableOpacity
-              onPress={() => pickImage({index, ImagePicker, photoUrls, setPhotoUrls})}
-              style={styles.photoButton}
-            >
-              <Text style={styles.photoButtonText}>
-                {url ? t("profile.change") : t("profile.add")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
+        <View style={styles.photoEditorContainer}>
+            {photoUrls.map((url, index) => (
+                <View key={index} style={styles.photoContainer}>
+                    {url ? (
+                        <Image
+                            source={{ uri: url }}
+                            style={styles.photoThumbnail}
+                            cachePolicy="none"
+                        />
+                    ) : (
+                        <View style={styles.emptyPhoto} />
+                    )}
+                    <TouchableOpacity
+                        onPress={() => pickImage(index, ImagePicker, photoUrls, setPhotoUrls)}
+                        style={styles.photoButton}
+                    >
+                        <Text style={styles.photoButtonText}>
+                            {url ? t("profile.change") : t("profile.add")}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            ))}
+        </View>
     );
-  };
+};
 
   const handleFriendSelect = async (friend) => {
     const user = auth.currentUser;
@@ -344,22 +375,22 @@ export default function Profile({ navigation }) {
 
   const renderEditableOval = (value, setValue, placeholder) => {
     if (isEditing) {
-      return (
-        <TextInput
-          style={[styles.oval, styles.ovalInput]}
-          value={value}
-          onChangeText={setValue}
-          placeholder={placeholder}
-          maxLength={12}
-        />
-      );
+        return (
+            <TextInput
+                style={[styles.oval, styles.ovalInput]}
+                value={value}
+                onChangeText={setValue}
+                placeholder={placeholder}
+                maxLength={12}
+            />
+        );
     }
     return (
-      <View style={styles.oval}>
-        <Text style={styles.ovalText}>{value}</Text>
-      </View>
+        <View style={styles.oval}>
+            <Text style={styles.ovalText}>{value}</Text>
+        </View>
     );
-  };
+};
 
   return (
     <Provider>
@@ -440,14 +471,7 @@ export default function Profile({ navigation }) {
                     {index === 0 && isEditing && (
                       <>
                         {renderPhotoEditor()}
-                        <TouchableOpacity
-                          style={styles.saveButton}
-                          onPress={handleSaveChanges}
-                        >
-                          <Text style={styles.saveButtonText}>
-                            {t("profile.saveChanges")}
-                          </Text>
-                        </TouchableOpacity>
+                        {renderSaveButton()}
                       </>
                     )}
                     {index === 1 && (
@@ -490,6 +514,13 @@ export default function Profile({ navigation }) {
                             </View>
 
                             <View style={styles.iconsContainer}>
+                            <TouchableOpacity style={styles.iconButton}>
+                                <AntDesign
+                                  name="adduser"
+                                  size={24}
+                                  color="white"
+                                />
+                              </TouchableOpacity>
                               <TouchableOpacity
                                 style={styles.iconButton}
                                 onPress={() => handleHeartPress({isHearted, heartCount, setIsHearted, setHeartCount})}
@@ -513,16 +544,7 @@ export default function Profile({ navigation }) {
                             </View>
                           </View>
                         </View>
-                        {isEditing && (
-                          <TouchableOpacity
-                            style={styles.saveButton}
-                            onPress={handleSaveChanges}
-                          >
-                            <Text style={styles.saveButtonText}>
-                              {t("profile.saveChanges")}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
+                        {isEditing && renderSaveButton()}
                       </>
                     )}
                   </View>

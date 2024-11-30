@@ -91,11 +91,24 @@ export default function NotificationsComponent() {
             .filter(
               (notif) =>
                 !hiddenNotifications.includes(notif.id) &&
-                !blockedUsers.includes(notif.fromId) &&
-                notif.status !== "accepted" &&
-                notif.status !== "rejected"
+                !blockedUsers.includes(notif.fromId)
             );
-          setNotifications(notifList);
+
+          setNotifications((prevNotifications) => {
+            const mergedNotifications = [...prevNotifications];
+            notifList.forEach((newNotif) => {
+              const index = mergedNotifications.findIndex((n) => n.id === newNotif.id);
+              if (index !== -1) {
+                mergedNotifications[index] = {
+                  ...mergedNotifications[index],
+                  ...newNotif,
+                };
+              } else {
+                mergedNotifications.push(newNotif);
+              }
+            });
+            return mergedNotifications.sort((a, b) => b.timestamp - a.timestamp);
+          });
         }
       );
 
@@ -111,9 +124,7 @@ export default function NotificationsComponent() {
             .filter(
               (notif) =>
                 !hiddenNotifications.includes(notif.id) &&
-                !blockedUsers.includes(notif.fromId) &&
-                notif.status !== "accepted" &&
-                notif.status !== "rejected"
+                !blockedUsers.includes(notif.fromId)
             );
 
           updateNotifications({
