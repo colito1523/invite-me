@@ -457,6 +457,11 @@ useEffect(() => {
     />
   ), [menuVisible, toggleMenu, handleCategorySelect, handleCitySelect, onSignOut, isNightMode, searchQuery, setSearchQuery]);
 
+  useEffect(() => {
+    const unsubscribe = fetchUnreadNotifications({ setUnreadNotifications });
+    return () => unsubscribe();
+  }, [navigation]);
+
   if (!locationGranted) {
     return (
       <View style={currentStyles.centeredView}>
@@ -547,18 +552,18 @@ useEffect(() => {
           )}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
-  <Ionicons
-    name="notifications"
-    size={24}
-    color={isNightMode ? "white" : "black"}
-  />
-  {unreadNotifications && (
-    <View style={[
-      styles.unreadIndicator,
-      { backgroundColor: isNightMode ? "white" : "black" }
-    ]} />
-  )}
-</TouchableOpacity>
+          <Ionicons
+            name="notifications"
+            size={24}
+            color={isNightMode ? "white" : "black"}
+          />
+          {unreadNotifications && (
+            <View style={[
+              styles.unreadIndicator,
+              { backgroundColor: "red" }
+            ]} />
+          )}
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Ionicons
             name="mail"
@@ -568,7 +573,7 @@ useEffect(() => {
           {unreadMessages && (
             <View style={[
               styles.unreadIndicator,
-              { backgroundColor: isNightMode ? "white" : "black" }
+              { backgroundColor: "red" }
             ]} />
           )}
         </TouchableOpacity>

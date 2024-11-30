@@ -1,35 +1,35 @@
-import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, where, getDocs } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
 
-export const fetchUnreadNotifications = async ({auth, setUnreadNotifications,}) => {
-    if (auth.currentUser) {
-      const user = auth.currentUser;
-      const notificationsRef = collection(database, "users", user.uid, "notifications");
-      const q = query(notificationsRef, where("seen", "==", false));
-      const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
-      const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
+export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
+  if (auth.currentUser) {
+    const user = auth.currentUser;
+    const notificationsRef = collection(database, "users", user.uid, "notifications");
+    const q = query(notificationsRef, where("seen", "==", false));
+    const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
+    const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
 
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        if (!querySnapshot.empty) {
-          setUnreadNotifications(true);
-        } else {
-          setUnreadNotifications(false);
-        }
-      });
+    const unsubscribeNotifications = onSnapshot(q, (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        setUnreadNotifications(true);
+      } else {
+        setUnreadNotifications(false);
+      }
+    });
 
-      const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
-        if (!querySnapshot.empty) {
-          setUnreadNotifications(true);
-        } else {
-          setUnreadNotifications(false);
-        }
-      });
+    const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        setUnreadNotifications(true);
+      } else {
+        setUnreadNotifications(false);
+      }
+    });
 
-      return () => {
-        unsubscribe();
-        unsubscribeFriendRequests();
-      };
-    }
+    return () => {
+      unsubscribeNotifications();
+      unsubscribeFriendRequests();
+    };
+  }
 };
 
 export const fetchData = async ({setLoading, fetchBoxData, fetchPrivateEvents }) => {
@@ -82,4 +82,54 @@ export const fetchUnreadMessages = async ({setUnreadMessages}) => {
       });
     });
     return () => unsubscribe();
+};
+
+export const checkNotificationsSeenStatus = async (setNotificationIconState) => {
+  if (auth.currentUser) {
+    const user = auth.currentUser;
+    const notificationsRef = collection(database, "users", user.uid, "notifications");
+    const q = query(notificationsRef, where("seen", "==", false));
+    const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
+    const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
+
+    const notificationsSnapshot = await getDocs(q);
+    const friendRequestsSnapshot = await getDocs(friendRequestsQuery);
+
+    if (!notificationsSnapshot.empty || !friendRequestsSnapshot.empty) {
+      setNotificationIconState(true);
+    } else {
+      setNotificationIconState(false);
+    }
+  }
+};
+
+export const listenForNotificationChanges = (setNotificationIconState) => {
+  if (auth.currentUser) {
+    const user = auth.currentUser;
+    const notificationsRef = collection(database, "users", user.uid, "notifications");
+    const q = query(notificationsRef, where("seen", "==", false));
+    const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
+    const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
+
+    const unsubscribeNotifications = onSnapshot(q, (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        setNotificationIconState(true);
+      } else {
+        setNotificationIconState(false);
+      }
+    });
+
+    const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        setNotificationIconState(true);
+      } else {
+        setNotificationIconState(false);
+      }
+    });
+
+    return () => {
+      unsubscribeNotifications();
+      unsubscribeFriendRequests();
+    };
+  }
 };
