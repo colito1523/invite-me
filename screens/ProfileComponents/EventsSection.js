@@ -8,7 +8,7 @@ const EventsSection = ({ events, handleBoxPress, t }) => {
         <TouchableOpacity
           key={event.id}
           style={styles.button}
-          onPress={() => handleBoxPress(event)}
+          onPress={() => handleBoxPress(event)} // Pass event directly
         >
           <Text style={styles.buttonText}>
             {event.title.length > 9

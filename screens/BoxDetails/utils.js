@@ -103,56 +103,49 @@ export const fetchEventDetails = async (params) => {
 };
 
 export const fetchAttendees = (params) => {
-  const box = params.box
-  const selectedDate = params.selectedDate
-  const setAttendeesList = params.setAttendeesList
-  
+  const box = params.box;
+  const selectedDate = params.selectedDate;
+  const setAttendeesList = params.setAttendeesList;
+
   const eventRef = doc(
     database,
     box.category === "EventoParaAmigos" ? "EventsPriv" : "GoBoxs",
     box.eventId || box.id || box.title
   );
 
-  // Usa `onSnapshot` para escuchar los cambios en tiempo real
   const unsub = onSnapshot(eventRef, async (docSnapshot) => {
     if (docSnapshot.exists()) {
       const data = docSnapshot.data();
-
-      // Selección de asistentes según el tipo de evento
       const attendees =
         box.category === "EventoParaAmigos"
-          ? data.attendees || [] // Para eventos privados
-          : data[selectedDate] || []; // Para eventos generales
+          ? data.attendees || []
+          : data[selectedDate] || [];
 
       try {
-        // Obtener la lista de usuarios bloqueados
         const userRef = doc(database, "users", auth.currentUser.uid);
         const userSnapshot = await getDoc(userRef);
         const blockedUsers = userSnapshot.data()?.blockedUsers || [];
 
-        // Filtrar los usuarios bloqueados
         const filteredAttendees = attendees.filter(
           (attendee) => !blockedUsers.includes(attendee.uid)
         );
 
-        // Procesa los asistentes para asegurar imágenes de perfil
         const uniqueAttendees = filteredAttendees.map((attendee) => ({
           ...attendee,
           profileImage:
             attendee.profileImage || "https://via.placeholder.com/150",
         }));
 
-
         setAttendeesList(uniqueAttendees);
       } catch (error) {
         console.error("Error al filtrar usuarios bloqueados:", error);
       }
     } else {
-      setAttendeesList([]); // Limpia la lista local si no existe
+      setAttendeesList([]);
     }
   });
 
-  return unsub; // Devuelve la función para limpiar el listener
+  return unsub;
 };
 
 export const handleGeneralEventInvite = async (params) => {

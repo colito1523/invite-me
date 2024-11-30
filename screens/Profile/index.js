@@ -464,7 +464,7 @@ export default function Profile({ navigation }) {
                     {index === 0 && !isEditing && (
                       <EventsSection
                         events={events.slice(0, 4)}
-                        handleBoxPress={() => handleBoxPress({event, navigation, t})}
+                        handleBoxPress={(event) => handleBoxPress({ event, navigation, t })} // Pass event correctly
                         t={t}
                       />
                     )}
@@ -477,7 +477,7 @@ export default function Profile({ navigation }) {
                     {index === 1 && (
                       <EventsSection
                         events={events.slice(4, 6)}
-                        handleBoxPress={() => handleBoxPress({event, navigation, t})}
+                        handleBoxPress={(event) => handleBoxPress({ event, navigation, t })} // Pass event correctly
                         t={t}
                       />
                     )}
