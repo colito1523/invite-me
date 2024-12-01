@@ -226,9 +226,9 @@ export const cancelFriendRequest = async (user, setStatus) => {
   }
 };
 
-export const saveSearchHistory = async (user, history, translation) => {
+export const saveSearchHistory = async (user, history) => {
+  const { t } = useTranslation();
   if (user) {
-    console.log(user, "usuario de busqueda")
     try {
       // Convert the history object to a string and encode it safely
       const safeHistory = JSON.stringify(history.map(item => ({
@@ -243,9 +243,8 @@ export const saveSearchHistory = async (user, history, translation) => {
         `searchHistory_${user.uid}`,
         safeHistory
       );
-      console.log("uuario guardado", user, "id", user.id)
     } catch (error) {
-      console.error(translation('errorSavingSearchHistory'), error);
+      console.error(t('errorSavingSearchHistory'), error);
     }
   }
 };

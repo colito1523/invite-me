@@ -14,38 +14,25 @@ import {
   Alert,
   ActivityIndicator
 } from "react-native";
-import { auth, database, storage } from "../../config/firebase";
-import {
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc,
-  setDoc,
-  getDoc,
-  writeBatch,
-  getDocs,
-} from "firebase/firestore";
-import { LinearGradient } from "expo-linear-gradient";
+import { addDoc, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { auth, database } from "../../config/firebase";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Video } from "expo-av";
-import { Audio } from "expo-av";
 import AudioPlayer from "../AudioPlayer";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { ImageBackground } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
+import { setupChat, handleReport, handleReportSubmit, handleCameraLaunch, pickMedia, handleHideChat, handleUserPress, handleMediaPress } from "./utils";
 
 
 import Complaints from '../../Components/Complaints/Complaints';
+import { storage } from "../../config/firebase";
 
 export default function Chat({ route }) {
-  const { initialChatId, recipientUser, imageUri } = route.params;
+  const { chatId: initialChatId, recipientUser, imageUri } = route.params;
   const [backgroundImage, setBackgroundImage] = useState(imageUri || null);
   const [chatId, setChatId] = useState(initialChatId);
   const [message, setMessage] = useState("");
@@ -87,473 +74,12 @@ export default function Chat({ route }) {
 
   // Configuración del chat
   useEffect(() => {
-      if (chatId) {
-        const messagesRef = collection(database, "chats", chatId, "messages");
-        const q = query(messagesRef, orderBy("createdAt", "asc"));
-
-        // Escucha los mensajes del chat
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-          const messagesList = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setMessages(messagesList);
-        });
-
-        // Limpieza
-        console.log("sin chat", chatId)
-        return () => unsubscribe();
-      } else {
-        createChatIfNotExists()
-        console.log("post crear", chatId)
-      }
+    setupChat({chatId, setMessages});
   }, [chatId]);
-
-  const markMessagesAsRead = async (messages) => {
-    const batch = writeBatch(database);
-    messages.forEach((message) => {
-      if (message.senderId !== user.uid && !message.viewedBy?.includes(user.uid)) {
-        const messageRef = doc(database, "chats", chatId, "messages", message.id);
-        batch.update(messageRef, {
-          viewedBy: [...(message.viewedBy || []), user.uid],
-        });
-      }
-    });
-    try {
-      await batch.commit();
-      console.log('Todos los mensajes visibles han sido marcados como leídos.');
-    } catch (error) {
-      console.error('Error al marcar los mensajes como leídos:', error);
-    }
-  };
-
-  const handleReport = async () => {
-    try {
-      console.log("Datos del usuario reportado al abrir el modal:", recipient);
-      setIsComplaintVisible(true);
-    } catch (error) {
-      console.error("Error al abrir el modal de denuncia:", error);
-    }
-  };
-
-
-
-  const handleReportSubmit = async (reason, description) => {
-    try {
-      const chatRef = doc(database, "chats", chatId);
-      const chatSnapshot = await getDoc(chatRef);
-
-      if (!chatSnapshot.exists()) {
-        console.error("El chat no existe.");
-        Alert.alert("Error", "No se pudo encontrar el chat.");
-        return;
-      }
-
-      const chatData = chatSnapshot.data();
-      const participants = chatData.participants || [];
-
-      const recipientId = participants.find((participant) => participant !== user.uid);
-
-      if (!recipientId) {
-        console.error("No se encontró un ID válido para el usuario reportado.");
-        Alert.alert("Error", "No se pudo identificar al usuario reportado.");
-        return;
-      }
-
-      console.log("Datos de la denuncia:", { reason, description, recipientId });
-
-      const complaintsRef = collection(database, "complaints");
-      const newComplaint = {
-        reporterId: user.uid,
-        reporterName: user.displayName || "Anónimo",
-        reportedId: recipientId,
-        reportedName: `${recipientUser?.firstName || "Usuario"} ${recipientUser?.lastName || "desconocido"}`,
-        reason,
-        description: description || "",
-        timestamp: new Date(),
-      };
-
-      console.log("Enviando denuncia:", newComplaint);
-      await addDoc(complaintsRef, newComplaint);
-
-      Alert.alert("Gracias", "Tu denuncia ha sido enviada.");
-      setIsComplaintVisible(false);
-    } catch (error) {
-      console.error("Error al enviar la denuncia:", error);
-      Alert.alert("Error", "No se pudo enviar la denuncia.");
-    }
-  };
-
-
-
-
-
-  const createChatIfNotExists = async () => {
-    if (!chatId) {
-      const chatRef = doc(collection(database, "chats"));
-      const newChatId = chatRef.id;
-
-      // Validar que los datos no sean undefined
-      if (!user || !recipientUser || !newChatId) {
-        console.error(
-          "Error: Los datos del chat o los usuarios son indefinidos."
-        );
-        return null;
-      }
-
-      await setDoc(chatRef, {
-        participants: [user.uid, recipientUser.id],
-        createdAt: new Date(),
-        lastMessage: "",
-      });
-
-      setChatId(newChatId);
-      return newChatId;
-    }
-
-    return chatId;
-  };
-
-  const handleSend = async (
-    messageType = "text",
-    mediaUri = null,
-    isViewOnce = false
-) => {
-    if (isUploading) {
-        Alert.alert("Cargando", "Por favor espera a que termine la subida actual.");
-        return;
-    }
-
-    try {
-        const chatIdToUse = await createChatIfNotExists();
-        const messagesRef = collection(
-            database,
-            "chats",
-            chatIdToUse,
-            "messages"
-        );
-
-        let messageData = {
-            senderId: user.uid,
-            senderName: user.displayName || "Anónimo",
-            createdAt: new Date(),
-            seen: false,
-            viewedBy: [],
-            isViewOnce,
-        };
-
-        // Añade la lógica para tipo de mensaje:
-        if (messageType === "text") {
-          messageData.text = message.trim();
-          setMessage("");
-      } else if (messageType === "image" || messageType === "video") {
-          setIsUploading(true);
-          const tempId = `temp-${new Date().getTime()}`;
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { id: tempId, mediaType: messageType, isUploading: true },
-          ]);
-          const mediaUrl = await uploadMedia(mediaUri);
-          if (!mediaUrl) return;
-          messageData.mediaType = messageType;
-          messageData.mediaUrl = mediaUrl;
-          setIsUploading(false);
-          setMessages((prevMessages) =>
-            prevMessages.map((message) =>
-              message.id === tempId ? { ...messageData, id: tempId } : message
-            )
-          );
-      }
-      await addDoc(messagesRef, messageData);
-
-        // Actualizar información del chat
-        const chatDocRef = doc(database, "chats", chatIdToUse);
-        const chatDoc = await getDoc(chatDocRef);
-
-        if (chatDoc.exists()) {
-            const chatData = chatDoc.data();
-            const otherParticipantId = chatData.participants.find(
-                (participant) => participant !== user.uid
-            );
-
-            // Establecer isHidden a false para el receptor
-            await updateDoc(chatDocRef, {
-                lastMessage: messageData.text || "Media",
-                lastMessageTimestamp: messageData.createdAt,
-                lastMessageSenderId: user.uid,
-                lastMessageSenderName: user.displayName || "Anónimo",
-                [`isHidden.${otherParticipantId}`]: false,
-            });
-        }
-
-        // Limpiar el campo de texto
-        flatListRef.current?.scrollToEnd({ animated: true });
-    } catch (error) {
-        console.error("Error al enviar el mensaje:", error);
-        Alert.alert(
-            "Error",
-            "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
-        );
-        setIsUploading(false);
-    }
-};
-
-const handleDeleteChat = async () => {
-    try {
-      const batch = writeBatch(database);
-      const chatRef = doc(database, "chats", chatId);
-      const messagesRef = collection(database, "chats", chatId, "messages");
-
-      // Mark the chat as deleted for the current user
-      batch.update(chatRef, {
-        [`deletedFor.${user.uid}`]: true
-      });
-
-      // Mark all messages as deleted for the current user
-      const messagesSnapshot = await getDocs(messagesRef);
-      messagesSnapshot.forEach((messageDoc) => {
-        batch.update(messageDoc.ref, {
-          [`deletedFor.${user.uid}`]: true
-        });
-      });
-
-      // Commit the batch
-      await batch.commit();
-
-      // Navigate back
-      navigation.goBack();
-      Alert.alert("Éxito", "El chat ha sido eliminado para ti.");
-    } catch (error) {
-      console.error("Error al eliminar el chat:", error);
-      Alert.alert("Error", "No se pudo eliminar el chat. Por favor, intenta nuevamente.");
-    }
-  };
-
-  const uploadMedia = async (uri) => {
-    if (!uri) return null;
-
-    try {
-      setIsUploading(true); // Inicia la carga
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const storageRef = ref(
-        storage,
-        `media/${user.uid}/${new Date().getTime()}`
-      );
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
-    } catch (error) {
-      console.error("Error al subir el archivo:", error);
-      Alert.alert("Error", "No se pudo subir el archivo.");
-      return null;
-    } finally {
-      setIsUploading(false); // Finaliza la carga
-    }
-  };
-
-  const handleCameraLaunch = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permiso denegado",
-        "Se necesita permiso para acceder a la cámara"
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const asset = result.assets[0];
-      handleSend("image", asset.uri, true); // Enviar como `isViewOnce: true`
-    }
-  };
-
-  const pickMedia = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permiso denegado",
-        "Se necesita permiso para acceder a la galería"
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const mediaType = result.assets[0].type === "video" ? "video" : "image";
-      handleSend(mediaType, result.assets[0].uri); // Verifica que `handleSend` esté en `ChatUsersParaEditar.js`
-    }
-};
-
-  const startRecording = async () => {
-    try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-        setRecording(null);
-      }
-
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permiso de audio no concedido");
-        return;
-      }
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const newRecording = new Audio.Recording();
-      await newRecording.prepareToRecordAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      await newRecording.startAsync();
-      setRecording(newRecording);
-      setIsRecording(true);
-    } catch (err) {
-      console.error("Error al iniciar la grabación:", err);
-    }
-  };
-
-  const stopRecording = async () => {
-    try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-        const uri = recording.getURI();
-        setRecording(null);
-        setIsRecording(false);
-        handleSend("audio", uri);
-      }
-    } catch (err) {
-      console.error("Error al detener la grabación:", err);
-    }
-  };
-
-  const handleHideChat = async () => {
-    try {
-      await updateDoc(doc(database, "chats", chatId), { isHidden: true });
-      setIsChatHidden(true);
-      Alert.alert("Chat oculto", "Este chat ha sido ocultado.");
-    } catch (error) {
-      console.error("Error al ocultar el chat:", error);
-    }
-
-    setMenuVisible(false);
-  };
-
-  const handleUserPress = async () => {
-    try {
-      if (!chatId) {
-        Alert.alert("Error", "No se puede identificar el chat.");
-        return;
-      }
-
-      const chatRef = doc(database, "chats", chatId);
-      const chatSnapshot = await getDoc(chatRef);
-
-      if (!chatSnapshot.exists()) {
-        console.error("El documento del chat no existe.");
-        Alert.alert("Error", "El chat no existe.");
-        return;
-      }
-
-      const chatData = chatSnapshot.data();
-
-      // Obtener el ID del destinatario desde los participantes
-      const otherParticipantId = chatData.participants.find(
-        (participantId) => participantId !== user.uid
-      );
-
-      if (!otherParticipantId) {
-        console.error("No se encontró un ID válido para el destinatario.");
-        Alert.alert("Error", "No se pudo identificar al destinatario.");
-        return;
-      }
-
-      navigation.navigate("UserProfile", { selectedUser: { id: otherParticipantId, ...recipientUser } });
-    } catch (error) {
-      console.error("Error navegando al perfil del usuario:", error);
-      Alert.alert("Error", "No se pudo navegar al perfil del usuario.");
-    }
-  };
-
-  const handleMediaPress = async (
-    mediaUrl,
-    mediaType,
-    messageId,
-    isViewOnce
-  ) => {
-    try {
-      const messageRef = doc(database, "chats", chatId, "messages", messageId);
-      const messageSnapshot = await getDoc(messageRef);
-
-      if (!messageSnapshot.exists()) {
-        Alert.alert("Error", "No se encontró el mensaje.");
-        return;
-      }
-
-      const messageData = messageSnapshot.data();
-
-      if (isViewOnce) {
-        if (messageData.viewedBy?.includes(user.uid)) {
-          Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista.");
-          return;
-        }
-
-        await updateDoc(messageRef, {
-          viewedBy: [...(messageData.viewedBy || []), user.uid],
-        });
-
-        setSelectedImage(mediaUrl);
-        setIsModalVisible(true);
-      } else {
-        setSelectedImage(mediaUrl);
-        setIsModalVisible(true);
-      }
-    } catch (error) {
-      console.error("Error al abrir la imagen:", error);
-      Alert.alert("Error", "No se pudo abrir la imagen.");
-    }
-  };
 
   const closeModal = () => {
     setIsModalVisible(false);
     setSelectedImage(null);
-  };
-
-  const handleLongPressMessage = (message) => {
-    if (message.senderId === user.uid) {
-      // Solo permitir eliminación de mensajes enviados por el usuario actual
-      Alert.alert("Opciones de Mensaje", "¿Qué te gustaría hacer?", [
-        {
-          text: "Cancelar",
-          onPress: () => setSelectedMessageId(null),
-          style: "cancel",
-        },
-        {
-          text: "Eliminar",
-          onPress: () => handleDeleteMessage(message.id),
-          style: "destructive",
-        },
-      ]);
-    }
-  };
-
-  const handleDeleteMessage = (messageId) => {
-    setMessages((prevMessages) =>
-      prevMessages.filter((message) => message.id !== messageId)
-    );
-    setSelectedMessageId(null);
   };
 
   const renderDate = (date) => {
@@ -714,7 +240,7 @@ const handleDeleteChat = async () => {
               item.isViewOnce ? (
                 <TouchableOpacity
                   onPress={() =>
-                    handleMediaPress(item.mediaUrl, "image", item.id, item.isViewOnce)
+                    handleMediaPress(item.mediaUrl, "image", item.id, item.isViewOnce, params= {chatId, user, setSelectedImage, setIsModalVisible})
                   }
                   style={[
                     styles.viewOnceImagePlaceholder,
@@ -777,6 +303,116 @@ const handleDeleteChat = async () => {
 
 };
 
+const handleSend = async (
+  messageType = "text",
+  mediaUri = null,
+  isViewOnce = false
+) => {
+  if (isUploading) {
+      Alert.alert("Cargando", "Por favor espera a que termine la subida actual.");
+      return;
+  }
+
+  const createChatIfNotExists = async () => {
+    if (!chatId) {
+      const chatRef = doc(collection(database, "chats"));
+      const newChatId = chatRef.id;
+
+      // Validar que los datos no sean undefined
+      if (!user || !recipientUser || !newChatId) {
+        console.error(
+          "Error: Los datos del chat o los usuarios son indefinidos."
+        );
+        return null;
+      }
+
+      await setDoc(chatRef, {
+        participants: [user.uid, recipientUser.id],
+        createdAt: new Date(),
+        lastMessage: "",
+      });
+
+      setChatId(newChatId);
+      return newChatId;
+    }
+
+    return chatId;
+  };
+
+  try {
+      const chatIdToUse = await createChatIfNotExists();
+      const messagesRef = collection(
+          database,
+          "chats",
+          chatIdToUse,
+          "messages"
+      );
+
+      let messageData = {
+          senderId: user.uid,
+          senderName: user.displayName || "Anónimo",
+          createdAt: new Date(),
+          seen: false,
+          viewedBy: [],
+          isViewOnce,
+      };
+
+      // Añade la lógica para tipo de mensaje:
+      if (messageType === "text") {
+        messageData.text = message.trim();
+    } else if (messageType === "image" || messageType === "video") {
+        setIsUploading(true);
+        const tempId = `temp-${new Date().getTime()}`;
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { id: tempId, mediaType: messageType, isUploading: true },
+        ]);
+        const mediaUrl = await uploadMedia(mediaUri);
+        if (!mediaUrl) return;
+        messageData.mediaType = messageType;
+        messageData.mediaUrl = mediaUrl;
+        setIsUploading(false);
+        setMessages((prevMessages) =>
+          prevMessages.map((message) =>
+            message.id === tempId ? { ...messageData, id: tempId } : message
+          )
+        );
+    }
+    await addDoc(messagesRef, messageData);
+
+      // Actualizar información del chat
+      const chatDocRef = doc(database, "chats", chatIdToUse);
+      const chatDoc = await getDoc(chatDocRef);
+
+      if (chatDoc.exists()) {
+          const chatData = chatDoc.data();
+          const otherParticipantId = chatData.participants.find(
+              (participant) => participant !== user.uid
+          );
+
+          // Establecer isHidden a false para el receptor
+          await updateDoc(chatDocRef, {
+              lastMessage: messageData.text || "Media",
+              lastMessageTimestamp: messageData.createdAt,
+              lastMessageSenderId: user.uid,
+              lastMessageSenderName: user.displayName || "Anónimo",
+              [`isHidden.${otherParticipantId}`]: false,
+          });
+      }
+
+      // Limpiar el campo de texto
+      setMessage("");
+      flatListRef.current?.scrollToEnd({ animated: true });
+  } catch (error) {
+      console.error("Error al enviar el mensaje:", error);
+      Alert.alert(
+          "Error",
+          "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
+      );
+      setIsUploading(false);
+  }
+};
+
   return (
     <ImageBackground source={{ uri: backgroundImage }} style={styles.container}>
       <View style={styles.header}>
@@ -786,7 +422,7 @@ const handleDeleteChat = async () => {
         >
           <Feather name="arrow-left" size={24} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleUserPress} style={styles.userInfo}>
+        <TouchableOpacity onPress={() => handleUserPress({chatId, user, navigation, recipientUser})} style={styles.userInfo}>
           <Text style={styles.username}>
             {recipient.firstName + " " + recipient.lastName}
           </Text>
@@ -825,13 +461,13 @@ const handleDeleteChat = async () => {
             style={styles.menuItemContainer}
           />
           <Menu.Item
-            onPress={handleHideChat}
+            onPress={() => handleHideChat({chatId, setIsChatHidden, setMenuVisible})}
             title="Silenciar"
             titleStyle={styles.menuItemText}
             style={styles.menuItemContainer}
           />
           <Menu.Item
-            onPress={handleReport}
+            onPress={() => handleReport({recipient, setIsComplaintVisible})}
             title="Denunciar"
             titleStyle={styles.menuItemText}
             style={styles.menuItemContainer}
@@ -849,7 +485,7 @@ const handleDeleteChat = async () => {
 
       <View style={styles.containerIg}>
         <TouchableOpacity
-          onPress={handleCameraLaunch}
+          onPress={() => handleCameraLaunch({ImagePicker, handleSend})}
           style={styles.iconButtonCamera}
         >
           <Ionicons name="camera-outline" size={20} color="white" />
@@ -863,14 +499,14 @@ const handleDeleteChat = async () => {
         />
         {message.trim() ? (
           <TouchableOpacity
-            onPress={() => handleSend("text")}
+            onPress={() => {console.log("está entrando"), handleSend("text")}}
             style={styles.sendButton}
           >
             <FontAwesome name="send" size={20} color="white" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            onPress={pickMedia}
+            onPress={() => pickMedia({ImagePicker, handleSend})}
             style={styles.iconButtonGaleria}
           >
             <Ionicons name="image-outline" size={30} color="#000" />
@@ -899,7 +535,7 @@ const handleDeleteChat = async () => {
   onClose={() => setIsComplaintVisible(false)}
   onSubmit={(reason, description) => {
     console.log("Razón y descripción enviadas:", { reason, description });
-    handleReportSubmit(reason, description);
+    handleReportSubmit({reason, description, chatId, recipientUser, setIsComplaintVisible, user});
     setIsComplaintVisible(false);
   }}
 />
@@ -910,3 +546,4 @@ const handleDeleteChat = async () => {
 
   );
 }
+

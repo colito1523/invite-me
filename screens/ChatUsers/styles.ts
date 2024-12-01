@@ -235,7 +235,6 @@ export const styles = StyleSheet.create({
     },
     menuContainer: {
       borderRadius: 20,
-      textAlign: "left"
     },
     menuItemText: {
       fontWeight: "bold",

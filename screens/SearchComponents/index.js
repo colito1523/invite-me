@@ -190,7 +190,6 @@ export default function Search() {
           const savedHistory = await AsyncStorage.getItem(
             `searchHistory_${user.uid}`
           );
-          console.log(user.uid, "id del colo")
           if (savedHistory !== null) {
             setSearchHistory(JSON.parse(savedHistory));
           }
@@ -216,9 +215,8 @@ export default function Search() {
       updatedHistory.unshift(user);
       if (updatedHistory.length > 10) updatedHistory.pop();
       setSearchHistory(updatedHistory);
-      console.log("no hay user", updatedHistory.length)
 
-      saveSearchHistory(user, updatedHistory, t);
+      saveSearchHistory(user, updatedHistory);
     }
 
     navigation.navigate("UserProfile", { selectedUser: user, imageUri: user.profileImage });
