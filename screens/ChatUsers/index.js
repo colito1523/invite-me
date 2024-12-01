@@ -69,9 +69,9 @@ export default function Chat({ route }) {
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
 
   useEffect(() => {
-    console.log("recipient", recipientUser);
+    console.log("recipient", messages);
 
-  }, [currentChatId, recipientUser]);
+  }, [messages.length]);
   
 
 
@@ -121,17 +121,17 @@ export default function Chat({ route }) {
   const markMessagesAsRead = async (messages) => {
     const batch = writeBatch(database);
     messages.forEach((message) => {
-      if (message.senderId !== user.uid && !message.viewedBy?.includes(user.uid)) {
+      if (message.senderId !== user.uid && (!Array.isArray(message.viewedBy) || !message.viewedBy.includes(user.uid))) {
+        console.log("wow", message.seen)
         const messageRef = doc(database, "chats", chatId, "messages", message.id);
         batch.update(messageRef, {
-          viewedBy: [...(message.viewedBy || []), user.uid],
+          viewedBy: arrayUnion(user.uid),
         });
       }
     });
     try {
       await batch.commit();
       console.log('Todos los mensajes visibles han sido marcados como leídos.');
-      console.log();
     } catch (error) {
       console.error('Error al marcar los mensajes como leídos:', error);
     }
@@ -799,7 +799,7 @@ const handleDeleteChat = async () => {
               <Text style={styles.timeText}>
                 {currentMessageDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </Text>
-              {item.senderId === user.uid && item.viewedBy?.includes(recipient.uid) && (
+              {item.senderId === user.uid && item.seen && (
                 <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon} />
               )}
             </View>
