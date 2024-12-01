@@ -494,6 +494,7 @@ export default function SignUp() {
       }
 
       const userData = {
+        uid: user.uid, // Add uid property
         age: answers.age,
         email: emailToLower,
         firstName: answers.firstName,

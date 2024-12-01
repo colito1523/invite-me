@@ -70,7 +70,6 @@ export const styles = StyleSheet.create({
       justifyContent: "flex-end", // Alinea el contenido hacia la derecha
       marginTop: 5,
       gap: "20px",
-      backgroundColor: "rgba(0, 0, 0, 0.5)"
     },
     emojiMessage: {
       backgroundColor: "transparent",
@@ -78,7 +77,6 @@ export const styles = StyleSheet.create({
     },
     seenIcon: {
       marginLeft: 7, // Ajusta el espacio entre el horario y el ícono
-      backgroundColor: "red"
     },
     messageText: {
       marginTop: 20,

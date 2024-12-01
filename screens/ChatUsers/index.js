@@ -69,7 +69,7 @@ export default function Chat({ route }) {
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
 
   useEffect(() => {
-    console.log("initialChatId:", currentChatId, "current Id", chatId);
+    console.log("recipient", recipientUser);
 
   }, [currentChatId, recipientUser]);
   
@@ -778,7 +778,7 @@ const handleDeleteChat = async () => {
                     source={{ uri: item.mediaUrl }}
                     style={styles.messageImage}
                   />
-                  {item.senderId === user.uid && item.viewedBy?.includes(recipient.id) && (
+                  {item.senderId === user.uid && item.viewedBy?.includes(recipient.uid) && (
                     <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon}/>
                   )}
                 </TouchableOpacity>
@@ -793,7 +793,7 @@ const handleDeleteChat = async () => {
                 useNativeControls
                 resizeMode="contain"
               />
-              {item.senderId === user.uid && item.viewedBy?.includes(recipient.id) && (
+              {item.senderId === user.uid && item.viewedBy?.includes(recipient.uid) && (
                 <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon}/>
               )}
               </>
@@ -805,7 +805,7 @@ const handleDeleteChat = async () => {
               <Text style={styles.timeText}>
                 {currentMessageDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </Text>
-              {item.senderId === user.uid && item.viewedBy?.includes(recipient.id) && (
+              {item.senderId === user.uid && item.viewedBy?.includes(recipient.uid) && (
                 <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon} />
               )}
             </View>
