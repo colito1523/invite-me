@@ -66,7 +66,6 @@ export default function Chat({ route }) {
   const [isUploading, setIsUploading] = useState(false);
 
 
-
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
 
 
@@ -93,20 +92,23 @@ export default function Chat({ route }) {
         const messagesRef = collection(database, "chats", chatId, "messages");
         const q = query(messagesRef, orderBy("createdAt", "asc"));
 
-        // Escucha los mensajes del chat
+        // Escuchar los mensajes en tiempo real
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
           const messagesList = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
           setMessages(messagesList);
+
+          // Marcar los mensajes como leídos
+          markMessagesAsRead(messagesList);
         });
 
-        // Limpieza
-        console.log("ya estamos dentro del chat")
         return () => unsubscribe();
+
       } else {
         createChatIfNotExists()
+        console.log("post crear", chatId)
       }
   }, [chatId]);
 
@@ -123,6 +125,7 @@ export default function Chat({ route }) {
     try {
       await batch.commit();
       console.log('Todos los mensajes visibles han sido marcados como leídos.');
+      console.log();
     } catch (error) {
       console.error('Error al marcar los mensajes como leídos:', error);
     }
@@ -209,10 +212,12 @@ export default function Chat({ route }) {
         });
   
         if (existingChatId) {
-          setChatId(existingChatId);
+          setChatId(existingChatId); // Si el chat existe, usa su ID
           console.log("Chat existente encontrado:", existingChatId);
           return existingChatId;
         }
+  
+        // Si no existe el chat, crearlo
         const chatRef = doc(chatsRef);
         const newChatId = chatRef.id;
   
@@ -230,7 +235,7 @@ export default function Chat({ route }) {
       }
     }
   
-    return chatId;
+    return chatId; // Retorna el ID del chat actual si ya está definido
   };
   
   
@@ -778,18 +783,10 @@ const handleDeleteChat = async () => {
 
             <View style={styles.messageFooter}>
               <Text style={styles.timeText}>
-                {currentMessageDate.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {currentMessageDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </Text>
-              {item.senderId === user.uid && item.seen && (
-                <Ionicons
-                  name="checkmark-done-sharp"
-                  size={16}
-                  color="black"
-                  style={styles.seenIcon}
-                />
+              {item.senderId === user.uid && item.viewedBy?.includes(recipient.id) && (
+                <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon} />
               )}
             </View>
           </View>
