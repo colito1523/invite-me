@@ -63,6 +63,7 @@ export default function Notes() {
   const [responseMessage, setResponseMessage] = useState("");
   const [isNightMode, setIsNightMode] = useState(false);
   const [showMoodToggle, setShowMoodToggle] = useState(false);
+  const [sendingResponse, setSendingResponse] = useState(false)
 
   const user = auth.currentUser;
   const inputRef = useRef(null);
@@ -301,6 +302,7 @@ export default function Notes() {
   };
 
   const handleSendNoteResponse = async (note) => {
+    setSendingResponse(true)
     if (noteResponse.trim()) {
       try {
         const senderId = user.uid;
@@ -328,6 +330,7 @@ export default function Notes() {
           isNoteResponse: true, // Mark as a note response
           noteText: selectedNoteFullScreen.text, // Include the note text
         };
+        setResponseMessage("");
         // Add the message to the database
         await addDoc(messagesRef, newMessage);
         // Update the chat with the last message details
@@ -336,10 +339,11 @@ export default function Notes() {
           lastMessageSenderId: user.uid,
           lastMessageTimestamp: new Date(),
         });
-        setResponseMessage("");
+        setSendingResponse(false)
         setShowResponseInput(false);
       } catch (error) {
         console.error("Error sending response:", error);
+        setSendingResponse(false)
         Alert.alert(t("notes.error"), t("notes.sendResponseError"));
       }
     }
@@ -429,6 +433,7 @@ export default function Notes() {
   
 
   const handleSendResponse = async () => {
+    setSendingResponse(true)
     if (responseMessage.trim() === "") {
       Alert.alert(t("notes.error"), t("notes.emptyResponseError"));
       return;
@@ -469,8 +474,10 @@ export default function Notes() {
       setResponseMessage("");
       setShowResponseInput(false);
       setSelectedNoteFullScreen(null);
+      setSendingResponse(false)
     } catch (error) {
       console.error("Error sending response:", error);
+      setSendingResponse(false)
       Alert.alert(t("notes.error"), t("notes.sendResponseError"));
     }
   };
@@ -589,6 +596,7 @@ export default function Notes() {
                       <TouchableOpacity
                         style={styles.inlineSendButton}
                         onPress={handleSendResponse}
+                        disabled={sendingResponse}
                       >
                         <FontAwesome name="send" size={20} color="white" />
                       </TouchableOpacity>
@@ -746,7 +754,9 @@ export default function Notes() {
               { backgroundColor: isNightMode ? "#C0A368" : "#3e3d3d" },
             ]}
             onPress={() => handleSendNoteResponse(selectedNote)}
+            disabled={sendingResponse}
           >
+            asdlknas
             <Feather
               name="message-circle"
               size={24}

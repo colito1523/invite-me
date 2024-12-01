@@ -317,3 +317,8 @@ export const styles = StyleSheet.create({
       fontWeight: "bold",
     },
 });
+
+
+const hola = '{"age": "27", "blockedUsers": [], "currentChat": null, "email": "tomas@gmail.com", "expoPushToken": "ExponentPushToken[XNgc-JLunBivV8HpUN_QVi]", "firstHobby": "bdjqwknd", "firstInterest": "sacedcd", "firstName": "Tom", "gender": "Male", "hiddenStories": ["2XtmmB0Z5HSDb8n4VgeC1oyyezX2"], "hideStoriesFrom": [], "isPrivate": false, "lastName": "Lasso", "likeCount": 8, "manuallyBlocked": [], "photoUrls": ["https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/profileImages%2Fifewm3BVglg4vQO43eqwSeodxut1_0.jpg?alt=media&token=6237cdca-d22c-4ea5-830c-904a8a5c238d", "https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/profileImages%2Fifewm3BVglg4vQO43eqwSeodxut1_1.jpg?alt=media&token=3514afa2-78bc-47bc-823a-939b117b2aa0", "https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/profileImages%2Fifewm3BVglg4vQO43eqwSeodxut1_2.jpg?alt=media&token=ec9417ed-3d7d-47be-9073-9606ef8e1d62"], "pinnedViewers": [], "relationshipStatus": "", "secondHobby": "jdjdgdhtg", "secondInterest": "ddcs", "username": "tomaslasso"}'
+
+const hula = ''

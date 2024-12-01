@@ -100,7 +100,6 @@ export default function ChatList() {
       
         try {
           const userRef = doc(database, "users", user.uid);
-          console.log("usuario", userRef)
           const userSnapshot = await getDoc(userRef);
           const blockedUsers = userSnapshot.data()?.blockedUsers || [];
       
@@ -296,7 +295,6 @@ export default function ChatList() {
   };
 
   const handleChatPress = async (chat) => {
-    console.log("chat presionado", chat.id)
     try {
       const messagesRef = collection(database, "chats", chat.id, "messages");
       const unseenMessagesQuery = query(
@@ -311,7 +309,7 @@ export default function ChatList() {
       });
 
       navigation.navigate("ChatUsers", {
-        currentChatId: chat.id,
+        chatId: chat.id,
         recipientUser: chat.user,
       });
     } catch (error) {

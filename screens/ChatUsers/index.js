@@ -46,9 +46,9 @@ import { styles } from "./styles";
 import Complaints from '../../Components/Complaints/Complaints';
 
 export default function Chat({ route }) {
-  const { initialChatId, recipientUser, imageUri } = route.params; //a Params no le llega el initialchatId
+  const { currentChatId, recipientUser, imageUri } = route.params; //a Params no le llega el initialchatId
   const [backgroundImage, setBackgroundImage] = useState(imageUri || null);
-  const [chatId, setChatId] = useState(initialChatId || "");
+  const [chatId, setChatId] = useState(currentChatId || "");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [recipient, setRecipient] = useState(recipientUser);
@@ -67,6 +67,12 @@ export default function Chat({ route }) {
 
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
+
+  useEffect(() => {
+    console.log("initialChatId:", currentChatId, "current Id", chatId);
+
+  }, [currentChatId, recipientUser]);
+  
 
 
   // Verificación de usuarios bloqueados
