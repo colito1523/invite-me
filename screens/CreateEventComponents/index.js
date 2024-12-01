@@ -19,6 +19,7 @@ import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { LinearGradient } from "expo-linear-gradient";
+import { Keyboard } from "react-native";
 import { fetchFriends, sendInvitationNotifications, pickImage, handleSubmit, onChangeDate, onChangeTime, toggleFriendSelection } from "./utils";
 import { styles, lightTheme, darkTheme } from "./styles";
 
@@ -42,6 +43,7 @@ export default function CreateEvent() {
   const blockedUsers = useBlockedUsers();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const today = new Date();
   const maxDate = new Date(today.getTime() + 2 * 30 * 24 * 60 * 60 * 1000); // Max 2 months from today
@@ -72,6 +74,26 @@ export default function CreateEvent() {
     fetchFriends(setFriends);
   }, []);
 
+  // Add this useEffect for keyboard listeners
+useEffect(() => {
+  const keyboardDidShowListener = Keyboard.addListener(
+    'keyboardDidShow',
+    () => {
+      setKeyboardVisible(true);
+    }
+  );
+  const keyboardDidHideListener = Keyboard.addListener(
+    'keyboardDidHide',
+    () => {
+      setKeyboardVisible(false);
+    }
+  );
+  return () => {
+    keyboardDidShowListener.remove();
+    keyboardDidHideListener.remove();
+  };
+}, []);
+
   const theme = isNightMode ? darkTheme : lightTheme;
 
   const filteredFriends = friends.filter((friend) =>
@@ -97,9 +119,10 @@ export default function CreateEvent() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
+    style={[styles.container, keyboardVisible && styles.keyboardAvoidingContainer]}
+    keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+  >
       <LinearGradient
         colors={isNightMode ? ["#1a1a1a", "#000"] : ["#fff", "#f0f0f0"]}
         style={styles.gradientContainer}
@@ -229,6 +252,7 @@ export default function CreateEvent() {
                   </Text>
                 )}
               </TouchableOpacity>
+              <View style={{ marginBottom: 20 }} /> 
             </>
           }
         />
