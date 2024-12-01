@@ -202,25 +202,26 @@ export default function Search() {
     loadSearchHistory();
   }, [user]);
 
-  const handleUserPress = (user) => {
-    if (blockedUsers.includes(user.id)) {
-      Alert.alert(t('error'), t('cannotInteractWithUser'));
-      return;
-    }
-
-    const updatedHistory = [...searchHistory];
-    const existingUser = updatedHistory.find((item) => item.id === user.id);
-
-    if (!existingUser) {
-      updatedHistory.unshift(user);
-      if (updatedHistory.length > 10) updatedHistory.pop();
-      setSearchHistory(updatedHistory);
-
-      saveSearchHistory(user, updatedHistory);
-    }
-
-    navigation.navigate("UserProfile", { selectedUser: user, imageUri: user.profileImage });
-  };
+// En index.js, modifica el handleUserPress
+const handleUserPress = (selectedUser) => {
+  if (blockedUsers.includes(selectedUser.id)) {
+    Alert.alert(t('error'), t('cannotInteractWithUser'));
+    return;
+  }
+  const updatedHistory = [...searchHistory];
+  const existingUser = updatedHistory.find((item) => item.id === selectedUser.id);
+  if (!existingUser) {
+    updatedHistory.unshift(selectedUser);
+    if (updatedHistory.length > 10) updatedHistory.pop();
+    setSearchHistory(updatedHistory);
+    // Aquí pasamos el usuario actual (auth.currentUser)
+    saveSearchHistory(auth.currentUser, updatedHistory);
+  }
+  navigation.navigate("UserProfile", { 
+    selectedUser: selectedUser, 
+    imageUri: selectedUser.profileImage 
+  });
+};
 
   const removeFromHistory = (userId) => {
     const updatedHistory = searchHistory.filter((user) => user.id !== userId);

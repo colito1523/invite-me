@@ -226,25 +226,24 @@ export const cancelFriendRequest = async (user, setStatus) => {
   }
 };
 
-export const saveSearchHistory = async (user, history) => {
-  const { t } = useTranslation();
-  if (user) {
-    try {
-      // Convert the history object to a string and encode it safely
-      const safeHistory = JSON.stringify(history.map(item => ({
-        id: item.id,
-        username: item.username,
-        firstName: item.firstName || '',
-        lastName: item.lastName || '',
-        profileImage: item.profileImage || 'https://via.placeholder.com/150'
-      })));
-      
-      await AsyncStorage.setItem(
-        `searchHistory_${user.uid}`,
-        safeHistory
-      );
-    } catch (error) {
-      console.error(t('errorSavingSearchHistory'), error);
-    }
+export const saveSearchHistory = async (currentUser, history) => {
+  if (!currentUser) return;
+  
+  try {
+    const safeHistory = JSON.stringify(history.map(item => ({
+      id: item.id,
+      username: item.username,
+      firstName: item.firstName || '',
+      lastName: item.lastName || '',
+      profileImage: item.profileImage || 'https://via.placeholder.com/150'
+    })));
+    
+    await AsyncStorage.setItem(
+      `searchHistory_${currentUser.uid}`,
+      safeHistory
+    );
+  } catch (error) {
+    console.error('Error saving search history:', error);
   }
 };
+
