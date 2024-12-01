@@ -100,7 +100,6 @@ export default function ChatList() {
       
         try {
           const userRef = doc(database, "users", user.uid);
-          console.log("usuario", userRef)
           const userSnapshot = await getDoc(userRef);
           const blockedUsers = userSnapshot.data()?.blockedUsers || [];
       
@@ -144,6 +143,13 @@ export default function ChatList() {
                   docSnapshot.id,
                   "messages"
                 );
+
+                const messagesSnapshot = await getDocs(messagesRef);
+
+                if (messagesSnapshot.empty) {
+                  return null; // Excluir chats sin mensajes
+                }
+
                 const unseenMessagesQuery = query(
                   messagesRef,
                   where("seen", "==", false),

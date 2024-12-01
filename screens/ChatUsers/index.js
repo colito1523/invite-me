@@ -91,6 +91,12 @@ export default function Chat({ route }) {
     }
   }, [recipientUser]);
 
+  useEffect(() => {
+    if (messages.length > 0) {
+      flatListRef.current?.scrollToEnd();
+    }
+  }, [messages]);
+
 
   // Configuración del chat
   useEffect(() => {
@@ -772,17 +778,25 @@ const handleDeleteChat = async () => {
                     source={{ uri: item.mediaUrl }}
                     style={styles.messageImage}
                   />
+                  {item.senderId === user.uid && item.viewedBy?.includes(recipient.id) && (
+                    <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon}/>
+                  )}
                 </TouchableOpacity>
               )
             )}
 
             {item.mediaType === "video" && (
+              <>
               <Video
                 source={{ uri: item.mediaUrl }}
                 style={styles.messageVideo}
                 useNativeControls
                 resizeMode="contain"
               />
+              {item.senderId === user.uid && item.viewedBy?.includes(recipient.id) && (
+                <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon}/>
+              )}
+              </>
             )}
 
             {item.mediaType === "audio" && <AudioPlayer uri={item.mediaUrl} />}
@@ -870,6 +884,7 @@ const handleDeleteChat = async () => {
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={renderMessage}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({animated: true})}
       />
 
       <View style={styles.containerIg}>

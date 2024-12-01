@@ -756,7 +756,6 @@ export default function Notes() {
             onPress={() => handleSendNoteResponse(selectedNote)}
             disabled={sendingResponse}
           >
-            asdlknas
             <Feather
               name="message-circle"
               size={24}
@@ -1012,6 +1011,9 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: "center",
     alignItems: "center",
+    "& disabled": {
+      opacity: "0.3",
+    }
   },
   sendResponseButton: {
     backgroundColor: "#007AFF",
