@@ -122,7 +122,7 @@ export default function Chat({ route }) {
         createChatIfNotExists()
         console.log("post crear", chatId)
       }
-  }, [chatId]);
+  }, [chatId, messages.length]);
 
   const markMessagesAsRead = async (messages) => {
     const batch = writeBatch(database);
