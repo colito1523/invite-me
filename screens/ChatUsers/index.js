@@ -27,6 +27,7 @@ import {
   getDoc,
   writeBatch,
   getDocs,
+  where
 } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -45,9 +46,9 @@ import { styles } from "./styles";
 import Complaints from '../../Components/Complaints/Complaints';
 
 export default function Chat({ route }) {
-  const { initialChatId, recipientUser, imageUri } = route.params;
+  const { initialChatId, recipientUser, imageUri } = route.params; //a Params no le llega el initialchatId
   const [backgroundImage, setBackgroundImage] = useState(imageUri || null);
-  const [chatId, setChatId] = useState(initialChatId);
+  const [chatId, setChatId] = useState(initialChatId || "");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [recipient, setRecipient] = useState(recipientUser);
@@ -85,6 +86,7 @@ export default function Chat({ route }) {
     }
   }, [recipientUser]);
 
+
   // Configuración del chat
   useEffect(() => {
       if (chatId) {
@@ -101,11 +103,10 @@ export default function Chat({ route }) {
         });
 
         // Limpieza
-        console.log("sin chat", chatId)
+        console.log("ya estamos dentro del chat")
         return () => unsubscribe();
       } else {
         createChatIfNotExists()
-        console.log("post crear", chatId)
       }
   }, [chatId]);
 
@@ -190,29 +191,49 @@ export default function Chat({ route }) {
 
   const createChatIfNotExists = async () => {
     if (!chatId) {
-      const chatRef = doc(collection(database, "chats"));
-      const newChatId = chatRef.id;
-
-      // Validar que los datos no sean undefined
-      if (!user || !recipientUser || !newChatId) {
-        console.error(
-          "Error: Los datos del chat o los usuarios son indefinidos."
+      try {
+        const chatsRef = collection(database, "chats");
+        const q = query(
+          chatsRef,
+          where("participants", "array-contains", user.uid)
         );
-        return null;
+  
+        const querySnapshot = await getDocs(q);
+        let existingChatId = null;
+  
+        querySnapshot.forEach((doc) => {
+          const chatData = doc.data();
+          if (chatData.participants.includes(recipientUser.id)) {
+            existingChatId = doc.id; // Encuentra el chat que coincide
+          }
+        });
+  
+        if (existingChatId) {
+          setChatId(existingChatId);
+          console.log("Chat existente encontrado:", existingChatId);
+          return existingChatId;
+        }
+        const chatRef = doc(chatsRef);
+        const newChatId = chatRef.id;
+  
+        await setDoc(chatRef, {
+          participants: [user.uid, recipientUser.id],
+          createdAt: new Date(),
+          lastMessage: "",
+        });
+  
+        setChatId(newChatId);
+        console.log("Nuevo chat creado:", newChatId);
+        return newChatId;
+      } catch (error) {
+        console.error("Error al verificar o crear el chat:", error);
       }
-
-      await setDoc(chatRef, {
-        participants: [user.uid, recipientUser.id],
-        createdAt: new Date(),
-        lastMessage: "",
-      });
-
-      setChatId(newChatId);
-      return newChatId;
     }
-
+  
     return chatId;
   };
+  
+  
 
   const handleSend = async (
     messageType = "text",
@@ -232,6 +253,7 @@ export default function Chat({ route }) {
             chatIdToUse,
             "messages"
         );
+
 
         let messageData = {
             senderId: user.uid,
@@ -269,9 +291,9 @@ export default function Chat({ route }) {
         // Actualizar información del chat
         const chatDocRef = doc(database, "chats", chatIdToUse);
         const chatDoc = await getDoc(chatDocRef);
-
+        
         if (chatDoc.exists()) {
-            const chatData = chatDoc.data();
+          const chatData = chatDoc.data();
             const otherParticipantId = chatData.participants.find(
                 (participant) => participant !== user.uid
             );
