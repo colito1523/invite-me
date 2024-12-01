@@ -91,12 +91,6 @@ export default function Chat({ route }) {
     }
   }, [recipientUser]);
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      flatListRef.current?.scrollToEnd();
-    }
-  }, [messages]);
-
 
   // Configuración del chat
   useEffect(() => {
@@ -884,7 +878,6 @@ const handleDeleteChat = async () => {
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={renderMessage}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({animated: true})}
       />
 
       <View style={styles.containerIg}>
