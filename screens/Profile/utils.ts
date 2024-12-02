@@ -245,6 +245,7 @@ export const handleBoxPress = ({ event, navigation, t }) => {
   const coordinates = event.coordinates || { latitude: 0, longitude: 0 };
   navigation.navigate("BoxDetails", {
     box: {
+      category: event.category || "General",
       title: event.title || t("profile.noTitle"),
       imageUrl: event.imageUrl || "https://via.placeholder.com/150",
       dateArray: event.dateArray || [],

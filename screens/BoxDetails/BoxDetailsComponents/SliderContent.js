@@ -87,12 +87,16 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
             </View>
           ) : box.category === "EventoParaAmigos" ? (
             <View style={styles.notificationHours}>
-              <Text style={styles.hoursText}>
-                {`Hora: ${boxData.hour || "No disponible"}`}
-              </Text>
-              <Text style={styles.dayText}>
-                {`Día: ${boxData.day || "No disponible"}`}
-              </Text>
+              {Object.keys(boxData.hours || {}).map((day, index) => (
+                  <Text key={index} style={styles.dayText}>
+                    {day}
+                  </Text>
+                ))}
+              {Object.values(boxData.hours || {}).map((time, index) => (
+                  <Text key={index} style={styles.timeText}>
+                    {time}
+                  </Text>
+                ))}
             </View>
           ) : (
             <View style={styles.hoursContent}>
