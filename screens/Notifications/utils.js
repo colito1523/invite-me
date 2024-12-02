@@ -463,6 +463,20 @@ export const handleAcceptPrivateEvent = async (params) => {
       return;
     }
 
+    // Check if the user already has an event with the same eventId
+    const eventsRef = collection(database, "users", user.uid, "events");
+    const q = query(eventsRef, where("eventId", "==", item.eventId));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      Alert.alert(
+        t("notifications.alreadyParticipant"),
+        t("notifications.alreadyInEvent")
+      );
+      setLoadingEventId(null);
+      return;
+    }
+
     // Get user data
     const userDoc = await getDoc(doc(database, "users", user.uid));
     const userData = userDoc.data();

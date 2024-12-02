@@ -219,6 +219,7 @@ export default function NotificationsComponent() {
               hour: item.hour,
               address: item.address,
               phoneNumber: item.phoneNumber,
+              eventId: item.eventId // Ensure eventId is passed
             },
             selectedDate: eventDate,
             isFromNotification: true,

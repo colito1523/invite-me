@@ -82,6 +82,13 @@ export default memo(function BoxDetails({ route, navigation }) {
       // Solo fetch de datos si no viene de una notificación
       fetchEventDetails();
     }
+    if (isFromNotification) {
+      console.log("Datos del evento privado desde notificación:", {
+        box,
+        selectedDate,
+        isFromNotification
+      });
+    }
   }, [box, isFromNotification]);
 
   useEffect(() => {
@@ -452,14 +459,20 @@ export default memo(function BoxDetails({ route, navigation }) {
       return;
     }
 
+    const eventId = box.eventId || box.id || box.title; // Ensure eventId is defined
+    if (!eventId) {
+      console.error("Event ID is undefined");
+      Alert.alert(t("boxDetails.error"), t("boxDetails.eventIdError"));
+      setIsProcessing(false);
+      return;
+    }
+
     const eventData = {
       title: box.title,
       category: box.category || "General", // Ensure category is defined
       date: box.date,
       dateArray: [eventDate],
-  
       description: box.description || "",
-      eventid: box.id || box.title,
       expirationDate: box.expiration || "",
       address: box.address || "",
       imageUrl: box.imageUrl || "",
@@ -467,7 +480,8 @@ export default memo(function BoxDetails({ route, navigation }) {
       phoneNumber: box.number || "Sin número",
       locationLink: box.locationLink || "Sin ubicación especificada",
       hours: box.hours || {},
-      ...(box.coordinates ? { coordinates: box.coordinates } : {}),
+      uid: auth.currentUser.uid, // Add this line to include the uid
+      eventId: eventId // Ensure the correct eventId from the notification is used
     };
 
     if (isPrivateEvent) {
