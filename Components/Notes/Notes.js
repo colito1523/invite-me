@@ -193,28 +193,24 @@ export default function Notes() {
     }
 
     try {
-      const noteRef = doc(database, "users", user.uid, "note", "current");
-      await setDoc(noteRef, {
+      const chatId = await createChatIfNotExists(user.uid, selectedNote.friendId); // Método que crea o obtiene un ID de chat
+      const messagesRef = collection(database, "chats", chatId, "messages");
+
+      await addDoc(messagesRef, {
         text: text,
+        senderId: user.uid,
+        senderName: user.displayName || t("notes.anonymous"),
         createdAt: new Date(),
-        photoUrl: userData ? userData.photoUrls[0] : "",
-      });
-      setNote("");
+        isNoteResponse: true, // Indica que se trata de una nota
+      });setNote("");
       setIsEditing(false);
-      setShowOptions(false);
-      setShowSendButton(false);
-      setIsInputActive(false);
-      setShowMoodOptions(false);
-      setShowMoodToggle(false);
-      Animated.timing(moodOptionsHeight, {
-        toValue: 0,
-        useNativeDriver: false,
-      }).start();
     } catch (error) {
       console.error("Error posting note:", error);
       Alert.alert(t("notes.error"), t("notes.postNoteError"));
     }
   };
+
+  
 
   const handleDeleteNote = async () => {
     try {
