@@ -27,7 +27,8 @@ import {
   getDoc,
   writeBatch,
   getDocs,
-  where
+  where,
+  arrayUnion
 } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -94,7 +95,9 @@ export default function Chat({ route }) {
 
   // Configuración del chat
   useEffect(() => {
+    console.log("123123")
       if (chatId) {
+        console.log("holitra")
         const messagesRef = collection(database, "chats", chatId, "messages");
         const q = query(messagesRef, orderBy("createdAt", "asc"));
 
@@ -107,6 +110,7 @@ export default function Chat({ route }) {
           setMessages(messagesList);
 
           // Marcar los mensajes como leídos
+          console.log("2222")
           markMessagesAsRead(messagesList);
         });
 
@@ -119,26 +123,36 @@ export default function Chat({ route }) {
   }, [chatId, messages.length]);
 
   const markMessagesAsRead = async (messages) => {
-    const batch = writeBatch(database);
-    messages.forEach((message) => {
-      if (message.senderId !== user.uid && (!Array.isArray(message.viewedBy) || !message.viewedBy.includes(user.uid))) {
-        console.log("wow", message.seen)
-        const messageRef = doc(database, "chats", chatId, "messages", message.id);
-        batch.update(messageRef, {
-          viewedBy: arrayUnion(user.uid),
-        });
-        batch.update(messageRef, {
-          seen: true
-        })
-      }
-    });
     try {
+      console.log("Marcando mensajes como leídos...");
+      if (!chatId) {
+        console.error("El chatId no está definido.");
+        return;
+      }
+  
+      const batch = writeBatch(database);
+  
+      messages.forEach((message) => {
+        if (
+          message.senderId !== user.uid && 
+          (!Array.isArray(message.viewedBy) || !message.viewedBy.includes(user.uid))
+        ) {
+          console.log("Marcando mensaje como leído:", message.id);
+          const messageRef = doc(database, "chats", chatId, "messages", message.id);
+          batch.update(messageRef, {
+            viewedBy: arrayUnion(user.uid),
+            seen: true, // Asegúrate de que este campo exista en Firestore
+          });
+        }
+      });
+  
       await batch.commit();
-      console.log('Todos los mensajes visibles han sido marcados como leídos.');
+      console.log("Todos los mensajes visibles han sido marcados como leídos.");
     } catch (error) {
-      console.error('Error al marcar los mensajes como leídos:', error);
+      console.error("Error al marcar los mensajes como leídos:", error);
     }
   };
+  
 
   const handleReport = async () => {
     try {

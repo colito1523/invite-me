@@ -598,14 +598,14 @@ export const handleAcceptGeneralEvent = async (params) => {
         [item.eventDate]: updatedParticipants,
       });
 
-      // Ensure that imageUrl is correctly handled as a number
-      const imageUrl = typeof item.imageUrl === 'number' ? item.imageUrl : parseInt(item.imageUrl, 10);
+      // Ensure you are passing the correct imageUrl here
+      const imageUrl = item.imageUrl || item.eventImage; // Use the appropriate mapping based on your data structure
 
       // Add event data to user's database
       const userEventsRef = collection(database, "users", user.uid, "events");
       await addDoc(userEventsRef, {
         title: item.eventTitle,
-        imageUrl: imageUrl,
+        imageUrl: imageUrl, // Correctly assign the imageUrl here.
         date: item.eventDate,
         coordinates: item.coordinates,
         dateArray: [item.eventDate],

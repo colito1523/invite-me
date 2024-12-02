@@ -92,6 +92,8 @@ export default function Notes() {
     }
   }, [user]);
 
+
+
   useEffect(() => {
     if (user) {
       const noteRef = doc(database, "users", user.uid, "note", "current");
@@ -305,6 +307,7 @@ export default function Notes() {
       try {
         const senderId = user.uid;
         const receiverId = selectedNoteFullScreen.friendId;
+        console.log(receiverId);
         // Use the getChatId function to find or create a chat between the users
         const chatId = await getChatId(senderId, receiverId);
         const chatRef = doc(database, "chats", chatId);
@@ -317,6 +320,7 @@ export default function Notes() {
             lastMessage: "",
           });
         }
+
         // Create the message
         const messagesRef = collection(database, "chats", chatId, "messages");
         const newMessage = {
