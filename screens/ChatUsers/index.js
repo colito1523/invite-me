@@ -127,6 +127,9 @@ export default function Chat({ route }) {
         batch.update(messageRef, {
           viewedBy: arrayUnion(user.uid),
         });
+        batch.update(messageRef, {
+          seen: true
+        })
       }
     });
     try {
