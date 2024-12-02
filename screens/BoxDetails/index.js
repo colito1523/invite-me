@@ -406,7 +406,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       const q = query(eventsRef, where("title", "==", box.title));
       const querySnapshot = await getDocs(q);
 
-      const isPrivateEvent = box.category === "EventoParaAmigos";
+      const isPrivateEvent = box.category === "EventoParaAmigos" || box.isPrivate;
       const eventDate = isPrivateEvent ? box.date : selectedDate;
       const eventRef = doc(
         database,
