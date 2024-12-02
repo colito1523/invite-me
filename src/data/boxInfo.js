@@ -1190,6 +1190,7 @@ const boxInfo = [
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
+    
   },
   {
     path: require("../../assets/Madrid/Gabana.jpg"),

@@ -141,7 +141,7 @@ export default function Search() {
 
     const toggleFriendRequest = async () => {
       if (status === "pending") {
-        await cancelFriendRequest(item, setStatus);
+        await deleteFriendRequest(item, setStatus);
       } else {
         await sendFriendRequest(item, setStatus);
       }

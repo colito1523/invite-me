@@ -226,6 +226,30 @@ export const cancelFriendRequest = async (user, setStatus) => {
   }
 };
 
+export const deleteFriendRequest = async (user, setStatus) => {
+  const auth = getAuth();
+  if (!auth.currentUser || !user) return;
+
+  try {
+    const requestRef = collection(database, "users", user.id, "friendRequests");
+    const existingRequestQuery = query(
+      requestRef,
+      where("fromId", "==", auth.currentUser.uid)
+    );
+    const existingRequestSnapshot = await getDocs(existingRequestQuery);
+
+    if (!existingRequestSnapshot.empty) {
+      const requestId = existingRequestSnapshot.docs[0].id;
+      const requestDocRef = doc(database, "users", user.id, "friendRequests", requestId);
+      await deleteDoc(requestDocRef);
+
+      setStatus(null);
+    }
+  } catch (error) {
+    console.error("Error deleting friend request:", error);
+  }
+};
+
 export const saveSearchHistory = async (currentUser, history) => {
   if (!currentUser) return;
   
