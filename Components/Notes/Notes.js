@@ -63,7 +63,6 @@ export default function Notes() {
   const [responseMessage, setResponseMessage] = useState("");
   const [isNightMode, setIsNightMode] = useState(false);
   const [showMoodToggle, setShowMoodToggle] = useState(false);
-  const [sendingResponse, setSendingResponse] = useState(false)
 
   const user = auth.currentUser;
   const inputRef = useRef(null);
@@ -193,24 +192,28 @@ export default function Notes() {
     }
 
     try {
-      const chatId = await createChatIfNotExists(user.uid, selectedNote.friendId); // Método que crea o obtiene un ID de chat
-      const messagesRef = collection(database, "chats", chatId, "messages");
-
-      await addDoc(messagesRef, {
+      const noteRef = doc(database, "users", user.uid, "note", "current");
+      await setDoc(noteRef, {
         text: text,
-        senderId: user.uid,
-        senderName: user.displayName || t("notes.anonymous"),
         createdAt: new Date(),
-        isNoteResponse: true, // Indica que se trata de una nota
-      });setNote("");
+        photoUrl: userData ? userData.photoUrls[0] : "",
+      });
+      setNote("");
       setIsEditing(false);
+      setShowOptions(false);
+      setShowSendButton(false);
+      setIsInputActive(false);
+      setShowMoodOptions(false);
+      setShowMoodToggle(false);
+      Animated.timing(moodOptionsHeight, {
+        toValue: 0,
+        useNativeDriver: false,
+      }).start();
     } catch (error) {
       console.error("Error posting note:", error);
       Alert.alert(t("notes.error"), t("notes.postNoteError"));
     }
   };
-
-  
 
   const handleDeleteNote = async () => {
     try {
@@ -298,7 +301,6 @@ export default function Notes() {
   };
 
   const handleSendNoteResponse = async (note) => {
-    setSendingResponse(true)
     if (noteResponse.trim()) {
       try {
         const senderId = user.uid;
@@ -326,7 +328,6 @@ export default function Notes() {
           isNoteResponse: true, // Mark as a note response
           noteText: selectedNoteFullScreen.text, // Include the note text
         };
-        setResponseMessage("");
         // Add the message to the database
         await addDoc(messagesRef, newMessage);
         // Update the chat with the last message details
@@ -335,11 +336,10 @@ export default function Notes() {
           lastMessageSenderId: user.uid,
           lastMessageTimestamp: new Date(),
         });
-        setSendingResponse(false)
+        setResponseMessage("");
         setShowResponseInput(false);
       } catch (error) {
         console.error("Error sending response:", error);
-        setSendingResponse(false)
         Alert.alert(t("notes.error"), t("notes.sendResponseError"));
       }
     }
@@ -429,7 +429,6 @@ export default function Notes() {
   
 
   const handleSendResponse = async () => {
-    setSendingResponse(true)
     if (responseMessage.trim() === "") {
       Alert.alert(t("notes.error"), t("notes.emptyResponseError"));
       return;
@@ -470,10 +469,8 @@ export default function Notes() {
       setResponseMessage("");
       setShowResponseInput(false);
       setSelectedNoteFullScreen(null);
-      setSendingResponse(false)
     } catch (error) {
       console.error("Error sending response:", error);
-      setSendingResponse(false)
       Alert.alert(t("notes.error"), t("notes.sendResponseError"));
     }
   };
@@ -592,7 +589,6 @@ export default function Notes() {
                       <TouchableOpacity
                         style={styles.inlineSendButton}
                         onPress={handleSendResponse}
-                        disabled={sendingResponse}
                       >
                         <FontAwesome name="send" size={20} color="white" />
                       </TouchableOpacity>
@@ -750,7 +746,6 @@ export default function Notes() {
               { backgroundColor: isNightMode ? "#C0A368" : "#3e3d3d" },
             ]}
             onPress={() => handleSendNoteResponse(selectedNote)}
-            disabled={sendingResponse}
           >
             <Feather
               name="message-circle"
@@ -1007,9 +1002,6 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: "center",
     alignItems: "center",
-    "& disabled": {
-      opacity: "0.3",
-    }
   },
   sendResponseButton: {
     backgroundColor: "#007AFF",
