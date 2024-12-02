@@ -548,7 +548,10 @@ const saveUserEvent = async (
 // ...existing code...
 
 export const handleAcceptGeneralEvent = async (params) => {
-  const { item, setLoadingEventId, setNotifications, t } = params;
+  const item = params.item;
+  const setLoadingEventId = params.setLoadingEventId;
+  const setNotifications = params.setNotifications;
+  const t = params.t;
 
   try {
     setLoadingEventId(item.id);
@@ -559,9 +562,11 @@ export const handleAcceptGeneralEvent = async (params) => {
       return;
     }
 
+    // Get user data
     const userDoc = await getDoc(doc(database, "users", user.uid));
     const userData = userDoc.data();
 
+    // Check if user is already a participant in the event
     const eventRef = doc(database, "GoBoxs", item.eventTitle);
     const eventDoc = await getDoc(eventRef);
     if (eventDoc.exists()) {
@@ -580,6 +585,7 @@ export const handleAcceptGeneralEvent = async (params) => {
         return;
       }
 
+      // Add user as a participant
       const updatedParticipants = participants.concat({
         uid: user.uid,
         username: userData.username || user.displayName,
@@ -592,22 +598,28 @@ export const handleAcceptGeneralEvent = async (params) => {
         [item.eventDate]: updatedParticipants,
       });
 
+      // Ensure that imageUrl is correctly handled as a number
+      const imageUrl = typeof item.imageUrl === 'number' ? item.imageUrl : parseInt(item.imageUrl, 10);
+
+      // Add event data to user's database
       const userEventsRef = collection(database, "users", user.uid, "events");
       await addDoc(userEventsRef, {
         title: item.eventTitle,
+        imageUrl: imageUrl,
         date: item.eventDate,
         coordinates: item.coordinates,
         dateArray: [item.eventDate],
         hours: item.hours,
         locationLink: "Sin ubicación especificada",
-        phoneNumber: item.number, // Incluye el número aquí
-        image: item.imageUrl || "https://via.placeholder.com/150",
+        phoneNumber: item.number,
       });
     }
 
+    // Delete the notification from the database
     const notifRef = doc(database, "users", user.uid, "notifications", item.id);
     await deleteDoc(notifRef);
 
+    // Update local notification state
     setNotifications((prevNotifications) =>
       prevNotifications.filter((n) => n.id !== item.id)
     );

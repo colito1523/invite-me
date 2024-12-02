@@ -581,10 +581,10 @@ export const handleRejectPrivateEvent = async (params) => {
 };
 
 export const handleAcceptGeneralEvent = async (params) => {
-  const item = params.item
-  const setLoadingEventId = params.setLoadingEventId
-  const setNotifications = params.setNotifications
-  const t = params.t
+  const item = params.item;
+  const setLoadingEventId = params.setLoadingEventId;
+  const setNotifications = params.setNotifications;
+  const t = params.t;
 
   try {
     setLoadingEventId(item.id);
@@ -599,7 +599,7 @@ export const handleAcceptGeneralEvent = async (params) => {
     const userDoc = await getDoc(doc(database, "users", user.uid));
     const userData = userDoc.data();
 
-    // Check if user is already a participant
+    // Check if user is already a participant in the event
     const eventRef = doc(database, "GoBoxs", item.eventTitle);
     const eventDoc = await getDoc(eventRef);
     if (eventDoc.exists()) {
@@ -618,7 +618,7 @@ export const handleAcceptGeneralEvent = async (params) => {
         return;
       }
 
-      // Add user as participant
+      // Add user as a participant
       const updatedParticipants = participants.concat({
         uid: user.uid,
         username: userData.username || user.displayName,
@@ -631,11 +631,14 @@ export const handleAcceptGeneralEvent = async (params) => {
         [item.eventDate]: updatedParticipants,
       });
 
+      // Ensure that imageUrl is correctly handled as a number
+      const imageUrl = typeof item.imageUrl === 'number' ? item.imageUrl : parseInt(item.imageUrl, 10);
+
       // Add event data to user's database
       const userEventsRef = collection(database, "users", user.uid, "events");
       await addDoc(userEventsRef, {
         title: item.eventTitle,
-        imageUrl: item.eventImage, // Ensure imageUrl is saved
+        imageUrl: imageUrl,
         date: item.eventDate,
         coordinates: item.coordinates,
         dateArray: [item.eventDate],
