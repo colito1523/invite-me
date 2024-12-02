@@ -368,36 +368,14 @@ export const fetchEvents = async (params) => {
       ...doc.data(),
     }));
 
-    // Filtrar eventos si el usuario está bloqueado
     if (blockedUsers.includes(selectedUser.id)) {
-      setEvents([]);
+      console.log("Usuario bloqueado, no se mostrarán eventos.");
+      setEvents([]); // Asegúrate de que esta lógica es la deseada
     } else {
-      const filteredEvents = checkAndRemoveExpiredEvents({userEvents, selectedUser, parseEventDate});
-      setEvents(filteredEvents);
+      setEvents(userEvents);
+      console.log("Eventos cargados:", userEvents);
     }
-  }
-};
-
-const checkAndRemoveExpiredEvents = ({userEvents, selectedUser, parseEventDate}) => {
-  const currentDate = new Date();
-  const filteredEvents = userEvents.filter((event) => {
-    const eventDate = parseEventDate(event.date);
-    const timeDifference = currentDate - eventDate;
-    const hoursPassed = timeDifference / (1000 * 60 * 60);
-
-    if (hoursPassed >= 24) {
-      // Remove the expired event from Firestore
-      deleteDoc(doc(database, "users", selectedUser.id, "events", event.id))
-        .then(() => console.log(`Event ${event.id} removed successfully`))
-        .catch((error) =>
-          console.error(`Error removing event ${event.id}:`, error)
-        );
-      return false;
-    }
-    return true;
-  });
-
-  return filteredEvents;
+  };
 };
 
 export const checkFriendship = async (params) => {

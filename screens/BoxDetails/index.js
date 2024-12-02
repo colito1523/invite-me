@@ -486,7 +486,8 @@ export default memo(function BoxDetails({ route, navigation }) {
       hours: box.hours || {},
       uid: auth.currentUser.uid, // Add this line to include the uid
       eventId: eventId, // Ensure the correct eventId from the notification is used
-      status: "accepted" 
+      status: "accepted",
+      coordinates: box.coordinates || {} // Add coordinates
     };
   
     if (isPrivateEvent) {
@@ -510,7 +511,7 @@ export default memo(function BoxDetails({ route, navigation }) {
         return;
       }
     } else {
-      await saveUserEvent(box.title, eventDate, box.day, eventData.phoneNumber, eventData.locationLink, eventData.hours);
+      await saveUserEvent(box.title, eventDate, box.day, eventData.phoneNumber, eventData.locationLink, eventData.hours, eventData.coordinates, eventData.imageUrl);
     }
   
     await addDoc(eventsRef, {
@@ -525,7 +526,9 @@ export default memo(function BoxDetails({ route, navigation }) {
     daySpecial,
     phoneNumber,
     locationLink,
-    hours
+    hours,
+    coordinates,
+    imageUrl
   ) => {
     try {
       const user = auth.currentUser;
@@ -564,6 +567,8 @@ export default memo(function BoxDetails({ route, navigation }) {
         phoneNumber: phoneNumber,
         locationLink: locationLink,
         hours: hours,
+        coordinates: coordinates, // Add coordinates
+        imageUrl: imageUrl // Add imageUrl
       };
   
       if (daySpecial) {
@@ -646,7 +651,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           <Ionicons
             name={item.invited ? "checkmark-sharp" : "arrow-redo"}
             size={16}
-            color={isNightMode ? "black" : "red"}
+            color={isNightMode ? "black" : "black"}
           />
         </TouchableOpacity>
       ) : (
@@ -670,7 +675,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           <Ionicons
             name={item.invited ? "checkmark-sharp" : "arrow-redo"}
             size={16}
-            color={isNightMode ? "black" : "green"}
+            color={isNightMode ? "black" : "black"}
           />
         </TouchableOpacity>
       )}

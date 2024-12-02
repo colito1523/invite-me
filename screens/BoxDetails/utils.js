@@ -492,3 +492,68 @@ export const handleDeleteEvent = async (params) => {
     ]
   );
 };
+
+// ...existing code...
+const saveUserEvent = async (
+  boxTitle,
+  selectedDate,
+  daySpecial,
+  phoneNumber,
+  locationLink,
+  hours,
+  coordinates,
+  imageUrl // Add imageUrl parameter
+) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user logged in");
+
+    const userDocRef = doc(database, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    let username = "Usuario desconocido";
+    let profileImage = "https://via.placeholder.com/150";
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      username = userData.username || username;
+      profileImage =
+        userData.photoUrls && userData.photoUrls.length > 0
+          ? userData.photoUrls[0]
+          : profileImage;
+    }
+
+    const boxRef = doc(database, "GoBoxs", boxTitle);
+    const boxDoc = await getDoc(boxRef);
+
+    let existingData = [];
+    if (boxDoc.exists()) {
+      const data = boxDoc.data();
+      existingData = data[selectedDate] || [];
+    } else {
+      await setDoc(boxRef, { [selectedDate]: [] });
+    }
+
+    const userDataToSave = {
+      profileImage: profileImage,
+      username: username,
+      uid: user.uid,
+      phoneNumber: phoneNumber,
+      locationLink: locationLink,
+      hours: hours,
+      coordinates: coordinates, // Save coordinates
+      imageUrl: imageUrl // Save imageUrl
+    };
+
+    if (daySpecial) {
+      userDataToSave.DaySpecial = daySpecial;
+    }
+
+    await updateDoc(boxRef, {
+      [selectedDate]: [...existingData, userDataToSave],
+    });
+  } catch (error) {
+    console.error("Error al guardar el evento: ", error);
+  }
+};
+// ...existing code...

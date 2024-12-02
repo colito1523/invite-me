@@ -635,7 +635,7 @@ export const handleAcceptGeneralEvent = async (params) => {
       const userEventsRef = collection(database, "users", user.uid, "events");
       await addDoc(userEventsRef, {
         title: item.eventTitle,
-        imageUrl: item.eventImage,
+        imageUrl: item.eventImage, // Ensure imageUrl is saved
         date: item.eventDate,
         coordinates: item.coordinates,
         dateArray: [item.eventDate],

@@ -186,6 +186,15 @@ export default function UserProfile({ route, navigation }) {
     });
   }, [navigation]);
 
+  const parseEventDate = (dateString) => {
+    const [day, month] = dateString.split(" ");
+    const currentYear = new Date().getFullYear();
+    const monthIndex = t("months", { returnObjects: true }).indexOf(
+      month.toLowerCase()
+    );
+    return new Date(currentYear, monthIndex, parseInt(day));
+  };
+
   useEffect(() => {
     fetchUserData({
       selectedUser,
@@ -209,15 +218,6 @@ export default function UserProfile({ route, navigation }) {
     });
     fetchMutualFriends({ user, selectedUser, setMutualFriends });
   }, [selectedUser, user, friendshipStatus, navigation]);
-
-  const parseEventDate = (dateString) => {
-    const [day, month] = dateString.split(" ");
-    const currentYear = new Date().getFullYear();
-    const monthIndex = t("months", { returnObjects: true }).indexOf(
-      month.toLowerCase()
-    );
-    return new Date(currentYear, monthIndex, parseInt(day));
-  };
 
   const renderMutualFriends = () => {
     if (mutualFriends.length === 0) {

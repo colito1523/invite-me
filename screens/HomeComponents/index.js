@@ -261,8 +261,8 @@ const Home = React.memo(() => {
               coordinates,
               country,
               city,
-              attendees,
-              attendeesCount: attendees.length || 0,
+              attendees: filteredAttendees,
+              attendeesCount: filteredAttendees.length || 0,
             };
           }
         )
@@ -293,8 +293,8 @@ const Home = React.memo(() => {
             country: eventData.country || "Portugal",
             city: eventData.city || "Lisboa",
             date: eventData.date,
-            attendees: eventData.attendees || [], 
-            attendeesCount: eventData.attendees ? eventData.attendees.length : 0,
+            attendees: filteredAttendees,
+            attendeesCount: filteredAttendees.length,
             isPrivateEvent: true,
           });
         });
