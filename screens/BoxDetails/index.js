@@ -454,6 +454,14 @@ export default memo(function BoxDetails({ route, navigation }) {
 
     const eventData = {
       title: box.title,
+      category: box.category || "General", // Ensure category is defined
+      date: box.date,
+      dateArray: [eventDate],
+  
+      description: box.description || "",
+      eventid: box.id || box.title,
+      expirationDate: box.expiration || "",
+      address: box.address || "",
       imageUrl: box.imageUrl || "",
       date: eventDate,
       phoneNumber: box.number || "Sin número",

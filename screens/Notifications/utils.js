@@ -511,6 +511,7 @@ export const handleAcceptPrivateEvent = async (params) => {
         expirationDate: eventData.expirationDate,
         hour: eventData.hour,
         status: "accepted",
+        dateArray: [eventData.date],
       });
     }
 
