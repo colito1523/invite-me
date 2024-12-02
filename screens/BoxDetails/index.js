@@ -394,26 +394,23 @@ export default memo(function BoxDetails({ route, navigation }) {
   const handleAddEvent = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
-
+  
     const user = auth.currentUser;
     if (!user || !box) {
       setIsProcessing(false);
       return;
     }
-
+  
     try {
       const eventsRef = collection(database, "users", user.uid, "events");
       const q = query(eventsRef, where("title", "==", box.title));
       const querySnapshot = await getDocs(q);
-
+  
       const isPrivateEvent = box.category === "EventoParaAmigos" || box.isPrivate;
       const eventDate = isPrivateEvent ? box.date : selectedDate;
-      const eventRef = doc(
-        database,
-        isPrivateEvent ? "EventsPriv" : "GoBoxs",
-        box.id || box.title
-      );
-
+      const eventId = box.eventId || box.id || box.title; // Ensure eventId is defined
+      const eventRef = doc(database, "EventsPriv", eventId);
+  
       if (!querySnapshot.empty) {
         // Check if the event for the selected date already exists
         const existingEvent = querySnapshot.docs.find(doc => doc.data().dateArray.includes(eventDate));
@@ -421,13 +418,20 @@ export default memo(function BoxDetails({ route, navigation }) {
           // If the event for the selected date exists, remove it
           await deleteDoc(existingEvent.ref);
           setIsEventSaved(false);
-
+  
           if (isPrivateEvent) {
-            await updateDoc(eventRef, {
-              attendees: arrayRemove({ uid: user.uid }),
-            });
+            const eventSnapshot = await getDoc(eventRef);
+            if (eventSnapshot.exists()) {
+              const eventData = eventSnapshot.data();
+              const updatedAttendees = eventData.attendees.filter(
+                (attendee) => attendee.uid !== user.uid
+              );
+              await updateDoc(eventRef, {
+                attendees: updatedAttendees,
+              });
+            }
           } else {
-            await handleRemoveFromGoBoxs(box.title, selectedDate);
+            await handleRemoveFromGoBoxs(box.title, eventDate);
           }
         } else {
           // If the event for the selected date does not exist, add it
@@ -437,7 +441,7 @@ export default memo(function BoxDetails({ route, navigation }) {
         // If no events exist, add the new event
         await addEventToUser(eventsRef, eventDate, eventRef, isPrivateEvent);
       }
-
+  
       setIsEventSaved(true);
     } catch (error) {
       console.error("Error al manejar el evento:", error);
@@ -458,7 +462,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       setIsProcessing(false);
       return;
     }
-
+  
     const eventId = box.eventId || box.id || box.title; // Ensure eventId is defined
     if (!eventId) {
       console.error("Event ID is undefined");
@@ -466,7 +470,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       setIsProcessing(false);
       return;
     }
-
+  
     const eventData = {
       title: box.title,
       category: box.category || "General", // Ensure category is defined
@@ -481,33 +485,34 @@ export default memo(function BoxDetails({ route, navigation }) {
       locationLink: box.locationLink || "Sin ubicación especificada",
       hours: box.hours || {},
       uid: auth.currentUser.uid, // Add this line to include the uid
-      eventId: eventId // Ensure the correct eventId from the notification is used
+      eventId: eventId, // Ensure the correct eventId from the notification is used
+      status: "accepted" 
     };
-
+  
     if (isPrivateEvent) {
       const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
       const username = userDoc.exists() ? userDoc.data().username || "Anónimo" : "Anónimo";
       const profileImage = userDoc.exists()
         ? userDoc.data().photoUrls?.[0] || "https://via.placeholder.com/150"
         : "https://via.placeholder.com/150";
-
+  
       const attendeeData = { uid: auth.currentUser.uid, username, profileImage };
-
+  
       const eventSnapshot = await getDoc(eventRef);
-      if (!eventSnapshot.exists()) {
-        await setDoc(eventRef, {
-          attendees: [attendeeData],
-          ...eventData,
-        });
-      } else {
+      if (eventSnapshot.exists()) {
         await updateDoc(eventRef, {
           attendees: arrayUnion(attendeeData),
         });
+      } else {
+        console.error("Event does not exist in EventsPriv");
+        Alert.alert(t("boxDetails.error"), t("boxDetails.eventNotFound"));
+        setIsProcessing(false);
+        return;
       }
     } else {
       await saveUserEvent(box.title, eventDate, box.day, eventData.phoneNumber, eventData.locationLink, eventData.hours);
     }
-
+  
     await addDoc(eventsRef, {
       ...eventData,
       dateArray: [eventDate],
