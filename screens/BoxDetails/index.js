@@ -80,7 +80,7 @@ export default memo(function BoxDetails({ route, navigation }) {
   useEffect(() => {
     if (box && !isFromNotification) {
       // Solo fetch de datos si no viene de una notificación
-      fetchEventDetails();
+      fetchEventDetails({ box, setBoxData });
     }
     if (isFromNotification) {
       console.log("Datos del evento privado desde notificación:", {
@@ -489,6 +489,8 @@ export default memo(function BoxDetails({ route, navigation }) {
       status: "accepted",
       coordinates: box.coordinates || {} // Add coordinates
     };
+  
+    console.log("Adding event to user:", eventData); // Log the event data
   
     if (isPrivateEvent) {
       const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
