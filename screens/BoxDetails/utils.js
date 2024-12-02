@@ -244,6 +244,7 @@ export const handleGeneralEventInvite = async (params) => {
       number: box.number || "Sin número",
       coordinates: box.coordinates || {},
       seen: false, // Campo añadido
+      imageUrl: box.imageUrl || "https://via.placeholder.com/150" // Update this line
     });
 
     Alert.alert(
