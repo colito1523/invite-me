@@ -595,52 +595,66 @@ export const toggleHideMyStories = async (params) => {
 };
 
 export const toggleUserStatus = async (params) => {
-  const user = params.user
-  const selectedUser = params.selectedUser
-  const setPendingRequest = params.setPendingRequest
-  const setFriendshipStatus = params.setFriendshipStatus
-  const setFriendCount = params.setFriendCount
-  const friendCount = params.friendCount
-  const t = params.t
+  const {
+    user,
+    selectedUser,
+    setPendingRequest,
+    setFriendshipStatus,
+    setFriendCount,
+    friendCount,
+    t,
+    isProcessing,
+    setIsProcessing,
+    friendshipStatus,
+  } = params;
 
-  if (!user || !selectedUser) return;
+  if (!user || !selectedUser || isProcessing) return; // No hacer nada si ya se está procesando
 
-  const friendsRef = collection(database, "users", user.uid, "friends");
-  const q = query(friendsRef, where("friendId", "==", selectedUser.id));
-  const friendSnapshot = await getDocs(q);
+  // Comenzar a procesar
+  setIsProcessing(true);
 
-  const currentUserRequestsRef = collection(
+  try {
+    // Optimistic UI update
+    const wasFriends = friendshipStatus; // Estado anterior
+    setFriendshipStatus(!wasFriends);
+    setFriendCount(friendCount + (wasFriends ? -1 : 1));
+
+    const friendsRef = collection(database, "users", user.uid, "friends");
+    const q = query(friendsRef, where("friendId", "==", selectedUser.id));
+    const friendSnapshot = await getDocs(q);
+
+    const currentUserRequestsRef = collection(
       database,
       "users",
       user.uid,
       "friendRequests"
-  );
-  const existingRequestFromThemQuery = query(
+    );
+    const existingRequestFromThemQuery = query(
       currentUserRequestsRef,
       where("fromId", "==", selectedUser.id)
-  );
-  const existingRequestFromThemSnapshot = await getDocs(
+    );
+    const existingRequestFromThemSnapshot = await getDocs(
       existingRequestFromThemQuery
-  );
+    );
 
-  if (!existingRequestFromThemSnapshot.empty && friendSnapshot.empty) {
+    if (!existingRequestFromThemSnapshot.empty && friendSnapshot.empty) {
       Alert.alert(
-          "Solicitud pendiente",
-          "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
+        "Solicitud pendiente",
+        "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
       );
       return;
-  }
+    }
 
-  if (friendSnapshot.empty) {
+    if (friendSnapshot.empty) {
       const requestRef = collection(
-          database,
-          "users",
-          selectedUser.id,
-          "friendRequests"
+        database,
+        "users",
+        selectedUser.id,
+        "friendRequests"
       );
       const existingRequestQuery = query(
-          requestRef,
-          where("fromId", "==", user.uid)
+        requestRef,
+        where("fromId", "==", user.uid)
       );
       const existingRequestSnapshot = await getDocs(existingRequestQuery);
 
@@ -648,90 +662,83 @@ export const toggleUserStatus = async (params) => {
       const userDocSnapshot = await getDoc(userDocRef);
 
       const currentUser = userDocSnapshot.exists()
-          ? userDocSnapshot.data()
-          : {
-              username: t("userProfile.anonymousUser"),
-              profileImage: "https://via.placeholder.com/150",
-          };
+        ? userDocSnapshot.data()
+        : {
+            username: t("userProfile.anonymousUser"),
+            profileImage: "https://via.placeholder.com/150",
+        };
 
       const profileImage =
-          currentUser.photoUrls && currentUser.photoUrls.length > 0
-              ? currentUser.photoUrls[0]
-              : "https://via.placeholder.com/150";
-
+        currentUser.photoUrls && currentUser.photoUrls.length > 0
+          ? currentUser.photoUrls[0]
+          : "https://via.placeholder.com/150";
 
       if (existingRequestSnapshot.empty) {
-          try {
-              await addDoc(requestRef, {
-                  fromName: currentUser.username,
-                  fromId: user.uid,
-                  fromImage: profileImage,
-                  status: "pending",
-                  timestamp: Timestamp.now(),
-                  seen: false,
+        await addDoc(requestRef, {
+          fromName: currentUser.username,
+          fromId: user.uid,
+          fromImage: profileImage,
+          status: "pending",
+          timestamp: Timestamp.now(),
+          seen: false,
+        });
 
-              });
-
-              setPendingRequest(true);
-          } catch (error) {
-              console.error("Error sending friend request:", error);
-          }
+        setPendingRequest(true);
       } else {
-          try {
-              existingRequestSnapshot.forEach(async (doc) => {
-                  await deleteDoc(doc.ref);
-              });
+        existingRequestSnapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+        });
 
-              setPendingRequest(false);
-          } catch (error) {
-              console.error("Error canceling friend request:", error);
-          }
+        setPendingRequest(false);
       }
-  } else {
-      try {
-          friendSnapshot.forEach(async (doc) => {
-              await deleteDoc(doc.ref);
-          });
+    } else {
+      // Si ya son amigos, eliminar la relación
+      friendSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
 
-          const reverseFriendSnapshot = await getDocs(
-              query(
-                  collection(database, "users", selectedUser.id, "friends"),
-                  where("friendId", "==", user.uid)
-              )
-          );
-          reverseFriendSnapshot.forEach(async (doc) => {
-              await deleteDoc(doc.ref);
-          });
+      const reverseFriendSnapshot = await getDocs(
+        query(
+          collection(database, "users", selectedUser.id, "friends"),
+          where("friendId", "==", user.uid)
+        )
+      );
+      reverseFriendSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
 
-          // Eliminar solicitudes de amistad pendientes entre ambos usuarios
-          const currentUserRequestsRef = collection(
-              database,
-              "users",
-              selectedUser.id,
-              "friendRequests"
-          );
-          const requestQuery = query(
-              currentUserRequestsRef,
-              where("fromId", "==", user.uid)
-          );
-          const requestSnapshot = await getDocs(requestQuery);
-          requestSnapshot.forEach(async (doc) => {
-              await deleteDoc(doc.ref);
-          });
+      // Eliminar solicitudes de amistad pendientes entre ambos usuarios
+      const currentUserRequestsRef = collection(
+        database,
+        "users",
+        selectedUser.id,
+        "friendRequests"
+      );
+      const requestQuery = query(
+        currentUserRequestsRef,
+        where("fromId", "==", user.uid)
+      );
+      const requestSnapshot = await getDocs(requestQuery);
+      requestSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
 
-          const reverseRequestQuery = query(
-              collection(database, "users", user.uid, "friendRequests"),
-              where("fromId", "==", selectedUser.id)
-          );
-          const reverseRequestSnapshot = await getDocs(reverseRequestQuery);
-          reverseRequestSnapshot.forEach(async (doc) => {
-              await deleteDoc(doc.ref);
-          });
+      const reverseRequestQuery = query(
+        collection(database, "users", user.uid, "friendRequests"),
+        where("fromId", "==", selectedUser.id)
+      );
+      const reverseRequestSnapshot = await getDocs(reverseRequestQuery);
+      reverseRequestSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
 
-          setFriendshipStatus(false);
-          setFriendCount(friendCount - 1);
-      } catch (error) {
-          console.error("Error removing friendship:", error);
-      }
+      setFriendshipStatus(false);
+      setFriendCount(friendCount - 1);
+    }
+  } catch (error) {
+    console.error("Error toggling user status:", error);
+  } finally {
+    // Restablecer el estado de procesamiento
+    setIsProcessing(false);
   }
 };

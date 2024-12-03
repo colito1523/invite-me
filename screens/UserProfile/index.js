@@ -94,6 +94,7 @@ export default function UserProfile({ route, navigation }) {
   const [isElementsVisible, setIsElementsVisible] = useState(true);
   const [hideStories, setHideStories] = useState(false);
   const [hideMyStories, setHideMyStories] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [heartCount, setHeartCount] = useState(0);
@@ -247,20 +248,17 @@ export default function UserProfile({ route, navigation }) {
           ]}
         >
           {Array.isArray(mutualFriends) &&
-            mutualFriends
-              .slice(0, 4)
-              .map((friend, index) => (
-                <Image
-                  key={friend?.id || index}
-                  source={{
-                    uri:
-                      friend?.photoUrls?.[0] ||
-                      "https://via.placeholder.com/150",
-                  }}
-                  style={[styles.mutualFriendImage, { left: index * 30 }]}
-                  cachePolicy="memory-disk"
-                />
-              ))}
+            mutualFriends.slice(0, 4).map((friend, index) => (
+              <Image
+                key={friend?.id || index}
+                source={{
+                  uri:
+                    friend?.photoUrls?.[0] || "https://via.placeholder.com/150",
+                }}
+                style={[styles.mutualFriendImage, { left: index * 30 }]}
+                cachePolicy="memory-disk"
+              />
+            ))}
         </View>
         <Text style={[styles.mutualFriendMoreText, { marginLeft: 10 }]}>
           {mutualFriends.length > 4
@@ -406,6 +404,8 @@ export default function UserProfile({ route, navigation }) {
                                       setFriendCount,
                                       friendCount,
                                       t,
+                                      isProcessing,
+                                      setIsProcessing, // Agregar aquí
                                     })
                                   }
                                 >
