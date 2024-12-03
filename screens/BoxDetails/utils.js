@@ -348,7 +348,12 @@ export const handleInvite = async (params) => {
     await updateDoc(eventRef, {
       invitedFriends: arrayUnion(friendId),
     });
-
+    
+    setFriends((prevFriends) =>
+      prevFriends.map((friend) =>
+        friend.friendId === friendId ? { ...friend, invited: true } : friend
+      )
+    );
     // Crear una nueva colección para las invitaciones
     const invitationsRef = collection(eventRef, "invitations");
     await addDoc(invitationsRef, {

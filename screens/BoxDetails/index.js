@@ -144,6 +144,27 @@ export default memo(function BoxDetails({ route, navigation }) {
     };
   }, [box, selectedDate]);
 
+  useEffect(() => {
+    if (!box || box.category !== "EventoParaAmigos") return;
+  
+    const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
+  
+    const unsubscribe = onSnapshot(eventRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const eventData = docSnapshot.data();
+        setBoxData((prevData) => ({
+          ...prevData,
+          invitedFriends: eventData.invitedFriends || [],
+        }));
+      }
+    });
+  
+    return () => unsubscribe();
+  }, [box]);
+  
+
+  
+
   const handleRemoveFromEvent = async () => {
     const user = auth.currentUser;
     if (!user || !box) return;
@@ -640,16 +661,28 @@ export default memo(function BoxDetails({ route, navigation }) {
   };
 
 
-
   const renderFriendItem = ({ item }) => {
-    const isInvited = attendeesList.some(attendee => attendee.uid === item.friendId);
-    const hasBeenInvited = attendeesList.some(attendee =>
-      attendee.invitations && attendee.invitations.some(invitation =>
-        invitation.invitedTo === item.friendId && invitation.invitedBy === auth.currentUser.uid
-      )
-    );
+    let isInvited, hasBeenInvited, isDisabled;
   
-    const isDisabled = isInvited || hasBeenInvited;
+    if (box.category !== "EventoParaAmigos") {
+      // Lógica para eventos generales
+      isInvited = attendeesList.some((attendee) => attendee.uid === item.friendId);
+      hasBeenInvited = attendeesList.some(
+        (attendee) =>
+          attendee.invitations &&
+          attendee.invitations.some(
+            (invitation) =>
+              invitation.invitedTo === item.friendId &&
+              invitation.invitedBy === auth.currentUser.uid
+          )
+      );
+      isDisabled = isInvited || hasBeenInvited;
+    } else {
+      // Lógica para eventos privados
+      isInvited = boxData.invitedFriends?.includes(item.friendId);
+      const isAttending = attendeesList.some((attendee) => attendee.uid === item.friendId);
+      isDisabled = isInvited || isAttending;
+    }
   
     return (
       <View
@@ -669,18 +702,21 @@ export default memo(function BoxDetails({ route, navigation }) {
           {item.friendName}
         </Text>
         {box.category !== "EventoParaAmigos" ? (
+          // Botón para eventos generales
           <TouchableOpacity
             style={[
               styles.shareButton,
               isDisabled && styles.invitedButton,
               isNightMode && styles.shareButtonNight,
             ]}
-            onPress={() => handleGeneralEventInvite({
-              friendId: item.friendId,
-              isEventSaved,
-              box,
-              selectedDate
-            })}
+            onPress={() =>
+              handleGeneralEventInvite({
+                friendId: item.friendId,
+                isEventSaved,
+                box,
+                selectedDate,
+              })
+            }
             disabled={isDisabled}
           >
             <Ionicons
@@ -690,26 +726,29 @@ export default memo(function BoxDetails({ route, navigation }) {
             />
           </TouchableOpacity>
         ) : (
+          // Botón para eventos privados
           <TouchableOpacity
             style={[
               styles.shareButton,
               isDisabled && styles.invitedButton,
               isNightMode && styles.shareButtonNight,
             ]}
-            onPress={() => handleInvite({
-              box,
-              friends,
-              isEventSaved,
-              selectedDate,
-              friendId: item.friendId,
-              setFriends,
-              t
-            })}
+            onPress={() =>
+              handleInvite({
+                box,
+                friends,
+                isEventSaved,
+                selectedDate,
+                friendId: item.friendId,
+                setFriends,
+                t,
+              })
+            }
             disabled={isDisabled}
           >
             <Ionicons
-              name={isDisabled ? "close-sharp" : "arrow-redo"}
-              size={16}
+               name={isDisabled ? "close-sharp" : "paper-plane"}
+              size={20}
               color={isNightMode ? "white" : "black"}
             />
           </TouchableOpacity>
@@ -718,7 +757,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     );
   };
   
-
   const handleSearch = (text) => {
     setSearchText(text);
     if (text === "") {

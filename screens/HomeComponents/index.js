@@ -347,7 +347,7 @@ const fetchPrivateEvents = useCallback(async () => {
           ...eventData,
           attendees: fullEventData.attendees || [],
         });
-       
+        console.log("Full event data:", fullEventData); // Log the full event data
       }
     }
   }
@@ -420,6 +420,7 @@ const fetchPrivateEvents = useCallback(async () => {
   // Función para manejar el evento de clic en el box
   const handleBoxPress = useCallback(
     (box) => {
+      console.log("Event data:", box); // Log the event data
       navigation.navigate("BoxDetails", {
         box,
         selectedDate,
