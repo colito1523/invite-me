@@ -124,34 +124,34 @@ export default function Chat({ route }) {
 
   const markMessagesAsRead = async (messages) => {
     try {
-      console.log("Marcando mensajes como leídos...");
-      if (!chatId) {
-        console.error("El chatId no está definido.");
-        return;
-      }
-  
-      const batch = writeBatch(database);
-  
-      messages.forEach((message) => {
-        if (
-          message.senderId !== user.uid && 
-          (!Array.isArray(message.viewedBy) || !message.viewedBy.includes(user.uid))
-        ) {
-          console.log("Marcando mensaje como leído:", message.id);
-          const messageRef = doc(database, "chats", chatId, "messages", message.id);
-          batch.update(messageRef, {
-            viewedBy: arrayUnion(user.uid),
-            seen: true, // Asegúrate de que este campo exista en Firestore
-          });
+        if (!chatId) {
+            console.error("El chatId no está definido.");
+            return;
         }
-      });
-  
-      await batch.commit();
-      console.log("Todos los mensajes visibles han sido marcados como leídos.");
+
+        const batch = writeBatch(database);
+
+        messages.forEach((message) => {
+            if (
+                message.senderId !== user.uid &&
+                (!Array.isArray(message.viewedBy) || !message.viewedBy.includes(user.uid)) &&
+                !message.isViewOnce // Ignorar mensajes de tipo "ver una vez"
+            ) {
+                const messageRef = doc(database, "chats", chatId, "messages", message.id);
+                batch.update(messageRef, {
+                    viewedBy: arrayUnion(user.uid),
+                    seen: true,
+                });
+            }
+        });
+
+        await batch.commit();
+        console.log("Todos los mensajes visibles han sido marcados como leídos.");
     } catch (error) {
-      console.error("Error al marcar los mensajes como leídos:", error);
+        console.error("Error al marcar los mensajes como leídos:", error);
     }
-  };
+};
+
   
 
   const handleReport = async () => {
@@ -537,44 +537,43 @@ const handleDeleteChat = async () => {
     }
   };
 
-  const handleMediaPress = async (
-    mediaUrl,
-    mediaType,
-    messageId,
-    isViewOnce
-  ) => {
+  const handleMediaPress = async (mediaUrl, mediaType, messageId, isViewOnce) => {
     try {
-      const messageRef = doc(database, "chats", chatId, "messages", messageId);
-      const messageSnapshot = await getDoc(messageRef);
+        const messageRef = doc(database, "chats", chatId, "messages", messageId);
+        const messageSnapshot = await getDoc(messageRef);
 
-      if (!messageSnapshot.exists()) {
-        Alert.alert("Error", "No se encontró el mensaje.");
-        return;
-      }
-
-      const messageData = messageSnapshot.data();
-
-      if (isViewOnce) {
-        if (messageData.viewedBy?.includes(user.uid)) {
-          Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista.");
-          return;
+        if (!messageSnapshot.exists()) {
+            Alert.alert("Error", "No se encontró el mensaje.");
+            return;
         }
 
-        await updateDoc(messageRef, {
-          viewedBy: [...(messageData.viewedBy || []), user.uid],
-        });
+        const messageData = messageSnapshot.data();
 
-        setSelectedImage(mediaUrl);
-        setIsModalVisible(true);
-      } else {
-        setSelectedImage(mediaUrl);
-        setIsModalVisible(true);
-      }
+        // Solo actualizar si es una imagen de "ver una vez"
+        if (isViewOnce) {
+            if (messageData.viewedBy?.includes(user.uid)) {
+                Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista.");
+                return;
+            }
+
+            // Marcar el mensaje como visto por el usuario actual
+            await updateDoc(messageRef, {
+                viewedBy: [...(messageData.viewedBy || []), user.uid],
+                seen: true,
+            });
+
+            setSelectedImage(mediaUrl);
+            setIsModalVisible(true);
+        } else {
+            setSelectedImage(mediaUrl);
+            setIsModalVisible(true);
+        }
     } catch (error) {
-      console.error("Error al abrir la imagen:", error);
-      Alert.alert("Error", "No se pudo abrir la imagen.");
+        console.error("Error al abrir la imagen:", error);
+        Alert.alert("Error", "No se pudo abrir la imagen.");
     }
-  };
+};
+
 
   const closeModal = () => {
     setIsModalVisible(false);
