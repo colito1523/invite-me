@@ -277,24 +277,72 @@ export default function UserProfile({ route, navigation }) {
     </View>
   );
 
-  const renderEvents = (start, end) => (
-    <View style={styles.buttonContainer}>
-      {events.slice(start, end).map((event, index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.button}
-          onPress={() => handleBoxPress({ box: event, navigation, t })}
-        >
-          <Text style={styles.buttonText}>
-            {event.title.length > 9
-              ? event.title.substring(0, 5) + "..."
-              : event.title}{" "}
-            {event.date || t("userProfile.noTitle")}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
+  const renderEvents = (start, end) => {
+    const userId = auth.currentUser?.uid;
+  
+    console.log("User ID:", userId); // Verifica el ID del usuario
+    console.log("All Events:", events); // Verifica todos los eventos antes de filtrar
+  
+    if (events.length === 0) {
+      console.log("No hay eventos para mostrar en este momento."); // Log cuando no hay eventos disponibles
+      return (
+        <View style={styles.noEventsContainer}>
+          <Text style={styles.noEventsText}>No hay eventos disponibles.</Text>
+        </View>
+      );
+    }
+  
+    const filteredEvents = events.slice(start, end).filter((event) => {
+      console.log("Evaluating Event:", event); // Verificar cada evento antes de evaluar
+  
+      // Mostrar todos los eventos que no sean de tipo "EventoParaAmigos"
+      if (event.category && event.category !== "EventoParaAmigos") {
+        console.log("Evento General:", event.title); // Log cuando es un evento general
+        return true;
+      }
+  
+      // Mostrar eventos privados solo si el usuario está asistiendo o fue invitado
+      if (event.category === "EventoParaAmigos") {
+        const isAttending =
+          Array.isArray(event.attendees) && event.attendees.some((attendee) => attendee.uid === userId);
+        const isInvited =
+          Array.isArray(event.invitedFriends) && event.invitedFriends.includes(userId);
+  
+        console.log("Evento Privado:", event.title, "isAttending:", isAttending, "isInvited:", isInvited); // Log detallado de condición de evento privado
+  
+        return isAttending || isInvited;
+      }
+  
+      console.log("Evento filtrado, no cumple las condiciones:", event.title); // Log si no se cumple ninguna condición
+      // No se muestra si no cumple con los requisitos anteriores
+      return false;
+    });
+  
+    console.log("Filtered Events:", filteredEvents); // Verifica los eventos después de filtrar
+  
+    return (
+      <View style={styles.buttonContainer}>
+        {filteredEvents.map((event, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.button}
+            onPress={() => handleBoxPress({ box: event, navigation, t })}
+          >
+            <Text style={styles.buttonText}>
+              {event.title.length > 9
+                ? event.title.substring(0, 5) + "..."
+                : event.title}{" "}
+              {event.date || t("userProfile.noTitle")}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+  
+  
+  
+  
 
   useEffect(() => {
     const fetchLikeCount = async () => {

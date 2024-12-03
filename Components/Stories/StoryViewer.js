@@ -27,6 +27,9 @@ import {
   setDoc,
   addDoc,
   collection,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import { Image } from "expo-image";
@@ -154,12 +157,31 @@ export function StoryViewer({
   
 
   const getChatId = async (user1Id, user2Id) => {
+    const chatsRef = collection(database, "chats");
+  
+    // Query for a chat that includes both user1Id and user2Id
+    const q = query(
+      chatsRef,
+      where("participants", "array-contains", user1Id)
+    );
+  
+    const querySnapshot = await getDocs(q);
+  
+    for (const doc of querySnapshot.docs) {
+      const chatParticipants = doc.data().participants;
+      if (chatParticipants.includes(user2Id)) {
+        return doc.id; // Return existing chat ID
+      }
+    }
+  
+    // If no chat exists, return a new chat ID based on user IDs
+    // This part is for creating a new chat if none exists
     const user1Doc = await getDoc(doc(database, "users", user1Id));
     const user2Doc = await getDoc(doc(database, "users", user2Id));
-
+  
     const user1Name = user1Doc.data().username;
     const user2Name = user2Doc.data().username;
-
+  
     return user1Name > user2Name
       ? `${user1Name}_${user2Name}`
       : `${user2Name}_${user1Name}`;

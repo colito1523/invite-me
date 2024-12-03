@@ -573,7 +573,7 @@ export default function Notes() {
                           }
                           size={24}
                           color={
-                            selectedNoteFullScreen.isLiked ? "red" : "white"
+                            selectedNoteFullScreen.isLiked ? "red" : "black"
                           }
                         />
                       </TouchableOpacity>
