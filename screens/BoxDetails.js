@@ -966,7 +966,6 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
         [selectedDate]: [...existingData, userDataToSave],
       });
   
-      console.log("Evento guardado con éxito");
     } catch (error) {
       console.error("Error al guardar el evento:", error);
     }

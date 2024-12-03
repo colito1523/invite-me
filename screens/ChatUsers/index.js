@@ -70,7 +70,6 @@ export default function Chat({ route }) {
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
 
   useEffect(() => {
-    console.log("recipient", messages);
 
   }, [messages.length]);
   
@@ -95,9 +94,7 @@ export default function Chat({ route }) {
 
   // Configuración del chat
   useEffect(() => {
-    console.log("123123")
       if (chatId) {
-        console.log("holitra")
         const messagesRef = collection(database, "chats", chatId, "messages");
         const q = query(messagesRef, orderBy("createdAt", "asc"));
 
@@ -110,7 +107,6 @@ export default function Chat({ route }) {
           setMessages(messagesList);
 
           // Marcar los mensajes como leídos
-          console.log("2222")
           markMessagesAsRead(messagesList);
         });
 
@@ -118,7 +114,6 @@ export default function Chat({ route }) {
 
       } else {
         createChatIfNotExists()
-        console.log("post crear", chatId)
       }
   }, [chatId, messages.length]);
 
@@ -146,7 +141,6 @@ export default function Chat({ route }) {
         });
 
         await batch.commit();
-        console.log("Todos los mensajes visibles han sido marcados como leídos.");
     } catch (error) {
         console.error("Error al marcar los mensajes como leídos:", error);
     }
@@ -156,7 +150,6 @@ export default function Chat({ route }) {
 
   const handleReport = async () => {
     try {
-      console.log("Datos del usuario reportado al abrir el modal:", recipient);
       setIsComplaintVisible(true);
     } catch (error) {
       console.error("Error al abrir el modal de denuncia:", error);
@@ -187,7 +180,6 @@ export default function Chat({ route }) {
         return;
       }
 
-      console.log("Datos de la denuncia:", { reason, description, recipientId });
 
       const complaintsRef = collection(database, "complaints");
       const newComplaint = {
@@ -200,7 +192,6 @@ export default function Chat({ route }) {
         timestamp: new Date(),
       };
 
-      console.log("Enviando denuncia:", newComplaint);
       await addDoc(complaintsRef, newComplaint);
 
       Alert.alert("Gracias", "Tu denuncia ha sido enviada.");
@@ -236,7 +227,6 @@ export default function Chat({ route }) {
   
         if (existingChatId) {
           setChatId(existingChatId); // Si el chat existe, usa su ID
-          console.log("Chat existente encontrado:", existingChatId);
           return existingChatId;
         }
   
@@ -251,7 +241,6 @@ export default function Chat({ route }) {
         });
   
         setChatId(newChatId);
-        console.log("Nuevo chat creado:", newChatId);
         return newChatId;
       } catch (error) {
         console.error("Error al verificar o crear el chat:", error);

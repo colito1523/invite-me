@@ -85,7 +85,6 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             : "https://via.placeholder.com/150";
         navigation.navigate("UserProfile", { selectedUser: userData });
       } else {
-        console.log("No se encontraron detalles para este usuario.");
       }
     } catch (error) {
       console.error("Error fetching user data:", error);

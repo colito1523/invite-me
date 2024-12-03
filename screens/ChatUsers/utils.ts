@@ -22,27 +22,10 @@ export const setupChat = async ({chatId, setMessages}) => {
     }
   };
 
-//   const markMessagesAsRead = async (messages) => {
-//     const batch = writeBatch(database);
-//     messages.forEach((message) => {
-//       if (message.senderId !== user.uid && !message.viewedBy?.includes(user.uid)) {
-//         const messageRef = doc(database, "chats", chatId, "messages", message.id);
-//         batch.update(messageRef, {
-//           viewedBy: [...(message.viewedBy || []), user.uid],
-//         });
-//       }
-//     });
-//     try {
-//       await batch.commit();
-//       console.log('Todos los mensajes visibles han sido marcados como leídos.');
-//     } catch (error) {
-//       console.error('Error al marcar los mensajes como leídos:', error);
-//     }
-//   };
+
 
 export const handleReport = async ({recipient, setIsComplaintVisible}) => {
     try {
-      console.log("Datos del usuario reportado al abrir el modal:", recipient);
       setIsComplaintVisible(true);
     } catch (error) {
       console.error("Error al abrir el modal de denuncia:", error);

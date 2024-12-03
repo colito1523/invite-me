@@ -140,9 +140,7 @@ export function StoryViewer({
   
         // Verificar si el campo `hideStoriesFrom` incluye el UID del usuario actual
         if (viewerData.hideStoriesFrom && viewerData.hideStoriesFrom.includes(user.uid)) {
-          console.log("El usuario actual está en la lista de `hideStoriesFrom` del espectador.");
         } else {
-          console.log("El usuario actual NO está en la lista de `hideStoriesFrom` del espectador.");
         }
   
         // Mostrar el modal para ocultar o mostrar historias

@@ -91,7 +91,6 @@ export default memo(function BoxDetails({ route, navigation }) {
           // ...other fields if needed
         }));
       } else {
-        console.log("No such document!");
       }
     } catch (error) {
       console.error("Error fetching event details:", error);
@@ -104,7 +103,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       fetchEventDetails({ box, setBoxData });
     }
     if (isFromNotification) {
-      console.log("Datos del evento privado desde notificación:", {
+      ( {
         box,
         selectedDate,
         isFromNotification
@@ -511,7 +510,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       coordinates: box.coordinates || {} // Add coordinates
     };
   
-    console.log("Adding event to user:", eventData); // Log the event data
   
     if (isPrivateEvent) {
       const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));

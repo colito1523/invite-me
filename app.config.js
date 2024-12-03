@@ -6,7 +6,7 @@ export default {
     slug: "ChatApp-Tutorial",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/notification-icon.png",  
+    icon: "./assets/Logo_Invite_Me.png",  
     userInterfaceStyle: "light",
     splash: {
       image: "./assets/Logo_Invite_Me.png",

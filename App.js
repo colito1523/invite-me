@@ -148,7 +148,6 @@ export default function App() {
           "Roboto-Light": require("./assets/fonts/Roboto-Light.ttf"),
           "Lato-Black": require("./assets/fonts/Lato-Black.ttf"),
         });
-        console.log("Fonts loaded successfully");
         setFontsLoaded(true);
       } catch (error) {
         console.error("Error loading fonts", error);
@@ -173,7 +172,7 @@ export default function App() {
         try {
           const userRef = doc(database, 'users', auth.currentUser.uid);
           await updateDoc(userRef, { expoPushToken: expoPushToken });
-          console.log("Expo Push Token actualizado en Firestore");
+       
         } catch (error) {
           console.error("Error actualizando expoPushToken:", error);
         }
