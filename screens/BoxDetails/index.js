@@ -643,6 +643,13 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   const renderFriendItem = ({ item }) => {
     const isInvited = attendeesList.some(attendee => attendee.uid === item.friendId);
+    const hasBeenInvited = attendeesList.some(attendee =>
+      attendee.invitations && attendee.invitations.some(invitation =>
+        invitation.invitedTo === item.friendId && invitation.invitedBy === auth.currentUser.uid
+      )
+    );
+  
+    const isDisabled = isInvited || hasBeenInvited;
   
     return (
       <View
@@ -665,7 +672,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           <TouchableOpacity
             style={[
               styles.shareButton,
-              (item.invited || isInvited) && styles.invitedButton,
+              isDisabled && styles.invitedButton,
               isNightMode && styles.shareButtonNight,
             ]}
             onPress={() => handleGeneralEventInvite({
@@ -674,19 +681,19 @@ export default memo(function BoxDetails({ route, navigation }) {
               box,
               selectedDate
             })}
-            disabled={item.invited || isInvited}
+            disabled={isDisabled}
           >
             <Ionicons
-              name={(item.invited || isInvited) ? "close-sharp" : "paper-plane"}
+              name={isDisabled ? "close-sharp" : "paper-plane"}
               size={20}
-              color={isNightMode ? "black" : "black"}
+              color={isNightMode ? "white" : "black"}
             />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
             style={[
               styles.shareButton,
-              (item.invited || isInvited) && styles.invitedButton,
+              isDisabled && styles.invitedButton,
               isNightMode && styles.shareButtonNight,
             ]}
             onPress={() => handleInvite({
@@ -698,19 +705,19 @@ export default memo(function BoxDetails({ route, navigation }) {
               setFriends,
               t
             })}
-            disabled={item.invited || isInvited}
+            disabled={isDisabled}
           >
             <Ionicons
-              name={(item.invited || isInvited) ? "checkmark-sharp" : "arrow-redo"}
+              name={isDisabled ? "close-sharp" : "arrow-redo"}
               size={16}
-              color={isNightMode ? "black" : "black"}
+              color={isNightMode ? "white" : "black"}
             />
           </TouchableOpacity>
         )}
       </View>
     );
   };
-
+  
 
   const handleSearch = (text) => {
     setSearchText(text);
