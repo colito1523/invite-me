@@ -247,13 +247,13 @@ export const handleGeneralEventInvite = async (params) => {
 };
 
 export const handleInvite = async (params) => {
-  const friendId = params.friendId
-  const isEventSaved = params.isEventSaved
-  const setFriends = params.setFriends
-  const friends = params.friends
-  const box = params.box
-  const selectedDate = params.selectedDate
-  const t = params.t
+  const friendId = params.friendId;
+  const isEventSaved = params.isEventSaved;
+  const setFriends = params.setFriends;
+  const friends = params.friends;
+  const box = params.box;
+  const selectedDate = params.selectedDate;
+  const t = params.t;
 
   const user = auth.currentUser;
   if (!user) return;
@@ -264,14 +264,12 @@ export const handleInvite = async (params) => {
   }
 
   try {
-    // Actualizar el estado local para marcar al usuario como invitado
     setFriends(
       friends.map((friend) =>
         friend.friendId === friendId ? { ...friend, invited: true } : friend
       )
     );
 
-    // Obtener referencia del evento en Firestore
     const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
     const eventDoc = await getDoc(eventRef);
 
@@ -284,25 +282,27 @@ export const handleInvite = async (params) => {
     const invitedFriends = eventData.invitedFriends || [];
     const attendees = eventData.attendees || [];
 
-    // Verificar si el usuario ya ha sido invitado o si ya está asistiendo
     if (invitedFriends.includes(friendId) || attendees.some(attendee => attendee.uid === friendId)) {
       Alert.alert("Error", "Esta persona ya está invitada o asistiendo al evento.");
       return;
     }
 
-    // Preparar datos del usuario que envía la invitación
-    let fromName = user.displayName || "Usuario Desconocido";
     const userDocRef = doc(database, "users", user.uid);
     const userDocSnapshot = await getDoc(userDocRef);
+    let fromName = user.displayName || "Usuario Desconocido";
+    let fromImage = "https://via.placeholder.com/150";
+
     if (userDocSnapshot.exists()) {
       const userData = userDocSnapshot.data();
       fromName = userData.username || fromName;
+      fromImage = userData.photoUrls && userData.photoUrls.length > 0
+        ? userData.photoUrls[0]
+        : fromImage;
     }
 
     const eventDateTimestamp = box.date || new Date();
     let eventDateFormatted = "Fecha no disponible";
 
-    // Formatear la fecha del evento
     if (eventDateTimestamp instanceof Date) {
       eventDateFormatted = eventDateTimestamp.toLocaleDateString("es-ES", {
         day: "numeric",
@@ -322,16 +322,14 @@ export const handleInvite = async (params) => {
       eventDateFormatted = eventDateTimestamp;
     }
 
-    // Datos adicionales de la notificación
     const eventImage = box.imageUrl;
     const eventCategory = box.category || "Sin categoría";
     const notificationRef = collection(database, "users", friendId, "notifications");
 
-    // Crear la notificación
     await addDoc(notificationRef, {
       fromId: user.uid,
       fromName: fromName,
-      fromImage: eventImage,
+      fromImage: fromImage,
       eventId: box.id,
       eventTitle: box.title,
       eventImage: eventImage,
@@ -341,10 +339,12 @@ export const handleInvite = async (params) => {
       type: "invitation",
       status: "pendiente",
       timestamp: new Date(),
-      seen: false, // Campo añadido
+      seen: false,
+      address: eventData.address || "Dirección no disponible",
+      description: eventData.description || "Descripción no disponible",
+      eventDateTime: `${eventData.day || "Fecha no disponible"} ${eventData.hour || "Hora no disponible"}`
     });
 
-    // Actualizar la lista de invitados en el evento
     await updateDoc(eventRef, {
       invitedFriends: arrayUnion(friendId),
     });
@@ -354,7 +354,7 @@ export const handleInvite = async (params) => {
         friend.friendId === friendId ? { ...friend, invited: true } : friend
       )
     );
-    // Crear una nueva colección para las invitaciones
+
     const invitationsRef = collection(eventRef, "invitations");
     await addDoc(invitationsRef, {
       invitedBy: user.uid,
