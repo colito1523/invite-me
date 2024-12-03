@@ -257,7 +257,7 @@ export const handleBoxPress = ({ event, navigation, t }) => {
           locationLink: event.locationLink || t("profile.noLocation"),
           coordinates: event.coordinates || { latitude: 0, longitude: 0 },
           description: event.description || t("profile.noDescription"),
-          address: event.address || t("profile.noAddress"),
+      
         };
   
     // Navegar al componente `BoxDetails`

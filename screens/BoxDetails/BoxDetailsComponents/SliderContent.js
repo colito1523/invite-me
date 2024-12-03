@@ -130,11 +130,11 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
           </View>
         ) : (
           <View style={styles.contactContainer}>
-            <Text style={styles.contactTitle}>Contacto:</Text>
-            <Text style={styles.contactText}>
-              {boxData.number || boxData.phoneNumber || "Sin número de contacto"}
-            </Text>
-          </View>
+  <Text style={styles.contactTitle}>Contacto:</Text>
+  <Text style={styles.contactText}>
+    {boxData.number || boxData.phoneNumber || box.phoneNumber || "Sin número de contacto"}
+  </Text>
+</View>
         )}
       </View>
     </ScrollView>
