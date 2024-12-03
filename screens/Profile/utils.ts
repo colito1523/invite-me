@@ -242,20 +242,28 @@ export const pickImage = async (index, ImagePicker, photoUrls, setPhotoUrls) => 
 };
 
 export const handleBoxPress = ({ event, navigation, t }) => {
-  const coordinates = event.coordinates || { latitude: 0, longitude: 0 };
-  navigation.navigate("BoxDetails", {
-    box: {
-      category: event.category || "General",
-      title: event.title || t("profile.noTitle"),
-      imageUrl: event.imageUrl || "https://via.placeholder.com/150",
-      dateArray: event.dateArray || [],
-      hours: event.hours || {},
-      phoneNumber: event.phoneNumber || t("profile.noNumber"),
-      locationLink: event.locationLink || t("profile.noLocation"),
-      coordinates: coordinates,
-      description: event.description || t("profile.noDescription"),
-      address: event.address || t("profile.noAddress"),
-    },
-    selectedDate: event.date || t("profile.noDate"),
-  });
-};
+    const isPrivateEvent = event.category === "EventoParaAmigos";
+  
+    // Definir el objeto `box` dependiendo del tipo de evento
+    const box = isPrivateEvent
+      ? event
+      : {
+          category: event.category || "General",
+          title: event.title || t("profile.noTitle"),
+          imageUrl: event.imageUrl || "https://via.placeholder.com/150",
+          dateArray: event.dateArray || [],
+          hours: event.hours || {},
+          phoneNumber: event.phoneNumber || t("profile.noNumber"),
+          locationLink: event.locationLink || t("profile.noLocation"),
+          coordinates: event.coordinates || { latitude: 0, longitude: 0 },
+          description: event.description || t("profile.noDescription"),
+          address: event.address || t("profile.noAddress"),
+        };
+  
+    // Navegar al componente `BoxDetails`
+    navigation.navigate("BoxDetails", {
+      box: box,
+      collectionType: isPrivateEvent ? "EventsPriv" : "GoBoxs",
+      selectedDate: event.date || t("profile.noDate"),
+    });
+  };

@@ -2,10 +2,10 @@ import React from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 
 const EventsSection = ({ events, handleBoxPress, t }) => {
-  const handlePress = (event) => {
-    console.log("Event details:", event);
-    handleBoxPress(event);
-  };
+const handlePress = (event) => {
+  console.log("Event details:", event);
+  handleBoxPress(event);
+};
 
   return (
     <View style={styles.buttonContainer}>
