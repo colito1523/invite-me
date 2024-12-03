@@ -306,7 +306,7 @@ const Home = React.memo(() => {
   
       setBoxData(allEvents);
     } catch (error) {
-      console.log("Error fetching box data:", error);
+     
     }
   }, [selectedDate]);
 
@@ -347,7 +347,7 @@ const fetchPrivateEvents = useCallback(async () => {
           ...eventData,
           attendees: fullEventData.attendees || [],
         });
-        console.log("Evento agregado:", fullEventData); 
+       
       }
     }
   }

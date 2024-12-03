@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -18,9 +18,16 @@ const InviteFriendsModal = ({
   handleSearch,
   filteredFriends,
   renderFriendItem,
+  attendeesList,
 }) => {
   const { t } = useTranslation();
   const [invitedFriends, setInvitedFriends] = useState([]);
+
+  useEffect(() => {
+    if (modalVisible) {
+      console.log("Attendees for the event:", attendeesList);
+    }
+  }, [modalVisible, attendeesList]);
 
   const handleInvite = (friendId) => {
     setInvitedFriends([...invitedFriends, friendId]);

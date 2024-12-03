@@ -641,71 +641,75 @@ export default memo(function BoxDetails({ route, navigation }) {
 
 
 
-  const renderFriendItem = ({ item }) => (
-    <View
-      style={[
-        styles.friendContainer,
-        isNightMode && styles.friendContainerNight,
-      ]}
-    >
-      <Image
-        source={{
-          uri: item.friendImage || "https://via.placeholder.com/150",
-        }}
-        style={styles.friendImage}
-        cachePolicy="memory-disk"
-      />
-      <Text style={[styles.friendName, isNightMode && styles.friendNameNight]}>
-        {item.friendName}
-      </Text>
-      {box.category !== "EventoParaAmigos" ? (
-        <TouchableOpacity
-          style={[
-            styles.shareButton,
-            item.invited && styles.invitedButton,
-            isNightMode && styles.shareButtonNight,
-          ]}
-          onPress={() => handleGeneralEventInvite({
-            friendId: item.friendId,
-            isEventSaved,
-            box,
-            selectedDate
-          })}
-          disabled={item.invited}
-        >
-          <Ionicons
-            name={item.invited ? "checkmark-sharp" : "arrow-redo"}
-            size={16}
-            color={isNightMode ? "black" : "black"}
-          />
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity
-          style={[
-            styles.shareButton,
-            item.invited && styles.invitedButton,
-            isNightMode && styles.shareButtonNight,
-          ]}
-          onPress={() => handleInvite({
-            box,
-            friends,
-            isEventSaved,
-            selectedDate,
-            friendId: item.friendId,
-            setFriends,
-            t
-          })}
-          disabled={item.invited}
-        >
-          <Ionicons
-            name={item.invited ? "checkmark-sharp" : "arrow-redo"}
-            size={16}
-            color={isNightMode ? "black" : "black"}
-          />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+  const renderFriendItem = ({ item }) => {
+    const isInvited = attendeesList.some(attendee => attendee.uid === item.friendId);
+  
+    return (
+      <View
+        style={[
+          styles.friendContainer,
+          isNightMode && styles.friendContainerNight,
+        ]}
+      >
+        <Image
+          source={{
+            uri: item.friendImage || "https://via.placeholder.com/150",
+          }}
+          style={styles.friendImage}
+          cachePolicy="memory-disk"
+        />
+        <Text style={[styles.friendName, isNightMode && styles.friendNameNight]}>
+          {item.friendName}
+        </Text>
+        {box.category !== "EventoParaAmigos" ? (
+          <TouchableOpacity
+            style={[
+              styles.shareButton,
+              (item.invited || isInvited) && styles.invitedButton,
+              isNightMode && styles.shareButtonNight,
+            ]}
+            onPress={() => handleGeneralEventInvite({
+              friendId: item.friendId,
+              isEventSaved,
+              box,
+              selectedDate
+            })}
+            disabled={item.invited || isInvited}
+          >
+            <Ionicons
+              name={(item.invited || isInvited) ? "close-sharp" : "paper-plane"}
+              size={20}
+              color={isNightMode ? "black" : "black"}
+            />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[
+              styles.shareButton,
+              (item.invited || isInvited) && styles.invitedButton,
+              isNightMode && styles.shareButtonNight,
+            ]}
+            onPress={() => handleInvite({
+              box,
+              friends,
+              isEventSaved,
+              selectedDate,
+              friendId: item.friendId,
+              setFriends,
+              t
+            })}
+            disabled={item.invited || isInvited}
+          >
+            <Ionicons
+              name={(item.invited || isInvited) ? "checkmark-sharp" : "arrow-redo"}
+              size={16}
+              color={isNightMode ? "black" : "black"}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
 
   const handleSearch = (text) => {
@@ -795,6 +799,7 @@ export default memo(function BoxDetails({ route, navigation }) {
         filteredFriends={filteredFriends}
         renderFriendItem={renderFriendItem}
         styles={styles}
+        attendeesList={attendeesList} // Pasar la lista de asistentes
       />
 
       {/* Modal para editar el evento */}

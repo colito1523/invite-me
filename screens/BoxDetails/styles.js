@@ -214,16 +214,15 @@ export const styles = StyleSheet.create({
       color: "white",
     },
     shareButton: {
-      backgroundColor: "#fff",
       padding: 10,
       borderRadius: 25,
       marginRight: 10,
     },
     shareButtonNight: {
-      backgroundColor: "green",
+      backgroundColor: "transparent",
     },
     invitedButton: {
-      backgroundColor: "blue",
+      backgroundColor: "transparent",
     },
     closeModalButton: {
       marginTop: 20,
