@@ -315,39 +315,48 @@ useEffect(() => {
   fetchBoxData();
 }, [selectedCategory]);
 
-  const fetchPrivateEvents = useCallback(async () => {
-    const user = auth.currentUser;
-    if (!user) return;
+const fetchPrivateEvents = useCallback(async () => {
+  const user = auth.currentUser;
+  if (!user) return;
 
-    let blockedUsers = [];
+  let blockedUsers = [];
   const userDoc = await getDoc(doc(database, "users", user.uid));
   if (userDoc.exists()) {
     blockedUsers = userDoc.data()?.blockedUsers || [];
   }
 
-    const eventsRef = collection(database, 'users', user.uid, 'events');
-    const eventsSnapshot = await getDocs(eventsRef);
+  const eventsRef = collection(database, 'users', user.uid, 'events');
+  const eventsSnapshot = await getDocs(eventsRef);
+  const events = [];
+
+  console.log("Eventos recuperados:", eventsSnapshot.docs.map(doc => doc.data())); 
+
+  for (const docSnapshot of eventsSnapshot.docs) {
+    const eventData = docSnapshot.data();
     
-    const events = [];
-    for (const docSnapshot of eventsSnapshot.docs) {
-      const eventData = docSnapshot.data();
-      if (eventData.status === 'accepted') {
-        const eventPrivRef = doc(database, 'EventsPriv', eventData.eventId);
-        const eventPrivDoc = await getDoc(eventPrivRef);
-        if (eventPrivDoc.exists()) {
-          const fullEventData = eventPrivDoc.data();
-          events.push({
-            id: docSnapshot.id,
-            ...fullEventData,
-            ...eventData,
-            attendees: fullEventData.attendees || [], 
-          });
-        }
+    // Verificar si el evento es aceptado y que no es del usuario actual
+    if (eventData.status === 'accepted' && eventData.uid !== user.uid) {
+      const eventPrivRef = doc(database, 'EventsPriv', eventData.eventId);
+      const eventPrivDoc = await getDoc(eventPrivRef);
+      if (eventPrivDoc.exists()) {
+        const fullEventData = eventPrivDoc.data();
+
+        events.push({
+          id: docSnapshot.id,
+          ...fullEventData,
+          ...eventData,
+          attendees: fullEventData.attendees || [],
+        });
+        console.log("Evento agregado:", fullEventData); 
       }
     }
+  }
 
-    setPrivateEvents(events);
-  }, []);
+  console.log("Datos de eventos privados finales:", events); // Log de eventos finales
+
+  setPrivateEvents(events);
+}, []);
+
 
   const filteredBoxData = useMemo(() => {
     if (!boxData || !Array.isArray(boxData)) {
