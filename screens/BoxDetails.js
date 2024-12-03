@@ -813,7 +813,7 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
     return;
   }
 
-  const eventData = {
+  let eventData = {
     title: box.title,
     imageUrl: box.imageUrl || "",
     date: eventDate,
@@ -823,7 +823,20 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
     ...(box.coordinates ? { coordinates: box.coordinates } : {}),
   };
 
+
   if (isPrivateEvent) {
+    const eventSnapshot = await getDoc(eventRef);
+    if (eventSnapshot.exists()) {
+      const eventDataFromFirebase = eventSnapshot.data();
+      eventData = {
+        ...eventData,
+        description: eventDataFromFirebase.description || "Sin descripción",
+        address: eventDataFromFirebase.address || "Sin dirección",
+      };
+    } else {
+      console.error("El evento privado no existe en Firebase.");
+    }
+
     const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
     const username = userDoc.exists() ? userDoc.data().username || "Anónimo" : "Anónimo";
     const profileImage = userDoc.exists()
@@ -832,7 +845,6 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
 
     const attendeeData = { uid: auth.currentUser.uid, username, profileImage };
 
-    const eventSnapshot = await getDoc(eventRef);
     if (!eventSnapshot.exists()) {
       await setDoc(eventRef, {
         attendees: [attendeeData],
@@ -844,7 +856,16 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
       });
     }
   } else {
-    await saveUserEvent(box.title, eventDate, box.day, eventData.phoneNumber, eventData.locationLink, eventData.hours);
+    await saveUserEvent(
+      box.title,
+      eventDate,
+      box.day,
+      eventData.phoneNumber,
+      eventData.locationLink,
+      eventData.hours,
+      eventData.description, // Incluye la descripción
+      eventData.address // Incluye la dirección
+    );
   }
 
   await addDoc(eventsRef, {
@@ -852,7 +873,6 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
     dateArray: [eventDate],
   });
 };
-// ...existing code...
 
   const handleRemoveFromGoBoxs = async (boxTitle, selectedDate) => {
     try {
@@ -891,18 +911,22 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
     daySpecial,
     phoneNumber,
     locationLink,
-    hours
+    hours,
+    coordinates,
+    imageUrl,
+    description, // Add description parameter
+    address // Add address parameter
   ) => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error("No user logged in");
-
+  
       const userDocRef = doc(database, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
-
+  
       let username = "Usuario desconocido";
       let profileImage = "https://via.placeholder.com/150";
-
+  
       if (userDoc.exists()) {
         const userData = userDoc.data();
         username = userData.username || username;
@@ -911,10 +935,10 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
             ? userData.photoUrls[0]
             : profileImage;
       }
-
+  
       const boxRef = doc(database, "GoBoxs", boxTitle);
       const boxDoc = await getDoc(boxRef);
-
+  
       let existingData = [];
       if (boxDoc.exists()) {
         const data = boxDoc.data();
@@ -922,7 +946,7 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
       } else {
         await setDoc(boxRef, { [selectedDate]: [] });
       }
-
+  
       const userDataToSave = {
         profileImage: profileImage,
         username: username,
@@ -930,17 +954,21 @@ const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) =>
         phoneNumber: phoneNumber,
         locationLink: locationLink,
         hours: hours,
+        address: address || "No address provided", // Ensure address is not empty
+        description: description || "No description provided", // Ensure description is not empty
       };
-
+  
       if (daySpecial) {
         userDataToSave.DaySpecial = daySpecial;
       }
-
+  
       await updateDoc(boxRef, {
         [selectedDate]: [...existingData, userDataToSave],
       });
+  
+      console.log("Evento guardado con éxito");
     } catch (error) {
-      console.error("Error al guardar el evento: ", error);
+      console.error("Error al guardar el evento:", error);
     }
   };
 

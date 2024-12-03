@@ -77,6 +77,27 @@ export default memo(function BoxDetails({ route, navigation }) {
     setModalVisible(false);
   };
 
+  const fetchEventDetails = async ({ box, setBoxData }) => {
+    try {
+      const eventRef = doc(database, "EventsPriv", box.id || box.title);
+      const eventSnapshot = await getDoc(eventRef);
+  
+      if (eventSnapshot.exists()) {
+        const eventData = eventSnapshot.data();
+        setBoxData((prevData) => ({
+          ...prevData,
+          description: eventData.description || prevData.description,
+          address: eventData.address || prevData.address,
+          // ...other fields if needed
+        }));
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Error fetching event details:", error);
+    }
+  };
+
   useEffect(() => {
     if (box && !isFromNotification) {
       // Solo fetch de datos si no viene de una notificación
@@ -503,6 +524,10 @@ export default memo(function BoxDetails({ route, navigation }) {
   
       const eventSnapshot = await getDoc(eventRef);
       if (eventSnapshot.exists()) {
+        const eventDetails = eventSnapshot.data();
+        eventData.description = eventDetails.description || eventData.description;
+        eventData.address = eventDetails.address || eventData.address;
+  
         await updateDoc(eventRef, {
           attendees: arrayUnion(attendeeData),
         });

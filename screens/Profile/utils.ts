@@ -253,6 +253,8 @@ export const handleBoxPress = ({ event, navigation, t }) => {
       phoneNumber: event.phoneNumber || t("profile.noNumber"),
       locationLink: event.locationLink || t("profile.noLocation"),
       coordinates: coordinates,
+      description: event.description || t("profile.noDescription"),
+      address: event.address || t("profile.noAddress"),
     },
     selectedDate: event.date || t("profile.noDate"),
   });
