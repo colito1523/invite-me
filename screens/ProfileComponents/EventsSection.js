@@ -2,13 +2,18 @@ import React from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 
 const EventsSection = ({ events, handleBoxPress, t }) => {
+  const handlePress = (event) => {
+    console.log("Event details:", event);
+    handleBoxPress(event);
+  };
+
   return (
     <View style={styles.buttonContainer}>
       {events.map((event) => (
         <TouchableOpacity
           key={event.id}
           style={styles.button}
-          onPress={() => handleBoxPress(event)} // Pass event directly
+          onPress={() => handlePress(event)}
         >
           <Text style={styles.buttonText}>
             {event.title.length > 9

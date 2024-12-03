@@ -263,10 +263,10 @@ export default function Chat({ route }) {
   
   
 
-  const handleSend = async (
+ const handleSend = async (
     messageType = "text",
     mediaUri = null,
-    isViewOnce = false
+    isViewOnce = false // Este parámetro se pasará desde donde se llama a la función
 ) => {
     if (isUploading) {
         Alert.alert("Cargando", "Por favor espera a que termine la subida actual.");
@@ -790,7 +790,7 @@ const handleDeleteChat = async () => {
                     style={styles.messageImage}
                   />
                   {item.senderId === user.uid && item.viewedBy?.includes(recipient.uid) && (
-                    <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon}/>
+                    <Ionicons name="checkmark-done-sharp" size={16} color="black" style={styles.seenIcon}/>
                   )}
                 </TouchableOpacity>
               )
@@ -805,7 +805,7 @@ const handleDeleteChat = async () => {
                 resizeMode="contain"
               />
               {item.senderId === user.uid && item.viewedBy?.includes(recipient.uid) && (
-                <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon}/>
+                <Ionicons name="checkmark-done-sharp" size={16} color="black" style={styles.seenIcon}/>
               )}
               </>
             )}
@@ -817,7 +817,7 @@ const handleDeleteChat = async () => {
                 {currentMessageDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </Text>
               {item.senderId === user.uid && item.seen && (
-                <Ionicons name="checkmark-done-sharp" size={16} color="blue" style={styles.seenIcon} />
+                <Ionicons name="checkmark-done-sharp" size={16} color="black" style={styles.seenIcon} />
               )}
             </View>
           </View>

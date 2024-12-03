@@ -92,8 +92,6 @@ export default function Notes() {
     }
   }, [user]);
 
-
-
   useEffect(() => {
     if (user) {
       const noteRef = doc(database, "users", user.uid, "note", "current");
@@ -307,7 +305,6 @@ export default function Notes() {
       try {
         const senderId = user.uid;
         const receiverId = selectedNoteFullScreen.friendId;
-        console.log(receiverId);
         // Use the getChatId function to find or create a chat between the users
         const chatId = await getChatId(senderId, receiverId);
         const chatRef = doc(database, "chats", chatId);
@@ -320,7 +317,6 @@ export default function Notes() {
             lastMessage: "",
           });
         }
-
         // Create the message
         const messagesRef = collection(database, "chats", chatId, "messages");
         const newMessage = {
@@ -350,12 +346,31 @@ export default function Notes() {
   };
 
   const getChatId = async (user1Id, user2Id) => {
+    const chatsRef = collection(database, "chats");
+  
+    // Query for a chat that includes both user1Id and user2Id
+    const q = query(
+      chatsRef,
+      where("participants", "array-contains", user1Id)
+    );
+  
+    const querySnapshot = await getDocs(q);
+  
+    for (const doc of querySnapshot.docs) {
+      const chatParticipants = doc.data().participants;
+      if (chatParticipants.includes(user2Id)) {
+        return doc.id; // Return existing chat ID
+      }
+    }
+  
+    // If no chat exists, return a new chat ID based on user IDs
+    // This part is for creating a new chat if none exists
     const user1Doc = await getDoc(doc(database, "users", user1Id));
     const user2Doc = await getDoc(doc(database, "users", user2Id));
-
+  
     const user1Name = user1Doc.data().username;
     const user2Name = user2Doc.data().username;
-
+  
     return user1Name > user2Name
       ? `${user1Name}_${user2Name}`
       : `${user2Name}_${user1Name}`;
@@ -558,7 +573,7 @@ export default function Notes() {
                           }
                           size={24}
                           color={
-                            selectedNoteFullScreen.isLiked ? "red" : "black"
+                            selectedNoteFullScreen.isLiked ? "red" : "white"
                           }
                         />
                       </TouchableOpacity>
