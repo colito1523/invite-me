@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     slider: {
       width: width,
       height: 250,
-      marginTop: 60,
+      marginTop: 100,
     },
     sliderPart: {
       width: width * 0.9,
