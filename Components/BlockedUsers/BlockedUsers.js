@@ -2,63 +2,121 @@ import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Alert } from "react-native";
 import { Image } from "expo-image";
 import { doc, getDoc, updateDoc, arrayRemove } from "firebase/firestore";
-import { database, auth } from "../../config/firebase";
+import { database, auth } from "../../config/firebase"; // Asegúrate de importar correctamente Firebase
 
-export default function BlockedListModal({ isVisible, onClose, manuallyBlocked }) {
+export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
   const [userDetails, setUserDetails] = useState([]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      const usersData = [];
-      for (const uid of manuallyBlocked) {
-        try {
-          const userDoc = await getDoc(doc(database, "users", uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            usersData.push({
-              uid,
-              firstName: data.firstName,
-              lastName: data.lastName,
-              profileImage: data.photoUrls?.[0] || "https://via.placeholder.com/150",
-            });
-          }
-        } catch (error) {
-          console.error(`Error fetching data for UID ${uid}:`, error);
-        }
+      const currentUser = auth.currentUser;
+  
+      if (!currentUser) {
+        console.error("No estás autenticado.");
+        return;
       }
-      setUserDetails(usersData);
+  
+      try {
+        // Obtener los datos del usuario actual
+        const currentUserRef = doc(database, "users", currentUser.uid);
+        const currentUserDoc = await getDoc(currentUserRef);
+  
+        if (!currentUserDoc.exists()) {
+          console.error("No se encontraron los datos del usuario actual.");
+          return;
+        }
+  
+        const currentUserData = currentUserDoc.data();
+  
+        // Filtrar solo los usuarios bloqueados manualmente
+        const manuallyBlockedUsers =
+          currentUserData.manuallyBlocked || []; // Obtener manualmente bloqueados
+  
+        const usersData = [];
+  
+        for (const uid of blockedUsers) {
+          if (manuallyBlockedUsers.includes(uid)) {
+            try {
+              const userDoc = await getDoc(doc(database, "users", uid));
+              if (userDoc.exists()) {
+                const data = userDoc.data();
+                usersData.push({
+                  uid,
+                  firstName: data.firstName,
+                  lastName: data.lastName,
+                  profileImage: data.photoUrls?.[0] || "https://via.placeholder.com/150",
+                });
+              }
+            } catch (error) {
+              console.error(`Error fetching data for UID ${uid}:`, error);
+            }
+          }
+        }
+  
+        setUserDetails(usersData);
+      } catch (error) {
+        console.error("Error al obtener datos del usuario actual:", error);
+      }
     };
-
-    if (manuallyBlocked && manuallyBlocked.length > 0) {
+  
+    if (blockedUsers && blockedUsers.length > 0) {
       fetchUserDetails();
     }
-  }, [manuallyBlocked]);
+  }, [blockedUsers]);
+  
 
   const handleUnblockUser = async (uid) => {
     const currentUser = auth.currentUser;
-
+  
     if (!currentUser) {
       Alert.alert("Error", "No estás autenticado.");
       return;
     }
-
+  
     try {
+      // Obtener los datos del usuario actual
       const currentUserRef = doc(database, "users", currentUser.uid);
-
-      // Eliminar del array de bloqueos manuales
+      const currentUserDoc = await getDoc(currentUserRef);
+  
+      if (!currentUserDoc.exists()) {
+        Alert.alert("Error", "No se encontraron los datos del usuario actual.");
+        return;
+      }
+  
+      const currentUserData = currentUserDoc.data();
+  
+      // Verificar si el usuario a desbloquear está en la lista de manuallyBlocked
+      if (
+        !currentUserData.manuallyBlocked ||
+        !currentUserData.manuallyBlocked.includes(uid)
+      ) {
+        Alert.alert("Error", "No puedes desbloquear a este usuario.");
+        return;
+      }
+  
+      const blockedUserRef = doc(database, "users", uid);
+  
+      // Eliminar del array de bloqueados del usuario actual
       await updateDoc(currentUserRef, {
+        blockedUsers: arrayRemove(uid),
         manuallyBlocked: arrayRemove(uid),
       });
-
+  
+      // Eliminar al usuario actual del array de bloqueados del otro usuario
+      await updateDoc(blockedUserRef, {
+        blockedUsers: arrayRemove(currentUser.uid),
+      });
+  
       // Actualizar la lista localmente
       setUserDetails((prev) => prev.filter((user) => user.uid !== uid));
-
+  
       Alert.alert("Éxito", "El usuario ha sido desbloqueado.");
     } catch (error) {
       console.error("Error al desbloquear al usuario:", error);
       Alert.alert("Error", "No se pudo desbloquear al usuario.");
     }
   };
+  
 
   return (
     <Modal visible={isVisible} animationType="slide" transparent={true} onRequestClose={onClose}>

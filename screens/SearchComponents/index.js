@@ -191,7 +191,9 @@ export default function Search() {
             `searchHistory_${user.uid}`
           );
           if (savedHistory !== null) {
-            setSearchHistory(JSON.parse(savedHistory));
+            const parsedHistory = JSON.parse(savedHistory);
+            const filteredHistory = parsedHistory.filter(item => !blockedUsers.includes(item.id)); // Filter out blocked users
+            setSearchHistory(filteredHistory);
           }
         } catch (error) {
           console.error(t('errorLoadingSearchHistory'), error);
@@ -200,7 +202,7 @@ export default function Search() {
     };
 
     loadSearchHistory();
-  }, [user]);
+  }, [user, blockedUsers]); // Add blockedUsers as a dependency
 
 // En index.js, modifica el handleUserPress
 const handleUserPress = (selectedUser) => {
@@ -215,7 +217,7 @@ const handleUserPress = (selectedUser) => {
     if (updatedHistory.length > 10) updatedHistory.pop();
     setSearchHistory(updatedHistory);
     // Aquí pasamos el usuario actual (auth.currentUser)
-    saveSearchHistory(auth.currentUser, updatedHistory);
+    saveSearchHistory(auth.currentUser, updatedHistory, blockedUsers);
   }
   navigation.navigate("UserProfile", { 
     selectedUser: selectedUser, 
@@ -227,7 +229,7 @@ const handleUserPress = (selectedUser) => {
     const updatedHistory = searchHistory.filter((user) => user.id !== userId);
     setSearchHistory(updatedHistory);
 
-    saveSearchHistory(user, updatedHistory);
+    saveSearchHistory(user, updatedHistory, blockedUsers);
   };
 
   const renderHistoryItem = ({ item, index }) => (

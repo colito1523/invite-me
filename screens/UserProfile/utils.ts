@@ -1,7 +1,7 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, Timestamp, updateDoc, where, writeBatch } from "firebase/firestore";
 import { database } from "../../config/firebase";
 import { Alert } from "react-native";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const fetchBlockedUsers = async (params) => {
   const user = params.user
@@ -99,6 +99,15 @@ export const handleBlockUser = async (params) => {
     await updateDoc(selectedUserRef, {
       blockedUsers: arrayUnion(user.uid),
     });
+
+    // Eliminar el usuario bloqueado del historial de búsqueda
+    const searchHistoryKey = `searchHistory_${user.uid}`;
+    const savedHistory = await AsyncStorage.getItem(searchHistoryKey);
+    if (savedHistory !== null) {
+      const parsedHistory = JSON.parse(savedHistory);
+      const updatedHistory = parsedHistory.filter(item => item.id !== selectedUser.id);
+      await AsyncStorage.setItem(searchHistoryKey, JSON.stringify(updatedHistory));
+    }
 
     Alert.alert(
       t("userProfile.userBlocked"),

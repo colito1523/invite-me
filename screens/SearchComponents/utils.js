@@ -250,18 +250,21 @@ export const deleteFriendRequest = async (user, setStatus) => {
   }
 };
 
-export const saveSearchHistory = async (currentUser, history) => {
+export const saveSearchHistory = async (currentUser, history, blockedUsers) => {
   if (!currentUser) return;
-  
+
   try {
-    const safeHistory = JSON.stringify(history.map(item => ({
-      id: item.id,
-      username: item.username,
-      firstName: item.firstName || '',
-      lastName: item.lastName || '',
-      profileImage: item.profileImage || 'https://via.placeholder.com/150'
-    })));
-    
+    const safeHistory = JSON.stringify(history
+      .filter(item => !blockedUsers.includes(item.id)) // Filter out blocked users
+      .map(item => ({
+        id: item.id,
+        username: item.username,
+        firstName: item.firstName || '',
+        lastName: item.lastName || '',
+        profileImage: item.profileImage || 'https://via.placeholder.com/150'
+      }))
+    );
+
     await AsyncStorage.setItem(
       `searchHistory_${currentUser.uid}`,
       safeHistory
