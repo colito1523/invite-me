@@ -96,6 +96,7 @@ export const updateNotifications = (params) => {
 };
 
 export const handleUserPress = async (params) => {
+  console.log("handleUserPress params:", params);
   const uid = params.uid
   const navigation = params.navigation
   const t = params.t

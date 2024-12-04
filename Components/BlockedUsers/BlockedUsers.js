@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Alert } from "react-native";
 import { Image } from "expo-image";
 import { doc, getDoc, updateDoc, arrayRemove } from "firebase/firestore";
-import { database, auth } from "../../config/firebase"; // Asegúrate de importar correctamente Firebase
+import { database, auth } from "../../config/firebase";
 
-export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
+export default function BlockedListModal({ isVisible, onClose, manuallyBlocked }) {
   const [userDetails, setUserDetails] = useState([]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       const usersData = [];
-      for (const uid of blockedUsers) {
+      for (const uid of manuallyBlocked) {
         try {
           const userDoc = await getDoc(doc(database, "users", uid));
           if (userDoc.exists()) {
@@ -29,10 +29,10 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
       setUserDetails(usersData);
     };
 
-    if (blockedUsers && blockedUsers.length > 0) {
+    if (manuallyBlocked && manuallyBlocked.length > 0) {
       fetchUserDetails();
     }
-  }, [blockedUsers]);
+  }, [manuallyBlocked]);
 
   const handleUnblockUser = async (uid) => {
     const currentUser = auth.currentUser;
@@ -44,17 +44,10 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
 
     try {
       const currentUserRef = doc(database, "users", currentUser.uid);
-      const blockedUserRef = doc(database, "users", uid);
 
-      // Eliminar del array de bloqueados del usuario actual
+      // Eliminar del array de bloqueos manuales
       await updateDoc(currentUserRef, {
-        blockedUsers: arrayRemove(uid),
-        manuallyBlocked: arrayRemove(uid), // También eliminar de los bloqueos manuales si corresponde
-      });
-
-      // Eliminar al usuario actual del array de bloqueados del otro usuario
-      await updateDoc(blockedUserRef, {
-        blockedUsers: arrayRemove(currentUser.uid),
+        manuallyBlocked: arrayRemove(uid),
       });
 
       // Actualizar la lista localmente
