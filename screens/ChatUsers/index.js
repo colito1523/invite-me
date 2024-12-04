@@ -936,7 +936,7 @@ const handleDeleteChat = async () => {
   isVisible={isComplaintVisible}
   onClose={() => setIsComplaintVisible(false)}
   onSubmit={(reason, description) => {
-    console.log("Razón y descripción enviadas:", { reason, description });
+ 
     handleReportSubmit(reason, description);
     setIsComplaintVisible(false);
   }}

@@ -204,29 +204,43 @@ export default function NotificationsComponent() {
   }, [fetchNotifications]);
 
   const renderPrivateEventNotification = ({ item }) => {
+    
     const eventDate = item.date; // Use the date field instead of timestamp
     return (
       <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: item.eventImage,
-              date: eventDate,
-              isPrivate: true,
-              description: item.description,
-              day: item.day,
-              hour: item.hour,
-              address: item.address,
-              phoneNumber: item.phoneNumber,
-              eventId: item.eventId // Ensure eventId is passed
-            },
-            selectedDate: eventDate,
-            isFromNotification: true,
-          });
-        }}
-        style={[styles.notificationContainer]}
-      >
+            onPress={() => {
+                console.log("Navegando a BoxDetails con los siguientes datos:", {
+                    title: item.eventTitle,
+                    imageUrl: item.eventImage,
+                    date: eventDate,
+                    isPrivate: true,
+                    description: item.description,
+                    day: item.day,
+                    hour: item.hour,
+                    address: item.address,
+                    phoneNumber: item.phoneNumber,
+                    eventId: item.eventId,
+                });
+                navigation.navigate("BoxDetails", {
+                  box: {
+                    title: item.eventTitle,
+                    imageUrl: item.eventImage,
+                    date: eventDate,
+                    isPrivate: true,
+                    description: item.description,
+                    day: item.day,
+                    hour: item.hour,
+                    address: item.address,
+                    phoneNumber: item.phoneNumber,
+                    eventId: item.eventId,
+                    category: "EventoParaAmigos", // Agregar la categoría aquí
+                  },
+                  selectedDate: eventDate,
+                  isFromNotification: true,
+                });
+            }}
+            style={[styles.notificationContainer]}
+        >
         <View style={styles.notificationContent}>
           <Image
             source={{ uri: item.fromImage }}
@@ -373,6 +387,7 @@ export default function NotificationsComponent() {
     }
 
     const handleNotificationPress = () => {
+      
       if (isEventInvitation) {
         if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
           navigation.navigate("BoxDetails", {

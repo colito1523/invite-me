@@ -378,11 +378,11 @@ export const fetchEvents = async (params) => {
     }));
 
     if (blockedUsers.includes(selectedUser.id)) {
-      console.log("Usuario bloqueado, no se mostrarán eventos.");
+   
       setEvents([]); // Asegúrate de que esta lógica es la deseada
     } else {
       setEvents(userEvents);
-      console.log("Eventos cargados:", userEvents);
+    
     }
   };
 };

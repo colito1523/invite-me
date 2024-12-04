@@ -54,7 +54,6 @@ export const handleReportSubmit = async ({reason, description, chatId, user, rec
         return;
       }
 
-      console.log("Datos de la denuncia:", { reason, description, recipientId });
 
       const complaintsRef = collection(database, "complaints");
       const newComplaint = {
@@ -111,7 +110,7 @@ export const handleSend = async (
     params
 ) => {
     const {isUploading, user, message, setIsUploading, setMessages, storage, flatListRef, chatId, recipientUser, setChatId} = params
-    console.log("llega la data", message, "usuario", user)
+   
     if (isUploading) {
         Alert.alert("Cargando", "Por favor espera a que termine la subida actual.");
         return;

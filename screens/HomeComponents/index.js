@@ -329,7 +329,7 @@ const fetchPrivateEvents = useCallback(async () => {
   const eventsSnapshot = await getDocs(eventsRef);
   const events = [];
 
-  console.log("Eventos recuperados:", eventsSnapshot.docs.map(doc => doc.data())); 
+ 
 
   for (const docSnapshot of eventsSnapshot.docs) {
     const eventData = docSnapshot.data();
@@ -347,12 +347,11 @@ const fetchPrivateEvents = useCallback(async () => {
           ...eventData,
           attendees: fullEventData.attendees || [],
         });
-        console.log("Full event data:", fullEventData); // Log the full event data
+       
       }
     }
   }
 
-  console.log("Datos de eventos privados finales:", events); // Log de eventos finales
 
   setPrivateEvents(events);
 }, []);
@@ -420,7 +419,6 @@ const fetchPrivateEvents = useCallback(async () => {
   // Función para manejar el evento de clic en el box
   const handleBoxPress = useCallback(
     (box) => {
-      console.log("Event data:", box); // Log the event data
       navigation.navigate("BoxDetails", {
         box,
         selectedDate,

@@ -5,13 +5,12 @@ import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 const EventsSection = ({ events, handleBoxPress, t }) => {
  
 const handlePress = (event) => {
-  console.log("Event details:", event);
+ 
   handleBoxPress(event);
 };
 
 
 useEffect(() => {
-  console.log("Datos de events:", events);
 }, [events]);
   return (
     <View style={styles.buttonContainer}>

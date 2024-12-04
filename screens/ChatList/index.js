@@ -302,7 +302,7 @@ export default function ChatList() {
   };
 
   const handleChatPress = async (chat) => {
-    console.log("chat presionado", chat.id)
+  
     try {
       const messagesRef = collection(database, "chats", chat.id, "messages");
       const unseenMessagesQuery = query(

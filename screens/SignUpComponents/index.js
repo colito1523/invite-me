@@ -538,7 +538,7 @@ export default function SignUp() {
       handleAnswer(`photo${photoNumber}`, result.assets[0].uri);
       handleNext();
     } else {
-      console.log("Image selection was canceled");
+    
     }
   };
 

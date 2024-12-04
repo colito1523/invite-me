@@ -76,13 +76,13 @@ const useNotifications = () => {
 const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
   // Extrae el título y el cuerpo del contenido de la notificación
   const { title, body } = notification.request.content;
-  console.log("Notificación recibida:", title, body);
+ 
 });
 
 // Listener para manejar acciones cuando se interactúa con la notificación (tocar la notificación)
 const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
   const { title, body } = response.notification.request.content;
-  console.log("Respuesta a la notificación:", title, body);
+
 });
 
     // Limpiar los listeners cuando el componente se desmonte

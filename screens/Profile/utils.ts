@@ -185,17 +185,17 @@ export const checkLikeStatus = async (params) => {
 export const fetchFriendCount = async (params) => {
     const setFriendCount = params.setFriendCount
 
-    console.log("fetchFriendCount running");
+
     try {
         const user = auth.currentUser;
         if (user) {
             const friendsSnapshot = await getDocs(
                 collection(database, "users", user.uid, "friends")
             );
-            console.log("Number of friends:", friendsSnapshot.size);
+          
             setFriendCount(friendsSnapshot.size);
         } else {
-            console.log("No user is currently signed in");
+     
         }
     } catch (error) {
         console.error("Error fetching friend count:", error);
@@ -237,7 +237,7 @@ export const pickImage = async (index, ImagePicker, photoUrls, setPhotoUrls) => 
         const newPhotoUrls = [...photoUrls];
         newPhotoUrls[index] = result.assets[0].uri;
         setPhotoUrls(newPhotoUrls);
-        console.log("Nueva URL de imagen:", result.assets[0].uri);
+     
     }
 };
 

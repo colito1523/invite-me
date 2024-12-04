@@ -280,17 +280,16 @@ export default function UserProfile({ route, navigation }) {
   const renderEvents = (start, end) => {
     const userId = auth.currentUser?.uid;
   
-    console.log("User ID:", userId); // Verifica el ID del usuario
-    console.log("All Events:", events); // Verifica todos los eventos antes de filtrar
+   
   
    
   
     const filteredEvents = events.slice(start, end).filter((event) => {
-      console.log("Evaluating Event:", event); // Verificar cada evento antes de evaluar
+    
   
       // Mostrar todos los eventos que no sean de tipo "EventoParaAmigos"
       if (event.category && event.category !== "EventoParaAmigos") {
-        console.log("Evento General:", event.title); // Log cuando es un evento general
+      
         return true;
       }
   
@@ -301,17 +300,17 @@ export default function UserProfile({ route, navigation }) {
         const isInvited =
           Array.isArray(event.invitedFriends) && event.invitedFriends.includes(userId);
   
-        console.log("Evento Privado:", event.title, "isAttending:", isAttending, "isInvited:", isInvited); // Log detallado de condición de evento privado
+      
   
         return isAttending || isInvited;
       }
   
-      console.log("Evento filtrado, no cumple las condiciones:", event.title); // Log si no se cumple ninguna condición
+  
       // No se muestra si no cumple con los requisitos anteriores
       return false;
     });
   
-    console.log("Filtered Events:", filteredEvents); // Verifica los eventos después de filtrar
+ 
   
     return (
       <View style={styles.buttonContainer}>
