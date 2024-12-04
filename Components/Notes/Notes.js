@@ -1014,8 +1014,8 @@ const styles = StyleSheet.create({
   },
   inlineSendButton: {
     position: "absolute",
-    right: 10,
-    top: 10,
+    right: 15,
+    top: 5,
     backgroundColor: "#3e3d3d",
     borderRadius: 50,
     padding: 10,
