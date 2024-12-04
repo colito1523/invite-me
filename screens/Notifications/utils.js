@@ -217,7 +217,7 @@ export const handleAcceptRequest = async (params) => {
       return updatedNotifications.sort((a, b) => b.timestamp - a.timestamp);
     });
 
-    Alert.alert(t("notifications.invitationAccepted"), t("notifications.eventAddedToProfile"));
+    Alert.alert(t("notifications.FriendsAccepted"), t("notifications.FriendsAcceptedDescription"));
   } catch (error) {
     console.error("Error accepting request:", error);
     Alert.alert(t("notifications.error"), t("notifications.acceptRequestError"));
@@ -450,109 +450,91 @@ export const handleRejectEventInvitation = async (params) => {
 };
 
 export const handleAcceptPrivateEvent = async (params) => {
-  const setNotifications = params.setNotifications
-  const setLoadingEventId = params.setLoadingEventId
-  const item = params.item
-  const t = params.t
+  const setNotifications = params.setNotifications;
+  const setLoadingEventId = params.setLoadingEventId;
+  const item = params.item;
 
   try {
     setLoadingEventId(item.id);
     const user = auth.currentUser;
     if (!user) {
-      Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
+      Alert.alert("Error", "Debes iniciar sesión para aceptar el evento.");
       setLoadingEventId(null);
       return;
     }
 
-    // Check if the user already has an event with the same eventId
-    const eventsRef = collection(database, "users", user.uid, "events");
-    const q = query(eventsRef, where("eventId", "==", item.eventId));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      Alert.alert(
-        t("notifications.alreadyParticipant"),
-        t("notifications.alreadyInEvent")
-      );
-      setLoadingEventId(null);
-      return;
-    }
-
-    // Get user data
+    // Obtener datos del usuario
     const userDoc = await getDoc(doc(database, "users", user.uid));
     const userData = userDoc.data();
 
-    // Check if user is already an attendee
+    // Verificar si el usuario ya está registrado en el evento
     const eventRef = doc(database, "EventsPriv", item.eventId);
     const eventDoc = await getDoc(eventRef);
     if (eventDoc.exists()) {
-      const eventData = eventDoc.data();
-      const attendees = eventData.attendees || [];
-      const isAlreadyAttendee = attendees.some(
-        (attendee) => attendee.uid === user.uid
-      );
-
-      if (isAlreadyAttendee) {
-        Alert.alert(
-          t("notifications.alreadyParticipant"),
-          t("notifications.alreadyInEvent")
-        );
+      const attendees = eventDoc.data().attendees || [];
+      if (attendees.some((attendee) => attendee.uid === user.uid)) {
+        Alert.alert("Aviso", "Ya estás participando en este evento.");
         setLoadingEventId(null);
         return;
       }
 
-      // Add user to attendees
+      // Agregar al usuario como participante
       await updateDoc(eventRef, {
         attendees: arrayUnion({
           uid: user.uid,
           username: userData.username || user.displayName,
-          profileImage: userData.photoUrls && userData.photoUrls.length > 0
-            ? userData.photoUrls[0]
-            : "https://via.placeholder.com/150",
+          profileImage:
+            userData.photoUrls?.[0] || "https://via.placeholder.com/150",
         }),
       });
 
-      // Add event data to user's database
+      // Agregar el evento a la base de datos del usuario
       const userEventsRef = collection(database, "users", user.uid, "events");
       await addDoc(userEventsRef, {
-        title: eventData.title,
-        imageUrl: eventData.image,
-        date: eventData.date,
-        address: eventData.address,
-        category: eventData.category,
-        day: eventData.day,
-        description: eventData.description,
-        eventId: eventData.eventId,
-        expirationDate: eventData.expirationDate,
-        hour: eventData.hour,
-        status: "accepted",
-        dateArray: [eventData.date],
+        title: eventDoc.data().title,
+        imageUrl: eventDoc.data().image,
+        date: eventDoc.data().date,
+        description: eventDoc.data().description,
+        hour: eventDoc.data().hour,
+        address: eventDoc.data().address,
+        category: eventDoc.data().category,
+        isPrivate: true,
       });
+
+      // Actualizar la notificación existente
+      const notifRef = doc(database, "users", user.uid, "notifications", item.id);
+      await updateDoc(notifRef, {
+        status: "confirmed",
+        message: `¡Has aceptado la invitación al evento privado: ${eventDoc.data().title}!`, // Mensaje de confirmación
+        timestamp: new Date(),
+        type: "privateEventConfirmation",
+      });
+
+      // Actualizar el estado local
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notif) =>
+          notif.id === item.id
+            ? {
+                ...notif,
+                status: "confirmed",
+                message: `¡Has aceptado la invitación al evento privado: ${eventDoc.data().title}!`,
+                timestamp: new Date(),
+                type: "privateEventConfirmation",
+              }
+            : notif
+        )
+      );
+
+      Alert.alert("Confirmación", "El evento privado ha sido añadido a tu perfil.");
     }
-
-    // Delete the notification from the database
-    const notifRef = doc(database, "users", user.uid, "notifications", item.id);
-    await deleteDoc(notifRef);
-
-    // Update local notification state
-    setNotifications((prevNotifications) =>
-      prevNotifications.filter((n) => n.id !== item.id)
-    );
-
-    Alert.alert(
-      t("notifications.invitationAccepted"),
-      t("notifications.eventAddedToProfile")
-    );
   } catch (error) {
-    console.error("Error accepting private event invitation:", error);
-    Alert.alert(
-      t("notifications.error"),
-      t("notifications.acceptInvitationError")
-    );
+    console.error("Error al aceptar el evento privado:", error);
+    Alert.alert("Error", "No se pudo aceptar el evento. Intenta nuevamente.");
   } finally {
     setLoadingEventId(null);
   }
 };
+
 
 export const handleRejectPrivateEvent = async (params) => {
   const item = params.item
@@ -585,89 +567,83 @@ export const handleAcceptGeneralEvent = async (params) => {
   const item = params.item;
   const setLoadingEventId = params.setLoadingEventId;
   const setNotifications = params.setNotifications;
-  const t = params.t;
 
   try {
     setLoadingEventId(item.id);
     const user = auth.currentUser;
     if (!user) {
-      Alert.alert(t("notifications.error"), t("notifications.userAuthError"));
+      Alert.alert("Error", "Debes iniciar sesión para aceptar el evento.");
       setLoadingEventId(null);
       return;
     }
 
-    // Get user data
+    // Obtener datos del usuario
     const userDoc = await getDoc(doc(database, "users", user.uid));
     const userData = userDoc.data();
 
-    // Check if user is already a participant in the event
+    // Verificar si ya es participante
     const eventRef = doc(database, "GoBoxs", item.eventTitle);
     const eventDoc = await getDoc(eventRef);
-    if (eventDoc.exists()) {
-      const eventData = eventDoc.data();
-      const participants = eventData[item.eventDate] || [];
-      const isAlreadyParticipant = participants.some(
-        (participant) => participant.uid === user.uid
-      );
 
-      if (isAlreadyParticipant) {
-        Alert.alert(
-          t("notifications.alreadyParticipant"),
-          t("notifications.alreadyInEvent")
-        );
+    if (eventDoc.exists()) {
+      const participants = eventDoc.data()[item.eventDate] || [];
+      if (participants.some((p) => p.uid === user.uid)) {
+        Alert.alert("Aviso", "Ya estás participando en este evento.");
         setLoadingEventId(null);
         return;
       }
 
-      // Add user as a participant
+      // Agregar al usuario como participante
       const updatedParticipants = participants.concat({
         uid: user.uid,
         username: userData.username || user.displayName,
-        profileImage: userData.photoUrls && userData.photoUrls.length > 0
-          ? userData.photoUrls[0]
-          : "https://via.placeholder.com/150",
+        profileImage:
+          userData.photoUrls?.[0] || "https://via.placeholder.com/150",
       });
 
-      await updateDoc(eventRef, {
-        [item.eventDate]: updatedParticipants,
-      });
+      await updateDoc(eventRef, { [item.eventDate]: updatedParticipants });
 
-      // Ensure that imageUrl is correctly handled as a number
-      const imageUrl = typeof item.imageUrl === 'number' ? item.imageUrl : parseInt(item.imageUrl, 10);
-
-      // Add event data to user's database
+      // Agregar el evento a la base de datos del usuario
       const userEventsRef = collection(database, "users", user.uid, "events");
       await addDoc(userEventsRef, {
         title: item.eventTitle,
-        imageUrl: imageUrl,
+        imageUrl: item.imageUrl,
         date: item.eventDate,
         coordinates: item.coordinates,
-        dateArray: [item.eventDate],
         hours: item.hours,
         locationLink: "Sin ubicación especificada",
         phoneNumber: item.number,
       });
+
+      // Actualizar la notificación existente
+      const notifRef = doc(database, "users", user.uid, "notifications", item.id);
+      await updateDoc(notifRef, {
+        status: "confirmed",
+        message: "¡Has aceptado la invitación al evento!", // Texto genérico
+        timestamp: new Date(),
+        type: "eventConfirmation",
+      });
+
+      // Actualizar el estado local
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notif) =>
+          notif.id === item.id
+            ? {
+                ...notif,
+                status: "confirmed",
+                message: "¡Has aceptado la invitación al evento!", // Reflejar el mensaje genérico
+                timestamp: new Date(),
+                type: "eventConfirmation",
+              }
+            : notif
+        )
+      );
+
+      Alert.alert("Confirmación", "El evento ha sido añadido a tu perfil.");
     }
-
-    // Delete the notification from the database
-    const notifRef = doc(database, "users", user.uid, "notifications", item.id);
-    await deleteDoc(notifRef);
-
-    // Update local notification state
-    setNotifications((prevNotifications) =>
-      prevNotifications.filter((n) => n.id !== item.id)
-    );
-
-    Alert.alert(
-      t("notifications.invitationAccepted"),
-      t("notifications.eventAddedToProfile")
-    );
   } catch (error) {
-    console.error("Error accepting general event invitation:", error);
-    Alert.alert(
-      t("notifications.error"),
-      t("notifications.acceptInvitationError")
-    );
+    console.error("Error al aceptar la invitación:", error);
+    Alert.alert("Error", "No se pudo aceptar la invitación. Intenta nuevamente.");
   } finally {
     setLoadingEventId(null);
   }

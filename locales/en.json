@@ -15,6 +15,7 @@
 
   "_comment_complaints.js": "complaints.js",
 
+  "notifications.invitationAcceptedConfirmation": "¡Has aceptado la invitación de {{name}}!",
   "reportUser": "Report User",
   "reportUserConfirmation": "Are you sure you want to report this user?",
   "reportReasons": {
