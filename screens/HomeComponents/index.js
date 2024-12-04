@@ -454,9 +454,8 @@ const fetchPrivateEvents = useCallback(async () => {
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
   useEffect(() => {
-  
-    fetchUnreadMessages({setUnreadMessages});
-  }, [navigation]);
+    fetchUnreadMessages({ setUnreadMessages, user: auth.currentUser });
+}, [navigation]);
 
   const memoizedMenu = useMemo(() => (
     <Menu

@@ -36,6 +36,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Menu, Provider } from "react-native-paper";
 import Notes from "../../Components/Notes/Notes";
+import { handleMuteSelectedChats as muteChats } from "./utils";
 
 const muteOptions = [
   { label: "1 hora", value: 1 },
@@ -409,15 +410,8 @@ export default function ChatList() {
     }
   };
 
-  const handleMuteSelectedChats = (hours) => {
-    selectedChats.forEach((chatId) => {
-      const chatRef = doc(database, "chats", chatId);
-      const muteUntil = new Date(Date.now() + hours * 60 * 60 * 1000);
-      updateDoc(chatRef, { mutedUntil: muteUntil });
-    });
-    setSelectedChats([]);
-    setIsSelectionMode(false);
-    setShowMuteOptions(false);
+  const handleMuteSelectedChats = async (hours) => {
+    await muteChats({ hours, selectedChats, user, setSelectedChats, setIsSelectionMode, setShowMuteOptions });
   };
 
   const toggleChatSelection = (chatId) => {

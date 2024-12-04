@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, onSnapshot, query, Timestamp, updateDoc, where, writeBatch } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, onSnapshot, query, Timestamp, updateDoc, where, writeBatch, arrayUnion } from "firebase/firestore";
 import { database } from "../../config/firebase";
 import { Alert } from "react-native";
 
@@ -273,15 +273,23 @@ export const handleDeleteSelectedChats = async ({selectedChats, user, setChats, 
     }
 };
 
-export const handleMuteSelectedChats = ({hours, selectedChats, setSelectedChats, setIsSelectionMode, setShowMuteOptions}) => {
-    selectedChats.forEach((chatId) => {
-      const chatRef = doc(database, "chats", chatId);
-      const muteUntil = new Date(Date.now() + hours * 60 * 60 * 1000);
-      updateDoc(chatRef, { mutedUntil: muteUntil });
-    });
-    setSelectedChats([]);
-    setIsSelectionMode(false);
-    setShowMuteOptions(false);
+export const handleMuteSelectedChats = async ({hours, selectedChats, user, setSelectedChats, setIsSelectionMode, setShowMuteOptions}) => {
+    try {
+        const userRef = doc(database, "users", user.uid);
+        const muteUntil = new Date(Date.now() + hours * 60 * 60 * 1000);
+
+        for (const chatId of selectedChats) {
+            await updateDoc(userRef, {
+                mutedChats: arrayUnion({ chatId, muteUntil })
+            });
+        }
+
+        setSelectedChats([]);
+        setIsSelectionMode(false);
+        setShowMuteOptions(false);
+    } catch (error) {
+        console.error("Error muting selected chats:", error);
+    }
 };
 
 export const toggleChatSelection = ({chatId, setSelectedChats}) => {
@@ -290,5 +298,49 @@ export const toggleChatSelection = ({chatId, setSelectedChats}) => {
         ? prevSelected.filter((id) => id !== chatId)
         : [...prevSelected, chatId]
     );
+};
+
+export const fetchUnreadMessages = async ({ setUnreadMessages, user }) => {
+    if (!user) return;
+
+    const userRef = doc(database, "users", user.uid);
+    const userSnapshot = await getDoc(userRef);
+    const mutedChats = userSnapshot.data()?.mutedChats || [];
+
+    const chatsRef = collection(database, "chats");
+    const q = query(chatsRef, where("participants", "array-contains", user.uid));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        let hasUnreadMessages = false;
+
+        querySnapshot.forEach((docSnapshot) => {
+            const chatData = docSnapshot.data();
+            const isMuted = mutedChats.some(
+                (mutedChat) => mutedChat.chatId === docSnapshot.id && mutedChat.muteUntil.toDate() > new Date()
+            );
+
+            if (!isMuted) {
+                const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
+                const unseenMessagesQuery = query(
+                    messagesRef,
+                    where("seen", "==", false),
+                    where("senderId", "!=", user.uid)
+                );
+
+                onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
+                    if (!unseenMessagesSnapshot.empty) {
+                        hasUnreadMessages = true;
+                        setUnreadMessages(true);
+                    }
+                });
+            }
+        });
+
+        if (!hasUnreadMessages) {
+            setUnreadMessages(false);
+        }
+    });
+
+    return () => unsubscribe();
 };
 
