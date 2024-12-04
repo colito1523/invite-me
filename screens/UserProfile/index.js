@@ -283,14 +283,7 @@ export default function UserProfile({ route, navigation }) {
     console.log("User ID:", userId); // Verifica el ID del usuario
     console.log("All Events:", events); // Verifica todos los eventos antes de filtrar
   
-    if (events.length === 0) {
-      console.log("No hay eventos para mostrar en este momento."); // Log cuando no hay eventos disponibles
-      return (
-        <View style={styles.noEventsContainer}>
-          <Text style={styles.noEventsText}>No hay eventos disponibles.</Text>
-        </View>
-      );
-    }
+   
   
     const filteredEvents = events.slice(start, end).filter((event) => {
       console.log("Evaluating Event:", event); // Verificar cada evento antes de evaluar
