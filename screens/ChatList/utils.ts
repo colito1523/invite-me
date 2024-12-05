@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, onSnapshot, query, Timestamp, updateDoc, where, writeBatch, arrayUnion } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, onSnapshot, query, Timestamp, updateDoc, where, writeBatch} from "firebase/firestore";
 import { database } from "../../config/firebase";
 import { Alert } from "react-native";
 
