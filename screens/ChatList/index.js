@@ -73,12 +73,23 @@ export default function ChatList() {
 
   useEffect(() => {
     const fetchMutedChats = async () => {
-      const userRef = doc(database, "users", user.uid);
-      const userSnapshot = await getDoc(userRef);
-      const fetchedMutedChats = userSnapshot.data()?.mutedChats || [];
-      console.log("Muted Chats:", fetchedMutedChats); // Verifica aquí
-      setMutedChats(fetchedMutedChats);
+      try {
+        const userRef = doc(database, "users", user.uid);
+        const userSnapshot = await getDoc(userRef);
+        const fetchedMutedChats =
+          userSnapshot.data()?.mutedChats.map((mute) => ({
+            ...mute,
+            muteUntil: mute.muteUntil instanceof Timestamp
+              ? mute.muteUntil.toDate()
+              : new Date(mute.muteUntil), // Convierte si es necesario
+          })) || [];
+        console.log("Muted Chats:", fetchedMutedChats);
+        setMutedChats(fetchedMutedChats);
+      } catch (error) {
+        console.error("Error fetching muted chats:", error);
+      }
     };
+  
     fetchMutedChats();
   }, []);
 
@@ -309,6 +320,7 @@ export default function ChatList() {
   };
 
   const handleChatPress = async (chat) => {
+    const isMuted = mutedChats.some((mute) => mute.chatId === chat.id);
   
     try {
       const messagesRef = collection(database, "chats", chat.id, "messages");
@@ -423,8 +435,24 @@ export default function ChatList() {
     }
   
     const muteUntil = new Date(Date.now() + selectedMuteHours * 60 * 60 * 1000);
-    await muteChats({ muteUntil, selectedChats, user, setSelectedChats, setIsSelectionMode, setShowMuteOptions });
+    try {
+      const updatedMutedChats = [...mutedChats, ...selectedChats.map((chatId) => ({ chatId, muteUntil }))];
+  
+      // Actualiza Firebase
+      const userRef = doc(database, "users", user.uid);
+      await updateDoc(userRef, { mutedChats: updatedMutedChats });
+  
+      // Actualiza el estado local
+      setMutedChats(updatedMutedChats);
+      setSelectedChats([]);
+      setIsSelectionMode(false);
+      setShowMuteOptions(false);
+    } catch (error) {
+      console.error("Error al silenciar los chats:", error);
+      Alert.alert("Error", "No se pudieron silenciar los chats. Intenta nuevamente.");
+    }
   };
+  
 
   const toggleChatSelection = (chatId) => {
     setSelectedChats((prevSelected) =>
@@ -445,11 +473,26 @@ export default function ChatList() {
     return null;
   };
 
+  const handleUnmuteChat = async (chatId) => {
+    try {
+      const updatedMutedChats = mutedChats.filter((mute) => mute.chatId !== chatId);
+  
+      // Actualiza Firebase
+      const userRef = doc(database, "users", user.uid);
+      await updateDoc(userRef, { mutedChats: updatedMutedChats });
+  
+      // Actualiza el estado local
+      setMutedChats(updatedMutedChats);
+      Alert.alert("Éxito", "El silencio ha sido desactivado.");
+    } catch (error) {
+      console.error("Error al desactivar el silencio:", error);
+      Alert.alert("Error", "No se pudo desactivar el silencio. Intenta nuevamente.");
+    }
+  };
+
   const renderChatItem = ({ item }) => {
     const isMuted = mutedChats.some(
-      (mute) =>
-        mute.chatId === item.id &&
-        mute.muteUntil.toDate().getTime() > Date.now() // Convertir a fecha
+      (mute) => mute.chatId === item.id && new Date(mute.muteUntil) > new Date()
     );
 
     return (
@@ -458,17 +501,30 @@ export default function ChatList() {
       onPress={() =>
         isSelectionMode ? toggleChatSelection(item.id) : handleChatPress(item)
       }
-      onLongPress={() =>
-        !isSelectionMode &&
-        Alert.alert(
-          "Eliminar Chat",
-          "¿Estás seguro de que deseas eliminar este chat?",
-          [
-            { text: "Cancelar", style: "cancel" },
-            { text: "Eliminar", onPress: () => handleDeleteChat(item) },
-          ]
-        )
-      }
+      onLongPress={() => {
+        if (isMuted) {
+          Alert.alert(
+            "Chat silenciado",
+            "Este chat está silenciado. ¿Quieres desactivar el silencio?",
+            [
+              { text: "Cancelar", style: "cancel" },
+              {
+                text: "Desactivar silencio",
+                onPress: () => handleUnmuteChat(item.id),
+              },
+            ]
+          );
+        } else {
+          Alert.alert(
+            "Eliminar Chat",
+            "¿Estás seguro de que deseas eliminar este chat?",
+            [
+              { text: "Cancelar", style: "cancel" },
+              { text: "Eliminar", onPress: () => handleDeleteChat(item) },
+            ]
+          );
+        }
+      }}
     >
       {isSelectionMode && (
         <View
