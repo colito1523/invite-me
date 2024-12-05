@@ -273,24 +273,61 @@ export const handleDeleteSelectedChats = async ({selectedChats, user, setChats, 
     }
 };
 
-export const handleMuteSelectedChats = async ({hours, selectedChats, user, setSelectedChats, setIsSelectionMode, setShowMuteOptions}) => {
-    try {
-        const userRef = doc(database, "users", user.uid);
-        const muteUntil = new Date(Date.now() + hours * 60 * 60 * 1000);
+export const handleMuteSelectedChats = async ({
+  hours,
+  selectedChats,
+  user,
+  setSelectedChats,
+  setIsSelectionMode,
+  setShowMuteOptions,
+}) => {
+  if (!user || selectedChats.length === 0) return;
 
-        for (const chatId of selectedChats) {
-            await updateDoc(userRef, {
-                mutedChats: arrayUnion({ chatId, muteUntil })
-            });
-        }
+  try {
+    const userRef = doc(database, "users", user.uid);
+    const userSnapshot = await getDoc(userRef);
 
-        setSelectedChats([]);
-        setIsSelectionMode(false);
-        setShowMuteOptions(false);
-    } catch (error) {
-        console.error("Error muting selected chats:", error);
+    if (!userSnapshot.exists()) {
+      throw new Error("Usuario no encontrado.");
     }
+
+    const currentMutedChats = userSnapshot.data()?.mutedChats || [];
+
+    const batch = writeBatch(database);
+    const muteUntil = new Date(Date.now() + hours * 60 * 60 * 1000);
+
+    const updatedMutedChats = [...currentMutedChats];
+
+    selectedChats.forEach((chatId) => {
+      const existingIndex = updatedMutedChats.findIndex(
+        (mutedChat) => mutedChat.chatId === chatId
+      );
+
+      if (existingIndex !== -1) {
+        // Actualizar muteUntil si ya existe
+        updatedMutedChats[existingIndex].muteUntil = muteUntil;
+      } else {
+        // Agregar nuevo chat si no existe
+        updatedMutedChats.push({ chatId, muteUntil });
+      }
+    });
+
+    // Actualizar en Firestore
+    batch.update(userRef, { mutedChats: updatedMutedChats });
+    await batch.commit();
+
+    // Restablecer selección
+    setSelectedChats([]);
+    setIsSelectionMode(false);
+    setShowMuteOptions(false);
+
+    console.log("Chats silenciados correctamente.");
+  } catch (error) {
+    console.error("Error al silenciar los chats:", error);
+  }
 };
+
+
 
 export const toggleChatSelection = ({chatId, setSelectedChats}) => {
     setSelectedChats((prevSelected) =>
