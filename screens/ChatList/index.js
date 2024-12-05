@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
-  Modal,
   Platform,
 } from "react-native";
 import { Image } from "expo-image";
@@ -21,14 +20,8 @@ import {
   getDoc,
   doc,
   updateDoc,
-  deleteDoc,
-  orderBy,
-  limit,
   Timestamp,
   writeBatch,
-  deleteField,
-  serverTimestamp,
-  arrayUnion,
 } from "firebase/firestore";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { auth, database } from "../../config/firebase";
@@ -61,6 +54,7 @@ export default function ChatList() {
   const [showMuteOptions, setShowMuteOptions] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedMuteHours, setSelectedMuteHours] = useState(null);
+  const [mutedChats, setMutedChats] = useState([]);
 
   const user = auth.currentUser;
   const navigation = useNavigation();
@@ -75,6 +69,17 @@ export default function ChatList() {
     checkTime();
     const interval = setInterval(checkTime, 60000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const fetchMutedChats = async () => {
+      const userRef = doc(database, "users", user.uid);
+      const userSnapshot = await getDoc(userRef);
+      const fetchedMutedChats = userSnapshot.data()?.mutedChats || [];
+      console.log("Muted Chats:", fetchedMutedChats); // Verifica aquí
+      setMutedChats(fetchedMutedChats);
+    };
+    fetchMutedChats();
   }, []);
 
   useEffect(() => {
@@ -440,7 +445,14 @@ export default function ChatList() {
     return null;
   };
 
-  const renderChatItem = ({ item }) => (
+  const renderChatItem = ({ item }) => {
+    const isMuted = mutedChats.some(
+      (mute) =>
+        mute.chatId === item.id &&
+        mute.muteUntil.toDate().getTime() > Date.now() // Convertir a fecha
+    );
+
+    return (
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() =>
@@ -494,6 +506,14 @@ export default function ChatList() {
         )}
       </View>
       <View style={styles.timeAndUnreadContainer}>
+      {isMuted && (
+            <Ionicons
+              name="notifications-off"
+              size={16}
+              color="red"
+              style={{ marginRight: 10 }}
+            />
+          )}
         {item.unseenMessagesCount > 0 ? (
           <View style={styles.unseenCountContainer}>
             <Text style={styles.unseenCountText}>
@@ -507,7 +527,8 @@ export default function ChatList() {
         )}
       </View>
     </TouchableOpacity>
-  );
+    );
+  };
 
   const renderMuteOptions = () => (
     <View
