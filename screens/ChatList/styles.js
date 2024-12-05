@@ -212,6 +212,7 @@ export const lightTheme = {
     selectionModeBackground: "#f0f0f0",
     selectionModeButtonBackground: "rgba(255, 255, 255, 255)",
     selectionModeButtonText: "#4b4b4b",
+    muteOptionSelectedBackground: "#b5a642",
   };
   
 export const darkTheme = {
@@ -239,4 +240,5 @@ export const darkTheme = {
     selectionModeBackground: "#1a1a1a",
     selectionModeButtonBackground: "rgba(255, 255, 255, 0.2)",
     selectionModeButtonText: "#fff",
+    muteOptionSelectedBackground: "#444",
   };

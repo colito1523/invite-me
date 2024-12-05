@@ -274,14 +274,14 @@ export const handleDeleteSelectedChats = async ({selectedChats, user, setChats, 
 };
 
 export const handleMuteSelectedChats = async ({
-  hours,
+  muteUntil,
   selectedChats,
   user,
   setSelectedChats,
   setIsSelectionMode,
   setShowMuteOptions,
 }) => {
-  if (!user || selectedChats.length === 0) return;
+  if (!user || selectedChats.length === 0 || !muteUntil) return;
 
   try {
     const userRef = doc(database, "users", user.uid);
@@ -294,7 +294,6 @@ export const handleMuteSelectedChats = async ({
     const currentMutedChats = userSnapshot.data()?.mutedChats || [];
 
     const batch = writeBatch(database);
-    const muteUntil = new Date(Date.now() + hours * 60 * 60 * 1000);
 
     const updatedMutedChats = [...currentMutedChats];
 

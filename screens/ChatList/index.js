@@ -60,6 +60,7 @@ export default function ChatList() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [showMuteOptions, setShowMuteOptions] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
+  const [selectedMuteHours, setSelectedMuteHours] = useState(null);
 
   const user = auth.currentUser;
   const navigation = useNavigation();
@@ -410,8 +411,14 @@ export default function ChatList() {
     }
   };
 
-  const handleMuteSelectedChats = async (hours) => {
-    await muteChats({ hours, selectedChats, user, setSelectedChats, setIsSelectionMode, setShowMuteOptions });
+  const handleMuteSelectedChats = async () => {
+    if (!selectedMuteHours) {
+      Alert.alert("Error", "Por favor selecciona una duración para silenciar.");
+      return;
+    }
+  
+    const muteUntil = new Date(Date.now() + selectedMuteHours * 60 * 60 * 1000);
+    await muteChats({ muteUntil, selectedChats, user, setSelectedChats, setIsSelectionMode, setShowMuteOptions });
   };
 
   const toggleChatSelection = (chatId) => {
@@ -502,7 +509,39 @@ export default function ChatList() {
     </TouchableOpacity>
   );
 
-  
+  const renderMuteOptions = () => (
+    <View
+      style={[
+        styles.muteOptionsContainer,
+        { backgroundColor: theme.muteOptionsBackground },
+      ]}
+    >
+      {muteOptions.map((option) => (
+        <TouchableOpacity
+          key={option.value}
+          style={[
+            styles.muteOption,
+            {
+              backgroundColor:
+                selectedMuteHours === option.value
+                  ? theme.muteOptionSelectedBackground
+                  : theme.muteOptionBackground,
+            },
+          ]}
+          onPress={() => setSelectedMuteHours(option.value)}
+        >
+          <Text
+            style={[
+              styles.muteOptionText,
+              { color: theme.muteOptionText },
+            ]}
+          >
+            {option.label}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
 
   return (
     <Provider>
@@ -580,34 +619,7 @@ export default function ChatList() {
             </TouchableOpacity>
           )}
 
-          {showMuteOptions && (
-            <View
-              style={[
-                styles.muteOptionsContainer,
-                { backgroundColor: theme.muteOptionsBackground },
-              ]}
-            >
-              {muteOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.muteOption,
-                    { backgroundColor: theme.muteOptionBackground },
-                  ]}
-                  onPress={() => handleMuteSelectedChats(option.value)}
-                >
-                  <Text
-                    style={[
-                      styles.muteOptionText,
-                      { color: theme.muteOptionText },
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
+          {showMuteOptions && renderMuteOptions()}
 
           <FlatList
             data={showHiddenChats ? hiddenChats : filteredChats}
@@ -643,7 +655,7 @@ export default function ChatList() {
                   styles.selectionModeButton,
                   { backgroundColor: theme.selectionModeButtonBackground },
                 ]}
-                onPress={() => setShowMuteOptions(true)}
+                onPress={handleMuteSelectedChats}
               >
                 <Text
                   style={[
@@ -874,7 +886,7 @@ const lightTheme = {
   icon: "#3e3d3d",
   borderColor: "#bbb7b7",
   noteBackground: "rgba(128, 128, 128, 0.7)",
-  sendButtonBackground: "rgba(0, 0, 0, 0.5)",
+  sendButtonBackground: "rgba(0, 0, 0, 5)",
   sendButtonIcon: "white",
   moodOptionsBackground: "rgba(255, 255, 255, 0.9)",
   noteResponseBackground: "white",
