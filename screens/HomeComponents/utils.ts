@@ -1,5 +1,148 @@
-import { collection, doc, getDoc, onSnapshot, query, where, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, where, getDocs, } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
+import { storage } from "../../config/firebase";
+
+import * as Location from "expo-location";
+
+export const fetchBoxData = async ({
+  selectedDate,
+  setBoxData,
+  boxInfo,
+  blockedUsers = [],
+}: {
+  selectedDate: string;
+  setBoxData: (data: any[]) => void;
+  boxInfo: any[];
+  blockedUsers?: string[];
+}) => {
+  try {
+    const data = await Promise.all(
+      boxInfo.map(
+        async ({
+          path,
+          title,
+          category,
+          hours,
+          number,
+          coordinates,
+          country,
+          city,
+        }) => {
+          let url = path;
+
+          if (typeof path === "string") {
+            const storageRef = ref(storage, path);
+            url = await getDownloadURL(storageRef);
+          }
+
+          const boxRef = doc(database, "GoBoxs", title);
+          const boxDoc = await getDoc(boxRef);
+          let attendees = [];
+
+          if (boxDoc.exists()) {
+            attendees = Array.isArray(boxDoc.data()[selectedDate])
+              ? boxDoc.data()[selectedDate]
+              : [];
+          }
+
+          const filteredAttendees = attendees.filter(
+            (attendee) => !blockedUsers.includes(attendee.uid)
+          );
+
+          return {
+            imageUrl: url,
+            title,
+            category,
+            hours,
+            number,
+            coordinates,
+            country,
+            city,
+            attendees: filteredAttendees,
+            attendeesCount: filteredAttendees.length || 0,
+          };
+        }
+      )
+    );
+
+    setBoxData(data.sort((a, b) => b.attendeesCount - a.attendeesCount));
+  } catch (error) {
+    console.error("Error fetching box data:", error);
+  }
+};
+
+export const fetchPrivateEvents = async ({
+  userId,
+  setPrivateEvents,
+  blockedUsers = [],
+}: {
+  userId: string;
+  setPrivateEvents: (events: any[]) => void;
+  blockedUsers?: string[];
+}) => {
+  try {
+    const eventsRef = collection(database, "users", userId, "events");
+    const eventsSnapshot = await getDocs(eventsRef);
+    const events = [];
+
+    for (const docSnapshot of eventsSnapshot.docs) {
+      const eventData = docSnapshot.data();
+
+      if (eventData.status === "accepted" && eventData.uid !== userId) {
+        const eventPrivRef = doc(database, "EventsPriv", eventData.eventId);
+        const eventPrivDoc = await getDoc(eventPrivRef);
+
+        if (eventPrivDoc.exists()) {
+          const fullEventData = eventPrivDoc.data();
+          events.push({
+            id: docSnapshot.id,
+            ...fullEventData,
+            ...eventData,
+            attendees: fullEventData.attendees || [],
+          });
+        }
+      }
+    }
+
+    setPrivateEvents(events);
+  } catch (error) {
+    console.error("Error fetching private events:", error);
+  }
+};
+
+
+export const requestLocationPermission = async (
+  setErrorMessage: (message: string | null) => void,
+  setLocationGranted: (granted: boolean) => void,
+  setCountry: (country: string | null) => void,
+  setSelectedCity: (city: string) => void
+) => {
+  try {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMessage("Se necesita acceso a la ubicación para usar la aplicación.");
+      return;
+    }
+    setLocationGranted(true);
+
+    const location = await Location.getCurrentPositionAsync({});
+    const geocode = await Location.reverseGeocodeAsync({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    });
+
+    if (geocode.length > 0) {
+      const userCountry = geocode[0].country || null;
+      console.log("País detectado:", userCountry);
+      setCountry(userCountry);
+      setSelectedCity(userCountry === "Portugal" ? "Lisboa" : "Madrid");
+    }
+  } catch (error) {
+    console.error("Error al solicitar permisos de ubicación:", error);
+    setErrorMessage("Ocurrió un error al obtener la ubicación.");
+  }
+};
+
 
 // utils.ts
 export const checkTime = (setIsNightMode: (value: boolean) => void) => {
@@ -120,6 +263,7 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
     unsubscribeUser();
   };
 };
+
 
 
 // Verifica si hay notificaciones o solicitudes de amistad no vistas

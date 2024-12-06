@@ -32,20 +32,17 @@ import CalendarPicker from "../CalendarPicker";
 import DotIndicator from "../../Components/Dots/DotIndicator";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import dayjs from "dayjs";
-import * as Location from "expo-location";
 import { Image } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
-
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, checkTime, } from "./utils";
+import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, checkTime, requestLocationPermission  } from "./utils";
 
 const Home = React.memo(() => {
   const navigation = useNavigation();
   const route = useRoute();
-
   const [errorMessage, setErrorMessage] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [boxData, setBoxData] = useState([]);
@@ -99,26 +96,7 @@ const Home = React.memo(() => {
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMessage("Se necesita acceso a la ubicación para usar la aplicación.");
-        return;
-      }
-      setLocationGranted(true);
-      let location = await Location.getCurrentPositionAsync({});
-      let geocode = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-  
-      if (geocode.length > 0) {
-        const userCountry = geocode[0].country;
-        console.log("País detectado:", userCountry);
-        setCountry(userCountry);
-        setSelectedCity(userCountry === 'Portugal' ? 'Lisboa' : 'Madrid'); // Selección automática de ciudad
-      }
-    })();
+    requestLocationPermission(setErrorMessage, setLocationGranted, setCountry, setSelectedCity);
   }, []);
 
   useEffect(() => {
