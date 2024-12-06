@@ -337,46 +337,50 @@ export const toggleChatSelection = ({chatId, setSelectedChats}) => {
 };
 
 export const fetchUnreadMessages = async ({ setUnreadMessages, user }) => {
-    if (!user) return;
+  if (!user) return;
 
-    const userRef = doc(database, "users", user.uid);
-    const userSnapshot = await getDoc(userRef);
-    const mutedChats = userSnapshot.data()?.mutedChats || [];
+  const userRef = doc(database, "users", user.uid);
+  const userSnapshot = await getDoc(userRef);
+  const mutedChats = userSnapshot.data()?.mutedChats || [];
 
-    const chatsRef = collection(database, "chats");
-    const q = query(chatsRef, where("participants", "array-contains", user.uid));
+  const chatsRef = collection(database, "chats");
+  const q = query(chatsRef, where("participants", "array-contains", user.uid));
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        let hasUnreadMessages = false;
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    let hasUnreadMessages = false;
 
-        querySnapshot.forEach((docSnapshot) => {
-            const chatData = docSnapshot.data();
-            const isMuted = mutedChats.some(
-                (mutedChat) => mutedChat.chatId === docSnapshot.id && mutedChat.muteUntil.toDate() > new Date()
-            );
+    querySnapshot.forEach((docSnapshot) => {
+      const chatData = docSnapshot.data();
 
-            if (!isMuted) {
-                const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
-                const unseenMessagesQuery = query(
-                    messagesRef,
-                    where("seen", "==", false),
-                    where("senderId", "!=", user.uid)
-                );
+      // Comprueba si el chat está silenciado y si el tiempo aún no ha pasado
+      const isMuted = mutedChats.some(
+        (mutedChat) =>
+          mutedChat.chatId === docSnapshot.id &&
+          new Date(mutedChat.muteUntil) > new Date()
+      );
 
-                onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
-                    if (!unseenMessagesSnapshot.empty) {
-                        hasUnreadMessages = true;
-                        setUnreadMessages(true);
-                    }
-                });
-            }
+      if (!isMuted) {
+        const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
+        const unseenMessagesQuery = query(
+          messagesRef,
+          where("seen", "==", false),
+          where("senderId", "!=", user.uid)
+        );
+
+        onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
+          if (!unseenMessagesSnapshot.empty) {
+            hasUnreadMessages = true;
+            setUnreadMessages(true);
+          }
         });
-
-        if (!hasUnreadMessages) {
-            setUnreadMessages(false);
-        }
+      }
     });
 
-    return () => unsubscribe();
+    if (!hasUnreadMessages) {
+      setUnreadMessages(false);
+    }
+  });
+
+  return () => unsubscribe();
 };
 
