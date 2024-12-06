@@ -1,9 +1,7 @@
 import { collection, doc, getDoc, onSnapshot, query, where, getDocs, } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
-import { View, TouchableOpacity } from "react-native";
 import { storage } from "../../config/firebase";
-import { Ionicons } from "@expo/vector-icons";
-import CalendarPicker from "../../screens/CalendarPicker";
+
 
 import * as Location from "expo-location";
 
@@ -336,4 +334,53 @@ export const listenForNotificationChanges = (setNotificationIconState) => {
       unsubscribeFriendRequests();
     };
   }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const filterBoxData = ({ boxData, selectedCity, selectedCategory, t }) => {
+  if (!boxData || !Array.isArray(boxData)) {
+    return [];
+  }
+
+  let filteredData = boxData;
+  if (selectedCity && selectedCity !== "All Cities") {
+    filteredData = filteredData.filter((box) => box.city === selectedCity);
+  }
+
+  if (selectedCategory && selectedCategory !== t("categories.all")) {
+    filteredData = filteredData.filter(
+      (box) => box.category === selectedCategory
+    );
+  }
+
+  const privateEvents = [];
+  const generalEvents = [];
+
+  filteredData.forEach((box) => {
+    if (box.category === "EventoParaAmigos") {
+      privateEvents.push(box);
+    } else {
+      generalEvents.push(box);
+    }
+  });
+
+  return [
+    { title: "Eventos Privados", data: privateEvents },
+    { title: "Eventos Generales", data: generalEvents },
+  ];
 };

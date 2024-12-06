@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo, lazy, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  lazy,
+  useRef,
+} from "react";
 import {
   View,
   Text,
@@ -6,10 +13,9 @@ import {
   RefreshControl,
   TouchableOpacity,
   ActivityIndicator,
-
 } from "react-native";
 import { signOut } from "firebase/auth";
-import {Ionicons  } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import {
   auth,
   storage,
@@ -24,21 +30,30 @@ import {
   getDocs,
   doc,
   getDoc,
-  onSnapshot
+  onSnapshot,
 } from "firebase/firestore";
 import Colors from "../../constants/Colors";
-import Box from "../../Components/Boxs/Box";
 import CalendarPicker from "../CalendarPicker";
-import DotIndicator from "../../Components/Dots/DotIndicator";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import dayjs from "dayjs";
 import { Image } from "expo-image";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import { dayStyles, nightStyles, styles } from "./styles";
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, checkTime, requestLocationPermission, configureHeader   } from "./utils";
+import {
+  fetchUnreadNotifications,
+  fetchData,
+  fetchProfileImage,
+  fetchUnreadMessages,
+  checkTime,
+  requestLocationPermission,
+  configureHeader,
+  filterBoxData 
+} from "./utils";
+import EventItem from "./EventItem";
+import EventListHeader from "./EventListHeader";
 
 const Home = React.memo(() => {
   const navigation = useNavigation();
@@ -59,17 +74,16 @@ const Home = React.memo(() => {
   const [searchQuery, setSearchQuery] = useState("");
   const [privateEvents, setPrivateEvents] = useState([]);
   const { t } = useTranslation();
-  const LazyBoxDetails = lazy(() => import('../../screens/BoxDetails')); // Aaca tendremos que ver si esta siendo llanado correctamente
+  const LazyBoxDetails = lazy(() => import("../../screens/BoxDetails")); // Aaca tendremos que ver si esta siendo llanado correctamente
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(false);
 
- useEffect(() => {
+  useEffect(() => {
     fetchUnreadNotifications();
   }, [navigation]);
-  
 
   useEffect(() => {
-    fetchData({setLoading, fetchBoxData, fetchPrivateEvents});
+    fetchData({ setLoading, fetchBoxData, fetchPrivateEvents });
   }, []);
 
   useEffect(() => {
@@ -78,7 +92,7 @@ const Home = React.memo(() => {
     const interval = setInterval(() => checkTime(setIsNightMode), 60000);
 
     return () => clearInterval(interval);
-}, []);
+  }, []);
 
   useEffect(() => {
     if (route.params?.selectedCategory) {
@@ -87,15 +101,23 @@ const Home = React.memo(() => {
   }, [route.params?.selectedCategory]);
 
   useEffect(() => {
-  const unsubscribe = navigation.addListener('focus', () => {
-    fetchProfileImage({setProfileImage}); // Asegúrate de definir esta función para obtener la imagen
-  });
-  return unsubscribe;
-}, [navigation]);
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchProfileImage({ setProfileImage }); // Asegúrate de definir esta función para obtener la imagen
+    });
+    return unsubscribe;
+  }, [navigation]);
 
-  const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
+  const currentStyles = useMemo(
+    () => (isNightMode ? nightStyles : dayStyles),
+    [isNightMode]
+  );
   useEffect(() => {
-    requestLocationPermission(setErrorMessage, setLocationGranted, setCountry, setSelectedCity);
+    requestLocationPermission(
+      setErrorMessage,
+      setLocationGranted,
+      setCountry,
+      setSelectedCity
+    );
   }, []);
 
   useEffect(() => {
@@ -108,7 +130,7 @@ const Home = React.memo(() => {
             color={isNightMode ? "white" : "black"}
           />
         </TouchableOpacity>
-  
+
         <CalendarPicker
           onDateChange={handleDateChange}
           style={styles.calendarPicker}
@@ -116,14 +138,13 @@ const Home = React.memo(() => {
         />
       </View>
     );
-  
+
     configureHeader({
       navigation,
       headerTitleComponent,
       isNightMode,
     });
   }, [navigation, isNightMode, currentStyles, toggleMenu, handleDateChange]);
-  
 
   const handleDateChange = useCallback(async (date) => {
     selectedDateRef.current = date;
@@ -165,7 +186,7 @@ const Home = React.memo(() => {
   const onSignOut = useCallback(async () => {
     try {
       await signOut(auth); // Cierra la sesión de Firebase
-      await SecureStore.deleteItemAsync('session_token'); // Elimina el token de sesión
+      await SecureStore.deleteItemAsync("session_token"); // Elimina el token de sesión
       console.log("Sign-out successful and session token cleared.");
       navigation.navigate("Login");
     } catch (error) {
@@ -182,12 +203,12 @@ const Home = React.memo(() => {
     try {
       const user = auth.currentUser;
       let blockedUsers = [];
-    if (user) {
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      if (userDoc.exists()) {
-        blockedUsers = userDoc.data()?.blockedUsers || [];
+      if (user) {
+        const userDoc = await getDoc(doc(database, "users", user.uid));
+        if (userDoc.exists()) {
+          blockedUsers = userDoc.data()?.blockedUsers || [];
+        }
       }
-    }
       const data = await Promise.all(
         boxInfo.map(
           async ({
@@ -201,27 +222,27 @@ const Home = React.memo(() => {
             city,
           }) => {
             let url = path;
-  
+
             if (typeof path === "string") {
               const storageRef = ref(storage, path);
               url = await getDownloadURL(storageRef);
             }
-  
+
             const boxRef = doc(database, "GoBoxs", title);
             const boxDoc = await getDoc(boxRef);
             let attendees = [];
-  
+
             if (boxDoc.exists()) {
               attendees = Array.isArray(boxDoc.data()[selectedDateRef.current])
                 ? boxDoc.data()[selectedDateRef.current]
                 : [];
             }
 
-             // Filtrar asistentes bloqueados
-          const filteredAttendees = attendees.filter(
-            (attendee) => !blockedUsers.includes(attendee.uid)
-          );
-            
+            // Filtrar asistentes bloqueados
+            const filteredAttendees = attendees.filter(
+              (attendee) => !blockedUsers.includes(attendee.uid)
+            );
+
             return {
               imageUrl: url,
               title,
@@ -237,7 +258,7 @@ const Home = React.memo(() => {
           }
         )
       );
-  
+
       const userEvents = [];
       if (user) {
         const privateEventsRef = collection(database, "EventsPriv");
@@ -246,7 +267,7 @@ const Home = React.memo(() => {
           where("Admin", "==", user.uid)
         );
         const querySnapshot = await getDocs(adminEventsQuery);
-  
+
         querySnapshot.forEach((doc) => {
           const eventData = doc.data();
           const filteredAttendees = (eventData.attendees || []).filter(
@@ -269,98 +290,68 @@ const Home = React.memo(() => {
           });
         });
       }
-  
+
       const allEvents = [...userEvents, ...data].sort(
         (a, b) => b.attendeesCount - a.attendeesCount
       );
-  
+
       setBoxData(allEvents);
-    } catch (error) {
-     
-    }
+    } catch (error) {}
   }, [selectedDate]);
 
   // Coloca aquí el nuevo useEffect para actualizar los datos cuando cambie selectedCategory
-useEffect(() => {
-  fetchBoxData();
-}, [selectedCategory]);
+  useEffect(() => {
+    fetchBoxData();
+  }, [selectedCategory]);
 
-const fetchPrivateEvents = useCallback(async () => {
-  const user = auth.currentUser;
-  if (!user) return;
+  const fetchPrivateEvents = useCallback(async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-  let blockedUsers = [];
-  const userDoc = await getDoc(doc(database, "users", user.uid));
-  if (userDoc.exists()) {
-    blockedUsers = userDoc.data()?.blockedUsers || [];
-  }
+    let blockedUsers = [];
+    const userDoc = await getDoc(doc(database, "users", user.uid));
+    if (userDoc.exists()) {
+      blockedUsers = userDoc.data()?.blockedUsers || [];
+    }
 
-  const eventsRef = collection(database, 'users', user.uid, 'events');
-  const eventsSnapshot = await getDocs(eventsRef);
-  const events = [];
+    const eventsRef = collection(database, "users", user.uid, "events");
+    const eventsSnapshot = await getDocs(eventsRef);
+    const events = [];
 
- 
+    for (const docSnapshot of eventsSnapshot.docs) {
+      const eventData = docSnapshot.data();
 
-  for (const docSnapshot of eventsSnapshot.docs) {
-    const eventData = docSnapshot.data();
-    
-    // Verificar si el evento es aceptado y que no es del usuario actual
-    if (eventData.status === 'accepted' && eventData.uid !== user.uid) {
-      const eventPrivRef = doc(database, 'EventsPriv', eventData.eventId);
-      const eventPrivDoc = await getDoc(eventPrivRef);
-      if (eventPrivDoc.exists()) {
-        const fullEventData = eventPrivDoc.data();
+      // Verificar si el evento es aceptado y que no es del usuario actual
+      if (eventData.status === "accepted" && eventData.uid !== user.uid) {
+        const eventPrivRef = doc(database, "EventsPriv", eventData.eventId);
+        const eventPrivDoc = await getDoc(eventPrivRef);
+        if (eventPrivDoc.exists()) {
+          const fullEventData = eventPrivDoc.data();
 
-        events.push({
-          id: docSnapshot.id,
-          ...fullEventData,
-          ...eventData,
-          attendees: fullEventData.attendees || [],
-        });
-       
+          events.push({
+            id: docSnapshot.id,
+            ...fullEventData,
+            ...eventData,
+            attendees: fullEventData.attendees || [],
+          });
+        }
       }
     }
-  }
 
+    setPrivateEvents(events);
+  }, []);
 
-  setPrivateEvents(events);
-}, []);
+  const filteredBoxData = useMemo(
+    () =>
+      filterBoxData({
+        boxData,
+        selectedCity,
+        selectedCategory,
+        t,
+      }),
+    [boxData, selectedCity, selectedCategory, t]
+  );
 
-
-  const filteredBoxData = useMemo(() => {
-    if (!boxData || !Array.isArray(boxData)) {
-      return [];
-    }
-  
-    // Filtrado inicial según ciudad
-    let filteredData = boxData;
-    if (selectedCity && selectedCity !== "All Cities") {
-      filteredData = filteredData.filter((box) => box.city === selectedCity);
-    }
-  
-    // Filtrado adicional según categoría, ignorando la opción "Todos"
-    if (selectedCategory && selectedCategory !== t("categories.all")) {
-      filteredData = filteredData.filter((box) => box.category === selectedCategory);
-    }
-  
-    // Separación de eventos en categorías de amigos y generales
-    const privateEvents = [];
-    const generalEvents = [];
-  
-    filteredData.forEach((box) => {
-      if (box.category === "EventoParaAmigos") {
-        privateEvents.push(box);
-      } else {
-        generalEvents.push(box);
-      }
-    });
-  
-    return [
-      { title: "Eventos Privados", data: privateEvents },
-      { title: "Eventos Generales", data: generalEvents },
-    ];
-  }, [boxData, selectedCity, selectedCategory, t]);
-  
   useEffect(() => {
     fetchBoxData();
     fetchPrivateEvents();
@@ -370,22 +361,25 @@ const fetchPrivateEvents = useCallback(async () => {
     const user = auth.currentUser;
     if (user) {
       // Escucha en tiempo real los cambios del documento de usuario
-      const unsubscribe = onSnapshot(doc(database, "users", user.uid), (userDoc) => {
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          if (data.photoUrls && data.photoUrls.length > 0) {
-            setProfileImage(data.photoUrls[0]); // Actualiza la imagen del perfil al recibir cambios
+      const unsubscribe = onSnapshot(
+        doc(database, "users", user.uid),
+        (userDoc) => {
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            if (data.photoUrls && data.photoUrls.length > 0) {
+              setProfileImage(data.photoUrls[0]); // Actualiza la imagen del perfil al recibir cambios
+            }
           }
         }
-      });
+      );
       return () => {
-        if (typeof unsubscribe === 'function') {
+        if (typeof unsubscribe === "function") {
           unsubscribe();
         }
       };
     }
   }, []);
-  
+
   // Función para manejar el evento de clic en el box
   const handleBoxPress = useCallback(
     (box) => {
@@ -398,55 +392,58 @@ const fetchPrivateEvents = useCallback(async () => {
     [navigation, selectedDate]
   );
 
-  const renderItem = useCallback(({ item }) => (
-    <View style={styles.boxContainer}>
-      <Box
-  imageUrl={item.imageUrl}
-  title={item.title}
-  onPress={() => handleBoxPress(item)}
-  selectedDate={selectedDate}
-  date={item.date}
-  isPrivateEvent={item.category === "EventoParaAmigos"}
-/>
-      {item.attendees && item.attendees.length > 0 && (
-        <DotIndicator
-          profileImages={item.attendees.map(
-            (attendee) => attendee.profileImage
-          )}
-          attendeesList={item.attendees}
-        />
-      )}
-    </View>
-  ), [handleBoxPress, selectedDate]);
+  const renderItem = ({ item }) => (
+    <EventItem
+      item={item}
+      handleBoxPress={handleBoxPress}
+      selectedDate={selectedDate}
+      styles={styles}
+    />
+  );
 
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
   useEffect(() => {
-    const unsubscribe = fetchUnreadMessages({ setUnreadMessages, user: auth.currentUser });
+    const unsubscribe = fetchUnreadMessages({
+      setUnreadMessages,
+      user: auth.currentUser,
+    });
     return () => {
-      if (typeof unsubscribe === 'function') {
+      if (typeof unsubscribe === "function") {
         unsubscribe();
       }
     };
   }, [navigation, auth.currentUser]);
 
-  const memoizedMenu = useMemo(() => (
-    <Menu
-      isVisible={menuVisible}
-      onClose={toggleMenu}
-      onCategorySelect={handleCategorySelect}
-      onCitySelect={handleCitySelect}
-      onSignOut={onSignOut}
-      isNightMode={isNightMode}
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
-    />
-  ), [menuVisible, toggleMenu, handleCategorySelect, handleCitySelect, onSignOut, isNightMode, searchQuery, setSearchQuery]);
+  const memoizedMenu = useMemo(
+    () => (
+      <Menu
+        isVisible={menuVisible}
+        onClose={toggleMenu}
+        onCategorySelect={handleCategorySelect}
+        onCitySelect={handleCitySelect}
+        onSignOut={onSignOut}
+        isNightMode={isNightMode}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
+    ),
+    [
+      menuVisible,
+      toggleMenu,
+      handleCategorySelect,
+      handleCitySelect,
+      onSignOut,
+      isNightMode,
+      searchQuery,
+      setSearchQuery,
+    ]
+  );
 
   useEffect(() => {
     const unsubscribe = fetchUnreadNotifications({ setUnreadNotifications });
     return () => {
-      if (typeof unsubscribe === 'function') {
+      if (typeof unsubscribe === "function") {
         unsubscribe();
       }
     };
@@ -470,7 +467,7 @@ const fetchPrivateEvents = useCallback(async () => {
     <View style={currentStyles.container}>
       {memoizedMenu}
       <FlatList
-        data={filteredBoxData.flatMap(group => group.data)}
+        data={filteredBoxData.flatMap((group) => group.data)}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.container}
@@ -478,28 +475,11 @@ const fetchPrivateEvents = useCallback(async () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListHeaderComponent={
-          <View style={styles.sectionContainer}>
-            {privateEvents.map((event, index) => (
-              <View style={styles.boxContainer} key={index}>
-                <Box
-                  imageUrl={event.image || event.imageUrl}
-                  title={event.title}
-                  onPress={() => handleBoxPress(event)}
-                  selectedDate={event.date}
-                  date={event.date}
-                  isPrivateEvent={true}
-                />
-                {event.attendees && event.attendees.length > 0 && (
-                  <DotIndicator
-                    profileImages={event.attendees.map(
-                      (attendee) => attendee.profileImage
-                    )}
-                    attendeesList={event.attendees}
-                  />
-                )}
-              </View>
-            ))}
-          </View>
+          <EventListHeader
+            privateEvents={privateEvents}
+            handleBoxPress={handleBoxPress}
+            styles={styles}
+          />
         }
       />
 
@@ -529,12 +509,9 @@ const fetchPrivateEvents = useCallback(async () => {
         </TouchableOpacity>
         <TouchableOpacity onPress={navigateToProfile}>
           {profileImage ? (
-            <Image
-              source={{ uri: profileImage }}
-              style={styles.profileImage}
-            />
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
           ) : (
-            <Ionicons 
+            <Ionicons
               name="person-circle"
               size={24}
               color={isNightMode ? "white" : "black"}
@@ -548,10 +525,9 @@ const fetchPrivateEvents = useCallback(async () => {
             color={isNightMode ? "white" : "black"}
           />
           {unreadNotifications && (
-            <View style={[
-              styles.unreadIndicator,
-              { backgroundColor: "red" }
-            ]} />
+            <View
+              style={[styles.unreadIndicator, { backgroundColor: "red" }]}
+            />
           )}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
@@ -561,10 +537,9 @@ const fetchPrivateEvents = useCallback(async () => {
             color={isNightMode ? "white" : "black"}
           />
           {unreadMessages && (
-            <View style={[
-              styles.unreadIndicator,
-              { backgroundColor: "red" }
-            ]} />
+            <View
+              style={[styles.unreadIndicator, { backgroundColor: "red" }]}
+            />
           )}
         </TouchableOpacity>
       </View>
