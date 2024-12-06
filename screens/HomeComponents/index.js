@@ -55,6 +55,7 @@ import {
 } from "./utils";
 import EventItem from "./EventItem";
 import EventListHeader from "./EventListHeader";
+import EventList from "./EventList";
 
 const Home = React.memo(() => {
   const navigation = useNavigation();
@@ -474,22 +475,13 @@ const Home = React.memo(() => {
   return (
     <View style={currentStyles.container}>
       {memoizedMenu}
-      <FlatList
-        data={filteredBoxData.flatMap((group) => group.data)}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        contentContainerStyle={styles.container}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListHeaderComponent={
-          <EventListHeader
-            privateEvents={privateEvents}
-            handleBoxPress={handleBoxPress}
-            styles={styles}
-          />
-        }
-      />
+      <EventList
+  filteredBoxData={filteredBoxData}
+  privateEvents={privateEvents}
+  handleBoxPress={handleBoxPress}
+  selectedDate={selectedDate}
+  styles={currentStyles}
+/>
 
       {loading && (
         <View style={styles.loadingOverlay}>
