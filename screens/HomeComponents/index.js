@@ -33,12 +33,12 @@ import DotIndicator from "../../Components/Dots/DotIndicator";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import dayjs from "dayjs";
 import * as Location from "expo-location";
-import { Image } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
 
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
 import TabBar from "./TabBar";
+import Header from "./Header"; // Importamos el nuevo componente
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
 import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages} from "./utils";
@@ -101,9 +101,6 @@ const Home = React.memo(() => {
   return unsubscribe;
 }, [navigation]);
 
-
-
-
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
 
   useEffect(() => {
@@ -136,21 +133,12 @@ const Home = React.memo(() => {
       },
       headerTintColor: isNightMode ? "white" : "black",
       headerTitle: () => (
-        <View style={currentStyles.headerContainer}>
-          <TouchableOpacity style={{ marginLeft: 10 }} onPress={toggleMenu}>
-            <Ionicons
-              name="menu"
-              size={24}
-              color={isNightMode ? "white" : "black"}
-            />
-          </TouchableOpacity>
-
-          <CalendarPicker
-            onDateChange={handleDateChange}
-            style={styles.calendarPicker}
-            setLoading={setLoading}
-          />
-        </View>
+        <Header
+          isNightMode={isNightMode}
+          toggleMenu={toggleMenu}
+          handleDateChange={handleDateChange}
+          setLoading={setLoading}
+        />
       ),
     });
   }, [navigation, isNightMode]);
