@@ -29,7 +29,6 @@ import CalendarPicker from "../CalendarPicker";
 import DotIndicator from "../../Components/Dots/DotIndicator";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import dayjs from "dayjs";
-import * as Location from "expo-location";
 import * as SecureStore from 'expo-secure-store';
 import { useLocationAndTime } from "../../src/hooks/useLocationAndTime";
 
@@ -61,16 +60,15 @@ const Home = React.memo(() => {
   const LazyBoxDetails = lazy(() => import('../../screens/BoxDetails')); // Aaca tendremos que ver si esta siendo llanado correctamente
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(false);
+  const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
 
  useEffect(() => {
     fetchUnreadNotifications();
   }, [navigation]);
-  
 
   useEffect(() => {
     fetchData({setLoading, fetchBoxData, fetchPrivateEvents});
   }, []);
-
 
   useEffect(() => {
     if (route.params?.selectedCategory) {
@@ -84,8 +82,6 @@ const Home = React.memo(() => {
   });
   return unsubscribe;
 }, [navigation]);
-
-  const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
 
   useEffect(() => {
     if (country) {
