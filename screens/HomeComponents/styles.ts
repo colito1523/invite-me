@@ -43,6 +43,11 @@ export const dayStyles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
   },
+  profileImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+  },
 });
 
 export const nightStyles = StyleSheet.create({
@@ -80,6 +85,11 @@ export const nightStyles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     marginTop: 10,
+  },
+  profileImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
   },
 });
 

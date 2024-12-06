@@ -38,6 +38,7 @@ import * as SecureStore from 'expo-secure-store';
 
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
+import TabBar from "./TabBar";
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
 import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages} from "./utils";
@@ -541,62 +542,12 @@ const fetchPrivateEvents = useCallback(async () => {
         </View>
       )}
 
-      <View style={currentStyles.tabBar}>
-        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-          <Ionicons
-            name="home"
-            size={24}
-            color={isNightMode ? "white" : "black"}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Search")}>
-          <Ionicons
-            name="search"
-            size={24}
-            color={isNightMode ? "white" : "black"}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={navigateToProfile}>
-          {profileImage ? (
-            <Image
-              source={{ uri: profileImage }}
-              style={styles.profileImage}
-            />
-          ) : (
-            <Ionicons 
-              name="person-circle"
-              size={24}
-              color={isNightMode ? "white" : "black"}
-            />
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
-          <Ionicons
-            name="notifications"
-            size={24}
-            color={isNightMode ? "white" : "black"}
-          />
-          {unreadNotifications && (
-            <View style={[
-              styles.unreadIndicator,
-              { backgroundColor: "red" }
-            ]} />
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
-          <Ionicons
-            name="mail"
-            size={25}
-            color={isNightMode ? "white" : "black"}
-          />
-          {unreadMessages && (
-            <View style={[
-              styles.unreadIndicator,
-              { backgroundColor: "red" }
-            ]} />
-          )}
-        </TouchableOpacity>
-      </View>
+<TabBar
+      isNightMode={isNightMode}
+      profileImage={profileImage}
+      unreadNotifications={unreadNotifications}
+      unreadMessages={unreadMessages}
+    />
     </View>
   );
 });
