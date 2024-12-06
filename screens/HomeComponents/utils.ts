@@ -1,6 +1,13 @@
 import { collection, doc, getDoc, onSnapshot, query, where, getDocs } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
 
+// utils.ts
+export const checkTime = (setIsNightMode: (value: boolean) => void) => {
+  const currentHour = new Date().getHours();
+  setIsNightMode(currentHour >= 19 || currentHour < 6);
+};
+
+
 export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
   if (auth.currentUser) {
     const user = auth.currentUser;

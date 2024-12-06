@@ -40,12 +40,11 @@ import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
 import SliderContent from "./BoxDetailsComponents/SliderContent";
 import InviteFriendsModal from "./BoxDetailsComponents/InviteFriendsModal";
 import {
+  checkTime,
   handleInvite,
-  saveUserEvent,
   fetchAttendees,
   checkNightMode,
   checkEventStatus,
-  fetchEventDetails,
   handleGeneralEventInvite,
   checkAndRemoveExpiredEvents,
 } from "./utils"

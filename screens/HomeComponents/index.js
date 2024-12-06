@@ -40,7 +40,7 @@ import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages} from "./utils";
+import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, checkTime, } from "./utils";
 
 const Home = React.memo(() => {
   const navigation = useNavigation();
@@ -75,17 +75,13 @@ const Home = React.memo(() => {
     fetchData({setLoading, fetchBoxData, fetchPrivateEvents});
   }, []);
 
-  const checkTime = () => {
-    const currentHour = new Date().getHours();
-    setIsNightMode(currentHour >= 19 || currentHour < 6);
-  };
-
   useEffect(() => {
-    checkTime();
-    const interval = setInterval(checkTime, 60000);
+    // Pasa la referencia correcta de setIsNightMode
+    checkTime(setIsNightMode);
+    const interval = setInterval(() => checkTime(setIsNightMode), 60000);
 
     return () => clearInterval(interval);
-  }, []);
+}, []);
 
   useEffect(() => {
     if (route.params?.selectedCategory) {
@@ -99,9 +95,6 @@ const Home = React.memo(() => {
   });
   return unsubscribe;
 }, [navigation]);
-
-
-
 
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
 
