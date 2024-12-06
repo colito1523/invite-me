@@ -58,10 +58,8 @@ export const fetchProfileImage = async ({setProfileImage}) => {
 };
 export const fetchUnreadMessages = ({ setUnreadMessages }) => {
   const user = auth.currentUser;
-
   if (!user) return;
 
-  // Escucha cambios en el documento del usuario
   const userDocRef = doc(database, "users", user.uid);
   const unsubscribeUser = onSnapshot(userDocRef, (userDoc) => {
     if (!userDoc.exists()) {
@@ -73,7 +71,6 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
     const userData = userDoc.data();
     const mutedChats = userData.mutedChats || [];
 
-    // Escucha cambios en los chats del usuario
     const chatsRef = collection(database, "chats");
     const chatsQuery = query(chatsRef, where("participants", "array-contains", user.uid));
     const unsubscribeChats = onSnapshot(chatsQuery, (querySnapshot) => {
@@ -82,11 +79,9 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
       querySnapshot.forEach((chatDoc) => {
         const chatId = chatDoc.id;
 
-        // Verificar si el chat está silenciado
         const isMuted = mutedChats.some((mutedChat) => mutedChat.chatId === chatId);
-        if (isMuted) return; // Ignorar chats silenciados
+        if (isMuted) return;
 
-        // Escucha cambios en los mensajes no leídos
         const messagesRef = collection(database, "chats", chatId, "messages");
         const unseenMessagesQuery = query(
           messagesRef,

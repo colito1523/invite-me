@@ -352,7 +352,6 @@ export const fetchUnreadMessages = async ({ setUnreadMessages, user }) => {
     querySnapshot.forEach((docSnapshot) => {
       const chatData = docSnapshot.data();
 
-      // Comprueba si el chat está silenciado y si el tiempo aún no ha pasado
       const isMuted = mutedChats.some(
         (mutedChat) =>
           mutedChat.chatId === docSnapshot.id &&

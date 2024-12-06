@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo, lazy, useRef } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   ActivityIndicator,
-  Dimensions,
-  Platform,
+
 } from "react-native";
 import { signOut } from "firebase/auth";
 import {Ionicons  } from "@expo/vector-icons";
@@ -452,13 +451,13 @@ const fetchPrivateEvents = useCallback(async () => {
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
   useEffect(() => {
-    const unsubscribe = fetchUnreadMessages({ setUnreadMessages });
+    const unsubscribe = fetchUnreadMessages({ setUnreadMessages, user: auth.currentUser });
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
       }
     };
-  }, [navigation]);
+  }, [navigation, auth.currentUser]);
 
   const memoizedMenu = useMemo(() => (
     <Menu
