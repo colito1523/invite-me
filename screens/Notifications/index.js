@@ -162,7 +162,7 @@ export default function NotificationsComponent() {
     React.useCallback(() => {
       navigation.setOptions({
         headerStyle: {
-          backgroundColor: isNightMode ? "#1a1a1a" : "#fff",
+          backgroundColor: isNightMode ? "black" : "#fff",
         },
         headerTintColor: isNightMode ? "#fff" : "#000",
         headerTitleStyle: {
@@ -621,7 +621,7 @@ export default function NotificationsComponent() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient
-        colors={isNightMode ? ["#1a1a1a", "#000"] : ["#fff", "#f0f0f0"]}
+        colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
         style={styles.container}
       >
         <FlatList

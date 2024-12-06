@@ -11,17 +11,16 @@ import {
   RefreshControl,
 } from "react-native";
 import { Image } from "expo-image";
-import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import StorySlider from "../../Components/Stories/StorySlider";
 import { useTranslation } from 'react-i18next';
-import i18n from 'i18next';
 import { getAuth } from "firebase/auth"; // Add this line
-import { fetchUsers, fetchRecommendations, sendFriendRequest, cancelFriendRequest, saveSearchHistory } from './utils';
-import { database, auth } from "../../config/firebase";
+import { fetchUsers, fetchRecommendations, sendFriendRequest, saveSearchHistory } from './utils';
+import { database} from "../../config/firebase";
 import {
   collection,
   query,
@@ -60,7 +59,7 @@ export default function Search() {
     React.useCallback(() => {
       navigation.setOptions({
         headerStyle: {
-          backgroundColor: isNightMode ? "#1a1a1a" : "#fff",
+          backgroundColor: isNightMode ? "black" : "#fff",
         },
         headerTintColor: isNightMode ? "#fff" : "#000",
         headerTitleStyle: {
@@ -298,7 +297,7 @@ const handleUserPress = (selectedUser) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient
-        colors={isNightMode ? ["#1a1a1a", "#000"] : ["#fff", "#f0f0f0"]}
+        colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
         style={styles.container}
       >
         <View style={styles.header}>
