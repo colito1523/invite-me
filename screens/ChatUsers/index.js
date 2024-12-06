@@ -5,9 +5,6 @@ import {
   TouchableOpacity,
   FlatList,
   Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   Image,
   Modal,
   TouchableWithoutFeedback,
@@ -30,7 +27,6 @@ import {
   where,
   arrayUnion
 } from "firebase/firestore";
-import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";

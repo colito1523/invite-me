@@ -143,7 +143,7 @@ export const styles = StyleSheet.create({
     marginRight: 10,
   },
   checkboxSelected: {
-    backgroundColor: "white",
+    backgroundColor: "black",
   },
   selectionModeContainer: {
     flexDirection: "row",

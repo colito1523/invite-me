@@ -28,6 +28,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Menu, Provider } from "react-native-paper";
 import Notes from "../../Components/Notes/Notes";
 import { styles, lightTheme, darkTheme } from "./styles";
+import { useTranslation } from 'react-i18next';
 
 const muteOptions = [
   { label: "1 hora", value: 1 },
@@ -50,6 +51,7 @@ export default function ChatList() {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedMuteHours, setSelectedMuteHours] = useState(null);
   const [mutedChats, setMutedChats] = useState([]);
+  const { t } = useTranslation();
 
   const user = auth.currentUser;
   const navigation = useNavigation();
