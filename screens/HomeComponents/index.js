@@ -38,7 +38,7 @@ import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, checkTime, requestLocationPermission  } from "./utils";
+import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, checkTime, requestLocationPermission, configureHeader   } from "./utils";
 
 const Home = React.memo(() => {
   const navigation = useNavigation();
@@ -94,36 +94,36 @@ const Home = React.memo(() => {
 }, [navigation]);
 
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
-
   useEffect(() => {
     requestLocationPermission(setErrorMessage, setLocationGranted, setCountry, setSelectedCity);
   }, []);
 
   useEffect(() => {
-    navigation.setOptions({
-      headerStyle: {
-        backgroundColor: isNightMode ? "black" : "white",
-      },
-      headerTintColor: isNightMode ? "white" : "black",
-      headerTitle: () => (
-        <View style={currentStyles.headerContainer}>
-          <TouchableOpacity style={{ marginLeft: 10 }} onPress={toggleMenu}>
-            <Ionicons
-              name="menu"
-              size={24}
-              color={isNightMode ? "white" : "black"}
-            />
-          </TouchableOpacity>
-
-          <CalendarPicker
-            onDateChange={handleDateChange}
-            style={styles.calendarPicker}
-            setLoading={setLoading}
+    const headerTitleComponent = () => (
+      <View style={currentStyles.headerContainer}>
+        <TouchableOpacity style={{ marginLeft: 10 }} onPress={toggleMenu}>
+          <Ionicons
+            name="menu"
+            size={24}
+            color={isNightMode ? "white" : "black"}
           />
-        </View>
-      ),
+        </TouchableOpacity>
+  
+        <CalendarPicker
+          onDateChange={handleDateChange}
+          style={styles.calendarPicker}
+          setLoading={setLoading}
+        />
+      </View>
+    );
+  
+    configureHeader({
+      navigation,
+      headerTitleComponent,
+      isNightMode,
     });
-  }, [navigation, isNightMode]);
+  }, [navigation, isNightMode, currentStyles, toggleMenu, handleDateChange]);
+  
 
   const handleDateChange = useCallback(async (date) => {
     selectedDateRef.current = date;

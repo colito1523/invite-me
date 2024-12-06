@@ -1,8 +1,26 @@
 import { collection, doc, getDoc, onSnapshot, query, where, getDocs, } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
+import { View, TouchableOpacity } from "react-native";
 import { storage } from "../../config/firebase";
+import { Ionicons } from "@expo/vector-icons";
+import CalendarPicker from "../../screens/CalendarPicker";
 
 import * as Location from "expo-location";
+
+
+export const configureHeader = ({
+  navigation,
+  headerTitleComponent,
+  isNightMode,
+}) => {
+  navigation.setOptions({
+    headerStyle: {
+      backgroundColor: isNightMode ? "black" : "white",
+    },
+    headerTintColor: isNightMode ? "white" : "black",
+    headerTitle: headerTitleComponent,
+  });
+};
 
 export const fetchBoxData = async ({
   selectedDate,
