@@ -28,7 +28,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Menu, Provider } from "react-native-paper";
 import Notes from "../../Components/Notes/Notes";
 import { styles, lightTheme, darkTheme } from "./styles";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const muteOptions = [
   { label: "1 hora", value: 1 },
@@ -73,22 +73,25 @@ export default function ChatList() {
       try {
         const userRef = doc(database, "users", user.uid);
         const userSnapshot = await getDoc(userRef);
-  
+
         // Verifica que mutedChats sea un array antes de usar .map()
-        const fetchedMutedChats = (userSnapshot.data()?.mutedChats || []).map((mute) => ({
-          ...mute,
-          muteUntil: mute.muteUntil instanceof Timestamp
-            ? mute.muteUntil.toDate()
-            : new Date(mute.muteUntil), // Convierte si es necesario
-        }));
-  
+        const fetchedMutedChats = (userSnapshot.data()?.mutedChats || []).map(
+          (mute) => ({
+            ...mute,
+            muteUntil:
+              mute.muteUntil instanceof Timestamp
+                ? mute.muteUntil.toDate()
+                : new Date(mute.muteUntil), // Convierte si es necesario
+          })
+        );
+
         console.log("Muted Chats:", fetchedMutedChats);
         setMutedChats(fetchedMutedChats);
       } catch (error) {
         console.error("Error fetching muted chats:", error);
       }
     };
-  
+
     fetchMutedChats();
   }, []);
 
@@ -259,8 +262,7 @@ export default function ChatList() {
   const handleCloseMuteOptions = () => {
     setShowMuteOptions(false); // Oculta las opciones de silenciar
     setSelectedMuteHours(null); // Limpia la selección actual (opcional)
-};
-
+  };
 
   const handleChatPress = async (chat) => {
     const isMuted = mutedChats.some((mute) => mute.chatId === chat.id);
@@ -490,7 +492,7 @@ export default function ChatList() {
             style={[
               styles.checkbox,
               selectedChats.includes(item.id) && {
-                backgroundColor: isNightMode ? 'white' : 'black',
+                backgroundColor: isNightMode ? "white" : "black",
               },
             ]}
           />
@@ -560,27 +562,30 @@ export default function ChatList() {
       ]}
     >
       {muteOptions.map((option) => (
-        <TouchableOpacity
-          key={option.value}
-          style={[
-            styles.muteOption,
-            {
-              backgroundColor:
-                selectedMuteHours === option.value
-                  ? theme.muteOptionSelectedBackground
-                  : theme.muteOptionBackground,
-            },
-          ]}
-          onPress={() => setSelectedMuteHours(option.value)}
-        >
-          <Text
+         <TouchableOpacity
+         key={option.value}
+         style={[
+           styles.muteOption,
+           {
+             backgroundColor:
+               selectedMuteHours === option.value
+                 ? "transparent" // Fondo transparente si está seleccionado
+                 : isNightMode
+                 ? "white"
+                 : "black", // Fondo dinámico si no está seleccionado
+             borderWidth: selectedMuteHours === option.value ? 1 : 0, // Opcional para delinear
+             borderColor: isNightMode ? "transparent" : "transparent", // Borde para contraste
+           },
+         ]}
+         onPress={() => setSelectedMuteHours(option.value)}
+       >
+        <Text
           style={[
             styles.muteOptionText,
             {
-              // Cambia el color del texto solo si esta opción está seleccionada
               color: selectedMuteHours === option.value
-                ? (isNightMode ? 'white' : 'black') // Negro en el día, blanco en la noche
-                : theme.muteOptionText,
+                ? (isNightMode ? "white" : "black") // Color de texto dinámico según el fondo
+                : (isNightMode ? "black" : "white"), // Texto para no seleccionados
             },
           ]}
         >
@@ -715,21 +720,21 @@ export default function ChatList() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-  style={[
-    styles.selectionModeButton,
-    { backgroundColor: theme.selectionModeButtonBackground },
-  ]}
-  onPress={handleCancel}
->
-  <Text
-    style={[
-      styles.selectionModeButtonText,
-      { color: theme.selectionModeButtonText },
-    ]}
-  >
-    Cancelar
-  </Text>
-</TouchableOpacity>
+                style={[
+                  styles.selectionModeButton,
+                  { backgroundColor: theme.selectionModeButtonBackground },
+                ]}
+                onPress={handleCancel}
+              >
+                <Text
+                  style={[
+                    styles.selectionModeButtonText,
+                    { color: theme.selectionModeButtonText },
+                  ]}
+                >
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
         </LinearGradient>
@@ -737,5 +742,3 @@ export default function ChatList() {
     </Provider>
   );
 }
-
-
