@@ -489,7 +489,9 @@ export default function ChatList() {
           <View
             style={[
               styles.checkbox,
-              selectedChats.includes(item.id) && styles.checkboxSelected,
+              selectedChats.includes(item.id) && {
+                backgroundColor: isNightMode ? 'white' : 'black',
+              },
             ]}
           />
         )}
@@ -572,8 +574,16 @@ export default function ChatList() {
           onPress={() => setSelectedMuteHours(option.value)}
         >
           <Text
-            style={[styles.muteOptionText, { color: theme.muteOptionText }]}
-          >
+          style={[
+            styles.muteOptionText,
+            {
+              // Cambia el color del texto solo si esta opción está seleccionada
+              color: selectedMuteHours === option.value
+                ? (isNightMode ? 'white' : 'black') // Negro en el día, blanco en la noche
+                : theme.muteOptionText,
+            },
+          ]}
+        >
             {option.label}
           </Text>
         </TouchableOpacity>
