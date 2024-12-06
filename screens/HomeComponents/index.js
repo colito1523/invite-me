@@ -4,12 +4,9 @@ import {
   Text,
   FlatList,
   RefreshControl,
-  TouchableOpacity,
   ActivityIndicator,
-
 } from "react-native";
 import { signOut } from "firebase/auth";
-import {Ionicons  } from "@expo/vector-icons";
 import {
   auth,
   storage,
@@ -34,6 +31,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import dayjs from "dayjs";
 import * as Location from "expo-location";
 import * as SecureStore from 'expo-secure-store';
+import { useLocationAndTime } from "../../src/hooks/useLocationAndTime";
 
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
@@ -44,9 +42,9 @@ import { dayStyles, nightStyles, styles } from "./styles";
 import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages} from "./utils";
 
 const Home = React.memo(() => {
+  const { locationGranted, country, isNightMode } = useLocationAndTime();
   const navigation = useNavigation();
   const route = useRoute();
-
   const [errorMessage, setErrorMessage] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [boxData, setBoxData] = useState([]);
@@ -56,9 +54,6 @@ const Home = React.memo(() => {
   const [refreshing, setRefreshing] = useState(false);
   const selectedDateRef = useRef(dayjs().format("D MMM"));
   const [selectedDate, setSelectedDate] = useState(selectedDateRef.current);
-  const [locationGranted, setLocationGranted] = useState(false);
-  const [country, setCountry] = useState(null);
-  const [isNightMode, setIsNightMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [privateEvents, setPrivateEvents] = useState([]);
@@ -76,17 +71,6 @@ const Home = React.memo(() => {
     fetchData({setLoading, fetchBoxData, fetchPrivateEvents});
   }, []);
 
-  const checkTime = () => {
-    const currentHour = new Date().getHours();
-    setIsNightMode(currentHour >= 19 || currentHour < 6);
-  };
-
-  useEffect(() => {
-    checkTime();
-    const interval = setInterval(checkTime, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (route.params?.selectedCategory) {
@@ -104,27 +88,10 @@ const Home = React.memo(() => {
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMessage("Se necesita acceso a la ubicación para usar la aplicación.");
-        return;
-      }
-      setLocationGranted(true);
-      let location = await Location.getCurrentPositionAsync({});
-      let geocode = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-  
-      if (geocode.length > 0) {
-        const userCountry = geocode[0].country;
-        console.log("País detectado:", userCountry);
-        setCountry(userCountry);
-        setSelectedCity(userCountry === 'Portugal' ? 'Lisboa' : 'Madrid'); // Selección automática de ciudad
-      }
-    })();
-  }, []);
+    if (country) {
+      setSelectedCity(country === 'Portugal' ? 'Lisboa' : 'Madrid');
+    }
+  }, [country]);
 
   useEffect(() => {
     navigation.setOptions({
