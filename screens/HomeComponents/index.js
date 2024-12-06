@@ -50,7 +50,8 @@ import {
   checkTime,
   requestLocationPermission,
   configureHeader,
-  filterBoxData 
+  filterBoxData ,
+  fetchBoxData 
 } from "./utils";
 import EventItem from "./EventItem";
 import EventListHeader from "./EventListHeader";
@@ -83,8 +84,15 @@ const Home = React.memo(() => {
   }, [navigation]);
 
   useEffect(() => {
-    fetchData({ setLoading, fetchBoxData, fetchPrivateEvents });
-  }, []);
+    const fetchData = async () => {
+      await fetchBoxData({
+        boxInfo,
+        selectedDate: selectedDateRef.current,
+        setBoxData,
+      });
+    };
+    fetchData();
+  }, [selectedDate]);
 
   useEffect(() => {
     // Pasa la referencia correcta de setIsNightMode

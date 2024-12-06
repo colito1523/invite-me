@@ -1,7 +1,6 @@
 import { collection, doc, getDoc, onSnapshot, query, where, getDocs, } from "firebase/firestore";
-import { auth, database } from "../../config/firebase";
-import { storage } from "../../config/firebase";
-
+import { auth, database, storage } from "../../config/firebase";
+import { ref, getDownloadURL } from "firebase/storage";
 
 import * as Location from "expo-location";
 
@@ -21,17 +20,23 @@ export const configureHeader = ({
 };
 
 export const fetchBoxData = async ({
+  boxInfo,
   selectedDate,
   setBoxData,
-  boxInfo,
-  blockedUsers = [],
-}: {
-  selectedDate: string;
-  setBoxData: (data: any[]) => void;
-  boxInfo: any[];
-  blockedUsers?: string[];
 }) => {
   try {
+    const user = auth.currentUser;
+    let blockedUsers = [];
+
+    // Obtener usuarios bloqueados
+    if (user) {
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      if (userDoc.exists()) {
+        blockedUsers = userDoc.data()?.blockedUsers || [];
+      }
+    }
+
+    // Obtener datos de los boxes
     const data = await Promise.all(
       boxInfo.map(
         async ({
@@ -81,11 +86,50 @@ export const fetchBoxData = async ({
       )
     );
 
-    setBoxData(data.sort((a, b) => b.attendeesCount - a.attendeesCount));
+    // Obtener eventos privados del usuario
+    const userEvents = [];
+    if (user) {
+      const privateEventsRef = collection(database, "EventsPriv");
+      const adminEventsQuery = query(
+        privateEventsRef,
+        where("Admin", "==", user.uid)
+      );
+      const querySnapshot = await getDocs(adminEventsQuery);
+
+      querySnapshot.forEach((doc) => {
+        const eventData = doc.data();
+        const filteredAttendees = (eventData.attendees || []).filter(
+          (attendee) => !blockedUsers.includes(attendee.uid)
+        );
+
+        userEvents.push({
+          id: doc.id,
+          imageUrl: eventData.image,
+          title: eventData.title,
+          category: "EventoParaAmigos",
+          hours: { [eventData.day]: eventData.hour },
+          number: eventData.phoneNumber,
+          coordinates: { latitude: 0, longitude: 0 },
+          country: eventData.country || "Portugal",
+          city: eventData.city || "Lisboa",
+          date: eventData.date,
+          attendees: filteredAttendees,
+          attendeesCount: filteredAttendees.length,
+          isPrivateEvent: true,
+        });
+      });
+    }
+
+    const allEvents = [...userEvents, ...data].sort(
+      (a, b) => b.attendeesCount - a.attendeesCount
+    );
+
+    setBoxData(allEvents);
   } catch (error) {
     console.error("Error fetching box data:", error);
   }
 };
+
 
 export const fetchPrivateEvents = async ({
   userId,
@@ -124,6 +168,39 @@ export const fetchPrivateEvents = async ({
   } catch (error) {
     console.error("Error fetching private events:", error);
   }
+};
+
+export const filterBoxData = ({ boxData, selectedCity, selectedCategory, t }) => {
+  if (!boxData || !Array.isArray(boxData)) {
+    return [];
+  }
+
+  let filteredData = boxData;
+  if (selectedCity && selectedCity !== "All Cities") {
+    filteredData = filteredData.filter((box) => box.city === selectedCity);
+  }
+
+  if (selectedCategory && selectedCategory !== t("categories.all")) {
+    filteredData = filteredData.filter(
+      (box) => box.category === selectedCategory
+    );
+  }
+
+  const privateEvents = [];
+  const generalEvents = [];
+
+  filteredData.forEach((box) => {
+    if (box.category === "EventoParaAmigos") {
+      privateEvents.push(box);
+    } else {
+      generalEvents.push(box);
+    }
+  });
+
+  return [
+    { title: "Eventos Privados", data: privateEvents },
+    { title: "Eventos Generales", data: generalEvents },
+  ];
 };
 
 
@@ -352,35 +429,6 @@ export const listenForNotificationChanges = (setNotificationIconState) => {
 
 
 
-export const filterBoxData = ({ boxData, selectedCity, selectedCategory, t }) => {
-  if (!boxData || !Array.isArray(boxData)) {
-    return [];
-  }
 
-  let filteredData = boxData;
-  if (selectedCity && selectedCity !== "All Cities") {
-    filteredData = filteredData.filter((box) => box.city === selectedCity);
-  }
 
-  if (selectedCategory && selectedCategory !== t("categories.all")) {
-    filteredData = filteredData.filter(
-      (box) => box.category === selectedCategory
-    );
-  }
 
-  const privateEvents = [];
-  const generalEvents = [];
-
-  filteredData.forEach((box) => {
-    if (box.category === "EventoParaAmigos") {
-      privateEvents.push(box);
-    } else {
-      generalEvents.push(box);
-    }
-  });
-
-  return [
-    { title: "Eventos Privados", data: privateEvents },
-    { title: "Eventos Generales", data: generalEvents },
-  ];
-};
