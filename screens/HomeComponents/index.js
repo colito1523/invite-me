@@ -6,7 +6,6 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from "react-native";
-import { signOut } from "firebase/auth";
 import {
   auth,
   storage,
@@ -25,20 +24,17 @@ import {
 } from "firebase/firestore";
 import Colors from "../../constants/Colors";
 import Box from "../../Components/Boxs/Box";
-import CalendarPicker from "../CalendarPicker";
 import DotIndicator from "../../Components/Dots/DotIndicator";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import dayjs from "dayjs";
-import * as SecureStore from 'expo-secure-store';
 import { useLocationAndTime } from "../../src/hooks/useLocationAndTime";
-
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
 import TabBar from "./TabBar";
 import Header from "./Header"; // Importamos el nuevo componente
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages} from "./utils";
+import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, onSignOut, subscribeToUserProfile  } from "./utils";
 
 const Home = React.memo(() => {
   const { locationGranted, country, isNightMode } = useLocationAndTime();
@@ -143,21 +139,10 @@ const Home = React.memo(() => {
     setMenuVisible(false);
   }, []);
 
-  const onSignOut = useCallback(async () => {
-    try {
-      await signOut(auth); // Cierra la sesión de Firebase
-      await SecureStore.deleteItemAsync('session_token'); // Elimina el token de sesión
-      console.log("Sign-out successful and session token cleared.");
-      navigation.navigate("Login");
-    } catch (error) {
-      console.log("Sign-out error:", error);
-      Alert.alert("Error", "No se pudo cerrar la sesión correctamente.");
-    }
-  }, [navigation]);
+  const handleSignOut = useCallback(() => {
+    onSignOut(navigation, auth);
+  }, [navigation, auth]);
 
-  const navigateToProfile = useCallback(() => {
-    navigation.navigate("Profile");
-  }, [navigation]);
 
   const fetchBoxData = useCallback(async () => {
     try {
@@ -349,23 +334,17 @@ const fetchPrivateEvents = useCallback(async () => {
 
   useEffect(() => {
     const user = auth.currentUser;
-    if (user) {
-      // Escucha en tiempo real los cambios del documento de usuario
-      const unsubscribe = onSnapshot(doc(database, "users", user.uid), (userDoc) => {
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          if (data.photoUrls && data.photoUrls.length > 0) {
-            setProfileImage(data.photoUrls[0]); // Actualiza la imagen del perfil al recibir cambios
-          }
-        }
-      });
-      return () => {
-        if (typeof unsubscribe === 'function') {
-          unsubscribe();
-        }
-      };
-    }
-  }, []);
+  
+    // Llama a la función modularizada.
+    const unsubscribe = subscribeToUserProfile(database, user, setProfileImage);
+  
+    // Devuelve la función de limpieza.
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
+  }, [auth.currentUser]); // Dependencia del usuario autenticado.
   
   // Función para manejar el evento de clic en el box
   const handleBoxPress = useCallback(
@@ -417,7 +396,7 @@ const fetchPrivateEvents = useCallback(async () => {
       onClose={toggleMenu}
       onCategorySelect={handleCategorySelect}
       onCitySelect={handleCitySelect}
-      onSignOut={onSignOut}
+      onSignOut={handleSignOut} // Aquí pasamos la función
       isNightMode={isNightMode}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}

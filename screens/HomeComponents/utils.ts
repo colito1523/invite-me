@@ -1,8 +1,37 @@
-import { collection, doc, getDoc, onSnapshot, query, where, getDocs, } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, where, getDocs,  } from "firebase/firestore";
 import { auth, database, storage } from "../../config/firebase";
 import { ref, getDownloadURL } from "firebase/storage";
-
+import { signOut } from "firebase/auth";
+import * as SecureStore from "expo-secure-store";
+import { Alert } from "react-native";
 import * as Location from "expo-location";
+
+export const onSignOut = async (navigation, auth) => {
+  try {
+    await signOut(auth); // Cierra la sesión de Firebase
+    await SecureStore.deleteItemAsync("session_token"); // Elimina el token de sesión
+    console.log("Sign-out successful and session token cleared.");
+    navigation.navigate("Login");
+  } catch (error) {
+    console.log("Sign-out error:", error);
+    Alert.alert("Error", "No se pudo cerrar la sesión correctamente.");
+  }
+};
+
+export const subscribeToUserProfile = (database, user, setProfileImage) => {
+  if (!user) return null; // Retorna null si no hay usuario.
+
+  const unsubscribe = onSnapshot(doc(database, "users", user.uid), (userDoc) => {
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      if (data.photoUrls && data.photoUrls.length > 0) {
+        setProfileImage(data.photoUrls[0]); // Actualiza la imagen de perfil.
+      }
+    }
+  });
+
+  return unsubscribe;
+};
 
 
 export const configureHeader = ({
