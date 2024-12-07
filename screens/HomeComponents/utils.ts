@@ -118,16 +118,16 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
 };
 
 export const fetchData = async ({ 
-  setLoading, 
-  fetchBoxData, 
-  fetchPrivateEvents, 
-  database, 
-  storage, 
-  boxInfo, 
-  user, 
-  setBoxData, 
-  setPrivateEvents,
-  selectedDate 
+  setLoading,
+  fetchBoxData,
+  fetchPrivateEvents,
+  database,
+  storage,
+  boxInfo,
+  user,
+  setBoxData,
+  selectedDate,
+  setPrivateEvents, // Este debe ser pasado correctamente
 }) => {
   try {
     setLoading(true);
@@ -370,6 +370,49 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
     console.error("Error fetching box data:", error);
   }
 };
+
+export const fetchPrivateEvents = async ({ database, user, setPrivateEvents }) => {
+  if (!user) return;
+
+  try {
+    let blockedUsers = [];
+    const userDoc = await getDoc(doc(database, "users", user.uid));
+    if (userDoc.exists()) {
+      blockedUsers = userDoc.data()?.blockedUsers || [];
+    }
+
+    const eventsRef = collection(database, "users", user.uid, "events");
+    const eventsSnapshot = await getDocs(eventsRef);
+    const events = [];
+
+    for (const docSnapshot of eventsSnapshot.docs) {
+      const eventData = docSnapshot.data();
+
+      if (eventData.status === "accepted" && eventData.uid !== user.uid) {
+        const eventPrivRef = doc(database, "EventsPriv", eventData.eventId);
+        const eventPrivDoc = await getDoc(eventPrivRef);
+        if (eventPrivDoc.exists()) {
+          const fullEventData = eventPrivDoc.data();
+          events.push({
+            id: docSnapshot.id,
+            ...fullEventData,
+            ...eventData,
+            attendees: fullEventData.attendees || [],
+          });
+        }
+      }
+    }
+
+    if (typeof setPrivateEvents === "function") {
+      setPrivateEvents(events);
+    } else {
+      console.error("setPrivateEvents is not a function");
+    }
+  } catch (error) {
+    console.error("Error fetching private events:", error);
+  }
+};
+
 
 
 
