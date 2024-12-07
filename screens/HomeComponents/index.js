@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, lazy, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,6 @@ import {
 import {
   auth,
   storage,
-  ref,
-  getDownloadURL,
   database,
 } from "../../config/firebase";
 import {
@@ -20,7 +18,6 @@ import {
   getDocs,
   doc,
   getDoc,
-  onSnapshot
 } from "firebase/firestore";
 import Colors from "../../constants/Colors";
 import Box from "../../Components/Boxs/Box";
@@ -34,7 +31,7 @@ import TabBar from "./TabBar";
 import Header from "./Header"; // Importamos el nuevo componente
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, onSignOut, subscribeToUserProfile  } from "./utils";
+import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, onSignOut, subscribeToUserProfile, fetchBoxData } from "./utils";
 
 const Home = React.memo(() => {
   const { locationGranted, country, isNightMode } = useLocationAndTime();
@@ -53,7 +50,6 @@ const Home = React.memo(() => {
   const [searchQuery, setSearchQuery] = useState("");
   const [privateEvents, setPrivateEvents] = useState([]);
   const { t } = useTranslation();
-  const LazyBoxDetails = lazy(() => import('../../screens/BoxDetails')); // Aaca tendremos que ver si esta siendo llanado correctamente
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(false);
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
@@ -63,9 +59,22 @@ const Home = React.memo(() => {
   }, [navigation]);
 
   useEffect(() => {
-    fetchData({setLoading, fetchBoxData, fetchPrivateEvents});
-  }, []);
-
+    const user = auth.currentUser;
+  
+    if (user) {
+      fetchBoxData({
+        database,
+        storage,
+        boxInfo,
+        user,
+        setBoxData,
+        selectedDate: selectedDateRef.current,
+      });
+    }
+  
+    fetchPrivateEvents();
+  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
+  
   useEffect(() => {
     if (route.params?.selectedCategory) {
       setSelectedCategory(route.params.selectedCategory);
@@ -106,16 +115,39 @@ const Home = React.memo(() => {
     selectedDateRef.current = date;
     setSelectedDate(date);
     setLoading(true);
-    await fetchBoxData();
+  
+    const user = auth.currentUser;
+    if (user) {
+      await fetchBoxData({
+        database,
+        storage,
+        boxInfo,
+        user,
+        setBoxData,
+        selectedDate: selectedDateRef.current,
+      });
+    }
+  
     setLoading(false);
-  }, []);
+  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef]);
+  
+const onRefresh = useCallback(async () => {
+  setRefreshing(true);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await fetchBoxData(); // Usa selectedDateRef.current dentro de fetchBoxData
-    await fetchPrivateEvents();
-    setRefreshing(false);
-  }, []);
+  const user = auth.currentUser;
+  if (user) {
+    await fetchBoxData({
+      database,
+      storage,
+      boxInfo,
+      user,
+      setBoxData,
+      selectedDate: selectedDateRef.current,
+    });
+  }
+
+  setRefreshing(false);
+}, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef]);
 
   const toggleMenu = useCallback(() => {
     setMenuVisible((prev) => !prev);
@@ -143,113 +175,22 @@ const Home = React.memo(() => {
     onSignOut(navigation, auth);
   }, [navigation, auth]);
 
-
-  const fetchBoxData = useCallback(async () => {
-    try {
-      const user = auth.currentUser;
-      let blockedUsers = [];
+  useEffect(() => {
+    const user = auth.currentUser;
+  
     if (user) {
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      if (userDoc.exists()) {
-        blockedUsers = userDoc.data()?.blockedUsers || [];
-      }
+      fetchBoxData({
+        database,
+        storage,
+        boxInfo,
+        user,
+        setBoxData,
+        selectedDate: selectedDateRef.current,
+      });
     }
-      const data = await Promise.all(
-        boxInfo.map(
-          async ({
-            path,
-            title,
-            category,
-            hours,
-            number,
-            coordinates,
-            country,
-            city,
-          }) => {
-            let url = path;
-  
-            if (typeof path === "string") {
-              const storageRef = ref(storage, path);
-              url = await getDownloadURL(storageRef);
-            }
-  
-            const boxRef = doc(database, "GoBoxs", title);
-            const boxDoc = await getDoc(boxRef);
-            let attendees = [];
-  
-            if (boxDoc.exists()) {
-              attendees = Array.isArray(boxDoc.data()[selectedDateRef.current])
-                ? boxDoc.data()[selectedDateRef.current]
-                : [];
-            }
+  }, [selectedCategory, auth.currentUser, database, storage, boxInfo, selectedDateRef, setBoxData]);
 
-             // Filtrar asistentes bloqueados
-          const filteredAttendees = attendees.filter(
-            (attendee) => !blockedUsers.includes(attendee.uid)
-          );
-            
-            return {
-              imageUrl: url,
-              title,
-              category,
-              hours,
-              number,
-              coordinates,
-              country,
-              city,
-              attendees: filteredAttendees,
-              attendeesCount: filteredAttendees.length || 0,
-            };
-          }
-        )
-      );
-  
-      const userEvents = [];
-      if (user) {
-        const privateEventsRef = collection(database, "EventsPriv");
-        const adminEventsQuery = query(
-          privateEventsRef,
-          where("Admin", "==", user.uid)
-        );
-        const querySnapshot = await getDocs(adminEventsQuery);
-  
-        querySnapshot.forEach((doc) => {
-          const eventData = doc.data();
-          const filteredAttendees = (eventData.attendees || []).filter(
-            (attendee) => !blockedUsers.includes(attendee.uid)
-          );
-          userEvents.push({
-            id: doc.id,
-            imageUrl: eventData.image,
-            title: eventData.title,
-            category: "EventoParaAmigos",
-            hours: { [eventData.day]: eventData.hour },
-            number: eventData.phoneNumber,
-            coordinates: { latitude: 0, longitude: 0 },
-            country: eventData.country || "Portugal",
-            city: eventData.city || "Lisboa",
-            date: eventData.date,
-            attendees: filteredAttendees,
-            attendeesCount: filteredAttendees.length,
-            isPrivateEvent: true,
-          });
-        });
-      }
-  
-      const allEvents = [...userEvents, ...data].sort(
-        (a, b) => b.attendeesCount - a.attendeesCount
-      );
-  
-      setBoxData(allEvents);
-    } catch (error) {
-     
-    }
-  }, [selectedDate]);
-
-  // Coloca aquí el nuevo useEffect para actualizar los datos cuando cambie selectedCategory
-useEffect(() => {
-  fetchBoxData();
-}, [selectedCategory]);
+   // para modulizar inicio
 
 const fetchPrivateEvents = useCallback(async () => {
   const user = auth.currentUser;
@@ -326,11 +267,26 @@ const fetchPrivateEvents = useCallback(async () => {
       { title: "Eventos Generales", data: generalEvents },
     ];
   }, [boxData, selectedCity, selectedCategory, t]);
+
+  // para modulizar final
   
   useEffect(() => {
-    fetchBoxData();
+    const user = auth.currentUser;
+  
+    if (user) {
+      fetchBoxData({
+        database,
+        storage,
+        boxInfo,
+        user,
+        setBoxData,
+        selectedDate: selectedDateRef.current,
+      });
+    }
+  
     fetchPrivateEvents();
-  }, [selectedDate, fetchBoxData, fetchPrivateEvents]);
+  }, [selectedDate, auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
+  
 
   useEffect(() => {
     const user = auth.currentUser;

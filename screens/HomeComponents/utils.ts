@@ -1,6 +1,6 @@
-import { collection, doc, getDoc, onSnapshot, query, where, getDocs,  } from "firebase/firestore";
-import { auth, database, storage } from "../../config/firebase";
+import { collection, doc, getDoc, onSnapshot, query, where, getDocs  } from "firebase/firestore";
 import { ref, getDownloadURL } from "firebase/storage";
+import { auth, database, } from "../../config/firebase";
 import { signOut } from "firebase/auth";
 import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";
@@ -33,7 +33,6 @@ export const subscribeToUserProfile = (database, user, setProfileImage) => {
   return unsubscribe;
 };
 
-
 export const configureHeader = ({
   navigation,
   headerTitleComponent,
@@ -47,191 +46,6 @@ export const configureHeader = ({
     headerTitle: headerTitleComponent,
   });
 };
-
-export const fetchBoxData = async ({
-  boxInfo,
-  selectedDate,
-  setBoxData,
-}) => {
-  try {
-    const user = auth.currentUser;
-    let blockedUsers = [];
-
-    // Obtener usuarios bloqueados
-    if (user) {
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      if (userDoc.exists()) {
-        blockedUsers = userDoc.data()?.blockedUsers || [];
-      }
-    }
-
-    // Obtener datos de los boxes
-    const data = await Promise.all(
-      boxInfo.map(
-        async ({
-          path,
-          title,
-          category,
-          hours,
-          number,
-          coordinates,
-          country,
-          city,
-        }) => {
-          let url = path;
-
-          if (typeof path === "string") {
-            const storageRef = ref(storage, path);
-            url = await getDownloadURL(storageRef);
-          }
-
-          const boxRef = doc(database, "GoBoxs", title);
-          const boxDoc = await getDoc(boxRef);
-          let attendees = [];
-
-          if (boxDoc.exists()) {
-            attendees = Array.isArray(boxDoc.data()[selectedDate])
-              ? boxDoc.data()[selectedDate]
-              : [];
-          }
-
-          const filteredAttendees = attendees.filter(
-            (attendee) => !blockedUsers.includes(attendee.uid)
-          );
-
-          return {
-            imageUrl: url,
-            title,
-            category,
-            hours,
-            number,
-            coordinates,
-            country,
-            city,
-            attendees: filteredAttendees,
-            attendeesCount: filteredAttendees.length || 0,
-          };
-        }
-      )
-    );
-
-    // Obtener eventos privados del usuario
-    const userEvents = [];
-    if (user) {
-      const privateEventsRef = collection(database, "EventsPriv");
-      const adminEventsQuery = query(
-        privateEventsRef,
-        where("Admin", "==", user.uid)
-      );
-      const querySnapshot = await getDocs(adminEventsQuery);
-
-      querySnapshot.forEach((doc) => {
-        const eventData = doc.data();
-        const filteredAttendees = (eventData.attendees || []).filter(
-          (attendee) => !blockedUsers.includes(attendee.uid)
-        );
-
-        userEvents.push({
-          id: doc.id,
-          imageUrl: eventData.image,
-          title: eventData.title,
-          category: "EventoParaAmigos",
-          hours: { [eventData.day]: eventData.hour },
-          number: eventData.phoneNumber,
-          coordinates: { latitude: 0, longitude: 0 },
-          country: eventData.country || "Portugal",
-          city: eventData.city || "Lisboa",
-          date: eventData.date,
-          attendees: filteredAttendees,
-          attendeesCount: filteredAttendees.length,
-          isPrivateEvent: true,
-        });
-      });
-    }
-
-    const allEvents = [...userEvents, ...data].sort(
-      (a, b) => b.attendeesCount - a.attendeesCount
-    );
-
-    setBoxData(allEvents);
-  } catch (error) {
-    console.error("Error fetching box data:", error);
-  }
-};
-
-
-export const fetchPrivateEvents = async ({
-  userId,
-  setPrivateEvents,
-  blockedUsers = [],
-}: {
-  userId: string;
-  setPrivateEvents: (events: any[]) => void;
-  blockedUsers?: string[];
-}) => {
-  try {
-    const eventsRef = collection(database, "users", userId, "events");
-    const eventsSnapshot = await getDocs(eventsRef);
-    const events = [];
-
-    for (const docSnapshot of eventsSnapshot.docs) {
-      const eventData = docSnapshot.data();
-
-      if (eventData.status === "accepted" && eventData.uid !== userId) {
-        const eventPrivRef = doc(database, "EventsPriv", eventData.eventId);
-        const eventPrivDoc = await getDoc(eventPrivRef);
-
-        if (eventPrivDoc.exists()) {
-          const fullEventData = eventPrivDoc.data();
-          events.push({
-            id: docSnapshot.id,
-            ...fullEventData,
-            ...eventData,
-            attendees: fullEventData.attendees || [],
-          });
-        }
-      }
-    }
-
-    setPrivateEvents(events);
-  } catch (error) {
-    console.error("Error fetching private events:", error);
-  }
-};
-
-export const filterBoxData = ({ boxData, selectedCity, selectedCategory, t }) => {
-  if (!boxData || !Array.isArray(boxData)) {
-    return [];
-  }
-
-  let filteredData = boxData;
-  if (selectedCity && selectedCity !== "All Cities") {
-    filteredData = filteredData.filter((box) => box.city === selectedCity);
-  }
-
-  if (selectedCategory && selectedCategory !== t("categories.all")) {
-    filteredData = filteredData.filter(
-      (box) => box.category === selectedCategory
-    );
-  }
-
-  const privateEvents = [];
-  const generalEvents = [];
-
-  filteredData.forEach((box) => {
-    if (box.category === "EventoParaAmigos") {
-      privateEvents.push(box);
-    } else {
-      generalEvents.push(box);
-    }
-  });
-
-  return [
-    { title: "Eventos Privados", data: privateEvents },
-    { title: "Eventos Generales", data: generalEvents },
-  ];
-};
-
 
 export const requestLocationPermission = async (
   setErrorMessage: (message: string | null) => void,
@@ -265,13 +79,11 @@ export const requestLocationPermission = async (
   }
 };
 
-
 // utils.ts
 export const checkTime = (setIsNightMode: (value: boolean) => void) => {
   const currentHour = new Date().getHours();
   setIsNightMode(currentHour >= 19 || currentHour < 6);
 };
-
 
 export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
   if (auth.currentUser) {
@@ -328,6 +140,7 @@ export const fetchProfileImage = async ({setProfileImage}) => {
       }
     }
 };
+
 export const fetchUnreadMessages = ({ setUnreadMessages }) => {
   const user = auth.currentUser;
   if (!user) return;
@@ -386,8 +199,6 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
   };
 };
 
-
-
 // Verifica si hay notificaciones o solicitudes de amistad no vistas
 export const checkNotificationsSeenStatus = async (setNotificationIconState) => {
   if (auth.currentUser) {
@@ -441,6 +252,110 @@ export const listenForNotificationChanges = (setNotificationIconState) => {
     };
   }
 };
+
+
+export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxData, selectedDate }) => {
+  try {
+    let blockedUsers = [];
+    if (user) {
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      if (userDoc.exists()) {
+        blockedUsers = userDoc.data()?.blockedUsers || [];
+      }
+    }
+
+    const data = await Promise.all(
+      boxInfo.map(
+        async ({ path, title, category, hours, number, coordinates, country, city }) => {
+          let url = path;
+
+          if (typeof path === "string") {
+            const storageRef = ref(storage, path);
+            url = await getDownloadURL(storageRef);
+          }
+
+          const boxRef = doc(database, "GoBoxs", title);
+          const boxDoc = await getDoc(boxRef);
+          let attendees = [];
+
+          if (boxDoc.exists()) {
+            attendees = Array.isArray(boxDoc.data()[selectedDate])
+              ? boxDoc.data()[selectedDate]
+              : [];
+          }
+
+          // Filter out blocked attendees
+          const filteredAttendees = attendees.filter(
+            (attendee) => !blockedUsers.includes(attendee.uid)
+          );
+
+          return {
+            imageUrl: url,
+            title,
+            category,
+            hours,
+            number,
+            coordinates,
+            country,
+            city,
+            attendees: filteredAttendees,
+            attendeesCount: filteredAttendees.length || 0,
+          };
+        }
+      )
+    );
+
+    const userEvents = [];
+    if (user) {
+      const privateEventsRef = collection(database, "EventsPriv");
+      const adminEventsQuery = query(privateEventsRef, where("Admin", "==", user.uid));
+      const querySnapshot = await getDocs(adminEventsQuery);
+
+      querySnapshot.forEach((doc) => {
+        const eventData = doc.data();
+        const filteredAttendees = (eventData.attendees || []).filter(
+          (attendee) => !blockedUsers.includes(attendee.uid)
+        );
+        userEvents.push({
+          id: doc.id,
+          imageUrl: eventData.image,
+          title: eventData.title,
+          category: "EventoParaAmigos",
+          hours: { [eventData.day]: eventData.hour },
+          number: eventData.phoneNumber,
+          coordinates: { latitude: 0, longitude: 0 },
+          country: eventData.country || "Portugal",
+          city: eventData.city || "Lisboa",
+          date: eventData.date,
+          attendees: filteredAttendees,
+          attendeesCount: filteredAttendees.length,
+          isPrivateEvent: true,
+        });
+      });
+    }
+
+    const allEvents = [...userEvents, ...data].sort(
+      (a, b) => b.attendeesCount - a.attendeesCount
+    );
+
+    setBoxData(allEvents);
+  } catch (error) {
+    console.error("Error fetching box data:", error);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
