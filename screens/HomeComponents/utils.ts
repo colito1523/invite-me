@@ -413,6 +413,40 @@ export const fetchPrivateEvents = async ({ database, user, setPrivateEvents }) =
   }
 };
 
+export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t) => {
+  if (!boxData || !Array.isArray(boxData)) {
+    return [];
+  }
+
+  // Filtrado inicial según ciudad
+  let filteredData = boxData;
+  if (selectedCity && selectedCity !== "All Cities") {
+    filteredData = filteredData.filter((box) => box.city === selectedCity);
+  }
+
+  // Filtrado adicional según categoría, ignorando la opción "Todos"
+  if (selectedCategory && selectedCategory !== t("categories.all")) {
+    filteredData = filteredData.filter((box) => box.category === selectedCategory);
+  }
+
+  // Separación de eventos en categorías de amigos y generales
+  const privateEvents = [];
+  const generalEvents = [];
+
+  filteredData.forEach((box) => {
+    if (box.category === "EventoParaAmigos") {
+      privateEvents.push(box);
+    } else {
+      generalEvents.push(box);
+    }
+  });
+
+  return [
+    { title: "Eventos Privados", data: privateEvents },
+    { title: "Eventos Generales", data: generalEvents },
+  ];
+};
+
 
 
 
