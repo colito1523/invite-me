@@ -87,6 +87,7 @@ export const sendInvitationNotifications = async (
             description: eventData.description,
             phoneNumber: eventData.phoneNumber || "No disponible",
             eventCategory: eventData.category,
+            Admin: eventData.Admin, // Asegúrate de incluir el admin
             eventId: eventId,
             type: "invitation",
             status: "pending",

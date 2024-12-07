@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { auth } from "../../../config/firebase";
 
 const ButtonsSection = ({
   isEventSaved,
@@ -8,8 +9,13 @@ const ButtonsSection = ({
   handleRemoveFromEvent,
   setModalVisible,
   t,
+  box,
+  boxData,
 }) => {
   const [isLoading, setIsLoading] = useState(false); // Indicador local de carga
+  const showInviteButton =
+  box?.category !== "EventoParaAmigos" || // Siempre mostrar para eventos generales
+  (box?.category === "EventoParaAmigos" && boxData?.Admin === auth.currentUser?.uid); // Mostrar solo si el usuario es el Admin
 
   const handleButtonPress = async () => {
     if (isLoading) return; // Evita múltiples clics mientras está en proceso
@@ -52,13 +58,15 @@ const ButtonsSection = ({
       </TouchableOpacity>
 
       {/* Botón Invitar Amigos */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => setModalVisible(true)}
-        disabled={isProcessing} // Desactiva si hay un procesamiento global
-      >
-        <Text style={styles.buttonText}>{t("boxDetails.inviteButton")}</Text>
-      </TouchableOpacity>
+      {showInviteButton && (
+  <TouchableOpacity
+    style={styles.button}
+    onPress={() => setModalVisible(true)}
+    disabled={isProcessing}
+  >
+    <Text style={styles.buttonText}>{t("boxDetails.inviteButton")}</Text>
+  </TouchableOpacity>
+)}
     </View>
   );
 };

@@ -11,7 +11,7 @@ import {
   TextInput,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
+import {  Ionicons } from "@expo/vector-icons";
 import { auth, database } from "../../config/firebase";
 import {
   collection,
@@ -78,23 +78,30 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   const fetchEventDetails = async ({ box, setBoxData }) => {
     try {
+      // Referencia al documento del evento
       const eventRef = doc(database, "EventsPriv", box.id || box.title);
       const eventSnapshot = await getDoc(eventRef);
   
       if (eventSnapshot.exists()) {
         const eventData = eventSnapshot.data();
+        
+        // Actualiza `setBoxData` con los datos obtenidos, incluidos Admin y category
         setBoxData((prevData) => ({
           ...prevData,
           description: eventData.description || prevData.description,
           address: eventData.address || prevData.address,
-          // ...other fields if needed
+          Admin: eventData.Admin || prevData.Admin, // Agregar Admin
+          category: eventData.category || prevData.category, // Agregar category
+          // ...otros campos necesarios
         }));
       } else {
+        console.warn("El evento no existe.");
       }
     } catch (error) {
       console.error("Error fetching event details:", error);
     }
   };
+  
 
   useEffect(() => {
     if (box && !isFromNotification) {
@@ -811,13 +818,15 @@ export default memo(function BoxDetails({ route, navigation }) {
 
             {/* Sección de botones */}
             <ButtonsSection
-              isEventSaved={isEventSaved}
-              isProcessing={isProcessing}
-              handleAddEvent={handleAddEvent}
-              handleRemoveFromEvent={handleRemoveFromEvent}
-              setModalVisible={setModalVisible}
-              t={t}
-            />
+  isEventSaved={isEventSaved}
+  isProcessing={isProcessing}
+  handleAddEvent={handleAddEvent}
+  handleRemoveFromEvent={handleRemoveFromEvent}
+  setModalVisible={setModalVisible}
+  t={t}
+  box={box}
+  boxData={boxData}
+/>
 
             {/* Slider de contenido */}
             <SliderContent

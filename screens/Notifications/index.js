@@ -220,6 +220,8 @@ export default function NotificationsComponent() {
                     address: item.address,
                     phoneNumber: item.phoneNumber,
                     eventId: item.eventId,
+                    Admin: item.Admin, // Agregar Admin
+                    category: item.eventCategory, // Agregar eventCategory
                 });
                 navigation.navigate("BoxDetails", {
                   box: {
