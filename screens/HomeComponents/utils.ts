@@ -117,16 +117,43 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
   return () => {}; // Return a no-op function if auth.currentUser is not set
 };
 
-export const fetchData = async ({setLoading, fetchBoxData, fetchPrivateEvents }) => {
-    try {
-      setLoading(true);
-      await Promise.all([fetchBoxData(), fetchPrivateEvents()]);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
+export const fetchData = async ({ 
+  setLoading, 
+  fetchBoxData, 
+  fetchPrivateEvents, 
+  database, 
+  storage, 
+  boxInfo, 
+  user, 
+  setBoxData, 
+  setPrivateEvents,
+  selectedDate 
+}) => {
+  try {
+    setLoading(true);
+
+    await Promise.all([
+      fetchBoxData({
+        database,
+        storage,
+        boxInfo,
+        user,
+        setBoxData,
+        selectedDate,
+      }),
+      fetchPrivateEvents({
+        database,
+        user,
+        setPrivateEvents, // Asegúrate de pasar esta función si la necesitas
+      }),
+    ]);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  } finally {
+    setLoading(false);
+  }
 };
+
 
 export const fetchProfileImage = async ({setProfileImage}) => {
     const user = auth.currentUser;

@@ -9,6 +9,8 @@ import {
 import {
   auth,
   storage,
+  ref,
+  getDownloadURL,
   database,
 } from "../../config/firebase";
 import {
@@ -60,9 +62,11 @@ const Home = React.memo(() => {
 
   useEffect(() => {
     const user = auth.currentUser;
-  
     if (user) {
-      fetchBoxData({
+      fetchData({
+        setLoading,
+        fetchBoxData,
+        fetchPrivateEvents,
         database,
         storage,
         boxInfo,
@@ -71,10 +75,9 @@ const Home = React.memo(() => {
         selectedDate: selectedDateRef.current,
       });
     }
-  
-    fetchPrivateEvents();
   }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
   
+
   useEffect(() => {
     if (route.params?.selectedCategory) {
       setSelectedCategory(route.params.selectedCategory);
@@ -175,6 +178,9 @@ const onRefresh = useCallback(async () => {
     onSignOut(navigation, auth);
   }, [navigation, auth]);
 
+  
+  // para modulizar inicio
+
   useEffect(() => {
     const user = auth.currentUser;
   
@@ -190,7 +196,6 @@ const onRefresh = useCallback(async () => {
     }
   }, [selectedCategory, auth.currentUser, database, storage, boxInfo, selectedDateRef, setBoxData]);
 
-   // para modulizar inicio
 
 const fetchPrivateEvents = useCallback(async () => {
   const user = auth.currentUser;
