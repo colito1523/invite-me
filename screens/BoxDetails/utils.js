@@ -246,6 +246,15 @@ export const handleGeneralEventInvite = async (params) => {
   }
 };
 
+const formatHour = (hour) => {
+  const date = new Date(hour);
+  return date.toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 export const handleInvite = async (params) => {
   const friendId = params.friendId;
   const isEventSaved = params.isEventSaved;
@@ -333,6 +342,7 @@ export const handleInvite = async (params) => {
       eventId: box.id,
       eventTitle: box.title,
       eventImage: eventImage,
+      day: box.day || "Fecha no disponible", // Agregar el campo day
       eventDate: eventDateTimestamp,
       date: eventDateFormatted,
       eventCategory: eventCategory,
@@ -342,8 +352,11 @@ export const handleInvite = async (params) => {
       seen: false,
       address: eventData.address || "Dirección no disponible",
       description: eventData.description || "Descripción no disponible",
-      eventDateTime: `${eventData.day || "Fecha no disponible"} ${eventData.hour || "Hora no disponible"}`
+      eventDateTime: `${eventData.day || "Fecha no disponible"} ${eventData.hour || "Hora no disponible"}`,
+      hour: box.category === "EventoParaAmigos" ? formatHour(box.hour || new Date()) : box.hours || {}
     });
+
+    
 
     await updateDoc(eventRef, {
       invitedFriends: arrayUnion(friendId),
