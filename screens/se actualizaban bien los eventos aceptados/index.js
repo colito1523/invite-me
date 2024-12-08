@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo, lazy, useRef } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,19 @@ import {
 import {
   auth,
   storage,
+  ref,
+  getDownloadURL,
   database,
 } from "../../config/firebase";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+  onSnapshot
+} from "firebase/firestore";
 import Colors from "../../constants/Colors";
 import Box from "../../Components/Boxs/Box";
 import DotIndicator from "../../Components/Dots/DotIndicator";
@@ -23,7 +34,7 @@ import TabBar from "./TabBar";
 import Header from "./Header"; // Importamos el nuevo componente
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, onSignOut, subscribeToUserProfile, fetchBoxData, fetchPrivateEvents, getFilteredBoxData   } from "./utils";
+import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, onSignOut, subscribeToUserProfile  } from "./utils";
 
 const Home = React.memo(() => {
   const { locationGranted, country, isNightMode } = useLocationAndTime();
@@ -42,6 +53,7 @@ const Home = React.memo(() => {
   const [searchQuery, setSearchQuery] = useState("");
   const [privateEvents, setPrivateEvents] = useState([]);
   const { t } = useTranslation();
+  const LazyBoxDetails = lazy(() => import('../../screens/BoxDetails')); // Aaca tendremos que ver si esta siendo llanado correctamente
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(false);
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
@@ -51,23 +63,8 @@ const Home = React.memo(() => {
   }, [navigation]);
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      fetchData({
-        setLoading,
-        fetchBoxData,
-        fetchPrivateEvents,
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
-        setPrivateEvents,
-      });
-    }
-  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
-  
+    fetchData({setLoading, fetchBoxData, fetchPrivateEvents});
+  }, []);
 
   useEffect(() => {
     if (route.params?.selectedCategory) {
@@ -109,54 +106,16 @@ const Home = React.memo(() => {
     selectedDateRef.current = date;
     setSelectedDate(date);
     setLoading(true);
-  
-    const user = auth.currentUser;
-    if (user) {
-      await fetchBoxData({
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
-      });
-    }
-  
+    await fetchBoxData();
     setLoading(false);
-  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef]);
-  
+  }, []);
+
   const onRefresh = useCallback(async () => {
-    setRefreshing(true); // Mostrar el indicador de recarga
-  
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        // Cargar datos del usuario
-        await fetchData({
-          setLoading,
-          fetchBoxData,
-          fetchPrivateEvents,
-          database,
-          storage,
-          boxInfo,
-          user,
-          setBoxData,
-          selectedDate: selectedDateRef.current,
-          setPrivateEvents,
-        });
-  
-        // Actualizar la imagen de perfil
-        await fetchProfileImage({ setProfileImage });
-  
-        // (Opcional) Si necesitas más tareas programáticas, inclúyelas aquí
-      } catch (error) {
-        console.error("Error al recargar datos:", error);
-      }
-    }
-  
-    setRefreshing(false); // Ocultar el indicador de recarga
-  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef]);
-  
+    setRefreshing(true);
+    await fetchBoxData(); // Usa selectedDateRef.current dentro de fetchBoxData
+    await fetchPrivateEvents();
+    setRefreshing(false);
+  }, []);
 
   const toggleMenu = useCallback(() => {
     setMenuVisible((prev) => !prev);
@@ -184,64 +143,194 @@ const Home = React.memo(() => {
     onSignOut(navigation, auth);
   }, [navigation, auth]);
 
-  useEffect(() => {
-    const user = auth.currentUser;
-  
-    if (user) {
-      fetchBoxData({
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
-      });
-    }
-  }, [selectedCategory, auth.currentUser, database, storage, boxInfo, selectedDateRef, setBoxData]);
 
-  useEffect(() => {
-    const user = auth.currentUser;
+  const fetchBoxData = useCallback(async () => {
+    try {
+      const user = auth.currentUser;
+      let blockedUsers = [];
     if (user) {
-      fetchData({
-        setLoading,
-        fetchBoxData,
-        fetchPrivateEvents,
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
-        setPrivateEvents, // Este valor debe pasar correctamente
-      });
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      if (userDoc.exists()) {
+        blockedUsers = userDoc.data()?.blockedUsers || [];
+      }
     }
-  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
-   
-  // para modulizar inicio
+      const data = await Promise.all(
+        boxInfo.map(
+          async ({
+            path,
+            title,
+            category,
+            hours,
+            number,
+            coordinates,
+            country,
+            city,
+          }) => {
+            let url = path;
+  
+            if (typeof path === "string") {
+              const storageRef = ref(storage, path);
+              url = await getDownloadURL(storageRef);
+            }
+  
+            const boxRef = doc(database, "GoBoxs", title);
+            const boxDoc = await getDoc(boxRef);
+            let attendees = [];
+  
+            if (boxDoc.exists()) {
+              attendees = Array.isArray(boxDoc.data()[selectedDateRef.current])
+                ? boxDoc.data()[selectedDateRef.current]
+                : [];
+            }
+
+             // Filtrar asistentes bloqueados
+          const filteredAttendees = attendees.filter(
+            (attendee) => !blockedUsers.includes(attendee.uid)
+          );
+            
+            return {
+              imageUrl: url,
+              title,
+              category,
+              hours,
+              number,
+              coordinates,
+              country,
+              city,
+              attendees: filteredAttendees,
+              attendeesCount: filteredAttendees.length || 0,
+            };
+          }
+        )
+      );
+  
+      const userEvents = [];
+      if (user) {
+        const privateEventsRef = collection(database, "EventsPriv");
+        const adminEventsQuery = query(
+          privateEventsRef,
+          where("Admin", "==", user.uid)
+        );
+        const querySnapshot = await getDocs(adminEventsQuery);
+  
+        querySnapshot.forEach((doc) => {
+          const eventData = doc.data();
+          const filteredAttendees = (eventData.attendees || []).filter(
+            (attendee) => !blockedUsers.includes(attendee.uid)
+          );
+          userEvents.push({
+            id: doc.id,
+            imageUrl: eventData.image,
+            title: eventData.title,
+            category: "EventoParaAmigos",
+            hours: { [eventData.day]: eventData.hour },
+            number: eventData.phoneNumber,
+            coordinates: { latitude: 0, longitude: 0 },
+            country: eventData.country || "Portugal",
+            city: eventData.city || "Lisboa",
+            date: eventData.date,
+            attendees: filteredAttendees,
+            attendeesCount: filteredAttendees.length,
+            isPrivateEvent: true,
+          });
+        });
+      }
+  
+      const allEvents = [...userEvents, ...data].sort(
+        (a, b) => b.attendeesCount - a.attendeesCount
+      );
+  
+      setBoxData(allEvents);
+    } catch (error) {
+     
+    }
+  }, [selectedDate]);
+
+  // Coloca aquí el nuevo useEffect para actualizar los datos cuando cambie selectedCategory
+useEffect(() => {
+  fetchBoxData();
+}, [selectedCategory]);
+
+const fetchPrivateEvents = useCallback(async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  let blockedUsers = [];
+  const userDoc = await getDoc(doc(database, "users", user.uid));
+  if (userDoc.exists()) {
+    blockedUsers = userDoc.data()?.blockedUsers || [];
+  }
+
+  const eventsRef = collection(database, 'users', user.uid, 'events');
+  const eventsSnapshot = await getDocs(eventsRef);
+  const events = [];
+
+ 
+
+  for (const docSnapshot of eventsSnapshot.docs) {
+    const eventData = docSnapshot.data();
+    
+    // Verificar si el evento es aceptado y que no es del usuario actual
+    if (eventData.status === 'accepted' && eventData.uid !== user.uid) {
+      const eventPrivRef = doc(database, 'EventsPriv', eventData.eventId);
+      const eventPrivDoc = await getDoc(eventPrivRef);
+      if (eventPrivDoc.exists()) {
+        const fullEventData = eventPrivDoc.data();
+
+        events.push({
+          id: docSnapshot.id,
+          ...fullEventData,
+          ...eventData,
+          attendees: fullEventData.attendees || [],
+        });
+       
+      }
+    }
+  }
+
+
+  setPrivateEvents(events);
+}, []);
+
 
   const filteredBoxData = useMemo(() => {
-    return getFilteredBoxData(boxData, selectedCity, selectedCategory, t);
-  }, [boxData, selectedCity, selectedCategory, t]);
-
-
-  // para modulizar final
-  
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      fetchBoxData({
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
-      });
+    if (!boxData || !Array.isArray(boxData)) {
+      return [];
     }
   
-    fetchPrivateEvents();
-  }, [selectedDate, auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
+    // Filtrado inicial según ciudad
+    let filteredData = boxData;
+    if (selectedCity && selectedCity !== "All Cities") {
+      filteredData = filteredData.filter((box) => box.city === selectedCity);
+    }
   
+    // Filtrado adicional según categoría, ignorando la opción "Todos"
+    if (selectedCategory && selectedCategory !== t("categories.all")) {
+      filteredData = filteredData.filter((box) => box.category === selectedCategory);
+    }
+  
+    // Separación de eventos en categorías de amigos y generales
+    const privateEvents = [];
+    const generalEvents = [];
+  
+    filteredData.forEach((box) => {
+      if (box.category === "EventoParaAmigos") {
+        privateEvents.push(box);
+      } else {
+        generalEvents.push(box);
+      }
+    });
+  
+    return [
+      { title: "Eventos Privados", data: privateEvents },
+      { title: "Eventos Generales", data: generalEvents },
+    ];
+  }, [boxData, selectedCity, selectedCategory, t]);
+  
+  useEffect(() => {
+    fetchBoxData();
+    fetchPrivateEvents();
+  }, [selectedDate, fetchBoxData, fetchPrivateEvents]);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -293,17 +382,13 @@ const Home = React.memo(() => {
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
   useEffect(() => {
-    const unsubscribe = fetchUnreadMessages({
-      setUnreadMessages,
-      user: auth.currentUser,
-    });
-  
+    const unsubscribe = fetchUnreadMessages({ setUnreadMessages, user: auth.currentUser });
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
       }
     };
-  }, [auth.currentUser]);
+  }, [navigation, auth.currentUser]);
 
   const memoizedMenu = useMemo(() => (
     <Menu
@@ -378,16 +463,14 @@ const Home = React.memo(() => {
         }
       />
 
-{loading && (
-  <View
-    style={[
-      styles.loadingOverlay,
-      { backgroundColor: isNightMode ? "rgba(0, 0, 0, 0.8)" : "rgba(255, 255, 255, 0.8)" },
-    ]}
-  >
-    <ActivityIndicator size="large" color={isNightMode ? "white" : Colors.primary} />
-  </View>
-)}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size={50} color="black" />
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        </View>
+      )}
 
 <TabBar
       isNightMode={isNightMode}
@@ -395,12 +478,6 @@ const Home = React.memo(() => {
       unreadNotifications={unreadNotifications}
       unreadMessages={unreadMessages}
     />
-    {console.log("Props enviados a TabBar:", {
-  unreadNotifications,
-  unreadMessages,
-  profileImage,
-  isNightMode,
-})}
     </View>
   );
 });

@@ -490,3 +490,4 @@ export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t) =
 
 
 
+
