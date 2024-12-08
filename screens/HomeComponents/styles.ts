@@ -48,6 +48,14 @@ export const dayStyles = StyleSheet.create({
     height: 35,
     borderRadius: 20,
   },
+  unreadIndicator: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
 });
 
 export const nightStyles = StyleSheet.create({
@@ -90,6 +98,14 @@ export const nightStyles = StyleSheet.create({
     width: 35,
     height: 35,
     borderRadius: 20,
+  },
+  unreadIndicator: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
 });
 

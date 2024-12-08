@@ -27,7 +27,6 @@ import {
   deleteField,
   arrayUnion,
   onSnapshot,
-  arrayRemove,
   writeBatch,
 } from "firebase/firestore";
 import { Image } from "expo-image";
@@ -40,7 +39,6 @@ import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
 import SliderContent from "./BoxDetailsComponents/SliderContent";
 import InviteFriendsModal from "./BoxDetailsComponents/InviteFriendsModal";
 import {
-  checkTime,
   handleInvite,
   fetchAttendees,
   checkNightMode,
@@ -168,9 +166,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     return () => unsubscribe();
   }, [box]);
   
-
-  
-
   const handleRemoveFromEvent = async () => {
     const user = auth.currentUser;
     if (!user || !box) return;
@@ -332,10 +327,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
-
-
-
-
   const handleEditEvent = () => {
     const user = auth.currentUser;
 
@@ -380,8 +371,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       setIsProcessing(false);
     }
   };
-
-
 
   const renderEditModal = () => (
     <Modal
@@ -435,7 +424,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       </View>
     </Modal>
   );
-
 
   // ...existing code...
   const handleAddEvent = async () => {
@@ -774,8 +762,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       setFilteredFriends(filtered);
     }
   };
-
-
 
   return (
     <SafeAreaView style={styles.container}>

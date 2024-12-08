@@ -48,7 +48,11 @@ const TabBar = ({
           color={isNightMode ? "white" : "black"}
         />
         {unreadNotifications && (
+          <>
+           {console.log("Renderizando indicador de notificaciones")}
           <View style={[styles.unreadIndicator, { backgroundColor: "red" }]} />
+          </>
+
         )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>

@@ -90,17 +90,47 @@ export const checkEventStatus = async (params) => {
   }
 };
 
-export const fetchEventDetails = async (params) => {
-  const box = params.box
-  const setBoxData = params.setBoxData
 
-  const eventRef = doc(database, "EventsPriv", box.id || box.title);
-  const eventSnapshot = await getDoc(eventRef);
-  if (eventSnapshot.exists()) {
-    const eventData = eventSnapshot.data();
-    setBoxData((prevBox) => ({ ...prevBox, ...eventData }));
+export const fetchEventDetails = async (params) => {
+  const { box, setBoxData } = params;
+
+  try {
+    // Referencia al documento del evento
+    const eventRef = doc(database, "EventsPriv", box.id || box.title);
+    const eventSnapshot = await getDoc(eventRef);
+
+    if (eventSnapshot.exists()) {
+      const eventData = eventSnapshot.data();
+      
+      // Asegurarte de que `day` esté correctamente formateado
+      const formatDay = (date) => {
+        if (typeof date === "string") {
+          return date; // Si ya es un string, usarlo directamente
+        }
+        const parsedDate = new Date(date);
+        return parsedDate.toLocaleDateString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      };
+
+      const formattedDay = eventData.day || formatDay(eventData.date);
+
+      // Actualiza `setBoxData` con los datos obtenidos
+      setBoxData((prevBox) => ({
+        ...prevBox,
+        ...eventData,
+        day: formattedDay, // Agrega el campo `day` con el formato correcto
+      }));
+    } else {
+      console.warn("El evento no existe.");
+    }
+  } catch (error) {
+    console.error("Error al obtener los detalles del evento:", error);
   }
 };
+
 
 export const fetchAttendees = (params) => {
   const box = params.box;
@@ -335,14 +365,26 @@ export const handleInvite = async (params) => {
     const eventCategory = box.category || "Sin categoría";
     const notificationRef = collection(database, "users", friendId, "notifications");
 
-    await addDoc(notificationRef, {
+    const formatDay = (date) => {
+      if (typeof date === "string") {
+          return date; // Asume que ya está correctamente formateada.
+      }
+      const parsedDate = new Date(date);
+      return parsedDate.toLocaleDateString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+      });
+  };
+  
+  await addDoc(notificationRef, {
       fromId: user.uid,
       fromName: fromName,
       fromImage: fromImage,
       eventId: box.id,
       eventTitle: box.title,
       eventImage: eventImage,
-      day: box.day || "Fecha no disponible", // Agregar el campo day
+      day: eventData.day || formatDay(box.date || new Date()), // Usar `eventData.day` primero
       eventDate: eventDateTimestamp,
       date: eventDateFormatted,
       eventCategory: eventCategory,
@@ -354,7 +396,8 @@ export const handleInvite = async (params) => {
       description: eventData.description || "Descripción no disponible",
       eventDateTime: `${eventData.day || "Fecha no disponible"} ${eventData.hour || "Hora no disponible"}`,
       hour: box.category === "EventoParaAmigos" ? formatHour(box.hour || new Date()) : box.hours || {}
-    });
+  });
+  
 
     
 
@@ -500,70 +543,6 @@ export const handleDeleteEvent = async (params) => {
   );
 };
 
-// ...existing code...
-const saveUserEvent = async (
-  boxTitle,
-  selectedDate,
-  daySpecial,
-  phoneNumber,
-  locationLink,
-  hours,
-  coordinates,
-  imageUrl // Add imageUrl parameter
-) => {
-  try {
-    const user = auth.currentUser;
-    if (!user) throw new Error("No user logged in");
-
-    const userDocRef = doc(database, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    let username = "Usuario desconocido";
-    let profileImage = "https://via.placeholder.com/150";
-
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      username = userData.username || username;
-      profileImage =
-        userData.photoUrls && userData.photoUrls.length > 0
-          ? userData.photoUrls[0]
-          : profileImage;
-    }
-
-    const boxRef = doc(database, "GoBoxs", boxTitle);
-    const boxDoc = await getDoc(boxRef);
-
-    let existingData = [];
-    if (boxDoc.exists()) {
-      const data = boxDoc.data();
-      existingData = data[selectedDate] || [];
-    } else {
-      await setDoc(boxRef, { [selectedDate]: [] });
-    }
-
-    const userDataToSave = {
-      profileImage: profileImage,
-      username: username,
-      uid: user.uid,
-      phoneNumber: phoneNumber,
-      locationLink: locationLink,
-      hours: hours,
-      coordinates: coordinates, // Save coordinates
-      imageUrl: imageUrl // Save imageUrl
-    };
-
-    if (daySpecial) {
-      userDataToSave.DaySpecial = daySpecial;
-    }
-
-    await updateDoc(boxRef, {
-      [selectedDate]: [...existingData, userDataToSave],
-    });
-  } catch (error) {
-    console.error("Error al guardar el evento: ", error);
-  }
-};
-// ...existing code...
 
 export const handleAcceptGeneralEvent = async (params) => {
   const item = params.item;

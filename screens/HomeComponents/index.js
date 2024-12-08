@@ -278,13 +278,17 @@ const onRefresh = useCallback(async () => {
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
   useEffect(() => {
-    const unsubscribe = fetchUnreadMessages({ setUnreadMessages, user: auth.currentUser });
+    const unsubscribe = fetchUnreadMessages({
+      setUnreadMessages,
+      user: auth.currentUser,
+    });
+  
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
       }
     };
-  }, [navigation, auth.currentUser]);
+  }, [auth.currentUser]);
 
   const memoizedMenu = useMemo(() => (
     <Menu
@@ -374,6 +378,12 @@ const onRefresh = useCallback(async () => {
       unreadNotifications={unreadNotifications}
       unreadMessages={unreadMessages}
     />
+    {console.log("Props enviados a TabBar:", {
+  unreadNotifications,
+  unreadMessages,
+  profileImage,
+  isNightMode,
+})}
     </View>
   );
 });

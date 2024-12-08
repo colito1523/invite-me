@@ -88,12 +88,14 @@ export const checkTime = (setIsNightMode: (value: boolean) => void) => {
 export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
   if (auth.currentUser) {
     const user = auth.currentUser;
+    console.log("Usuario autenticado:", user.uid); // Log del usuario autenticado
     const notificationsRef = collection(database, "users", user.uid, "notifications");
     const q = query(notificationsRef, where("seen", "==", false));
     const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
     const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
 
     const unsubscribeNotifications = onSnapshot(q, (querySnapshot) => {
+      console.log("fetchUnreadNotifications - Notificaciones no vistas:", !querySnapshot.empty);
       if (!querySnapshot.empty) {
         setUnreadNotifications(true);
       } else {
@@ -102,6 +104,7 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
     });
 
     const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
+      console.log("fetchUnreadNotifications - Solicitudes de amistad no vistas:", !querySnapshot.empty);
       if (!querySnapshot.empty) {
         setUnreadNotifications(true);
       } else {
@@ -110,10 +113,13 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
     });
 
     return () => {
+      console.log("Limpiando suscripciones a onSnapshot");
       unsubscribeNotifications();
       unsubscribeFriendRequests();
     };
   }
+
+  console.warn("fetchUnreadNotifications - Usuario no autenticado");
   return () => {}; // Return a no-op function if auth.currentUser is not set
 };
 
@@ -173,7 +179,9 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
   if (!user) return;
 
   const userDocRef = doc(database, "users", user.uid);
-  const unsubscribeUser = onSnapshot(userDocRef, (userDoc) => {
+
+  // Escucha los cambios en el documento del usuario
+  const unsubscribeUser = onSnapshot(userDocRef, async (userDoc) => {
     if (!userDoc.exists()) {
       console.error("El documento del usuario no existe.");
       setUnreadMessages(false);
@@ -185,35 +193,35 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
 
     const chatsRef = collection(database, "chats");
     const chatsQuery = query(chatsRef, where("participants", "array-contains", user.uid));
-    const unsubscribeChats = onSnapshot(chatsQuery, (querySnapshot) => {
+
+    // Recupera todos los chats y verifica mensajes no leídos
+    const unsubscribeChats = onSnapshot(chatsQuery, async (querySnapshot) => {
+      const chats = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+
+      // Filtra los chats no muteados
+      const activeChats = chats.filter((chat) => 
+        !mutedChats.some((mutedChat) => mutedChat.chatId === chat.id)
+      );
+
+      // Comprueba si hay mensajes no leídos en los chats activos
       let hasUnreadMessages = false;
 
-      querySnapshot.forEach((chatDoc) => {
-        const chatId = chatDoc.id;
-
-        const isMuted = mutedChats.some((mutedChat) => mutedChat.chatId === chatId);
-        if (isMuted) return;
-
-        const messagesRef = collection(database, "chats", chatId, "messages");
+      for (const chat of activeChats) {
+        const messagesRef = collection(database, "chats", chat.id, "messages");
         const unseenMessagesQuery = query(
           messagesRef,
           where("seen", "==", false),
           where("senderId", "!=", user.uid)
         );
 
-        onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
-          if (!unseenMessagesSnapshot.empty) {
-            hasUnreadMessages = true;
-            setUnreadMessages(true);
-          } else if (!hasUnreadMessages) {
-            setUnreadMessages(false);
-          }
-        });
-      });
-
-      if (!hasUnreadMessages) {
-        setUnreadMessages(false);
+        const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+        if (!unseenMessagesSnapshot.empty) {
+          hasUnreadMessages = true;
+          break;
+        }
       }
+
+      setUnreadMessages(hasUnreadMessages);
     });
 
     return () => {
@@ -225,6 +233,8 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
     unsubscribeUser();
   };
 };
+
+
 
 // Verifica si hay notificaciones o solicitudes de amistad no vistas
 export const checkNotificationsSeenStatus = async (setNotificationIconState) => {
