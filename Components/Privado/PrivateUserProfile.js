@@ -748,5 +748,7 @@ const styles = StyleSheet.create({
   addFriendButton: {
     padding: 10,
     borderRadius: 20,
+    position: "absolute",
+    right: 20, // Asegura un posicionamiento fijo
   },
 });
