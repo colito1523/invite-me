@@ -67,14 +67,18 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Manejar la interacción con un usuario
-  const handleUserPress = async (uid) => {
-    if (blockedUsers.includes(uid)) {
-      Alert.alert("Error", "No puedes interactuar con este usuario.");
-      return;
-    }
+ const handleUserPress = async (uid) => {
+  if (blockedUsers.includes(uid)) {
+    Alert.alert("Error", "No puedes interactuar con este usuario.");
+    return;
+  }
 
-    try {
+  try {
+    if (uid === auth.currentUser.uid) {
+      // Navega al perfil de la cuenta propia
+      navigation.navigate("Profile");
+    } else {
+      // Navega al perfil de otros usuarios
       const userDoc = await getDoc(doc(database, "users", uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
@@ -85,11 +89,17 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             : "https://via.placeholder.com/150";
         navigation.navigate("UserProfile", { selectedUser: userData });
       } else {
+        Alert.alert("Error", "No se encontraron detalles para este usuario.");
       }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    Alert.alert(
+      "Error",
+      "Hubo un problema al obtener los detalles del usuario."
+    );
+  }
+};
 
   // Renderizar asistentes
   const renderItem = ({ item }) => (

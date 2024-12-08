@@ -94,17 +94,23 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     }
   
     try {
-      const userDoc = await getDoc(doc(database, "users", uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        userData.id = uid;
-        userData.profileImage =
-          userData.photoUrls && userData.photoUrls.length > 0
-            ? userData.photoUrls[0]
-            : "https://via.placeholder.com/150";
-        navigation.navigate("UserProfile", { selectedUser: userData });
+      if (uid === auth.currentUser.uid) {
+        // Navega al perfil de la cuenta propia
+        navigation.navigate("Profile");
       } else {
-        Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        // Navega al perfil de otros usuarios
+        const userDoc = await getDoc(doc(database, "users", uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          userData.id = uid;
+          userData.profileImage =
+            userData.photoUrls && userData.photoUrls.length > 0
+              ? userData.photoUrls[0]
+              : "https://via.placeholder.com/150";
+          navigation.navigate("UserProfile", { selectedUser: userData });
+        } else {
+          Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        }
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -114,6 +120,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       );
     }
   };
+  
   
 
   const currentStyles = isNightMode ? nightStyles : dayStyles;
