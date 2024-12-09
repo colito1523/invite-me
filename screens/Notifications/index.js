@@ -165,22 +165,21 @@ export default function NotificationsComponent() {
           backgroundColor: isNightMode ? "black" : "#fff",
         },
         headerTintColor: isNightMode ? "#fff" : "#000",
-        headerTitleStyle: {
-          color: isNightMode ? "#fff" : "#000",
-          fontSize: 19,
-        },
-        headerLeft: () => (
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={{ flexDirection: "row", alignItems: "center", marginLeft: 15 }}
-          >
+        headerTitle: () => (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Ionicons
               name="arrow-back"
               size={20}
               color={isNightMode ? "#fff" : "#000"}
+              onPress={() => navigation.goBack()}
+              style={{ marginRight: 5 }}
             />
-          </TouchableOpacity>
+            <Text style={{ color: isNightMode ? "#fff" : "#000", fontSize: 18 }}>
+              Notificaciones
+            </Text>
+          </View>
         ),
+        headerLeft: null, // Elimina el botón por defecto
       });
     }, [isNightMode, navigation])
   );

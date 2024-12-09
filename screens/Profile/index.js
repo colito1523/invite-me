@@ -334,7 +334,7 @@ export default function Profile({ navigation }) {
                         <Image
                             source={{ uri: url }}
                             style={styles.photoThumbnail}
-                            cachePolicy="none"
+                            cachePolicy="memory-disk"
                         />
                     ) : (
                         <View style={styles.emptyPhoto} />
@@ -444,7 +444,7 @@ export default function Profile({ navigation }) {
                   source={{ uri: item }}
                   style={styles.backgroundImage}
                   contentFit="cover"
-                  cachePolicy="none"
+                 cachePolicy="memory-disk"
                   placeholder={{ uri: "placeholder-image-url" }} // Placeholder
                 />
                 {isElementsVisible && (
