@@ -158,6 +158,30 @@ export default function UserProfile({ route, navigation }) {
     setIsReportModalVisible(false);
   };
 
+  const handleToggleFriendshipStatus = async () => {
+    setIsProcessing(true); // Evitar múltiples clics rápidos
+    try {
+      const { friendshipStatus: newFriendshipStatus, pendingRequest: newPendingRequest } =
+        await toggleUserStatus({
+          user,
+          selectedUser,
+          friendCount,
+          t,
+          friendshipStatus,
+        });
+  
+      // Actualiza los estados locales con los nuevos valores
+      setFriendshipStatus(newFriendshipStatus);
+      setPendingRequest(newPendingRequest);
+    } catch (error) {
+      console.error("Error actualizando estado de amistad:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  
+
   useEffect(() => {
     checkHiddenStatus({ user, selectedUser, setHideStories, setHideMyStories });
   }, [user, selectedUser]);
@@ -279,39 +303,29 @@ export default function UserProfile({ route, navigation }) {
 
   const renderEvents = (start, end) => {
     const userId = auth.currentUser?.uid;
-  
-   
-  
-   
-  
+
     const filteredEvents = events.slice(start, end).filter((event) => {
-    
-  
       // Mostrar todos los eventos que no sean de tipo "EventoParaAmigos"
       if (event.category && event.category !== "EventoParaAmigos") {
-      
         return true;
       }
-  
+
       // Mostrar eventos privados solo si el usuario está asistiendo o fue invitado
       if (event.category === "EventoParaAmigos") {
         const isAttending =
-          Array.isArray(event.attendees) && event.attendees.some((attendee) => attendee.uid === userId);
+          Array.isArray(event.attendees) &&
+          event.attendees.some((attendee) => attendee.uid === userId);
         const isInvited =
-          Array.isArray(event.invitedFriends) && event.invitedFriends.includes(userId);
-  
-      
-  
+          Array.isArray(event.invitedFriends) &&
+          event.invitedFriends.includes(userId);
+
         return isAttending || isInvited;
       }
-  
-  
+
       // No se muestra si no cumple con los requisitos anteriores
       return false;
     });
-  
- 
-  
+
     return (
       <View style={styles.buttonContainer}>
         {filteredEvents.map((event, index) => (
@@ -331,10 +345,6 @@ export default function UserProfile({ route, navigation }) {
       </View>
     );
   };
-  
-  
-  
-  
 
   useEffect(() => {
     const fetchLikeCount = async () => {
@@ -433,34 +443,31 @@ export default function UserProfile({ route, navigation }) {
                                 </View>
                               </View>
                               <View style={styles.iconsContainer}>
-                                <TouchableOpacity
-                                  style={styles.iconButton}
-                                  onPress={() =>
-                                    toggleUserStatus({
-                                      user,
-                                      selectedUser,
-                                      setPendingRequest,
-                                      setFriendshipStatus,
-                                      setFriendCount,
-                                      friendCount,
-                                      t,
-                                      isProcessing,
-                                      setIsProcessing, // Agregar aquí
-                                    })
-                                  }
-                                >
-                                  <AntDesign
-                                    name={
-                                      friendshipStatus
-                                        ? "deleteuser"
-                                        : pendingRequest
-                                        ? "clockcircle"
-                                        : "adduser"
-                                    }
-                                    size={24}
-                                    color="white"
-                                  />
-                                </TouchableOpacity>
+                              <TouchableOpacity
+  style={styles.iconButton}
+  onPress={handleToggleFriendshipStatus} // Llama a la nueva función
+  disabled={isProcessing} // Evita múltiples clics mientras se procesa
+>
+  {console.log(
+    friendshipStatus
+      ? "Se muestra el icono de eliminar amigo (deleteuser)"
+      : pendingRequest
+      ? "Se muestra el icono de cancelar solicitud (clockcircle)"
+      : "Se muestra el icono de pedir ser amigos (adduser)"
+  )}
+  <AntDesign
+    name={
+      friendshipStatus
+        ? "deleteuser"
+        : pendingRequest
+        ? "clockcircle"
+        : "adduser"
+    }
+    size={24}
+    color="white"
+  />
+</TouchableOpacity>
+
                                 <TouchableOpacity
                                   style={styles.iconButton}
                                   onPress={() =>

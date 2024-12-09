@@ -107,11 +107,13 @@ export default memo(function BoxDetails({ route, navigation }) {
       fetchEventDetails({ box, setBoxData });
     }
     if (isFromNotification) {
-      ( {
+      console.log("Datos recibidos desde la notificación:", {
         box,
         selectedDate,
-        isFromNotification
+        isFromNotification,
       });
+    } else {
+      console.log("Datos iniciales del box:", box);
     }
   }, [box, isFromNotification]);
 
@@ -139,6 +141,7 @@ export default memo(function BoxDetails({ route, navigation }) {
         selectedDate,
         setAttendeesList
       });
+      console.log("Datos del box después de fetchEventDetails:", box);
     }
 
     return () => {
