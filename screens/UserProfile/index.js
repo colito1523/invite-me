@@ -35,6 +35,7 @@ import {
   toggleHideMyStories,
   toggleUserStatus,
 } from "./utils";
+import { ActivityIndicator } from "react-native";
 
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
@@ -159,9 +160,18 @@ export default function UserProfile({ route, navigation }) {
   };
 
   const handleToggleFriendshipStatus = async () => {
-    setIsProcessing(true); // Evitar múltiples clics rápidos
+    setIsProcessing(true);
+  
+    // Actualización optimista
+    const newFriendshipStatus = !friendshipStatus;
+    const newPendingRequest = !pendingRequest;
+  
+    setFriendshipStatus(newFriendshipStatus);
+    setPendingRequest(newPendingRequest);
+  
     try {
-      const { friendshipStatus: newFriendshipStatus, pendingRequest: newPendingRequest } =
+      // Realiza la actualización real en el backend
+      const { friendshipStatus: updatedFriendshipStatus, pendingRequest: updatedPendingRequest } =
         await toggleUserStatus({
           user,
           selectedUser,
@@ -170,15 +180,20 @@ export default function UserProfile({ route, navigation }) {
           friendshipStatus,
         });
   
-      // Actualiza los estados locales con los nuevos valores
-      setFriendshipStatus(newFriendshipStatus);
-      setPendingRequest(newPendingRequest);
+      // Actualiza nuevamente con la respuesta real si es necesario
+      setFriendshipStatus(updatedFriendshipStatus);
+      setPendingRequest(updatedPendingRequest);
     } catch (error) {
       console.error("Error actualizando estado de amistad:", error);
+  
+      // Revertir el estado si ocurre un error
+      setFriendshipStatus(!newFriendshipStatus);
+      setPendingRequest(!newPendingRequest);
     } finally {
       setIsProcessing(false);
     }
   };
+  
   
   
 
@@ -445,27 +460,24 @@ export default function UserProfile({ route, navigation }) {
                               <View style={styles.iconsContainer}>
                               <TouchableOpacity
   style={styles.iconButton}
-  onPress={handleToggleFriendshipStatus} // Llama a la nueva función
-  disabled={isProcessing} // Evita múltiples clics mientras se procesa
+  onPress={handleToggleFriendshipStatus}
+  disabled={isProcessing}
 >
-  {console.log(
-    friendshipStatus
-      ? "Se muestra el icono de eliminar amigo (deleteuser)"
-      : pendingRequest
-      ? "Se muestra el icono de cancelar solicitud (clockcircle)"
-      : "Se muestra el icono de pedir ser amigos (adduser)"
+  {isProcessing ? (
+    <ActivityIndicator size="small" color="#fff" />
+  ) : (
+    <AntDesign
+      name={
+        friendshipStatus
+          ? "deleteuser"
+          : pendingRequest
+          ? "clockcircle"
+          : "adduser"
+      }
+      size={24}
+      color="white"
+    />
   )}
-  <AntDesign
-    name={
-      friendshipStatus
-        ? "deleteuser"
-        : pendingRequest
-        ? "clockcircle"
-        : "adduser"
-    }
-    size={24}
-    color="white"
-  />
 </TouchableOpacity>
 
                                 <TouchableOpacity
