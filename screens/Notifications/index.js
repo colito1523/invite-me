@@ -165,24 +165,25 @@ export default function NotificationsComponent() {
           backgroundColor: isNightMode ? "black" : "#fff",
         },
         headerTintColor: isNightMode ? "#fff" : "#000",
-        headerTitle: () => (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+        headerTitle: "", // Elimina el título por defecto
+        headerLeft: () => (
+          <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 10 }}>
             <Ionicons
               name="arrow-back"
               size={20}
               color={isNightMode ? "#fff" : "#000"}
               onPress={() => navigation.goBack()}
-              style={{ marginRight: 5 }}
+              style={{ marginRight: 10 }}
             />
-            <Text style={{ color: isNightMode ? "#fff" : "#000", fontSize: 18 }}>
+            <Text style={{ color: isNightMode ? "#fff" : "#000", fontSize: 18, fontWeight: "bold" }}>
               Notificaciones
             </Text>
           </View>
         ),
-        headerLeft: null, // Elimina el botón por defecto
       });
     }, [isNightMode, navigation])
   );
+  
 
   useFocusEffect(
     useCallback(() => {
