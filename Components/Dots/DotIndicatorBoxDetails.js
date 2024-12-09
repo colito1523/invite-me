@@ -157,8 +157,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   imageContainer: {
-    width: 80,
-    height: 80,
+    width: 70,
+    height: 70,
     borderRadius: 40,
     overflow: 'hidden',
   },
