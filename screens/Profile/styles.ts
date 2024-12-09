@@ -1,6 +1,8 @@
-import { Dimensions, StyleSheet, Platform, } from "react-native";
+import { Dimensions, StyleSheet, Platform } from "react-native";
 
 const { width, height } = Dimensions.get("window");
+
+const isLargeScreen = width > 500 && height > 900;
 
 export const styles = StyleSheet.create({
     scrollViewContent: {
@@ -59,12 +61,12 @@ export const styles = StyleSheet.create({
     text: {
       fontSize: 25,
       fontWeight: "bold",
-      color: "white",
+      color:"white",
     },
     editableText: {
       fontSize: 25,
       fontWeight: "bold",
-      color: "white",
+      color:"white",
       paddingBottom: 5,
     },
     editableTextEditing: {

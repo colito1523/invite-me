@@ -857,6 +857,7 @@ export function StoryViewer({
                 key={currentStory.id}
                 source={{ uri: currentStory.storyUrl }}
                 style={styles.image}
+                resizeMode="contain" // Cambia de "cover" a "contain"
                 onLoadStart={() => setIsImageLoading(true)}
                 onLoadEnd={() => setIsImageLoading(false)}
                 onLoad={() =>
@@ -1180,7 +1181,7 @@ const styles = StyleSheet.create({
   image: {
     width,
     height,
-    contentFit: "cover",
+    resizeMode: "contain"
   },
   userInfo: {
     position: "absolute",

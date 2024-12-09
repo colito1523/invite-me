@@ -11,7 +11,8 @@ import {
   Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform 
+  Platform,
+
 } from "react-native";
 import { auth, database, storage } from "../../config/firebase";
 import {
@@ -29,6 +30,7 @@ import {
   where,
   arrayUnion
 } from "firebase/firestore";
+
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -70,7 +72,7 @@ export default function Chat({ route }) {
   useEffect(() => {
 
   }, [messages.length]);
-  
+
 
 
   // Verificación de usuarios bloqueados

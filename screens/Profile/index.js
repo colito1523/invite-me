@@ -8,6 +8,7 @@ import {
   Alert,
   Pressable,
   ActivityIndicator,
+  Dimensions
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -117,6 +118,7 @@ export default function Profile({ navigation }) {
   const [isBlockedListVisible, setIsBlockedListVisible] = useState(false);
   const [userData, setUserData] = useState(null);
   const { t } = useTranslation()
+  const [screenCategory, setScreenCategory] = useState("");
 
   const nameInputRef = useRef(null);
   const surnameInputRef = useRef(null);
@@ -132,33 +134,25 @@ export default function Profile({ navigation }) {
   useEffect(() => {
     fetchUserData({setBlockedUsers, setUserData});
   }, []);
-/*
-  const handleFriendCountClick = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
 
-    try {
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      const blockedUsers = userDoc.data()?.blockedUsers || [];
+  useEffect(() => {
+    const { width, height } = Dimensions.get('window');
+    console.log(`Tamaño de la pantalla - Ancho: ${width}, Alto: ${height}`);
+  }, []);
 
-      const friendsSnapshot = await getDocs(
-        collection(database, "users", user.uid, "friends")
-      );
+   useEffect(() => {
+    const { width, height } = Dimensions.get("window");
 
-      const filteredFriends = friendsSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .filter((friend) => !blockedUsers.includes(friend.friendId));
-
-      navigation.navigate("FriendList", { friends: filteredFriends });
-      setIsFriendListVisible(true);
-    } catch (error) {
-      console.error("Error al cargar la lista de amigos:", error);
+    if (width === 411 && height === 835) {
+      setScreenCategory("small");
+    } else if (width === 430 && height === 932) {
+      setScreenCategory("large");
+    } else {
+      setScreenCategory("default");
     }
-  };
-*/
+  }, []);
+
+  
 
   useEffect(() => {
     checkLikeStatus({setIsHearted});
