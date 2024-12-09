@@ -68,7 +68,15 @@ export default memo(function BoxDetails({ route, navigation }) {
     hour: "",
     day: new Date(),
   });
+  
+  useEffect(() => {
+    const start = Date.now(); // Marca el tiempo inicial
 
+    return () => {
+      const end = Date.now(); // Marca el tiempo al desmontar
+      console.log(`Tiempo de desmontaje: ${end - start}ms`);
+    };
+  }, []);
 
   const closeModal = () => {
     setModalVisible(false);
@@ -118,38 +126,43 @@ export default memo(function BoxDetails({ route, navigation }) {
   }, [box, isFromNotification]);
 
   useEffect(() => {
-    let unsubscribe;
-
-    if (box) {
-
-      fetchEventDetails({
-        box,
-        setBoxData
-      });
-      checkEventStatus({
-        box,
-        selectedDate,
-        setIsEventSaved
-      });
-      fetchFriends();
-      checkNightMode(setIsNightMode);
-      checkAndRemoveExpiredEvents(box.title);
-
-      // Configura el listener en tiempo real para los asistentes
-      unsubscribe = fetchAttendees({
-        box,
-        selectedDate,
-        setAttendeesList
-      });
-      console.log("Datos del box después de fetchEventDetails:", box);
-    }
-
+    let unsubscribeAttendees;
+  
+    const fetchDetailsAndAttendees = async () => {
+      if (!box) return;
+  
+      try {
+        await Promise.allSettled([
+          fetchEventDetails({ box, setBoxData }),
+          (unsubscribeAttendees = fetchAttendees({
+            box,
+            selectedDate,
+            setAttendeesList,
+          })),
+        ]);
+  
+        setTimeout(() => {
+          fetchFriends();
+          checkNightMode(setIsNightMode);
+          checkAndRemoveExpiredEvents(box.title);
+        }, 300);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    };
+  
+    fetchDetailsAndAttendees();
+  
     return () => {
-      if (typeof unsubscribe === "function") {
-        unsubscribe(); // Limpia el listener al salir del componente
+      if (typeof unsubscribeAttendees === "function") {
+        unsubscribeAttendees();
       }
     };
   }, [box, selectedDate]);
+  
+  
+  
+  
 
   useEffect(() => {
     if (!box || box.category !== "EventoParaAmigos") return;

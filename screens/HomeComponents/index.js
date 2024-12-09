@@ -258,16 +258,9 @@ const Home = React.memo(() => {
   }, [auth.currentUser]); // Dependencia del usuario autenticado.
   
   // Función para manejar el evento de clic en el box
-  const handleBoxPress = useCallback(
-    (box) => {
-      navigation.navigate("BoxDetails", {
-        box,
-        selectedDate,
-        attendees: box.attendees || [],
-      });
-    },
-    [navigation, selectedDate]
-  );
+  const handleBoxPress = useCallback((box) => {
+    navigation.navigate("BoxDetails", { box, selectedDate, attendees: box.attendees || [] });
+  }, [navigation, selectedDate]);
 
   const renderItem = useCallback(({ item }) => (
     <View style={styles.boxContainer}>
@@ -349,6 +342,13 @@ const Home = React.memo(() => {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.container}
+        initialNumToRender={5}
+        removeClippedSubviews={true}
+        getItemLayout={(data, index) => ({
+          length: 100, // Altura fija
+          offset: 100 * index,
+          index,
+        })}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
