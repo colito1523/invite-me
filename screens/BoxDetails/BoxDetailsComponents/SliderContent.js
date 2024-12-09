@@ -75,49 +75,42 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
 
       {/* Segundo Slider: Horarios */}
       <View style={styles.sliderPart}>
-        <View style={styles.hoursContainer}>
-          {isFromNotification && (box.hour || box.day) ? (
-            <View style={styles.notificationHours}>
-              <Text style={styles.hoursText}>
-                {`Hora: ${box.hour || "No disponible"}`}
-              </Text>
-              <Text style={styles.dayText}>
-                {`Día: ${box.day || "No disponible"}`}
-              </Text>
-            </View>
-          ) : box.category === "EventoParaAmigos" ? (
-            <View style={styles.notificationHours}>
-              {Object.keys(boxData.hours || {}).map((day, index) => (
-                  <Text key={index} style={styles.dayText}>
-                    {day}
-                  </Text>
-                ))}
-              {Object.values(boxData.hours || {}).map((time, index) => (
-                  <Text key={index} style={styles.timeText}>
-                    {time}
-                  </Text>
-                ))}
-            </View>
-          ) : (
-            <View style={styles.hoursContent}>
-              <View style={styles.column}>
-                {Object.keys(boxData.hours || {}).map((day, index) => (
-                  <Text key={index} style={styles.dayText}>
-                    {day}
-                  </Text>
-                ))}
-              </View>
-              <View style={styles.column}>
-                {Object.values(boxData.hours || {}).map((time, index) => (
-                  <Text key={index} style={styles.timeText}>
-                    {time}
-                  </Text>
-                ))}
-              </View>
-            </View>
-          )}
+  <View style={styles.hoursContainer}>
+    {box.category === "EventoParaAmigos" && box.day && box.hour ? (
+      <View style={styles.notificationHours}>
+        <Text style={styles.hoursText}>{`Hora: ${box.hour}`}</Text>
+        <Text style={styles.dayText}>{`Día: ${box.day}`}</Text>
+      </View>
+    ) : isFromNotification && (box.hour || box.day) ? (
+      <View style={styles.notificationHours}>
+        <Text style={styles.hoursText}>
+          {`Hora: ${box.hour || "No disponible"}`}
+        </Text>
+        <Text style={styles.dayText}>
+          {`Día: ${box.day || "No disponible"}`}
+        </Text>
+      </View>
+    ) : (
+      <View style={styles.hoursContent}>
+        <View style={styles.column}>
+          {Object.keys(boxData.hours || {}).map((day, index) => (
+            <Text key={index} style={styles.dayText}>
+              {day}
+            </Text>
+          ))}
+        </View>
+        <View style={styles.column}>
+          {Object.values(boxData.hours || {}).map((time, index) => (
+            <Text key={index} style={styles.timeText}>
+              {time}
+            </Text>
+          ))}
         </View>
       </View>
+    )}
+  </View>
+</View>
+
 
       {/* Tercer Slider: Ubicación o Contacto */}
       <View style={styles.sliderPart}>
