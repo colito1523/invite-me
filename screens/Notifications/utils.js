@@ -450,10 +450,10 @@ export const handleRejectEventInvitation = async (params) => {
 };
 
 export const handleAcceptPrivateEvent = async (params) => {
-  const setNotifications = params.setNotifications
-  const setLoadingEventId = params.setLoadingEventId
-  const item = params.item
-  const t = params.t
+  const setNotifications = params.setNotifications;
+  const setLoadingEventId = params.setLoadingEventId;
+  const item = params.item;
+  const t = params.t;
 
   try {
     setLoadingEventId(item.id);
@@ -506,9 +506,10 @@ export const handleAcceptPrivateEvent = async (params) => {
         attendees: arrayUnion({
           uid: user.uid,
           username: userData.username || user.displayName,
-          profileImage: userData.photoUrls &&             userData.photoUrls.length > 0
-            ? userData.photoUrls[0]
-            : "https://via.placeholder.com/150",
+          profileImage:
+            userData.photoUrls && userData.photoUrls.length > 0
+              ? userData.photoUrls[0]
+              : "https://via.placeholder.com/150",
         }),
       });
 
@@ -526,20 +527,35 @@ export const handleAcceptPrivateEvent = async (params) => {
         expirationDate: eventData.expirationDate,
         hour: eventData.hour,
         status: "accepted",
-       
       });
     }
 
-    // Delete the notification from the database
-      const notifRef = doc(database, "users", user.uid, "notifications", item.id);
-      await deleteDoc(notifRef);
+    // Update the notification with the confirmation message
+    const notifRef = doc(database, "users", user.uid, "notifications", item.id);
+    await setDoc(notifRef, {
+      ...item,
+      status: "confirmed",
+      message: "¡Has aceptado la invitación al evento privado!",
+      timestamp: new Date(),
+      type: "eventConfirmation",
+    });
 
-      // Update local notification state
-      setNotifications((prevNotifications) =>
-        prevNotifications.filter((n) => n.id !== item.id)
-      );
+    // Update local notification state
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notif) =>
+        notif.id === item.id
+          ? {
+              ...notif,
+              status: "confirmed",
+              message: "¡Has aceptado la invitación al evento privado!",
+              timestamp: new Date(),
+              type: "eventConfirmation",
+            }
+          : notif
+      )
+    );
 
-      Alert.alert(
+    Alert.alert(
       t("notifications.invitationAccepted"),
       t("notifications.eventAddedToProfile")
     );
@@ -548,7 +564,7 @@ export const handleAcceptPrivateEvent = async (params) => {
     Alert.alert(
       t("notifications.error"),
       t("notifications.acceptInvitationError")
-);
+    );
   } finally {
     setLoadingEventId(null);
   }
@@ -569,10 +585,19 @@ export const handleRejectPrivateEvent = async (params) => {
       invitedFriends: arrayRemove(auth.currentUser.uid)
     });
 
-    // Remover la notificación del estado local
     setNotifications((prevNotifications) =>
-      prevNotifications.filter((notif) => notif.id !== item.id)
-    );
+      prevNotifications.map((notif) =>
+          notif.id === item.id
+              ? {
+                  ...notif,
+                  status: "confirmed",
+                  message: "¡Has aceptado la invitación al evento privado!",
+                  timestamp: new Date(),
+                  type: "eventConfirmation",
+              }
+              : notif
+      )
+  );
 
     Alert.alert("Rechazado", "Has rechazado la invitación al evento privado.");
   } catch (error) {
