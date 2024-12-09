@@ -106,7 +106,7 @@ export default function ChatList() {
           name="arrow-back"
           size={24}
           color={isNightMode ? "#fff" : "#000"}
-          style={{ marginLeft: 10 }}
+          style={{ marginLeft: 10, }}
           onPress={() => navigation.goBack()}
         />
       ),

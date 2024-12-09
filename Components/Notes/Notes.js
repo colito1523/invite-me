@@ -680,26 +680,13 @@ export default function Notes() {
                         onBlur={() => {
                           setIsInputActive(false);
                         }}
+                        blurOnSubmit={false}
+                        onKeyPress={({ nativeEvent }) => {
+                          if (nativeEvent.key === 'Enter') {
+                            handleSubmitNote();
+                          }
+                        }}
                       />
-                      {showSendButton && (
-                        <TouchableOpacity
-                          style={[
-                            styles.sendButton,
-                            {
-                              backgroundColor: isNightMode
-                                ? "rgba(255, 255, 255, 0.5)"
-                                : "rgba(0, 0, 0, 0.5)",
-                            },
-                          ]}
-                          onPress={() => handleSubmitNote()}
-                        >
-                          <Ionicons
-                            name="paper-plane"
-                            size={10}
-                            color={isNightMode ? "#000" : "#fff"}
-                          />
-                        </TouchableOpacity>
-                      )}
                     </View>
                   ) : (
                     <Text style={styles.placeholderText}>
