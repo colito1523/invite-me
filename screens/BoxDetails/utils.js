@@ -420,7 +420,7 @@ export const handleInvite = async (params) => {
 
     Alert.alert(
       t("boxDetails.invitationSent"),
-      `${t("boxDetails.invitationSentMessage")} el día ${selectedDate}.`
+      `${t("boxDetails.invitationSentMessage")} el día ${eventData.date || selectedDate}.`
     );
   } catch (error) {
     console.error("Error al invitar al usuario:", error);
