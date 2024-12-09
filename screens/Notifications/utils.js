@@ -518,7 +518,7 @@ export const handleAcceptPrivateEvent = async (params) => {
         title: eventData.title,
         imageUrl: eventData.image,
         date: eventData.date,
-                address: eventData.address,
+        address: eventData.address,
         category: eventData.category,
         day: eventData.day,
         description: eventData.description,
@@ -526,7 +526,7 @@ export const handleAcceptPrivateEvent = async (params) => {
         expirationDate: eventData.expirationDate,
         hour: eventData.hour,
         status: "accepted",
-        dateArray: [eventData.date],
+       
       });
     }
 
@@ -582,7 +582,9 @@ export const handleRejectPrivateEvent = async (params) => {
 };
 
 export const handleAcceptGeneralEvent = async (params) => {
-  const { item, setLoadingEventId, setNotifications } = params;
+  const item = params.item;
+  const setLoadingEventId = params.setLoadingEventId;
+  const setNotifications = params.setNotifications;
 
   try {
     setLoadingEventId(item.id);
@@ -610,15 +612,13 @@ export const handleAcceptGeneralEvent = async (params) => {
       }
 
       // Agregar al usuario como participante
-      const updatedParticipants = [
-        ...participants,
-        {
-          uid: user.uid,
-          username: userData.username || user.displayName,
-          profileImage:
-            userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-        },
-      ];
+      const updatedParticipants = participants.concat({
+        uid: user.uid,
+        username: userData.username || user.displayName,
+        profileImage:
+          userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+      });
+
       await updateDoc(eventRef, { [item.eventDate]: updatedParticipants });
 
       // Agregar el evento a la base de datos del usuario
@@ -631,26 +631,26 @@ export const handleAcceptGeneralEvent = async (params) => {
         hours: item.hours,
         locationLink: "Sin ubicación especificada",
         phoneNumber: item.number,
+        dateArray: [item.eventDate],
       });
 
       // Actualizar la notificación existente
       const notifRef = doc(database, "users", user.uid, "notifications", item.id);
-      const updatedMessage = `¡Has aceptado la invitación al evento "${item.eventTitle}" que se llevará a cabo el ${item.eventDate}!`;
       await updateDoc(notifRef, {
         status: "confirmed",
-        message: updatedMessage,
+        message: "¡Has aceptado la invitación al evento!", // Texto genérico
         timestamp: new Date(),
         type: "eventConfirmation",
       });
 
-      // Actualizar el estado local de las notificaciones
+      // Actualizar el estado local
       setNotifications((prevNotifications) =>
         prevNotifications.map((notif) =>
           notif.id === item.id
             ? {
                 ...notif,
                 status: "confirmed",
-                message: updatedMessage,
+                message: "¡Has aceptado la invitación al evento!", // Reflejar el mensaje genérico
                 timestamp: new Date(),
                 type: "eventConfirmation",
               }
@@ -658,10 +658,7 @@ export const handleAcceptGeneralEvent = async (params) => {
         )
       );
 
-      Alert.alert(
-        "Confirmación",
-        `El evento "${item.eventTitle}" ha sido añadido a tu perfil.`
-      );
+      Alert.alert("Confirmación", "El evento ha sido añadido a tu perfil.");
     }
   } catch (error) {
     console.error("Error al aceptar la invitación:", error);
@@ -670,8 +667,6 @@ export const handleAcceptGeneralEvent = async (params) => {
     setLoadingEventId(null);
   }
 };
-
-
 
 export const handleRejectGeneralEvent = async (params) => {
   const item = params.item
