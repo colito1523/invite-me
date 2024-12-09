@@ -249,11 +249,9 @@ export default function NotificationsComponent() {
             style={styles.profileImage}
           />
           <View style={styles.textContainer}>
-            <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
-              <Text style={[styles.boldText]}>{item.fromName}</Text> te ha invitado a{" "}
-              <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
-              <Text style={[styles.boldText]}>{eventDate}</Text>
-            </Text>
+         <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
+  {item.message || `¡Invitación al evento ${item.eventTitle} el día ${eventDate}!`}
+</Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.button, styles.acceptButton]}
@@ -293,6 +291,7 @@ export default function NotificationsComponent() {
       : item.eventDate; // Convert timestamp to string if necessary
     const matchedBox = boxInfo.find((box) => box.title === item.eventTitle);
     const eventImage = matchedBox ? matchedBox.path : "https://via.placeholder.com/150";
+  
     return (
       <TouchableOpacity
         onPress={() => {
@@ -319,9 +318,7 @@ export default function NotificationsComponent() {
           />
           <View style={styles.textContainer}>
             <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
-              <Text style={[styles.boldText]}>{item.fromName}</Text> te ha invitado a{" "}
-              <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
-              <Text style={[styles.boldText]}>{eventDate}</Text>
+              {item.message || `¡Invitación al evento ${item.eventTitle} el día ${eventDate}!`}
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -355,7 +352,7 @@ export default function NotificationsComponent() {
       </TouchableOpacity>
     );
   };
-
+  
   const renderNotificationItem = ({ item }) => {
     const isFriendRequest =
       item.type === "friendRequest" &&
