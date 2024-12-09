@@ -172,7 +172,7 @@ export default function NotificationsComponent() {
         headerLeft: () => (
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            style={{ marginLeft: 15 }}
+            style={{ flexDirection: "row", alignItems: "center", marginLeft: 15 }}
           >
             <Ionicons
               name="arrow-back"

@@ -9,7 +9,9 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform 
 } from "react-native";
 import { auth, database, storage } from "../../config/firebase";
 import {
@@ -813,6 +815,11 @@ const handleDeleteChat = async () => {
 
   return (
     <ImageBackground source={{ uri: backgroundImage }} style={styles.container}>
+     <KeyboardAvoidingView
+      style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
+    keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+    >
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -938,7 +945,7 @@ const handleDeleteChat = async () => {
   }}
 />
 
-
+</KeyboardAvoidingView>
     </ImageBackground>
 
 
