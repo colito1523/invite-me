@@ -525,6 +525,9 @@ export default function NotificationsComponent() {
                           ? t("notifications.nowFriends")
                           : t("notifications.rejectedFriendRequest"))}
                       {isLikeNotification && item.message}{" "}
+                      <Text>
+  {item.message || "Mensaje no disponible"}
+</Text>
                       {/* Mostrar el mensaje de like */}
                       {item.type === "storyLike" &&
                         t("notifications.likedYourStory")}

@@ -69,6 +69,7 @@ export const styles = StyleSheet.create({
       paddingHorizontal: 10,
     },
     buttonText: {
+      color: "#fff",
       fontWeight: "bold",
       textAlign: "center",
     },
@@ -89,10 +90,5 @@ export const styles = StyleSheet.create({
       paddingVertical: 6,
       paddingHorizontal: 10,
       marginRight: 8,
-    },
-    buttonText: {
-      color: "#fff",
-      fontWeight: "bold",
-      textAlign: "center",
     },
   });
