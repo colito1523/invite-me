@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Alert, Platform } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { getAuth, deleteUser } from "firebase/auth";
@@ -87,7 +87,7 @@ const MenuSection = ({
 const styles = StyleSheet.create({
   menuContainer: {
     position: "absolute",
-    top: 40,
+    top: Platform.OS === "ios" ? 60 : 40,
     right: 20,
     zIndex: 10,
   },

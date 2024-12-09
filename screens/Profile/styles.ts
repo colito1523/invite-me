@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet, Platform, } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
     },
     backButton: {
       position: "absolute",
-      top: 40,
+      top: Platform.OS === "ios" ? 60 : 40,
       left: 20,
       zIndex: 10,
     },
@@ -107,7 +107,7 @@ export const styles = StyleSheet.create({
     },
     menuContainer: {
       position: "absolute",
-      top: 40,
+      top: Platform.OS === "ios" ? 80 : 40,
       right: 20,
       zIndex: 10,
     },
@@ -161,15 +161,15 @@ export const styles = StyleSheet.create({
       marginBottom: 20,
       flexDirection: "row",
       justifyContent: "space-evenly",
-      gap: 30,
+      gap: 10,
     },
     centerOvalContainer: {
       alignItems: "center",
     },
     oval: {
-      width: "48%",
-      height: 40,
-      backgroundColor: "rgba(255, 255, 255, 0.5)",
+      width: "45%",
+      height: 45,
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
       borderRadius: 20,
       justifyContent: "center",
       alignItems: "center",
