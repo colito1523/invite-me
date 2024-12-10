@@ -93,6 +93,12 @@ export const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 5,
   },
+  unseenStoryCircle: {
+    borderWidth: 2,
+    borderColor: "black", // Color para destacar que hay historias
+    borderRadius: 30, // Hace que el contenedor sea circular
+    padding: 5, // Espaciado alrededor del círculo
+  },
 });
 
 export const lightTheme = {

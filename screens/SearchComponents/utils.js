@@ -9,20 +9,20 @@ import { useTranslation } from 'react-i18next';
 // ...existing code...
 
 export const fetchUsers = async (searchTerm, setResults) => {
-  const auth = getAuth(); // Add this line
+  const auth = getAuth();
   if (searchTerm.trim().length > 0) {
     try {
       const user = auth.currentUser;
       if (!user) return;
 
-      // Load blocked users
+      // Cargar usuarios bloqueados
       const userRef = doc(database, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
       const blockedUsers = userSnapshot.data()?.blockedUsers || [];
 
       const normalizedSearchTerm = searchTerm.toLowerCase();
-      
-      // Create compound query for username, firstName, and lastName
+
+      // Crear consulta para buscar usuarios por username, firstName y lastName
       const q = query(
         collection(database, "users"),
         or(
@@ -36,36 +36,41 @@ export const fetchUsers = async (searchTerm, setResults) => {
       );
 
       const querySnapshot = await getDocs(q);
-      const userList = querySnapshot.docs
-        .map((doc) => {
+
+      // Procesar cada usuario y verificar si tienen historias
+      const userList = await Promise.all(
+        querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
+          const storiesRef = collection(database, "users", doc.id, "stories");
+          const storiesSnapshot = await getDocs(storiesRef);
+          const now = new Date();
+
+          // Verificar si hay historias disponibles y no expiradas
+          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
+            const storyData = storyDoc.data();
+            return new Date(storyData.expiresAt.toDate()) > now;
+          });
+
           return {
             id: doc.id,
             ...data,
+            hasStories,
             profileImage:
               data.photoUrls && data.photoUrls.length > 0
                 ? data.photoUrls[0]
                 : "https://via.placeholder.com/150",
           };
         })
-        .filter((user) => {
-          // Filter out blocked users and current user
-          if (user.id === auth.currentUser.uid || blockedUsers.includes(user.id)) {
-            return false;
-          }
-          
-          // Check if search term matches any of the fields
-          const searchLower = normalizedSearchTerm;
-          const usernameLower = user.username?.toLowerCase() || '';
-          const firstNameLower = user.firstName?.toLowerCase() || '';
-          const lastNameLower = user.lastName?.toLowerCase() || '';
-          
-          return usernameLower.includes(searchLower) ||
-                 firstNameLower.includes(searchLower) ||
-                 lastNameLower.includes(searchLower);
-        });
+      );
 
-      setResults(userList);
+      // Filtrar usuarios bloqueados y al usuario actual
+      const filteredList = userList.filter(
+        (user) =>
+          user.id !== auth.currentUser.uid && !blockedUsers.includes(user.id)
+      );
+      console.log("Usuarios con historias disponibles:", filteredList);
+
+      setResults(filteredList);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -73,6 +78,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
     setResults([]);
   }
 };
+
 
 export const fetchRecommendations = async (user, setRecommendations) => {
   const auth = getAuth(); // Add this line

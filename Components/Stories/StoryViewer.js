@@ -470,27 +470,36 @@ export function StoryViewer({
     }
   };
 
-  const handleUserPress = async (uid) => {
-    try {
-      const userDoc = await getDoc(doc(database, "users", uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        userData.id = uid;
-        navigation.navigate("UserProfile", { selectedUser: userData });
-      } else {
-        Alert.alert(
-          t("storyViewer.error"),
-          t("storyViewer.userDetailsNotFound")
-        );
+  const handleUserPress = async (selectedUser) => {
+    if (selectedUser.hasStories) {
+      try {
+        const storiesRef = collection(database, "users", selectedUser.id, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+  
+        // Obtener historias válidas (que no hayan expirado)
+        const now = new Date();
+        const userStories = storiesSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(story => new Date(story.expiresAt.toDate()) > now);
+  
+        if (userStories.length > 0) {
+          // Navegar al visor de historias
+          navigation.navigate("StoryViewer", {
+            stories: [{ uid: selectedUser.id, username: selectedUser.username, userStories }],
+            initialIndex: 0,
+          });
+          return;
+        }
+      } catch (error) {
+        console.error("Error loading stories:", error);
+        Alert.alert("Error", "No se pudieron cargar las historias.");
       }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      Alert.alert(
-        t("storyViewer.error"),
-        t("storyViewer.userDetailsFetchError")
-      );
     }
+  
+    // Si no tiene historias, proceder a su perfil
+    navigation.navigate("UserProfile", { selectedUser });
   };
+  
 
   const loadViewers = async () => {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
@@ -548,6 +557,11 @@ export function StoryViewer({
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
+  
+  const handleClose = () => {
+    if (onClose) onClose();
+    navigation.goBack();
+  };
 
   const handleNext = () => {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];

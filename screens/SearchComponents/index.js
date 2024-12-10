@@ -191,7 +191,29 @@ export default function Search() {
           );
           if (savedHistory !== null) {
             const parsedHistory = JSON.parse(savedHistory);
-            const filteredHistory = parsedHistory.filter(item => !blockedUsers.includes(item.id)); // Filter out blocked users
+  
+            // Verificar si los usuarios tienen historias disponibles
+            const updatedHistory = await Promise.all(
+              parsedHistory.map(async (item) => {
+                const storiesRef = collection(database, "users", item.id, "stories");
+                const storiesSnapshot = await getDocs(storiesRef);
+                const now = new Date();
+  
+                // Comprobar si hay historias activas
+                const hasStories = storiesSnapshot.docs.some((storyDoc) => {
+                  const storyData = storyDoc.data();
+                  return new Date(storyData.expiresAt.toDate()) > now;
+                });
+  
+                return { ...item, hasStories };
+              })
+            );
+  
+            // Filtrar usuarios bloqueados
+            const filteredHistory = updatedHistory.filter(
+              (item) => !blockedUsers.includes(item.id)
+            );
+  
             setSearchHistory(filteredHistory);
           }
         } catch (error) {
@@ -199,9 +221,9 @@ export default function Search() {
         }
       }
     };
-
+  
     loadSearchHistory();
-  }, [user, blockedUsers]); // Add blockedUsers as a dependency
+  }, [user, blockedUsers]); // Dependencias de usuario y bloqueados
 
 // En index.js, modifica el handleUserPress
 const handleUserPress = (selectedUser) => {
@@ -245,7 +267,7 @@ const handleUserPress = (selectedUser) => {
           source={{
             uri: item.profileImage || "https://via.placeholder.com/150",
           }}
-          style={styles.userImage}
+          style={[styles.userImage, item.hasStories && styles.unseenStoryCircle,]}
           cachePolicy="memory-disk"
         />
         <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
@@ -260,14 +282,17 @@ const handleUserPress = (selectedUser) => {
     return (
       <TouchableOpacity
         key={`user-${item.id}-${index}`}
-        style={styles.resultItem}
+        style={[
+          styles.resultItem, // Aplica el estilo si tiene historias
+        ]}
         onPress={() => handleUserPress(item)}
       >
         <Image
           key={`user-image-${item.id}`}
           source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
-          style={styles.userImage}
+          style={[styles.userImage, item.hasStories && styles.unseenStoryCircle, ]}
           cachePolicy="memory-disk"
+
         />
         <View style={styles.textContainer}>
           <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
@@ -280,7 +305,7 @@ const handleUserPress = (selectedUser) => {
       </TouchableOpacity>
     );
   };
-
+  
   const sectionsData = [
     {
       title: t('recent'),
