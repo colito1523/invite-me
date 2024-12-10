@@ -58,9 +58,9 @@ export function StoryViewer({
   // Ensure stories and initialIndex are valid
   if (!stories || !Array.isArray(stories) || stories.length === 0) {
     console.error("Invalid stories array:", stories);
+    if (onClose) onClose(); // Asegúrate de cerrar el visor si no hay historias
     return null;
   }
-
   if (typeof initialIndex !== "number" || initialIndex < 0 || initialIndex >= stories.length) {
     console.error("Invalid initialIndex:", initialIndex);
     return null;
@@ -153,6 +153,12 @@ export function StoryViewer({
       );
     }
   };
+
+  useEffect(() => {
+    if (!currentStory) {
+      onClose(); // Cierra el visor si no hay una historia actual válida
+    }
+  }, [currentStory, onClose]);
 
   const handleThreeDotsPress = async (viewer) => {
     try {
@@ -745,30 +751,18 @@ export function StoryViewer({
       const user = auth.currentUser;
       if (!user) {
         console.error("No user logged in");
-        Alert.alert(t("storyViewer.error"), t("storyViewer.userAuthError"));
+        Alert.alert("Error", "No estás autenticado.");
         return;
       }
-
-      if (
-        !stories[currentIndex] ||
-        !stories[currentIndex].userStories[storyIndex]
-      ) {
-        console.error("Story not found at specified indices");
-        Alert.alert(t("storyViewer.error"), t("storyViewer.storyNotFound"));
+  
+      const currentStory = stories[currentIndex]?.userStories[storyIndex];
+      if (!currentStory) {
+        console.error("Story not found");
+        Alert.alert("Error", "Historia no encontrada.");
         return;
       }
-
-      const currentStory = stories[currentIndex].userStories[storyIndex];
-
-      if (currentStory.uid !== user.uid) {
-        console.error("User does not have permission to delete this story");
-        Alert.alert(
-          t("storyViewer.error"),
-          t("storyViewer.deletePermissionError")
-        );
-        return;
-      }
-
+  
+      // Elimina la historia de Firebase
       const storyDocRef = doc(
         database,
         "users",
@@ -777,27 +771,32 @@ export function StoryViewer({
         currentStory.id
       );
       await deleteDoc(storyDocRef);
-
+  
       const storyImageRef = ref(storage, currentStory.storyUrl);
       await deleteObject(storyImageRef);
-
-      handleCloseViewersModal();
-      onStoryDeleted(currentIndex, storyIndex);
-
-      if (stories[currentIndex].userStories.length === 1) {
-        onClose();
-      } else {
-        if (storyIndex < stories[currentIndex].userStories.length - 1) {
-          setStoryIndex(storyIndex + 1);
-        } else if (storyIndex > 0) {
-          setStoryIndex(storyIndex - 1);
+  
+      // Actualiza el estado local
+      if (stories[currentIndex]?.userStories.length === 1) {
+        // Elimina el grupo de historias si era la última
+        stories.splice(currentIndex, 1);
+        if (stories.length === 0) {
+          onClose();
+          return;
         }
+        setCurrentIndex((prev) => Math.max(0, prev - 1));
+        setStoryIndex(0);
+      } else {
+        // Navegar a la siguiente historia o la anterior
+        setStoryIndex((prev) =>
+          prev < stories[currentIndex].userStories.length - 1 ? prev : prev - 1
+        );
       }
     } catch (error) {
       console.error("Error deleting story:", error);
-      Alert.alert(t("storyViewer.error"), t("storyViewer.deleteError"));
+      Alert.alert("Error", "No se pudo eliminar la historia.");
     }
   };
+  
 
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;
