@@ -74,8 +74,11 @@ export default function StorySlider() {
   };
 
   const updateUnseenStories = (updatedUnseenStories) => {
-    setUnseenStories(updatedUnseenStories); // Actualiza el estado inmediatamente
-  };
+    setUnseenStories((prev) => ({
+        ...prev,
+        ...updatedUnseenStories,
+    }));
+};
 
   const handleStoryDeleted = (storyIndex, userStoryIndex) => {
     setStories(prevStories => {
@@ -164,6 +167,8 @@ export default function StorySlider() {
           }
         }
       }
+
+      console.log("Historias cargadas:", JSON.stringify(loadedStories, null, 2));
   
       setStories(loadedStories);
       setUnseenStories(unseenStoriesTemp);
@@ -401,18 +406,21 @@ const handleGallery = async () => {
         transparent={false}
         animationType="slide"
       >
-    <StoryViewer
+   <StoryViewer
   stories={stories}
   initialIndex={selectedStoryIndex}
   onClose={(updatedUnseenStories) => {
-    setStoryViewerVisible(false);
-    updateUnseenStories(updatedUnseenStories); // Sincroniza `unseenStories` en tiempo real
-    loadExistingStories(); // Recarga las historias inmediatamente
+    setTimeout(() => {
+      updateUnseenStories(updatedUnseenStories); // Sincroniza `unseenStories` en tiempo real
+      loadExistingStories(); // Recarga las historias inmediatamente
+    }, 0); // Aplaza las actualizaciones hasta después del renderizado
+    setStoryViewerVisible(false); // Oculta el visor inmediatamente
   }}
   onStoryDeleted={handleStoryDeleted}
   unseenStories={unseenStories} // Pasa `unseenStories` al visor
   navigation={navigation}
 />
+
       </Modal>
       <Modal
   animationType="slide"

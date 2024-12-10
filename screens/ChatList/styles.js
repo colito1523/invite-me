@@ -185,6 +185,11 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  hasStoryIndicator: {
+    borderWidth: 2,
+    borderColor: "black", // Cambia el color según el diseño
+    borderRadius: 25, // Ajusta según el tamaño de la imagen
+  },
 });
 
 export const lightTheme = {

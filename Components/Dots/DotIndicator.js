@@ -11,8 +11,11 @@ import {
   TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { doc, getDoc } from "firebase/firestore";
-import { database, auth } from "../../config/firebase";
+import {collection,
+  getDocs,
+  doc,
+  getDoc} from "firebase/firestore";
+  import { database, auth, } from "../../config/firebase";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -42,6 +45,33 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   
     fetchBlockedUsers();
   }, []);
+
+  const checkStories = async () => {
+    try {
+      const updatedAttendees = await Promise.all(
+        attendeesList.map(async (attendee) => {
+          const storiesRef = collection(database, "users", attendee.uid, "stories");
+          const storiesSnapshot = await getDocs(storiesRef);
+          const now = new Date();
+  
+          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
+            const storyData = storyDoc.data();
+            return new Date(storyData.expiresAt.toDate()) > now; // Comprueba si la historia no ha expirado
+          });
+  
+          return { ...attendee, hasStories };
+        })
+      );
+      setFilteredAttendees(updatedAttendees);
+    } catch (error) {
+      console.error("Error verificando historias:", error);
+    }
+  };
+  
+  useEffect(() => {
+    checkStories();
+  }, [attendeesList]);
+  
 
   useEffect(() => {
     const updateFilteredImages = () => {
@@ -180,25 +210,28 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                 />
               </View>
               <FlatList
-                data={filteredAttendees}
-                keyExtractor={(item) => item.uid || item.username}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleUserPress(item.uid)}>
-                    <View style={currentStyles.attendeeItem}>
-                      <Image
-                        source={{
-                          uri: item.profileImage || "https://via.placeholder.com/150",
-                        }}
-                        style={currentStyles.attendeeImage}
-                        cachePolicy="memory-disk" // Opcional: mejora la carga de imágenes
-                      />
-                      <Text style={currentStyles.attendeeName}>
-                        {item.username}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                )}
-              />
+  data={filteredAttendees}
+  keyExtractor={(item) => item.uid || item.username}
+  renderItem={({ item }) => (
+    <TouchableOpacity onPress={() => handleUserPress(item.uid)}>
+      <View style={currentStyles.attendeeItem}>
+        <Image
+          source={{
+            uri: item.profileImage || "https://via.placeholder.com/150",
+          }}
+          style={[
+            currentStyles.attendeeImage,
+            item.hasStories && currentStyles.unseenStoryCircle, // Estilo si tiene historias
+          ]}
+          cachePolicy="memory-disk"
+        />
+        <Text style={currentStyles.attendeeName}>
+          {item.username}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  )}
+/>
             </LinearGradient>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -276,6 +309,11 @@ const baseStyles = {
   searchInput: {
     flex: 1,
     height: 40,
+  },
+  unseenStoryCircle: {
+    borderWidth: 2,
+    borderColor: "black", // Indica historias disponibles
+    borderRadius: 25,
   },
 };
 

@@ -68,6 +68,36 @@ export default function ChatList() {
     return () => clearInterval(interval);
   }, []);
 
+  const checkStories = async () => {
+    try {
+      const updatedChats = await Promise.all(
+        chats.map(async (chat) => {
+          const userRef = doc(database, "users", chat.user.uid);
+          const storiesRef = collection(userRef, "stories");
+          const storiesSnapshot = await getDocs(storiesRef);
+          const now = new Date();
+  
+          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
+            const storyData = storyDoc.data();
+            return storyData.expiresAt && new Date(storyData.expiresAt.toDate()) > now;
+          });
+  
+          return { ...chat, user: { ...chat.user, hasStories } };
+        })
+      );
+      setChats(updatedChats);
+    } catch (error) {
+      console.error("Error verificando historias en chats:", error);
+    }
+  };
+  
+  useEffect(() => {
+    if (chats.length > 0) {
+      checkStories();
+    }
+  }, [chats]);
+  
+
   useEffect(() => {
     const fetchMutedChats = async () => {
       try {
@@ -497,12 +527,14 @@ export default function ChatList() {
             ]}
           />
         )}
+       
         <Image
           source={{
             uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
           }}
-          style={styles.userImage}
+          style={[styles.userImage,styles.userImageContainer, item.user.hasStories && styles.hasStoryIndicator]}
         />
+       
         <View style={styles.chatInfo}>
           <Text
             style={[

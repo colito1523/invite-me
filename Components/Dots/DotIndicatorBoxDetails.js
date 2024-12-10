@@ -8,7 +8,10 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection,
+  getDocs,
+  doc,
+  getDoc} from 'firebase/firestore';
 import { database, auth } from '../../config/firebase'; // Asegúrate de importar correctamente `auth`
 import { Image } from 'expo-image';
 
@@ -22,6 +25,33 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
 
+
+const checkStories = async () => {
+    try {
+      const updatedAttendees = await Promise.all(
+        attendeesList.map(async (attendee) => {
+          const userDocRef = doc(database, "users", attendee.uid);
+          const storiesRef = collection(userDocRef, "stories");
+          const storiesSnapshot = await getDocs(storiesRef);
+          const now = new Date();
+  
+          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
+            const storyData = storyDoc.data();
+            return storyData.expiresAt && new Date(storyData.expiresAt.toDate()) > now;
+          });
+  
+          return { ...attendee, hasStories };
+        })
+      );
+      setFilteredAttendees(updatedAttendees);
+    } catch (error) {
+      console.error("Error verificando historias:", error);
+    }
+  };
+  
+  useEffect(() => {
+    checkStories();
+  }, [attendeesList]);
   // Cargar usuarios bloqueados
   useEffect(() => {
     const fetchBlockedUsers = async () => {
@@ -107,7 +137,10 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
       onPress={() => handleUserPress(item.uid)}
       style={styles.itemContainer}
     >
-      <View style={styles.imageContainer}>
+     <View style={[
+      styles.imageContainer,
+      item.hasStories && styles.unseenStoryCircle // Aplica estilo si tiene historias
+    ]}>
         <Image
           cachePolicy="memory-disk"
           source={{ uri: item.profileImage }}
@@ -165,6 +198,11 @@ const styles = StyleSheet.create({
   profileImage: {
     width: '100%',
     height: '100%',
+  },
+  unseenStoryCircle: {
+    borderWidth: 2,
+    borderColor: "black", // Cambia el color según tu diseño
+    borderRadius: 35,
   },
 });
 
