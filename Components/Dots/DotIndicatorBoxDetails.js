@@ -26,28 +26,50 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const navigation = useNavigation();
 
 
-const checkStories = async () => {
+ 
+  const checkStories = async () => {
     try {
-      const updatedAttendees = await Promise.all(
+      const loadedStories = await Promise.all(
         attendeesList.map(async (attendee) => {
           const userDocRef = doc(database, "users", attendee.uid);
           const storiesRef = collection(userDocRef, "stories");
           const storiesSnapshot = await getDocs(storiesRef);
           const now = new Date();
   
-          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
-            const storyData = storyDoc.data();
-            return storyData.expiresAt && new Date(storyData.expiresAt.toDate()) > now;
+          const userStories = storiesSnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              ...data,
+              createdAt: {
+                seconds: data.createdAt.seconds,
+                nanoseconds: data.createdAt.nanoseconds,
+              },
+              expiresAt: {
+                seconds: data.expiresAt.seconds,
+                nanoseconds: data.expiresAt.nanoseconds,
+              },
+            };
           });
   
-          return { ...attendee, hasStories };
+          return {
+            uid: attendee.uid,
+            username: attendee.username || `${attendee.firstName || ''} ${attendee.lastName || ''}`.trim(),
+            profileImage: attendee.profileImage || "https://via.placeholder.com/150",
+            userStories,
+          };
         })
       );
-      setFilteredAttendees(updatedAttendees);
+      console.log("Historias cargadas en DotIndicator:", JSON.stringify(loadedStories, null, 2));
+      loadedStories.sort((a, b) => a.username.localeCompare(b.username));
+      setFilteredAttendees(loadedStories);
     } catch (error) {
       console.error("Error verificando historias:", error);
     }
   };
+  
+  
+  
+  
   
   useEffect(() => {
     checkStories();
@@ -97,39 +119,69 @@ const checkStories = async () => {
     return () => clearInterval(interval);
   }, []);
 
- const handleUserPress = async (uid) => {
-  if (blockedUsers.includes(uid)) {
-    Alert.alert("Error", "No puedes interactuar con este usuario.");
-    return;
-  }
-
-  try {
-    if (uid === auth.currentUser.uid) {
-      // Navega al perfil de la cuenta propia
-      navigation.navigate("Profile");
-    } else {
-      // Navega al perfil de otros usuarios
-      const userDoc = await getDoc(doc(database, "users", uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        userData.id = uid;
-        userData.profileImage =
-          userData.photoUrls && userData.photoUrls.length > 0
-            ? userData.photoUrls[0]
-            : "https://via.placeholder.com/150";
-        navigation.navigate("UserProfile", { selectedUser: userData });
-      } else {
-        Alert.alert("Error", "No se encontraron detalles para este usuario.");
-      }
+  const handleUserPress = async (uid) => {
+    if (blockedUsers.includes(uid)) {
+      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      return;
     }
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    Alert.alert(
-      "Error",
-      "Hubo un problema al obtener los detalles del usuario."
-    );
-  }
-};
+  
+    try {
+      const userDoc = await getDoc(doc(database, "users", uid));
+      if (!userDoc.exists()) {
+        Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        return;
+      }
+  
+      const userData = userDoc.data();
+      userData.id = uid;
+      userData.profileImage =
+        userData.photoUrls && userData.photoUrls.length > 0
+          ? userData.photoUrls[0]
+          : "https://via.placeholder.com/150";
+  
+      // Verificar historias activas
+      const storiesRef = collection(database, "users", uid, "stories");
+      const storiesSnapshot = await getDocs(storiesRef);
+      const now = new Date();
+      const activeStories = storiesSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: new Date(doc.data().createdAt.seconds * 1000), // Convertir timestamps
+          expiresAt: new Date(doc.data().expiresAt.seconds * 1000),
+        }))
+        .filter((story) => story.expiresAt > now);
+  
+      if (activeStories.length > 0) {
+        // Navegar al visor de historias con datos válidos
+        console.log("Navegando al visor con historias activas:", activeStories);
+        navigation.navigate("StoryViewer", {
+          stories: [
+            {
+              uid: uid,
+              username: userData.username || "Unknown",
+              profileImage: userData.profileImage,
+              userStories: activeStories,
+            },
+          ],
+          initialIndex: 0, // Índice inicial
+        });
+      } else {
+        // Navegar al perfil si no hay historias activas
+        navigation.navigate("UserProfile", { selectedUser: userData });
+      }
+    } catch (error) {
+      console.error("Error al manejar clic en usuario:", error);
+      Alert.alert(
+        "Error",
+        "Hubo un problema al obtener los detalles del usuario."
+      );
+    }
+  };
+  
+  
+  
+  
 
   // Renderizar asistentes
   const renderItem = ({ item }) => (
