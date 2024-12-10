@@ -199,22 +199,22 @@ const handleOpenViewer = async (index) => {
         }
 
         const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images, // Corrected
-            
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: false,
             quality: 1,
         });
 
         if (!result.canceled && result.assets?.length > 0) {
-            await uploadStory(result.assets[0].uri);
+            setSelectedImage(result.assets[0].uri); // Muestra la imagen en el modal
+        } else {
+            Alert.alert("Operación cancelada", "No se tomó ninguna foto.");
         }
     } catch (error) {
         console.error("Error al abrir la cámara:", error);
         Alert.alert("Error", "Hubo un problema al intentar abrir la cámara.");
-    } finally {
-        setIsModalVisible(false);
     }
 };
+
 
 
 const handleGallery = async () => {
