@@ -78,6 +78,12 @@ export default memo(function BoxDetails({ route, navigation }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (box) {
+      checkEventStatus({ box, selectedDate, setIsEventSaved });
+    }
+  }, [box, selectedDate]);
+
   const closeModal = () => {
     setModalVisible(false);
   };
