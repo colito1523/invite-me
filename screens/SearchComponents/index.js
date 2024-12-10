@@ -280,31 +280,43 @@ const handleUserPress = (selectedUser) => {
 
   const renderUserItem = ({ item, index }) => {
     return (
-      <TouchableOpacity
-        key={`user-${item.id}-${index}`}
-        style={[
-          styles.resultItem, // Aplica el estilo si tiene historias
-        ]}
-        onPress={() => handleUserPress(item)}
-      >
-        <Image
-          key={`user-image-${item.id}`}
-          source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
-          style={[styles.userImage, item.hasStories && styles.unseenStoryCircle, ]}
-          cachePolicy="memory-disk"
-
-        />
-        <View style={styles.textContainer}>
+      <View key={`user-${item.id}-${index}`} style={styles.resultItem}>
+        {/* Imagen con acción específica */}
+        <TouchableOpacity
+          onPress={() => {
+            if (item.hasStories) {
+              navigation.navigate("StoryViewer", {
+                stories: [{ uid: item.id, username: item.username, userStories: item.userStories }],
+                initialIndex: 0,
+              });
+            } else {
+              handleUserPress(item); // Guarda en el historial y navega al perfil
+            }
+          }}
+        >
+          <Image
+            source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
+            style={[styles.userImage, item.hasStories && styles.unseenStoryCircle]}
+            cachePolicy="memory-disk"
+          />
+        </TouchableOpacity>
+  
+        {/* Texto con acción al perfil */}
+        <TouchableOpacity
+          onPress={() => handleUserPress(item)} // Guarda en el historial y navega al perfil
+          style={styles.textContainer}
+        >
           <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
           {item.firstName && item.lastName && (
-            <Text
-              style={[styles.fullName, { color: theme.textSecondary }]}
-            >{`${item.firstName} ${item.lastName}`}</Text>
+            <Text style={[styles.fullName, { color: theme.textSecondary }]}>
+              {`${item.firstName} ${item.lastName}`}
+            </Text>
           )}
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
     );
   };
+  
   
   const sectionsData = [
     {
