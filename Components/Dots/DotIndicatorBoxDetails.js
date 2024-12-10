@@ -29,43 +29,53 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
  
   const checkStories = async () => {
     try {
-      const loadedStories = await Promise.all(
-        attendeesList.map(async (attendee) => {
-          const userDocRef = doc(database, "users", attendee.uid);
-          const storiesRef = collection(userDocRef, "stories");
-          const storiesSnapshot = await getDocs(storiesRef);
-          const now = new Date();
+      const loadedStories = [];
+      const now = new Date();
   
-          const userStories = storiesSnapshot.docs.map((doc) => {
+      for (const attendee of attendeesList) {
+        const userDocRef = doc(database, "users", attendee.uid);
+        const storiesRef = collection(userDocRef, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+  
+        const userStories = storiesSnapshot.docs
+          .map((doc) => {
             const data = doc.data();
             return {
-              ...data,
-              createdAt: {
-                seconds: data.createdAt.seconds,
-                nanoseconds: data.createdAt.nanoseconds,
-              },
-              expiresAt: {
-                seconds: data.expiresAt.seconds,
-                nanoseconds: data.expiresAt.nanoseconds,
-              },
+              id: doc.id,
+              storyUrl: data.storyUrl,
+              createdAt: data.createdAt,
+              expiresAt: data.expiresAt,
+              profileImage: data.profileImage || attendee.profileImage,
+              uid: attendee.uid,
+              username: data.username || attendee.username || "Unknown",
+              viewers: data.viewers || [],
+              likes: data.likes || [],
             };
-          });
+          })
+          .filter((story) => new Date(story.expiresAt.seconds * 1000) > now);
   
-          return {
+        if (userStories.length > 0) {
+          loadedStories.push({
             uid: attendee.uid,
-            username: attendee.username || `${attendee.firstName || ''} ${attendee.lastName || ''}`.trim(),
+            username: attendee.username || "Unknown",
+            lastName: attendee.lastName || "",
             profileImage: attendee.profileImage || "https://via.placeholder.com/150",
             userStories,
-          };
-        })
-      );
-      console.log("Historias cargadas en DotIndicator:", JSON.stringify(loadedStories, null, 2));
+          });
+        }
+      }
+  
       loadedStories.sort((a, b) => a.username.localeCompare(b.username));
+  
+      console.log("Historias cargadas en DotIndicator:", JSON.stringify(loadedStories, null, 2));
       setFilteredAttendees(loadedStories);
     } catch (error) {
       console.error("Error verificando historias:", error);
     }
   };
+  
+  
+  
   
   
   
