@@ -46,11 +46,39 @@ export function StoryViewer({
   onStoryDeleted,
   unseenStories,
   navigation,
+  route 
 }) {
   const { t } = useTranslation();
+
+  // Add logging to debug the issue
+  useEffect(() => {
+    console.log("StoryViewer props:", { stories, initialIndex, unseenStories });
+  }, [stories, initialIndex, unseenStories]);
+
+  // Ensure stories and initialIndex are valid
+  if (!stories || !Array.isArray(stories) || stories.length === 0) {
+    console.error("Invalid stories array:", stories);
+    return null;
+  }
+
+  if (typeof initialIndex !== "number" || initialIndex < 0 || initialIndex >= stories.length) {
+    console.error("Invalid initialIndex:", initialIndex);
+    return null;
+  }
+
+  // Deserialize the createdAt and expiresAt fields
+  const deserializedStories = stories.map(storyGroup => ({
+    ...storyGroup,
+    userStories: storyGroup.userStories.map(story => ({
+      ...story,
+      createdAt: new Date(story.createdAt),
+      expiresAt: new Date(story.expiresAt),
+    })),
+  }));
+
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [storyIndex, setStoryIndex] = useState(() => {
-    const userStories = stories[initialIndex]?.userStories || [];
+    const userStories = deserializedStories[initialIndex]?.userStories || [];
     const unseenIndex = userStories.findIndex(
       (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
     );

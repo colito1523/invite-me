@@ -121,7 +121,7 @@ export default memo(function BoxDetails({ route, navigation }) {
         isFromNotification,
       });
     } else {
-      console.log("Datos iniciales del box:", box);
+    
     }
   }, [box, isFromNotification]);
 
