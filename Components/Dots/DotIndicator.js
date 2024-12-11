@@ -265,8 +265,23 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   data={filteredAttendees}
   keyExtractor={(item) => item.uid || item.username}
   renderItem={({ item }) => (
-    <TouchableOpacity onPress={() => handleUserPress(item.uid)}>
-      <View style={currentStyles.attendeeItem}>
+    <TouchableOpacity
+      onPress={() => {
+        if (auth.currentUser?.uid === item.uid) {
+          // Navegar a tu perfil
+          navigation.navigate("Profile", { selectedUser: auth.currentUser });
+        } else {
+          // Navegar al perfil de otro usuario
+          navigation.navigate("UserProfile", { selectedUser: item });
+        }
+      }}
+      style={currentStyles.attendeeItem}
+    >
+      <TouchableOpacity
+        onPress={() => handleUserPress(item.uid)}
+        onStartShouldSetResponder={() => true} // Evita bloquear el evento exterior
+        style={currentStyles.attendeeImageContainer}
+      >
         <Image
           source={{
             uri: item.profileImage || "https://via.placeholder.com/150",
@@ -277,13 +292,15 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
           ]}
           cachePolicy="memory-disk"
         />
-        <Text style={currentStyles.attendeeName}>
-          {item.username}
-        </Text>
-      </View>
+      </TouchableOpacity>
+      <Text style={currentStyles.attendeeName}>{item.username}</Text>
     </TouchableOpacity>
   )}
 />
+
+
+
+
 
 {isModalVisible && (
     <Modal
