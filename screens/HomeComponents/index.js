@@ -382,10 +382,10 @@ const Home = React.memo(() => {
   <View
     style={[
       styles.loadingOverlay,
-      { backgroundColor: isNightMode ? "rgba(0, 0, 0, 0.8)" : "rgba(255, 255, 255, 0.8)" },
+      { backgroundColor: isNightMode ? "rgba(0, 0, 0, 0.8)" : "rgba(255, 255, 255, 0.5)" },
     ]}
   >
-    <ActivityIndicator size="large" color={isNightMode ? "white" : Colors.primary} />
+    <ActivityIndicator size="large" color={isNightMode ? "white" : "black"} />
   </View>
 )}
 

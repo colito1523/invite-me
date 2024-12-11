@@ -953,7 +953,27 @@ export function StoryViewer({
                 <ActivityIndicator size={50} color="#FFFFFF" />
               )}
               <View style={styles.userInfo}>
-                <View style={styles.userDetails}>
+                <TouchableOpacity 
+                  style={styles.userDetails}
+                  onPress={() => {
+                    const currentStory = stories[currentIndex];
+                    if (currentStory) {
+                      if (currentStory.uid === auth.currentUser.uid) {
+                        navigation.navigate("Profile");
+                      } else {
+                        navigation.navigate("UserProfile", { 
+                          selectedUser: {
+                            id: currentStory.uid,
+                            username: currentStory.username,
+                            firstName: currentStory.username,
+                            lastName: currentStory.lastName || "",
+                            profileImage: currentStory.profileImage
+                          }
+                        });
+                      }
+                    }
+                  }}
+                >
                   <Image
                     source={{ uri: stories[currentIndex]?.profileImage }}
                     style={styles.avatar}
@@ -964,7 +984,7 @@ export function StoryViewer({
                       stories[currentIndex]?.lastName || ""
                     }`}
                   </Text>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.rightInfo}>
                   <Text style={styles.timeAgo}>
                     {t("storyViewer.hoursAgo", { hours: hoursAgo })}

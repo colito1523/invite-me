@@ -16,6 +16,7 @@ export const styles = StyleSheet.create({
       top: Platform.OS === "ios" ? 60 : 40,
       left: 20,
       zIndex: 10,
+      
     },
     backgroundImage: {
       ...StyleSheet.absoluteFillObject,
