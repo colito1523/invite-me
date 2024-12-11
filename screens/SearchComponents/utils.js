@@ -41,19 +41,25 @@ export const fetchUsers = async (searchTerm, setResults) => {
       const userList = await Promise.all(
         querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
+      
+          // Verificar si el usuario actual es amigo
+          const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+          const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", doc.id)));
+          const isFriend = !friendSnapshot.empty;
+      
           const storiesRef = collection(database, "users", doc.id, "stories");
           const storiesSnapshot = await getDocs(storiesRef);
           const now = new Date();
-
-          // Verificar si hay historias disponibles y no expiradas
+      
           const hasStories = storiesSnapshot.docs.some((storyDoc) => {
             const storyData = storyDoc.data();
             return new Date(storyData.expiresAt.toDate()) > now;
           });
-
+      
           return {
             id: doc.id,
             ...data,
+            isFriend, // Agregamos esta propiedad
             hasStories,
             profileImage:
               data.photoUrls && data.photoUrls.length > 0
@@ -62,6 +68,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
           };
         })
       );
+      
 
       // Filtrar usuarios bloqueados y al usuario actual
       const filteredList = userList.filter(

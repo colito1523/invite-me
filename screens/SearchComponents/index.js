@@ -74,6 +74,7 @@ export default function Search() {
   );
 
   const theme = isNightMode ? darkTheme : lightTheme;
+  
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -389,13 +390,15 @@ export default function Search() {
           }}
         >
           <Image
-            source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
-            style={[
-              styles.userImage, 
-              item.hasStories && !item.isPrivate && styles.unseenStoryCircle,
-            ]}
-            cachePolicy="memory-disk"
-          />
+  source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
+  style={[
+    styles.userImage,
+    item.hasStories &&
+      (!item.isPrivate || (item.isPrivate && item.isFriend)) &&
+      styles.unseenStoryCircle,
+  ]}
+  cachePolicy="memory-disk"
+/>
         </TouchableOpacity>
 
         <TouchableOpacity
