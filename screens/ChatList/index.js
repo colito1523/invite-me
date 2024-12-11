@@ -322,8 +322,8 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
     if (chat.user.hasStories) {
       const stories = chat.user.userStories.map((story) => ({
         ...story,
-        createdAt: story.createdAt || new Date(0), // Fecha predeterminada
-        expiresAt: story.expiresAt || new Date(), // Evitar valores no definidos
+        createdAt: story.createdAt?.toDate ? story.createdAt : Timestamp.fromDate(new Date()),
+        expiresAt: story.expiresAt?.toDate ? story.expiresAt : Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
       }));
       setSelectedStories([
         {
