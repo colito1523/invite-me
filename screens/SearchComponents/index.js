@@ -405,6 +405,11 @@ export default function Search() {
     },
   ];
 
+  const loadExistingStories = async () => {
+    //This function is added to reload stories after closing the StoryViewer
+    await loadSearchHistory();
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient
@@ -491,7 +496,10 @@ export default function Search() {
             <StoryViewer
               stories={selectedStories}
               initialIndex={0}
-              onClose={() => setIsModalVisible(false)}
+              onClose={async () => {
+                setIsModalVisible(false);
+                await loadExistingStories();
+              }}
               unseenStories={{}}
             />
           </Modal>

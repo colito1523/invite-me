@@ -823,7 +823,10 @@ const renderChatItem = ({ item }) => {
     <StoryViewer
       stories={selectedStories}
       initialIndex={0}
-      onClose={() => setIsModalVisible(false)}
+      onClose={async () => {
+        setIsModalVisible(false);
+        await checkStories();
+      }}
       unseenStories={{}}
     />
   </Modal>

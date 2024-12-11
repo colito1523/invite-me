@@ -201,7 +201,9 @@ const checkStories = async () => {
     >
      <View style={[
       styles.imageContainer,
-      item.hasStories && !viewedStories[item.uid]?.length && styles.unseenStoryCircle,// Aplica estilo si tiene historias
+      item.hasStories && !item.userStories.every(story => 
+        story.viewers?.some(viewer => viewer.uid === auth.currentUser.uid)
+      ) && styles.unseenStoryCircle,
     ]}>
         <Image
           cachePolicy="memory-disk"
@@ -243,9 +245,10 @@ const checkStories = async () => {
     <StoryViewer
         stories={selectedStories}
         initialIndex={0}
-        onClose={(updatedUnseenStories) => {
+        onClose={async (updatedUnseenStories) => {
           handleCloseStoryViewer(updatedUnseenStories);
-          setIsModalVisible(false); // Cierra el modal
+          setIsModalVisible(false);
+          await checkStories(); // Recargar historias inmediatamente
         }}
         unseenStories={{}}
     />
