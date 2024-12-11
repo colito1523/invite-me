@@ -335,7 +335,7 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
       ]);
       setIsModalVisible(true);
     } else {
-      Alert.alert("Sin historias", "Este usuario no tiene historias activas.");
+      handleChatPress(chat);
     }
   };
   
@@ -536,6 +536,14 @@ const renderChatItem = ({ item }) => {
 
   return (
     <View style={styles.chatItem}>
+      {isSelectionMode && (
+        <View
+          style={[
+            styles.selectionIndicator,
+            selectedChats.includes(item.id) && styles.selectionIndicatorSelected,
+          ]}
+        />
+      )}
       {/* Imagen de usuario: Abre el modal de historias si se hace clic aquí */}
       <TouchableOpacity onPress={() => handleImagePress(item)}>
         <Image
