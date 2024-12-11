@@ -263,7 +263,17 @@ export default function Search() {
       >
         <TouchableOpacity
           onPress={async () => {
-            if (item.hasStories) {
+            if (item.isPrivate) {
+              const friendsRef = collection(database, "users", user.uid, "friends");
+              const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
+              if (friendsSnapshot.empty) {
+                navigation.navigate("UserProfile", { selectedUser: item });
+                return;
+              }
+            }
+            if (!item.hasStories) {
+              navigation.navigate("UserProfile", { selectedUser: item });
+            } else {
               try {
                 const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
@@ -300,8 +310,6 @@ export default function Search() {
                 Alert.alert("Error", "No se pudieron cargar las historias");
                 navigation.navigate("UserProfile", { selectedUser: item });
               }
-            } else {
-              navigation.navigate("UserProfile", { selectedUser: item });
             }
           }}
         >
@@ -310,7 +318,10 @@ export default function Search() {
             source={{
               uri: item.profileImage || "https://via.placeholder.com/150",
             }}
-            style={[styles.userImage, item.hasStories && styles.unseenStoryCircle,]}
+            style={[
+              styles.userImage, 
+              item.hasStories && !item.isPrivate && styles.unseenStoryCircle,
+            ]}
             cachePolicy="memory-disk"
           />
         </TouchableOpacity>
@@ -327,7 +338,17 @@ export default function Search() {
       <View key={`user-${item.id}-${index}`} style={styles.resultItem}>
         <TouchableOpacity
           onPress={async () => {
-            if (item.hasStories) {
+            if (item.isPrivate) {
+              const friendsRef = collection(database, "users", user.uid, "friends");
+              const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
+              if (friendsSnapshot.empty) {
+                handleUserPress(item);
+                return;
+              }
+            }
+            if (!item.hasStories) {
+              handleUserPress(item);
+            } else {
               try {
                 const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
@@ -364,14 +385,15 @@ export default function Search() {
                 Alert.alert("Error", "No se pudieron cargar las historias");
                 handleUserPress(item);
               }
-            } else {
-              handleUserPress(item);
             }
           }}
         >
           <Image
             source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
-            style={[styles.userImage, item.hasStories && styles.unseenStoryCircle]}
+            style={[
+              styles.userImage, 
+              item.hasStories && !item.isPrivate && styles.unseenStoryCircle,
+            ]}
             cachePolicy="memory-disk"
           />
         </TouchableOpacity>
