@@ -195,26 +195,26 @@ export default function Search() {
           );
           if (savedHistory !== null) {
             const parsedHistory = JSON.parse(savedHistory);
-  
+
             const updatedHistory = await Promise.all(
               parsedHistory.map(async (item) => {
                 const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
-  
+
                 const hasStories = storiesSnapshot.docs.some((storyDoc) => {
                   const storyData = storyDoc.data();
                   return new Date(storyData.expiresAt.toDate()) > now;
                 });
-  
+
                 return { ...item, hasStories };
               })
             );
-  
+
             const filteredHistory = updatedHistory.filter(
               (item) => !blockedUsers.includes(item.id)
             );
-  
+
             setSearchHistory(filteredHistory);
           }
         } catch (error) {
@@ -222,7 +222,7 @@ export default function Search() {
         }
       }
     };
-  
+
     loadSearchHistory();
   }, [user, blockedUsers]); 
 
@@ -258,17 +258,62 @@ export default function Search() {
       style={styles.historyItem}
     >
       <TouchableOpacity
-        onPress={() => handleUserPress(item)}
+        onPress={() => navigation.navigate("UserProfile", { selectedUser: item })}
         style={styles.historyTextContainer}
       >
-        <Image
-          key={`history-image-${item.id}`}
-          source={{
-            uri: item.profileImage || "https://via.placeholder.com/150",
+        <TouchableOpacity
+          onPress={async () => {
+            if (item.hasStories) {
+              try {
+                const storiesRef = collection(database, "users", item.id, "stories");
+                const storiesSnapshot = await getDocs(storiesRef);
+                const now = new Date();
+
+                const userStories = storiesSnapshot.docs
+                  .map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt,
+                    expiresAt: doc.data().expiresAt,
+                    storyUrl: doc.data().storyUrl,
+                    profileImage: doc.data().profileImage || item.profileImage,
+                    uid: item.id,
+                    username: doc.data().username || item.username || "Unknown",
+                    viewers: doc.data().viewers || [],
+                    likes: doc.data().likes || []
+                  }))
+                  .filter((story) => new Date(story.expiresAt.toDate()) > now);
+
+                if (userStories.length > 0) {
+                  setSelectedStories([{
+                    uid: item.id,
+                    username: item.username,
+                    profileImage: item.profileImage,
+                    userStories: userStories
+                  }]);
+                  setIsModalVisible(true);
+                } else {
+                  navigation.navigate("UserProfile", { selectedUser: item });
+                }
+              } catch (error) {
+                console.error("Error loading stories:", error);
+                Alert.alert("Error", "No se pudieron cargar las historias");
+                navigation.navigate("UserProfile", { selectedUser: item });
+              }
+            } else {
+              navigation.navigate("UserProfile", { selectedUser: item });
+            }
           }}
-          style={[styles.userImage, item.hasStories && styles.unseenStoryCircle,]}
-          cachePolicy="memory-disk"
-        />
+        >
+          <Image
+            key={`history-image-${item.id}`}
+            source={{
+              uri: item.profileImage || "https://via.placeholder.com/150",
+            }}
+            style={[styles.userImage, item.hasStories && styles.unseenStoryCircle,]}
+            cachePolicy="memory-disk"
+          />
+        </TouchableOpacity>
         <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => removeFromHistory(item.id)}>
@@ -287,7 +332,7 @@ export default function Search() {
                 const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
-                
+
                 const userStories = storiesSnapshot.docs
                   .map((doc) => ({
                     id: doc.id,
@@ -330,7 +375,7 @@ export default function Search() {
             cachePolicy="memory-disk"
           />
         </TouchableOpacity>
-  
+
         <TouchableOpacity
           onPress={() => handleUserPress(item)}
           style={styles.textContainer}
@@ -345,8 +390,8 @@ export default function Search() {
       </View>
     );
   };
-  
-  
+
+
   const sectionsData = [
     {
       title: t('recent'),
