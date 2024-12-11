@@ -196,26 +196,35 @@ export default function Search() {
           );
           if (savedHistory !== null) {
             const parsedHistory = JSON.parse(savedHistory);
-
+  
             const updatedHistory = await Promise.all(
               parsedHistory.map(async (item) => {
+                // Verificar si el usuario actual es amigo
+                const friendsRef = collection(database, "users", user.uid, "friends");
+                const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
+                const isFriend = !friendsSnapshot.empty;
+  
                 const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
-
+  
+                // Las historias solo estarán disponibles si son amigos o el perfil no es privado
                 const hasStories = storiesSnapshot.docs.some((storyDoc) => {
                   const storyData = storyDoc.data();
-                  return new Date(storyData.expiresAt.toDate()) > now;
+                  return (
+                    new Date(storyData.expiresAt.toDate()) > now &&
+                    (!item.isPrivate || (item.isPrivate && isFriend))
+                  );
                 });
-
-                return { ...item, hasStories };
+  
+                return { ...item, hasStories, isFriend };
               })
             );
-
+  
             const filteredHistory = updatedHistory.filter(
               (item) => !blockedUsers.includes(item.id)
             );
-
+  
             setSearchHistory(filteredHistory);
           }
         } catch (error) {
@@ -223,9 +232,11 @@ export default function Search() {
         }
       }
     };
-
+  
     loadSearchHistory();
-  }, [user, blockedUsers]); 
+  }, [user, blockedUsers]);
+  
+  
 
   const handleUserPress = (selectedUser) => {
     if (blockedUsers.includes(selectedUser.id)) {
@@ -262,77 +273,80 @@ export default function Search() {
         onPress={() => navigation.navigate("UserProfile", { selectedUser: item })}
         style={styles.historyTextContainer}
       >
-        <TouchableOpacity
-          onPress={async () => {
-            if (item.isPrivate) {
-              const friendsRef = collection(database, "users", user.uid, "friends");
-              const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
-              if (friendsSnapshot.empty) {
-                navigation.navigate("UserProfile", { selectedUser: item });
-                return;
-              }
-            }
-            if (!item.hasStories) {
-              navigation.navigate("UserProfile", { selectedUser: item });
-            } else {
-              try {
-                const storiesRef = collection(database, "users", item.id, "stories");
-                const storiesSnapshot = await getDocs(storiesRef);
-                const now = new Date();
+      <TouchableOpacity
+  onPress={async () => {
+    if (item.isPrivate) {
+      const friendsRef = collection(database, "users", user.uid, "friends");
+      const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
+      if (friendsSnapshot.empty) {
+        Alert.alert("Acceso denegado", "No puedes ver las historias de este usuario.");
+        return;
+      }
+    }
+    if (!item.hasStories) {
+      navigation.navigate("UserProfile", { selectedUser: item });
+    } else {
+      try {
+        const storiesRef = collection(database, "users", item.id, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+        const now = new Date();
 
-                const userStories = storiesSnapshot.docs
-                  .map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    createdAt: doc.data().createdAt,
-                    expiresAt: doc.data().expiresAt,
-                    storyUrl: doc.data().storyUrl,
-                    profileImage: doc.data().profileImage || item.profileImage,
-                    uid: item.id,
-                    username: doc.data().username || item.username || "Unknown",
-                    viewers: doc.data().viewers || [],
-                    likes: doc.data().likes || []
-                  }))
-                  .filter((story) => new Date(story.expiresAt.toDate()) > now);
+        const userStories = storiesSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt,
+            expiresAt: doc.data().expiresAt,
+            storyUrl: doc.data().storyUrl,
+            profileImage: doc.data().profileImage || item.profileImage,
+            uid: item.id,
+            username: doc.data().username || item.username || "Unknown",
+            viewers: doc.data().viewers || [],
+            likes: doc.data().likes || []
+          }))
+          .filter((story) => new Date(story.expiresAt.toDate()) > now);
 
-                if (userStories.length > 0) {
-                  setSelectedStories([{
-                    uid: item.id,
-                    username: item.username,
-                    profileImage: item.profileImage,
-                    userStories: userStories
-                  }]);
-                  setIsModalVisible(true);
-                } else {
-                  navigation.navigate("UserProfile", { selectedUser: item });
-                }
-              } catch (error) {
-                console.error("Error loading stories:", error);
-                Alert.alert("Error", "No se pudieron cargar las historias");
-                navigation.navigate("UserProfile", { selectedUser: item });
-              }
-            }
-          }}
-        >
-          <Image
-            key={`history-image-${item.id}`}
-            source={{
-              uri: item.profileImage || "https://via.placeholder.com/150",
-            }}
-            style={[
-              styles.userImage, 
-              item.hasStories && !item.isPrivate && styles.unseenStoryCircle,
-            ]}
-            cachePolicy="memory-disk"
-          />
+        if (userStories.length > 0) {
+          setSelectedStories([{
+            uid: item.id,
+            username: item.username,
+            profileImage: item.profileImage,
+            userStories: userStories
+          }]);
+          setIsModalVisible(true);
+        } else {
+          navigation.navigate("UserProfile", { selectedUser: item });
+        }
+      } catch (error) {
+        console.error("Error loading stories:", error);
+        Alert.alert("Error", "No se pudieron cargar las historias");
+      }
+    }
+  }}
+>
+
+        <Image
+  key={`history-image-${item.id}`}
+  source={{
+    uri: item.profileImage || "https://via.placeholder.com/150",
+  }}
+  style={[
+    styles.userImage,
+    item.hasStories &&
+    (!item.isPrivate || (item.isPrivate && item.isFriend)) &&
+    styles.unseenStoryCircle,
+  ]}
+  cachePolicy="memory-disk"
+/>
         </TouchableOpacity>
         <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => removeFromHistory(item.id)}>
-        <Ionicons name="close" size={20}   color={theme.text} />
+        <Ionicons name="close" size={20} color={theme.text} />
       </TouchableOpacity>
     </View>
   );
+  
 
   const renderUserItem = ({ item, index }) => {
     return (
