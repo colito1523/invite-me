@@ -19,6 +19,7 @@ import {collection,
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import StoryViewer from '../Stories/StoryViewer';
 
 const { width } = Dimensions.get("window");
 
@@ -30,6 +31,8 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   const [isNightMode, setIsNightMode] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [filteredImages, setFilteredImages] = useState(profileImages);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedStories, setSelectedStories] = useState([]);
 
   useEffect(() => {
     const fetchBlockedUsers = async () => {
@@ -48,29 +51,43 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
   const checkStories = async () => {
     try {
-      const updatedAttendees = await Promise.all(
-        attendeesList.map(async (attendee) => {
-          const storiesRef = collection(database, "users", attendee.uid, "stories");
-          const storiesSnapshot = await getDocs(storiesRef);
-          const now = new Date();
+        const attendeesWithStories = attendeesList.map((attendee) => ({
+            ...attendee,
+            hasStories: false,
+            userStories: [],
+        }));
   
-          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
-            const storyData = storyDoc.data();
-            return new Date(storyData.expiresAt.toDate()) > now; // Comprueba si la historia no ha expirado
-          });
+        for (const attendee of attendeesWithStories) {
+            const userDocRef = doc(database, "users", attendee.uid);
+            const storiesRef = collection(userDocRef, "stories");
+            const storiesSnapshot = await getDocs(storiesRef);
   
-          return { ...attendee, hasStories };
-        })
-      );
-      setFilteredAttendees(updatedAttendees);
+            const now = new Date();
+            const userStories = storiesSnapshot.docs
+                .map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt?.toDate(),
+                    expiresAt: doc.data().expiresAt?.toDate(),
+                }))
+                .filter((story) => story.expiresAt > now);
+  
+            if (userStories.length > 0) {
+                attendee.hasStories = true;
+                attendee.userStories = userStories;
+            }
+        }
+  
+        setFilteredAttendees(attendeesWithStories);
     } catch (error) {
-      console.error("Error verificando historias:", error);
+        console.error("Error verificando historias:", error);
     }
   };
-  
+
   useEffect(() => {
     checkStories();
   }, [attendeesList]);
+
   
 
   useEffect(() => {
@@ -119,38 +136,73 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
   const handleUserPress = async (uid) => {
     if (blockedUsers.includes(uid)) {
-      Alert.alert("Error", "No puedes interactuar con este usuario.");
-      return;
+        Alert.alert("Error", "No puedes interactuar con este usuario.");
+        return;
     }
-  
+
+    // Si el usuario actual hace clic en su propio perfil
+    if (auth.currentUser?.uid === uid) {
+        navigation.navigate("Profile", { selectedUser: auth.currentUser });
+        return;
+    }
+
     try {
-      if (uid === auth.currentUser.uid) {
-        // Navega al perfil de la cuenta propia
-        navigation.navigate("Profile");
-      } else {
-        // Navega al perfil de otros usuarios
         const userDoc = await getDoc(doc(database, "users", uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          userData.id = uid;
-          userData.profileImage =
-            userData.photoUrls && userData.photoUrls.length > 0
-              ? userData.photoUrls[0]
-              : "https://via.placeholder.com/150";
-          navigation.navigate("UserProfile", { selectedUser: userData });
-        } else {
-          Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        if (!userDoc.exists()) {
+            Alert.alert("Error", "No se encontraron detalles para este usuario.");
+            return;
         }
-      }
+
+        const userData = userDoc.data();
+        userData.id = uid;
+        userData.profileImage =
+            userData.photoUrls && userData.photoUrls.length > 0
+                ? userData.photoUrls[0]
+                : "https://via.placeholder.com/150";
+
+        // Verificar historias activas
+        const storiesRef = collection(database, "users", uid, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+        const now = new Date();
+        const activeStories = storiesSnapshot.docs
+            .map((doc) => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt,
+                    expiresAt: data.expiresAt,
+                    storyUrl: data.storyUrl,
+                    profileImage: data.profileImage || userData.profileImage,
+                    uid: uid,
+                    username: data.username || userData.username || "Unknown",
+                    viewers: data.viewers || [],
+                    likes: data.likes || [],
+                };
+            })
+            .filter((story) => new Date(story.expiresAt.toDate()) > now);
+
+        if (activeStories.length > 0) {
+            setSelectedStories([
+                {
+                    uid: uid,
+                    username: userData.username || "Unknown",
+                    profileImage: userData.profileImage,
+                    userStories: activeStories,
+                },
+            ]);
+            setIsModalVisible(true); // Mostrar el modal
+        } else {
+            navigation.navigate("UserProfile", { selectedUser: userData });
+        }
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      Alert.alert(
-        "Error",
-        "Hubo un problema al obtener los detalles del usuario."
-      );
+        console.error("Error al manejar clic en usuario:", error);
+        Alert.alert(
+            "Error",
+            "Hubo un problema al obtener los detalles del usuario."
+        );
     }
-  };
-  
+};
   
 
   const currentStyles = isNightMode ? nightStyles : dayStyles;
@@ -232,6 +284,20 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     </TouchableOpacity>
   )}
 />
+
+{isModalVisible && (
+    <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={false}
+    >
+        <StoryViewer
+            stories={selectedStories}
+            initialIndex={0}
+            onClose={() => setIsModalVisible(false)}
+        />
+    </Modal>
+)}
             </LinearGradient>
           </TouchableOpacity>
         </TouchableOpacity>

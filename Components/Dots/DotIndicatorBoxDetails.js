@@ -29,9 +29,6 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 const [selectedStories, setSelectedStories] = useState([]);
 
-
-
-
 const checkStories = async () => {
   try {
       const attendeesWithStories = attendeesList.map((attendee) => ({
