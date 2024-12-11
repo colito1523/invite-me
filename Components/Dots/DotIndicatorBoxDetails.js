@@ -6,12 +6,14 @@ import {
   Dimensions,
   Animated,
   Alert,
-  Modal
+  Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { collection,
   getDocs,
   doc,
+  query,
+  where,
   getDoc} from 'firebase/firestore';
 import { database, auth } from '../../config/firebase'; // Asegúrate de importar correctamente `auth`
 import { Image } from 'expo-image';
@@ -39,41 +41,80 @@ const handleCloseStoryViewer = (updatedUnseenStories) => {
 
 const checkStories = async () => {
   try {
-      const attendeesWithStories = attendeesList.map((attendee) => ({
-          ...attendee,
-          hasStories: false,
-          userStories: [],
-      }));
+    const attendeesWithStories = attendeesList.map((attendee) => ({
+      ...attendee,
+      hasStories: false,
+      userStories: [],
+    }));
 
-      for (const attendee of attendeesWithStories) {
-          const userDocRef = doc(database, "users", attendee.uid);
-          const storiesRef = collection(userDocRef, "stories");
-          const storiesSnapshot = await getDocs(storiesRef);
+    for (const attendee of attendeesWithStories) {
+      const userDocRef = doc(database, "users", attendee.uid);
+      const userDoc = await getDoc(userDocRef);
+      const userData = userDoc.data();
+      
+      // Verificar si el perfil es privado
+      const isPrivate = userData?.isPrivate || false;
+      
+      // Verificar si somos amigos
+      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+      const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
+      const friendSnapshot = await getDocs(friendQuery);
+      const isFriend = !friendSnapshot.empty;
 
-          const now = new Date();
-          const userStories = storiesSnapshot.docs
-              .map((doc) => ({
-                  id: doc.id,
-                  ...doc.data(),
-                  createdAt: doc.data().createdAt?.toDate(),
-                  expiresAt: doc.data().expiresAt?.toDate(),
-              }))
-              .filter((story) => story.expiresAt > now);
-
-          if (userStories.length > 0) {
-              attendee.hasStories = true;
-              attendee.userStories = userStories;
-          }
+      // Si el perfil es privado y no somos amigos, saltamos este usuario
+      if (isPrivate && !isFriend) {
+        continue;
       }
 
-      setFilteredAttendees(attendeesWithStories);
+      // Solo verificar historias si el perfil es público o si somos amigos
+      const storiesRef = collection(userDocRef, "stories");
+      const storiesSnapshot = await getDocs(storiesRef);
+
+      const now = new Date();
+      const userStories = storiesSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate(),
+          expiresAt: doc.data().expiresAt?.toDate(),
+        }))
+        .filter((story) => story.expiresAt > now);
+
+      if (userStories.length > 0) {
+        attendee.hasStories = true;
+        attendee.userStories = userStories;
+      }
+    }
+
+    setFilteredAttendees(attendeesWithStories);
   } catch (error) {
-      console.error("Error verificando historias:", error);
+    console.error("Error verificando historias:", error);
   }
 };
 
   useEffect(() => {
-    checkStories();
+    const fetchCompleteUserData = async () => {
+      try {
+        const usersWithFullData = await Promise.all(
+          attendeesList.map(async (attendee) => {
+            const userDoc = await getDoc(doc(database, "users", attendee.uid));
+            const userData = userDoc.exists() ? userDoc.data() : {};
+            return {
+              ...userData,
+              ...attendee,
+              hasStories: attendee.hasStories,
+              userStories: attendee.userStories
+            };
+          })
+        );
+        console.log("Attendees Complete Details:", usersWithFullData);
+        await checkStories();
+      } catch (error) {
+        console.error("Error fetching complete user data:", error);
+      }
+    };
+
+    fetchCompleteUserData();
   }, [attendeesList]);
   // Cargar usuarios bloqueados
   useEffect(() => {
