@@ -886,6 +886,7 @@ const renderChatItem = ({ item }) => {
     <StoryViewer
       stories={selectedStories}
       initialIndex={0}
+      navigation={navigation} 
       onClose={async () => {
         setIsModalVisible(false);
         await checkStories();

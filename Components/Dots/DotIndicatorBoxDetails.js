@@ -299,6 +299,7 @@ const checkStories = async () => {
           await checkStories(); // Recargar historias inmediatamente
         }}
         unseenStories={{}}
+        navigation={navigation} 
     />
 </Modal>
     )}

@@ -566,6 +566,7 @@ export default function Search() {
                 await loadExistingStories();
               }}
               unseenStories={{}}
+              navigation={navigation} 
             />
           </Modal>
         )}

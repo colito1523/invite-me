@@ -329,6 +329,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                 await checkStories();
             }}
             unseenStories={{}}
+            navigation={navigation} 
         />
     </Modal>
 )}
