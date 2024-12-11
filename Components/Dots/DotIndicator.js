@@ -287,16 +287,9 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   keyExtractor={(item) => item.uid || item.username}
   renderItem={({ item }) => (
     <TouchableOpacity
-      onPress={() => {
-        // Clic en el cuerpo lleva a UserProfile o Profile según corresponda
-        if (auth.currentUser?.uid === item.uid) {
-          navigation.navigate("Profile", { selectedUser: item });
-        } else {
-          navigation.navigate("UserProfile", { selectedUser: item });
-        }
-      }}
-      style={currentStyles.attendeeItem}
-    >
+    onPress={() => handleUserPress(item.uid)} // Reutilizamos handleUserPress
+    style={currentStyles.attendeeItem}
+  >
       {/* Imagen de perfil, clic accede a las historias */}
       <TouchableOpacity
         onPress={() => handleUserPress(item.uid)} // Manejo de historias
