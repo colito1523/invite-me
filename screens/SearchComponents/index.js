@@ -9,6 +9,7 @@ import {
   Alert,
   SafeAreaView,
   RefreshControl,
+  Modal,
 } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,7 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import StorySlider from "../../Components/Stories/StorySlider";
 import { useTranslation } from 'react-i18next';
-import { getAuth } from "firebase/auth"; // Add this line
+import { getAuth } from "firebase/auth"; 
 import { fetchUsers, fetchRecommendations, sendFriendRequest, saveSearchHistory } from './utils';
 import { database} from "../../config/firebase";
 import {
@@ -27,10 +28,11 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import StoryViewer from "../../Components/Stories/StoryViewer"; // Added import
 import { styles, lightTheme, darkTheme } from './styles';
 
 export default function Search() {
-  const auth = getAuth(); // Add this line
+  const auth = getAuth(); 
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
@@ -38,6 +40,8 @@ export default function Search() {
   const [requestStatus, setRequestStatus] = useState(null);
   const [isNightMode, setIsNightMode] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false); // Added state
+  const [selectedStories, setSelectedStories] = useState(null); // Added state
   const blockedUsers = useBlockedUsers();
   const { t } = useTranslation();
 
@@ -192,14 +196,12 @@ export default function Search() {
           if (savedHistory !== null) {
             const parsedHistory = JSON.parse(savedHistory);
   
-            // Verificar si los usuarios tienen historias disponibles
             const updatedHistory = await Promise.all(
               parsedHistory.map(async (item) => {
                 const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
   
-                // Comprobar si hay historias activas
                 const hasStories = storiesSnapshot.docs.some((storyDoc) => {
                   const storyData = storyDoc.data();
                   return new Date(storyData.expiresAt.toDate()) > now;
@@ -209,7 +211,6 @@ export default function Search() {
               })
             );
   
-            // Filtrar usuarios bloqueados
             const filteredHistory = updatedHistory.filter(
               (item) => !blockedUsers.includes(item.id)
             );
@@ -223,28 +224,26 @@ export default function Search() {
     };
   
     loadSearchHistory();
-  }, [user, blockedUsers]); // Dependencias de usuario y bloqueados
+  }, [user, blockedUsers]); 
 
-// En index.js, modifica el handleUserPress
-const handleUserPress = (selectedUser) => {
-  if (blockedUsers.includes(selectedUser.id)) {
-    Alert.alert(t('error'), t('cannotInteractWithUser'));
-    return;
-  }
-  const updatedHistory = [...searchHistory];
-  const existingUser = updatedHistory.find((item) => item.id === selectedUser.id);
-  if (!existingUser) {
-    updatedHistory.unshift(selectedUser);
-    if (updatedHistory.length > 10) updatedHistory.pop();
-    setSearchHistory(updatedHistory);
-    // Aquí pasamos el usuario actual (auth.currentUser)
-    saveSearchHistory(auth.currentUser, updatedHistory, blockedUsers);
-  }
-  navigation.navigate("UserProfile", { 
-    selectedUser: selectedUser, 
-    imageUri: selectedUser.profileImage 
-  });
-};
+  const handleUserPress = (selectedUser) => {
+    if (blockedUsers.includes(selectedUser.id)) {
+      Alert.alert(t('error'), t('cannotInteractWithUser'));
+      return;
+    }
+    const updatedHistory = [...searchHistory];
+    const existingUser = updatedHistory.find((item) => item.id === selectedUser.id);
+    if (!existingUser) {
+      updatedHistory.unshift(selectedUser);
+      if (updatedHistory.length > 10) updatedHistory.pop();
+      setSearchHistory(updatedHistory);
+      saveSearchHistory(auth.currentUser, updatedHistory, blockedUsers);
+    }
+    navigation.navigate("UserProfile", { 
+      selectedUser: selectedUser, 
+      imageUri: selectedUser.profileImage 
+    });
+  };
 
   const removeFromHistory = (userId) => {
     const updatedHistory = searchHistory.filter((user) => user.id !== userId);
@@ -281,16 +280,47 @@ const handleUserPress = (selectedUser) => {
   const renderUserItem = ({ item, index }) => {
     return (
       <View key={`user-${item.id}-${index}`} style={styles.resultItem}>
-        {/* Imagen con acción específica */}
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
             if (item.hasStories) {
-              navigation.navigate("StoryViewer", {
-                stories: [{ uid: item.id, username: item.username, userStories: item.userStories }],
-                initialIndex: 0,
-              });
+              try {
+                const storiesRef = collection(database, "users", item.id, "stories");
+                const storiesSnapshot = await getDocs(storiesRef);
+                const now = new Date();
+                
+                const userStories = storiesSnapshot.docs
+                  .map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt,
+                    expiresAt: doc.data().expiresAt,
+                    storyUrl: doc.data().storyUrl,
+                    profileImage: doc.data().profileImage || item.profileImage,
+                    uid: item.id,
+                    username: doc.data().username || item.username || "Unknown",
+                    viewers: doc.data().viewers || [],
+                    likes: doc.data().likes || []
+                  }))
+                  .filter((story) => new Date(story.expiresAt.toDate()) > now);
+
+                if (userStories.length > 0) {
+                  setSelectedStories([{
+                    uid: item.id,
+                    username: item.username,
+                    profileImage: item.profileImage,
+                    userStories: userStories
+                  }]); //set the stories to display in the modal
+                  setIsModalVisible(true); //show the modal
+                } else {
+                  handleUserPress(item);
+                }
+              } catch (error) {
+                console.error("Error loading stories:", error);
+                Alert.alert("Error", "No se pudieron cargar las historias");
+                handleUserPress(item);
+              }
             } else {
-              handleUserPress(item); // Guarda en el historial y navega al perfil
+              handleUserPress(item);
             }
           }}
         >
@@ -301,9 +331,8 @@ const handleUserPress = (selectedUser) => {
           />
         </TouchableOpacity>
   
-        {/* Texto con acción al perfil */}
         <TouchableOpacity
-          onPress={() => handleUserPress(item)} // Guarda en el historial y navega al perfil
+          onPress={() => handleUserPress(item)}
           style={styles.textContainer}
         >
           <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
@@ -407,6 +436,19 @@ const handleUserPress = (selectedUser) => {
               />
             }
           />
+        )}
+        {isModalVisible && (
+          <Modal
+            visible={isModalVisible}
+            animationType="slide"
+            transparent={false}
+          >
+            <StoryViewer
+              stories={selectedStories}
+              initialIndex={0}
+              onClose={() => setIsModalVisible(false)}
+            />
+          </Modal>
         )}
       </LinearGradient>
     </SafeAreaView>
