@@ -34,9 +34,13 @@ const [selectedStories, setSelectedStories] = useState([]);
 
 const checkStories = async () => {
   try {
-      const attendeesWithStories = [];
+      const attendeesWithStories = attendeesList.map((attendee) => ({
+          ...attendee,
+          hasStories: false,
+          userStories: [],
+      }));
 
-      for (const attendee of attendeesList) {
+      for (const attendee of attendeesWithStories) {
           const userDocRef = doc(database, "users", attendee.uid);
           const storiesRef = collection(userDocRef, "stories");
           const storiesSnapshot = await getDocs(storiesRef);
@@ -51,27 +55,17 @@ const checkStories = async () => {
               }))
               .filter((story) => story.expiresAt > now);
 
-          attendeesWithStories.push({
-              ...attendee,
-              hasStories: userStories.length > 0,
-              userStories,
-          });
+          if (userStories.length > 0) {
+              attendee.hasStories = true;
+              attendee.userStories = userStories;
+          }
       }
 
-      attendeesWithStories.sort((a, b) => a.username.localeCompare(b.username));
       setFilteredAttendees(attendeesWithStories);
   } catch (error) {
       console.error("Error verificando historias:", error);
   }
 };
-
-
-
-
-
-
-
-
 
   useEffect(() => {
     checkStories();
@@ -127,6 +121,12 @@ const checkStories = async () => {
         return;
     }
 
+    // Si el usuario actual hace clic en su propio perfil
+    if (auth.currentUser?.uid === uid) {
+        navigation.navigate("Profile", { selectedUser: auth.currentUser });
+        return;
+    }
+
     try {
         const userDoc = await getDoc(doc(database, "users", uid));
         if (!userDoc.exists()) {
@@ -164,8 +164,6 @@ const checkStories = async () => {
             .filter((story) => new Date(story.expiresAt.toDate()) > now);
 
         if (activeStories.length > 0) {
-            // Muestra el modal con historias activas
-            console.log("Mostrando modal con historias activas:", activeStories);
             setSelectedStories([
                 {
                     uid: uid,
@@ -174,9 +172,8 @@ const checkStories = async () => {
                     userStories: activeStories,
                 },
             ]);
-            setIsModalVisible(true);
+            setIsModalVisible(true); // Mostrar el modal
         } else {
-            // Redirige al perfil si no hay historias activas
             navigation.navigate("UserProfile", { selectedUser: userData });
         }
     } catch (error) {
@@ -187,6 +184,7 @@ const checkStories = async () => {
         );
     }
 };
+
 
 
 

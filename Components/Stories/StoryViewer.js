@@ -54,27 +54,27 @@ export function StoryViewer({
   useEffect(() => {
     console.log("StoryViewer props:", { stories, initialIndex, unseenStories });
     if (!stories || !Array.isArray(stories)) {
-      console.error("Prop 'stories' is not an array:", stories);
+      console.error("Prop 'stories' no es un array válido:", stories);
       onClose?.();
       return;
-    }
-    const validStories = stories.filter(
-      (story) => story && Array.isArray(story.userStories),
-    );
-    if (validStories.length === 0) {
-      console.error("No valid stories available.");
+  }
+  const validStories = stories.filter(
+      (story) => story && Array.isArray(story.userStories)
+  );
+  if (validStories.length === 0) {
+      console.error("No hay historias válidas disponibles.");
       onClose?.();
       return;
-    }
-    if (
+  }
+  if (
       typeof initialIndex !== "number" ||
       initialIndex < 0 ||
       initialIndex >= validStories.length
-    ) {
-      console.error("Invalid initialIndex:", initialIndex);
+  ) {
+      console.error("Índice inicial inválido:", initialIndex);
       onClose?.();
       return;
-    }
+  }
   }, [stories, initialIndex, unseenStories]);
 
   // Deserialize the createdAt and expiresAt fields
@@ -619,34 +619,46 @@ export function StoryViewer({
   };
 
   const handleNext = () => {
+    // Verificar que stories y currentIndex sean válidos
+    if (!stories || !stories[currentIndex]) {
+        console.error("Índice actual fuera de rango o 'stories' es inválido.");
+        onClose(localUnseenStories);
+        return;
+    }
+
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
 
-    // Verificar si currentStory es undefined antes de acceder a sus propiedades
+    // Validar si la historia actual existe
     if (!currentStory) {
-      onClose(localUnseenStories);
-      return;
+        console.error("Historia actual no encontrada.");
+        onClose(localUnseenStories);
+        return;
     }
 
+    // Actualizar historias no vistas si corresponde
     if (localUnseenStories[currentStory.uid]?.length > 0) {
-      setLocalUnseenStories((prev) => ({
-        ...prev,
-        [currentStory.uid]: prev[currentStory.uid].filter(
-          (story) => story.id !== currentStory.id,
-        ),
-      }));
+        setLocalUnseenStories((prev) => ({
+            ...prev,
+            [currentStory.uid]: prev[currentStory.uid].filter(
+                (story) => story.id !== currentStory.id
+            ),
+        }));
     }
 
+    // Avanzar al siguiente índice de historia o al siguiente usuario
     if (storyIndex < stories[currentIndex]?.userStories.length - 1) {
-      setStoryIndex((prev) => prev + 1);
-      setProgress(0);
+        setStoryIndex((prev) => prev + 1);
+        setProgress(0);
     } else if (currentIndex < stories.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      setStoryIndex(0);
-      setProgress(0);
+        setCurrentIndex((prev) => prev + 1);
+        setStoryIndex(0);
+        setProgress(0);
     } else {
-      onClose(localUnseenStories); // Pasa el estado actualizado de vuelta
+        // Si ya estamos en la última historia, cerrar el visor
+        onClose(localUnseenStories);
     }
-  };
+};
+
 
   const handlePrevious = () => {
     if (storyIndex > 0) {
@@ -661,12 +673,21 @@ export function StoryViewer({
 
   const handleTap = (event) => {
     const { locationX } = event.nativeEvent;
-    if (locationX > width / 2) {
-      handleNext();
-    } else {
-      handlePrevious();
+    const currentStory = stories[currentIndex]?.userStories[storyIndex];
+    
+    if (!currentStory) {
+        console.error("Historia actual no válida:", currentStory);
+        onClose?.();
+        return;
     }
-  };
+
+    if (locationX > width / 2) {
+        handleNext();
+    } else {
+        handlePrevious();
+    }
+};
+
 
   const handleSendMessage = async () => {
     if (message.trim()) {
