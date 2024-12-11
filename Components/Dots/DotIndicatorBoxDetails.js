@@ -28,6 +28,14 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
 const [selectedStories, setSelectedStories] = useState([]);
+const [viewedStories, setViewedStories] = useState({});
+
+const handleCloseStoryViewer = (updatedUnseenStories) => {
+  setViewedStories((prev) => ({
+    ...prev,
+    ...updatedUnseenStories,
+  }));
+};
 
 const checkStories = async () => {
   try {
@@ -193,7 +201,7 @@ const checkStories = async () => {
     >
      <View style={[
       styles.imageContainer,
-      item.hasStories && styles.unseenStoryCircle // Aplica estilo si tiene historias
+      item.hasStories && !viewedStories[item.uid]?.length && styles.unseenStoryCircle,// Aplica estilo si tiene historias
     ]}>
         <Image
           cachePolicy="memory-disk"
@@ -235,7 +243,10 @@ const checkStories = async () => {
     <StoryViewer
         stories={selectedStories}
         initialIndex={0}
-        onClose={() => setIsModalVisible(false)}
+        onClose={(updatedUnseenStories) => {
+          handleCloseStoryViewer(updatedUnseenStories);
+          setIsModalVisible(false); // Cierra el modal
+        }}
         unseenStories={{}}
     />
 </Modal>
