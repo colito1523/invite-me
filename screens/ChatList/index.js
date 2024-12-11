@@ -824,6 +824,7 @@ const renderChatItem = ({ item }) => {
       stories={selectedStories}
       initialIndex={0}
       onClose={() => setIsModalVisible(false)}
+      unseenStories={{}}
     />
   </Modal>
 )}

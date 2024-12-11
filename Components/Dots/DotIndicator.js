@@ -45,7 +45,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         console.error("Error fetching blocked users:", error);
       }
     };
-  
+
     fetchBlockedUsers();
   }, []);
 
@@ -56,12 +56,12 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
             hasStories: false,
             userStories: [],
         }));
-  
+
         for (const attendee of attendeesWithStories) {
             const userDocRef = doc(database, "users", attendee.uid);
             const storiesRef = collection(userDocRef, "stories");
             const storiesSnapshot = await getDocs(storiesRef);
-  
+
             const now = new Date();
             const userStories = storiesSnapshot.docs
                 .map((doc) => ({
@@ -71,13 +71,13 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                     expiresAt: doc.data().expiresAt?.toDate(),
                 }))
                 .filter((story) => story.expiresAt > now);
-  
+
             if (userStories.length > 0) {
                 attendee.hasStories = true;
                 attendee.userStories = userStories;
             }
         }
-  
+
         setFilteredAttendees(attendeesWithStories);
     } catch (error) {
         console.error("Error verificando historias:", error);
@@ -88,7 +88,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     checkStories();
   }, [attendeesList]);
 
-  
+
 
   useEffect(() => {
     const updateFilteredImages = () => {
@@ -97,7 +97,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       );
       setFilteredImages(filtered);
     };
-  
+
     updateFilteredImages();
   }, [profileImages, blockedUsers, attendeesList]);
 
@@ -128,7 +128,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       setFilteredAttendees(filtered);
     }
   }, [searchTerm, attendeesList, blockedUsers]);
-  
+
 
   const handlePress = () => {
     setModalVisible(true);
@@ -159,6 +159,12 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
             userData.photoUrls && userData.photoUrls.length > 0
                 ? userData.photoUrls[0]
                 : "https://via.placeholder.com/150";
+
+        // Si es el usuario actual, navegar a Profile
+        if (auth.currentUser?.uid === uid) {
+            navigation.navigate("Profile", { selectedUser: auth.currentUser });
+            return;
+        }
 
         // Verificar historias activas
         const storiesRef = collection(database, "users", uid, "stories");
@@ -203,7 +209,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         );
     }
 };
-  
+
 
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 
@@ -268,10 +274,8 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     <TouchableOpacity
       onPress={() => {
         if (auth.currentUser?.uid === item.uid) {
-          // Navegar a tu perfil
-          navigation.navigate("Profile", { selectedUser: auth.currentUser });
+          navigation.navigate("Profile", { selectedUser: item });
         } else {
-          // Navegar al perfil de otro usuario
           navigation.navigate("UserProfile", { selectedUser: item });
         }
       }}
@@ -279,7 +283,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     >
       <TouchableOpacity
         onPress={() => handleUserPress(item.uid)}
-        onStartShouldSetResponder={() => true} // Evita bloquear el evento exterior
+        onStartShouldSetResponder={() => true}
         style={currentStyles.attendeeImageContainer}
       >
         <Image
@@ -312,6 +316,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
             stories={selectedStories}
             initialIndex={0}
             onClose={() => setIsModalVisible(false)}
+            unseenStories={{}}
         />
     </Modal>
 )}

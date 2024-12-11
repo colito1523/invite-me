@@ -447,6 +447,7 @@ export default function Search() {
               stories={selectedStories}
               initialIndex={0}
               onClose={() => setIsModalVisible(false)}
+              unseenStories={{}}
             />
           </Modal>
         )}
