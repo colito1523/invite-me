@@ -241,17 +241,24 @@ const [selectedStories, setSelectedStories] = useState([]);
 
     {/* Modal para StoryViewer */}
     {isModalVisible && (
-      <StoryViewer
-        stories={selectedStories}
-        initialIndex={0}
-        onClose={() => setIsModalVisible(false)}
-      />
+      <View style={[StyleSheet.absoluteFill, { zIndex: 9999 }]}>
+        <StoryViewer
+          stories={selectedStories}
+          initialIndex={0}
+          onClose={() => setIsModalVisible(false)}
+        />
+      </View>
     )}
   </View>
 );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 9999,
+    elevation: 9999,
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
