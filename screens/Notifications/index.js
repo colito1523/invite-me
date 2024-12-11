@@ -183,7 +183,7 @@ export default function NotificationsComponent() {
       });
     }, [isNightMode, navigation])
   );
-  
+
 
   useFocusEffect(
     useCallback(() => {
@@ -204,7 +204,7 @@ export default function NotificationsComponent() {
   }, [fetchNotifications]);
 
   const renderPrivateEventNotification = ({ item }) => {
-    
+
     const eventDate = item.date; // Use the date field instead of timestamp
     return (
       <TouchableOpacity
@@ -389,7 +389,7 @@ export default function NotificationsComponent() {
     }
 
     const handleNotificationPress = () => {
-      
+
       if (isEventInvitation) {
         if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
           navigation.navigate("BoxDetails", {
@@ -501,8 +501,8 @@ export default function NotificationsComponent() {
                     { color: isNightMode ? "#fff" : "#333" },
                   ]}
                 >
-                  {item.type === "invitation" && item.status === "accepted" ? (
-                    t("notifications.acceptedInvitation", {
+                  {(item.type === "invitation" || item.type === "eventConfirmation") && (item.status === "accepted" || item.status === "confirmed") ? (
+                    item.message || t("notifications.acceptedInvitation", {
                       name: item.fromName,
                     })
                   ) : (
@@ -525,9 +525,6 @@ export default function NotificationsComponent() {
                           ? t("notifications.nowFriends")
                           : t("notifications.rejectedFriendRequest"))}
                       {isLikeNotification && item.message}{" "}
-                      <Text>
-  {item.message || "Mensaje no disponible"}
-</Text>
                       {/* Mostrar el mensaje de like */}
                       {item.type === "storyLike" &&
                         t("notifications.likedYourStory")}
