@@ -190,6 +190,15 @@ export const styles = StyleSheet.create({
     borderColor: "black", // Cambia el color según el diseño
     borderRadius: 25, // Ajusta según el tamaño de la imagen
   },
+  chatInfoContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  
 });
 
 export const lightTheme = {

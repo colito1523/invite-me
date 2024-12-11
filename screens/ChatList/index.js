@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  Modal,
 } from "react-native";
 import { Image } from "expo-image";
 import {
@@ -29,6 +30,7 @@ import { Menu, Provider } from "react-native-paper";
 import Notes from "../../Components/Notes/Notes";
 import { styles, lightTheme, darkTheme } from "./styles";
 import { useTranslation } from "react-i18next";
+import StoryViewer from '../../Components/Stories/StoryViewer';
 
 const muteOptions = [
   { label: "1 hora", value: 1 },
@@ -51,6 +53,9 @@ export default function ChatList() {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedMuteHours, setSelectedMuteHours] = useState(null);
   const [mutedChats, setMutedChats] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false); // Controla la visibilidad del modal
+const [selectedStories, setSelectedStories] = useState([]); // Almacena las historias seleccionadas
+
   const { t } = useTranslation();
 
   const user = auth.currentUser;
@@ -70,26 +75,46 @@ export default function ChatList() {
 
   const checkStories = async () => {
     try {
-      const updatedChats = await Promise.all(
-        chats.map(async (chat) => {
-          const userRef = doc(database, "users", chat.user.uid);
-          const storiesRef = collection(userRef, "stories");
-          const storiesSnapshot = await getDocs(storiesRef);
-          const now = new Date();
+      const updatedChats = [];
   
-          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
-            const storyData = storyDoc.data();
-            return storyData.expiresAt && new Date(storyData.expiresAt.toDate()) > now;
-          });
+      for (const chat of chats) {
+        const userRef = doc(database, "users", chat.user.uid);
+        const storiesRef = collection(userRef, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+        const now = new Date();
   
-          return { ...chat, user: { ...chat.user, hasStories } };
-        })
-      );
+        const userStories = storiesSnapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              createdAt: data.createdAt instanceof Timestamp
+                ? data.createdAt.toDate()
+                : new Date(0), // Fecha predeterminada para valores inválidos
+              expiresAt: data.expiresAt instanceof Timestamp
+                ? data.expiresAt.toDate()
+                : new Date(), // Fecha predeterminada para evitar errores
+            };
+          })
+          .filter((story) => story.expiresAt > now); // Excluir historias expiradas
+  
+        updatedChats.push({
+          ...chat,
+          user: {
+            ...chat.user,
+            hasStories: userStories.length > 0,
+            userStories,
+          },
+        });
+      }
+  
       setChats(updatedChats);
     } catch (error) {
       console.error("Error verificando historias en chats:", error);
     }
   };
+  
   
   useEffect(() => {
     if (chats.length > 0) {
@@ -293,6 +318,29 @@ export default function ChatList() {
     setShowMuteOptions(false); // Oculta las opciones de silenciar
     setSelectedMuteHours(null); // Limpia la selección actual (opcional)
   };
+  const handleImagePress = (chat) => {
+    if (chat.user.hasStories) {
+      const stories = chat.user.userStories.map((story) => ({
+        ...story,
+        createdAt: story.createdAt || new Date(0), // Fecha predeterminada
+        expiresAt: story.expiresAt || new Date(), // Evitar valores no definidos
+      }));
+      setSelectedStories([
+        {
+          uid: chat.user.uid,
+          username: chat.user.username || "Usuario desconocido",
+          profileImage: chat.user.photoUrls?.[0],
+          userStories: stories,
+        },
+      ]);
+      setIsModalVisible(true);
+    } else {
+      Alert.alert("Sin historias", "Este usuario no tiene historias activas.");
+    }
+  };
+  
+  
+  
 
   const handleChatPress = async (chat) => {
     const isMuted = mutedChats.some((mute) => mute.chatId === chat.id);
@@ -481,14 +529,29 @@ export default function ChatList() {
     }
   };
 
-  const renderChatItem = ({ item }) => {
-    const isMuted = mutedChats.some(
-      (mute) => mute.chatId === item.id && new Date(mute.muteUntil) > new Date()
-    );
+const renderChatItem = ({ item }) => {
+  const isMuted = mutedChats.some(
+    (mute) => mute.chatId === item.id && new Date(mute.muteUntil) > new Date()
+  );
 
-    return (
+  return (
+    <View style={styles.chatItem}>
+      {/* Imagen de usuario: Abre el modal de historias si se hace clic aquí */}
+      <TouchableOpacity onPress={() => handleImagePress(item)}>
+        <Image
+          source={{
+            uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
+          }}
+          style={[
+            styles.userImage,
+            item.user.hasStories && styles.hasStoryIndicator, // Indicador de historias
+          ]}
+        />
+      </TouchableOpacity>
+
+      {/* Información del chat: Abre la conversación si se hace clic aquí */}
       <TouchableOpacity
-        style={styles.chatItem}
+        style={styles.chatInfoContainer}
         onPress={() =>
           isSelectionMode ? toggleChatSelection(item.id) : handleChatPress(item)
         }
@@ -517,24 +580,6 @@ export default function ChatList() {
           }
         }}
       >
-        {isSelectionMode && (
-          <View
-            style={[
-              styles.checkbox,
-              selectedChats.includes(item.id) && {
-                backgroundColor: isNightMode ? "white" : "black",
-              },
-            ]}
-          />
-        )}
-       
-        <Image
-          source={{
-            uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
-          }}
-          style={[styles.userImage,styles.userImageContainer, item.user.hasStories && styles.hasStoryIndicator]}
-        />
-       
         <View style={styles.chatInfo}>
           <Text
             style={[
@@ -545,17 +590,16 @@ export default function ChatList() {
           >
             {item.user.username || "Usuario desconocido"}
           </Text>
-          {item.unseenMessagesCount === 0 && (
-            <Text
-              style={[
-                styles.lastMessagePreview,
-                { color: isNightMode ? "white" : "black" },
-              ]}
-            >
-              {truncateMessage(item.lastMessage || "")}
-            </Text>
-          )}
+          <Text
+            style={[
+              styles.lastMessagePreview,
+              { color: isNightMode ? "white" : "black" },
+            ]}
+          >
+            {truncateMessage(item.lastMessage || "")}
+          </Text>
         </View>
+
         <View style={styles.timeAndUnreadContainer}>
           {isMuted && (
             <Ionicons
@@ -583,8 +627,9 @@ export default function ChatList() {
           )}
         </View>
       </TouchableOpacity>
-    );
-  };
+    </View>
+  );
+};
 
   const renderMuteOptions = () => (
     <View
@@ -769,6 +814,19 @@ export default function ChatList() {
               </TouchableOpacity>
             </View>
           )}
+          {isModalVisible && (
+  <Modal
+    visible={isModalVisible}
+    animationType="slide"
+    transparent={false}
+  >
+    <StoryViewer
+      stories={selectedStories}
+      initialIndex={0}
+      onClose={() => setIsModalVisible(false)}
+    />
+  </Modal>
+)}
         </LinearGradient>
       </SafeAreaView>
     </Provider>
