@@ -292,7 +292,7 @@ const Home = React.memo(() => {
     });
   
     return () => {
-      if (typeof unsubscribe === 'function') {
+      if (typeof unsubscribe === "function") {
         unsubscribe();
       }
     };

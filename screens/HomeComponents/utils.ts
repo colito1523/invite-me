@@ -180,10 +180,9 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
 
   const userDocRef = doc(database, "users", user.uid);
 
-  // Escucha los cambios en el documento del usuario
+  // Escucha cambios en los chats silenciados y los mensajes
   const unsubscribeUser = onSnapshot(userDocRef, async (userDoc) => {
     if (!userDoc.exists()) {
-      console.error("El documento del usuario no existe.");
       setUnreadMessages(false);
       return;
     }
@@ -194,45 +193,35 @@ export const fetchUnreadMessages = ({ setUnreadMessages }) => {
     const chatsRef = collection(database, "chats");
     const chatsQuery = query(chatsRef, where("participants", "array-contains", user.uid));
 
-    // Recupera todos los chats y verifica mensajes no leídos
-    const unsubscribeChats = onSnapshot(chatsQuery, async (querySnapshot) => {
+    onSnapshot(chatsQuery, async (querySnapshot) => {
       const chats = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 
-      // Filtra los chats no muteados
-      const activeChats = chats.filter((chat) => 
-        !mutedChats.some((mutedChat) => mutedChat.chatId === chat.id)
-      );
+      const activeChats = chats.filter((chat) => {
+        const mutedChat = mutedChats.find((muted) => muted.chatId === chat.id);
+        return !mutedChat || mutedChat.muteUntil.toDate() <= new Date();
+      });
 
-      // Comprueba si hay mensajes no leídos en los chats activos
-      let hasUnreadMessages = false;
-
-      for (const chat of activeChats) {
-        const messagesRef = collection(database, "chats", chat.id, "messages");
-        const unseenMessagesQuery = query(
-          messagesRef,
-          where("seen", "==", false),
-          where("senderId", "!=", user.uid)
-        );
-
-        const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
-        if (!unseenMessagesSnapshot.empty) {
-          hasUnreadMessages = true;
-          break;
-        }
-      }
+      const hasUnreadMessages = await Promise.all(
+        activeChats.map(async (chat) => {
+          const messagesRef = collection(database, "chats", chat.id, "messages");
+          const unseenMessagesQuery = query(
+            messagesRef,
+            where("seen", "==", false),
+            where("senderId", "!=", user.uid)
+          );
+          const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+          return !unseenMessagesSnapshot.empty;
+        })
+      ).then((results) => results.includes(true));
 
       setUnreadMessages(hasUnreadMessages);
     });
-
-    return () => {
-      unsubscribeChats();
-    };
   });
 
-  return () => {
-    unsubscribeUser();
-  };
+  return () => unsubscribeUser();
 };
+
+
 
 
 

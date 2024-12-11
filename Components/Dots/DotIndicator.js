@@ -273,17 +273,18 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   renderItem={({ item }) => (
     <TouchableOpacity
       onPress={() => {
+        // Clic en el cuerpo lleva a UserProfile o Profile según corresponda
         if (auth.currentUser?.uid === item.uid) {
           navigation.navigate("Profile", { selectedUser: item });
         } else {
-          navigation.navigate("UserProfile", { selectedUser: item });
+          navigation.navigate("UserProfile", { selectedUser: item }); // Cambié userData por item
         }
       }}
       style={currentStyles.attendeeItem}
     >
+      {/* Imagen de perfil, clic accede a las historias */}
       <TouchableOpacity
-        onPress={() => handleUserPress(item.uid)}
-        onStartShouldSetResponder={() => true}
+        onPress={() => handleUserPress(item.uid)} // Manejo de historias
         style={currentStyles.attendeeImageContainer}
       >
         <Image
@@ -292,14 +293,17 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
           }}
           style={[
             currentStyles.attendeeImage,
-            item.hasStories && currentStyles.unseenStoryCircle, // Estilo si tiene historias
+            item.hasStories && currentStyles.unseenStoryCircle, // Indicar si tiene historias
           ]}
           cachePolicy="memory-disk"
         />
       </TouchableOpacity>
+  
+      {/* Nombre del usuario */}
       <Text style={currentStyles.attendeeName}>{item.username}</Text>
     </TouchableOpacity>
   )}
+  
 />
 
 
