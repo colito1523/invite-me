@@ -46,36 +46,44 @@ export function StoryViewer({
   onStoryDeleted,
   unseenStories,
   navigation,
-  route 
+  route,
 }) {
   const { t } = useTranslation();
 
   // Add logging to debug the issue
   useEffect(() => {
     console.log("StoryViewer props:", { stories, initialIndex, unseenStories });
-  
-    if (!stories || !Array.isArray(stories) || stories.length === 0) {
-      console.error("Invalid stories array:", stories);
-      onClose?.(); // Cierra el visor si no hay historias
+    if (!stories || !Array.isArray(stories)) {
+      console.error("Prop 'stories' is not an array:", stories);
+      onClose?.();
       return;
     }
-  
-    if (typeof initialIndex !== "number" || initialIndex < 0 || initialIndex >= stories.length) {
+    const validStories = stories.filter(
+      (story) => story && Array.isArray(story.userStories),
+    );
+    if (validStories.length === 0) {
+      console.error("No valid stories available.");
+      onClose?.();
+      return;
+    }
+    if (
+      typeof initialIndex !== "number" ||
+      initialIndex < 0 ||
+      initialIndex >= validStories.length
+    ) {
       console.error("Invalid initialIndex:", initialIndex);
       onClose?.();
       return;
     }
   }, [stories, initialIndex, unseenStories]);
 
-  
-
   // Deserialize the createdAt and expiresAt fields
-  const deserializedStories = stories.map(storyGroup => ({
+  const deserializedStories = stories.map((storyGroup) => ({
     ...storyGroup,
-    userStories: storyGroup.userStories.map(story => ({
+    userStories: storyGroup.userStories.map((story) => ({
       ...story,
-      createdAt: new Date(story.createdAt),
-      expiresAt: new Date(story.expiresAt),
+      createdAt: story.createdAt?.toDate ? story.createdAt.toDate() : new Date(story.createdAt),
+      expiresAt: story.expiresAt?.toDate ? story.expiresAt.toDate() : new Date(story.expiresAt),
     })),
   }));
 
@@ -83,7 +91,8 @@ export function StoryViewer({
   const [storyIndex, setStoryIndex] = useState(() => {
     const userStories = deserializedStories[initialIndex]?.userStories || [];
     const unseenIndex = userStories.findIndex(
-      (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
+      (story) =>
+        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid),
     );
     return unseenIndex !== -1 ? unseenIndex : 0;
   });
@@ -124,14 +133,14 @@ export function StoryViewer({
       let updatedHideStoriesFrom;
       if (hideStoriesFrom.includes(user.uid)) {
         updatedHideStoriesFrom = hideStoriesFrom.filter(
-          (uid) => uid !== user.uid
+          (uid) => uid !== user.uid,
         );
         await updateDoc(viewerRef, {
           hideStoriesFrom: updatedHideStoriesFrom,
         });
         Alert.alert(
           t("storyViewer.success"),
-          t("storyViewer.viewerCanSeeStories")
+          t("storyViewer.viewerCanSeeStories"),
         );
       } else {
         updatedHideStoriesFrom = [...hideStoriesFrom, user.uid];
@@ -140,7 +149,7 @@ export function StoryViewer({
         });
         Alert.alert(
           t("storyViewer.success"),
-          t("storyViewer.viewerCannotSeeStories")
+          t("storyViewer.viewerCannotSeeStories"),
         );
       }
 
@@ -152,7 +161,7 @@ export function StoryViewer({
       console.error("Error updating hideStoriesFrom:", error);
       Alert.alert(
         t("storyViewer.error"),
-        t("storyViewer.storySettingsUpdateError")
+        t("storyViewer.storySettingsUpdateError"),
       );
     }
   };
@@ -168,18 +177,21 @@ export function StoryViewer({
       // Obtener los datos del espectador desde Firestore
       const viewerRef = doc(database, "users", viewer.uid);
       const viewerDoc = await getDoc(viewerRef);
-  
+
       if (viewerDoc.exists()) {
         const viewerData = viewerDoc.data();
-  
+
         // Actualizar el estado de `selectedViewer` con los datos más recientes
         setSelectedViewer({ ...viewer, ...viewerData });
-  
+
         // Verificar si el campo `hideStoriesFrom` incluye el UID del usuario actual
-        if (viewerData.hideStoriesFrom && viewerData.hideStoriesFrom.includes(user.uid)) {
+        if (
+          viewerData.hideStoriesFrom &&
+          viewerData.hideStoriesFrom.includes(user.uid)
+        ) {
         } else {
         }
-  
+
         // Mostrar el modal para ocultar o mostrar historias
         setIsHideStoryModalVisible(true);
       } else {
@@ -189,34 +201,30 @@ export function StoryViewer({
       console.error("Error al obtener el documento del espectador:", error);
     }
   };
-  
 
   const getChatId = async (user1Id, user2Id) => {
     const chatsRef = collection(database, "chats");
-  
+
     // Query for a chat that includes both user1Id and user2Id
-    const q = query(
-      chatsRef,
-      where("participants", "array-contains", user1Id)
-    );
-  
+    const q = query(chatsRef, where("participants", "array-contains", user1Id));
+
     const querySnapshot = await getDocs(q);
-  
+
     for (const doc of querySnapshot.docs) {
       const chatParticipants = doc.data().participants;
       if (chatParticipants.includes(user2Id)) {
         return doc.id; // Return existing chat ID
       }
     }
-  
+
     // If no chat exists, return a new chat ID based on user IDs
     // This part is for creating a new chat if none exists
     const user1Doc = await getDoc(doc(database, "users", user1Id));
     const user2Doc = await getDoc(doc(database, "users", user2Id));
-  
+
     const user1Name = user1Doc.data().username;
     const user2Name = user2Doc.data().username;
-  
+
     return user1Name > user2Name
       ? `${user1Name}_${user2Name}`
       : `${user2Name}_${user1Name}`;
@@ -281,14 +289,14 @@ export function StoryViewer({
       () => {
         setIsKeyboardVisible(true);
         setIsPaused(true);
-      }
+      },
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
         setIsKeyboardVisible(false);
         setIsPaused(false);
-      }
+      },
     );
 
     return () => {
@@ -308,7 +316,7 @@ export function StoryViewer({
     if (auth.currentUser) {
       addViewerToStory(currentStory.id, currentStory.uid);
       const userHasLiked = currentStory.likes?.some(
-        (like) => like.uid === auth.currentUser.uid
+        (like) => like.uid === auth.currentUser.uid,
       );
       setHasLiked(userHasLiked || false);
     }
@@ -344,7 +352,7 @@ export function StoryViewer({
 
       // Encuentra el índice del espectador en la lista actual
       const viewerIndex = updatedPinnedViewers.findIndex(
-        (v) => v.uid === viewer.uid
+        (v) => v.uid === viewer.uid,
       );
 
       if (viewerIndex !== -1) {
@@ -397,7 +405,7 @@ export function StoryViewer({
 
         Alert.alert(
           t("storyViewer.success"),
-          t("storyViewer.hiddenSuccessfully")
+          t("storyViewer.hiddenSuccessfully"),
         );
 
         // Cerrar el visor de historias después de agregar el UID
@@ -454,7 +462,7 @@ export function StoryViewer({
         "users",
         currentStory.uid,
         "stories",
-        currentStory.id
+        currentStory.id,
       );
 
       const userRef = doc(database, "users", currentUser.uid);
@@ -485,7 +493,7 @@ export function StoryViewer({
         database,
         "users",
         currentStory.uid,
-        "notifications"
+        "notifications",
       );
       await addDoc(notificationRef, {
         type: "storyLike",
@@ -510,19 +518,30 @@ export function StoryViewer({
   const handleUserPress = async (selectedUser) => {
     if (selectedUser.hasStories) {
       try {
-        const storiesRef = collection(database, "users", selectedUser.id, "stories");
+        const storiesRef = collection(
+          database,
+          "users",
+          selectedUser.id,
+          "stories",
+        );
         const storiesSnapshot = await getDocs(storiesRef);
-  
+
         // Obtener historias válidas (que no hayan expirado)
         const now = new Date();
         const userStories = storiesSnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(story => new Date(story.expiresAt.toDate()) > now);
-  
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((story) => new Date(story.expiresAt.toDate()) > now);
+
         if (userStories.length > 0) {
           // Navegar al visor de historias
           navigation.navigate("StoryViewer", {
-            stories: [{ uid: selectedUser.id, username: selectedUser.username, userStories }],
+            stories: [
+              {
+                uid: selectedUser.id,
+                username: selectedUser.username,
+                userStories,
+              },
+            ],
             initialIndex: 0,
           });
           return;
@@ -532,11 +551,10 @@ export function StoryViewer({
         Alert.alert("Error", "No se pudieron cargar las historias.");
       }
     }
-  
+
     // Si no tiene historias, proceder a su perfil
     navigation.navigate("UserProfile", { selectedUser });
   };
-  
 
   const loadViewers = async () => {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
@@ -546,7 +564,7 @@ export function StoryViewer({
         "users",
         stories[currentIndex].uid,
         "stories",
-        currentStory.id
+        currentStory.id,
       );
       const storySnap = await getDoc(storyRef);
       if (storySnap.exists()) {
@@ -567,7 +585,7 @@ export function StoryViewer({
         const uniqueViewers = allViewers.filter(
           (viewer, index, self) =>
             index === self.findIndex((t) => t.uid === viewer.uid) &&
-            viewer.uid !== stories[currentIndex].uid
+            viewer.uid !== stories[currentIndex].uid,
         );
 
         const sortedViewers = uniqueViewers.sort((a, b) => {
@@ -592,9 +610,9 @@ export function StoryViewer({
   const filteredViewers = viewers.filter((viewer) =>
     `${viewer.firstName} ${viewer.lastName}`
       .toLowerCase()
-      .includes(searchQuery.toLowerCase())
+      .includes(searchQuery.toLowerCase()),
   );
-  
+
   const handleClose = () => {
     if (onClose) onClose();
     navigation.goBack();
@@ -613,7 +631,7 @@ export function StoryViewer({
       setLocalUnseenStories((prev) => ({
         ...prev,
         [currentStory.uid]: prev[currentStory.uid].filter(
-          (story) => story.id !== currentStory.id
+          (story) => story.id !== currentStory.id,
         ),
       }));
     }
@@ -705,7 +723,7 @@ export function StoryViewer({
           console.error("Error sending response:", error);
           Alert.alert(
             t("storyViewer.error"),
-            t("storyViewer.sendResponseError")
+            t("storyViewer.sendResponseError"),
           );
         }
       }
@@ -757,27 +775,27 @@ export function StoryViewer({
         Alert.alert("Error", "No estás autenticado.");
         return;
       }
-  
+
       const currentStory = stories[currentIndex]?.userStories[storyIndex];
       if (!currentStory) {
         console.error("Story not found");
         Alert.alert("Error", "Historia no encontrada.");
         return;
       }
-  
+
       // Elimina la historia de Firebase
       const storyDocRef = doc(
         database,
         "users",
         user.uid,
         "stories",
-        currentStory.id
+        currentStory.id,
       );
       await deleteDoc(storyDocRef);
-  
+
       const storyImageRef = ref(storage, currentStory.storyUrl);
       await deleteObject(storyImageRef);
-  
+
       // Actualiza el estado local
       if (stories[currentIndex]?.userStories.length === 1) {
         // Elimina el grupo de historias si era la última
@@ -791,7 +809,7 @@ export function StoryViewer({
       } else {
         // Navegar a la siguiente historia o la anterior
         setStoryIndex((prev) =>
-          prev < stories[currentIndex].userStories.length - 1 ? prev : prev - 1
+          prev < stories[currentIndex].userStories.length - 1 ? prev : prev - 1,
         );
       }
     } catch (error) {
@@ -799,7 +817,6 @@ export function StoryViewer({
       Alert.alert("Error", "No se pudo eliminar la historia.");
     }
   };
-  
 
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;
@@ -812,7 +829,7 @@ export function StoryViewer({
   const currentStory = stories[currentIndex]?.userStories[storyIndex];
   const hoursAgo = currentStory
     ? Math.floor(
-        (Date.now() - currentStory.createdAt.toDate()) / (1000 * 60 * 60)
+        (Date.now() - currentStory.createdAt.toDate()) / (1000 * 60 * 60),
       )
     : 0;
 
@@ -888,8 +905,8 @@ export function StoryViewer({
                             index === storyIndex
                               ? `${progress * 100}%`
                               : index < storyIndex
-                              ? "100%"
-                              : "0%",
+                                ? "100%"
+                                : "0%",
                         },
                       ]}
                     />
@@ -1130,7 +1147,7 @@ export function StoryViewer({
               if (!currentStory || !currentStory.uid || !currentStory.id) {
                 Alert.alert(
                   "Error",
-                  "No se encontró la historia o los datos necesarios."
+                  "No se encontró la historia o los datos necesarios.",
                 );
                 setIsSubmittingReport(false);
                 return;
@@ -1225,7 +1242,7 @@ const styles = StyleSheet.create({
   image: {
     width,
     height,
-    resizeMode: "contain"
+    resizeMode: "contain",
   },
   userInfo: {
     position: "absolute",

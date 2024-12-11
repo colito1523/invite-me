@@ -399,6 +399,7 @@ export default function Profile({ navigation }) {
                 name="arrow-back"
                 size={24}
                 color={isNightMode ? "#fff" : "#000"}
+                style={styles.iconShadow}
               />
             </TouchableOpacity>
           )}

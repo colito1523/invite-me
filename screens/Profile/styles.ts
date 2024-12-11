@@ -219,4 +219,14 @@ export const styles = StyleSheet.create({
       marginTop: 5,
       textAlign: "center",
     },
+    iconShadow: {
+      shadowColor: "white",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5, // Para sombras en Android
+    },
   });

@@ -14,6 +14,7 @@ import { collection,
   getDoc} from 'firebase/firestore';
 import { database, auth } from '../../config/firebase'; // Asegúrate de importar correctamente `auth`
 import { Image } from 'expo-image';
+import StoryViewer from '../Stories/StoryViewer';
 
 const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [blockedUsers, setBlockedUsers] = useState([]);
@@ -24,19 +25,22 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const SPACING = 10;
   const scrollX = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+const [selectedStories, setSelectedStories] = useState([]);
 
 
- 
+
+
   const checkStories = async () => {
     try {
       const loadedStories = [];
       const now = new Date();
-  
+
       for (const attendee of attendeesList) {
         const userDocRef = doc(database, "users", attendee.uid);
         const storiesRef = collection(userDocRef, "stories");
         const storiesSnapshot = await getDocs(storiesRef);
-  
+
         const userStories = storiesSnapshot.docs
           .map((doc) => {
             const data = doc.data();
@@ -53,7 +57,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             };
           })
           .filter((story) => new Date(story.expiresAt.seconds * 1000) > now);
-  
+
         if (userStories.length > 0) {
           loadedStories.push({
             uid: attendee.uid,
@@ -64,23 +68,23 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
           });
         }
       }
-  
+
       loadedStories.sort((a, b) => a.username.localeCompare(b.username));
-  
+
       console.log("Historias cargadas en DotIndicator:", JSON.stringify(loadedStories, null, 2));
       setFilteredAttendees(loadedStories);
     } catch (error) {
       console.error("Error verificando historias:", error);
     }
   };
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
   useEffect(() => {
     checkStories();
   }, [attendeesList]);
@@ -134,51 +138,56 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
       Alert.alert("Error", "No puedes interactuar con este usuario.");
       return;
     }
-  
+
     try {
       const userDoc = await getDoc(doc(database, "users", uid));
       if (!userDoc.exists()) {
         Alert.alert("Error", "No se encontraron detalles para este usuario.");
         return;
       }
-  
+
       const userData = userDoc.data();
       userData.id = uid;
       userData.profileImage =
         userData.photoUrls && userData.photoUrls.length > 0
           ? userData.photoUrls[0]
           : "https://via.placeholder.com/150";
-  
+
       // Verificar historias activas
       const storiesRef = collection(database, "users", uid, "stories");
       const storiesSnapshot = await getDocs(storiesRef);
       const now = new Date();
       const activeStories = storiesSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: new Date(doc.data().createdAt.seconds * 1000), // Convertir timestamps
-          expiresAt: new Date(doc.data().expiresAt.seconds * 1000),
-        }))
-        .filter((story) => story.expiresAt > now);
-  
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt,
+            expiresAt: data.expiresAt,
+            storyUrl: data.storyUrl,
+            profileImage: data.profileImage || userData.profileImage,
+            uid: uid,
+            username: data.username || userData.username || "Unknown",
+            viewers: data.viewers || [],
+            likes: data.likes || [],
+          };
+        })
+        .filter((story) => new Date(story.expiresAt.toDate()) > now);
+
       if (activeStories.length > 0) {
-        // Navegar al visor de historias con datos válidos
-        console.log("Navegando al visor con historias activas:", activeStories);
-        navigation.navigate("StoryViewer", {
-          stories: [
-            {
-              uid: uid,
-              username: userData.username || "Unknown",
-              profileImage: userData.profileImage,
-              userStories: activeStories,
-            },
-          ],
-          initialIndex: 0, // Índice inicial
-        });
+        console.log("Mostrando modal con historias activas:", activeStories);
+        setSelectedStories([
+          {
+            uid: uid,
+            username: userData.username || "Unknown",
+            profileImage: userData.profileImage,
+            userStories: activeStories,
+          },
+        ]);
+        setIsModalVisible(true); // Muestra el modal
       } else {
-        // Navegar al perfil si no hay historias activas
-        navigation.navigate("UserProfile", { selectedUser: userData });
+        Alert.alert("Sin historias", "Este usuario no tiene historias activas.");
       }
     } catch (error) {
       console.error("Error al manejar clic en usuario:", error);
@@ -188,10 +197,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
       );
     }
   };
-  
-  
-  
-  
+
 
   // Renderizar asistentes
   const renderItem = ({ item }) => (
@@ -216,24 +222,33 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
 
   return (
     <View style={currentStyles.container}>
-      {filteredAttendees.length > 0 ? (
-        <Animated.FlatList
-          data={filteredAttendees}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.uid}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.flatListContent}
-          snapToInterval={ITEM_SIZE + SPACING}
-          decelerationRate="fast"
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: true }
-          )}
-        />
-      ) : null}
-    </View>
-  );
+    {filteredAttendees.length > 0 ? (
+      <Animated.FlatList
+        data={filteredAttendees}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.uid}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.flatListContent}
+        snapToInterval={ITEM_SIZE + SPACING}
+        decelerationRate="fast"
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: true }
+        )}
+      />
+    ) : null}
+
+    {/* Modal para StoryViewer */}
+    {isModalVisible && (
+      <StoryViewer
+        stories={selectedStories}
+        initialIndex={0}
+        onClose={() => setIsModalVisible(false)}
+      />
+    )}
+  </View>
+);
 };
 
 const styles = StyleSheet.create({
