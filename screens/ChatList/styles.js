@@ -204,7 +204,7 @@ export const styles = StyleSheet.create({
   },
   hasStoryIndicator: {
     borderWidth: 2,
-    borderColor: "black", // Cambia el color según el diseño
+    borderColor: "white", // Cambia el color según el diseño
     borderRadius: 25, // Ajusta según el tamaño de la imagen
   },
   chatInfoContainer: {

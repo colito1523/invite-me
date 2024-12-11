@@ -79,31 +79,47 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
   
       for (const chat of chats) {
         const userRef = doc(database, "users", chat.user.uid);
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.exists() ? userDoc.data() : null;
+  
+        if (!userData) continue;
+  
+        const isPrivate = userData?.isPrivate || false;
+  
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
+        const friendSnapshot = await getDocs(friendQuery);
+        const isFriend = !friendSnapshot.empty;
+  
         const storiesRef = collection(userRef, "stories");
         const storiesSnapshot = await getDocs(storiesRef);
         const now = new Date();
   
-        const userStories = storiesSnapshot.docs
-          .map((doc) => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              ...data,
-              createdAt: data.createdAt instanceof Timestamp
-                ? data.createdAt.toDate()
-                : new Date(0), // Fecha predeterminada para valores inválidos
-              expiresAt: data.expiresAt instanceof Timestamp
-                ? data.expiresAt.toDate()
-                : new Date(), // Fecha predeterminada para evitar errores
-            };
-          })
-          .filter((story) => story.expiresAt > now); // Excluir historias expiradas
+        const userStories = isPrivate && !isFriend
+          ? [] // Si es privado y no somos amigos, no hay historias
+          : storiesSnapshot.docs
+              .map((doc) => {
+                const data = doc.data();
+                return {
+                  id: doc.id,
+                  ...data,
+                  createdAt: data.createdAt instanceof Timestamp
+                    ? data.createdAt.toDate()
+                    : new Date(0), // Fecha predeterminada para valores inválidos
+                  expiresAt: data.expiresAt instanceof Timestamp
+                    ? data.expiresAt.toDate()
+                    : new Date(), // Fecha predeterminada para evitar errores
+                };
+              })
+              .filter((story) => story.expiresAt > now);
   
         updatedChats.push({
           ...chat,
           user: {
             ...chat.user,
             hasStories: userStories.length > 0,
+            isFriend,
+            isPrivate,
             userStories,
           },
         });
@@ -114,6 +130,7 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
       console.error("Error verificando historias en chats:", error);
     }
   };
+  
   
   
   useEffect(() => {
@@ -318,26 +335,64 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
     setShowMuteOptions(false); // Oculta las opciones de silenciar
     setSelectedMuteHours(null); // Limpia la selección actual (opcional)
   };
-  const handleImagePress = (chat) => {
-    if (chat.user.hasStories) {
-      const stories = chat.user.userStories.map((story) => ({
-        ...story,
-        createdAt: story.createdAt?.toDate ? story.createdAt : Timestamp.fromDate(new Date()),
-        expiresAt: story.expiresAt?.toDate ? story.expiresAt : Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
-      }));
-      setSelectedStories([
-        {
-          uid: chat.user.uid,
-          username: chat.user.username || "Usuario desconocido",
-          profileImage: chat.user.photoUrls?.[0],
-          userStories: stories,
-        },
-      ]);
-      setIsModalVisible(true);
-    } else {
-      handleChatPress(chat);
+  const handleImagePress = async (chat) => {
+    const user = chat.user;
+  
+    try {
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      if (!userDoc.exists()) {
+        Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        return;
+      }
+  
+      const userData = userDoc.data();
+      const isPrivate = userData?.isPrivate || false;
+  
+      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+      const friendQuery = query(friendsRef, where("friendId", "==", user.uid));
+      const friendSnapshot = await getDocs(friendQuery);
+      const isFriend = !friendSnapshot.empty;
+  
+      if (isPrivate && !isFriend) {
+        // Si el perfil es privado y no somos amigos, redirigir al perfil del usuario
+        navigation.navigate("UserProfile", {
+          selectedUser: {
+            id: user.uid,
+            username: user.username || "Usuario desconocido",
+            firstName: userData.firstName || "Nombre desconocido",
+            lastName: userData.lastName || "Apellido desconocido",
+            profileImage: user.photoUrls?.[0] || "https://via.placeholder.com/150",
+            isPrivate: userData.isPrivate || false,
+          },
+        });
+        return;
+      }
+  
+      // Si hay historias disponibles
+      if (user.hasStories) {
+        const stories = user.userStories.map((story) => ({
+          ...story,
+          createdAt: story.createdAt?.toDate ? story.createdAt : Timestamp.fromDate(new Date()),
+          expiresAt: story.expiresAt?.toDate ? story.expiresAt : Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+        }));
+        setSelectedStories([
+          {
+            uid: user.uid,
+            username: user.username || "Usuario desconocido",
+            profileImage: user.photoUrls?.[0],
+            userStories: stories,
+          },
+        ]);
+        setIsModalVisible(true);
+      } else {
+        handleChatPress(chat); // Si no hay historias, abrir el chat
+      }
+    } catch (error) {
+      console.error("Error al manejar clic en imagen:", error);
+      Alert.alert("Error", "Hubo un problema al procesar la solicitud.");
     }
   };
+  
   
   
   

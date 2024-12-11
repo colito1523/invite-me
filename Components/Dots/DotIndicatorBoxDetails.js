@@ -50,23 +50,24 @@ const checkStories = async () => {
     for (const attendee of attendeesWithStories) {
       const userDocRef = doc(database, "users", attendee.uid);
       const userDoc = await getDoc(userDocRef);
-      const userData = userDoc.data();
-      
-      // Verificar si el perfil es privado
+      const userData = userDoc.exists() ? userDoc.data() : null;
+
+      if (!userData) continue;
+
       const isPrivate = userData?.isPrivate || false;
-      
+
       // Verificar si somos amigos
       const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
       const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
       const friendSnapshot = await getDocs(friendQuery);
       const isFriend = !friendSnapshot.empty;
 
-      // Si el perfil es privado y no somos amigos, saltamos este usuario
+      // Saltar si es privado y no somos amigos
       if (isPrivate && !isFriend) {
         continue;
       }
 
-      // Solo verificar historias si el perfil es público o si somos amigos
+      // Cargar historias solo si el perfil es público o si somos amigos
       const storiesRef = collection(userDocRef, "stories");
       const storiesSnapshot = await getDocs(storiesRef);
 
@@ -91,6 +92,7 @@ const checkStories = async () => {
     console.error("Error verificando historias:", error);
   }
 };
+
 
   useEffect(() => {
     const fetchCompleteUserData = async () => {
@@ -163,73 +165,76 @@ const checkStories = async () => {
 
   const handleUserPress = async (uid) => {
     if (blockedUsers.includes(uid)) {
-        Alert.alert("Error", "No puedes interactuar con este usuario.");
-        return;
+      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      return;
     }
-
-    // Si el usuario actual hace clic en su propio perfil
+  
     if (auth.currentUser?.uid === uid) {
-        navigation.navigate("Profile", { selectedUser: auth.currentUser });
-        return;
+      navigation.navigate("Profile", { selectedUser: auth.currentUser });
+      return;
     }
-
+  
     try {
-        const userDoc = await getDoc(doc(database, "users", uid));
-        if (!userDoc.exists()) {
-            Alert.alert("Error", "No se encontraron detalles para este usuario.");
-            return;
-        }
-
-        const userData = userDoc.data();
-        userData.id = uid;
-        userData.profileImage =
-            userData.photoUrls && userData.photoUrls.length > 0
-                ? userData.photoUrls[0]
-                : "https://via.placeholder.com/150";
-
-        // Verificar historias activas
-        const storiesRef = collection(database, "users", uid, "stories");
-        const storiesSnapshot = await getDocs(storiesRef);
-        const now = new Date();
-        const activeStories = storiesSnapshot.docs
-            .map((doc) => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    ...data,
-                    createdAt: data.createdAt,
-                    expiresAt: data.expiresAt,
-                    storyUrl: data.storyUrl,
-                    profileImage: data.profileImage || userData.profileImage,
-                    uid: uid,
-                    username: data.username || userData.username || "Unknown",
-                    viewers: data.viewers || [],
-                    likes: data.likes || [],
-                };
-            })
-            .filter((story) => new Date(story.expiresAt.toDate()) > now);
-
-        if (activeStories.length > 0) {
-            setSelectedStories([
-                {
-                    uid: uid,
-                    username: userData.username || "Unknown",
-                    profileImage: userData.profileImage,
-                    userStories: activeStories,
-                },
-            ]);
-            setIsModalVisible(true); // Mostrar el modal
-        } else {
-            navigation.navigate("UserProfile", { selectedUser: userData });
-        }
+      const userDoc = await getDoc(doc(database, "users", uid));
+      if (!userDoc.exists()) {
+        Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        return;
+      }
+  
+      const userData = userDoc.data();
+      const isPrivate = userData?.isPrivate || false;
+  
+      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+      const friendQuery = query(friendsRef, where("friendId", "==", uid));
+      const friendSnapshot = await getDocs(friendQuery);
+      const isFriend = !friendSnapshot.empty;
+  
+      if (isPrivate && !isFriend) {
+        navigation.navigate("UserProfile", {
+          selectedUser: {
+            id: uid,
+            username: userData.username || "Usuario desconocido",
+            firstName: userData.firstName || "Nombre desconocido",
+            lastName: userData.lastName || "Apellido desconocido",
+            profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+            isPrivate: userData.isPrivate || false,
+          },
+        });
+        return;
+      }
+  
+      const storiesRef = collection(database, "users", uid, "stories");
+      const storiesSnapshot = await getDocs(storiesRef);
+      const now = new Date();
+      const activeStories = storiesSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt,
+          expiresAt: doc.data().expiresAt,
+        }))
+        .filter((story) => new Date(story.expiresAt.toDate()) > now);
+  
+      if (activeStories.length > 0) {
+        setSelectedStories([
+          {
+            uid,
+            username: userData.username || "Unknown",
+            profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+            userStories: activeStories,
+          },
+        ]);
+        setIsModalVisible(true);
+      } else {
+        navigation.navigate("UserProfile", { selectedUser: userData });
+      }
     } catch (error) {
-        console.error("Error al manejar clic en usuario:", error);
-        Alert.alert(
-            "Error",
-            "Hubo un problema al obtener los detalles del usuario."
-        );
+      console.error("Error al manejar clic en usuario:", error);
+      Alert.alert("Error", "Hubo un problema al obtener los detalles del usuario.");
     }
-};
+  };
+  
+  
 
 
 
@@ -240,18 +245,20 @@ const checkStories = async () => {
       onPress={() => handleUserPress(item.uid)}
       style={styles.itemContainer}
     >
-     <View style={[
-      styles.imageContainer,
-      item.hasStories && !item.userStories.every(story => 
-        story.viewers?.some(viewer => viewer.uid === auth.currentUser.uid)
-      ) && styles.unseenStoryCircle,
-    ]}>
-        <Image
-          cachePolicy="memory-disk"
-          source={{ uri: item.profileImage }}
-          style={styles.profileImage}
-        />
-      </View>
+   <View
+  style={[
+    styles.imageContainer,
+    item.hasStories &&
+      (!item.isPrivate || (item.isPrivate && item.isFriend)) &&
+      styles.unseenStoryCircle,
+  ]}
+>
+  <Image
+    cachePolicy="memory-disk"
+    source={{ uri: item.profileImage }}
+    style={styles.profileImage}
+  />
+</View>
     </TouchableOpacity>
   );
 
@@ -343,7 +350,7 @@ const styles = StyleSheet.create({
   },
   unseenStoryCircle: {
     borderWidth: 2,
-    borderColor: "black", // Cambia el color según tu diseño
+    borderColor: "white", // Cambia el color según tu diseño
     borderRadius: 35,
   },
 });
