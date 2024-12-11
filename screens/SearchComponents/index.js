@@ -27,6 +27,8 @@ import {
   query,
   where,
   getDocs,
+  doc,
+  getDoc
 } from "firebase/firestore";
 import StoryViewer from "../../Components/Stories/StoryViewer"; // Added import
 import { styles, lightTheme, darkTheme } from './styles';
@@ -199,36 +201,52 @@ export default function Search() {
   
             const updatedHistory = await Promise.all(
               parsedHistory.map(async (item) => {
-                // Verificar si el usuario actual es amigo
+                // Verificar el estado actual del perfil
+                const userDocRef = doc(database, "users", item.id);
+                const userDoc = await getDoc(userDocRef);
+                if (!userDoc.exists()) {
+                  return null; // Eliminar usuarios que ya no existen
+                }
+  
+                const userData = userDoc.data();
+                const isPrivate = userData?.isPrivate || false;
+  
+                // Verificar si es amigo
                 const friendsRef = collection(database, "users", user.uid, "friends");
                 const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
                 const isFriend = !friendsSnapshot.empty;
   
+                // Validar historias solo si es amigo o no es privado
                 const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
   
-                // Las historias solo estarán disponibles si son amigos o el perfil no es privado
                 const hasStories = storiesSnapshot.docs.some((storyDoc) => {
                   const storyData = storyDoc.data();
                   return (
                     new Date(storyData.expiresAt.toDate()) > now &&
-                    (!item.isPrivate || (item.isPrivate && isFriend))
+                    (!isPrivate || isFriend)
                   );
                 });
   
-                return { ...item, hasStories, isFriend };
+                return {
+                  ...item,
+                  hasStories,
+                  isPrivate,
+                  isFriend,
+                };
               })
             );
   
+            // Filtrar usuarios bloqueados o eliminados
             const filteredHistory = updatedHistory.filter(
-              (item) => !blockedUsers.includes(item.id)
+              (item) => item && !blockedUsers.includes(item.id)
             );
   
             setSearchHistory(filteredHistory);
           }
         } catch (error) {
-          console.error(t('errorLoadingSearchHistory'), error);
+          console.error("Error al cargar el historial de búsqueda:", error);
         }
       }
     };
@@ -237,12 +255,16 @@ export default function Search() {
   }, [user, blockedUsers]);
   
   
+  
+  
 
   const handleUserPress = (selectedUser) => {
     if (blockedUsers.includes(selectedUser.id)) {
-      Alert.alert(t('error'), t('cannotInteractWithUser'));
+      Alert.alert("Error", "No puedes interactuar con este usuario.");
       return;
     }
+  
+    // Agregar al historial si no existe ya
     const updatedHistory = [...searchHistory];
     const existingUser = updatedHistory.find((item) => item.id === selectedUser.id);
     if (!existingUser) {
@@ -251,11 +273,16 @@ export default function Search() {
       setSearchHistory(updatedHistory);
       saveSearchHistory(auth.currentUser, updatedHistory, blockedUsers);
     }
-    navigation.navigate("UserProfile", { 
-      selectedUser: selectedUser, 
-      imageUri: selectedUser.profileImage 
+  
+    navigation.navigate("UserProfile", {
+      selectedUser: {
+        ...selectedUser,
+        isPrivate: selectedUser.isPrivate || false,
+        isFriend: selectedUser.isFriend || false,
+      },
     });
   };
+  
 
   const removeFromHistory = (userId) => {
     const updatedHistory = searchHistory.filter((user) => user.id !== userId);
@@ -324,8 +351,7 @@ export default function Search() {
     }
   }}
 >
-
-        <Image
+<Image
   key={`history-image-${item.id}`}
   source={{
     uri: item.profileImage || "https://via.placeholder.com/150",
@@ -336,8 +362,8 @@ export default function Search() {
     (!item.isPrivate || (item.isPrivate && item.isFriend)) &&
     styles.unseenStoryCircle,
   ]}
-  cachePolicy="memory-disk"
 />
+
         </TouchableOpacity>
         <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
       </TouchableOpacity>

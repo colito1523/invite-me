@@ -267,23 +267,24 @@ export const saveSearchHistory = async (currentUser, history, blockedUsers) => {
   if (!currentUser) return;
 
   try {
-    const safeHistory = JSON.stringify(history
-      .filter(item => !blockedUsers.includes(item.id)) // Filter out blocked users
-      .map(item => ({
-        id: item.id,
-        username: item.username,
-        firstName: item.firstName || '',
-        lastName: item.lastName || '',
-        profileImage: item.profileImage || 'https://via.placeholder.com/150'
-      }))
+    const safeHistory = JSON.stringify(
+      history
+        .filter((item) => !blockedUsers.includes(item.id)) // Filtrar usuarios bloqueados
+        .map((item) => ({
+          id: item.id,
+          username: item.username,
+          firstName: item.firstName || "",
+          lastName: item.lastName || "",
+          profileImage: item.profileImage || "https://via.placeholder.com/150",
+          isPrivate: item.isPrivate || false, // Solo guardar el estado de privacidad
+        }))
     );
 
-    await AsyncStorage.setItem(
-      `searchHistory_${currentUser.uid}`,
-      safeHistory
-    );
+    await AsyncStorage.setItem(`searchHistory_${currentUser.uid}`, safeHistory);
   } catch (error) {
-    console.error('Error saving search history:', error);
+    console.error("Error al guardar el historial de búsqueda:", error);
   }
 };
+
+
 
