@@ -48,6 +48,11 @@ const checkStories = async () => {
     }));
 
     for (const attendee of attendeesWithStories) {
+      // Exclude current user's stories
+      if (attendee.uid === auth.currentUser.uid) {
+        continue;
+      }
+
       const userDocRef = doc(database, "users", attendee.uid);
       const userDoc = await getDoc(userDocRef);
       const userData = userDoc.exists() ? userDoc.data() : null;
@@ -240,12 +245,6 @@ const checkStories = async () => {
       Alert.alert("Error", "Hubo un problema al obtener los detalles del usuario.");
     }
   };
-  
-  
-
-
-
-
   // Renderizar asistentes
   const renderItem = ({ item }) => (
     <TouchableOpacity

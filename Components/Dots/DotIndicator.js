@@ -58,25 +58,30 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         hasStories: false,
         userStories: [],
       }));
-  
+
       for (const attendee of attendeesWithStories) {
+        // Exclude current user's stories
+        if (attendee.uid === auth.currentUser.uid) {
+          continue;
+        }
+
         const userDocRef = doc(database, "users", attendee.uid);
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.exists() ? userDoc.data() : null;
-  
+
         if (!userData) continue;
-  
+
         const isPrivate = userData?.isPrivate || false;
-  
+
         const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
         const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
         const friendSnapshot = await getDocs(friendQuery);
         const isFriend = !friendSnapshot.empty;
-  
+
         const storiesRef = collection(userDocRef, "stories");
         const storiesSnapshot = await getDocs(storiesRef);
         const now = new Date();
-  
+
         const userStories = isPrivate && !isFriend
           ? [] // Si es privado y no somos amigos, no hay historias
           : storiesSnapshot.docs
@@ -87,19 +92,19 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                 expiresAt: doc.data().expiresAt?.toDate(),
               }))
               .filter((story) => story.expiresAt > now);
-  
+
         if (userStories.length > 0) {
           attendee.hasStories = true;
           attendee.userStories = userStories;
         }
       }
-  
+
       setFilteredAttendees(attendeesWithStories);
     } catch (error) {
       console.error("Error verificando historias:", error);
     }
   };
-  
+
   useEffect(() => {
     checkStories();
   }, [attendeesList]);
