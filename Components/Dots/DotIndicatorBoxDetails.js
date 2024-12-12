@@ -183,6 +183,13 @@ const checkStories = async () => {
   
       const userData = userDoc.data();
       const isPrivate = userData?.isPrivate || false;
+      const hideStoriesFrom = userData?.hideStoriesFrom || [];
+  
+      // Check if the current user is in the hideStoriesFrom array
+      if (hideStoriesFrom.includes(auth.currentUser.uid)) {
+        navigation.navigate("UserProfile", { selectedUser: userData });
+        return;
+      }
   
       const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
       const friendQuery = query(friendsRef, where("friendId", "==", uid));

@@ -95,7 +95,7 @@ export const styles = StyleSheet.create({
   },
   unseenStoryCircle: {
     borderWidth: 2,
-    borderColor: "white", // Color para destacar que hay historias
+    borderColor: "red", // Color para destacar que hay historias
     borderRadius: 30, // Hace que el contenedor sea circular
     padding: 5, // Espaciado alrededor del círculo
   },

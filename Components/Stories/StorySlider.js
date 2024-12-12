@@ -168,7 +168,6 @@ export default function StorySlider() {
         }
       }
 
-      console.log("Historias cargadas:", JSON.stringify(loadedStories, null, 2));
   
       setStories(loadedStories);
       setUnseenStories(unseenStoriesTemp);

@@ -1,12 +1,10 @@
 import { collection, getDocs, query, where, addDoc, getDoc, deleteDoc, doc, or } from "firebase/firestore";
 import { database, auth } from "../../config/firebase";
-import { getAuth } from "firebase/auth"; // Add this line
+import { getAuth } from "firebase/auth"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import { useTranslation } from 'react-i18next';
 
-
-// ...existing code...
 
 export const fetchUsers = async (searchTerm, setResults) => {
   const auth = getAuth();
@@ -15,34 +13,25 @@ export const fetchUsers = async (searchTerm, setResults) => {
       const user = auth.currentUser;
       if (!user) return;
 
-      // Cargar usuarios bloqueados
+      // Load blocked users
       const userRef = doc(database, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
       const blockedUsers = userSnapshot.data()?.blockedUsers || [];
 
       const normalizedSearchTerm = searchTerm.toLowerCase();
 
-      // Crear consulta para buscar usuarios por username, firstName y lastName
-      const q = query(
-        collection(database, "users"),
-        or(
-          where("username", ">=", normalizedSearchTerm),
-          where("username", "<=", normalizedSearchTerm + "\uf8ff"),
-          where("firstName", ">=", normalizedSearchTerm),
-          where("firstName", "<=", normalizedSearchTerm + "\uf8ff"),
-          where("lastName", ">=", normalizedSearchTerm),
-          where("lastName", "<=", normalizedSearchTerm + "\uf8ff")
-        )
-      );
+      // Create query to search users by username, firstName, and lastName
+      const usersRef = collection(database, "users");
+      const q = query(usersRef);
 
       const querySnapshot = await getDocs(q);
 
-      // Procesar cada usuario y verificar si tienen historias
+      // Process each user and check if they have stories
       const userList = await Promise.all(
         querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
-      
-          // Verificar si el usuario actual es amigo
+          
+          // Check if the current user is a friend
           const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
           const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", doc.id)));
           const isFriend = !friendSnapshot.empty;
@@ -59,7 +48,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
           return {
             id: doc.id,
             ...data,
-            isFriend, // Agregamos esta propiedad
+            isFriend,
             hasStories,
             profileImage:
               data.photoUrls && data.photoUrls.length > 0
@@ -68,14 +57,18 @@ export const fetchUsers = async (searchTerm, setResults) => {
           };
         })
       );
-      
 
-      // Filtrar usuarios bloqueados y al usuario actual
+      // Filter blocked users, current user, and apply search term
       const filteredList = userList.filter(
         (user) =>
-          user.id !== auth.currentUser.uid && !blockedUsers.includes(user.id)
+          user.id !== auth.currentUser.uid &&
+          !blockedUsers.includes(user.id) &&
+          (user.username.toLowerCase().includes(normalizedSearchTerm) ||
+           user.firstName.toLowerCase().includes(normalizedSearchTerm) ||
+           user.lastName.toLowerCase().includes(normalizedSearchTerm))
       );
-      console.log("Usuarios con historias disponibles:", filteredList);
+
+      console.log("Users with available stories:", filteredList);
 
       setResults(filteredList);
     } catch (error) {
@@ -88,7 +81,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
 
 
 export const fetchRecommendations = async (user, setRecommendations) => {
-  const auth = getAuth(); // Add this line
+  const auth = getAuth(); 
   if (!user) return;
 
   try {
@@ -121,7 +114,7 @@ export const fetchRecommendations = async (user, setRecommendations) => {
       (id) =>
         id !== user.uid &&
         !friendsList.includes(id) &&
-        !blockedUsers.includes(id) // Excluir usuarios bloqueados
+        !blockedUsers.includes(id) 
     );
 
     const uniquePotentialFriends = [...new Set(potentialFriends)];
@@ -149,7 +142,7 @@ export const fetchRecommendations = async (user, setRecommendations) => {
 };
 
 export const sendFriendRequest = async (user, setStatus) => {
-  const auth = getAuth(); // Add this line
+  const auth = getAuth(); 
   if (!auth.currentUser || !user) return;
 
   const currentUser = auth.currentUser;
@@ -196,9 +189,9 @@ export const sendFriendRequest = async (user, setStatus) => {
           fromId: currentUser.uid,
           fromImage: profileImage,
           status: "pending",
-          seen: false, // Agregando este campo como en UserProfile.js
-          timestamp: new Date(), // Marca de tiempo válida
-          createdAt: new Date(), // Compatibilidad con Search.js
+          seen: false, 
+          timestamp: new Date(), 
+          createdAt: new Date(), 
         });
 
         setStatus("pending");
@@ -214,7 +207,7 @@ export const sendFriendRequest = async (user, setStatus) => {
 };
 
 export const cancelFriendRequest = async (user, setStatus) => {
-  const auth = getAuth(); // Add this line
+  const auth = getAuth(); 
   const { t } = useTranslation();
   if (!auth.currentUser || !user) return;
 
@@ -269,14 +262,14 @@ export const saveSearchHistory = async (currentUser, history, blockedUsers) => {
   try {
     const safeHistory = JSON.stringify(
       history
-        .filter((item) => !blockedUsers.includes(item.id)) // Filtrar usuarios bloqueados
+        .filter((item) => !blockedUsers.includes(item.id)) 
         .map((item) => ({
           id: item.id,
           username: item.username,
           firstName: item.firstName || "",
           lastName: item.lastName || "",
           profileImage: item.profileImage || "https://via.placeholder.com/150",
-          isPrivate: item.isPrivate || false, // Solo guardar el estado de privacidad
+          isPrivate: item.isPrivate || false, 
         }))
     );
 
@@ -285,6 +278,4 @@ export const saveSearchHistory = async (currentUser, history, blockedUsers) => {
     console.error("Error al guardar el historial de búsqueda:", error);
   }
 };
-
-
 
