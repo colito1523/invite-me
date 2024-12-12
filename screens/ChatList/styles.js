@@ -59,6 +59,12 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  storyIndicator: {
+    borderWidth: 2,
+    borderColor: "blue", // Color para el indicador
+    borderRadius: 25,
+  },
+
   unseenCountContainer: {
     width: 20,
     height: 20,
