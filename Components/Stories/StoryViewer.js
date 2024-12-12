@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  StyleSheet,
-  Dimensions,
   TouchableOpacity,
   Text,
   TextInput,
@@ -14,6 +12,9 @@ import {
   Keyboard,
   SafeAreaView,
   ActivityIndicator,
+  Animated, 
+  Easing,
+  Dimensions, // Add this import
 } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../config/firebase";
@@ -31,22 +32,21 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import styles from "./StoryViewStyles";
 import { ref, deleteObject } from "firebase/storage";
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 import Complaints from "../Complaints/Complaints";
 import { KeyboardAvoidingView, Platform } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window"); // Add this line
 
 export function StoryViewer({
   stories,
   initialIndex,
   onClose,
-  onStoryDeleted,
   unseenStories,
   navigation,
-  route,
 }) {
   const { t } = useTranslation();
 
@@ -262,14 +262,13 @@ export function StoryViewer({
   useEffect(() => {
     let timer;
     if (!isPaused && !isKeyboardVisible && !isComplaintsVisible) {
-      // Añade isComplaintsVisible
       timer = setInterval(() => {
         if (progress < 1) {
-          setProgress((prev) => prev + 0.02);
+          setProgress((prev) => prev + 0.004);
         } else {
           handleNext();
         }
-      }, 100);
+      }, 20);
     }
 
     return () => clearInterval(timer);
@@ -619,45 +618,50 @@ export function StoryViewer({
   };
 
   const handleNext = () => {
-    // Verificar que stories y currentIndex sean válidos
-    if (!stories || !stories[currentIndex]) {
-        console.error("Índice actual fuera de rango o 'stories' es inválido.");
+    try {
+      // Verificar que existan historias y el índice sea válido
+      if (!stories || !Array.isArray(stories) || stories.length === 0) {
         onClose(localUnseenStories);
         return;
-    }
+      }
 
-    const currentStory = stories[currentIndex]?.userStories[storyIndex];
-
-    // Validar si la historia actual existe
-    if (!currentStory) {
-        console.error("Historia actual no encontrada.");
+      // Verificar que el índice actual sea válido
+      if (currentIndex >= stories.length) {
         onClose(localUnseenStories);
         return;
-    }
+      }
 
-    // Actualizar historias no vistas si corresponde
-    if (localUnseenStories[currentStory.uid]?.length > 0) {
+      const currentStory = stories[currentIndex]?.userStories[storyIndex];
+
+      // Actualizar historias no vistas
+      if (currentStory && localUnseenStories[currentStory.uid]?.length > 0) {
         setLocalUnseenStories((prev) => ({
-            ...prev,
-            [currentStory.uid]: prev[currentStory.uid].filter(
-                (story) => story.id !== currentStory.id
-            ),
+          ...prev,
+          [currentStory.uid]: prev[currentStory.uid].filter(
+            (story) => story.id !== currentStory.id
+          ),
         }));
-    }
+      }
 
-    // Avanzar al siguiente índice de historia o al siguiente usuario
-    if (storyIndex < stories[currentIndex]?.userStories.length - 1) {
+      // Determinar si hay más historias
+      const hasMoreStoriesInCurrentUser = storyIndex < (stories[currentIndex]?.userStories?.length - 1);
+      const hasMoreUsers = currentIndex < (stories.length - 1);
+
+      if (hasMoreStoriesInCurrentUser) {
         setStoryIndex((prev) => prev + 1);
         setProgress(0);
-    } else if (currentIndex < stories.length - 1) {
+      } else if (hasMoreUsers) {
         setCurrentIndex((prev) => prev + 1);
         setStoryIndex(0);
         setProgress(0);
-    } else {
-        // Si ya estamos en la última historia, cerrar el visor
+      } else {
         onClose(localUnseenStories);
+      }
+    } catch (error) {
+      console.error("Error al navegar a la siguiente historia:", error);
+      onClose(localUnseenStories);
     }
-};
+  };
 
 
   const handlePrevious = () => {
@@ -674,7 +678,7 @@ export function StoryViewer({
   const handleTap = (event) => {
     const { locationX } = event.nativeEvent;
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
-    
+
     if (!currentStory) {
         console.error("Historia actual no válida:", currentStory);
         onClose?.();
@@ -1248,276 +1252,5 @@ export function StoryViewer({
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "black",
-  },
-  container: {
-    flex: 1,
-    backgroundColor: "black",
-  },
-  storyContainer: {
-    flex: 1,
-  },
-  progressContainer: {
-    flexDirection: "row",
-    position: "absolute",
-    top: 0,
-    left: 10,
-    right: 10,
-    zIndex: 10,
-  },
-  progressBar: {
-    marginTop: 10,
-    flex: 1,
-    height: 2,
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
-    marginHorizontal: 2,
-  },
-  progress: {
-    height: "100%",
-    backgroundColor: "white",
-  },
-  image: {
-    width,
-    height,
-    resizeMode: "contain",
-  },
-  userInfo: {
-    position: "absolute",
-    top: 20,
-    left: 10,
-    right: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  userDetails: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  username: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  rightInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  timeAgo: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-    marginRight: 10,
-  },
-  navButton: {
-    position: "absolute",
-    top: "50%",
-    padding: 20,
-  },
-  leftButton: {
-    left: 0,
-  },
-  rightButton: {
-    right: 0,
-  },
-  messageContainer: {
-    position: "absolute",
-    bottom: 40,
-    left: 10,
-    right: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    borderRadius: 25,
-    paddingHorizontal: 15,
-  },
-  messageInput: {
-    flex: 1,
-    color: "white",
-    paddingVertical: 10,
-    fontSize: 16,
-  },
-  iconButton: {
-    padding: 10,
-  },
-  viewersButton: {
-    position: "absolute",
-    bottom: 20,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  viewersModalContainer: {
-    backgroundColor: "rgba(225, 225, 225, 0.99)",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    height: "80%",
-  },
-  viewersModalContent: {
-    flex: 1,
-  },
-  viewersModalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "black",
-    borderRadius: 20,
-    marginRight: 10,
-    paddingHorizontal: 10,
-    marginBottom: 15,
-    width: "90%",
-    height: 40,
-  },
-  searchInput: {
-    flex: 1,
-    height: "100%",
-    marginLeft: 10,
-  },
-  searchInputDivider: {
-    width: 1,
-    height: "60%",
-    backgroundColor: "black",
-    marginHorizontal: 8,
-  },
-  searchInputCount: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "black",
-  },
-  deleteButton: {
-    padding: 4,
-    marginBottom: 10,
-  },
-  viewersTitle: {
-    color: "black",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 10,
-    paddingLeft: 10,
-  },
-  viewerItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  viewerImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  viewerName: {
-    flex: 1,
-    fontSize: 16,
-  },
-  likeIcon: {
-    marginRight: 10,
-  },
-  viewerEditButton: {
-    padding: 5,
-    marginRight: 5,
-  },
-  viewerMenuButton: {
-    padding: 5,
-  },
-  optionsModalContainer: {
-    backgroundColor: "transparent",
-    borderRadius: 10,
-    padding: 20,
-    width: "80%",
-    alignSelf: "center",
-    marginTop: "auto",
-    marginBottom: 50,
-    alignItems: "center",
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "red",
-  },
-  optionButton: {
-    padding: 10,
-    marginVertical: 5,
-  },
-  optionButtonText: {
-    fontSize: 16,
-    color: "red",
-  },
-  sendConfirmation: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  sendConfirmationText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  simpleModalContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    width: "80%",
-  },
-  simpleModalText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  modalOverlay2: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  simpleModalContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    width: "80%",
-  },
-  simpleModalText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-});
 
 export default StoryViewer;
