@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  Modal,
 } from "react-native";
 import { Image } from "expo-image";
 import {
@@ -29,6 +30,7 @@ import { Menu, Provider } from "react-native-paper";
 import Notes from "../../Components/Notes/Notes";
 import { styles, lightTheme, darkTheme } from "./styles";
 import { useTranslation } from "react-i18next";
+import StoryViewer from '../../Components/Stories/StoryViewer';
 
 const muteOptions = [
   { label: "1 hora", value: 1 },
@@ -51,6 +53,9 @@ export default function ChatList() {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedMuteHours, setSelectedMuteHours] = useState(null);
   const [mutedChats, setMutedChats] = useState([]);
+  const [selectedStories, setSelectedStories] = useState([]);
+const [isModalVisible, setIsModalVisible] = useState(false);
+
   const { t } = useTranslation();
 
   const user = auth.currentUser;
@@ -95,6 +100,41 @@ export default function ChatList() {
     fetchMutedChats();
   }, []);
 
+  const checkUserStories = async (userId) => {
+    try {
+      const userDocRef = doc(database, "users", userId);
+      const userDoc = await getDoc(userDocRef);
+      if (!userDoc.exists()) return null;
+  
+      const storiesRef = collection(userDocRef, "stories");
+      const storiesSnapshot = await getDocs(storiesRef);
+  
+      const now = new Date();
+      const activeStories = storiesSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate(),
+          expiresAt: doc.data().expiresAt?.toDate(),
+        }))
+        .filter((story) => story.expiresAt > now);
+  
+      return activeStories;
+    } catch (error) {
+      console.error("Error verificando historias:", error);
+      return null;
+    }
+  };
+
+  const handleStoryPress = (user) => {
+    if (user.hasStories) {
+      setSelectedStories(user.stories);
+      setIsModalVisible(true);
+    }
+  };
+  
+  
+
   useEffect(() => {
     navigation.setOptions({
       headerStyle: {
@@ -117,23 +157,23 @@ export default function ChatList() {
     useCallback(() => {
       const fetchChats = async () => {
         if (!user) return;
-
+      
         try {
           const userRef = doc(database, "users", user.uid);
           const userSnapshot = await getDoc(userRef);
           const blockedUsers = userSnapshot.data()?.blockedUsers || [];
-
+      
           const chatsRef = collection(database, "chats");
           const q = query(
             chatsRef,
             where("participants", "array-contains", user.uid)
           );
-
+      
           const unsubscribe = onSnapshot(q, async (querySnapshot) => {
             const chatList = await Promise.all(
               querySnapshot.docs.map(async (docSnapshot) => {
                 const chatData = docSnapshot.data();
-
+      
                 if (
                   chatData.isHidden?.[user.uid] ||
                   blockedUsers.some((blockedUid) =>
@@ -142,20 +182,23 @@ export default function ChatList() {
                 ) {
                   return null;
                 }
-
+      
                 const otherUserId = chatData.participants.find(
                   (uid) => uid !== user.uid
                 );
-
+      
                 const otherUserDoc = await getDoc(
                   doc(database, "users", otherUserId)
                 );
                 if (!otherUserDoc.exists()) {
                   return null;
                 }
-
+      
                 const otherUserData = otherUserDoc.data();
-
+      
+                // Verificar historias activas del usuario
+                const userStories = await checkUserStories(otherUserId);
+      
                 // Cálculo de mensajes no leídos
                 const messagesRef = collection(
                   database,
@@ -163,34 +206,29 @@ export default function ChatList() {
                   docSnapshot.id,
                   "messages"
                 );
-
-                const messagesSnapshot = await getDocs(messagesRef);
-
-                if (messagesSnapshot.empty) {
-                  return null; // Excluir chats sin mensajes
-                }
-
+      
                 const unseenMessagesQuery = query(
                   messagesRef,
                   where("seen", "==", false),
                   where("senderId", "!=", user.uid)
                 );
-                const unseenMessagesSnapshot = await getDocs(
-                  unseenMessagesQuery
-                );
-
+                const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
                 const unseenMessagesCount = unseenMessagesSnapshot.size;
-
+      
                 return {
                   id: docSnapshot.id,
-                  user: otherUserData,
+                  user: {
+                    ...otherUserData,
+                    hasStories: userStories && userStories.length > 0,
+                    stories: userStories, // Incluye las historias en los datos del usuario
+                  },
                   unseenMessagesCount, // Agregar el conteo
                   lastMessage: chatData.lastMessage || "", // Agregar el último mensaje
                   lastMessageTimestamp: chatData.lastMessageTimestamp || null,
                 };
               })
             );
-
+      
             const sortedChats = chatList
               .filter((chat) => chat !== null)
               .sort((a, b) => {
@@ -202,15 +240,16 @@ export default function ChatList() {
                   : 0;
                 return dateB - dateA; // Orden descendente
               });
-
+      
             setChats(sortedChats);
           });
-
+      
           return () => unsubscribe();
         } catch (error) {
           console.error("Error al obtener los chats:", error);
         }
       };
+      
 
       fetchChats();
     }, [user?.uid])
@@ -499,12 +538,17 @@ export default function ChatList() {
             ]}
           />
         )}
+        <TouchableOpacity onPress={() => handleStoryPress(item.user)}>
         <Image
           source={{
             uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
           }}
-          style={styles.userImage}
+          style={[
+            styles.userImage,
+            item.user.hasStories && styles.storyIndicator, // Agrega la clase para historias
+          ]}
         />
+        </TouchableOpacity>
         <View style={styles.chatInfo}>
           <Text
             style={[
@@ -741,6 +785,25 @@ export default function ChatList() {
           )}
         </LinearGradient>
       </SafeAreaView>
+
+      {isModalVisible && (
+          <Modal
+              visible={isModalVisible}
+              animationType="slide"
+              transparent={false}
+          >
+              <StoryViewer
+                  stories={selectedStories}
+                  initialIndex={0}
+                  onClose={async () => {
+                      setIsModalVisible(false);
+                      await checkStories();
+                  }}
+                  unseenStories={{}}
+                  navigation={navigation} 
+              />
+          </Modal>
+      )}
     </Provider>
   );
 }
