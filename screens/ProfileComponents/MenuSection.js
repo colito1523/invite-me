@@ -59,7 +59,7 @@ const MenuSection = ({
         onDismiss={() => setMenuVisible(false)}
         anchor={
           <TouchableOpacity onPress={() => setMenuVisible(true)}>
-            <Ionicons name="ellipsis-vertical" size={24} color="white" />
+            <Ionicons name="ellipsis-vertical" size={27} color="white" />
           </TouchableOpacity>
         }
         contentStyle={styles.menuContent}
@@ -87,7 +87,7 @@ const MenuSection = ({
 const styles = StyleSheet.create({
   menuContainer: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 60 : 40,
+    top: Platform.OS === "ios" ? 80 : 40,
     right: 20,
     zIndex: 10,
   },

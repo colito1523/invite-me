@@ -387,8 +387,8 @@ export default function UserProfile({ route, navigation }) {
             >
               <Ionicons
                 name="arrow-back"
-                size={24}
-                color={isNightMode ? "#fff" : "#000"}
+                size={27}
+                color="white"
               />
             </TouchableOpacity>
           )}
@@ -474,7 +474,7 @@ export default function UserProfile({ route, navigation }) {
           ? "clockcircle"
           : "adduser"
       }
-      size={24}
+      size={27}
       color="white"
     />
   )}
@@ -497,7 +497,7 @@ export default function UserProfile({ route, navigation }) {
                                 >
                                   <AntDesign
                                     name={isLiked ? "heart" : "hearto"}
-                                    size={24}
+                                    size={27}
                                     color="white"
                                   />
                                   <Text style={styles.heartCountText}>
@@ -517,7 +517,7 @@ export default function UserProfile({ route, navigation }) {
                                 >
                                   <AntDesign
                                     name="message1"
-                                    size={24}
+                                    size={27}
                                     color="white"
                                   />
                                 </TouchableOpacity>
@@ -544,7 +544,7 @@ export default function UserProfile({ route, navigation }) {
                   >
                     <Ionicons
                       name="ellipsis-vertical"
-                      size={24}
+                      size={27}
                       color="white"
                     />
                   </TouchableOpacity>

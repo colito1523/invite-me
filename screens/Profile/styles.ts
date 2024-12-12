@@ -1,8 +1,11 @@
 import { Dimensions, StyleSheet, Platform } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const isLargeScreen = width > 500 && height > 900;
+// Definir categorías de pantalla
+const isSmallScreen = screenWidth <= 413 && screenHeight <= 837; // Pantallas pequeñas
+const isMediumScreen = screenWidth > 411 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
+const isLargeScreen = screenWidth > 430 || screenHeight > 932; // Pantallas grandes
 
 export const styles = StyleSheet.create({
     scrollViewContent: {
@@ -13,7 +16,7 @@ export const styles = StyleSheet.create({
     },
     backButton: {
       position: "absolute",
-      top: Platform.OS === "ios" ? 60 : 40,
+      top: Platform.OS === "ios" ? 80 : 40,
       left: 20,
       zIndex: 10,
       
@@ -24,7 +27,7 @@ export const styles = StyleSheet.create({
       height: "100%",
     },
     imageContainer: {
-      width: width,
+      width: screenWidth,
       height: "100%",
     },
     overlay: {
@@ -38,7 +41,7 @@ export const styles = StyleSheet.create({
     },
     nameContainer: {
       position: "absolute",
-      top: 550,
+      top: isSmallScreen ? 550 : isMediumScreen ? 580 : 80, // Márgenes dinámicos
       left: 20,
       right: 20,
       zIndex: 10,
@@ -46,7 +49,7 @@ export const styles = StyleSheet.create({
     nameContainerEditing: {
       top: "70%", // Centra verticalmente
       left: "50%", // Centra horizontalmente
-      transform: [{ translateX: -width * 0.25 }, { translateY: -height * 0.25 }], // Ajuste para centrar completamente
+      transform: [{ translateX: -screenWidth * 0.25 }, { translateY: -screenHeight * 0.25 }], // Ajuste para centrar completamente
       alignItems: "center", // Centra el contenido dentro
     },
     nameAndSurnameContainer: {
@@ -161,7 +164,7 @@ export const styles = StyleSheet.create({
     },
     ovalContainer: {
       marginTop: 20,
-      marginBottom: 20,
+      marginBottom: 10,
       flexDirection: "row",
       justifyContent: "space-evenly",
       gap: 10,
@@ -170,17 +173,17 @@ export const styles = StyleSheet.create({
       alignItems: "center",
     },
     oval: {
-      width: "45%",
-      height: 45,
-      backgroundColor: "rgba(255, 255, 255, 0.2)",
+      width: "42%",
+      height: 40,
+      backgroundColor: "rgba(255, 255, 255, 0.5)",
       borderRadius: 20,
       justifyContent: "center",
       alignItems: "center",
     },
     ovalText: {
-      color: "white",
-      fontSize: 14,
-      fontWeight: "bold",
+      color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
     },
     ovalInput: {
       color: "#000",
@@ -201,13 +204,15 @@ export const styles = StyleSheet.create({
     },
     ovalWrapper: {
       flex: 1,
+      marginBottom:isSmallScreen ? 0 : isMediumScreen ? 80 : 120, // Márgenes dinámicos
     },
     iconsContainer: {
       flexDirection: "column",
       justifyContent: "space-between",
       alignItems: "flex-end",
-      marginLeft: 10,
+      marginRight: 10,
       gap: 10,
+      marginBottom: isSmallScreen ? 0 : isMediumScreen ? 50 : 120,
     },
     iconButton: {
       borderRadius: 20,

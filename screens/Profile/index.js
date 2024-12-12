@@ -397,8 +397,8 @@ export default function Profile({ navigation }) {
             >
               <Ionicons
                 name="arrow-back"
-                size={24}
-                color={isNightMode ? "#fff" : "#000"}
+                size={27}
+                color="white"
                 style={styles.iconShadow}
               />
             </TouchableOpacity>
@@ -512,7 +512,7 @@ export default function Profile({ navigation }) {
                             <TouchableOpacity style={styles.iconButton}>
                                 <AntDesign
                                   name="adduser"
-                                  size={24}
+                                  size={27}
                                   color="white"
                                 />
                               </TouchableOpacity>
@@ -522,7 +522,7 @@ export default function Profile({ navigation }) {
                               >
                                 <AntDesign
                                   name={isHearted ? "heart" : "hearto"}
-                                  size={24}
+                                  size={27}
                                   color="white"
                                 />
                                 <Text style={styles.heartCountText}>
@@ -532,7 +532,7 @@ export default function Profile({ navigation }) {
                               <TouchableOpacity style={styles.iconButton}>
                                 <AntDesign
                                   name="message1"
-                                  size={24}
+                                  size={27}
                                   color="white"
                                 />
                               </TouchableOpacity>

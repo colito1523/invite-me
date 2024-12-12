@@ -7,6 +7,7 @@ import {
   ScrollView,
   Dimensions,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { Menu, Provider } from "react-native-paper";
@@ -33,29 +34,34 @@ import MutualFriendsModal from "../Mutual-Friends-Modal/MutualFriendsModal";
 
 const { width, height } = Dimensions.get("window");
 
-const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus }) => {
+const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus, isProcessing }) => {
   const { t } = useTranslation();
   return (
     <View style={styles.nameContainer}>
-      <Text style={[styles.name, { color: isNightMode ? "#fff" : "#000" }]}>
+      <Text style={[styles.name]}>
         {firstName} {lastName}
       </Text>
       {showAddFriendButton && (
         <TouchableOpacity
           style={styles.addFriendButton}
           onPress={toggleUserStatus}
+          disabled={isProcessing}
         >
-          <AntDesign
-            name={
-              friendshipStatus
-                ? "deleteuser"
-                : pendingRequest
-                ? "clockcircle"
-                : "adduser"
-            }
-            size={24}
-            color={isNightMode ? "#fff" : "#000"}
-          />
+          {isProcessing ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <AntDesign
+              name={
+                friendshipStatus
+                  ? "deleteuser"
+                  : pendingRequest
+                  ? "clockcircle"
+                  : "adduser"
+              }
+              size={27}
+              color={isNightMode ? "#fff" : "#fff"}
+            />
+          )}
         </TouchableOpacity>
       )}
     </View>
@@ -75,7 +81,7 @@ export default function Component({ route, navigation }) {
   const [mutualFriends, setMutualFriends] = useState([]);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [isMutualFriendsModalVisible, setIsMutualFriendsModalVisible] = useState(false);
-
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const user = auth.currentUser;
 
@@ -319,6 +325,8 @@ export default function Component({ route, navigation }) {
   const toggleUserStatus = async () => {
     if (!user || !selectedUser) return;
 
+    setIsProcessing(true);
+
     // Verificar si ya hay una solicitud pendiente de la otra persona
   const currentUserRequestsRef = collection(
     database,
@@ -339,6 +347,7 @@ export default function Component({ route, navigation }) {
       "Solicitud pendiente",
       "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
     );
+    setIsProcessing(false);
     return;
   }
 
@@ -406,6 +415,8 @@ export default function Component({ route, navigation }) {
         t('cannotRemoveFriendFromPrivateProfile')
       );
     }
+
+    setIsProcessing(false);
   };
 
   const handleFriendSelect = (friend) => {
@@ -484,7 +495,7 @@ export default function Component({ route, navigation }) {
             <Ionicons
               name="arrow-back"
               size={24}
-              color={isNightMode ? "#fff" : "#000"}
+              color={isNightMode ? "#fff" : "#fff"}
             />
           </TouchableOpacity>
           <ScrollView
@@ -519,6 +530,7 @@ export default function Component({ route, navigation }) {
                     friendshipStatus={friendshipStatus}
                     pendingRequest={pendingRequest}
                     toggleUserStatus={toggleUserStatus}
+                    isProcessing={isProcessing}
                   />
                   <View style={styles.infoContainer}>
                     {index === 0 && (
@@ -527,7 +539,7 @@ export default function Component({ route, navigation }) {
                           <Text
                             style={[
                               styles.number,
-                              { color: isNightMode ? "#fff" : "#000" },
+                              { color: isNightMode ? "#fff" : "#fff" },
                             ]}
                           >
                             {friendCount}
@@ -548,13 +560,9 @@ export default function Component({ route, navigation }) {
                         <View style={styles.friendCountContainer}>
                           {renderMutualFriends()}
                         </View>
-                        <View style={styles.diagonalRectanglesContainer}>
-                          <View
-                            style={[styles.rectangle, styles.leftRectangle]}
-                          />
-                          <View
-                            style={[styles.rectangle, styles.rightRectangle]}
-                          />
+                        <View style={styles.horizontalRectanglesContainer}>
+                          <View style={styles.rectangle} />
+                          <View style={styles.rectangle} />
                         </View>
                       </>
                     )}
@@ -579,7 +587,7 @@ export default function Component({ route, navigation }) {
                   <Ionicons
                     name="ellipsis-vertical"
                     size={24}
-                    color={isNightMode ? "#fff" : "#000"}
+                    color={isNightMode ? "#fff" : "#fff"}
                   />
                 </TouchableOpacity>
               }
@@ -663,12 +671,13 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 10,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
   },
   name: {
     fontSize: 25,
     fontWeight: "bold",
+    color: "white",
+    marginRight: 10, // Add some space between the name and the button
   },
   spacer: {
     height: 150,
@@ -730,16 +739,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
-  diagonalRectanglesContainer: {
-    marginTop: 20,
+  horizontalRectanglesContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-  },
-  leftRectangle: {
-    marginBottom: 10,
-    alignSelf: "flex-start",
-  },
-  rightRectangle: {
-    alignSelf: "flex-end",
+    marginTop: 20,
   },
   addFriendContainer: {
     alignItems: "flex-end",
@@ -748,7 +752,5 @@ const styles = StyleSheet.create({
   addFriendButton: {
     padding: 10,
     borderRadius: 20,
-    position: "absolute",
-    right: 20, // Asegura un posicionamiento fijo
   },
 });

@@ -255,8 +255,6 @@ const [isModalVisible, setIsModalVisible] = useState(false);
     }, [user?.uid])
   );
 
-  
-
   useEffect(() => {
     const filtered = chats.filter((chat) =>
       chat.user.username.toLowerCase().includes(searchText.toLowerCase())

@@ -1,6 +1,12 @@
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet, Platform } from "react-native";
 
-const { width } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+// Definir categorías de pantalla
+const isSmallScreen = screenWidth <= 413 && screenHeight <= 837; // Pantallas pequeñas
+const isMediumScreen = screenWidth > 411 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
+const isLargeScreen = screenWidth > 430 || screenHeight > 932; // Pantallas grandes
+
 
 export const styles = StyleSheet.create({
     scrollViewContent: {
@@ -11,7 +17,7 @@ export const styles = StyleSheet.create({
     },
     backButton: {
       position: "absolute",
-      top: 40,
+      top: Platform.OS === "ios" ? 80 : 40,
       left: 20,
       zIndex: 10,
     },
@@ -19,7 +25,7 @@ export const styles = StyleSheet.create({
       // This can be left empty as it's not needed for fixing the white space issue
     },
     imageContainer: {
-      width: width,
+      width: screenWidth,
       height: "100%",
     },
     backgroundImage: {
@@ -38,7 +44,7 @@ export const styles = StyleSheet.create({
     },
     nameContainer: {
       position: "absolute",
-      top: 550,
+      top: isSmallScreen ? 550 : isMediumScreen ? 580 : 80, // Márgenes dinámicos
       left: 20,
       right: 20,
       zIndex: 10,
@@ -80,11 +86,13 @@ export const styles = StyleSheet.create({
       gap: 10,
     },
     button: {
-      backgroundColor: "rgba(255, 255, 255, 0.2)",
-      paddingVertical: 5,
-      paddingHorizontal: 20,
+      width: "42%",
+      height: 40,
+      backgroundColor: "rgba(255, 255, 255, 0.5)",
       borderRadius: 20,
-      margin: 5,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: isSmallScreen ? 10 : isMediumScreen ? 30 : 80, // Diferentes márgenes según la categoría
     },
     buttonText: {
       color: "#fff",
@@ -93,7 +101,7 @@ export const styles = StyleSheet.create({
     },
     menuContainer: {
       position: "absolute",
-      top: 50,
+      top: Platform.OS === "ios" ? 80 : 40,
       right: 20,
       zIndex: 10,
     },
