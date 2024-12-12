@@ -5,12 +5,15 @@ import {
   FlatList,
   RefreshControl,
   ActivityIndicator,
+  TouchableOpacity, // Necesario para el TabBar
+  Image
 } from "react-native";
 import {
   auth,
   storage,
   database,
 } from "../../config/firebase";
+import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 import Box from "../../Components/Boxs/Box";
 import DotIndicator from "../../Components/Dots/DotIndicator";
@@ -45,6 +48,9 @@ const Home = React.memo(() => {
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(false);
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
+  const navigateToProfile = useCallback(() => {
+    navigation.navigate("Profile");
+  }, [navigation]);
 
  useEffect(() => {
     fetchUnreadNotifications();
@@ -389,18 +395,63 @@ const Home = React.memo(() => {
   </View>
 )}
 
-<TabBar
-      isNightMode={isNightMode}
-      profileImage={profileImage}
-      unreadNotifications={unreadNotifications}
-      unreadMessages={unreadMessages}
+<View style={currentStyles.tabBar}>
+  <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+    <Ionicons
+      name="home"
+      size={24}
+      color={isNightMode ? "white" : "black"}
     />
-    {console.log("Props enviados a TabBar:", {
-  unreadNotifications,
-  unreadMessages,
-  profileImage,
-  isNightMode,
-})}
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => navigation.navigate("Search")}>
+    <Ionicons
+      name="search"
+      size={24}
+      color={isNightMode ? "white" : "black"}
+    />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={navigateToProfile}>
+    {profileImage ? (
+      <Image
+        source={{ uri: profileImage }}
+        style={styles.profileImage}
+      />
+    ) : (
+      <Ionicons
+        name="person-circle"
+        size={24}
+        color={isNightMode ? "white" : "black"}
+      />
+    )}
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
+    <Ionicons
+      name="notifications"
+      size={24}
+      color={isNightMode ? "white" : "black"}
+    />
+    {unreadNotifications && (
+      <View style={[
+        styles.unreadIndicator,
+        { backgroundColor: "red" }
+      ]} />
+    )}
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
+    <Ionicons
+      name="mail"
+      size={25}
+      color={isNightMode ? "white" : "black"}
+    />
+    {unreadMessages && (
+      <View style={[
+        styles.unreadIndicator,
+        { backgroundColor: "red" }
+      ]} />
+    )}
+  </TouchableOpacity>
+</View>
+
     </View>
   );
 });
