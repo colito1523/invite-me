@@ -382,4 +382,3 @@ export const fetchUnreadMessages = async ({ setUnreadMessages, user }) => {
 
   return () => unsubscribe();
 };
-

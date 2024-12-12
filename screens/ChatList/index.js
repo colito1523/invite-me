@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
-  Modal,
 } from "react-native";
 import { Image } from "expo-image";
 import {
@@ -30,7 +29,6 @@ import { Menu, Provider } from "react-native-paper";
 import Notes from "../../Components/Notes/Notes";
 import { styles, lightTheme, darkTheme } from "./styles";
 import { useTranslation } from "react-i18next";
-import StoryViewer from '../../Components/Stories/StoryViewer';
 
 const muteOptions = [
   { label: "1 hora", value: 1 },
@@ -53,9 +51,6 @@ export default function ChatList() {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedMuteHours, setSelectedMuteHours] = useState(null);
   const [mutedChats, setMutedChats] = useState([]);
-  const [isModalVisible, setIsModalVisible] = useState(false); // Controla la visibilidad del modal
-const [selectedStories, setSelectedStories] = useState([]); // Almacena las historias seleccionadas
-
   const { t } = useTranslation();
 
   const user = auth.currentUser;
@@ -72,73 +67,6 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
     const interval = setInterval(checkTime, 60000);
     return () => clearInterval(interval);
   }, []);
-
-  const checkStories = async () => {
-    try {
-      const updatedChats = [];
-  
-      for (const chat of chats) {
-        const userRef = doc(database, "users", chat.user.uid);
-        const userDoc = await getDoc(userRef);
-        const userData = userDoc.exists() ? userDoc.data() : null;
-  
-        if (!userData) continue;
-  
-        const isPrivate = userData?.isPrivate || false;
-  
-        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-        const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
-        const friendSnapshot = await getDocs(friendQuery);
-        const isFriend = !friendSnapshot.empty;
-  
-        const storiesRef = collection(userRef, "stories");
-        const storiesSnapshot = await getDocs(storiesRef);
-        const now = new Date();
-  
-        const userStories = isPrivate && !isFriend
-          ? [] // Si es privado y no somos amigos, no hay historias
-          : storiesSnapshot.docs
-              .map((doc) => {
-                const data = doc.data();
-                return {
-                  id: doc.id,
-                  ...data,
-                  createdAt: data.createdAt instanceof Timestamp
-                    ? data.createdAt.toDate()
-                    : new Date(0), // Fecha predeterminada para valores inválidos
-                  expiresAt: data.expiresAt instanceof Timestamp
-                    ? data.expiresAt.toDate()
-                    : new Date(), // Fecha predeterminada para evitar errores
-                };
-              })
-              .filter((story) => story.expiresAt > now);
-  
-        updatedChats.push({
-          ...chat,
-          user: {
-            ...chat.user,
-            hasStories: userStories.length > 0,
-            isFriend,
-            isPrivate,
-            userStories,
-          },
-        });
-      }
-  
-      setChats(updatedChats);
-    } catch (error) {
-      console.error("Error verificando historias en chats:", error);
-    }
-  };
-  
-  
-  
-  useEffect(() => {
-    if (chats.length > 0) {
-      checkStories();
-    }
-  }, [chats]);
-  
 
   useEffect(() => {
     const fetchMutedChats = async () => {
@@ -178,7 +106,7 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
           name="arrow-back"
           size={24}
           color={isNightMode ? "#fff" : "#000"}
-          style={{ marginLeft: 10, }}
+          style={{ marginLeft: 10 }}
           onPress={() => navigation.goBack()}
         />
       ),
@@ -335,67 +263,6 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
     setShowMuteOptions(false); // Oculta las opciones de silenciar
     setSelectedMuteHours(null); // Limpia la selección actual (opcional)
   };
-  const handleImagePress = async (chat) => {
-    const user = chat.user;
-  
-    try {
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      if (!userDoc.exists()) {
-        Alert.alert("Error", "No se encontraron detalles para este usuario.");
-        return;
-      }
-  
-      const userData = userDoc.data();
-      const isPrivate = userData?.isPrivate || false;
-  
-      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-      const friendQuery = query(friendsRef, where("friendId", "==", user.uid));
-      const friendSnapshot = await getDocs(friendQuery);
-      const isFriend = !friendSnapshot.empty;
-  
-      if (isPrivate && !isFriend) {
-        // Si el perfil es privado y no somos amigos, redirigir al perfil del usuario
-        navigation.navigate("UserProfile", {
-          selectedUser: {
-            id: user.uid,
-            username: user.username || "Usuario desconocido",
-            firstName: userData.firstName || "Nombre desconocido",
-            lastName: userData.lastName || "Apellido desconocido",
-            profileImage: user.photoUrls?.[0] || "https://via.placeholder.com/150",
-            isPrivate: userData.isPrivate || false,
-          },
-        });
-        return;
-      }
-  
-      // Si hay historias disponibles
-      if (user.hasStories) {
-        const stories = user.userStories.map((story) => ({
-          ...story,
-          createdAt: story.createdAt?.toDate ? story.createdAt : Timestamp.fromDate(new Date()),
-          expiresAt: story.expiresAt?.toDate ? story.expiresAt : Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
-        }));
-        setSelectedStories([
-          {
-            uid: user.uid,
-            username: user.username || "Usuario desconocido",
-            profileImage: user.photoUrls?.[0],
-            userStories: stories,
-          },
-        ]);
-        setIsModalVisible(true);
-      } else {
-        handleChatPress(chat); // Si no hay historias, abrir el chat
-      }
-    } catch (error) {
-      console.error("Error al manejar clic en imagen:", error);
-      Alert.alert("Error", "Hubo un problema al procesar la solicitud.");
-    }
-  };
-  
-  
-  
-  
 
   const handleChatPress = async (chat) => {
     const isMuted = mutedChats.some((mute) => mute.chatId === chat.id);
@@ -584,37 +451,14 @@ const [selectedStories, setSelectedStories] = useState([]); // Almacena las hist
     }
   };
 
-const renderChatItem = ({ item }) => {
-  const isMuted = mutedChats.some(
-    (mute) => mute.chatId === item.id && new Date(mute.muteUntil) > new Date()
-  );
+  const renderChatItem = ({ item }) => {
+    const isMuted = mutedChats.some(
+      (mute) => mute.chatId === item.id && new Date(mute.muteUntil) > new Date()
+    );
 
-  return (
-    <View style={styles.chatItem}>
-      {isSelectionMode && (
-        <View
-          style={[
-            styles.selectionIndicator,
-            selectedChats.includes(item.id) && styles.selectionIndicatorSelected,
-          ]}
-        />
-      )}
-      {/* Imagen de usuario: Abre el modal de historias si se hace clic aquí */}
-      <TouchableOpacity onPress={() => handleImagePress(item)}>
-        <Image
-          source={{
-            uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
-          }}
-          style={[
-            styles.userImage,
-            item.user.hasStories && styles.hasStoryIndicator, // Indicador de historias
-          ]}
-        />
-      </TouchableOpacity>
-
-      {/* Información del chat: Abre la conversación si se hace clic aquí */}
+    return (
       <TouchableOpacity
-        style={styles.chatInfoContainer}
+        style={styles.chatItem}
         onPress={() =>
           isSelectionMode ? toggleChatSelection(item.id) : handleChatPress(item)
         }
@@ -643,6 +487,22 @@ const renderChatItem = ({ item }) => {
           }
         }}
       >
+        {isSelectionMode && (
+          <View
+            style={[
+              styles.checkbox,
+              selectedChats.includes(item.id) && {
+                backgroundColor: isNightMode ? "white" : "black",
+              },
+            ]}
+          />
+        )}
+        <Image
+          source={{
+            uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
+          }}
+          style={styles.userImage}
+        />
         <View style={styles.chatInfo}>
           <Text
             style={[
@@ -653,16 +513,17 @@ const renderChatItem = ({ item }) => {
           >
             {item.user.username || "Usuario desconocido"}
           </Text>
-          <Text
-            style={[
-              styles.lastMessagePreview,
-              { color: isNightMode ? "white" : "black" },
-            ]}
-          >
-            {truncateMessage(item.lastMessage || "")}
-          </Text>
+          {item.unseenMessagesCount === 0 && (
+            <Text
+              style={[
+                styles.lastMessagePreview,
+                { color: isNightMode ? "white" : "black" },
+              ]}
+            >
+              {truncateMessage(item.lastMessage || "")}
+            </Text>
+          )}
         </View>
-
         <View style={styles.timeAndUnreadContainer}>
           {isMuted && (
             <Ionicons
@@ -690,9 +551,8 @@ const renderChatItem = ({ item }) => {
           )}
         </View>
       </TouchableOpacity>
-    </View>
-  );
-};
+    );
+  };
 
   const renderMuteOptions = () => (
     <View
@@ -877,24 +737,6 @@ const renderChatItem = ({ item }) => {
               </TouchableOpacity>
             </View>
           )}
-          {isModalVisible && (
-  <Modal
-    visible={isModalVisible}
-    animationType="slide"
-    transparent={false}
-  >
-    <StoryViewer
-      stories={selectedStories}
-      initialIndex={0}
-      navigation={navigation} 
-      onClose={async () => {
-        setIsModalVisible(false);
-        await checkStories();
-      }}
-      unseenStories={{}}
-    />
-  </Modal>
-)}
         </LinearGradient>
       </SafeAreaView>
     </Provider>

@@ -43,29 +43,12 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 15,
     paddingVertical: 10,
-    position: "relative",
   },
   userImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 4,
-    marginLeft: 15,
-  },
-  selectionIndicator: {
-    position: "absolute",
-    left: 5,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#000",
-    backgroundColor: "transparent",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  selectionIndicatorSelected: {
-    backgroundColor: "#000",
+    marginRight: 15,
   },
   chatInfo: {
     flex: 1,
@@ -202,20 +185,6 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  hasStoryIndicator: {
-    borderWidth: 2,
-    borderColor: "white", // Cambia el color según el diseño
-    borderRadius: 25, // Ajusta según el tamaño de la imagen
-  },
-  chatInfoContainer: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  
 });
 
 export const lightTheme = {
