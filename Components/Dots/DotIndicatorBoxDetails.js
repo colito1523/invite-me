@@ -41,6 +41,10 @@ const handleCloseStoryViewer = (updatedUnseenStories) => {
 
 const checkStories = async () => {
   try {
+    const currentUserRef = doc(database, "users", auth.currentUser.uid);
+    const currentUserDoc = await getDoc(currentUserRef);
+    const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
+
     const attendeesWithStories = attendeesList.map((attendee) => ({
       ...attendee,
       hasStories: false,
@@ -48,8 +52,8 @@ const checkStories = async () => {
     }));
 
     for (const attendee of attendeesWithStories) {
-      // Exclude current user's stories
-      if (attendee.uid === auth.currentUser.uid) {
+      // Exclude current user's stories and hidden stories
+      if (attendee.uid === auth.currentUser.uid || hideStoriesFrom.includes(attendee.uid)) {
         continue;
       }
 
@@ -173,6 +177,18 @@ const checkStories = async () => {
       Alert.alert("Error", "No puedes interactuar con este usuario.");
       return;
     }
+
+    const userRef = doc(database, "users", auth.currentUser.uid);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data();
+    const hideStoriesFrom = userData?.hideStoriesFrom || [];
+
+    if (hideStoriesFrom.includes(uid)) {
+      const targetUserDoc = await getDoc(doc(database, "users", uid));
+      const targetUserData = targetUserDoc.data();
+      navigation.navigate("UserProfile", { selectedUser: { id: uid, ...targetUserData } });
+      return;
+    }
   
     if (auth.currentUser?.uid === uid) {
       navigation.navigate("Profile", { selectedUser: auth.currentUser });
@@ -191,10 +207,7 @@ const checkStories = async () => {
       const hideStoriesFrom = userData?.hideStoriesFrom || [];
   
       // Check if the current user is in the hideStoriesFrom array
-      if (hideStoriesFrom.includes(auth.currentUser.uid)) {
-        navigation.navigate("UserProfile", { selectedUser: userData });
-        return;
-      }
+      
   
       const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
       const friendQuery = query(friendsRef, where("friendId", "==", uid));
