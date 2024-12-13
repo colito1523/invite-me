@@ -34,35 +34,74 @@ import MutualFriendsModal from "../Mutual-Friends-Modal/MutualFriendsModal";
 
 const { width, height } = Dimensions.get("window");
 
-const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus, isProcessing }) => {
+const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus, isProcessing, friendCount, mutualFriends }) => {
   const { t } = useTranslation();
   return (
     <View style={styles.nameContainer}>
-      <Text style={[styles.name]}>
-        {firstName} {lastName}
-      </Text>
-      {showAddFriendButton && (
-        <TouchableOpacity
-          style={styles.addFriendButton}
-          onPress={toggleUserStatus}
-          disabled={isProcessing}
-        >
-          {isProcessing ? (
-            <ActivityIndicator size="small" color="#fff" />
+      <View style={styles.nameAndButtonContainer}>
+        <Text style={[styles.name]}>
+          {firstName} {lastName}
+        </Text>
+        {showAddFriendButton && (
+          <TouchableOpacity
+            style={styles.addFriendButton}
+            onPress={toggleUserStatus}
+            disabled={isProcessing}
+          >
+            {isProcessing ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <AntDesign
+                name={
+                  friendshipStatus
+                    ? "deleteuser"
+                    : pendingRequest
+                    ? "clockcircle"
+                    : "adduser"
+                }
+                size={27}
+                color={isNightMode ? "#fff" : "#fff"}
+              />
+            )}
+          </TouchableOpacity>
+        )}
+      </View>
+      {friendCount !== undefined && (
+        <View style={styles.friendCountContainer}>
+          <Text style={[styles.number, { color: isNightMode ? "#fff" : "#fff" }]}>
+            {friendCount}
+          </Text>
+        </View>
+      )}
+      {mutualFriends !== undefined && (
+        <View style={styles.mutualFriendsContainer}>
+          {mutualFriends.length === 0 ? (
+            <Text style={[styles.noMutualFriendsText, { color: isNightMode ? "#fff" : "#fff" }]}>
+              {t('noMutualFriends')}
+            </Text>
           ) : (
-            <AntDesign
-              name={
-                friendshipStatus
-                  ? "deleteuser"
-                  : pendingRequest
-                  ? "clockcircle"
-                  : "adduser"
-              }
-              size={27}
-              color={isNightMode ? "#fff" : "#fff"}
-            />
+            <TouchableOpacity
+              onPress={handleMutualFriendsPress}
+              style={{ flexDirection: "row", alignItems: "center" }}
+            >
+              <View style={{ flexDirection: "row", height: 40 }}>
+                {mutualFriends.slice(0, 4).map((friend, index) => (
+                  <Image
+                    key={friend.uid}
+                    source={{ uri: friend.photoUrls[0] }}
+                    style={[styles.mutualFriendImage, { left: index * 30 }]}
+                    cachePolicy="memory-disk"
+                  />
+                ))}
+              </View>
+              <Text style={[styles.mutualFriendMoreText, { marginLeft: 10, color: isNightMode ? "#fff" : "#fff" }]}>
+                {mutualFriends.length > 4
+                  ? t('andMoreMutualFriends', { count: mutualFriends.length - 4 })
+                  : t('mutualFriends')}
+              </Text>
+            </TouchableOpacity>
           )}
-        </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -424,62 +463,6 @@ export default function Component({ route, navigation }) {
     setIsFriendListVisible(false);
   };
 
-  const renderMutualFriends = () => {
-    if (mutualFriends.length === 0) {
-      return (
-        <View style={styles.mutualFriendsContainer}>
-          <Text
-            style={[
-              styles.noMutualFriendsText,
-              { color: isNightMode ? "#fff" : "#fff" },
-            ]}
-          >
-            {t('noMutualFriends')}
-          </Text>
-        </View>
-      );
-    }
-  
-    const containerWidth = mutualFriends.length * 40;
-  
-    return (
-      <TouchableOpacity
-        onPress={handleMutualFriendsPress}
-        style={[
-          styles.mutualFriendsContainer,
-          { flexDirection: "row", alignItems: "center" },
-        ]}
-      >
-        <View
-          style={[
-            styles.mutualFriendImagesContainer,
-            { width: containerWidth },
-          ]}
-        >
-          {mutualFriends.slice(0, 4).map((friend, index) => (
-            <Image
-              key={friend.uid}
-              source={{ uri: friend.photoUrls[0] }}
-              style={[styles.mutualFriendImage, { left: index * 30 }]}
-              cachePolicy="memory-disk"
-            />
-          ))}
-        </View>
-        <Text
-          style={[
-            styles.mutualFriendMoreText,
-            { marginLeft: 10, color: isNightMode ? "#fff" : "#fff" },
-          ]}
-        >
-          {mutualFriends.length > 4
-            ? t('andMoreMutualFriends', { count: mutualFriends.length - 4 })
-            : t('mutualFriends')}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
-  
-
   return (
     <Provider>
       <LinearGradient
@@ -531,20 +514,12 @@ export default function Component({ route, navigation }) {
                     pendingRequest={pendingRequest}
                     toggleUserStatus={toggleUserStatus}
                     isProcessing={isProcessing}
+                    friendCount={index === 0 ? friendCount : undefined}
+                    mutualFriends={index === 1 ? mutualFriends : undefined}
                   />
                   <View style={styles.infoContainer}>
                     {index === 0 && (
                       <>
-                        <TouchableOpacity style={styles.friendCountContainer}>
-                          <Text
-                            style={[
-                              styles.number,
-                              { color: isNightMode ? "#fff" : "#fff" },
-                            ]}
-                          >
-                            {friendCount}
-                          </Text>
-                        </TouchableOpacity>
                         <View style={styles.rectanglesContainer}>
                           <View style={styles.topRectanglesRow}>
                             <View style={styles.rectangle} />
@@ -556,10 +531,6 @@ export default function Component({ route, navigation }) {
                     )}
                     {index === 1 && (
                       <>
-                        
-                        <View style={styles.friendCountContainer}>
-                          {renderMutualFriends()}
-                        </View>
                         <View style={styles.horizontalRectanglesContainer}>
                           <View style={styles.rectangle} />
                           <View style={styles.rectangle} />
@@ -670,6 +641,8 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     zIndex: 10,
+  },
+  nameAndButtonContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
