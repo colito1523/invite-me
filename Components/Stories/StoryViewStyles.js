@@ -33,10 +33,14 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   image: {
-    width,
-    height,
-    resizeMode: "contain",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "black",
   },
+  rotatedImage: {
+    transform: [{ rotate: "90deg" }],
+  },
+
   userInfo: {
     position: "absolute",
     top: 20,

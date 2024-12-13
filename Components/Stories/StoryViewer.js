@@ -446,79 +446,79 @@ export function StoryViewer({
     }
   };
 
-  const handleLikeStory = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-  
-      const currentStory = stories[currentIndex]?.userStories[storyIndex];
-      if (!currentStory) return;
-  
-      const storyRef = doc(
+ const handleLikeStory = async () => {
+  try {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const currentStory = stories[currentIndex]?.userStories[storyIndex];
+    if (!currentStory) return;
+
+    const storyRef = doc(
+      database,
+      "users",
+      currentStory.uid,
+      "stories",
+      currentStory.id
+    );
+
+    const userRef = doc(database, "users", currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+
+    if (hasLiked) {
+      // Eliminar el like
+      const storySnap = await getDoc(storyRef);
+      const storyData = storySnap.data();
+
+      if (storyData?.likes) {
+        const updatedLikes = storyData.likes.filter(
+          (like) => like.uid !== currentUser.uid
+        );
+        await updateDoc(storyRef, { likes: updatedLikes });
+      }
+      setHasLiked(false);
+    } else {
+      // Agregar el like
+      const likeData = {
+        uid: currentUser.uid,
+        firstName: userData.firstName || "Usuario",
+        lastName: userData.lastName || "",
+        profileImage: userData.photoUrls?.[0] || "default-image-url",
+        timestamp: new Date(),
+      };
+
+      await updateDoc(storyRef, {
+        likes: arrayUnion(likeData),
+      });
+
+      // Enviar notificación al propietario de la historia
+      const notificationRef = collection(
         database,
         "users",
         currentStory.uid,
-        "stories",
-        currentStory.id
+        "notifications"
       );
-  
-      const userRef = doc(database, "users", currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      const userData = userSnap.data();
-  
-      if (hasLiked) {
-        // Eliminar el like
-        const storySnap = await getDoc(storyRef);
-        const storyData = storySnap.data();
-  
-        if (storyData?.likes) {
-          const updatedLikes = storyData.likes.filter(
-            (like) => like.uid !== currentUser.uid
-          );
-          await updateDoc(storyRef, { likes: updatedLikes });
-        }
-        setHasLiked(false);
-      } else {
-        // Agregar el like
-        const likeData = {
-          uid: currentUser.uid,
-          firstName: userData.firstName || "Usuario",
-          lastName: userData.lastName || "",
-          profileImage: userData.photoUrls?.[0] || "default-image-url",
-          timestamp: new Date(),
-        };
-  
-        await updateDoc(storyRef, {
-          likes: arrayUnion(likeData),
-        });
-  
-        // Enviar notificación al propietario de la historia
-        const notificationRef = collection(
-          database,
-          "users",
-          currentStory.uid,
-          "notifications"
-        );
-  
-        await addDoc(notificationRef, {
-          type: "storyLike",
-          fromId: currentUser.uid,
-          fromName: `${userData.firstName} ${userData.lastName}`.trim(),
-          fromImage: userData.photoUrls?.[0] || "default-image-url",
-          storyId: currentStory.id,
-          message: `${userData.firstName} ${userData.lastName} te dio like en tu historia.`,
-          timestamp: new Date(),
-          seen: false, // Marcamos la notificación como no vista
-        });
-  
-        setHasLiked(true);
-      }
-    } catch (error) {
-      console.error("Error al gestionar el like:", error);
-      Alert.alert("Error", "No se pudo gestionar el like.");
+
+      await addDoc(notificationRef, {
+        type: "storyLike",
+        fromId: currentUser.uid,
+        fromName: `${userData.firstName} ${userData.lastName}`.trim(),
+        fromImage: userData.photoUrls?.[0] || "default-image-url",
+        storyId: currentStory.id,
+        message: `${userData.firstName} ${userData.lastName} te dio like en tu historia.`,
+        timestamp: new Date(),
+        seen: false, // Marcamos la notificación como no vista
+      });
+
+      setHasLiked(true);
     }
-  };
-  
+  } catch (error) {
+    console.error("Error al gestionar el like:", error);
+    Alert.alert("Error", "No se pudo gestionar el like.");
+  }
+};
+
   
 
   const handleUserPress = async (selectedUser) => {

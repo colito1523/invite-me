@@ -192,8 +192,9 @@ export const fetchUnreadMessages = async ({ setUnreadMessages }) => {
         const chatData = docSnapshot.data();
 
         // Verificar si el chat está silenciado
-        const isMuted = mutedChats.some((mute) => mute.chatId === docSnapshot.id);
-        if (isMuted) return; // Ignorar chats silenciados
+        const isMuted = mutedChats.some((mute) => { console.log("Chat no silenciado:", mute); console.log("Chat no silenciado:", docSnapshot.id);mute.chatId.toString() == docSnapshot.id.toString() });
+       console.log(isMuted) 
+       if (isMuted) return; // Ignorar chats silenciados
 
         const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
         const unseenMessagesQuery = query(
@@ -206,7 +207,9 @@ export const fetchUnreadMessages = async ({ setUnreadMessages }) => {
           if (!unseenMessagesSnapshot.empty) {
             hasUnreadMessages = true;
             setUnreadMessages(true);
+            console.log("Tienes mensajes no leídos.");
           } else if (!hasUnreadMessages) {
+            console.log("No tienes mensajes no leídos.");
             setUnreadMessages(false);
           }
         });
