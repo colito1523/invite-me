@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     position: "absolute",
-    bottom: 40,
+    bottom: 20,
     left: 10,
     right: 10,
     flexDirection: "row",
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   messageInput: {
     flex: 1,
     color: "white",
-    paddingVertical: 10,
+    paddingVertical: 15,
     fontSize: 16,
   },
   iconButton: {

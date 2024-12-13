@@ -153,10 +153,13 @@ export default function Notes() {
           const likesSnapshot = await getDocs(likesRef);
           const isLiked = likesSnapshot.docs.some((doc) => doc.id === user.uid);
 
+          const friendDoc = await getDoc(doc(database, "users", friend.friendId));
+          const friendData = friendDoc.data();
+
           return {
             id: noteSnapshot.id,
             ...noteData,
-            friendName: friend.friendName,
+            username: friendData.username,
             friendImage: friend.friendImage,
             friendId: friend.friendId,
             isLiked: isLiked,
@@ -410,7 +413,7 @@ export default function Notes() {
           { color: isNightMode ? "#fff" : "black" },
         ]}
       >
-        {isUser ? " " : note.friendName}
+        {isUser ? " " : note.username}
       </Text>
       <View style={styles.imageContainer}>
         <Image
@@ -540,7 +543,7 @@ export default function Notes() {
               >
                 <View style={styles.fullScreenUsernameContainer}>
                   <Text style={styles.fullScreenUsername}>
-                    {selectedNoteFullScreen.friendName || userData?.username}
+                    {selectedNoteFullScreen.username || userData?.username}
                   </Text>
                 </View>
 
@@ -950,15 +953,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#c8c8c8",
-    padding: 5,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    padding: 2,
     paddingHorizontal: 10,
     marginBottom: 20,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 35,
-    width: "100%",
+    width: "90%",
   },
   fullScreenNoteText: {
     fontSize: 18,
@@ -992,7 +995,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     padding: 15,
     borderRadius: 70,
-    marginBottom: 20,
+    marginBottom: 90,
     borderColor: "black",
     borderWidth: 1,
     color: "#000",

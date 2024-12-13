@@ -434,7 +434,7 @@ const Home = React.memo(() => {
     {unreadNotifications && (
       <View style={[
         styles.unreadIndicator,
-        { backgroundColor: "red" }
+        { backgroundColor: isNightMode ? "white" : "black" }
       ]} />
     )}
   </TouchableOpacity>
@@ -447,7 +447,7 @@ const Home = React.memo(() => {
     {unreadMessages && (
       <View style={[
         styles.unreadIndicator,
-        { backgroundColor: "red" }
+        { backgroundColor: isNightMode ? "white" : "black" }
       ]} />
     )}
   </TouchableOpacity>

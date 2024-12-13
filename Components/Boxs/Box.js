@@ -52,9 +52,9 @@ const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, is
 
 const styles = StyleSheet.create({
   touchable: {
-    width: width - 20,
-    marginHorizontal: 10,
-    marginBottom: 15,
+    width: width - 10,
+    marginHorizontal: 0,
+    marginBottom: 7,
     borderRadius: 15,
     overflow: "hidden",
     alignSelf: "center",
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   box: {
     width: "100%",
-    height: 200,
+    height: 210,
     justifyContent: "flex-end",
     borderRadius: 15,
   },

@@ -12,8 +12,6 @@ import {
   Keyboard,
   SafeAreaView,
   ActivityIndicator,
-  Animated, 
-  Easing,
   Dimensions, // Add this import
 } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
@@ -910,7 +908,7 @@ export function StoryViewer({
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // Ajusta según la interfaz
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0} // Ajusta según la interfaz
       >
         <View style={styles.container} {...panResponder.panHandlers}>
           <TouchableWithoutFeedback
