@@ -172,33 +172,58 @@ export const fetchProfileImage = async ({setProfileImage}) => {
     }
 };
 
-export const fetchUnreadMessages = async ({setUnreadMessages}) => {
+export const fetchUnreadMessages = async ({ setUnreadMessages }) => {
   if (!auth.currentUser) return;
+
   const user = auth.currentUser;
   const chatsRef = collection(database, "chats");
-  const q = query(chatsRef, where("participants", "array-contains", user.uid));
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    let hasUnreadMessages = false;
-    querySnapshot.forEach((docSnapshot) => {
-      const chatData = docSnapshot.data();
-      const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
-      const unseenMessagesQuery = query(
-        messagesRef,
-        where("seen", "==", false),
-        where("senderId", "!=", user.uid)
-      );
-      onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
-        if (!unseenMessagesSnapshot.empty) {
-          hasUnreadMessages = true;
-          setUnreadMessages(true);
-        } else {
-          setUnreadMessages(false);
-        }
+  const userRef = doc(database, "users", user.uid);
+
+  try {
+    // Obtener los chats silenciados del usuario
+    const userDoc = await getDoc(userRef);
+    const mutedChats = userDoc.data()?.mutedChats || [];
+
+    const q = query(chatsRef, where("participants", "array-contains", user.uid));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let hasUnreadMessages = false;
+
+      querySnapshot.forEach((docSnapshot) => {
+        const chatData = docSnapshot.data();
+
+        // Verificar si el chat está silenciado
+        const isMuted = mutedChats.some((mute) => mute.chatId === docSnapshot.id);
+        if (isMuted) return; // Ignorar chats silenciados
+
+        const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
+        const unseenMessagesQuery = query(
+          messagesRef,
+          where("seen", "==", false),
+          where("senderId", "!=", user.uid)
+        );
+
+        onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
+          if (!unseenMessagesSnapshot.empty) {
+            hasUnreadMessages = true;
+            setUnreadMessages(true);
+          } else if (!hasUnreadMessages) {
+            setUnreadMessages(false);
+          }
+        });
       });
+
+      // Si no hay mensajes no leídos en absoluto
+      if (!hasUnreadMessages) {
+        setUnreadMessages(false);
+      }
     });
-  });
-  return () => unsubscribe();
+
+    return () => unsubscribe();
+  } catch (error) {
+    console.error("Error fetching unread messages:", error);
+  }
 };
+
 
 export const checkNotificationsSeenStatus = async (setNotificationIconState) => {
 if (auth.currentUser) {

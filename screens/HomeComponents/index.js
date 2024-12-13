@@ -294,9 +294,8 @@ const Home = React.memo(() => {
   useEffect(() => {
     const unsubscribe = fetchUnreadMessages({
       setUnreadMessages,
-      user: auth.currentUser,
     });
-    
+  
     console.log("¿Tengo mensajes sin leer?:", unreadMessages);
   
     return () => {
