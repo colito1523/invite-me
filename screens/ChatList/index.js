@@ -795,7 +795,7 @@ const [isModalVisible, setIsModalVisible] = useState(false);
                   initialIndex={0}
                   onClose={async () => {
                       setIsModalVisible(false);
-                      await checkStories();
+                      await checkUserStories();
                   }}
                   unseenStories={{}}
                   navigation={navigation} 
