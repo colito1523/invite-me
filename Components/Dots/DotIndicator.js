@@ -53,6 +53,10 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
   const checkStories = async () => {
     try {
+      const currentUserRef = doc(database, "users", auth.currentUser.uid);
+      const currentUserDoc = await getDoc(currentUserRef);
+      const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
+
       const attendeesWithStories = attendeesList.map((attendee) => ({
         ...attendee,
         hasStories: false,
@@ -60,8 +64,8 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       }));
 
       for (const attendee of attendeesWithStories) {
-        // Exclude current user's stories
-        if (attendee.uid === auth.currentUser.uid) {
+        // Exclude current user's stories and hidden stories
+        if (attendee.uid === auth.currentUser.uid || hideStoriesFrom.includes(attendee.uid)) {
           continue;
         }
 
@@ -158,6 +162,17 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   const handleUserPress = async (uid) => {
     if (blockedUsers.includes(uid)) {
       Alert.alert("Error", "No puedes interactuar con este usuario.");
+      return;
+    }
+
+    const currentUserRef = doc(database, "users", auth.currentUser.uid);
+    const currentUserDoc = await getDoc(currentUserRef);
+    const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
+
+    if (hideStoriesFrom.includes(uid)) {
+      const targetUserDoc = await getDoc(doc(database, "users", uid));
+      const targetUserData = targetUserDoc.data();
+      navigation.navigate("UserProfile", { selectedUser: { id: uid, ...targetUserData } });
       return;
     }
   
