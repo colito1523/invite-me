@@ -95,7 +95,6 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
     const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
 
     const unsubscribeNotifications = onSnapshot(q, (querySnapshot) => {
-      console.log("fetchUnreadNotifications - Notificaciones no vistas:", !querySnapshot.empty);
       if (!querySnapshot.empty) {
         setUnreadNotifications(true);
       } else {
@@ -104,7 +103,6 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
     });
 
     const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
-      console.log("fetchUnreadNotifications - Solicitudes de amistad no vistas:", !querySnapshot.empty);
       if (!querySnapshot.empty) {
         setUnreadNotifications(true);
       } else {

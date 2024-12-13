@@ -296,6 +296,8 @@ const Home = React.memo(() => {
       setUnreadMessages,
       user: auth.currentUser,
     });
+    
+    console.log("¿Tengo mensajes sin leer?:", unreadMessages);
   
     return () => {
       if (typeof unsubscribe === "function") {
