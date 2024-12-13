@@ -73,6 +73,73 @@ const [isModalVisible, setIsModalVisible] = useState(false);
     return () => clearInterval(interval);
   }, []);
 
+  const checkStories = async () => {
+    try {
+      const updatedChats = [];
+  
+      for (const chat of chats) {
+        const userRef = doc(database, "users", chat.user.uid);
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.exists() ? userDoc.data() : null;
+  
+        if (!userData) continue;
+  
+        const isPrivate = userData?.isPrivate || false;
+  
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
+        const friendSnapshot = await getDocs(friendQuery);
+        const isFriend = !friendSnapshot.empty;
+  
+        const storiesRef = collection(userRef, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+        const now = new Date();
+  
+        const userStories = isPrivate && !isFriend
+          ? [] // Si es privado y no somos amigos, no hay historias
+          : storiesSnapshot.docs
+              .map((doc) => {
+                const data = doc.data();
+                return {
+                  id: doc.id,
+                  ...data,
+                  createdAt: data.createdAt instanceof Timestamp
+                    ? data.createdAt.toDate()
+                    : new Date(0), // Fecha predeterminada para valores inválidos
+                  expiresAt: data.expiresAt instanceof Timestamp
+                    ? data.expiresAt.toDate()
+                    : new Date(), // Fecha predeterminada para evitar errores
+                };
+              })
+              .filter((story) => story.expiresAt > now);
+  
+        updatedChats.push({
+          ...chat,
+          user: {
+            ...chat.user,
+            hasStories: userStories.length > 0,
+            isFriend,
+            isPrivate,
+            userStories,
+          },
+        });
+      }
+  
+      setChats(updatedChats);
+    } catch (error) {
+      console.error("Error verificando historias en chats:", error);
+    }
+  };
+  
+  
+  
+  useEffect(() => {
+    if (chats.length > 0) {
+      checkStories();
+    }
+  }, [chats]);
+  
+
   useEffect(() => {
     const fetchMutedChats = async () => {
       try {
@@ -99,41 +166,6 @@ const [isModalVisible, setIsModalVisible] = useState(false);
 
     fetchMutedChats();
   }, []);
-
-  const checkUserStories = async (userId) => {
-    try {
-      const userDocRef = doc(database, "users", userId);
-      const userDoc = await getDoc(userDocRef);
-      if (!userDoc.exists()) return null;
-  
-      const storiesRef = collection(userDocRef, "stories");
-      const storiesSnapshot = await getDocs(storiesRef);
-  
-      const now = new Date();
-      const activeStories = storiesSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          expiresAt: doc.data().expiresAt?.toDate(),
-        }))
-        .filter((story) => story.expiresAt > now);
-  
-      return activeStories;
-    } catch (error) {
-      console.error("Error verificando historias:", error);
-      return null;
-    }
-  };
-
-  const handleStoryPress = (user) => {
-    if (user.hasStories) {
-      setSelectedStories(user.stories);
-      setIsModalVisible(true);
-    }
-  };
-  
-  
 
   useEffect(() => {
     navigation.setOptions({
@@ -196,9 +228,6 @@ const [isModalVisible, setIsModalVisible] = useState(false);
       
                 const otherUserData = otherUserDoc.data();
       
-                // Verificar historias activas del usuario
-                const userStories = await checkUserStories(otherUserId);
-      
                 // Cálculo de mensajes no leídos
                 const messagesRef = collection(
                   database,
@@ -212,16 +241,15 @@ const [isModalVisible, setIsModalVisible] = useState(false);
                   where("seen", "==", false),
                   where("senderId", "!=", user.uid)
                 );
-                const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+                const unseenMessagesSnapshot = await getDocs(
+                  unseenMessagesQuery
+                );
+
                 const unseenMessagesCount = unseenMessagesSnapshot.size;
       
                 return {
                   id: docSnapshot.id,
-                  user: {
-                    ...otherUserData,
-                    hasStories: userStories && userStories.length > 0,
-                    stories: userStories, // Incluye las historias en los datos del usuario
-                  },
+                  user: otherUserData,
                   unseenMessagesCount, // Agregar el conteo
                   lastMessage: chatData.lastMessage || "", // Agregar el último mensaje
                   lastMessageTimestamp: chatData.lastMessageTimestamp || null,
@@ -302,6 +330,67 @@ const [isModalVisible, setIsModalVisible] = useState(false);
     setShowMuteOptions(false); // Oculta las opciones de silenciar
     setSelectedMuteHours(null); // Limpia la selección actual (opcional)
   };
+  const handleImagePress = async (chat) => {
+    const user = chat.user;
+  
+    try {
+      const userDoc = await getDoc(doc(database, "users", user.uid));
+      if (!userDoc.exists()) {
+        Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        return;
+      }
+  
+      const userData = userDoc.data();
+      const isPrivate = userData?.isPrivate || false;
+  
+      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+      const friendQuery = query(friendsRef, where("friendId", "==", user.uid));
+      const friendSnapshot = await getDocs(friendQuery);
+      const isFriend = !friendSnapshot.empty;
+  
+      if (isPrivate && !isFriend) {
+        // Si el perfil es privado y no somos amigos, redirigir al perfil del usuario
+        navigation.navigate("UserProfile", {
+          selectedUser: {
+            id: user.uid,
+            username: user.username || "Usuario desconocido",
+            firstName: userData.firstName || "Nombre desconocido",
+            lastName: userData.lastName || "Apellido desconocido",
+            profileImage: user.photoUrls?.[0] || "https://via.placeholder.com/150",
+            isPrivate: userData.isPrivate || false,
+          },
+        });
+        return;
+      }
+  
+      // Si hay historias disponibles
+      if (user.hasStories) {
+        const stories = user.userStories.map((story) => ({
+          ...story,
+          createdAt: story.createdAt?.toDate ? story.createdAt : Timestamp.fromDate(new Date()),
+          expiresAt: story.expiresAt?.toDate ? story.expiresAt : Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+        }));
+        setSelectedStories([
+          {
+            uid: user.uid,
+            username: user.username || "Usuario desconocido",
+            profileImage: user.photoUrls?.[0],
+            userStories: stories,
+          },
+        ]);
+        setIsModalVisible(true);
+      } else {
+        handleChatPress(chat); // Si no hay historias, abrir el chat
+      }
+    } catch (error) {
+      console.error("Error al manejar clic en imagen:", error);
+      Alert.alert("Error", "Hubo un problema al procesar la solicitud.");
+    }
+  };
+  
+  
+  
+  
 
   const handleChatPress = async (chat) => {
     const isMuted = mutedChats.some((mute) => mute.chatId === chat.id);
@@ -536,7 +625,7 @@ const [isModalVisible, setIsModalVisible] = useState(false);
             ]}
           />
         )}
-        <TouchableOpacity onPress={() => handleStoryPress(item.user)}>
+        <TouchableOpacity onPress={() => handleImagePress(item)}>
         <Image
           source={{
             uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
@@ -781,9 +870,6 @@ const [isModalVisible, setIsModalVisible] = useState(false);
               </TouchableOpacity>
             </View>
           )}
-        </LinearGradient>
-      </SafeAreaView>
-
       {isModalVisible && (
           <Modal
               visible={isModalVisible}
@@ -795,13 +881,15 @@ const [isModalVisible, setIsModalVisible] = useState(false);
                   initialIndex={0}
                   onClose={async () => {
                       setIsModalVisible(false);
-                      await checkUserStories();
+                      await checkStories();
                   }}
                   unseenStories={{}}
                   navigation={navigation} 
               />
           </Modal>
       )}
+        </LinearGradient>
+      </SafeAreaView>
     </Provider>
   );
 }
