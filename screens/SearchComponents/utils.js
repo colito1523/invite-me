@@ -17,6 +17,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
       const userRef = doc(database, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
       const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+      const hideStoriesFrom = userSnapshot.data()?.hideStoriesFrom || [];
 
       const normalizedSearchTerm = searchTerm.toLowerCase();
 
@@ -42,7 +43,10 @@ export const fetchUsers = async (searchTerm, setResults) => {
       
           const hasStories = storiesSnapshot.docs.some((storyDoc) => {
             const storyData = storyDoc.data();
-            return new Date(storyData.expiresAt.toDate()) > now;
+            return (
+              new Date(storyData.expiresAt.toDate()) > now &&
+              !hideStoriesFrom.includes(doc.id)
+            );
           });
       
           return {

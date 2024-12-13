@@ -306,7 +306,7 @@ export default function Search() {
       const friendsRef = collection(database, "users", user.uid, "friends");
       const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
       if (friendsSnapshot.empty) {
-        Alert.alert("Acceso denegado", "No puedes ver las historias de este usuario.");
+        navigation.navigate("UserProfile", { selectedUser: item });
         return;
       }
     }
@@ -383,7 +383,7 @@ export default function Search() {
               const friendsRef = collection(database, "users", user.uid, "friends");
               const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
               if (friendsSnapshot.empty) {
-                handleUserPress(item);
+                navigation.navigate("UserProfile", { selectedUser: item });
                 return;
               }
             }
