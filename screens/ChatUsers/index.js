@@ -111,9 +111,6 @@ export default function Chat({ route }) {
         });
 
         return () => unsubscribe();
-
-      } else {
-        createChatIfNotExists()
       }
   }, [chatId, messages.length]);
 
@@ -262,8 +259,12 @@ export default function Chat({ route }) {
         return;
     }
 
+    if (!message.trim() && !mediaUri) {
+        return;
+    }
+
     try {
-        const chatIdToUse = await createChatIfNotExists();
+        const chatIdToUse = chatId || await createChatIfNotExists();
         const messagesRef = collection(
             database,
             "chats",
