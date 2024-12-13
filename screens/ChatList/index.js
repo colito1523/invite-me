@@ -73,72 +73,6 @@ const [isModalVisible, setIsModalVisible] = useState(false);
     return () => clearInterval(interval);
   }, []);
 
-  const checkStories = async () => {
-    try {
-      const updatedChats = [];
-  
-      for (const chat of chats) {
-        const userRef = doc(database, "users", chat.user.uid);
-        const userDoc = await getDoc(userRef);
-        const userData = userDoc.exists() ? userDoc.data() : null;
-  
-        if (!userData) continue;
-  
-        const isPrivate = userData?.isPrivate || false;
-  
-        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-        const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
-        const friendSnapshot = await getDocs(friendQuery);
-        const isFriend = !friendSnapshot.empty;
-  
-        const storiesRef = collection(userRef, "stories");
-        const storiesSnapshot = await getDocs(storiesRef);
-        const now = new Date();
-  
-        const userStories = isPrivate && !isFriend
-          ? [] // Si es privado y no somos amigos, no hay historias
-          : storiesSnapshot.docs
-              .map((doc) => {
-                const data = doc.data();
-                return {
-                  id: doc.id,
-                  ...data,
-                  createdAt: data.createdAt instanceof Timestamp
-                    ? data.createdAt.toDate()
-                    : new Date(0), // Fecha predeterminada para valores inválidos
-                  expiresAt: data.expiresAt instanceof Timestamp
-                    ? data.expiresAt.toDate()
-                    : new Date(), // Fecha predeterminada para evitar errores
-                };
-              })
-              .filter((story) => story.expiresAt > now);
-  
-        updatedChats.push({
-          ...chat,
-          user: {
-            ...chat.user,
-            hasStories: userStories.length > 0,
-            isFriend,
-            isPrivate,
-            userStories,
-          },
-        });
-      }
-  
-      setChats(updatedChats);
-    } catch (error) {
-      console.error("Error verificando historias en chats:", error);
-    }
-  };
-  
-  
-  
-  useEffect(() => {
-    if (chats.length > 0) {
-      checkStories();
-    }
-  }, [chats]);
-  
 
   useEffect(() => {
     const fetchMutedChats = async () => {
@@ -537,6 +471,7 @@ const [isModalVisible, setIsModalVisible] = useState(false);
       );
     }
   };
+  
 
   const toggleChatSelection = (chatId) => {
     setSelectedChats((prevSelected) =>
@@ -579,10 +514,85 @@ const [isModalVisible, setIsModalVisible] = useState(false);
     }
   };
 
+  const areChatsDifferent = (oldChats, newChats) => {
+    return JSON.stringify(oldChats) !== JSON.stringify(newChats);
+  };
+  
+  const checkStories = async () => {
+    try {
+      const updatedChats = [];
+  
+      for (const chat of chats) {
+        const userRef = doc(database, "users", chat.user.uid);
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.exists() ? userDoc.data() : null;
+  
+        if (!userData) continue;
+  
+        const isPrivate = userData?.isPrivate || false;
+  
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
+        const friendSnapshot = await getDocs(friendQuery);
+        const isFriend = !friendSnapshot.empty;
+  
+        const storiesRef = collection(userRef, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+        const now = new Date();
+  
+        const userStories = isPrivate && !isFriend
+          ? [] // Si es privado y no somos amigos, no hay historias
+          : storiesSnapshot.docs
+              .map((doc) => {
+                const data = doc.data();
+                return {
+                  id: doc.id,
+                  ...data,
+                  createdAt: data.createdAt instanceof Timestamp
+                    ? data.createdAt.toDate()
+                    : new Date(0), // Fecha predeterminada para valores inválidos
+                  expiresAt: data.expiresAt instanceof Timestamp
+                    ? data.expiresAt.toDate()
+                    : new Date(), // Fecha predeterminada para evitar errores
+                };
+              })
+              .filter((story) => story.expiresAt > now);
+  
+        updatedChats.push({
+          ...chat,
+          user: {
+            ...chat.user,
+            hasStories: userStories.length > 0,
+            isFriend,
+            isPrivate,
+            userStories,
+          },
+        });
+      }
+  
+      if (areChatsDifferent(chats, updatedChats)) {
+        setChats(updatedChats);
+      }
+    } catch (error) {
+      console.error("Error verificando historias en chats:", error);
+    }
+  };
+  
+  useEffect(() => {
+    if (chats.length > 0) {
+      const debounceCheckStories = setTimeout(() => {
+        checkStories();
+      }, 300); // Agregar un pequeño debounce para evitar llamadas excesivas
+  
+      return () => clearTimeout(debounceCheckStories);
+    }
+  }, [chats]);
+
   const renderChatItem = ({ item }) => {
     const isMuted = mutedChats.some(
       (mute) => mute.chatId === item.id && new Date(mute.muteUntil) > new Date()
     );
+
 
     return (
       <TouchableOpacity

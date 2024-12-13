@@ -431,7 +431,7 @@ export default function Component({ route, navigation }) {
           <Text
             style={[
               styles.noMutualFriendsText,
-              { color: isNightMode ? "#fff" : "#000" },
+              { color: isNightMode ? "#fff" : "#fff" },
             ]}
           >
             {t('noMutualFriends')}
@@ -468,7 +468,7 @@ export default function Component({ route, navigation }) {
         <Text
           style={[
             styles.mutualFriendMoreText,
-            { marginLeft: 10, color: isNightMode ? "#fff" : "#000" },
+            { marginLeft: 10, color: isNightMode ? "#fff" : "#fff" },
           ]}
         >
           {mutualFriends.length > 4
