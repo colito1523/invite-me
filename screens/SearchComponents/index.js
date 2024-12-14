@@ -20,7 +20,8 @@ import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import StorySlider from "../../Components/Stories/StorySlider";
 import { useTranslation } from 'react-i18next';
 import { getAuth } from "firebase/auth"; 
-import { fetchUsers, fetchRecommendations, sendFriendRequest, saveSearchHistory } from './utils';
+import { fetchUsers, fetchRecommendations, sendFriendRequest, saveSearchHistory, cancelFriendRequest  } from './utils';
+import { ActivityIndicator } from "react-native";
 import { database} from "../../config/firebase";
 import {
   collection,
@@ -123,14 +124,15 @@ export default function Search() {
 
   const renderRecommendationItem = ({ item, index }) => {
     const [status, setStatus] = useState(null);
-
+    const [isProcessing, setIsProcessing] = useState(false);
+  
     useEffect(() => {
       const fetchFriendRequestStatus = async () => {
         try {
           const requestRef = collection(database, "users", item.id, "friendRequests");
           const existingRequestQuery = query(requestRef, where("fromId", "==", auth.currentUser.uid));
           const existingRequestSnapshot = await getDocs(existingRequestQuery);
-
+  
           if (!existingRequestSnapshot.empty) {
             const existingRequest = existingRequestSnapshot.docs[0].data();
             setStatus(existingRequest.status);
@@ -141,17 +143,27 @@ export default function Search() {
           console.error("Error checking friend request status:", error);
         }
       };
-
+  
       fetchFriendRequestStatus();
     }, [item]);
+  
+  const toggleFriendRequest = async () => {
+  setIsProcessing(true);
 
-    const toggleFriendRequest = async () => {
-      if (status === "pending") {
-        await deleteFriendRequest(item, setStatus);
-      } else {
-        await sendFriendRequest(item, setStatus);
-      }
-    };
+  try {
+    if (status === "pending") {
+      await cancelFriendRequest(item, setStatus, t); // Pasa 't' aquí
+    } else {
+      await sendFriendRequest(item, setStatus);
+    }
+  } catch (error) {
+    console.error("Error handling friend request:", error);
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
+    
 
     return (
       <TouchableOpacity
@@ -173,21 +185,23 @@ export default function Search() {
           )}
         </View>
         <TouchableOpacity
-          style={[styles.addFriendButton, { backgroundColor: theme.buttonBackground }]}
-          onPress={toggleFriendRequest}
-          disabled={status === "accepted"}
-        >
-          {status === "pending" ? (
-            <Ionicons name="time" size={20} color="black" />
-          ) : status === "accepted" ? (
-            <Ionicons name="checkmark" size={20} color="black" />
-          ) : (
-            <Ionicons name="person-add" size={24} color="black" />
-          )}
-        </TouchableOpacity>
+        style={[styles.addFriendButton, { backgroundColor: theme.buttonBackground }]}
+        onPress={toggleFriendRequest}
+        disabled={isProcessing || status === "accepted"}
+      >
+        {isProcessing ? (
+          <ActivityIndicator size="small" color="black" />
+        ) : status === "pending" ? (
+          <Ionicons name="time" size={20} color="black" />
+        ) : status === "accepted" ? (
+          <Ionicons name="checkmark" size={20} color="black" />
+        ) : (
+          <Ionicons name="person-add" size={24} color="black" />
+        )}
       </TouchableOpacity>
-    );
-  };
+    </TouchableOpacity>
+  );
+};
 
   useEffect(() => {
     const loadSearchHistory = async () => {

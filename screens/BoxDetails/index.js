@@ -45,6 +45,7 @@ import {
   checkEventStatus,
   handleGeneralEventInvite,
   checkAndRemoveExpiredEvents,
+  handleDeletePrivateEvent 
 } from "./utils"
 
 export default memo(function BoxDetails({ route, navigation }) {
@@ -237,31 +238,10 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
-  const handleDeleteEvent = async () => {
-    setMenuVisible(false);
-    Alert.alert(
-      "Eliminar Evento",
-      "¿Estás seguro de que deseas eliminar este evento?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const eventRef = doc(database, "EventsPriv", box.id || box.title);
-              await deleteDoc(eventRef);
-              Alert.alert("Evento eliminado exitosamente");
-              navigation.goBack();
-            } catch (error) {
-              console.error("Error eliminando el evento:", error);
-              Alert.alert("Error", "No se pudo eliminar el evento.");
-            }
-          },
-        },
-      ]
-    );
-  };
+const handleDeleteEvent = () => {
+  handleDeletePrivateEvent({ box, setMenuVisible, navigation });
+};
+  
 
   const fetchFriends = async () => {
     const user = auth.currentUser;

@@ -635,3 +635,73 @@ export const handleAcceptGeneralEvent = async (params) => {
     setLoadingEventId(null);
   }
 };
+
+export const handleDeletePrivateEvent = async (params) => {
+  const { box, setMenuVisible, navigation } = params;
+
+  setMenuVisible(false);
+
+  Alert.alert(
+    "Eliminar Evento",
+    "¿Estás seguro de que deseas eliminar este evento?",
+    [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const eventId = box.id || box.title;
+
+            // Eliminar el evento de la colección EventsPriv
+            const eventRef = doc(database, "EventsPriv", eventId);
+            await deleteDoc(eventRef);
+            console.log(`Evento ${eventId} eliminado de EventsPriv`);
+
+            // Obtener todos los usuarios
+            const usersRef = collection(database, "users");
+            const usersSnapshot = await getDocs(usersRef);
+
+            // Iterar sobre los usuarios para eliminar el evento de sus subcolecciones y las notificaciones
+            const promises = [];
+            usersSnapshot.forEach(async (userDoc) => {
+              const userId = userDoc.id;
+
+              // Eliminar el evento de la subcolección "events"
+              const userEventsRef = collection(database, "users", userId, "events");
+              const eventsQuery = query(userEventsRef, where("eventId", "==", eventId));
+              const userEventsSnapshot = await getDocs(eventsQuery);
+              userEventsSnapshot.forEach((eventDoc) => {
+                promises.push(deleteDoc(eventDoc.ref));
+              });
+
+              // Eliminar las notificaciones asociadas al eventId
+              const userNotificationsRef = collection(database, "users", userId, "notifications");
+              const notificationsQuery = query(userNotificationsRef, where("eventId", "==", eventId));
+              const userNotificationsSnapshot = await getDocs(notificationsQuery);
+              userNotificationsSnapshot.forEach((notificationDoc) => {
+                promises.push(deleteDoc(notificationDoc.ref));
+              });
+            });
+
+            // Esperar a que todas las promesas de eliminación se completen
+            await Promise.all(promises);
+            console.log(`Evento ${eventId} y sus notificaciones eliminados de todos los usuarios`);
+
+            // Mensaje de éxito
+            Alert.alert("Evento eliminado exitosamente");
+            navigation.goBack();
+          } catch (error) {
+            console.error("Error eliminando el evento y las notificaciones:", error);
+            Alert.alert("Error", "No se pudo eliminar el evento y las notificaciones.");
+          }
+        },
+      },
+    ]
+  );
+};
+
+
+
+
+

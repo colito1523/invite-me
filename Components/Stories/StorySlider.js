@@ -374,32 +374,31 @@ const handleGallery = async () => {
         horizontal
         showsHorizontalScrollIndicator={false}
       />
-       <Modal
-            visible={!!selectedImage}
-            transparent={true}
-            onRequestClose={() => setSelectedImage(null)}
+    <Modal
+    visible={!!selectedImage}
+    transparent={true}
+    onRequestClose={() => setSelectedImage(null)}
+>
+    <View style={styles.fullScreenContainer}>
+        <Image source={{ uri: selectedImage }} style={styles.fullScreenImage} />
+        <TouchableOpacity
+            style={styles.rejectIconContainer}
+            onPress={() => setSelectedImage(null)} // Cierra el modal sin subir
         >
-            <View style={styles.previewContainer}>
-                <Image source={{ uri: selectedImage }} style={styles.previewImage} />
-                <View style={styles.previewActions}>
-                    <TouchableOpacity
-                        style={styles.rejectButton}
-                        onPress={() => setSelectedImage(null)} // Cierra el modal sin subir
-                    >
-                        <Text style={styles.buttonTextReject}>Rechazar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.uploadButton}
-                        onPress={() => {
-                            uploadStory(selectedImage);
-                            setSelectedImage(null); // Sube y cierra el modal
-                        }}
-                    >
-                        <Text style={styles.buttonText}>Subir</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </Modal>
+            <Ionicons name="close" size={30} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity
+            style={styles.acceptButtonContainer}
+            onPress={() => {
+                uploadStory(selectedImage); // Sube la imagen
+                setSelectedImage(null); // Cierra el modal
+            }}
+        >
+            <Ionicons name="arrow-forward" size={30} color="black" />
+        </TouchableOpacity>
+    </View>
+</Modal>
+
       <Modal
         visible={storyViewerVisible}
         transparent={false}
@@ -512,42 +511,31 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
-  previewContainer: {
+  fullScreenContainer: {
     flex: 1,
+    backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'black',
 },
-previewImage: {
-    width: '90%',
-    height: '90%',
-    resizeMode: 'contain',
-    marginBottom: 20,
+fullScreenImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
 },
-previewActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '60%',
+rejectIconContainer: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
 },
-rejectButton: {
-    backgroundColor: 'black',
-    padding: 10,
-    borderRadius: 5,
-},
-uploadButton: {
+acceptButtonContainer: {
+    position: 'absolute',
+    bottom: 40,
+    right: 20,
     backgroundColor: 'white',
     padding: 10,
-    borderRadius: 5,
-},
-buttonText: {
-    color: 'black',
-    fontWeight: 'bold',
-    textAlign: 'center',
-},
-buttonTextReject: {
-  color: 'white',
-  fontWeight: 'bold',
-  textAlign: 'center',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
 },
 unseenStoryCircle: {
   borderColor: 'black',

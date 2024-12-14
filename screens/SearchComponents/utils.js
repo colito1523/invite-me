@@ -210,9 +210,8 @@ export const sendFriendRequest = async (user, setStatus) => {
   }
 };
 
-export const cancelFriendRequest = async (user, setStatus) => {
-  const auth = getAuth(); 
-  const { t } = useTranslation();
+export const cancelFriendRequest = async (user, setStatus, t) => {
+  const auth = getAuth();
   if (!auth.currentUser || !user) return;
 
   try {
@@ -235,6 +234,7 @@ export const cancelFriendRequest = async (user, setStatus) => {
     Alert.alert(t('error'), t('errorCancelingFriendRequestMessage'));
   }
 };
+
 
 export const deleteFriendRequest = async (user, setStatus) => {
   const auth = getAuth();
