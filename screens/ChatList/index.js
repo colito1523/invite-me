@@ -218,6 +218,25 @@ const [isModalVisible, setIsModalVisible] = useState(false);
   );
 
   useEffect(() => {
+    if (chats.length > 0) {
+      console.log("Lista de Chats:");
+      chats.forEach((chat) => {
+        console.log(`Chat ID: ${chat.id}`);
+        console.log("Detalles del usuario:");
+        console.log(`UID: ${chat.user.uid}`);
+        console.log(`Nombre de usuario: ${chat.user.username}`);
+        console.log(`Nombre: ${chat.user.firstName} ${chat.user.lastName}`);
+        console.log(`Email: ${chat.user.email}`);
+      });
+    }
+  }, [chats]);
+  
+  
+  
+  
+  
+
+  useEffect(() => {
     const filtered = chats.filter((chat) =>
       chat.user.username.toLowerCase().includes(searchText.toLowerCase())
     );
@@ -529,42 +548,53 @@ const [isModalVisible, setIsModalVisible] = useState(false);
   
         if (!userData) continue;
   
-        const isPrivate = userData?.isPrivate || false;
+        // Verificar si el UID del usuario está en hideStoriesFrom
+        const currentUserRef = doc(database, "users", auth.currentUser.uid);
+        const currentUserDoc = await getDoc(currentUserRef);
+        const currentUserData = currentUserDoc.data();
   
+        const isHidden =
+          currentUserData?.hideStoriesFrom?.includes(chat.user.uid) || false;
+  
+        // Verificar si el usuario es amigo
         const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
         const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
         const friendSnapshot = await getDocs(friendQuery);
         const isFriend = !friendSnapshot.empty;
   
+        // Si el perfil es privado y no son amigos, ocultar historias
+        const isPrivate = userData?.isPrivate || false;
+  
         const storiesRef = collection(userRef, "stories");
         const storiesSnapshot = await getDocs(storiesRef);
         const now = new Date();
   
-        const userStories = isPrivate && !isFriend
-          ? [] // Si es privado y no somos amigos, no hay historias
-          : storiesSnapshot.docs
-              .map((doc) => {
-                const data = doc.data();
-                return {
-                  id: doc.id,
-                  ...data,
-                  createdAt: data.createdAt instanceof Timestamp
-                    ? data.createdAt.toDate()
-                    : new Date(0), // Fecha predeterminada para valores inválidos
-                  expiresAt: data.expiresAt instanceof Timestamp
-                    ? data.expiresAt.toDate()
-                    : new Date(), // Fecha predeterminada para evitar errores
-                };
-              })
-              .filter((story) => story.expiresAt > now);
+        const userStories =
+          isPrivate && !isFriend
+            ? [] // Ocultar historias si es privado y no son amigos
+            : isHidden
+            ? [] // Ocultar historias si está en hideStoriesFrom
+            : storiesSnapshot.docs
+                .map((doc) => {
+                  const data = doc.data();
+                  return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt instanceof Timestamp
+                      ? data.createdAt.toDate()
+                      : new Date(0), // Fecha predeterminada para valores inválidos
+                    expiresAt: data.expiresAt instanceof Timestamp
+                      ? data.expiresAt.toDate()
+                      : new Date(), // Fecha predeterminada para evitar errores
+                  };
+                })
+                .filter((story) => story.expiresAt > now);
   
         updatedChats.push({
           ...chat,
           user: {
             ...chat.user,
-            hasStories: userStories.length > 0,
-            isFriend,
-            isPrivate,
+            hasStories: userStories.length > 0, // Solo muestra si no está oculto
             userStories,
           },
         });
@@ -577,6 +607,8 @@ const [isModalVisible, setIsModalVisible] = useState(false);
       console.error("Error verificando historias en chats:", error);
     }
   };
+  
+  
   
   useEffect(() => {
     if (chats.length > 0) {
