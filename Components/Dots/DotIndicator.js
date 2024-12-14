@@ -322,8 +322,10 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
           style={[
             currentStyles.attendeeImage,
             item.hasStories &&
-              (!item.isPrivate || (item.isPrivate && item.isFriend)) &&
-              currentStyles.unseenStoryCircle, // Aplicar borde solo si cumple condiciones
+              (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
+                ...currentStyles.unseenStoryCircle,
+                borderColor: isNightMode ? "white" : "black",
+              },
           ]}
           cachePolicy="memory-disk"
         />

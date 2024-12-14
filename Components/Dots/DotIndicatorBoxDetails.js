@@ -268,8 +268,10 @@ const checkStories = async () => {
   style={[
     styles.imageContainer,
     item.hasStories &&
-      (!item.isPrivate || (item.isPrivate && item.isFriend)) &&
-      styles.unseenStoryCircle,
+      (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
+        ...styles.unseenStoryCircle,
+        borderColor: isNightMode ? "white" : "black",
+      },
   ]}
 >
   <Image

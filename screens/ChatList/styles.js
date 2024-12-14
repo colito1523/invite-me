@@ -61,7 +61,6 @@ export const styles = StyleSheet.create({
 
   storyIndicator: {
     borderWidth: 2,
-    borderColor: "blue", // Color para el indicador
     borderRadius: 25,
   },
 

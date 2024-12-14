@@ -674,7 +674,10 @@ const [isModalVisible, setIsModalVisible] = useState(false);
           }}
           style={[
             styles.userImage,
-            item.user.hasStories && styles.storyIndicator, // Agrega la clase para historias
+            item.user.hasStories && {
+              ...styles.storyIndicator,
+              borderColor: isNightMode ? "white" : "black",
+            },
           ]}
         />
         </TouchableOpacity>

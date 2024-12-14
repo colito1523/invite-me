@@ -359,8 +359,10 @@ export default function Search() {
   style={[
     styles.userImage,
     item.hasStories &&
-    (!item.isPrivate || (item.isPrivate && item.isFriend)) &&
-    styles.unseenStoryCircle,
+    (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
+      ...styles.unseenStoryCircle,
+      borderColor: isNightMode ? "white" : "black",
+    },
   ]}
 />
 
@@ -434,8 +436,10 @@ export default function Search() {
   style={[
     styles.userImage,
     item.hasStories &&
-      (!item.isPrivate || (item.isPrivate && item.isFriend)) &&
-      styles.unseenStoryCircle,
+      (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
+        ...styles.unseenStoryCircle,
+        borderColor: isNightMode ? "white" : "black",
+      },
   ]}
   cachePolicy="memory-disk"
 />
