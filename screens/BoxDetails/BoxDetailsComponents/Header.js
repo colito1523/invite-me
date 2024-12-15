@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Entypo, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { auth } from "../../../config/firebase";
+import { useTranslation } from 'react-i18next';
 
 const Header = ({
   navigation,
@@ -19,78 +20,82 @@ const Header = ({
   handleEditEvent,
   handleDeleteEvent,
   isProcessing,
-}) => (
-  <View style={styles.headerContainer}>
-    {/* Botón Volver */}
-    <TouchableOpacity
-      style={styles.backButton}
-      onPress={() => navigation.goBack()}
-    >
-      <Entypo
-        name="chevron-left"
-        size={24}
-        color={isNightMode ? "#000" : "#000"}
-      />
-    </TouchableOpacity>
+}) => {
+  const { t } = useTranslation();
 
-    {/* Menú del Administrador */}
-    {boxData?.Admin === auth.currentUser?.uid && boxData.category === "EventoParaAmigos" && (
-      <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
+  return (
+    <View style={styles.headerContainer}>
+      {/* Botón Volver */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
         <Entypo
-          name="dots-three-vertical"
+          name="chevron-left"
           size={24}
           color={isNightMode ? "#000" : "#000"}
         />
       </TouchableOpacity>
-    )}
 
-    {/* Modal del Menú */}
-    <Modal
-      visible={menuVisible}
-      transparent
-      animationType="fade"
-      onRequestClose={() => toggleMenu(false)}
-    >
-      <TouchableOpacity
-        style={styles.modalOverlay}
-        onPress={() => toggleMenu(false)}
+      {/* Menú del Administrador */}
+      {boxData?.Admin === auth.currentUser?.uid && boxData.category === "EventoParaAmigos" && (
+        <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
+          <Entypo
+            name="dots-three-vertical"
+            size={24}
+            color={isNightMode ? "#000" : "#000"}
+          />
+        </TouchableOpacity>
+      )}
+
+      {/* Modal del Menú */}
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => toggleMenu(false)}
       >
-        <View style={styles.menuContainer}>
-          <TouchableOpacity
-            onPress={handleEditImage}
-            style={styles.editEventButton}
-            disabled={isProcessing}
-          >
-            <Text style={styles.editEventText}>
-              {isProcessing ? "Actualizando..." : "Editar Imagen "}
-              <Ionicons name="image" size={15} color="black" />
-            </Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          onPress={() => toggleMenu(false)}
+        >
+          <View style={styles.menuContainer}>
+            <TouchableOpacity
+              onPress={handleEditImage}
+              style={styles.editEventButton}
+              disabled={isProcessing}
+            >
+              <Text style={styles.editEventText}>
+                {isProcessing ? t('header.updating') : t('header.editImage')}
+                <Ionicons name="image" size={15} color="black" />
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={handleEditEvent}
-            style={styles.editEventButton}
-          >
-            <Text style={styles.editEventText}>
-              Editar Evento{" "}
-              <Ionicons name="pencil" size={15} color="black" />
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleEditEvent}
+              style={styles.editEventButton}
+            >
+              <Text style={styles.editEventText}>
+                {t('header.editEvent')}
+                <Ionicons name="pencil" size={15} color="black" />
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={handleDeleteEvent}
-            style={styles.deleteEventButton}
-          >
-            <Text style={styles.deleteEventText}>
-              Eliminar Evento{" "}
-              <FontAwesome name="trash" size={15} color="white" />
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  </View>
-);
+            <TouchableOpacity
+              onPress={handleDeleteEvent}
+              style={styles.deleteEventButton}
+            >
+              <Text style={styles.deleteEventText}>
+                {t('header.deleteEvent')}
+                <FontAwesome name="trash" size={15} color="white" />
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   headerContainer: {

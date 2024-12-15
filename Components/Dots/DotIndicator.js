@@ -22,6 +22,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import StoryViewer from '../Stories/StoryViewer';
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
@@ -35,6 +36,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   const [filteredImages, setFilteredImages] = useState(profileImages);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
+    const { t } = useTranslation();
 
   useEffect(() => {
     const fetchBlockedUsers = async () => {
@@ -44,7 +46,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         const blockedList = userSnapshot.data()?.blockedUsers || [];
         setBlockedUsers(blockedList);
       } catch (error) {
-        console.error("Error fetching blocked users:", error);
+        console.error(t("dotIndicator.errorFetchingBlockedUsers"), error);
       }
     };
 
@@ -105,7 +107,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
       setFilteredAttendees(attendeesWithStories);
     } catch (error) {
-      console.error("Error verificando historias:", error);
+      console.error(t("dotIndicator.errorCheckingStories"), error);
     }
   };
 
@@ -161,7 +163,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
   const handleUserPress = async (uid) => {
     if (blockedUsers.includes(uid)) {
-      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      Alert.alert(t("dotIndicator.blockedUserError"));
       return;
     }
 
@@ -184,7 +186,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     try {
       const userDoc = await getDoc(doc(database, "users", uid));
       if (!userDoc.exists()) {
-        Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        Alert.alert(t("dotIndicator.noDetailsFound"));
         return;
       }
   
@@ -201,9 +203,9 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         navigation.navigate("UserProfile", {
           selectedUser: {
             id: uid,
-            username: userData.username || "Usuario desconocido",
-            firstName: userData.firstName || "Nombre desconocido",
-            lastName: userData.lastName || "Apellido desconocido",
+            username: userData.username || t("dotIndicator.unknownUser"),
+            firstName: userData.firstName || t("dotIndicator.unknownUser"),
+            lastName: userData.lastName || t("dotIndicator.unknownUser"),
             profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
             isPrivate: userData.isPrivate || false,
           },
@@ -228,7 +230,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         setSelectedStories([
           {
             uid,
-            username: userData.username || "Usuario desconocido",
+            username: userData.username || t("dotIndicator.unknownUser"),
             profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
             userStories: activeStories,
           },
@@ -238,8 +240,8 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         navigation.navigate("UserProfile", { selectedUser: userData });
       }
     } catch (error) {
-      console.error("Error al manejar clic en usuario:", error);
-      Alert.alert("Error", "Hubo un problema al obtener los detalles del usuario.");
+      console.error(t("dotIndicator.errorHandlingUserClick"), error);
+      Alert.alert(t("dotIndicator.errorFetchingUserDetails"));
     }
   };
   
@@ -295,7 +297,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                 />
                 <TextInput
                   style={[currentStyles.searchInput, { color: isNightMode ? '#fff' : '#000' }]}
-                  placeholder="Pesquisar"
+                  placeholder={t("dotIndicator.searchPlaceholder")}
                   placeholderTextColor="gray"
                   value={searchTerm}
                   onChangeText={setSearchTerm}

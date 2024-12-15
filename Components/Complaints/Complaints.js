@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  View,
   Text,
   Modal,
   StyleSheet,
@@ -9,7 +8,6 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 const reportReasons = [
@@ -45,8 +43,8 @@ export default function Complaints({ isVisible, onClose, onSubmit }) {
     >
       <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={onClose}>
         <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
-          <Text style={styles.title}>{t('reportUser')}</Text>
-          <Text style={styles.subtitle}>{t('reportUserConfirmation')}</Text>
+          <Text style={styles.title}>{t('complaints.reportUser')}</Text>
+          <Text style={styles.subtitle}>{t('complaints.reportUserConfirmation')}</Text>
           <ScrollView style={styles.reasonsContainer}>
             {reportReasons.map((reason) => (
               <TouchableOpacity
@@ -57,14 +55,14 @@ export default function Complaints({ isVisible, onClose, onSubmit }) {
                 ]}
                 onPress={() => setSelectedReason(reason)}
               >
-                <Text style={styles.reasonText}>{t(`reportReasons.${reason}`)}</Text>
+                <Text style={styles.reasonText}>{t(`complaints.reportReasons.${reason}`)}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
           {selectedReason === 'Otros motivos' && (
             <TextInput
               style={styles.descriptionInput}
-              placeholder={t('describeReasonPlaceholder')}
+              placeholder={t('complaints.describeReasonPlaceholder')}
               multiline
               maxLength={500}
               value={description}
@@ -72,13 +70,14 @@ export default function Complaints({ isVisible, onClose, onSubmit }) {
             />
           )}
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>{t('sendReport')}</Text>
+            <Text style={styles.submitButtonText}>{t('complaints.sendReport')}</Text>
           </TouchableOpacity>
         </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
   );
 }
+
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
@@ -121,7 +120,7 @@ const styles = StyleSheet.create({
   },
   reasonText: {
     fontSize: 16,
-     textAlign: 'center',
+    textAlign: 'center',
     fontWeight: "bold"
   },
   descriptionInput: {

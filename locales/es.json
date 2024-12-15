@@ -1,4 +1,202 @@
 {
+  "complaints": {
+    "reportUser": "Denunciar usuario",
+    "reportUserConfirmation": "¿Estás seguro que quieres denunciar a este usuario?",
+    "reportReasons": {
+      "Spam": "Spam",
+      "Contenido inapropiado": "Contenido inapropiado",
+      "Acoso o intimidación": "Acoso o intimidación",
+      "Lenguaje abusivo": "Lenguaje abusivo",
+      "Violencia o amenazas": "Violencia o amenazas",
+      "Otros motivos": "Otros motivos"
+    },
+    "describeReasonPlaceholder": "Describe el motivo (máximo 100 palabras)",
+    "sendReport": "Enviar denuncia",
+    "selectReasonError": "Por favor, selecciona un motivo para la denuncia."
+  },
+
+  "blockedUsers": {
+    "modalTitle": "Usuarios bloqueados",
+    "unblockButtonText": "Desbloquear",
+    "closeButtonText": "Cerrar",
+    "unblockSuccess": "El usuario ha sido desbloqueado.",
+    "unblockError": "No se pudo desbloquear al usuario.",
+    "notAuthenticatedError": "No estás autenticado.",
+    "noUserDataError": "No se encontraron los datos del usuario actual.",
+    "cannotUnblockError": "No puedes desbloquear a este usuario."
+  },
+
+  "dotIndicator": {
+    "searchPlaceholder": "Buscar...",
+    "errorFetchingBlockedUsers": "Error al obtener usuarios bloqueados:",
+    "errorCheckingStories": "Error verificando historias:",
+    "errorFetchingUserDetails": "Error al obtener los detalles del usuario.",
+    "errorHandlingUserClick": "Hubo un problema al obtener los detalles del usuario.",
+    "noDetailsFound": "No se encontraron detalles para este usuario.",
+    "cannotInteractWithUser": "No puedes interactuar con este usuario.",
+    "blockedUserError": "No puedes interactuar con este usuario.",
+    "privateProfile": "Perfil privado",
+    "unknownUser": "Usuario desconocido",
+    "noStoriesAvailable": "No hay historias disponibles",
+    "errorOpeningCamera": "Hubo un problema al abrir la cámara. Por favor, inténtalo de nuevo.",
+    "errorOpeningGallery": "Hubo un problema al abrir la galería. Por favor, inténtalo de nuevo."
+  },
+
+  "dotIndicatorBoxDetails": {
+    "errorFetchingBlockedUsers": "Error al obtener usuarios bloqueados:",
+    "errorCheckingStories": "Error verificando historias:",
+    "errorFetchingUserDetails": "Error al obtener los detalles del usuario.",
+    "errorHandlingUserClick": "Hubo un problema al obtener los detalles del usuario.",
+    "noDetailsFound": "No se encontraron detalles para este usuario.",
+    "cannotInteractWithUser": "No puedes interactuar con este usuario.",
+    "blockedUserError": "No puedes interactuar con este usuario.",
+    "privateProfile": "Perfil privado",
+    "unknownUser": "Usuario desconocido",
+    "noStoriesAvailable": "No hay historias disponibles",
+    "errorOpeningCamera": "Hubo un problema al abrir la cámara. Por favor, inténtalo de nuevo.",
+    "errorOpeningGallery": "Hubo un problema al abrir la galería. Por favor, inténtalo de nuevo."
+  },
+
+  "eventRecommendation": {
+    "suggestSpace": "Sugerir un Espacio",
+    "selectImage": "Seleccionar Imagen",
+    "titlePlaceholder": "Título",
+    "placeNamePlaceholder": "Nombre del Lugar",
+    "addressPlaceholder": "Dirección",
+    "submitButton": "Enviar Recomendación",
+    "error": "Error",
+    "completeAllFields": "Por favor, completa todos los campos.",
+    "success": "Éxito",
+    "recommendationSent": "Recomendación enviada correctamente.",
+    "submissionError": "No se pudo enviar la recomendación."
+  },
+
+  "mutualFriendsModal": {
+    "searchPlaceholder": "Buscar entre {{count}} amigos",
+    "noFriendsFound": "No se encontraron amigos",
+    "errorFetchingUser": "Error al obtener los datos del usuario",
+    "userNotFound": "No se encontraron detalles para este usuario"
+  },
+
+  "notes": {
+    "error": "Error",
+    "emptyNoteError": "Por favor, ingresa una nota antes de enviar.",
+    "postNoteError": "No se pudo compartir tu estado de ánimo. Por favor, inténtalo de nuevo.",
+    "deleteNoteError": "No se pudo eliminar la nota y los me gusta. Por favor, inténtalo de nuevo.",
+    "deleteMood": "Eliminar estado de ánimo",
+    "deleteMoodConfirm": "¿Estás seguro de que quieres eliminar tu estado de ánimo?",
+    "cancel": "Cancelar",
+    "ok": "Aceptar",
+    "likedYourNote": "le gustó tu nota de estado de ánimo.",
+    "likeToggleError": "No se pudo dar/quitar me gusta a la nota. Por favor, inténtalo de nuevo.",
+    "anonymous": "Anónimo",
+    "sendResponseError": "No se pudo enviar tu respuesta. Por favor, inténtalo de nuevo.",
+    "success": "Éxito",
+    "moodShared": "Tu estado de ánimo ha sido compartido: {{mood}}",
+    "shareMoodError": "No se pudo compartir el estado de ánimo. Por favor, inténtalo de nuevo.",
+    "typePlaceholder": "Escribe...",
+    "emptyResponseError": "Por favor, ingresa un mensaje antes de enviar.",
+    "responseSent": "¡Tu respuesta ha sido enviada!",
+    "typeMoodPlaceholder": "Escribe tu estado",
+    "shareMoodPlaceholder": "Comparte tu estado",
+    "hideMoodOptions": "Ocultar opciones de estado de ánimo",
+    "showMoodOptions": "Mostrar opciones de estado de ánimo",
+    "respondToNotePlaceholder": "Responder a la nota...",
+    "moodOptions": {
+      "Movie night": "Noche de cine",
+      "Dinner out": "Cena fuera",
+      "Wine glass": "Copa de vino",
+      "Late night talks": "Charlas nocturnas",
+      "Evening Walk": "Paseo nocturno",
+      "Ice Cream Outing": "Salida por helado",
+      "Cozy night in": "Noche acogedora en casa"
+    }
+  },
+    "userProfilePrivate": {
+      "userBlocked": "Usuario Bloqueado",
+      "isBlocked": "ha sido bloqueado.",
+      "blockError": "No se pudo bloquear al usuario.",
+      "error": "Error",
+      "report": "Denunciar",
+      "cannotReportUser": "No se puede denunciar a este usuario en este momento.",
+      "couldNotGetUserInfo": "No se pudo obtener la información del usuario.",
+      "errorGettingUserData": "Error al obtener los datos del usuario:",
+      "errorAccessingUserData": "Ocurrió un error al intentar acceder a los datos del usuario.",
+      "anonymous": "Anónimo",
+      "thankYou": "Gracias",
+      "reportSubmitted": "Tu denuncia ha sido enviada y será revisada por nuestro equipo de moderadores.",
+      "errorSubmittingReport": "Error al enviar la denuncia:",
+      "couldNotSubmitReport": "No se pudo enviar la denuncia. Por favor, inténtalo de nuevo.",
+      "couldNotSendFriendRequest": "No se pudo enviar la solicitud de amistad.",
+      "actionNotAllowed": "Acción no permitida",
+      "cannotRemoveFriendFromPrivateProfile": "No puedes eliminar la amistad desde un perfil privado.",
+      "noMutualFriends": "No tienen amigos en común",
+      "andMoreMutualFriends": "y {{count}} amigos en común",
+      "mutualFriends": "amigos en común",
+      "goBack": "Volver atrás",
+      "openOptionsMenu": "Abrir menú de opciones",
+      "block": "Bloquear"
+    },
+    "storySlider": {
+    "error": "Error",
+    "userAuthError": "No se pudo autenticar al usuario.",
+    "userDataNotFound": "No se han encontrado datos del usuario.",
+    "unknownUser": "Usuario desconocido",
+    "uploadError": "Error al subir historia:",
+    "storyUploadError": "Hubo un error al subir tu historia.",
+    "camera": "Cámara",
+    "gallery": "Galería",
+    "loadStoriesError": "Error al cargar historias:"
+  },
+
+  "storyViewer": {
+    "error": "Error",
+    "user": "Usuario",
+    "anonymous": "Anónimo",
+    "userDetailsNotFound": "No se encontraron detalles para este usuario.",
+    "userDetailsFetchError": "Hubo un problema al obtener los detalles del usuario.",
+    "likedYourStory": "{{firstName}} {{lastName}} le gustó tu historia.",
+    "likeError": "No se pudo dar me gusta a la historia.",
+    "sendResponseError": "No se pudo enviar la respuesta. Por favor, inténtalo de nuevo.",
+    "userAuthError": "No se pudo autenticar al usuario. Por favor, inicia sesión e inténtalo de nuevo.",
+    "storyNotFound": "No se pudo encontrar la historia.",
+    "deletePermissionError": "No tienes permiso para eliminar esta historia.",
+    "deleteError": "No se pudo eliminar la historia. Por favor, inténtalo de nuevo.",
+    "hoursAgo": "{{hours}}h",
+    "typePlaceholder": "Escribe...",
+    "searchPlaceholder": "Buscar...",
+    "viewers": "Espectadores",
+    "pinUnpinError": "No se pudo fijar/desfijar al espectador.",
+    "success": "Éxito",
+    "viewerCanSeeStories": "Este usuario podrá ver tus historias.",
+    "viewerCannotSeeStories": "Tus historias serán ocultadas para este usuario.",
+    "storySettingsUpdateError": "No se pudo actualizar la configuración de las historias.",
+    "alreadyHidden": "Ya has ocultado las historias de este usuario.",
+    "hiddenSuccessfully": "Las historias de este usuario han sido ocultadas con éxito.",
+    "hideError": "No se pudo ocultar las historias de este usuario."
+  },
+
+  "header": {
+    "backButton": "Volver",
+    "editImage": "Editar Imagen",
+    "editEvent": "Editar Evento",
+    "deleteEvent": "Eliminar Evento",
+    "updating": "Actualizando..."
+  },
+
+  "SliderContent": {
+   "description": "Descripción",
+  "descriptionNotAvailable": "Descripción no disponible",
+  "hours": "Hora",
+  "day": "Día",
+  "notAvailable": "No disponible",
+  "location": "Ubicación:",
+  "locationNotAvailable": "Ubicación no disponible",
+  "contact": "Contacto",
+  "noContactNumber": "Sin número de contacto"
+  },
+
+  
 
   "_comment_Login.js": "Login.js",
 
@@ -18,24 +216,6 @@
 
   "notifications.invitationAcceptedConfirmation": "¡Has aceptado la invitación de {{name}}!",
 
-  
-  "menu": {
-    "searchPlaceholder": "Busca la ciudad que buscas...",
-    "categories": {
-      "title": "Categorías",
-      "all": "Todos",
-      "restaurantsRooftops": "Restaurantes & Rooftops",
-      "barsClubs": "Bares & Clubs",
-      "events": "Eventos",
-      "createOwnEvent": "Crear mi propio evento",
-      "suggestSpace": "Sugerir un Espacio",
-      "support": "Soporte"
-    },
-    "cities": {
-      "title": "Ciudades"
-    },
-    "signOut": "Cerrar Sesión"
-  },
 
   "_comment_complaints.js": "complaints.js",
 
@@ -299,81 +479,6 @@
     "likedYourStory": "le ha dado like a tu historia.",
     "accept": "Aceptar",
     "reject": "Rechazar"
-  },
-
-  "storySlider": {
-    "currentUser": "Usuario actual",
-    "friend": "Amigo",
-    "friendDataNotFound": "No se encontraron datos del amigo con ID: {{friendId}}",
-    "loadStoriesError": "Error al cargar historias:",
-    "permissionDenied": "Permiso denegado",
-    "cameraPermissionNeeded": "Se necesita acceso a tu cámara para subir una historia.",
-    "galleryPermissionNeeded": "Se necesita acceso a tu galería para subir una historia.",
-    "error": "Error",
-    "cameraOpenError": "Hubo un problema al abrir la cámara. Por favor, inténtalo de nuevo.",
-    "galleryOpenError": "Hubo un problema al abrir la galería. Por favor, inténtalo de nuevo.",
-    "userAuthError": "No se ha podido autenticar al usuario.",
-    "userDataNotFound": "No se han encontrado datos del usuario.",
-    "unknownUser": "Usuario desconocido",
-    "uploadError": "Error al subir historia:",
-    "storyUploadError": "Hubo un error al subir tu historia.",
-    "camera": "Cámara",
-    "gallery": "Galería"
-  },
-
-  "storyViewer": {
-    "error": "Error",
-    "user": "Usuario",
-    "anonymous": "Anónimo",
-    "userDetailsNotFound": "No se encontraron detalles para este usuario.",
-    "userDetailsFetchError": "Hubo un problema al obtener los detalles del usuario.",
-    "likedYourStory": "A {{firstName}} {{lastName}} le gustó tu historia.",
-    "likeError": "No se pudo dar me gusta a la historia.",
-    "sendResponseError": "No se pudo enviar la respuesta. Por favor, inténtalo de nuevo.",
-    "userAuthError": "No se pudo autenticar al usuario. Por favor, inicia sesión e inténtalo de nuevo.",
-    "storyNotFound": "No se pudo encontrar la historia.",
-    "deletePermissionError": "No tienes permiso para eliminar esta historia.",
-    "deleteError": "No se pudo eliminar la historia. Por favor, inténtalo de nuevo.",
-    "hoursAgo": "{{hours}}h",
-    "typePlaceholder": "Escribe...",
-    "searchPlaceholder": "Buscar...",
-    "viewers": "Espectadores",
-    "pinUnpinError": "No se pudo fijar/desfijar al espectador."
-  },
-
-  "notes": {
-    "error": "Error",
-    "emptyNoteError": "Por favor, ingresa una nota antes de enviar.",
-    "postNoteError": "No se pudo compartir tu estado de ánimo. Por favor, inténtalo de nuevo.",
-    "deleteNoteError": "No se pudo eliminar la nota y los me gusta. Por favor, inténtalo de nuevo.",
-    "deleteMood": "Eliminar estado de ánimo",
-    "deleteMoodConfirm": "¿Estás seguro de que quieres eliminar tu estado de ánimo?",
-    "cancel": "Cancelar",
-    "ok": "Aceptar",
-    "likedYourNote": "le gustó tu nota de estado de ánimo.",
-    "likeToggleError": "No se pudo dar/quitar me gusta a la nota. Por favor, inténtalo de nuevo.",
-    "anonymous": "Anónimo",
-    "sendResponseError": "No se pudo enviar tu respuesta. Por favor, inténtalo de nuevo.",
-    "success": "Éxito",
-    "moodShared": "Tu estado de ánimo ha sido compartido: {{mood}}",
-    "shareMoodError": "No se pudo compartir el estado de ánimo. Por favor, inténtalo de nuevo.",
-    "typePlaceholder": "Escribe...",
-    "emptyResponseError": "Por favor, ingresa un mensaje antes de enviar.",
-    "responseSent": "¡Tu respuesta ha sido enviada!",
-    "typeMoodPlaceholder": "Escribe tu estado",
-    "shareMoodPlaceholder": "Comparte tu estado",
-    "hideMoodOptions": "Ocultar opciones de estado de ánimo",
-    "showMoodOptions": "Mostrar opciones de estado de ánimo",
-    "respondToNotePlaceholder": "Responder a la nota...",
-    "moodOptions": {
-      "Movie night": "Movie night",
-      "Dinner out": "Dinner out",
-      "Wine glass": "Wine glass",
-      "Late night talks": "Late night talks",
-      "Evening Walk": "Evening Walk",
-      "Ice Cream Outing": "Ice Cream Outing",
-      "Cozy night in": "Cozy night in"
-    }
   },
 
   "termsAndConditions": {

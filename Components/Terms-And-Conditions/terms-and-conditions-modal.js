@@ -41,7 +41,7 @@ export default function TermsAndConditionsModal() {
               <Text style={styles.modalTitle}>{t('termsAndConditions.title')}</Text>
               
               <Text style={styles.updateDate}>
-                {t('termsAndConditions.lastUpdated', { date: '07-11-2024' })}
+                {t('termsAndConditions.lastUpdated', { date: '15-12-2024' })}
               </Text>
 
               <Text style={styles.paragraph}>

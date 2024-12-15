@@ -182,8 +182,8 @@ export default function Notes() {
       setShowSendButton(text.trim() !== "");
     } else {
       Alert.alert(
-        "Límite de caracteres",
-        "La nota no puede tener más de 30 caracteres."
+        t("notes.error"),
+        t("notes.emptyNoteError")
       );
     }
   };

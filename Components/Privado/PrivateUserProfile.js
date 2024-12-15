@@ -194,8 +194,8 @@ export default function Component({ route, navigation }) {
   const handleReport = async () => {
     if (!selectedUser || !selectedUser.id) {
       Alert.alert(
-        t('error'),
-        t('cannotReportUser')
+        t('userProfile.error'),
+        t('userProfile.cannotReportUser')
       );
       return;
     }
@@ -207,13 +207,13 @@ export default function Component({ route, navigation }) {
         setIsReportModalVisible(true);
         setMenuVisible(false);
       } else {
-        Alert.alert(t('error'), t('couldNotGetUserInfo'));
+        Alert.alert(t('userProfile.error'), t('userProfile.couldNotGetUserInfo'));
       }
     } catch (error) {
-      console.error(t('errorGettingUserData'), error);
+      console.error(t('userProfile.errorGettingUserData'), error);
       Alert.alert(
-        t('error'),
-        t('errorAccessingUserData')
+        t('userProfile.error'),
+        t('userProfile.errorAccessingUserData')
       );
     }
   };
@@ -227,7 +227,7 @@ export default function Component({ route, navigation }) {
       const complaintsRef = collection(database, "complaints");
       const newComplaint = {
         reporterId: user.uid,
-        reporterName: user.displayName || t('anonymous'),
+        reporterName: user.displayName || t('userProfile.anonymous'),
         reporterUsername: user.email ? user.email.split("@")[0] : "unknown",
         reportedId: selectedUser.id,
         reportedName: `${selectedUser.firstName} ${selectedUser.lastName}`,
@@ -238,14 +238,14 @@ export default function Component({ route, navigation }) {
       };
       await addDoc(complaintsRef, newComplaint);
       Alert.alert(
-        t('thankYou'),
-        t('reportSubmitted')
+        t('userProfile.thankYou'),
+        t('userProfile.reportSubmitted')
       );
     } catch (error) {
-      console.error(t('errorSubmittingReport'), error);
+      console.error(t('userProfile.errorSubmittingReport'), error);
       Alert.alert(
-        t('error'),
-        t('couldNotSubmitReport')
+        t('userProfile.error'),
+        t('userProfile.couldNotSubmitReport')
       );
     }
     setIsReportModalVisible(false);
@@ -572,7 +572,7 @@ export default function Component({ route, navigation }) {
     title={t("userProfile.block")}
     titleStyle={{ color: "#FF3B30" }}
   />
-              <Menu.Item onPress={handleReport} title={t('report')} />
+              <Menu.Item onPress={handleReport} title={t('userProfile.report')} />
             </Menu>
           </View>
         </ScrollView>

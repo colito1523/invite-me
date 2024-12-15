@@ -228,7 +228,7 @@ const handleOpenViewer = async (index) => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert("Permiso denegado", "Se necesita acceso a la cámara.");
+        Alert.alert(t('storySlider.error'), t('storySlider.camera'));
         return;
       }
   
@@ -242,11 +242,11 @@ const handleOpenViewer = async (index) => {
         const processedUri = await processImage(result.assets[0].uri);
         setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
       } else {
-        Alert.alert("Operación cancelada", "No se tomó ninguna foto.");
+        Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
       }
     } catch (error) {
-      console.error("Error al abrir la cámara:", error);
-      Alert.alert("Error", "Hubo un problema al intentar abrir la cámara.");
+      console.error(t('storySlider.uploadError'), error);
+      Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
     }
   };
   
@@ -254,7 +254,7 @@ const handleOpenViewer = async (index) => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert("Permiso denegado", "Se necesita acceso a la galería.");
+        Alert.alert(t('storySlider.error'), t('storySlider.gallery'));
         return;
       }
   
@@ -268,11 +268,11 @@ const handleOpenViewer = async (index) => {
         const processedUri = await processImage(result.assets[0].uri);
         setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
       } else {
-        Alert.alert("Operación cancelada", "No se seleccionó ninguna imagen.");
+        Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
       }
     } catch (error) {
-      console.error("Error al abrir la galería:", error);
-      Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
+      console.error(t('storySlider.uploadError'), error);
+      Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
     }
   };
   

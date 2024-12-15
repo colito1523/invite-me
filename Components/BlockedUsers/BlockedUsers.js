@@ -3,16 +3,18 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Alert } from
 import { Image } from "expo-image";
 import { doc, getDoc, updateDoc, arrayRemove } from "firebase/firestore";
 import { database, auth } from "../../config/firebase"; // Asegúrate de importar correctamente Firebase
+import { useTranslation } from "react-i18next";
 
 export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
   const [userDetails, setUserDetails] = useState([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       const currentUser = auth.currentUser;
   
       if (!currentUser) {
-        console.error("No estás autenticado.");
+        console.error(t("blockedUsers.notAuthenticatedError"));
         return;
       }
   
@@ -22,7 +24,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
         const currentUserDoc = await getDoc(currentUserRef);
   
         if (!currentUserDoc.exists()) {
-          console.error("No se encontraron los datos del usuario actual.");
+          console.error(t("blockedUsers.noUserDataError"));
           return;
         }
   
@@ -55,7 +57,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
   
         setUserDetails(usersData);
       } catch (error) {
-        console.error("Error al obtener datos del usuario actual:", error);
+        console.error(t("blockedUsers.noUserDataError"), error);
       }
     };
   
@@ -69,7 +71,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
     const currentUser = auth.currentUser;
   
     if (!currentUser) {
-      Alert.alert("Error", "No estás autenticado.");
+      Alert.alert(t("blockedUsers.notAuthenticatedError"));
       return;
     }
   
@@ -79,7 +81,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
       const currentUserDoc = await getDoc(currentUserRef);
   
       if (!currentUserDoc.exists()) {
-        Alert.alert("Error", "No se encontraron los datos del usuario actual.");
+        Alert.alert(t("blockedUsers.noUserDataError"));
         return;
       }
   
@@ -90,7 +92,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
         !currentUserData.manuallyBlocked ||
         !currentUserData.manuallyBlocked.includes(uid)
       ) {
-        Alert.alert("Error", "No puedes desbloquear a este usuario.");
+        Alert.alert(t("blockedUsers.cannotUnblockError"));
         return;
       }
   
@@ -110,10 +112,10 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
       // Actualizar la lista localmente
       setUserDetails((prev) => prev.filter((user) => user.uid !== uid));
   
-      Alert.alert("Éxito", "El usuario ha sido desbloqueado.");
+      Alert.alert(t("blockedUsers.unblockSuccess"));
     } catch (error) {
-      console.error("Error al desbloquear al usuario:", error);
-      Alert.alert("Error", "No se pudo desbloquear al usuario.");
+      console.error(t("blockedUsers.unblockError"), error);
+      Alert.alert(t("blockedUsers.unblockError"));
     }
   };
   
@@ -122,7 +124,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
     <Modal visible={isVisible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Usuarios bloqueados</Text>
+          <Text style={styles.modalTitle}>{t("blockedUsers.modalTitle")}</Text>
           <FlatList
             data={userDetails}
             keyExtractor={(item) => item.uid}
@@ -140,13 +142,13 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
                   style={styles.unblockButton}
                   onPress={() => handleUnblockUser(item.uid)}
                 >
-                  <Text style={styles.unblockButtonText}>Desbloquear</Text>
+                  <Text style={styles.unblockButtonText}>{t("blockedUsers.unblockButtonText")}</Text>
                 </TouchableOpacity>
               </View>
             )}
           />
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Cerrar</Text>
+            <Text style={styles.closeButtonText}>{t("blockedUsers.closeButtonText")}</Text>
           </TouchableOpacity>
         </View>
       </View>

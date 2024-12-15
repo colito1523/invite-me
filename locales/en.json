@@ -1,4 +1,201 @@
 {
+  "complaints": {
+    "reportUser": "Report User",
+    "reportUserConfirmation": "Are you sure you want to report this user?",
+    "reportReasons": {
+      "Spam": "Spam",
+      "Contenido inapropiado": "Inappropriate content",
+      "Acoso o intimidación": "Harassment or bullying",
+      "Lenguaje abusivo": "Abusive language",
+      "Violencia o amenazas": "Violence or threats",
+      "Otros motivos": "Other reasons"
+    },
+    "describeReasonPlaceholder": "Describe the reason (maximum 100 words)",
+    "sendReport": "Send Report",
+    "selectReasonError": "Please select a reason for the report."
+  },
+  "blockedUsers": {
+    "modalTitle": "Blocked Users",
+    "unblockButtonText": "Unblock",
+    "closeButtonText": "Close",
+    "unblockSuccess": "The user has been unblocked.",
+    "unblockError": "Could not unblock the user.",
+    "notAuthenticatedError": "You are not authenticated.",
+    "noUserDataError": "No data found for the current user.",
+    "cannotUnblockError": "You cannot unblock this user."
+  },
+
+  "dotIndicator": {
+    "searchPlaceholder": "Search...",
+    "errorFetchingBlockedUsers": "Error fetching blocked users:",
+    "errorCheckingStories": "Error checking stories:",
+    "errorFetchingUserDetails": "Error fetching user details.",
+    "errorHandlingUserClick": "There was a problem fetching the user details.",
+    "noDetailsFound": "No details found for this user.",
+    "cannotInteractWithUser": "You cannot interact with this user.",
+    "blockedUserError": "You cannot interact with this user.",
+    "privateProfile": "Private profile",
+    "unknownUser": "Unknown user",
+    "noStoriesAvailable": "No stories available",
+    "errorOpeningCamera": "There was a problem opening the camera. Please try again.",
+    "errorOpeningGallery": "There was a problem opening the gallery. Please try again."
+  },
+
+  "dotIndicatorBoxDetails": {
+    "errorFetchingBlockedUsers": "Error fetching blocked users:",
+    "errorCheckingStories": "Error checking stories:",
+    "errorFetchingUserDetails": "Error fetching user details.",
+    "errorHandlingUserClick": "There was a problem fetching the user details.",
+    "noDetailsFound": "No details found for this user.",
+    "cannotInteractWithUser": "You cannot interact with this user.",
+    "blockedUserError": "You cannot interact with this user.",
+    "privateProfile": "Private profile",
+    "unknownUser": "Unknown user",
+    "noStoriesAvailable": "No stories available",
+    "errorOpeningCamera": "There was a problem opening the camera. Please try again.",
+    "errorOpeningGallery": "There was a problem opening the gallery. Please try again."
+  },
+
+  "eventRecommendation": {
+    "suggestSpace": "Suggest a Space",
+    "selectImage": "Select Image",
+    "titlePlaceholder": "Title",
+    "placeNamePlaceholder": "Place Name",
+    "addressPlaceholder": "Address",
+    "submitButton": "Submit Recommendation",
+    "error": "Error",
+    "completeAllFields": "Please complete all fields.",
+    "success": "Success",
+    "recommendationSent": "Recommendation sent successfully.",
+    "submissionError": "Could not send the recommendation."
+  },
+
+  "mutualFriendsModal": {
+    "searchPlaceholder": "Search among {{count}} friends",
+    "noFriendsFound": "No friends found",
+    "errorFetchingUser": "Error fetching user data",
+    "userNotFound": "No details found for this user"
+  },
+
+  "notes": {
+    "error": "Error",
+    "emptyNoteError": "Please enter a note before submitting.",
+    "postNoteError": "Failed to share your mood. Please try again.",
+    "deleteNoteError": "Could not delete the note and likes. Please try again.",
+    "deleteMood": "Delete Mood",
+    "deleteMoodConfirm": "Are you sure you want to delete your mood?",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "likedYourNote": "liked your mood note.",
+    "likeToggleError": "Failed to like/unlike the note. Please try again.",
+    "anonymous": "Anonymous",
+    "sendResponseError": "Failed to send your response. Please try again.",
+    "success": "Success",
+    "moodShared": "Your mood has been shared: {{mood}}",
+    "shareMoodError": "Could not share the mood. Please try again.",
+    "typePlaceholder": "Type...",
+    "emptyResponseError": "Please enter a message before sending.",
+    "responseSent": "Your response has been sent!",
+    "typeMoodPlaceholder": "Type your mood...",
+    "shareMoodPlaceholder": "Share your mood...",
+    "hideMoodOptions": "Hide Mood Options",
+    "showMoodOptions": "Show Mood Options",
+    "respondToNotePlaceholder": "Respond to note...",
+    "moodOptions": {
+      "Movie night": "Movie night",
+      "Dinner out": "Dinner out",
+      "Wine glass": "Wine glass",
+      "Late night talks": "Late night talks",
+      "Evening Walk": "Evening Walk",
+      "Ice Cream Outing": "Ice Cream Outing",
+      "Cozy night in": "Cozy night in"
+    }
+  },
+
+  "userProfilePrivate": {
+    "userBlocked": "User Blocked",
+    "isBlocked": "has been blocked.",
+    "blockError": "Could not block the user.",
+    "error": "Error",
+    "report": "Report",
+    "cannotReportUser": "Cannot report this user at this time.",
+    "couldNotGetUserInfo": "Could not get user information.",
+    "errorGettingUserData": "Error getting user data:",
+    "errorAccessingUserData": "An error occurred while trying to access user data.",
+    "anonymous": "Anonymous",
+    "thankYou": "Thank you",
+    "reportSubmitted": "Your report has been submitted and will be reviewed by our moderation team.",
+    "errorSubmittingReport": "Error submitting report:",
+    "couldNotSubmitReport": "Could not submit the report. Please try again.",
+    "couldNotSendFriendRequest": "Could not send the friend request.",
+    "actionNotAllowed": "Action not allowed",
+    "cannotRemoveFriendFromPrivateProfile": "You cannot remove a friend from a private profile.",
+    "noMutualFriends": "No mutual friends",
+    "andMoreMutualFriends": "and {{count}} mutual friends",
+    "mutualFriends": "mutual friends",
+    "goBack": "Go back",
+    "openOptionsMenu": "Open options menu",
+    "block": "Block"
+  },
+  "storySlider": {
+    "error": "Error",
+    "userAuthError": "Could not authenticate user.",
+    "userDataNotFound": "User data not found.",
+    "unknownUser": "Unknown User",
+    "uploadError": "Error uploading story:",
+    "storyUploadError": "There was an error uploading your story.",
+    "camera": "Camera",
+    "gallery": "Gallery",
+    "loadStoriesError": "Error loading stories:"
+  },
+
+  "storyViewer": {
+    "error": "Error",
+    "user": "User",
+    "anonymous": "Anonymous",
+    "userDetailsNotFound": "No details found for this user.",
+    "userDetailsFetchError": "There was a problem fetching the user details.",
+    "likedYourStory": "{{firstName}} {{lastName}} liked your story.",
+    "likeError": "Could not like the story.",
+    "sendResponseError": "Could not send the response. Please try again.",
+    "userAuthError": "Could not authenticate user. Please log in and try again.",
+    "storyNotFound": "The story could not be found.",
+    "deletePermissionError": "You don't have permission to delete this story.",
+    "deleteError": "Could not delete the story. Please try again.",
+    "hoursAgo": "{{hours}}h",
+    "typePlaceholder": "Type...",
+    "searchPlaceholder": "Search...",
+    "viewers": "Viewers",
+    "pinUnpinError": "Could not pin/unpin the viewer.",
+    "success": "Success",
+    "viewerCanSeeStories": "This user will be able to see your stories.",
+    "viewerCannotSeeStories": "Your stories will be hidden from this user.",
+    "storySettingsUpdateError": "Could not update story settings.",
+    "alreadyHidden": "You have already hidden this user's stories.",
+    "hiddenSuccessfully": "This user's stories have been successfully hidden.",
+    "hideError": "Could not hide this user's stories."
+  },
+
+  "header": {
+    "backButton": "Back",
+    "editImage": "Edit Image",
+    "editEvent": "Edit Event",
+    "deleteEvent": "Delete Event",
+    "updating": "Updating..."
+  },
+
+  "SliderContent": {
+    "description": "Description",
+  "descriptionNotAvailable": "Description not available",
+  "hours": "Hour",
+  "day": "Day",
+  "notAvailable": "Not available",
+  "location": "Location:",
+  "locationNotAvailable": "Location not available",
+  "contact": "Contact",
+  "noContactNumber": "No contact number"
+   },
+  
   "accessPrivately": "Log In",
   "email": "Email",
   "password": "Password",
@@ -275,82 +472,6 @@
     "accept": "Accept",
     "reject": "Reject"
   },
-
-  "storySlider": {
-    "currentUser": "Current User",
-    "friend": "Friend",
-    "friendDataNotFound": "Friend data not found for ID: {{friendId}}",
-    "loadStoriesError": "Error loading stories:",
-    "permissionDenied": "Permission Denied",
-    "cameraPermissionNeeded": "Camera access is needed to upload a story.",
-    "galleryPermissionNeeded": "Gallery access is needed to upload a story.",
-    "error": "Error",
-    "cameraOpenError": "There was a problem opening the camera. Please try again.",
-    "galleryOpenError": "There was a problem opening the gallery. Please try again.",
-    "userAuthError": "Could not authenticate user.",
-    "userDataNotFound": "User data not found.",
-    "unknownUser": "Unknown User",
-    "uploadError": "Error uploading story:",
-    "storyUploadError": "There was an error uploading your story.",
-    "camera": "Camera",
-    "gallery": "Gallery"
-  },
-
-  "storyViewer": {
-    "error": "Error",
-    "user": "User",
-    "anonymous": "Anonymous",
-    "userDetailsNotFound": "No details found for this user.",
-    "userDetailsFetchError": "There was a problem fetching the user details.",
-    "likedYourStory": "{{firstName}} {{lastName}} liked your story.",
-    "likeError": "Could not like the story.",
-    "sendResponseError": "Could not send the response. Please try again.",
-    "userAuthError": "Could not authenticate user. Please log in and try again.",
-    "storyNotFound": "The story could not be found.",
-    "deletePermissionError": "You don't have permission to delete this story.",
-    "deleteError": "Could not delete the story. Please try again.",
-    "hoursAgo": "{{hours}}h",
-    "typePlaceholder": "Type...",
-    "searchPlaceholder": "Search...",
-    "viewers": "Viewers",
-    "pinUnpinError": "Could not pin/unpin the viewer."
-  },
-
-  "notes": {
-    "error": "Error",
-    "emptyNoteError": "Please enter a note before submitting.",
-    "postNoteError": "Failed to share your mood. Please try again.",
-    "deleteNoteError": "Could not delete the note and likes. Please try again.",
-    "deleteMood": "Delete Mood",
-    "deleteMoodConfirm": "Are you sure you want to delete your mood?",
-    "cancel": "Cancel",
-    "ok": "OK",
-    "likedYourNote": "liked your mood note.",
-    "likeToggleError": "Failed to like/unlike the note. Please try again.",
-    "anonymous": "Anonymous",
-    "sendResponseError": "Failed to send your response. Please try again.",
-    "success": "Success",
-    "moodShared": "Your mood has been shared: {{mood}}",
-    "shareMoodError": "Could not share the mood. Please try again.",
-    "typePlaceholder": "Type...",
-    "emptyResponseError": "Please enter a message before sending.",
-    "responseSent": "Your response has been sent!",
-    "typeMoodPlaceholder": "Type your mood...",
-    "shareMoodPlaceholder": "Share your mood...",
-    "hideMoodOptions": "Hide Mood Options",
-    "showMoodOptions": "Show Mood Options",
-    "respondToNotePlaceholder": "Respond to note...",
-    "moodOptions": {
-      "Movie night": "Movie night",
-      "Dinner out": "Dinner out",
-      "Wine glass": "Wine glass",
-      "Late night talks": "Late night talks",
-      "Evening Walk": "Evening Walk",
-      "Ice Cream Outing": "Ice Cream Outing",
-      "Cozy night in": "Cozy night in"
-    }
-  },
-
   "termsAndConditions": {
     "link": "terms and conditions",
     "title": "Terms and Conditions of Use for Invite Me",
@@ -507,8 +628,4 @@
       }
     }
   }
-
-  
-
-  
 }

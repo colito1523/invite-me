@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView
-
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from "@expo/vector-icons"; // Asegúrate de importar Ionicons
@@ -20,8 +19,7 @@ import { database, storage } from '../../config/firebase';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
-
+import { useTranslation } from 'react-i18next';
 
 export default function EventRecommendationForm() {
   const [title, setTitle] = useState('');
@@ -32,6 +30,7 @@ export default function EventRecommendationForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   // Verificar la hora para cambiar el tema
   useEffect(() => {
@@ -62,7 +61,7 @@ export default function EventRecommendationForm() {
 
   const handleSubmit = async () => {
     if (!title || !placeName || !address || !image) {
-      Alert.alert('Error', 'Por favor, completa todos los campos.');
+      Alert.alert(t('eventRecommendation.error'), t('eventRecommendation.completeAllFields'));
       return;
     }
 
@@ -87,7 +86,7 @@ export default function EventRecommendationForm() {
         createdAt: new Date(),
       });
 
-      Alert.alert('Éxito', 'Recomendación enviada correctamente.');
+      Alert.alert(t('eventRecommendation.success'), t('eventRecommendation.recommendationSent'));
       setTitle('');
       setPlaceName('');
       setAddress('');
@@ -96,8 +95,8 @@ export default function EventRecommendationForm() {
       // Redirigir al usuario al home
       navigation.navigate('Home');
     } catch (error) {
-      console.error('Error al enviar la recomendación:', error);
-      Alert.alert('Error', 'No se pudo enviar la recomendación.');
+      console.error(t('eventRecommendation.submissionError'), error);
+      Alert.alert(t('eventRecommendation.error'), t('eventRecommendation.submissionError'));
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +124,7 @@ export default function EventRecommendationForm() {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <LinearGradient colors={theme.gradient} style={styles.container}>
           <Text style={[styles.title, { color: theme.text }]}>
-            Sugerir un Espacio
+            {t('eventRecommendation.suggestSpace')}
           </Text>
 
           <TouchableOpacity
@@ -140,7 +139,7 @@ export default function EventRecommendationForm() {
             ) : (
               <View style={styles.placeholderImage}>
                 <Text style={{ color: theme.placeholder }}>
-                  Seleccionar Imagen
+                  {t('eventRecommendation.selectImage')}
                 </Text>
               </View>
             )}
@@ -151,7 +150,7 @@ export default function EventRecommendationForm() {
               styles.input,
               { backgroundColor: theme.inputBackground, color: theme.text },
             ]}
-            placeholder="Título"
+            placeholder={t('eventRecommendation.titlePlaceholder')}
             value={title}
             onChangeText={setTitle}
             placeholderTextColor={theme.placeholder}
@@ -161,7 +160,7 @@ export default function EventRecommendationForm() {
               styles.input,
               { backgroundColor: theme.inputBackground, color: theme.text },
             ]}
-            placeholder="Nombre del Lugar"
+            placeholder={t('eventRecommendation.placeNamePlaceholder')}
             value={placeName}
             onChangeText={setPlaceName}
             placeholderTextColor={theme.placeholder}
@@ -171,7 +170,7 @@ export default function EventRecommendationForm() {
               styles.input,
               { backgroundColor: theme.inputBackground, color: theme.text },
             ]}
-            placeholder="Dirección"
+            placeholder={t('eventRecommendation.addressPlaceholder')}
             value={address}
             onChangeText={setAddress}
             placeholderTextColor={theme.placeholder}
@@ -194,7 +193,7 @@ export default function EventRecommendationForm() {
                   fontWeight: 'bold',
                 }}
               >
-                Enviar Recomendación
+                {t('eventRecommendation.submitButton')}
               </Text>
             )}
           </TouchableOpacity>

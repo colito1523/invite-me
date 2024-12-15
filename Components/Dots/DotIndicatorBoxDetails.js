@@ -18,6 +18,7 @@ import { collection,
 import { database, auth } from '../../config/firebase'; // Asegúrate de importar correctamente `auth`
 import { Image } from 'expo-image';
 import StoryViewer from '../Stories/StoryViewer';
+import { useTranslation } from "react-i18next";
 
 const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [blockedUsers, setBlockedUsers] = useState([]);
@@ -29,79 +30,79 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
-const [selectedStories, setSelectedStories] = useState([]);
-const [viewedStories, setViewedStories] = useState({});
+  const [selectedStories, setSelectedStories] = useState([]);
+  const [viewedStories, setViewedStories] = useState({});
+  const { t } = useTranslation();
 
-const handleCloseStoryViewer = (updatedUnseenStories) => {
-  setViewedStories((prev) => ({
-    ...prev,
-    ...updatedUnseenStories,
-  }));
-};
-
-const checkStories = async () => {
-  try {
-    const currentUserRef = doc(database, "users", auth.currentUser.uid);
-    const currentUserDoc = await getDoc(currentUserRef);
-    const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
-
-    const attendeesWithStories = attendeesList.map((attendee) => ({
-      ...attendee,
-      hasStories: false,
-      userStories: [],
+  const handleCloseStoryViewer = (updatedUnseenStories) => {
+    setViewedStories((prev) => ({
+      ...prev,
+      ...updatedUnseenStories,
     }));
+  };
 
-    for (const attendee of attendeesWithStories) {
-      // Exclude current user's stories and hidden stories
-      if (attendee.uid === auth.currentUser.uid || hideStoriesFrom.includes(attendee.uid)) {
-        continue;
+  const checkStories = async () => {
+    try {
+      const currentUserRef = doc(database, "users", auth.currentUser.uid);
+      const currentUserDoc = await getDoc(currentUserRef);
+      const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
+
+      const attendeesWithStories = attendeesList.map((attendee) => ({
+        ...attendee,
+        hasStories: false,
+        userStories: [],
+      }));
+
+      for (const attendee of attendeesWithStories) {
+        // Exclude current user's stories and hidden stories
+        if (attendee.uid === auth.currentUser.uid || hideStoriesFrom.includes(attendee.uid)) {
+          continue;
+        }
+
+        const userDocRef = doc(database, "users", attendee.uid);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.exists() ? userDoc.data() : null;
+
+        if (!userData) continue;
+
+        const isPrivate = userData?.isPrivate || false;
+
+        // Verificar si somos amigos
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
+        const friendSnapshot = await getDocs(friendQuery);
+        const isFriend = !friendSnapshot.empty;
+
+        // Saltar si es privado y no somos amigos
+        if (isPrivate && !isFriend) {
+          continue;
+        }
+
+        // Cargar historias solo si el perfil es público o si somos amigos
+        const storiesRef = collection(userDocRef, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+
+        const now = new Date();
+        const userStories = storiesSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate(),
+            expiresAt: doc.data().expiresAt?.toDate(),
+          }))
+          .filter((story) => story.expiresAt > now);
+
+        if (userStories.length > 0) {
+          attendee.hasStories = true;
+          attendee.userStories = userStories;
+        }
       }
 
-      const userDocRef = doc(database, "users", attendee.uid);
-      const userDoc = await getDoc(userDocRef);
-      const userData = userDoc.exists() ? userDoc.data() : null;
-
-      if (!userData) continue;
-
-      const isPrivate = userData?.isPrivate || false;
-
-      // Verificar si somos amigos
-      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-      const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
-      const friendSnapshot = await getDocs(friendQuery);
-      const isFriend = !friendSnapshot.empty;
-
-      // Saltar si es privado y no somos amigos
-      if (isPrivate && !isFriend) {
-        continue;
-      }
-
-      // Cargar historias solo si el perfil es público o si somos amigos
-      const storiesRef = collection(userDocRef, "stories");
-      const storiesSnapshot = await getDocs(storiesRef);
-
-      const now = new Date();
-      const userStories = storiesSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          expiresAt: doc.data().expiresAt?.toDate(),
-        }))
-        .filter((story) => story.expiresAt > now);
-
-      if (userStories.length > 0) {
-        attendee.hasStories = true;
-        attendee.userStories = userStories;
-      }
+      setFilteredAttendees(attendeesWithStories);
+    } catch (error) {
+      console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
     }
-
-    setFilteredAttendees(attendeesWithStories);
-  } catch (error) {
-    console.error("Error verificando historias:", error);
-  }
-};
-
+  };
 
   useEffect(() => {
     const fetchCompleteUserData = async () => {
@@ -121,18 +122,19 @@ const checkStories = async () => {
         console.log("Attendees Complete Details:", usersWithFullData);
         await checkStories();
       } catch (error) {
-        console.error("Error fetching complete user data:", error);
+        console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
       }
     };
 
     fetchCompleteUserData();
   }, [attendeesList]);
+
   // Cargar usuarios bloqueados
   useEffect(() => {
     const fetchBlockedUsers = async () => {
       try {
         if (!auth.currentUser) {
-          console.error("El usuario no está autenticado.");
+          console.error(t("dotIndicatorBoxDetails.errorFetchingBlockedUsers"));
           return;
         }
 
@@ -141,7 +143,7 @@ const checkStories = async () => {
         const blockedList = userSnapshot.data()?.blockedUsers || [];
         setBlockedUsers(blockedList);
       } catch (error) {
-        console.error("Error fetching blocked users:", error);
+        console.error(t("dotIndicatorBoxDetails.errorFetchingBlockedUsers"), error);
       }
     };
 
@@ -174,7 +176,7 @@ const checkStories = async () => {
 
   const handleUserPress = async (uid) => {
     if (blockedUsers.includes(uid)) {
-      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      Alert.alert(t("dotIndicatorBoxDetails.blockedUserError"));
       return;
     }
 
@@ -198,7 +200,7 @@ const checkStories = async () => {
     try {
       const userDoc = await getDoc(doc(database, "users", uid));
       if (!userDoc.exists()) {
-        Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        Alert.alert(t("dotIndicatorBoxDetails.noDetailsFound"));
         return;
       }
   
@@ -218,9 +220,9 @@ const checkStories = async () => {
         navigation.navigate("UserProfile", {
           selectedUser: {
             id: uid,
-            username: userData.username || "Usuario desconocido",
-            firstName: userData.firstName || "Nombre desconocido",
-            lastName: userData.lastName || "Apellido desconocido",
+            username: userData.username || t("dotIndicatorBoxDetails.unknownUser"),
+            firstName: userData.firstName || t("dotIndicatorBoxDetails.unknownUser"),
+            lastName: userData.lastName || t("dotIndicatorBoxDetails.unknownUser"),
             profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
             isPrivate: userData.isPrivate || false,
           },
@@ -244,7 +246,7 @@ const checkStories = async () => {
         setSelectedStories([
           {
             uid,
-            username: userData.username || "Unknown",
+            username: userData.username || t("dotIndicatorBoxDetails.unknownUser"),
             profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
             userStories: activeStories,
           },
@@ -254,32 +256,33 @@ const checkStories = async () => {
         navigation.navigate("UserProfile", { selectedUser: userData });
       }
     } catch (error) {
-      console.error("Error al manejar clic en usuario:", error);
-      Alert.alert("Error", "Hubo un problema al obtener los detalles del usuario.");
+      console.error(t("dotIndicatorBoxDetails.errorHandlingUserClick"), error);
+      Alert.alert(t("dotIndicatorBoxDetails.errorFetchingUserDetails"));
     }
   };
+
   // Renderizar asistentes
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => handleUserPress(item.uid)}
       style={styles.itemContainer}
     >
-   <View
-  style={[
-    styles.imageContainer,
-    item.hasStories &&
-      (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
-        ...styles.unseenStoryCircle,
-        borderColor: isNightMode ? "white" : "black",
-      },
-  ]}
->
-  <Image
-    cachePolicy="memory-disk"
-    source={{ uri: item.profileImage }}
-    style={styles.profileImage}
-  />
-</View>
+      <View
+        style={[
+          styles.imageContainer,
+          item.hasStories &&
+            (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
+              ...styles.unseenStoryCircle,
+              borderColor: isNightMode ? "white" : "black",
+            },
+        ]}
+      >
+        <Image
+          cachePolicy="memory-disk"
+          source={{ uri: item.profileImage }}
+          style={styles.profileImage}
+        />
+      </View>
     </TouchableOpacity>
   );
 
@@ -287,45 +290,45 @@ const checkStories = async () => {
 
   return (
     <View style={currentStyles.container}>
-    {filteredAttendees.length > 0 ? (
-      <Animated.FlatList
-        data={filteredAttendees}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.uid}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.flatListContent}
-        snapToInterval={ITEM_SIZE + SPACING}
-        decelerationRate="fast"
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
-        )}
-      />
-    ) : null}
+      {filteredAttendees.length > 0 ? (
+        <Animated.FlatList
+          data={filteredAttendees}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.uid}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.flatListContent}
+          snapToInterval={ITEM_SIZE + SPACING}
+          decelerationRate="fast"
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: true }
+          )}
+        />
+      ) : null}
 
-    {/* Modal para StoryViewer */}
-    {isModalVisible && (
-    <Modal
-    visible={isModalVisible}
-    animationType="slide"
-    transparent={false} // Cambia a false para asegurarte de que ocupa toda la pantalla
->
-    <StoryViewer
-        stories={selectedStories}
-        initialIndex={0}
-        onClose={async (updatedUnseenStories) => {
-          handleCloseStoryViewer(updatedUnseenStories);
-          setIsModalVisible(false);
-          await checkStories(); // Recargar historias inmediatamente
-        }}
-        unseenStories={{}}
-        navigation={navigation} 
-    />
-</Modal>
-    )}
-  </View>
-);
+      {/* Modal para StoryViewer */}
+      {isModalVisible && (
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={false} // Cambia a false para asegurarte de que ocupa toda la pantalla
+        >
+          <StoryViewer
+            stories={selectedStories}
+            initialIndex={0}
+            onClose={async (updatedUnseenStories) => {
+              handleCloseStoryViewer(updatedUnseenStories);
+              setIsModalVisible(false);
+              await checkStories(); // Recargar historias inmediatamente
+            }}
+            unseenStories={{}}
+            navigation={navigation} 
+          />
+        </Modal>
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

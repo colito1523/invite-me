@@ -38,7 +38,6 @@ import { KeyboardAvoidingView, Platform } from "react-native";
 
 const { width, height } = Dimensions.get("window"); // Add this line
 
-
 export function StoryViewer({
   stories,
   initialIndex,
@@ -55,24 +54,24 @@ export function StoryViewer({
       console.error("Prop 'stories' no es un array válido:", stories);
       onClose?.();
       return;
-  }
-  const validStories = stories.filter(
+    }
+    const validStories = stories.filter(
       (story) => story && Array.isArray(story.userStories)
-  );
-  if (validStories.length === 0) {
+    );
+    if (validStories.length === 0) {
       console.error("No hay historias válidas disponibles.");
       onClose?.();
       return;
-  }
-  if (
+    }
+    if (
       typeof initialIndex !== "number" ||
       initialIndex < 0 ||
       initialIndex >= validStories.length
-  ) {
+    ) {
       console.error("Índice inicial inválido:", initialIndex);
       onClose?.();
       return;
-  }
+    }
   }, [stories, initialIndex, unseenStories]);
 
   // Deserialize the createdAt and expiresAt fields
@@ -80,8 +79,12 @@ export function StoryViewer({
     ...storyGroup,
     userStories: storyGroup.userStories.map((story) => ({
       ...story,
-      createdAt: story.createdAt?.toDate ? story.createdAt.toDate() : new Date(story.createdAt),
-      expiresAt: story.expiresAt?.toDate ? story.expiresAt.toDate() : new Date(story.expiresAt),
+      createdAt: story.createdAt?.toDate
+        ? story.createdAt.toDate()
+        : new Date(story.createdAt),
+      expiresAt: story.expiresAt?.toDate
+        ? story.expiresAt.toDate()
+        : new Date(story.expiresAt),
     })),
   }));
 
@@ -90,7 +93,7 @@ export function StoryViewer({
     const userStories = deserializedStories[initialIndex]?.userStories || [];
     const unseenIndex = userStories.findIndex(
       (story) =>
-        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid),
+        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
     );
     return unseenIndex !== -1 ? unseenIndex : 0;
   });
@@ -135,14 +138,14 @@ export function StoryViewer({
       let updatedHideStoriesFrom;
       if (hideStoriesFrom.includes(user.uid)) {
         updatedHideStoriesFrom = hideStoriesFrom.filter(
-          (uid) => uid !== user.uid,
+          (uid) => uid !== user.uid
         );
         await updateDoc(viewerRef, {
           hideStoriesFrom: updatedHideStoriesFrom,
         });
         Alert.alert(
           t("storyViewer.success"),
-          t("storyViewer.viewerCanSeeStories"),
+          t("storyViewer.viewerCanSeeStories")
         );
       } else {
         updatedHideStoriesFrom = [...hideStoriesFrom, user.uid];
@@ -151,7 +154,7 @@ export function StoryViewer({
         });
         Alert.alert(
           t("storyViewer.success"),
-          t("storyViewer.viewerCannotSeeStories"),
+          t("storyViewer.viewerCannotSeeStories")
         );
       }
 
@@ -163,7 +166,7 @@ export function StoryViewer({
       console.error("Error updating hideStoriesFrom:", error);
       Alert.alert(
         t("storyViewer.error"),
-        t("storyViewer.storySettingsUpdateError"),
+        t("storyViewer.storySettingsUpdateError")
       );
     }
   };
@@ -290,14 +293,14 @@ export function StoryViewer({
       () => {
         setIsKeyboardVisible(true);
         setIsPaused(true);
-      },
+      }
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
         setIsKeyboardVisible(false);
         setIsPaused(false);
-      },
+      }
     );
 
     return () => {
@@ -317,7 +320,7 @@ export function StoryViewer({
     if (auth.currentUser) {
       addViewerToStory(currentStory.id, currentStory.uid);
       const userHasLiked = currentStory.likes?.some(
-        (like) => like.uid === auth.currentUser.uid,
+        (like) => like.uid === auth.currentUser.uid
       );
       setHasLiked(userHasLiked || false);
     }
@@ -353,7 +356,7 @@ export function StoryViewer({
 
       // Encuentra el índice del espectador en la lista actual
       const viewerIndex = updatedPinnedViewers.findIndex(
-        (v) => v.uid === viewer.uid,
+        (v) => v.uid === viewer.uid
       );
 
       if (viewerIndex !== -1) {
@@ -406,7 +409,7 @@ export function StoryViewer({
 
         Alert.alert(
           t("storyViewer.success"),
-          t("storyViewer.hiddenSuccessfully"),
+          t("storyViewer.hiddenSuccessfully")
         );
 
         // Cerrar el visor de historias después de agregar el UID
@@ -450,80 +453,78 @@ export function StoryViewer({
     }
   };
 
- const handleLikeStory = async () => {
-  try {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+  const handleLikeStory = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
 
-    const currentStory = stories[currentIndex]?.userStories[storyIndex];
-    if (!currentStory) return;
+      const currentStory = stories[currentIndex]?.userStories[storyIndex];
+      if (!currentStory) return;
 
-    const storyRef = doc(
-      database,
-      "users",
-      currentStory.uid,
-      "stories",
-      currentStory.id
-    );
-
-    const userRef = doc(database, "users", currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    const userData = userSnap.data();
-
-    if (hasLiked) {
-      // Eliminar el like
-      const storySnap = await getDoc(storyRef);
-      const storyData = storySnap.data();
-
-      if (storyData?.likes) {
-        const updatedLikes = storyData.likes.filter(
-          (like) => like.uid !== currentUser.uid
-        );
-        await updateDoc(storyRef, { likes: updatedLikes });
-      }
-      setHasLiked(false);
-    } else {
-      // Agregar el like
-      const likeData = {
-        uid: currentUser.uid,
-        firstName: userData.firstName || "Usuario",
-        lastName: userData.lastName || "",
-        profileImage: userData.photoUrls?.[0] || "default-image-url",
-        timestamp: new Date(),
-      };
-
-      await updateDoc(storyRef, {
-        likes: arrayUnion(likeData),
-      });
-
-      // Enviar notificación al propietario de la historia
-      const notificationRef = collection(
+      const storyRef = doc(
         database,
         "users",
         currentStory.uid,
-        "notifications"
+        "stories",
+        currentStory.id
       );
 
-      await addDoc(notificationRef, {
-        type: "storyLike",
-        fromId: currentUser.uid,
-        fromName: `${userData.firstName} ${userData.lastName}`.trim(),
-        fromImage: userData.photoUrls?.[0] || "default-image-url",
-        storyId: currentStory.id,
-        message: `${userData.firstName} ${userData.lastName} te dio like en tu historia.`,
-        timestamp: new Date(),
-        seen: false, // Marcamos la notificación como no vista
-      });
+      const userRef = doc(database, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
 
-      setHasLiked(true);
+      if (hasLiked) {
+        // Eliminar el like
+        const storySnap = await getDoc(storyRef);
+        const storyData = storySnap.data();
+
+        if (storyData?.likes) {
+          const updatedLikes = storyData.likes.filter(
+            (like) => like.uid !== currentUser.uid
+          );
+          await updateDoc(storyRef, { likes: updatedLikes });
+        }
+        setHasLiked(false);
+      } else {
+        // Agregar el like
+        const likeData = {
+          uid: currentUser.uid,
+          firstName: userData.firstName || "Usuario",
+          lastName: userData.lastName || "",
+          profileImage: userData.photoUrls?.[0] || "default-image-url",
+          timestamp: new Date(),
+        };
+
+        await updateDoc(storyRef, {
+          likes: arrayUnion(likeData),
+        });
+
+        // Enviar notificación al propietario de la historia
+        const notificationRef = collection(
+          database,
+          "users",
+          currentStory.uid,
+          "notifications"
+        );
+
+        await addDoc(notificationRef, {
+          type: "storyLike",
+          fromId: currentUser.uid,
+          fromName: `${userData.firstName} ${userData.lastName}`.trim(),
+          fromImage: userData.photoUrls?.[0] || "default-image-url",
+          storyId: currentStory.id,
+          message: `${userData.firstName} ${userData.lastName} te dio like en tu historia.`,
+          timestamp: new Date(),
+          seen: false, // Marcamos la notificación como no vista
+        });
+
+        setHasLiked(true);
+      }
+    } catch (error) {
+      console.error("Error al gestionar el like:", error);
+      Alert.alert("Error", "No se pudo gestionar el like.");
     }
-  } catch (error) {
-    console.error("Error al gestionar el like:", error);
-    Alert.alert("Error", "No se pudo gestionar el like.");
-  }
-};
-
-  
+  };
 
   const handleUserPress = async (selectedUser) => {
     if (selectedUser.hasStories) {
@@ -532,7 +533,7 @@ export function StoryViewer({
           database,
           "users",
           selectedUser.id,
-          "stories",
+          "stories"
         );
         const storiesSnapshot = await getDocs(storiesRef);
 
@@ -574,7 +575,7 @@ export function StoryViewer({
         "users",
         stories[currentIndex].uid,
         "stories",
-        currentStory.id,
+        currentStory.id
       );
       const storySnap = await getDoc(storyRef);
       if (storySnap.exists()) {
@@ -595,7 +596,7 @@ export function StoryViewer({
         const uniqueViewers = allViewers.filter(
           (viewer, index, self) =>
             index === self.findIndex((t) => t.uid === viewer.uid) &&
-            viewer.uid !== stories[currentIndex].uid,
+            viewer.uid !== stories[currentIndex].uid
         );
 
         const sortedViewers = uniqueViewers.sort((a, b) => {
@@ -620,7 +621,7 @@ export function StoryViewer({
   const filteredViewers = viewers.filter((viewer) =>
     `${viewer.firstName} ${viewer.lastName}`
       .toLowerCase()
-      .includes(searchQuery.toLowerCase()),
+      .includes(searchQuery.toLowerCase())
   );
 
   const handleClose = () => {
@@ -655,8 +656,9 @@ export function StoryViewer({
       }
 
       // Determinar si hay más historias
-      const hasMoreStoriesInCurrentUser = storyIndex < (stories[currentIndex]?.userStories?.length - 1);
-      const hasMoreUsers = currentIndex < (stories.length - 1);
+      const hasMoreStoriesInCurrentUser =
+        storyIndex < stories[currentIndex]?.userStories?.length - 1;
+      const hasMoreUsers = currentIndex < stories.length - 1;
 
       if (hasMoreStoriesInCurrentUser) {
         setStoryIndex((prev) => prev + 1);
@@ -674,7 +676,6 @@ export function StoryViewer({
     }
   };
 
-
   const handlePrevious = () => {
     if (storyIndex > 0) {
       setStoryIndex((prev) => prev - 1);
@@ -691,18 +692,17 @@ export function StoryViewer({
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
 
     if (!currentStory) {
-        console.error("Historia actual no válida:", currentStory);
-        onClose?.();
-        return;
+      console.error("Historia actual no válida:", currentStory);
+      onClose?.();
+      return;
     }
 
     if (locationX > width / 2) {
-        handleNext();
+      handleNext();
     } else {
-        handlePrevious();
+      handlePrevious();
     }
-};
-
+  };
 
   const handleSendMessage = async () => {
     if (message.trim()) {
@@ -759,7 +759,7 @@ export function StoryViewer({
           console.error("Error sending response:", error);
           Alert.alert(
             t("storyViewer.error"),
-            t("storyViewer.sendResponseError"),
+            t("storyViewer.sendResponseError")
           );
         }
       }
@@ -825,7 +825,7 @@ export function StoryViewer({
         "users",
         user.uid,
         "stories",
-        currentStory.id,
+        currentStory.id
       );
       await deleteDoc(storyDocRef);
 
@@ -845,7 +845,7 @@ export function StoryViewer({
       } else {
         // Navegar a la siguiente historia o la anterior
         setStoryIndex((prev) =>
-          prev < stories[currentIndex].userStories.length - 1 ? prev : prev - 1,
+          prev < stories[currentIndex].userStories.length - 1 ? prev : prev - 1
         );
       }
     } catch (error) {
@@ -865,7 +865,7 @@ export function StoryViewer({
   const currentStory = stories[currentIndex]?.userStories[storyIndex];
   const hoursAgo = currentStory
     ? Math.floor(
-        (Date.now() - currentStory.createdAt.toDate()) / (1000 * 60 * 60),
+        (Date.now() - currentStory.createdAt.toDate()) / (1000 * 60 * 60)
       )
     : 0;
 
@@ -941,8 +941,8 @@ export function StoryViewer({
                             index === storyIndex
                               ? `${progress * 100}%`
                               : index < storyIndex
-                                ? "100%"
-                                : "0%",
+                              ? "100%"
+                              : "0%",
                         },
                       ]}
                     />
@@ -950,40 +950,39 @@ export function StoryViewer({
                 ))}
               </View>
               <Image
-  key={currentStory.id}
-  source={{ uri: currentStory.storyUrl }}
-  style={[
-    styles.image,
-    imageDimensions, // Aplica dimensiones dinámicas
-  ]}
-  resizeMode="cover" // Siempre usar "cover"
-  onLoad={(event) => {
-    const { width: imgWidth, height: imgHeight } = event.nativeEvent.source;
-    const screenAspectRatio = width / height;
-    const imageAspectRatio = imgWidth / imgHeight;
+                key={currentStory.id}
+                source={{ uri: currentStory.storyUrl }}
+                style={[
+                  styles.image,
+                  imageDimensions, // Aplica dimensiones dinámicas
+                ]}
+                resizeMode="cover" // Siempre usar "cover"
+                onLoad={(event) => {
+                  const { width: imgWidth, height: imgHeight } =
+                    event.nativeEvent.source;
+                  const screenAspectRatio = width / height;
+                  const imageAspectRatio = imgWidth / imgHeight;
 
-    // Si la imagen es horizontal, ajustamos dinámicamente el tamaño
-    if (imageAspectRatio > screenAspectRatio) {
-      setImageDimensions({
-        width: "100%",
-        height: "100%",
-      });
-    } else {
-      setImageDimensions({
-        width: "100%",
-        height: "100%",
-      });
-    }
-  }}
-/>
-
-
+                  // Si la imagen es horizontal, ajustamos dinámicamente el tamaño
+                  if (imageAspectRatio > screenAspectRatio) {
+                    setImageDimensions({
+                      width: "100%",
+                      height: "100%",
+                    });
+                  } else {
+                    setImageDimensions({
+                      width: "100%",
+                      height: "100%",
+                    });
+                  }
+                }}
+              />
 
               {isImageLoading && (
                 <ActivityIndicator size={50} color="#FFFFFF" />
               )}
               <View style={styles.userInfo}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.userDetails}
                   onPress={() => {
                     const currentStory = stories[currentIndex];
@@ -991,14 +990,14 @@ export function StoryViewer({
                       if (currentStory.uid === auth.currentUser.uid) {
                         navigation.navigate("Profile");
                       } else {
-                        navigation.navigate("UserProfile", { 
+                        navigation.navigate("UserProfile", {
                           selectedUser: {
                             id: currentStory.uid,
                             username: currentStory.username,
                             firstName: currentStory.username,
                             lastName: currentStory.lastName || "",
-                            profileImage: currentStory.profileImage
-                          }
+                            profileImage: currentStory.profileImage,
+                          },
                         });
                       }
                     }
@@ -1218,7 +1217,7 @@ export function StoryViewer({
               if (!currentStory || !currentStory.uid || !currentStory.id) {
                 Alert.alert(
                   "Error",
-                  "No se encontró la historia o los datos necesarios.",
+                  "No se encontró la historia o los datos necesarios."
                 );
                 setIsSubmittingReport(false);
                 return;

@@ -41,11 +41,11 @@ const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
         const userData = { id: userDoc.id, ...userDoc.data() };
         navigation.navigate("UserProfile", { selectedUser: userData });
       } else {
-        Alert.alert("Error", "Usuario no encontrado.");
+        Alert.alert(t("mutualFriendsModal.userNotFound"));
       }
     } catch (error) {
-      console.error("Error al obtener datos del usuario:", error);
-      Alert.alert("Error", "Hubo un problema al obtener los datos del usuario.");
+      console.error(t("mutualFriendsModal.errorFetchingUser"), error);
+      Alert.alert(t("mutualFriendsModal.errorFetchingUser"));
     }
     onClose();
   };
@@ -75,7 +75,7 @@ const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
         <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
           <TextInput
             style={styles.searchInput}
-            placeholder={t('friendListModal.searchPlaceholder', { count: friends.length })}
+            placeholder={t('mutualFriendsModal.searchPlaceholder', { count: friends.length })}
             placeholderTextColor="#999"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -88,7 +88,7 @@ const StyledMutualFriendsModal = ({ isVisible, onClose, friends }) => {
               showsVerticalScrollIndicator={false}
             />
           ) : (
-            <Text style={styles.noFriendsText}>{t('friendListModal.noFriendsFound')}</Text>
+            <Text style={styles.noFriendsText}>{t('mutualFriendsModal.noFriendsFound')}</Text>
           )}
         </View>
       </TouchableOpacity>
