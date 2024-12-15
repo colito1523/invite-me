@@ -1107,6 +1107,27 @@ const boxInfo = [
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
   },
+  {
+    path: require("../../assets/Madrid/Gaston.jpg"),
+    title: "Gaston",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "8:00 AM - 8:00 PM",
+      Martes: "8:00 AM - 8:00 PM",
+      Miércoles: "8:00 AM - 8:00 PM",
+      Jueves: "8:00 AM - 8:00 PM",
+      Viernes: "8:00 AM - 10:00 PM",
+      Sábado: "10:00 AM - 10:00 PM",
+      Domingo: "Cerrado",
+    },
+    number: "1160419607",
+    coordinates: {
+      latitude: 40.4253604,
+      longitude: -3.6917744,
+    },
+    country: "España", // Cambiado a España
+    city: "Madrid", // Cambiado a Madrid
+  },
 
   {
     path: require("../../assets/Madrid/Toni 2 piano Bar.jpg"),
