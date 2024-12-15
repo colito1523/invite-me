@@ -349,30 +349,76 @@ const handleDeleteEvent = () => {
   const handleSaveEdit = async () => {
     try {
       setIsProcessing(true);
-
+  
       const eventRef = doc(database, "EventsPriv", boxData.id || boxData.title);
-      await updateDoc(eventRef, {
+      const updatedData = {
         title: editedData.title,
         address: editedData.address,
         description: editedData.description,
-      });
-
+      };
+  
+      // Actualizar en EventsPriv
+      await updateDoc(eventRef, updatedData);
+  
+      // Actualizar en cada usuario en /users/{userId}/events/{eventId}
+      const attendees = boxData.attendees || [];
+      for (const attendee of attendees) {
+        const eventsCollectionRef = collection(
+          database,
+          "users",
+          attendee.uid,
+          "events"
+        );
+  
+        // Buscar el documento que coincida con el `eventId`
+        const querySnapshot = await getDocs(
+          query(eventsCollectionRef, where("eventId", "==", boxData.id || boxData.title))
+        );
+  
+        querySnapshot.forEach(async (docSnapshot) => {
+          // Actualizar el documento encontrado
+          await updateDoc(docSnapshot.ref, updatedData);
+        });
+  
+        // Actualizar las notificaciones en /users/{userId}/notifications
+        const notificationsCollectionRef = collection(
+          database,
+          "users",
+          attendee.uid,
+          "notifications"
+        );
+  
+        const notificationsSnapshot = await getDocs(
+          query(notificationsCollectionRef, where("eventId", "==", boxData.id || boxData.title))
+        );
+  
+        notificationsSnapshot.forEach(async (notificationSnapshot) => {
+          await updateDoc(notificationSnapshot.ref, {
+            eventTitle: updatedData.title,
+            description: updatedData.description,
+            address: updatedData.address,
+          });
+        });
+      }
+  
+      // Actualizar el estado local
       setBoxData((prevData) => ({
         ...prevData,
-        title: editedData.title,
-        address: editedData.address,
-        description: editedData.description,
+        ...updatedData,
       }));
-
-      Alert.alert("Éxito", "Evento actualizado exitosamente");
+  
+      Alert.alert("Éxito", "Evento actualizado exitosamente en todos los registros y notificaciones");
       setEditModalVisible(false);
     } catch (error) {
       console.error("Error al actualizar el evento:", error);
-      Alert.alert("Error", "Hubo un problema al actualizar el evento.");
+      Alert.alert("Error", "Hubo un problema al actualizar el evento en todos los registros.");
     } finally {
       setIsProcessing(false);
     }
   };
+  
+  
+  
 
   const renderEditModal = () => (
     <Modal
