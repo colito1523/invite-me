@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 export default function StorySlider() {
   const [refreshing, setRefreshing] = useState(false);
@@ -25,6 +26,35 @@ export default function StorySlider() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [unseenStories, setUnseenStories] = useState({});
   const [blockedUsers, setBlockedUsers] = useState([]);
+
+  const processImage = async (uri) => {
+    return new Promise((resolve, reject) => {
+      Image.getSize(
+        uri,
+        async (width, height) => {
+          if (width > height) {
+            try {
+              const rotatedImage = await ImageManipulator.manipulateAsync(
+                uri,
+                [{ rotate: 90 }],
+                { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+              );
+              resolve(rotatedImage.uri);
+            } catch (error) {
+              console.error("Error al rotar la imagen:", error);
+              reject(error);
+            }
+          } else {
+            resolve(uri);
+          }
+        },
+        (error) => {
+          console.error("Error al obtener las dimensiones de la imagen:", error);
+          reject(error);
+        }
+      );
+    });
+  };
 
   useEffect(() => {
     const fetchBlockedUsers = async () => {
@@ -196,62 +226,56 @@ const handleOpenViewer = async (index) => {
 
   const handleCamera = async () => {
     try {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert("Permiso denegado", "Se necesita acceso a la cámara.");
-            return;
-        }
-
-        const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: false,
-            quality: 1,
-        });
-
-        if (!result.canceled && result.assets?.length > 0) {
-            setSelectedImage(result.assets[0].uri); // Muestra la imagen en el modal
-        } else {
-            Alert.alert("Operación cancelada", "No se tomó ninguna foto.");
-        }
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Permiso denegado", "Se necesita acceso a la cámara.");
+        return;
+      }
+  
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 1,
+      });
+  
+      if (!result.canceled && result.assets?.length > 0) {
+        const processedUri = await processImage(result.assets[0].uri);
+        setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
+      } else {
+        Alert.alert("Operación cancelada", "No se tomó ninguna foto.");
+      }
     } catch (error) {
-        console.error("Error al abrir la cámara:", error);
-        Alert.alert("Error", "Hubo un problema al intentar abrir la cámara.");
+      console.error("Error al abrir la cámara:", error);
+      Alert.alert("Error", "Hubo un problema al intentar abrir la cámara.");
     }
-};
-
-
-
-const handleGallery = async () => {
-  try {
-    // Solicitar permisos para la galería
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert("Permiso denegado", "Se necesita acceso a la galería.");
-      return;
+  };
+  
+  const handleGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Permiso denegado", "Se necesita acceso a la galería.");
+        return;
+      }
+  
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 1,
+      });
+  
+      if (!result.canceled && result.assets?.length > 0) {
+        const processedUri = await processImage(result.assets[0].uri);
+        setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
+      } else {
+        Alert.alert("Operación cancelada", "No se seleccionó ninguna imagen.");
+      }
+    } catch (error) {
+      console.error("Error al abrir la galería:", error);
+      Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
     }
-
-    // Abrir la galería y seleccionar una imagen
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Corrected
-      allowsEditing: false,
-      quality: 1,
-    });
-
-    // Manejar la selección de la imagen
-    if (!result.canceled && result.assets?.length > 0) {
-      setSelectedImage(result.assets[0].uri); // Muestra la imagen en el modal
-    } else {
-      Alert.alert("Operación cancelada", "No se seleccionó ninguna imagen.");
-    }
-  } catch (error) {
-    console.error("Error al abrir la galería:", error);
-    Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
-  }
-};
-
-
-
-
+  };
+  
   const uploadStory = async (imageUri) => {
     try {
       const user = auth.currentUser;
