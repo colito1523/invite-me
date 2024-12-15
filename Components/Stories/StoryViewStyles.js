@@ -21,6 +21,10 @@ const styles = StyleSheet.create({
     right: 10,
     zIndex: 10,
   },
+  rotatedImage: {
+    transform: [{ rotate: "90deg" }],
+  },
+  
   progressBar: {
     marginTop: 10,
     flex: 1,
