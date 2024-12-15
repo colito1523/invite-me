@@ -217,19 +217,7 @@ const [isModalVisible, setIsModalVisible] = useState(false);
     }, [user?.uid])
   );
 
-  useEffect(() => {
-    if (chats.length > 0) {
-      console.log("Lista de Chats:");
-      chats.forEach((chat) => {
-        console.log(`Chat ID: ${chat.id}`);
-        console.log("Detalles del usuario:");
-        console.log(`UID: ${chat.user.uid}`);
-        console.log(`Nombre de usuario: ${chat.user.username}`);
-        console.log(`Nombre: ${chat.user.firstName} ${chat.user.lastName}`);
-        console.log(`Email: ${chat.user.email}`);
-      });
-    }
-  }, [chats]);
+
   
   
   

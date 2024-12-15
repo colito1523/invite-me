@@ -22,7 +22,6 @@ import dayjs from "dayjs";
 import { useLocationAndTime } from "../../src/hooks/useLocationAndTime";
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
-import TabBar from "./TabBar";
 import Header from "./Header"; // Importamos el nuevo componente
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
