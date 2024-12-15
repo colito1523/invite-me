@@ -34,7 +34,7 @@ import MutualFriendsModal from "../Mutual-Friends-Modal/MutualFriendsModal";
 
 const { width, height } = Dimensions.get("window");
 
-const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus, isProcessing, friendCount, mutualFriends }) => {
+const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus, isProcessing, friendCount, mutualFriends, handleMutualFriendsPress }) => {
   const { t } = useTranslation();
   return (
     <View style={styles.nameContainer}>
@@ -80,10 +80,10 @@ const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, fr
               {t('noMutualFriends')}
             </Text>
           ) : (
-            <TouchableOpacity
-              onPress={handleMutualFriendsPress}
-              style={{ flexDirection: "row", alignItems: "center" }}
-            >
+           <TouchableOpacity
+  onPress={handleMutualFriendsPress}
+  style={{ flexDirection: "row", alignItems: "center" }}
+>
               <View style={{ flexDirection: "row", height: 40 }}>
                 {mutualFriends.slice(0, 4).map((friend, index) => (
                   <Image
@@ -94,7 +94,7 @@ const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, fr
                   />
                 ))}
               </View>
-              <Text style={[styles.mutualFriendMoreText, { marginLeft: 10, color: isNightMode ? "#fff" : "#fff" }]}>
+              <Text style={[styles.mutualFriendMoreText, { marginLeft: 70, color: isNightMode ? "#fff" : "#fff" }]}>
                 {mutualFriends.length > 4
                   ? t('andMoreMutualFriends', { count: mutualFriends.length - 4 })
                   : t('mutualFriends')}
@@ -516,6 +516,7 @@ export default function Component({ route, navigation }) {
                     isProcessing={isProcessing}
                     friendCount={index === 0 ? friendCount : undefined}
                     mutualFriends={index === 1 ? mutualFriends : undefined}
+                    handleMutualFriendsPress={handleMutualFriendsPress}
                   />
                   <View style={styles.infoContainer}>
                     {index === 0 && (

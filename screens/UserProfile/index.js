@@ -551,34 +551,7 @@ export default function UserProfile({ route, navigation }) {
                 }
                 contentStyle={styles.menuContent}
               >
-                <Menu.Item
-                  onPress={() => {
-                    if (!blockedUsers.includes(selectedUser.id)) {
-                      toggleUserStatus({
-                        user,
-                        selectedUser,
-                        setPendingRequest,
-                        setFriendshipStatus,
-                        setFriendCount,
-                        friendCount,
-                        t,
-                      });
-                    } else {
-                      Alert.alert(
-                        t("userProfile.userBlocked"),
-                        t("userProfile.cannotAddFriend")
-                      );
-                    }
-                    closeMenu();
-                  }}
-                  title={
-                    friendshipStatus
-                      ? t("userProfile.removeFriend")
-                      : pendingRequest
-                      ? t("userProfile.cancelRequest")
-                      : t("userProfile.addFriend")
-                  }
-                />
+              
                 <Menu.Item
                   onPress={() => {
                     handleBlockUser({ user, selectedUser, t }); // Llamar a la nueva función

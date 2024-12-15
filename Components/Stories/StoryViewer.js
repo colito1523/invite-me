@@ -13,6 +13,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Dimensions, // Add this import
+  Image,
 } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../config/firebase";
@@ -22,7 +23,6 @@ import {
   updateDoc,
   arrayUnion,
   getDoc,
-  arrayRemove,
   setDoc,
   addDoc,
   collection,
@@ -32,12 +32,12 @@ import {
 } from "firebase/firestore";
 import styles from "./StoryViewStyles";
 import { ref, deleteObject } from "firebase/storage";
-import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 import Complaints from "../Complaints/Complaints";
 import { KeyboardAvoidingView, Platform } from "react-native";
 
 const { width, height } = Dimensions.get("window"); // Add this line
+
 
 export function StoryViewer({
   stories,
@@ -115,6 +115,10 @@ export function StoryViewer({
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [isHideStoryModalVisible, setIsHideStoryModalVisible] = useState(false);
   const [selectedViewer, setSelectedViewer] = useState(null); // Para almacenar el espectador seleccionado
+  const [imageDimensions, setImageDimensions] = useState({
+    width: "100%",
+    height: "100%",
+  });
 
   const user = auth.currentUser;
 
@@ -946,20 +950,35 @@ export function StoryViewer({
                 ))}
               </View>
               <Image
-                cachePolicy="memory-disk"
-                key={currentStory.id}
-                source={{ uri: currentStory.storyUrl }}
-                style={styles.image}
-                resizeMode="contain" // Cambia de "cover" a "contain"
-                onLoadStart={() => setIsImageLoading(true)}
-                onLoadEnd={() => setIsImageLoading(false)}
-                onLoad={() =>
-                  setLoadedImages((prev) => ({
-                    ...prev,
-                    [currentStory.storyUrl]: true,
-                  }))
-                }
-              />
+  key={currentStory.id}
+  source={{ uri: currentStory.storyUrl }}
+  style={[
+    styles.image,
+    imageDimensions, // Aplica dimensiones dinámicas
+  ]}
+  resizeMode="cover" // Siempre usar "cover"
+  onLoad={(event) => {
+    const { width: imgWidth, height: imgHeight } = event.nativeEvent.source;
+    const screenAspectRatio = width / height;
+    const imageAspectRatio = imgWidth / imgHeight;
+
+    // Si la imagen es horizontal, ajustamos dinámicamente el tamaño
+    if (imageAspectRatio > screenAspectRatio) {
+      setImageDimensions({
+        width: "100%",
+        height: "100%",
+      });
+    } else {
+      setImageDimensions({
+        width: "100%",
+        height: "100%",
+      });
+    }
+  }}
+/>
+
+
+
               {isImageLoading && (
                 <ActivityIndicator size={50} color="#FFFFFF" />
               )}
