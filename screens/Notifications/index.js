@@ -176,7 +176,7 @@ export default function NotificationsComponent() {
               style={{ marginRight: 10 }}
             />
             <Text style={{ color: isNightMode ? "#fff" : "#000", fontSize: 18, fontWeight: "bold" }}>
-              Notificaciones
+              {t("notifications.title")}
             </Text>
           </View>
         ),
@@ -250,9 +250,7 @@ export default function NotificationsComponent() {
           />
           <View style={styles.textContainer}>
             <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
-              <Text style={[styles.boldText]}>{item.fromName}</Text> te ha invitado a{" "}
-              <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
-              <Text style={[styles.boldText]}>{eventDate}</Text>
+              <Text style={[styles.boldText]}>{item.fromName}</Text> {t("notifications.invitedToEvent", { eventTitle: item.eventTitle })} {t("notifications.on")} <Text style={[styles.boldText]}>{eventDate}</Text>
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -268,7 +266,7 @@ export default function NotificationsComponent() {
                 {loadingEventId === item.id ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>Aceptar</Text>
+                  <Text style={styles.buttonText}>{t("notifications.accept")}</Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
@@ -278,7 +276,7 @@ export default function NotificationsComponent() {
                   setNotifications
                 })}
               >
-                <Text style={styles.buttonText}>Rechazar</Text>
+                <Text style={styles.buttonText}>{t("notifications.reject")}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -319,9 +317,7 @@ export default function NotificationsComponent() {
           />
           <View style={styles.textContainer}>
             <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
-              <Text style={[styles.boldText]}>{item.fromName}</Text> te ha invitado a{" "}
-              <Text style={[styles.boldText]}>{item.eventTitle}</Text> el día{" "}
-              <Text style={[styles.boldText]}>{eventDate}</Text>
+              <Text style={[styles.boldText]}>{item.fromName}</Text> {t("notifications.invitedToEvent", { eventTitle: item.eventTitle })} {t("notifications.on")} <Text style={[styles.boldText]}>{eventDate}</Text>
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -337,7 +333,7 @@ export default function NotificationsComponent() {
                 {loadingEventId === item.id ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>Aceptar</Text>
+                  <Text style={styles.buttonText}>{t("notifications.accept")}</Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
@@ -347,7 +343,7 @@ export default function NotificationsComponent() {
                   setNotifications
                 })}
               >
-                <Text style={styles.buttonText}>Rechazar</Text>
+                <Text style={styles.buttonText}>{t("notifications.reject")}</Text>
               </TouchableOpacity>
             </View>
           </View>

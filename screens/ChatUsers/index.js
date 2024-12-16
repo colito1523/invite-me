@@ -45,6 +45,7 @@ import { styles } from "./styles";
 
 
 import Complaints from '../../Components/Complaints/Complaints';
+import { useTranslation } from "react-i18next";
 
 export default function Chat({ route }) {
   const { currentChatId, recipientUser, imageUri } = route.params; //a Params no le llega el initialchatId
@@ -68,6 +69,7 @@ export default function Chat({ route }) {
 
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
+  const { t } = useTranslation();
 
   useEffect(() => {
 
@@ -78,7 +80,7 @@ export default function Chat({ route }) {
   // Verificación de usuarios bloqueados
   useEffect(() => {
     if (blockedUsers.includes(recipientUser.id)) {
-      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      Alert.alert(t("chatUsers.error"), t("chatUsers.blockedUser"));
       navigation.goBack();
       return;
     }
@@ -162,7 +164,7 @@ export default function Chat({ route }) {
 
       if (!chatSnapshot.exists()) {
         console.error("El chat no existe.");
-        Alert.alert("Error", "No se pudo encontrar el chat.");
+        Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
         return;
       }
 
@@ -173,7 +175,7 @@ export default function Chat({ route }) {
 
       if (!recipientId) {
         console.error("No se encontró un ID válido para el usuario reportado.");
-        Alert.alert("Error", "No se pudo identificar al usuario reportado.");
+        Alert.alert(t("chatUsers.error"), t("chatUsers.reportedUserNotFound"));
         return;
       }
 
@@ -191,11 +193,11 @@ export default function Chat({ route }) {
 
       await addDoc(complaintsRef, newComplaint);
 
-      Alert.alert("Gracias", "Tu denuncia ha sido enviada.");
+      Alert.alert(t("chatUsers.thankYou"), t("chatUsers.reportSubmitted"));
       setIsComplaintVisible(false);
     } catch (error) {
       console.error("Error al enviar la denuncia:", error);
-      Alert.alert("Error", "No se pudo enviar la denuncia.");
+      Alert.alert(t("chatUsers.error"), t("chatUsers.reportError"));
     }
   };
 
@@ -255,7 +257,7 @@ export default function Chat({ route }) {
     isViewOnce = false // Este parámetro se pasará desde donde se llama a la función
 ) => {
     if (isUploading) {
-        Alert.alert("Cargando", "Por favor espera a que termine la subida actual.");
+        Alert.alert(t("chatUsers.uploading"), t("chatUsers.waitForUpload"));
         return;
     }
 
@@ -330,10 +332,7 @@ export default function Chat({ route }) {
         flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
         console.error("Error al enviar el mensaje:", error);
-        Alert.alert(
-            "Error",
-            "No se pudo enviar el mensaje. Por favor, inténtalo de nuevo."
-        );
+        Alert.alert(t("chatUsers.error"), t("chatUsers.sendMessageError"));
         setIsUploading(false);
     }
 };
@@ -362,10 +361,10 @@ const handleDeleteChat = async () => {
 
       // Navigate back
       navigation.goBack();
-      Alert.alert("Éxito", "El chat ha sido eliminado para ti.");
+      Alert.alert(t("chatUsers.success"), t("chatUsers.chatDeleted"));
     } catch (error) {
       console.error("Error al eliminar el chat:", error);
-      Alert.alert("Error", "No se pudo eliminar el chat. Por favor, intenta nuevamente.");
+      Alert.alert(t("chatUsers.error"), t("chatUsers.deleteChatError"));
     }
   };
 
@@ -385,7 +384,7 @@ const handleDeleteChat = async () => {
       return downloadURL;
     } catch (error) {
       console.error("Error al subir el archivo:", error);
-      Alert.alert("Error", "No se pudo subir el archivo.");
+      Alert.alert(t("chatUsers.error"), t("chatUsers.uploadError"));
       return null;
     } finally {
       setIsUploading(false); // Finaliza la carga
@@ -395,10 +394,7 @@ const handleDeleteChat = async () => {
   const handleCameraLaunch = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
-        "Permiso denegado",
-        "Se necesita permiso para acceder a la cámara"
-      );
+      Alert.alert(t("chatUsers.permissionDenied"), t("chatUsers.cameraPermission"));
       return;
     }
 
@@ -416,10 +412,7 @@ const handleDeleteChat = async () => {
   const pickMedia = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
-        "Permiso denegado",
-        "Se necesita permiso para acceder a la galería"
-      );
+      Alert.alert(t("chatUsers.permissionDenied"), t("chatUsers.galleryPermission"));
       return;
     }
 
@@ -483,7 +476,7 @@ const handleDeleteChat = async () => {
     try {
       await updateDoc(doc(database, "chats", chatId), { isHidden: true });
       setIsChatHidden(true);
-      Alert.alert("Chat oculto", "Este chat ha sido ocultado.");
+      Alert.alert(t("chatUsers.hiddenSucces"), t("chatUsers.hiddenChat"));
     } catch (error) {
       console.error("Error al ocultar el chat:", error);
     }
@@ -494,7 +487,7 @@ const handleDeleteChat = async () => {
   const handleUserPress = async () => {
     try {
       if (!chatId) {
-        Alert.alert("Error", "No se puede identificar el chat.");
+        Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
         return;
       }
 
@@ -503,7 +496,7 @@ const handleDeleteChat = async () => {
 
       if (!chatSnapshot.exists()) {
         console.error("El documento del chat no existe.");
-        Alert.alert("Error", "El chat no existe.");
+        Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
         return;
       }
 
@@ -516,14 +509,14 @@ const handleDeleteChat = async () => {
 
       if (!otherParticipantId) {
         console.error("No se encontró un ID válido para el destinatario.");
-        Alert.alert("Error", "No se pudo identificar al destinatario.");
+        Alert.alert(t("chatUsers.error"), t("chatUsers.recipientNotFound"));
         return;
       }
 
       navigation.navigate("UserProfile", { selectedUser: { id: otherParticipantId, ...recipientUser } });
     } catch (error) {
       console.error("Error navegando al perfil del usuario:", error);
-      Alert.alert("Error", "No se pudo navegar al perfil del usuario.");
+      Alert.alert(t("chatUsers.error"), t("chatUsers.navigateToProfileError"));
     }
   };
 
@@ -533,7 +526,7 @@ const handleDeleteChat = async () => {
         const messageSnapshot = await getDoc(messageRef);
 
         if (!messageSnapshot.exists()) {
-            Alert.alert("Error", "No se encontró el mensaje.");
+            Alert.alert(t("chatUsers.error"), t("chatUsers.messageNotFound"));
             return;
         }
 
@@ -560,7 +553,7 @@ const handleDeleteChat = async () => {
         }
     } catch (error) {
         console.error("Error al abrir la imagen:", error);
-        Alert.alert("Error", "No se pudo abrir la imagen.");
+        Alert.alert(t("chatUsers.error"), t("chatUsers.openImageError"));
     }
 };
 
@@ -573,14 +566,14 @@ const handleDeleteChat = async () => {
   const handleLongPressMessage = (message) => {
     if (message.senderId === user.uid) {
       // Solo permitir eliminación de mensajes enviados por el usuario actual
-      Alert.alert("Opciones de Mensaje", "¿Qué te gustaría hacer?", [
+      Alert.alert(t("chatUsers.messageOptions"), t("chatUsers.messageOptionsPrompt"), [
         {
-          text: "Cancelar",
+          text: t("chatUsers.cancel"),
           onPress: () => setSelectedMessageId(null),
           style: "cancel",
         },
         {
-          text: "Eliminar",
+          text: t("chatUsers.delete"),
           onPress: () => handleDeleteMessage(message.id),
           style: "destructive",
         },
@@ -642,8 +635,9 @@ const handleDeleteChat = async () => {
           >
             <Text style={styles.storyResponseText}>
               {item.senderId === user.uid
-                ? `Respondiste a su historia`
-                : `Respondió a tu historia`}
+               ? t("chatUsers.youAnswered")
+               : t("chatUsers.Answered")}
+
             </Text>
             <Image
               source={{ uri: item.storyUrl }}
@@ -686,7 +680,8 @@ const handleDeleteChat = async () => {
             ]}
           >
             <Text style={styles.noteResponseText}>
-              {isOwnMessage ? "Respondiste a su nota" : "Respondió a tu nota"}
+              {isOwnMessage ? t("chatUsers.youAnsweredNote")
+               : t("chatUsers.AnsweredNote")}
             </Text>
 
             <Image
@@ -850,33 +845,33 @@ const handleDeleteChat = async () => {
             onPress={() => {
               setMenuVisible(false);
               Alert.alert(
-                "Eliminar chat",
-                "¿Estás seguro de que quieres eliminar este chat?",
+                t("chatUsers.deleteChat"),
+                t("chatUsers.deleteChatConfirmation"),
                 [
                   {
-                    text: "Cancelar",
+                    text: t("chatUsers.cancel"),
                     style: "cancel",
                   },
                   {
-                    text: "Eliminar",
+                    text: t("chatUsers.delete"),
                     onPress: handleDeleteChat,
                   },
                 ]
               );
             }}
-            title="Borrar chat"
+            title={t("chatUsers.deleteChat")}
             titleStyle={styles.menuItemText}
             style={styles.menuItemContainer}
           />
           <Menu.Item
             onPress={handleHideChat}
-            title="Silenciar"
+            title={t("chatUsers.mute")}
             titleStyle={styles.menuItemText}
             style={styles.menuItemContainer}
           />
           <Menu.Item
             onPress={handleReport}
-            title="Denunciar"
+            title={t("chatUsers.report")}
             titleStyle={styles.menuItemText}
             style={styles.menuItemContainer}
           />
@@ -902,7 +897,7 @@ const handleDeleteChat = async () => {
           style={styles.input}
           value={message}
           onChangeText={setMessage}
-          placeholder="Escribe un mensaje..."
+          placeholder={t("chatUsers.writeMessage")}
           placeholderTextColor="#999"
         />
         {message.trim() ? (
