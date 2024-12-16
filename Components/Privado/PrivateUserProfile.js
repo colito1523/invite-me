@@ -383,9 +383,9 @@ export default function Component({ route, navigation }) {
 
   if (!existingRequestFromThemSnapshot.empty) {
     Alert.alert(
-      "Solicitud pendiente",
-      "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
-    );
+        t('userProfile.error'),
+        t('userProfile.TheyAreAlreadyFriends')
+      );
     setIsProcessing(false);
     return;
   }

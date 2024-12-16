@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
 const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDescription }) => {
   const [mapRegion, setMapRegion] = useState(null);
   const [markerCoordinate, setMarkerCoordinate] = useState(null);
+  const { t } = useTranslation();
+  
 
   useEffect(() => {
     // Reinicia el mapa al cambiar las coordenadas del evento
@@ -45,8 +48,8 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
       <View style={styles.sliderPart}>
         {showDescription ? (
           <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionTitle}>Descripción</Text>
-            <Text style={styles.descriptionText}>{boxData.description}</Text>
+            <Text style={styles.descriptionTitle}>{t('SliderContent.description')}</Text>
+            <Text style={styles.descriptionText}>{boxData.description || t('SliderContent.descriptionNotAvailable')}</Text>
           </View>
         ) : mapRegion ? (
           <View style={styles.mapContainer}>
@@ -67,7 +70,7 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
         ) : (
           <View style={styles.descriptionContainer}>
             <Text style={styles.descriptionText}>
-              {boxData.description || "Descripción no disponible"}
+              {boxData.description || t('SliderContent.descriptionNotAvailable')}
             </Text>
           </View>
         )}
@@ -75,59 +78,58 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
 
       {/* Segundo Slider: Horarios */}
       <View style={styles.sliderPart}>
-  <View style={styles.hoursContainer}>
-    {box.category === "EventoParaAmigos" && box.day && box.hour ? (
-      <View style={styles.notificationHours}>
-        <Text style={styles.hoursText}>{`Hora: ${box.hour}`}</Text>
-        <Text style={styles.dayText}>{`Día: ${box.day}`}</Text>
-      </View>
-    ) : isFromNotification && (box.hour || box.day) ? (
-      <View style={styles.notificationHours}>
-        <Text style={styles.hoursText}>
-          {`Hora: ${box.hour || "No disponible"}`}
-        </Text>
-        <Text style={styles.dayText}>
-          {`Día: ${box.day || "No disponible"}`}
-        </Text>
-      </View>
-    ) : (
-      <View style={styles.hoursContent}>
-        <View style={styles.column}>
-          {Object.keys(boxData.hours || {}).map((day, index) => (
-            <Text key={index} style={styles.dayText}>
-              {day}
-            </Text>
-          ))}
+        <View style={styles.hoursContainer}>
+          {box.category === "EventoParaAmigos" && box.day && box.hour ? (
+            <View style={styles.notificationHours}>
+              <Text style={styles.hoursText}>{`${t('SliderContent.hours')}: ${box.hour}`}</Text>
+              <Text style={styles.dayText}>{`${t('SliderContent.day')}: ${box.day}`}</Text>
+            </View>
+          ) : isFromNotification && (box.hour || box.day) ? (
+            <View style={styles.notificationHours}>
+              <Text style={styles.hoursText}>
+                {`${t('SliderContent.hours')}: ${box.hour || t('SliderContent.notAvailable')}`}
+              </Text>
+              <Text style={styles.dayText}>
+                {`${t('SliderContent.day')}: ${box.day || t('SliderContent.notAvailable')}`}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.hoursContent}>
+              <View style={styles.column}>
+                {Object.keys(boxData.hours || {}).map((day, index) => (
+                  <Text key={index} style={styles.dayText}>
+                    {day}
+                  </Text>
+                ))}
+              </View>
+              <View style={styles.column}>
+                {Object.values(boxData.hours || {}).map((time, index) => (
+                  <Text key={index} style={styles.timeText}>
+                    {time}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          )}
         </View>
-        <View style={styles.column}>
-          {Object.values(boxData.hours || {}).map((time, index) => (
-            <Text key={index} style={styles.timeText}>
-              {time}
-            </Text>
-          ))}
-        </View>
       </View>
-    )}
-  </View>
-</View>
-
 
       {/* Tercer Slider: Ubicación o Contacto */}
       <View style={styles.sliderPart}>
         {boxData.address ? (
           <View style={styles.addressContainer}>
-            <Text style={styles.addressTitle}>Ubicación:</Text>
+            <Text style={styles.addressTitle}>{t('SliderContent.location')}</Text>
             <Text style={styles.addressText}>
-              {boxData.address || "Ubicación no disponible"}
+              {boxData.address || t('SliderContent.locationNotAvailable')}
             </Text>
           </View>
         ) : (
           <View style={styles.contactContainer}>
-  <Text style={styles.contactTitle}>Contacto:</Text>
-  <Text style={styles.contactText}>
-    {boxData.number || boxData.phoneNumber || box.phoneNumber || "Sin número de contacto"}
-  </Text>
-</View>
+            <Text style={styles.contactTitle}>{t('SliderContent.contact')}</Text>
+            <Text style={styles.contactText}>
+              {boxData.number || boxData.phoneNumber || box.phoneNumber || t('SliderContent.noContactNumber')}
+            </Text>
+          </View>
         )}
       </View>
     </ScrollView>

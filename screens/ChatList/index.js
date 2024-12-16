@@ -217,14 +217,6 @@ const { setHasUnreadMessages } = useUnreadMessages();
       fetchChats();
     }, [user?.uid])
   );
-  
-
-
-  
-  
-  
-  
-  
 
   useEffect(() => {
     const filtered = chats.filter((chat) =>
@@ -259,13 +251,10 @@ const { setHasUnreadMessages } = useUnreadMessages();
       // Actualizar el estado local para ocultar el chat
       setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
 
-      Alert.alert("Éxito", "El chat ha sido eliminado y ocultado para ti.");
+      Alert.alert(t("indexChatList.success"), t("indexChatList.chatDeleted"));
     } catch (error) {
       console.error("Error al eliminar el chat:", error);
-      Alert.alert(
-        "Error",
-        "No se pudo eliminar el chat. Por favor, intenta nuevamente."
-      );
+      Alert.alert(t("indexChatList.error"), t("indexChatList.chatDeleteError"));
     }
   };
 
@@ -279,7 +268,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
     try {
       const userDoc = await getDoc(doc(database, "users", user.uid));
       if (!userDoc.exists()) {
-        Alert.alert("Error", "No se encontraron detalles para este usuario.");
+        Alert.alert(t("indexChatList.error"), t("indexChatList.dontFindResults"));
         return;
       }
   
@@ -327,7 +316,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
       }
     } catch (error) {
       console.error("Error al manejar clic en imagen:", error);
-      Alert.alert("Error", "Hubo un problema al procesar la solicitud.");
+      Alert.alert(t("indexChatList.error"), t("indexChatList.dontProccessRequest"));
     }
   };
   
@@ -440,19 +429,16 @@ const { setHasUnreadMessages } = useUnreadMessages();
       setSelectedChats([]);
       setIsSelectionMode(false);
 
-      Alert.alert("Éxito", "Los chats seleccionados han sido eliminados.");
+      Alert.alert(t("indexChatList.success"), t("indexChatList.chatsDeleted"));
     } catch (error) {
       console.error("Error al eliminar los chats seleccionados:", error);
-      Alert.alert(
-        "Error",
-        "No se pudieron eliminar los chats seleccionados. Intenta de nuevo."
-      );
+      Alert.alert(t("indexChatList.error"), t("indexChatList.chatsDontDeleted"));
     }
   };
 
   const handleMuteSelectedChats = async () => {
     if (!selectedMuteHours) {
-      Alert.alert("Error", "Por favor selecciona una duración para silenciar.");
+      Alert.alert(t("indexChatList.error"), t("indexChatList.muteDurationError"));
       return;
     }
 
@@ -474,10 +460,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
       setShowMuteOptions(false);
     } catch (error) {
       console.error("Error al silenciar los chats:", error);
-      Alert.alert(
-        "Error",
-        "No se pudieron silenciar los chats. Intenta nuevamente."
-      );
+      Alert.alert(t("indexChatList.error"), t("indexChatList.muteError"));
     }
   };
   
@@ -513,13 +496,10 @@ const { setHasUnreadMessages } = useUnreadMessages();
 
       // Actualiza el estado local
       setMutedChats(updatedMutedChats);
-      Alert.alert("Éxito", "El silencio ha sido desactivado.");
+      Alert.alert(t("indexChatList.success"), t("indexChatList.unmuteSuccess"));
     } catch (error) {
       console.error("Error al desactivar el silencio:", error);
-      Alert.alert(
-        "Error",
-        "No se pudo desactivar el silencio. Intenta nuevamente."
-      );
+      Alert.alert(t("indexChatList.error"), t("indexChatList.unmuteError"));
     }
   };
 
@@ -625,23 +605,23 @@ const { setHasUnreadMessages } = useUnreadMessages();
         onLongPress={() => {
           if (isMuted) {
             Alert.alert(
-              "Chat silenciado",
-              "Este chat está silenciado. ¿Quieres desactivar el silencio?",
+              t("indexChatList.muteChat"),
+              t("indexChatList.muteChatConfirmation"),
               [
-                { text: "Cancelar", style: "cancel" },
+                { text: t("indexChatList.cancel"), style: "cancel" },
                 {
-                  text: "Desactivar silencio",
+                  text: t("indexChatList.unmuteChat"),
                   onPress: () => handleUnmuteChat(item.id),
                 },
               ]
             );
           } else {
             Alert.alert(
-              "Eliminar Chat",
-              "¿Estás seguro de que deseas eliminar este chat?",
+              t("indexChatList.deleteChat"),
+              t("indexChatList.deleteChatConfirmation"),
               [
-                { text: "Cancelar", style: "cancel" },
-                { text: "Eliminar", onPress: () => handleDeleteChat(item) },
+                { text: t("indexChatList.cancel"), style: "cancel" },
+                { text: t("indexChatList.delete"), onPress: () => handleDeleteChat(item) },
               ]
             );
           }
@@ -813,7 +793,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                   setIsSelectionMode(true);
                   setShowOptionsMenu(false);
                 }}
-                title="Borrar Mensajes"
+                title={t("indexChatList.deleteChats")}
               />
               <Menu.Item
                 onPress={() => {
@@ -821,7 +801,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                   setShowMuteOptions(true);
                   setShowOptionsMenu(false);
                 }}
-                title="Silenciar Notificaciones"
+                title={t("indexChatList.muteChats")}
               />
             </Menu>
           </View>
@@ -836,6 +816,10 @@ const { setHasUnreadMessages } = useUnreadMessages();
             >
               <Text style={[styles.selectAllText, { color: theme.buttonText }]}>
                 {selectAll ? "Deseleccionar todos" : "Seleccionar todos"}
+                {selectAll   ? t("indexChatList.selectAll")
+    : t("indexChatList.deselectAll")}
+
+                
               </Text>
             </TouchableOpacity>
           )}

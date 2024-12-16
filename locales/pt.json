@@ -172,7 +172,15 @@
     "storySettingsUpdateError": "Não foi possível atualizar as configurações das histórias.",
     "alreadyHidden": "Você já ocultou as histórias deste usuário.",
     "hiddenSuccessfully": "As histórias deste usuário foram ocultadas com sucesso.",
-    "hideError": "Não foi possível ocultar as histórias deste usuário."
+    "hideError": "Não foi possível ocultar as histórias deste usuário.",
+     "errorLike": "o se pudo gestionar el like.",
+     "dontAuthentication": "Você não está autenticado.",
+     "sendMenssage": "Mensagem enviada.",
+      "Delete": "Apagar",
+      "DontSeeMore": "Não ver mais Histórias",
+      "Report": "Denunciar",
+      "showMyStories": "Mostrar minhas histórias.",
+    "hideMyStories": "Não mostrar minhas histórias."
   },
 
   "header": {
@@ -183,7 +191,6 @@
     "updating": "Atualizando..."
   },
 
-  
   "SliderContent": {
     "description": "Descrição",
     "descriptionNotAvailable": "Descrição não disponível",
@@ -195,6 +202,74 @@
     "contact": "Contato",
     "noContactNumber": "Sem número de contato"
    },
+
+   "indexBoxDetails": {
+    "succes": "Sucesso",
+    "error": "Erro",
+    "editEvent": "Editar Evento",
+    "deleteEvent": "Excluir Evento",
+    "inviteFriends": "Convidar Amigos",
+    "eventDetails": "Detalhes do Evento",
+    "eventSaved": "Evento Salvo",
+    "eventRemoved": "Evento Removido",
+    "eventUpdated": "Evento Atualizado",
+    "eventUpdateError": "Erro ao atualizar o evento",
+    "eventDeleteError": "Erro ao excluir o evento",
+    "eventSaveError": "Erro ao salvar o evento",
+    "eventInviteError": "Erro ao convidar amigos",
+    "eventFetchError": "Erro ao obter detalhes do evento",
+    "eventNotFound": "Evento não encontrado",
+    "eventInviteSuccess": "Amigos convidados com sucesso",
+    "eventSaveSuccess": "Evento salvo com sucesso",
+    "eventRemoveSuccess": "Evento removido com sucesso",
+    "eventUpdateSuccess": "Evento atualizado com sucesso",
+    "eventDeleteSuccess": "Evento excluído com sucesso",
+    "dontPermission": "São necessárias permissões para acessar suas fotos.",
+    "saving": "Salvando...",
+     "saver": "Salvar",
+      "cancel": "Cancelar"
+  },
+
+  "indexChatList": {
+    "success": "Sucesso",
+    "chatsDeleted":"Chats Apagados",
+    "error": "Erro",
+    "chatsDontDeleted": "Chats não apagados",
+    "dontFindResults": "Não foram encontrados resultados",
+    "dontProccessRequest": "Não foi possível processar a solicitação",
+    "deleteChat": "Excluir Chat",
+    "deleteChats": "Excluir Chats",
+    "deleteChatConfirmation": "Tem certeza de que deseja excluir este chat?",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "muteChat": "Silenciar Chat",
+    "muteChats": "Silenciar Chats",
+    "unmuteChat": "Desativar Silêncio",
+    "muteChatConfirmation": "Este chat está silenciado. Deseja desativar o silêncio?",
+    "muteOptions": "Opções de Silêncio",
+    "muteFor": "Silenciar por",
+    "muteSuccess": "O chat foi silenciado.",
+    "unmuteSuccess": "O silêncio foi desativado.",
+    "muteError": "Não foi possível silenciar o chat. Tente novamente.",
+    "unmuteError": "Não foi possível desativar o silêncio. Tente novamente.",
+    "searchPlaceholder": "Pesquisar...",
+    "messages": "Mensagens",
+    "selectAll": "Selecionar todos",
+    "deselectAll": "Desmarcar todos",
+    "deleteSelected": "Excluir selecionados",
+    "muteSelected": "Silenciar selecionados",
+    "cancelSelection": "Cancelar seleção",
+    "muteDurationError": "Por favor, selecione uma duração para silenciar.",
+    "muteDuration": "Duração do silêncio",
+    "muteDurationOptions": {
+      "1hour": "1 hora",
+      "4hours": "4 horas",
+      "8hours": "8 horas",
+      "24hours": "24 horas"
+    },
+    "muteDurationSelected": "Silenciado por {{hours}} horas",
+    "muteDurationNotSelected": "Nenhuma duração selecionada"
+  },
   
   
   "accessPrivately": "Entrar",
@@ -296,7 +371,8 @@
     "clubs": "Bares & Clubes",
     "events": "Eventos",
     "createOwnEvent": "Crie meu próprio evento",
-    "suggestSpace": "Sugira um espaço"
+    "suggestSpace": "Sugira um espaço",
+    "support": "Apoio"
   },
 
   "searchPlaceholder": "Procura...",
@@ -443,7 +519,8 @@
     "seeTheirStories": "Ver suas histórias",
     "hideTheirStories": "Ocultar suas histórias",
     "showMyStories": "Mostrar minhas histórias",
-    "hideMyStories": "Ocultar minhas histórias"
+    "hideMyStories": "Ocultar minhas histórias",
+    "TheyAreAlreadyFriends": "Este utilizador já lhe enviou um pedido de amizade. Verifique as suas notificações."
   },
   "months": ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
 

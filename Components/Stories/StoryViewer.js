@@ -522,7 +522,10 @@ export function StoryViewer({
       }
     } catch (error) {
       console.error("Error al gestionar el like:", error);
-      Alert.alert("Error", "No se pudo gestionar el like.");
+      Alert.alert(
+              t('storyViewer.error'),
+              t('storyViewer.errorLike')
+            );
     }
   };
 
@@ -536,15 +539,13 @@ export function StoryViewer({
           "stories"
         );
         const storiesSnapshot = await getDocs(storiesRef);
-
-        // Obtener historias válidas (que no hayan expirado)
+  
         const now = new Date();
         const userStories = storiesSnapshot.docs
           .map((doc) => ({ id: doc.id, ...doc.data() }))
-          .filter((story) => new Date(story.expiresAt.toDate()) > now);
-
+          .filter((story) => new Date(story.expiresAt?.toDate()) > now);
+  
         if (userStories.length > 0) {
-          // Navegar al visor de historias
           navigation.navigate("StoryViewer", {
             stories: [
               {
@@ -559,13 +560,17 @@ export function StoryViewer({
         }
       } catch (error) {
         console.error("Error loading stories:", error);
-        Alert.alert("Error", "No se pudieron cargar las historias.");
+        Alert.alert(
+          t("storyViewer.error"),
+          t("storyViewer.userDetailsNotFound")
+        );
       }
     }
-
+  
     // Si no tiene historias, proceder a su perfil
     navigation.navigate("UserProfile", { selectedUser });
   };
+  
 
   const loadViewers = async () => {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
@@ -808,14 +813,20 @@ export function StoryViewer({
       const user = auth.currentUser;
       if (!user) {
         console.error("No user logged in");
-        Alert.alert("Error", "No estás autenticado.");
+        Alert.alert(
+          t("storyViewer.error"),
+          t("storyViewer.dontAuthentication")
+        );
         return;
       }
 
       const currentStory = stories[currentIndex]?.userStories[storyIndex];
       if (!currentStory) {
         console.error("Story not found");
-        Alert.alert("Error", "Historia no encontrada.");
+        Alert.alert(
+          t("storyViewer.error"),
+          t("storyViewer.storyNotFound")
+        );
         return;
       }
 
@@ -850,7 +861,10 @@ export function StoryViewer({
       }
     } catch (error) {
       console.error("Error deleting story:", error);
-      Alert.alert("Error", "No se pudo eliminar la historia.");
+      Alert.alert(
+        t("storyViewer.error"),
+        t("storyViewer.deleteError")
+      );
     }
   };
 
@@ -876,9 +890,18 @@ export function StoryViewer({
 
     return (
       <TouchableOpacity
-        style={styles.viewerItem}
-        onPress={() => handleUserPress(item.uid)}
-      >
+  style={styles.viewerItem}
+  onPress={() =>
+    handleUserPress({
+      id: item.uid,
+      username: item.username,
+      firstName: item.firstName,
+      lastName: item.lastName,
+      profileImage: item.profileImage,
+      hasStories: item.hasStories || false, // Asegúrate de tener esta propiedad
+    })
+  }
+>
         <Image
           source={{ uri: item.profileImage }}
           style={styles.viewerImage}
@@ -1034,7 +1057,7 @@ export function StoryViewer({
 
           {showSendConfirmation && (
             <View style={styles.sendConfirmation}>
-              <Text style={styles.sendConfirmationText}>Mensaje enviado</Text>
+              <Text style={styles.sendConfirmationText}>{t('storyViewer.sendMenssage')}</Text>
             </View>
           )}
 
@@ -1171,7 +1194,8 @@ export function StoryViewer({
                         deleteStory(); // Llamamos a la función de eliminar historia
                       }}
                     >
-                      <Text style={styles.deleteButtonText}>Eliminar</Text>
+                      <Text style={styles.deleteButtonText}>{t('storyViewer.Delete')}</Text>
+                      
                     </TouchableOpacity>
                   ) : (
                     // Opciones para otros usuarios
@@ -1184,7 +1208,7 @@ export function StoryViewer({
                         }}
                       >
                         <Text style={styles.optionButtonText}>
-                          No ver mas historias
+                        {t('storyViewer.DontSeeMore')}
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -1194,7 +1218,8 @@ export function StoryViewer({
                           setIsComplaintsVisible(true); // Abre el modal de denuncias
                         }}
                       >
-                        <Text style={styles.optionButtonText}>Denunciar</Text>
+                        <Text style={styles.optionButtonText}>{t('storyViewer.Report')}</Text>
+                        
                       </TouchableOpacity>
                     </>
                   )}
@@ -1216,8 +1241,8 @@ export function StoryViewer({
               // Validación para asegurar que `currentStory` y sus datos están disponibles
               if (!currentStory || !currentStory.uid || !currentStory.id) {
                 Alert.alert(
-                  "Error",
-                  "No se encontró la historia o los datos necesarios."
+                  t("storyViewer.error"),
+                  t("storyViewer.hideError")
                 );
                 setIsSubmittingReport(false);
                 return;
@@ -1233,11 +1258,9 @@ export function StoryViewer({
               };
 
               await addDoc(collection(database, "reports"), reportData);
-              Alert.alert("Denuncia enviada", "Gracias por tu reporte.");
               setIsComplaintsVisible(false);
             } catch (error) {
               console.error("Error al enviar la denuncia:", error);
-              Alert.alert("Error", "No se pudo enviar la denuncia.");
             } finally {
               setIsSubmittingReport(false);
             }
@@ -1264,8 +1287,8 @@ export function StoryViewer({
                   >
                     <Text style={styles.simpleModalText}>
                       {selectedViewer?.hideStoriesFrom?.includes(user.uid)
-                        ? "Mostrar mis historias"
-                        : "Ocultar mis historias"}
+                        ? t("storyViewer.showMyStories")
+    : t("storyViewer.hideMyStories")}
                     </Text>
                   </TouchableOpacity>
                 </View>

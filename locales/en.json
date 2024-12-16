@@ -173,7 +173,15 @@
     "storySettingsUpdateError": "Could not update story settings.",
     "alreadyHidden": "You have already hidden this user's stories.",
     "hiddenSuccessfully": "This user's stories have been successfully hidden.",
-    "hideError": "Could not hide this user's stories."
+    "hideError": "Could not hide this user's stories.",
+    "errorLike": "The like could not be managed.",
+    "dontAuthentication": "You are not authenticated.",
+    "sendMenssage": "Message sent.",
+    "Delete": "Delete",
+    "DontSeeMore": "Do not see more Stories",
+    "Report": "Report",
+    "showMyStories": "Show my stories.",
+    "hideMyStories": "Do not show my stories."
   },
 
   "header": {
@@ -186,16 +194,85 @@
 
   "SliderContent": {
     "description": "Description",
-  "descriptionNotAvailable": "Description not available",
-  "hours": "Hour",
-  "day": "Day",
-  "notAvailable": "Not available",
-  "location": "Location:",
-  "locationNotAvailable": "Location not available",
-  "contact": "Contact",
-  "noContactNumber": "No contact number"
-   },
-  
+    "descriptionNotAvailable": "Description not available",
+    "hours": "Hour",
+    "day": "Day",
+    "notAvailable": "Not available",
+    "location": "Location:",
+    "locationNotAvailable": "Location not available",
+    "contact": "Contact",
+    "noContactNumber": "No contact number"
+  },
+
+  "indexBoxDetails": {
+    "succes": "Success",
+    "error": "Error",
+    "editEvent": "Edit Event",
+    "deleteEvent": "Delete Event",
+    "inviteFriends": "Invite Friends",
+    "eventDetails": "Event Details",
+    "eventSaved": "Event Saved",
+    "eventRemoved": "Event Removed",
+    "eventUpdated": "Event Updated",
+    "eventUpdateError": "Error updating event",
+    "eventDeleteError": "Error deleting event",
+    "eventSaveError": "Error saving event",
+    "eventInviteError": "Error inviting friends",
+    "eventFetchError": "Error fetching event details",
+    "eventNotFound": "Event not found",
+    "eventInviteSuccess": "Friends invited successfully",
+    "eventSaveSuccess": "Event saved successfully",
+    "eventRemoveSuccess": "Event removed successfully",
+    "eventUpdateSuccess": "Event updated successfully",
+    "eventDeleteSuccess": "Event deleted successfully",
+    "dontPermission": "Permissions are required to access your photos",
+     "saving": "Saving...",
+    "cancel": "Cancel"
+
+  },
+
+  "indexChatList": {
+    "success": "Success",
+    "chatsDeleted":"Chats Deleted",
+    "chatsDontDeleted": "Chats don't Deleted",
+    "error": "Error",
+    "dontFindResults": "No results found",
+    "dontProccessRequest": "Could not process the request",
+    "deleteChat": "Delete Chat",
+    "deleteChats": "Delete Chats",
+    "deleteChatConfirmation": "Are you sure you want to delete this chat?",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "muteChat": "Mute Chat",
+    "muteChats": "Silenciar Chats",
+    "unmuteChat": "Unmute Chat",
+    "muteChatConfirmation": "This chat is muted. Do you want to unmute it?",
+    "muteOptions": "Mute Options",
+    "muteFor": "Mute for",
+    "muteSuccess": "The chat has been muted.",
+    "unmuteSuccess": "The chat has been unmuted.",
+    "muteError": "Could not mute the chat. Please try again.",
+    "unmuteError": "Could not unmute the chat. Please try again.",
+    "searchPlaceholder": "Search...",
+    "messages": "Messages",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "deleteSelected": "Delete selected",
+    "muteSelected": "Mute selected",
+    "cancelSelection": "Cancel selection",
+    "muteDurationError": "Please select a duration to mute.",
+    "muteDuration": "Mute duration",
+    "muteDurationOptions": {
+      "1hour": "1 hour",
+      "4hours": "4 hours",
+      "8hours": "8 hours",
+      "24hours": "24 hours"
+    },
+    "muteDurationSelected": "Muted for {{hours}} hours",
+    "muteDurationNotSelected": "No duration selected"
+    
+  },
+
   "accessPrivately": "Log In",
   "email": "Email",
   "password": "Password",
@@ -208,7 +285,7 @@
   "loginError": "Login Error",
   "incorrectCredentials": "Incorrect email or password. Please verify your information.",
   "genericError": "An error occurred. Please try again.",
-   "invalidCredentials": "invalid Data",
+  "invalidCredentials": "invalid Data",
 
   "_comment_complaints.js": "complaints.js",
 
@@ -292,7 +369,8 @@
     "clubs": "Bars & Clubs",
     "events": "Events",
     "createOwnEvent": "Create My Own Event",
-    "suggestSpace": "Suggest a Space"
+    "suggestSpace": "Suggest a Space",
+    "support": "Support"
   },
 
   "searchPlaceholder": "Search...",
@@ -318,8 +396,8 @@
     "eventCreationError": "There was a problem creating the event."
   },
   "locale": "en-US",
-  
- "_comment_BoxDetails.js": "BoxDetails.js",
+
+  "_comment_BoxDetails.js": "BoxDetails.js",
 
   "boxDetails": {
     "goingButton": "Going",
@@ -359,7 +437,7 @@
     "Saturday": "Saturday",
     "Sunday": "Sunday"
   },
-  
+
   "profile": {
     "namePlaceholder": "Name",
     "surnamePlaceholder": "Surname",
@@ -375,7 +453,20 @@
     "saveChangesError": "Changes could not be saved.",
     "noDate": "No date",
     "locale": "en-US",
-    "months": ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"],
+    "months": [
+      "jan",
+      "feb",
+      "mar",
+      "apr",
+      "may",
+      "jun",
+      "jul",
+      "aug",
+      "sep",
+      "oct",
+      "nov",
+      "dec"
+    ],
     "limitReached": "Limit reached",
     "eventLimitMessage": "You can only save up to 6 events. Delete one to add another.",
     "eventSaved": "Event saved",
@@ -438,9 +529,23 @@
     "seeTheirStories": "See their stories",
     "hideTheirStories": "Hide their stories",
     "showMyStories": "Show my stories",
-    "hideMyStories": "Hide my stories"
+    "hideMyStories": "Hide my stories",
+    "TheyAreAlreadyFriends": "This user has already sent you a friend request. Check your notifications."
   },
-  "months": ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"],
+  "months": [
+    "jan",
+    "feb",
+    "mar",
+    "apr",
+    "may",
+    "jun",
+    "jul",
+    "aug",
+    "sep",
+    "oct",
+    "nov",
+    "dec"
+  ],
 
   "notifications": {
     "error": "Error",

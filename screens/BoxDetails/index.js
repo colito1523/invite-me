@@ -108,7 +108,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           // ...otros campos necesarios
         }));
       } else {
-        console.warn("El evento no existe.");
+        
       }
     } catch (error) {
       console.error("Error fetching event details:", error);
@@ -166,10 +166,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       }
     };
   }, [box, selectedDate]);
-  
-  
-  
-  
 
   useEffect(() => {
     if (!box || box.category !== "EventoParaAmigos") return;
@@ -234,7 +230,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       setAttendeesList((prev) => prev.filter((attendee) => attendee.uid !== user.uid));
     } catch (error) {
       console.error("Error al eliminar del evento:", error);
-      Alert.alert("Error", "No se pudo eliminar del evento, por favor intente más tarde.");
+      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.eventDeleteError'));
     }
   };
 
@@ -279,13 +275,12 @@ const handleDeleteEvent = () => {
     const user = auth.currentUser;
 
     if (!user || user.uid !== boxData.Admin) {
-      Alert.alert("Acceso denegado", "Solo el administrador puede editar la imagen.");
       return;
     }
 
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert("Permiso denegado", "Se requieren permisos para acceder a tus fotos.");
+      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.dontPermission'));
       return;
     }
 
@@ -319,10 +314,11 @@ const handleDeleteEvent = () => {
         // Navegar a Home con el parámetro de recarga
         navigation.navigate("Home", { refresh: true });
 
-        Alert.alert("Éxito", "Imagen actualizada exitosamente");
+        Alert.alert(t("indexBoxDetails.succes"), t("indexBoxDetails.eventUpdated"));
+
       } catch (error) {
         console.error("Error al subir la imagen:", error);
-        Alert.alert("Error", "Hubo un problema al subir la imagen.");
+        Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.eventUpdateError"));
       } finally {
         setIsProcessing(false);
       }
@@ -331,12 +327,12 @@ const handleDeleteEvent = () => {
 
   const handleEditEvent = () => {
     const user = auth.currentUser;
-
+  
     if (!user || user.uid !== boxData.Admin) {
-      Alert.alert("Acceso denegado", "Solo el administrador puede editar este evento.");
+      Alert.alert(t("indexBoxDetails.accessDenied"), t("indexBoxDetails.onlyAdminCanEdit"));
       return;
     }
-
+  
     setEditedData({
       title: boxData.title || "",
       address: boxData.address || "",
@@ -345,7 +341,7 @@ const handleDeleteEvent = () => {
     setEditModalVisible(true);
     setMenuVisible(false);
   };
-
+  
   const handleSaveEdit = async () => {
     try {
       setIsProcessing(true);
@@ -407,17 +403,15 @@ const handleDeleteEvent = () => {
         ...updatedData,
       }));
   
-      Alert.alert("Éxito", "Evento actualizado exitosamente en todos los registros y notificaciones");
+      Alert.alert(t("indexBoxDetails.success"), t("indexBoxDetails.eventUpdateSuccess"));
       setEditModalVisible(false);
     } catch (error) {
       console.error("Error al actualizar el evento:", error);
-      Alert.alert("Error", "Hubo un problema al actualizar el evento en todos los registros.");
+      Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.eventUpdateError"));
     } finally {
       setIsProcessing(false);
     }
   };
-  
-  
   
 
   const renderEditModal = () => (
@@ -456,7 +450,7 @@ const handleDeleteEvent = () => {
               style={[styles.editModalButton, styles.cancelButton]}
               onPress={() => setEditModalVisible(false)}
             >
-              <Text style={styles.editModalButtonText}>Cancelar</Text>
+              <Text style={styles.editModalButtonText}>{t("storyViewer.cancel")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.editModalButton, styles.saveButton]}
@@ -464,7 +458,10 @@ const handleDeleteEvent = () => {
               disabled={isProcessing}
             >
               <Text style={styles.editModalButtonText}>
-                {isProcessing ? "Guardando..." : "Guardar"}
+
+                
+                {isProcessing ?  t("storyViewer.saving")
+    : t("storyViewer.saver")}
               </Text>
             </TouchableOpacity>
           </View>

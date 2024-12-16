@@ -173,7 +173,16 @@
     "storySettingsUpdateError": "No se pudo actualizar la configuración de las historias.",
     "alreadyHidden": "Ya has ocultado las historias de este usuario.",
     "hiddenSuccessfully": "Las historias de este usuario han sido ocultadas con éxito.",
-    "hideError": "No se pudo ocultar las historias de este usuario."
+    "hideError": "No se pudo ocultar las historias de este usuario.",
+    "errorLike": "No se pudo gestionar el like.",
+    "dontAuthentication": "No estás autenticado.",
+    "sendMenssage": "Mensaje enviado",
+    "Delete": "Eliminar",
+    "DontSeeMore": "No ver más Historias",
+    "Report": "Denunciar",
+    "showMyStories": "Mostrar mis historias",
+    "hideMyStories": "No Mostrar mis historias"
+
   },
 
   "header": {
@@ -185,18 +194,85 @@
   },
 
   "SliderContent": {
-   "description": "Descripción",
-  "descriptionNotAvailable": "Descripción no disponible",
-  "hours": "Hora",
-  "day": "Día",
-  "notAvailable": "No disponible",
-  "location": "Ubicación:",
-  "locationNotAvailable": "Ubicación no disponible",
-  "contact": "Contacto",
-  "noContactNumber": "Sin número de contacto"
+    "description": "Descripción",
+    "descriptionNotAvailable": "Descripción no disponible",
+    "hours": "Hora",
+    "day": "Día",
+    "notAvailable": "No disponible",
+    "location": "Ubicación:",
+    "locationNotAvailable": "Ubicación no disponible",
+    "contact": "Contacto",
+    "noContactNumber": "Sin número de contacto"
   },
 
-  
+  "indexBoxDetails": {
+    "succes": "Éxito",
+    "error": "Error",
+    "editEvent": "Editar Evento",
+    "deleteEvent": "Eliminar Evento",
+    "inviteFriends": "Invitar Amigos",
+    "eventDetails": "Detalles del Evento",
+    "eventSaved": "Evento Guardado",
+    "eventRemoved": "Evento Eliminado",
+    "eventUpdated": "Evento Actualizado",
+    "eventUpdateError": "Error al actualizar el evento",
+    "eventDeleteError": "Error al eliminar el evento",
+    "eventSaveError": "Error al guardar el evento",
+    "eventInviteError": "Error al invitar amigos",
+    "eventFetchError": "Error al obtener detalles del evento",
+    "eventNotFound": "Evento no encontrado",
+    "eventInviteSuccess": "Amigos invitados con éxito",
+    "eventSaveSuccess": "Evento guardado con éxito",
+    "eventRemoveSuccess": "Evento eliminado con éxito",
+    "eventUpdateSuccess": "Evento actualizado con éxito",
+    "eventDeleteSuccess": "Evento eliminado con éxito",
+    "dontPermission": "Se requieren permisos para acceder a tus fotos.",
+    "saving": "Guardando...",
+    "saver": "Guardar",
+    "cancel": "Cancelar"
+    
+  },
+
+  "indexChatList": {
+    "success": "Éxito",
+    "chatsDeleted":"los chats han sido eliminados",
+    "error": "Error",
+    "chatsDontDeleted": "No se pudieron eliminar los chats",
+    "dontFindResults": "No se encontraron resultados para este usuario",
+    "dontProccessRequest": "No se pudo procesar la solicitud",
+    "deleteChat": "Eliminar Chat",
+    "deleteChats": "Eliminar Chats",
+    "deleteChatConfirmation": "¿Estás seguro de que deseas eliminar este chat?",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "muteChat": "Silenciar Chat",
+    "muteChats": "Silenciar Chats",
+    "unmuteChat": "Desactivar Silencio",
+    "muteChatConfirmation": "Este chat está silenciado. ¿Quieres desactivar el silencio?",
+    "muteOptions": "Opciones de Silencio",
+    "muteFor": "Silenciar por",
+    "muteSuccess": "El chat ha sido silenciado.",
+    "unmuteSuccess": "El silencio ha sido desactivado.",
+    "muteError": "No se pudo silenciar el chat. Intenta nuevamente.",
+    "unmuteError": "No se pudo desactivar el silencio. Intenta nuevamente.",
+    "searchPlaceholder": "Buscar...",
+    "messages": "Mensajes",
+    "selectAll": "Seleccionar todos",
+    "deselectAll": "Deseleccionar todos",
+    "deleteSelected": "Eliminar seleccionados",
+    "muteSelected": "Silenciar seleccionados",
+    "cancelSelection": "Cancelar selección",
+    "muteDurationError": "Por favor selecciona una duración para silenciar.",
+    "muteDuration": "Duración del silencio",
+    "muteDurationOptions": {
+      "1hour": "1 hora",
+      "4hours": "4 horas",
+      "8hours": "8 horas",
+      "24hours": "24 horas"
+    },
+    "muteDurationSelected": "Silenciado por {{hours}} horas",
+    "muteDurationNotSelected": "No se ha seleccionado duración"
+  },
 
   "_comment_Login.js": "Login.js",
 
@@ -446,7 +522,8 @@
     "seeTheirStories": "Ver sus historias",
     "hideTheirStories": "Ocultar sus historias",
     "showMyStories": "Mostrar mis historias",
-    "hideMyStories": "Ocultar mis historias"
+    "hideMyStories": "Ocultar mis historias",
+    "TheyAreAlreadyFriends": "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
   },
   "months": ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
 
