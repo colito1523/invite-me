@@ -25,7 +25,8 @@ import Menu from "../../Components/Menu/Menu";
 import Header from "./Header"; // Importamos el nuevo componente
 import { useTranslation } from 'react-i18next';
 import { dayStyles, nightStyles, styles } from "./styles";
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, fetchUnreadMessages, onSignOut, subscribeToUserProfile, fetchBoxData, fetchPrivateEvents, getFilteredBoxData   } from "./utils";
+import { useUnreadMessages } from '../../src/hooks/UnreadMessagesContext';
+import {fetchUnreadNotifications, fetchData, fetchProfileImage, onSignOut, subscribeToUserProfile, fetchBoxData, fetchPrivateEvents, getFilteredBoxData   } from "./utils";
 
 const Home = React.memo(() => {
   const { locationGranted, country, isNightMode } = useLocationAndTime();
@@ -47,6 +48,7 @@ const Home = React.memo(() => {
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(false);
   const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
+  const { hasUnreadMessages } = useUnreadMessages();
   const navigateToProfile = useCallback(() => {
     navigation.navigate("Profile");
   }, [navigation]);
@@ -290,20 +292,6 @@ const Home = React.memo(() => {
 
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
-  useEffect(() => {
-    const unsubscribe = fetchUnreadMessages({
-      setUnreadMessages,
-    });
-  
-    console.log("¿Tengo mensajes sin leer?:", unreadMessages);
-  
-    return () => {
-      if (typeof unsubscribe === "function") {
-        unsubscribe();
-      }
-    };
-  }, [auth.currentUser]);
-
   const memoizedMenu = useMemo(() => (
     <Menu
       isVisible={menuVisible}
@@ -438,12 +426,8 @@ const Home = React.memo(() => {
     )}
   </TouchableOpacity>
   <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
-    <Ionicons
-      name="mail"
-      size={25}
-      color={isNightMode ? "white" : "black"}
-    />
-    {unreadMessages && (
+    <Ionicons name="mail" size={25} color={isNightMode ? "white" : "black"} />
+    {hasUnreadMessages && (
       <View style={[
         styles.unreadIndicator,
         { backgroundColor: isNightMode ? "white" : "black" }

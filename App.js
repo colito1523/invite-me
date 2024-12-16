@@ -13,6 +13,7 @@ import { initReactI18next } from 'react-i18next';
 import useNotifications from "./src/hooks/useNotifications"; // Importa el hook personalizado
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Importa esto
+import { UnreadMessagesProvider } from './src/hooks/UnreadMessagesContext';
 
 
 import Login from "./screens/LoginComponents/index";
@@ -198,9 +199,11 @@ export default function App() {
     <GestureHandlerRootView style={styles.container}>
        <SafeAreaProvider>
     <AuthenticatedUserProvider>
+    <UnreadMessagesProvider> 
       <PaperProvider>
         <RootNavigator />
       </PaperProvider>
+      </UnreadMessagesProvider>
     </AuthenticatedUserProvider>
     </SafeAreaProvider>
     </GestureHandlerRootView>

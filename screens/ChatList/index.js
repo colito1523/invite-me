@@ -31,6 +31,7 @@ import Notes from "../../Components/Notes/Notes";
 import { styles, lightTheme, darkTheme } from "./styles";
 import { useTranslation } from "react-i18next";
 import StoryViewer from '../../Components/Stories/StoryViewer';
+import { useUnreadMessages } from '../../src/hooks/UnreadMessagesContext';
 
 const muteOptions = [
   { label: "1 hora", value: 1 },
@@ -55,6 +56,7 @@ export default function ChatList() {
   const [mutedChats, setMutedChats] = useState([]);
   const [selectedStories, setSelectedStories] = useState([]);
 const [isModalVisible, setIsModalVisible] = useState(false);
+const { setHasUnreadMessages } = useUnreadMessages();
 
   const { t } = useTranslation();
 
@@ -123,23 +125,22 @@ const [isModalVisible, setIsModalVisible] = useState(false);
     useCallback(() => {
       const fetchChats = async () => {
         if (!user) return;
-      
+  
         try {
           const userRef = doc(database, "users", user.uid);
           const userSnapshot = await getDoc(userRef);
           const blockedUsers = userSnapshot.data()?.blockedUsers || [];
-      
+  
           const chatsRef = collection(database, "chats");
-          const q = query(
-            chatsRef,
-            where("participants", "array-contains", user.uid)
-          );
-      
+          const q = query(chatsRef, where("participants", "array-contains", user.uid));
+  
           const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+            let hasUnread = false;
+  
             const chatList = await Promise.all(
               querySnapshot.docs.map(async (docSnapshot) => {
                 const chatData = docSnapshot.data();
-      
+  
                 if (
                   chatData.isHidden?.[user.uid] ||
                   blockedUsers.some((blockedUid) =>
@@ -148,20 +149,20 @@ const [isModalVisible, setIsModalVisible] = useState(false);
                 ) {
                   return null;
                 }
-      
+  
                 const otherUserId = chatData.participants.find(
                   (uid) => uid !== user.uid
                 );
-      
+  
                 const otherUserDoc = await getDoc(
                   doc(database, "users", otherUserId)
                 );
                 if (!otherUserDoc.exists()) {
                   return null;
                 }
-      
+  
                 const otherUserData = otherUserDoc.data();
-      
+  
                 // Cálculo de mensajes no leídos
                 const messagesRef = collection(
                   database,
@@ -169,28 +170,28 @@ const [isModalVisible, setIsModalVisible] = useState(false);
                   docSnapshot.id,
                   "messages"
                 );
-      
+  
                 const unseenMessagesQuery = query(
                   messagesRef,
                   where("seen", "==", false),
                   where("senderId", "!=", user.uid)
                 );
-                const unseenMessagesSnapshot = await getDocs(
-                  unseenMessagesQuery
-                );
-
-                const unseenMessagesCount = unseenMessagesSnapshot.size;
-      
+                const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+  
+                if (unseenMessagesSnapshot.size > 0) {
+                  hasUnread = true;
+                }
+  
                 return {
                   id: docSnapshot.id,
                   user: otherUserData,
-                  unseenMessagesCount, // Agregar el conteo
-                  lastMessage: chatData.lastMessage || "", // Agregar el último mensaje
+                  unseenMessagesCount: unseenMessagesSnapshot.size,
+                  lastMessage: chatData.lastMessage || "",
                   lastMessageTimestamp: chatData.lastMessageTimestamp || null,
                 };
               })
             );
-      
+  
             const sortedChats = chatList
               .filter((chat) => chat !== null)
               .sort((a, b) => {
@@ -202,20 +203,21 @@ const [isModalVisible, setIsModalVisible] = useState(false);
                   : 0;
                 return dateB - dateA; // Orden descendente
               });
-      
+  
             setChats(sortedChats);
+            setHasUnreadMessages(hasUnread); // Actualiza el contexto global
           });
-      
+  
           return () => unsubscribe();
         } catch (error) {
           console.error("Error al obtener los chats:", error);
         }
       };
-      
-
+  
       fetchChats();
     }, [user?.uid])
   );
+  
 
 
   

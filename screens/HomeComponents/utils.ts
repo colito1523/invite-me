@@ -172,60 +172,6 @@ export const fetchProfileImage = async ({setProfileImage}) => {
     }
 };
 
-export const fetchUnreadMessages = async ({ setUnreadMessages }) => {
-  if (!auth.currentUser) return;
-
-  const user = auth.currentUser;
-  const chatsRef = collection(database, "chats");
-  const userRef = doc(database, "users", user.uid);
-
-  try {
-    // Obtener los chats silenciados del usuario
-    const userDoc = await getDoc(userRef);
-    const mutedChats = userDoc.data()?.mutedChats || [];
-
-    const q = query(chatsRef, where("participants", "array-contains", user.uid));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let hasUnreadMessages = false;
-
-      querySnapshot.forEach((docSnapshot) => {
-        const chatData = docSnapshot.data();
-
-        // Verificar si el chat está silenciado
-        const isMuted = mutedChats.some((mute) => { console.log("Chat no silenciado:", mute); console.log("Chat no silenciado:", docSnapshot.id);mute.chatId.toString() == docSnapshot.id.toString() });
-       console.log(isMuted) 
-       if (isMuted) return; // Ignorar chats silenciados
-
-        const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
-        const unseenMessagesQuery = query(
-          messagesRef,
-          where("seen", "==", false),
-          where("senderId", "!=", user.uid)
-        );
-
-        onSnapshot(unseenMessagesQuery, (unseenMessagesSnapshot) => {
-          if (!unseenMessagesSnapshot.empty) {
-            hasUnreadMessages = true;
-            setUnreadMessages(true);
-            console.log("Tienes mensajes no leídos.");
-          } else if (!hasUnreadMessages) {
-            console.log("No tienes mensajes no leídos.");
-            setUnreadMessages(false);
-          }
-        });
-      });
-
-      // Si no hay mensajes no leídos en absoluto
-      if (!hasUnreadMessages) {
-        setUnreadMessages(false);
-      }
-    });
-
-    return () => unsubscribe();
-  } catch (error) {
-    console.error("Error fetching unread messages:", error);
-  }
-};
 
 
 export const checkNotificationsSeenStatus = async (setNotificationIconState) => {
