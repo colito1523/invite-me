@@ -148,26 +148,7 @@ if (password) {
 }
 };
 
-const handleHiddenChatPress = ({chat, setSelectedHiddenChat, setPasswordModalVisible}) => {
-    setSelectedHiddenChat(chat);
-    setPasswordModalVisible(true);
-};
 
-const handlePasswordSubmit = ({selectedHiddenChat, password, setChats, setHiddenChats, chats, hiddenChats, setPasswordModalVisible, setPassword, setSelectedHiddenChat}) => {
-    if (selectedHiddenChat && password === selectedHiddenChat.password) {
-      updateDoc(doc(database, "chats", selectedHiddenChat.id), {
-        isHidden: false,
-        password: "",
-      });
-      setChats([...chats, { ...selectedHiddenChat, isHidden: false }]);
-      setHiddenChats(hiddenChats.filter((c) => c.id !== selectedHiddenChat.id));
-      setPasswordModalVisible(false);
-      setPassword("");
-      setSelectedHiddenChat(null);
-    } else {
-      Alert.alert("Error", "Contraseña incorrecta");
-    }
-};
 
 export const handleChatPress = async ({chat, user, navigation}) => {
     try {
