@@ -594,6 +594,27 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
+    path: require("../../assets/Lisboa/Go A Lisboa Rooftop.jpg"),
+    title: "Go A Lisboa Rooftop",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "8:00 AM - 8:00 PM",
+      Martes: "8:00 AM - 8:00 PM",
+      Miércoles: "8:00 AM - 8:00 PM",
+      Jueves: "8:00 AM - 8:00 PM",
+      Viernes: "8:00 AM - 10:00 PM",
+      Sábado: "10:00 AM - 10:00 PM",
+      Domingo: "Cerrado",
+    },
+    number: "1160419607",
+    coordinates: {
+      latitude: 38.6994781,
+      longitude: -9.1774925,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+  {
     path: require("../../assets/Lisboa/Ponto Final.jpg"),
     title: "Ponto Final",
     category: "Restaurants & Rooftops",

@@ -233,17 +233,22 @@ const handleOpenViewer = async (index) => {
       }
   
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
+        mediaType: 'photo',
         quality: 1,
+        allowsEditing: false,
       });
   
       if (!result.canceled && result.assets?.length > 0) {
-        const processedUri = await processImage(result.assets[0].uri);
-        setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
-        console.log("Imagen seleccionada para subir desde la cámara:", processedUri); // Aquí
-      } else {
-        Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
+        const asset = result.assets[0];
+        try {
+          const processedUri = await processImage(asset.uri);
+          setIsModalVisible(false);
+          setSelectedImage(processedUri);
+          console.log("Imagen procesada lista para subir:", processedUri);
+        } catch (processError) {
+          console.error("Error processing image:", processError);
+          Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
+        }
       }
     } catch (error) {
       console.error(t('storySlider.uploadError'), error);
