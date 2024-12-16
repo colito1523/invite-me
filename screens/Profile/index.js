@@ -245,10 +245,7 @@ export default function Profile({ navigation }) {
         setIsEditing(false);
       } catch (error) {
         console.error("Error guardando los datos:", error);
-        Alert.alert(
-          "Error",
-          "Ocurrió un problema al guardar los cambios. Intenta nuevamente."
-        );
+        Alert.alert(t("profile.error"), t("profile.saveChangesError"));
       } finally {
         setIsLoading(false);
       }
@@ -356,7 +353,7 @@ export default function Profile({ navigation }) {
       const blockedUsers = userDoc.data()?.blockedUsers || [];
 
       if (blockedUsers.includes(friend.id)) {
-        Alert.alert("Error", "No puedes interactuar con este usuario.");
+        Alert.alert(t("profile.error"), t("profile.dontInteract"));
         return;
       }
 

@@ -243,6 +243,7 @@
     "deleteChatConfirmation": "Are you sure you want to delete this chat?",
     "cancel": "Cancel",
     "delete": "Delete",
+    "mute": "Mute",
     "muteChat": "Mute Chat",
     "muteChats": "Silenciar Chats",
     "unmuteChat": "Unmute Chat",
@@ -269,7 +270,8 @@
       "24hours": "24 hours"
     },
     "muteDurationSelected": "Muted for {{hours}} hours",
-    "muteDurationNotSelected": "No duration selected"
+    "muteDurationNotSelected": "No duration selected",
+    "tittle": "Messages"
     
   },
 
@@ -553,7 +555,19 @@
     "hobby1": "Hobby 1",
     "hobby2": "Hobby 2",
     "interest1": "Interest 1",
-    "interest2": "Interest 2"
+    "interest2": "Interest 2",
+    "dontInteract": "You cannot interact with this user."
+  },
+
+  "profileMenuSections": {
+    "deleteAccount": "Delete account",
+    "deleteAccountQuestions": "Are you sure you want to delete your account? This action cannot be undone.",
+    "success": "Success",
+    "accountDeleted": "Your account has been successfully deleted.",
+    "error": "Error",
+    "noAuthenticatedUser": "No authenticated user found.",
+    "recentLoginRequired": "You need to log in again to delete your account.",
+    "deleteAccountError": "Failed to delete your account. Please try again."
   },
 
   "userProfile": {

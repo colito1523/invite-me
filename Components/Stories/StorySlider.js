@@ -241,6 +241,7 @@ const handleOpenViewer = async (index) => {
       if (!result.canceled && result.assets?.length > 0) {
         const processedUri = await processImage(result.assets[0].uri);
         setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
+        console.log("Imagen seleccionada para subir desde la cámara:", processedUri); // Aquí
       } else {
         Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
       }
@@ -267,6 +268,7 @@ const handleOpenViewer = async (index) => {
       if (!result.canceled && result.assets?.length > 0) {
         const processedUri = await processImage(result.assets[0].uri);
         setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
+        console.log("Imagen seleccionada para subir desde la galería:", processedUri); // Aquí
       } else {
         Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
       }

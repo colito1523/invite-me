@@ -115,7 +115,7 @@ export default function Search() {
           setRequestStatus(null);
         }
       } catch (error) {
-        console.error("Error checking friend request status:", error);
+        console.error(t("errorCheckingFriendRequestStatus"), error);
       }
     };
 
@@ -140,7 +140,7 @@ export default function Search() {
             setStatus(null);
           }
         } catch (error) {
-          console.error("Error checking friend request status:", error);
+          console.error(t("errorCheckingFriendRequestStatus"), error);
         }
       };
   
@@ -157,7 +157,7 @@ export default function Search() {
       await sendFriendRequest(item, setStatus);
     }
   } catch (error) {
-    console.error("Error handling friend request:", error);
+    console.error(t("errorHandlingFriendRequest"), error);
   } finally {
     setIsProcessing(false);
   }
@@ -260,7 +260,7 @@ export default function Search() {
             setSearchHistory(filteredHistory);
           }
         } catch (error) {
-          console.error("Error al cargar el historial de búsqueda:", error);
+          console.error(t("errorLoadingSearchHistory"), error);
         }
       }
     };
@@ -274,7 +274,7 @@ export default function Search() {
 
   const handleUserPress = (selectedUser) => {
     if (blockedUsers.includes(selectedUser.id)) {
-      Alert.alert("Error", "No puedes interactuar con este usuario.");
+      Alert.alert(t("error"), t("cannotInteractWithUser"));
       return;
     }
   
@@ -341,7 +341,7 @@ export default function Search() {
             storyUrl: doc.data().storyUrl,
             profileImage: doc.data().profileImage || item.profileImage,
             uid: item.id,
-            username: doc.data().username || item.username || "Unknown",
+            username: doc.data().username || item.username || t("unknownUser"),
             viewers: doc.data().viewers || [],
             likes: doc.data().likes || []
           }))
@@ -359,8 +359,8 @@ export default function Search() {
           navigation.navigate("UserProfile", { selectedUser: item });
         }
       } catch (error) {
-        console.error("Error loading stories:", error);
-        Alert.alert("Error", "No se pudieron cargar las historias");
+        console.error(t("errorLoadingStories"), error);
+        Alert.alert(t("error"), t("errorLoadingStories"));
       }
     }
   }}
@@ -420,7 +420,7 @@ export default function Search() {
                     storyUrl: doc.data().storyUrl,
                     profileImage: doc.data().profileImage || item.profileImage,
                     uid: item.id,
-                    username: doc.data().username || item.username || "Unknown",
+                    username: doc.data().username || item.username || t("unknownUser"),
                     viewers: doc.data().viewers || [],
                     likes: doc.data().likes || []
                   }))
@@ -438,8 +438,8 @@ export default function Search() {
                   handleUserPress(item);
                 }
               } catch (error) {
-                console.error("Error loading stories:", error);
-                Alert.alert("Error", "No se pudieron cargar las historias");
+                console.error(t("errorLoadingStories"), error);
+                Alert.alert(t("error"), t("errorLoadingStories"));
                 handleUserPress(item);
               }
             }

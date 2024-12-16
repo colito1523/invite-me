@@ -338,11 +338,6 @@ const Home = React.memo(() => {
         contentContainerStyle={styles.container}
         initialNumToRender={5}
         removeClippedSubviews={true}
-        getItemLayout={(data, index) => ({
-          length: 100, // Altura fija
-          offset: 100 * index,
-          index,
-        })}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

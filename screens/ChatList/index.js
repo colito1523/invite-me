@@ -765,7 +765,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
             />
             <TextInput
               style={[styles.searchInput, { color: theme.text }]}
-              placeholder="Pesquisar"
+              placeholder={t("indexChatList.searchPlaceholder")}
               placeholderTextColor={theme.placeholder}
               value={searchText}
               onChangeText={setSearchText}
@@ -773,7 +773,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
           </View>
 
           <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: theme.text }]}>Mensajes</Text>
+            <Text style={[styles.title, { color: theme.text }]}>{t("indexChatList.tittle")}</Text>
             <Menu
               visible={showOptionsMenu}
               onDismiss={() => setShowOptionsMenu(false)}
@@ -815,7 +815,6 @@ const { setHasUnreadMessages } = useUnreadMessages();
               onPress={handleSelectAll}
             >
               <Text style={[styles.selectAllText, { color: theme.buttonText }]}>
-                {selectAll ? "Deseleccionar todos" : "Seleccionar todos"}
                 {selectAll   ? t("indexChatList.selectAll")
     : t("indexChatList.deselectAll")}
 
@@ -852,7 +851,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                     { color: theme.selectionModeButtonText },
                   ]}
                 >
-                  Borrar
+                  {t("indexChatList.delete")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -868,7 +867,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                     { color: theme.selectionModeButtonText },
                   ]}
                 >
-                  Silenciar
+                   {t("indexChatList.mute")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -884,7 +883,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                     { color: theme.selectionModeButtonText },
                   ]}
                 >
-                  Cancelar
+                  {t("indexChatList.cancel")}
                 </Text>
               </TouchableOpacity>
             </View>

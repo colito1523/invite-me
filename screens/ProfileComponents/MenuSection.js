@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet, Alert, Platform } from "react-nativ
 import { Menu } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { getAuth, deleteUser } from "firebase/auth";
+import { useTranslation } from "react-i18next";
 
 const MenuSection = ({
   menuVisible,
@@ -10,21 +11,22 @@ const MenuSection = ({
   handleEditProfile,
   handleTogglePrivacy,
   isPrivate,
-  t,
   blockedUsers,
   setIsBlockedListVisible,
 }) => {
+  const { t } = useTranslation();
+
   const handleDeleteAccount = () => {
     Alert.alert(
-      "Eliminar cuenta",
-      "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.",
+      t("profileMenuSections.deleteAccount"),
+      t("profileMenuSections.deleteAccountQuestions"),
       [
         {
-          text: "Cancelar",
+          text: t("chatUsers.cancel"),
           style: "cancel",
         },
         {
-          text: "Eliminar",
+          text: t("chatUsers.delete"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -33,18 +35,18 @@ const MenuSection = ({
 
               if (user) {
                 await deleteUser(user);
-                Alert.alert("Cuenta eliminada", "Tu cuenta ha sido eliminada exitosamente.");
+                Alert.alert(t("profileMenuSections.success"), t("profileMenuSections.accountDeleted"));
               } else {
-                Alert.alert("Error", "No se encontró un usuario autenticado.");
+                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.noAuthenticatedUser"));
               }
             } catch (error) {
               if (error.code === "auth/requires-recent-login") {
                 Alert.alert(
-                  "Error",
-                  "Debes iniciar sesión nuevamente para eliminar tu cuenta."
+                  t("profileMenuSections.error"),
+                  t("profileMenuSections.recentLoginRequired")
                 );
               } else {
-                Alert.alert("Error", "No se pudo eliminar tu cuenta. Intenta nuevamente.");
+                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.deleteAccountError"));
               }
             }
           },
@@ -52,6 +54,7 @@ const MenuSection = ({
       ]
     );
   };
+
   return (
     <View style={styles.menuContainer}>
       <Menu
@@ -67,7 +70,7 @@ const MenuSection = ({
         <Menu.Item onPress={handleEditProfile} title={t("profile.editProfile")} />
         <Menu.Item
           onPress={() => setIsBlockedListVisible(true)}
-          title="Usuarios bloqueados"
+          title={t("blockedUsers.modalTitle")}
           disabled={blockedUsers.length === 0}
         />
         <Menu.Item
@@ -76,7 +79,7 @@ const MenuSection = ({
         />
         <Menu.Item
           onPress={handleDeleteAccount}
-          title="Eliminar cuenta"
+          title={t("profileMenuSections.deleteAccount")}
           titleStyle={{ color: "red" }}
         />
       </Menu>

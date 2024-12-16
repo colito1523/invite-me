@@ -247,6 +247,7 @@
     "unmuteChat": "Desativar Silêncio",
     "muteChatConfirmation": "Este chat está silenciado. Deseja desativar o silêncio?",
     "muteOptions": "Opções de Silêncio",
+    "mute": "Silenciar",
     "muteFor": "Silenciar por",
     "muteSuccess": "O chat foi silenciado.",
     "unmuteSuccess": "O silêncio foi desativado.",
@@ -268,7 +269,8 @@
       "24hours": "24 horas"
     },
     "muteDurationSelected": "Silenciado por {{hours}} horas",
-    "muteDurationNotSelected": "Nenhuma duração selecionada"
+    "muteDurationNotSelected": "Nenhuma duração selecionada",
+    "tittle": "Messages"
   },
 
   "chatUsers": {
@@ -545,7 +547,18 @@
     "hobby1": "Hobby 1",
     "hobby2": "Hobby 2",
     "interest1": "Interesse 1",
-    "interest2": "Interesse 2"
+    "interest2": "Interesse 2",
+    "dontInteract": "Você não pode interagir com este usuário."
+  },
+  "profileMenuSections": {
+    "deleteAccount": "Excluir conta",
+    "deleteAccountQuestions": "Tem certeza de que deseja excluir sua conta? Esta ação não pode ser desfeita.",
+    "success": "Sucesso",
+    "accountDeleted": "Sua conta foi excluída com sucesso.",
+    "error": "Erro",
+    "noAuthenticatedUser": "Nenhum usuário autenticado encontrado.",
+    "recentLoginRequired": "Você precisa fazer login novamente para excluir sua conta.",
+    "deleteAccountError": "Falha ao excluir sua conta. Por favor, tente novamente."
   },
   
   "userProfile": {

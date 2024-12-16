@@ -44,28 +44,6 @@ const boxInfo = [
     isPrivate: false, // Evento general
   },
 
-  // {
-  //   path: require("../../assets/Lisboa/palacio Chaiado.jpg"),
-  //   title: "Palacio Chiado",
-  //   category: "Eventos",  SI QUEREMOS AGREGAR UN EVENTO PONEMOS AQUI
-  //   hours: {
-  //     Lunes: "8:00 AM - 8:00 PM",
-  //     Martes: "8:00 AM - 8:00 PM",
-  //     Miércoles: "8:00 AM - 8:00 PM",
-  //     Jueves: "8:00 AM - 8:00 PM",
-  //     Viernes: "8:00 AM - 10:00 PM",
-  //     Sábado: "10:00 AM - 10:00 PM",
-  //     Domingo: "Cerrado",
-  //   },
-  //   number: "1160419607",
-  //   coordinates: {
-  //     latitude: 38.7096823,
-  //     longitude: -9.143029,
-  //   },
-  //   country: "Portugal", // Agregar esta propiedad
-  //   city: "Lisboa", // Agregado el campo de ciuda
-  //   isPrivate: false, // Evento general
-  // },
   {
     path: require("../../assets/Lisboa/mama shelter.jpg"),
     title: "Mama Shelter",
@@ -1045,7 +1023,7 @@ const boxInfo = [
     city: "Madrid", // Cambiado a Madrid
   },
   {
-    path: require("../../assets/Madrid/Tuétano.jpg"),
+    path: require("../../assets/Madrid/Tuetano.jpg"),
     title: "Tuétano",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1301,7 +1279,7 @@ const boxInfo = [
     city: "Madrid", // Cambiado a Madrid
   },
   {
-    path: require("../../assets/Madrid/Istar.jpg"),
+    path: require("../../assets/Madrid/almagro.jpg"),
     title: "Almagro Café & Bar Restaurante",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1402,6 +1380,28 @@ const boxInfo = [
     coordinates: {
       latitude: 40.4324618,
       longitude: -3.6878034,
+    },
+    country: "España", // Cambiado a España
+    city: "Madrid", // Cambiado a Madrid
+  },
+
+  {
+    path: require("../../assets/Madrid/margarita.jpg"),
+    title: "Margarita",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "8:00 AM - 8:00 PM",
+      Martes: "8:00 AM - 8:00 PM",
+      Miércoles: "8:00 AM - 8:00 PM",
+      Jueves: "8:00 AM - 8:00 PM",
+      Viernes: "8:00 AM - 10:00 PM",
+      Sábado: "10:00 AM - 10:00 PM",
+      Domingo: "Cerrado",
+    },
+    number: "1160419607",
+    coordinates: {
+      latitude: 40.4286449,
+      longitude: -3.6944338,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
