@@ -26,6 +26,15 @@ export default function StorySlider() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [unseenStories, setUnseenStories] = useState({});
   const [blockedUsers, setBlockedUsers] = useState([]);
+  const [pendingAction, setPendingAction] = useState(null);
+
+
+useEffect(() => {
+  if (!isModalVisible && typeof pendingAction === 'function') {
+    pendingAction(); // Ejecuta solo si pendingAction es una función
+    setPendingAction(null); // Resetea la acción pendiente
+  }
+}, [isModalVisible, pendingAction]);
 
   const processImage = async (uri) => {
     return new Promise((resolve, reject) => {
@@ -225,63 +234,61 @@ const handleOpenViewer = async (index) => {
   };
 
   const handleCamera = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(t('storySlider.error'), t('storySlider.camera'));
-        return;
-      }
-  
-      const result = await ImagePicker.launchCameraAsync({
-        mediaType: 'photo',
-        quality: 1,
-        allowsEditing: false,
-      });
-  
-      if (!result.canceled && result.assets?.length > 0) {
-        const asset = result.assets[0];
-        try {
-          const processedUri = await processImage(asset.uri);
-          setIsModalVisible(false);
-          setSelectedImage(processedUri);
-          console.log("Imagen procesada lista para subir:", processedUri);
-        } catch (processError) {
-          console.error("Error processing image:", processError);
-          Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
+    setPendingAction(() => async () => { // Asigna una función válida
+      try {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(t('storySlider.error'), t('storySlider.camera'));
+          return;
         }
+  
+        const result = await ImagePicker.launchCameraAsync({
+          mediaType: 'photo',
+          quality: 1,
+          allowsEditing: false,
+        });
+  
+        if (!result.canceled && result.assets?.length > 0) {
+          const processedUri = await processImage(result.assets[0].uri);
+          setSelectedImage(processedUri);
+        }
+      } catch (error) {
+        console.error("Error abriendo la cámara:", error);
+        Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
       }
-    } catch (error) {
-      console.error(t('storySlider.uploadError'), error);
-      Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
-    }
+    });
+  
+    setIsModalVisible(false); // Cierra el modal
   };
   
   const handleGallery = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(t('storySlider.error'), t('storySlider.gallery'));
-        return;
-      }
+    setPendingAction(() => async () => { // Asigna una función válida
+      try {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(t('storySlider.error'), t('storySlider.gallery'));
+          return;
+        }
   
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        quality: 1,
-      });
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: false,
+          quality: 1,
+        });
   
-      if (!result.canceled && result.assets?.length > 0) {
-        const processedUri = await processImage(result.assets[0].uri);
-        setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
-        console.log("Imagen seleccionada para subir desde la galería:", processedUri); // Aquí
-      } else {
+        if (!result.canceled && result.assets?.length > 0) {
+          const processedUri = await processImage(result.assets[0].uri);
+          setSelectedImage(processedUri);
+        }
+      } catch (error) {
+        console.error("Error seleccionando desde la galería:", error);
         Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
       }
-    } catch (error) {
-      console.error(t('storySlider.uploadError'), error);
-      Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
-    }
+    });
+  
+    setIsModalVisible(false); // Cierra el modal
   };
+  
   
   const uploadStory = async (imageUri) => {
     try {

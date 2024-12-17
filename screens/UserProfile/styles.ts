@@ -3,9 +3,8 @@ import { Dimensions, StyleSheet, Platform } from "react-native";
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 // Definir categorías de pantalla
-const isSmallScreen = screenWidth <= 411 && screenHeight <= 837; // Pantallas pequeñas
+const isSmallScreen = screenWidth <= 411 && screenHeight <= 850; // Pantallas pequeñas
 const isMediumScreen = screenWidth > 411 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
-const isLargeScreen = screenWidth > 430 || screenHeight > 932; // Pantallas grandes
 
 
 export const styles = StyleSheet.create({
@@ -44,18 +43,18 @@ export const styles = StyleSheet.create({
     },
     nameContainer: {
       position: "absolute",
-      top: isSmallScreen ? 550 : isMediumScreen ? 580 : 80, // Márgenes dinámicos
+      top: isSmallScreen ? 510 : isMediumScreen ? 580 : 80, // Márgenes dinámicos
       left: 20,
       right: 20,
       zIndex: 10,
     },
     name: {
-      fontSize: 25,
+      fontSize: isSmallScreen ? 19 : isMediumScreen ? 25 : 25, // Márgenes dinámicos
       fontWeight: "bold",
       color: "white",
     },
     friendCountText: {
-      fontSize: 28,
+      fontSize: isSmallScreen ? 19 : isMediumScreen ? 28 : 28, // Márgenes dinámicos
       color: "white",
       fontWeight: "bold",
       marginTop: 5,
@@ -129,7 +128,7 @@ export const styles = StyleSheet.create({
     },
     ovalText: {
       color: "white",
-      fontSize: 14,
+      fontSize: isSmallScreen ? 12 : isMediumScreen ? 15 : 12, // Márgenes dinámicos
       fontWeight: "bold",
     },
     contentWrapper: {

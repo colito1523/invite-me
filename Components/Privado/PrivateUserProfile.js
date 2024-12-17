@@ -8,6 +8,7 @@ import {
   Dimensions,
   Alert,
   ActivityIndicator,
+  Platform
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { Menu, Provider } from "react-native-paper";
@@ -32,7 +33,9 @@ import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import MutualFriendsModal from "../Mutual-Friends-Modal/MutualFriendsModal";
 
-const { width, height } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const isSmallScreen = screenWidth <= 411 && screenHeight <= 850; // Pantallas pequeñas
+const isMediumScreen = screenWidth > 411 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
 
 const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus, isProcessing, friendCount, mutualFriends, handleMutualFriendsPress }) => {
   const { t } = useTranslation();
@@ -608,12 +611,12 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 40,
+    top: Platform.OS === "ios" ? 70 : 50,
     left: 20,
     zIndex: 10,
   },
   imageContainer: {
-    width: width,
+    width: screenWidth,
     height: "100%",
   },
   backgroundImage: {
@@ -638,7 +641,7 @@ const styles = StyleSheet.create({
   },
   nameContainer: {
     position: "absolute",
-    top: 550,
+    top: isSmallScreen ? 510 : isMediumScreen ? 630 : 630, // Márgenes dinámicos
     left: 20,
     right: 20,
     zIndex: 10,
@@ -648,7 +651,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   name: {
-    fontSize: 25,
+    fontSize: isSmallScreen ? 21 : isMediumScreen ? 25 : 25, // Márgenes dinámicos
     fontWeight: "bold",
     color: "white",
     marginRight: 10, // Add some space between the name and the button
@@ -662,7 +665,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   number: {
-    fontSize: 24,
+    fontSize: isSmallScreen ? 19 : isMediumScreen ? 26 : 26, // Márgenes dinámicos,
     fontWeight: "bold",
   },
   rectanglesContainer: {
@@ -688,7 +691,7 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: "absolute",
-    top: 50,
+    top: Platform.OS === "ios" ? 70 : 50,
     right: 20,
     zIndex: 10,
   },

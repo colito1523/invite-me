@@ -6,9 +6,8 @@ import { Dimensions } from 'react-native';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 // Categorías de pantalla
-const isSmallScreen = screenWidth <= 411 && screenHeight <= 837; // Pantallas pequeñas
+const isSmallScreen = screenWidth <= 411 && screenHeight <= 850; // Pantallas pequeñas
 const isMediumScreen = screenWidth > 411 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
-const isLargeScreen = screenWidth > 430 || screenHeight > 932; // Pantallas grandes
 
 const EventsSection = ({ events, handleBoxPress, t }) => {
  
