@@ -11,7 +11,6 @@ import { Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImageManipulator from 'expo-image-manipulator';
-import CustomCamera from '../Camera/CustomCamera';
 
 export default function StorySlider() {
   const [refreshing, setRefreshing] = useState(false);
@@ -27,7 +26,6 @@ export default function StorySlider() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [unseenStories, setUnseenStories] = useState({});
   const [blockedUsers, setBlockedUsers] = useState([]);
-  const [isCameraVisible, setIsCameraVisible] = useState(false);
 
   const processImage = async (uri) => {
     return new Promise((resolve, reject) => {
@@ -226,15 +224,43 @@ const handleOpenViewer = async (index) => {
     setIsModalVisible(true);
   };
 
-  const handleCamera = () => {
-    setIsCameraVisible(true); // Muestra la cámara personalizada
+  const handleCamera = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('storySlider.error'), t('storySlider.camera'));
+        return;
+      }
+  
+      const result = await ImagePicker.launchCameraAsync({
+        mediaType: 'photo',
+        quality: 1,
+        allowsEditing: false,
+      });
+  
+      if (!result.canceled && result.assets?.length > 0) {
+        const asset = result.assets[0];
+        try {
+          const processedUri = await processImage(asset.uri);
+          setIsModalVisible(false);
+          setSelectedImage(processedUri);
+          console.log("Imagen procesada lista para subir:", processedUri);
+        } catch (processError) {
+          console.error("Error processing image:", processError);
+          Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
+        }
+      }
+    } catch (error) {
+      console.error(t('storySlider.uploadError'), error);
+      Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
+    }
   };
   
   const handleGallery = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert("Permiso denegado", "Se necesita acceso a la galería.");
+        Alert.alert(t('storySlider.error'), t('storySlider.gallery'));
         return;
       }
   
@@ -247,12 +273,13 @@ const handleOpenViewer = async (index) => {
       if (!result.canceled && result.assets?.length > 0) {
         const processedUri = await processImage(result.assets[0].uri);
         setSelectedImage(processedUri); // Muestra la imagen procesada en el modal
+        console.log("Imagen seleccionada para subir desde la galería:", processedUri); // Aquí
       } else {
-        Alert.alert("Operación cancelada", "No se seleccionó ninguna imagen.");
+        Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
       }
     } catch (error) {
-      console.error("Error al abrir la galería:", error);
-      Alert.alert("Error", "Hubo un problema al intentar abrir la galería.");
+      console.error(t('storySlider.uploadError'), error);
+      Alert.alert(t('storySlider.error'), t('storySlider.storyUploadError'));
     }
   };
   
@@ -438,15 +465,6 @@ const handleOpenViewer = async (index) => {
             <Ionicons name="camera-outline" size={24} color="black" />
             <Text style={styles.optionText}>{t('storySlider.camera')}</Text>
           </TouchableOpacity>
-          {/* Mostrar la cámara personalizada */}
-        {isCameraVisible && (
-          <CustomCamera
-            onCapture={(uri) => {
-              setSelectedImage(uri); // Captura directa sin confirmación del sistema
-              setIsCameraVisible(false); // Cerrar cámara
-            }}
-          />
-        )}
           <TouchableOpacity style={styles.option} onPress={handleGallery}>
             <Ionicons name="images-outline" size={24} color="black" />
             <Text style={styles.optionText}>{t('storySlider.gallery')}</Text>
