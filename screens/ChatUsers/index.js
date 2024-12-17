@@ -12,7 +12,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-
 } from "react-native";
 import { auth, database, storage } from "../../config/firebase";
 import {
@@ -28,7 +27,7 @@ import {
   writeBatch,
   getDocs,
   where,
-  arrayUnion
+  arrayUnion,
 } from "firebase/firestore";
 
 import { useNavigation } from "@react-navigation/native";
@@ -42,9 +41,9 @@ import { ImageBackground } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
+import { muteChat } from "./utils";
 
-
-import Complaints from '../../Components/Complaints/Complaints';
+import Complaints from "../../Components/Complaints/Complaints";
 import { useTranslation } from "react-i18next";
 
 export default function Chat({ route }) {
@@ -66,16 +65,17 @@ export default function Chat({ route }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [isComplaintVisible, setIsComplaintVisible] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-
+  const [mutedChats, setMutedChats] = useState([]);
+  const [isMuteModalVisible, setIsMuteModalVisible] = useState(false);
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
   const { t } = useTranslation();
 
-  useEffect(() => {
+  useEffect(() => {}, [messages.length]);
 
-  }, [messages.length]);
-
-
+  const handleMuteChat = (hours) => {
+    muteChat(user.uid, chatId, hours, setMutedChats);
+  };
 
   // Verificación de usuarios bloqueados
   useEffect(() => {
@@ -86,66 +86,69 @@ export default function Chat({ route }) {
     }
   }, [recipientUser, blockedUsers]); // Cierra el primer useEffect aquí
 
-
   useEffect(() => {
     if (recipientUser?.photoUrls && recipientUser.photoUrls.length > 0) {
       setBackgroundImage(recipientUser.photoUrls[0]);
     }
   }, [recipientUser]);
 
-
   // Configuración del chat
   useEffect(() => {
-      if (chatId) {
-        const messagesRef = collection(database, "chats", chatId, "messages");
-        const q = query(messagesRef, orderBy("createdAt", "asc"));
+    if (chatId) {
+      const messagesRef = collection(database, "chats", chatId, "messages");
+      const q = query(messagesRef, orderBy("createdAt", "asc"));
 
-        // Escuchar los mensajes en tiempo real
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-          const messagesList = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setMessages(messagesList);
+      // Escuchar los mensajes en tiempo real
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const messagesList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setMessages(messagesList);
 
-          // Marcar los mensajes como leídos
-          markMessagesAsRead(messagesList);
-        });
+        // Marcar los mensajes como leídos
+        markMessagesAsRead(messagesList);
+      });
 
-        return () => unsubscribe();
-      }
+      return () => unsubscribe();
+    }
   }, [chatId, messages.length]);
 
   const markMessagesAsRead = async (messages) => {
     try {
-        if (!chatId) {
-            console.error("El chatId no está definido.");
-            return;
+      if (!chatId) {
+        console.error("El chatId no está definido.");
+        return;
+      }
+
+      const batch = writeBatch(database);
+
+      messages.forEach((message) => {
+        if (
+          message.senderId !== user.uid &&
+          (!Array.isArray(message.viewedBy) ||
+            !message.viewedBy.includes(user.uid)) &&
+          !message.isViewOnce // Ignorar mensajes de tipo "ver una vez"
+        ) {
+          const messageRef = doc(
+            database,
+            "chats",
+            chatId,
+            "messages",
+            message.id
+          );
+          batch.update(messageRef, {
+            viewedBy: arrayUnion(user.uid),
+            seen: true,
+          });
         }
+      });
 
-        const batch = writeBatch(database);
-
-        messages.forEach((message) => {
-            if (
-                message.senderId !== user.uid &&
-                (!Array.isArray(message.viewedBy) || !message.viewedBy.includes(user.uid)) &&
-                !message.isViewOnce // Ignorar mensajes de tipo "ver una vez"
-            ) {
-                const messageRef = doc(database, "chats", chatId, "messages", message.id);
-                batch.update(messageRef, {
-                    viewedBy: arrayUnion(user.uid),
-                    seen: true,
-                });
-            }
-        });
-
-        await batch.commit();
+      await batch.commit();
     } catch (error) {
-        console.error("Error al marcar los mensajes como leídos:", error);
+      console.error("Error al marcar los mensajes como leídos:", error);
     }
-};
-
-  
+  };
 
   const handleReport = async () => {
     try {
@@ -154,8 +157,6 @@ export default function Chat({ route }) {
       console.error("Error al abrir el modal de denuncia:", error);
     }
   };
-
-
 
   const handleReportSubmit = async (reason, description) => {
     try {
@@ -171,7 +172,9 @@ export default function Chat({ route }) {
       const chatData = chatSnapshot.data();
       const participants = chatData.participants || [];
 
-      const recipientId = participants.find((participant) => participant !== user.uid);
+      const recipientId = participants.find(
+        (participant) => participant !== user.uid
+      );
 
       if (!recipientId) {
         console.error("No se encontró un ID válido para el usuario reportado.");
@@ -179,13 +182,14 @@ export default function Chat({ route }) {
         return;
       }
 
-
       const complaintsRef = collection(database, "complaints");
       const newComplaint = {
         reporterId: user.uid,
         reporterName: user.displayName || "Anónimo",
         reportedId: recipientId,
-        reportedName: `${recipientUser?.firstName || "Usuario"} ${recipientUser?.lastName || "desconocido"}`,
+        reportedName: `${recipientUser?.firstName || "Usuario"} ${
+          recipientUser?.lastName || "desconocido"
+        }`,
         reason,
         description: description || "",
         timestamp: new Date(),
@@ -201,10 +205,6 @@ export default function Chat({ route }) {
     }
   };
 
-
-
-
-
   const createChatIfNotExists = async () => {
     if (!chatId) {
       try {
@@ -213,131 +213,128 @@ export default function Chat({ route }) {
           chatsRef,
           where("participants", "array-contains", user.uid)
         );
-  
+
         const querySnapshot = await getDocs(q);
         let existingChatId = null;
-  
+
         querySnapshot.forEach((doc) => {
           const chatData = doc.data();
           if (chatData.participants.includes(recipientUser.id)) {
             existingChatId = doc.id; // Encuentra el chat que coincide
           }
         });
-  
+
         if (existingChatId) {
           setChatId(existingChatId); // Si el chat existe, usa su ID
           return existingChatId;
         }
-  
+
         // Si no existe el chat, crearlo
         const chatRef = doc(chatsRef);
         const newChatId = chatRef.id;
-  
+
         await setDoc(chatRef, {
           participants: [user.uid, recipientUser.id],
           createdAt: new Date(),
           lastMessage: "",
         });
-  
+
         setChatId(newChatId);
         return newChatId;
       } catch (error) {
         console.error("Error al verificar o crear el chat:", error);
       }
     }
-  
+
     return chatId; // Retorna el ID del chat actual si ya está definido
   };
-  
-  
 
- const handleSend = async (
+  const handleSend = async (
     messageType = "text",
     mediaUri = null,
     isViewOnce = false // Este parámetro se pasará desde donde se llama a la función
-) => {
+  ) => {
     if (isUploading) {
-        Alert.alert(t("chatUsers.uploading"), t("chatUsers.waitForUpload"));
-        return;
+      Alert.alert(t("chatUsers.uploading"), t("chatUsers.waitForUpload"));
+      return;
     }
 
     if (!message.trim() && !mediaUri) {
-        return;
+      return;
     }
 
     try {
-        const chatIdToUse = chatId || await createChatIfNotExists();
-        const messagesRef = collection(
-            database,
-            "chats",
-            chatIdToUse,
-            "messages"
-        );
+      const chatIdToUse = chatId || (await createChatIfNotExists());
+      const messagesRef = collection(
+        database,
+        "chats",
+        chatIdToUse,
+        "messages"
+      );
 
+      let messageData = {
+        senderId: user.uid,
+        senderName: user.displayName || "Anónimo",
+        createdAt: new Date(),
+        seen: false,
+        viewedBy: [],
+        isViewOnce,
+      };
 
-        let messageData = {
-            senderId: user.uid,
-            senderName: user.displayName || "Anónimo",
-            createdAt: new Date(),
-            seen: false,
-            viewedBy: [],
-            isViewOnce,
-        };
-
-        // Añade la lógica para tipo de mensaje:
-        if (messageType === "text") {
-          messageData.text = message.trim();
-          setMessage("");
+      // Añade la lógica para tipo de mensaje:
+      if (messageType === "text") {
+        messageData.text = message.trim();
+        setMessage("");
       } else if (messageType === "image" || messageType === "video") {
-          setIsUploading(true);
-          const tempId = `temp-${new Date().getTime()}`;
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { id: tempId, mediaType: messageType, isUploading: true },
-          ]);
-          const mediaUrl = await uploadMedia(mediaUri);
-          if (!mediaUrl) return;
-          messageData.mediaType = messageType;
-          messageData.mediaUrl = mediaUrl;
-          setIsUploading(false);
-          setMessages((prevMessages) =>
-            prevMessages.map((message) =>
-              message.id === tempId ? { ...messageData, id: tempId } : message
-            )
-          );
+        setIsUploading(true);
+        const tempId = `temp-${new Date().getTime()}`;
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { id: tempId, mediaType: messageType, isUploading: true },
+        ]);
+        const mediaUrl = await uploadMedia(mediaUri);
+        if (!mediaUrl) return;
+        messageData.mediaType = messageType;
+        messageData.mediaUrl = mediaUrl;
+        setIsUploading(false);
+        setMessages((prevMessages) =>
+          prevMessages.map((message) =>
+            message.id === tempId ? { ...messageData, id: tempId } : message
+          )
+        );
       }
       await addDoc(messagesRef, messageData);
 
-        // Actualizar información del chat
-        const chatDocRef = doc(database, "chats", chatIdToUse);
-        const chatDoc = await getDoc(chatDocRef);
-        
-        if (chatDoc.exists()) {
-          const chatData = chatDoc.data();
-            const otherParticipantId = chatData.participants.find(
-                (participant) => participant !== user.uid
-            );
+      // Actualizar información del chat
+      const chatDocRef = doc(database, "chats", chatIdToUse);
+      const chatDoc = await getDoc(chatDocRef);
 
-            // Establecer isHidden a false para el receptor
-            await updateDoc(chatDocRef, {
-                lastMessage: messageData.text || "Media",
-                lastMessageTimestamp: messageData.createdAt,
-                lastMessageSenderId: user.uid,
-                lastMessageSenderName: user.displayName || "Anónimo",
-                [`isHidden.${otherParticipantId}`]: false,
-            });
-        }
+      if (chatDoc.exists()) {
+        const chatData = chatDoc.data();
+        const otherParticipantId = chatData.participants.find(
+          (participant) => participant !== user.uid
+        );
 
-        // Limpiar el campo de texto
-        flatListRef.current?.scrollToEnd({ animated: true });
+        // Establecer isHidden a false para el receptor
+        await updateDoc(chatDocRef, {
+          lastMessage: messageData.text || "Media",
+          lastMessageTimestamp: messageData.createdAt,
+          lastMessageSenderId: user.uid,
+          lastMessageSenderName: user.displayName || "Anónimo",
+          [`isHidden.${otherParticipantId}`]: false,
+        });
+      }
+
+      // Limpiar el campo de texto
+      flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
-        console.error("Error al enviar el mensaje:", error);
-        Alert.alert(t("chatUsers.error"), t("chatUsers.sendMessageError"));
-        setIsUploading(false);
+      console.error("Error al enviar el mensaje:", error);
+      Alert.alert(t("chatUsers.error"), t("chatUsers.sendMessageError"));
+      setIsUploading(false);
     }
-};
+  };
 
-const handleDeleteChat = async () => {
+  const handleDeleteChat = async () => {
     try {
       const batch = writeBatch(database);
       const chatRef = doc(database, "chats", chatId);
@@ -345,14 +342,14 @@ const handleDeleteChat = async () => {
 
       // Mark the chat as deleted for the current user
       batch.update(chatRef, {
-        [`deletedFor.${user.uid}`]: true
+        [`deletedFor.${user.uid}`]: true,
       });
 
       // Mark all messages as deleted for the current user
       const messagesSnapshot = await getDocs(messagesRef);
       messagesSnapshot.forEach((messageDoc) => {
         batch.update(messageDoc.ref, {
-          [`deletedFor.${user.uid}`]: true
+          [`deletedFor.${user.uid}`]: true,
         });
       });
 
@@ -394,7 +391,10 @@ const handleDeleteChat = async () => {
   const handleCameraLaunch = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(t("chatUsers.permissionDenied"), t("chatUsers.cameraPermission"));
+      Alert.alert(
+        t("chatUsers.permissionDenied"),
+        t("chatUsers.cameraPermission")
+      );
       return;
     }
 
@@ -412,7 +412,10 @@ const handleDeleteChat = async () => {
   const pickMedia = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(t("chatUsers.permissionDenied"), t("chatUsers.galleryPermission"));
+      Alert.alert(
+        t("chatUsers.permissionDenied"),
+        t("chatUsers.galleryPermission")
+      );
       return;
     }
 
@@ -426,62 +429,6 @@ const handleDeleteChat = async () => {
       const mediaType = result.assets[0].type === "video" ? "video" : "image";
       handleSend(mediaType, result.assets[0].uri); // Verifica que `handleSend` esté en `ChatUsersParaEditar.js`
     }
-};
-
-  const startRecording = async () => {
-    try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-        setRecording(null);
-      }
-
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permiso de audio no concedido");
-        return;
-      }
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const newRecording = new Audio.Recording();
-      await newRecording.prepareToRecordAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      await newRecording.startAsync();
-      setRecording(newRecording);
-      setIsRecording(true);
-    } catch (err) {
-      console.error("Error al iniciar la grabación:", err);
-    }
-  };
-
-  const stopRecording = async () => {
-    try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-        const uri = recording.getURI();
-        setRecording(null);
-        setIsRecording(false);
-        handleSend("audio", uri);
-      }
-    } catch (err) {
-      console.error("Error al detener la grabación:", err);
-    }
-  };
-
-  const handleHideChat = async () => {
-    try {
-      await updateDoc(doc(database, "chats", chatId), { isHidden: true });
-      setIsChatHidden(true);
-      Alert.alert(t("chatUsers.hiddenSucces"), t("chatUsers.hiddenChat"));
-    } catch (error) {
-      console.error("Error al ocultar el chat:", error);
-    }
-
-    setMenuVisible(false);
   };
 
   const handleUserPress = async () => {
@@ -513,50 +460,56 @@ const handleDeleteChat = async () => {
         return;
       }
 
-      navigation.navigate("UserProfile", { selectedUser: { id: otherParticipantId, ...recipientUser } });
+      navigation.navigate("UserProfile", {
+        selectedUser: { id: otherParticipantId, ...recipientUser },
+      });
     } catch (error) {
       console.error("Error navegando al perfil del usuario:", error);
       Alert.alert(t("chatUsers.error"), t("chatUsers.navigateToProfileError"));
     }
   };
 
-  const handleMediaPress = async (mediaUrl, mediaType, messageId, isViewOnce) => {
+  const handleMediaPress = async (
+    mediaUrl,
+    mediaType,
+    messageId,
+    isViewOnce
+  ) => {
     try {
-        const messageRef = doc(database, "chats", chatId, "messages", messageId);
-        const messageSnapshot = await getDoc(messageRef);
+      const messageRef = doc(database, "chats", chatId, "messages", messageId);
+      const messageSnapshot = await getDoc(messageRef);
 
-        if (!messageSnapshot.exists()) {
-            Alert.alert(t("chatUsers.error"), t("chatUsers.messageNotFound"));
-            return;
+      if (!messageSnapshot.exists()) {
+        Alert.alert(t("chatUsers.error"), t("chatUsers.messageNotFound"));
+        return;
+      }
+
+      const messageData = messageSnapshot.data();
+
+      // Solo actualizar si es una imagen de "ver una vez"
+      if (isViewOnce) {
+        if (messageData.viewedBy?.includes(user.uid)) {
+          Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista.");
+          return;
         }
 
-        const messageData = messageSnapshot.data();
+        // Marcar el mensaje como visto por el usuario actual
+        await updateDoc(messageRef, {
+          viewedBy: [...(messageData.viewedBy || []), user.uid],
+          seen: true,
+        });
 
-        // Solo actualizar si es una imagen de "ver una vez"
-        if (isViewOnce) {
-            if (messageData.viewedBy?.includes(user.uid)) {
-                Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista.");
-                return;
-            }
-
-            // Marcar el mensaje como visto por el usuario actual
-            await updateDoc(messageRef, {
-                viewedBy: [...(messageData.viewedBy || []), user.uid],
-                seen: true,
-            });
-
-            setSelectedImage(mediaUrl);
-            setIsModalVisible(true);
-        } else {
-            setSelectedImage(mediaUrl);
-            setIsModalVisible(true);
-        }
+        setSelectedImage(mediaUrl);
+        setIsModalVisible(true);
+      } else {
+        setSelectedImage(mediaUrl);
+        setIsModalVisible(true);
+      }
     } catch (error) {
-        console.error("Error al abrir la imagen:", error);
-        Alert.alert(t("chatUsers.error"), t("chatUsers.openImageError"));
+      console.error("Error al abrir la imagen:", error);
+      Alert.alert(t("chatUsers.error"), t("chatUsers.openImageError"));
     }
-};
-
+  };
 
   const closeModal = () => {
     setIsModalVisible(false);
@@ -566,18 +519,22 @@ const handleDeleteChat = async () => {
   const handleLongPressMessage = (message) => {
     if (message.senderId === user.uid) {
       // Solo permitir eliminación de mensajes enviados por el usuario actual
-      Alert.alert(t("chatUsers.messageOptions"), t("chatUsers.messageOptionsPrompt"), [
-        {
-          text: t("chatUsers.cancel"),
-          onPress: () => setSelectedMessageId(null),
-          style: "cancel",
-        },
-        {
-          text: t("chatUsers.delete"),
-          onPress: () => handleDeleteMessage(message.id),
-          style: "destructive",
-        },
-      ]);
+      Alert.alert(
+        t("chatUsers.messageOptions"),
+        t("chatUsers.messageOptionsPrompt"),
+        [
+          {
+            text: t("chatUsers.cancel"),
+            onPress: () => setSelectedMessageId(null),
+            style: "cancel",
+          },
+          {
+            text: t("chatUsers.delete"),
+            onPress: () => handleDeleteMessage(message.id),
+            style: "destructive",
+          },
+        ]
+      );
     }
   };
 
@@ -604,9 +561,13 @@ const handleDeleteChat = async () => {
 
   const renderMessage = ({ item, index }) => {
     const previousMessage = messages[index - 1];
-    const currentMessageDate = item.createdAt ? new Date(item.createdAt.seconds * 1000) : new Date();
+    const currentMessageDate = item.createdAt
+      ? new Date(item.createdAt.seconds * 1000)
+      : new Date();
     const previousMessageDate =
-      previousMessage && previousMessage.createdAt ? new Date(previousMessage.createdAt.seconds * 1000) : null;
+      previousMessage && previousMessage.createdAt
+        ? new Date(previousMessage.createdAt.seconds * 1000)
+        : null;
 
     const isSameDay =
       previousMessageDate &&
@@ -635,9 +596,8 @@ const handleDeleteChat = async () => {
           >
             <Text style={styles.storyResponseText}>
               {item.senderId === user.uid
-               ? t("chatUsers.youAnswered")
-               : t("chatUsers.Answered")}
-
+                ? t("chatUsers.youAnswered")
+                : t("chatUsers.Answered")}
             </Text>
             <Image
               source={{ uri: item.storyUrl }}
@@ -680,15 +640,18 @@ const handleDeleteChat = async () => {
             ]}
           >
             <Text style={styles.noteResponseText}>
-              {isOwnMessage ? t("chatUsers.youAnsweredNote")
-               : t("chatUsers.AnsweredNote")}
+              {isOwnMessage
+                ? t("chatUsers.youAnsweredNote")
+                : t("chatUsers.AnsweredNote")}
             </Text>
 
             <Image
               source={require("../../assets/flecha-curva.png")}
               style={[
                 styles.arrowImage,
-                isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
+                isOwnMessage
+                  ? styles.arrowImageSent
+                  : styles.arrowImageReceived,
               ]}
             />
             <View>
@@ -744,11 +707,16 @@ const handleDeleteChat = async () => {
           >
             {item.text && <Text style={styles.messageText}>{item.text}</Text>}
 
-            {item.mediaType === "image" && (
-              item.isViewOnce ? (
+            {item.mediaType === "image" &&
+              (item.isViewOnce ? (
                 <TouchableOpacity
                   onPress={() =>
-                    handleMediaPress(item.mediaUrl, "image", item.id, item.isViewOnce)
+                    handleMediaPress(
+                      item.mediaUrl,
+                      "image",
+                      item.id,
+                      item.isViewOnce
+                    )
                   }
                   style={[
                     styles.viewOnceImagePlaceholder,
@@ -773,24 +741,35 @@ const handleDeleteChat = async () => {
                     source={{ uri: item.mediaUrl }}
                     style={styles.messageImage}
                   />
-                  {item.senderId === user.uid && item.viewedBy?.includes(recipient.uid) && (
-                    <Ionicons name="checkmark-done-sharp" size={16} color="black" style={styles.seenIcon}/>
-                  )}
+                  {item.senderId === user.uid &&
+                    item.viewedBy?.includes(recipient.uid) && (
+                      <Ionicons
+                        name="checkmark-done-sharp"
+                        size={16}
+                        color="black"
+                        style={styles.seenIcon}
+                      />
+                    )}
                 </TouchableOpacity>
-              )
-            )}
+              ))}
 
             {item.mediaType === "video" && (
               <>
-              <Video
-                source={{ uri: item.mediaUrl }}
-                style={styles.messageVideo}
-                useNativeControls
-                resizeMode="contain"
-              />
-              {item.senderId === user.uid && item.viewedBy?.includes(recipient.uid) && (
-                <Ionicons name="checkmark-done-sharp" size={16} color="black" style={styles.seenIcon}/>
-              )}
+                <Video
+                  source={{ uri: item.mediaUrl }}
+                  style={styles.messageVideo}
+                  useNativeControls
+                  resizeMode="contain"
+                />
+                {item.senderId === user.uid &&
+                  item.viewedBy?.includes(recipient.uid) && (
+                    <Ionicons
+                      name="checkmark-done-sharp"
+                      size={16}
+                      color="black"
+                      style={styles.seenIcon}
+                    />
+                  )}
               </>
             )}
 
@@ -798,154 +777,213 @@ const handleDeleteChat = async () => {
 
             <View style={styles.messageFooter}>
               <Text style={styles.timeText}>
-                {currentMessageDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {currentMessageDate.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </Text>
               {item.senderId === user.uid && item.seen && (
-                <Ionicons name="checkmark-done-sharp" size={16} color="black" style={styles.seenIcon} />
+                <Ionicons
+                  name="checkmark-done-sharp"
+                  size={16}
+                  color="black"
+                  style={styles.seenIcon}
+                />
               )}
             </View>
           </View>
         </TouchableOpacity>
       </>
     );
-
-};
+  };
 
   return (
     <ImageBackground source={{ uri: backgroundImage }} style={styles.container}>
-     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-    behavior={Platform.OS === "ios" ? "padding" : undefined}
-    keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-    >
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Feather name="arrow-left" size={24} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleUserPress} style={styles.userInfo}>
-          <Text style={styles.username}>
-            {recipient.firstName + " " + recipient.lastName}
-          </Text>
-        </TouchableOpacity>
-
-        <Menu
-          visible={menuVisible}
-          onDismiss={() => setMenuVisible(false)}
-          anchor={
-            <TouchableOpacity onPress={() => setMenuVisible(true)}>
-              <Feather name="more-vertical" size={24} color="white" />
-            </TouchableOpacity>
-          }
-          contentStyle={styles.menuContainer}
-        >
-          <Menu.Item
-            onPress={() => {
-              setMenuVisible(false);
-              Alert.alert(
-                t("chatUsers.deleteChat"),
-                t("chatUsers.deleteChatConfirmation"),
-                [
-                  {
-                    text: t("chatUsers.cancel"),
-                    style: "cancel",
-                  },
-                  {
-                    text: t("chatUsers.delete"),
-                    onPress: handleDeleteChat,
-                  },
-                ]
-              );
-            }}
-            title={t("chatUsers.deleteChat")}
-            titleStyle={styles.menuItemText}
-            style={styles.menuItemContainer}
-          />
-          <Menu.Item
-            onPress={handleHideChat}
-            title={t("chatUsers.mute")}
-            titleStyle={styles.menuItemText}
-            style={styles.menuItemContainer}
-          />
-          <Menu.Item
-            onPress={handleReport}
-            title={t("chatUsers.report")}
-            titleStyle={styles.menuItemText}
-            style={styles.menuItemContainer}
-          />
-
-        </Menu>
-      </View>
-
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessage}
-      />
-
-      <View style={styles.containerIg}>
-        <TouchableOpacity
-          onPress={handleCameraLaunch}
-          style={styles.iconButtonCamera}
-        >
-          <Ionicons name="camera-outline" size={20} color="white" />
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          value={message}
-          onChangeText={setMessage}
-          placeholder={t("chatUsers.writeMessage")}
-          placeholderTextColor="#999"
-        />
-        {message.trim() ? (
-          <TouchableOpacity
-            onPress={() => handleSend("text")}
-            style={styles.sendButton}
-          >
-            <FontAwesome name="send" size={20} color="white" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            onPress={pickMedia}
-            style={styles.iconButtonGaleria}
-          >
-            <Ionicons name="image-outline" size={30} color="#000" />
-          </TouchableOpacity>
-        )}
-      </View>
-
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        onRequestClose={closeModal}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalBackground}>
-            {selectedImage && (
-              <Image
-                source={{ uri: selectedImage }}
-                style={styles.fullscreenMedia}
-              />
-            )}
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-      <Complaints
-  isVisible={isComplaintVisible}
-  onClose={() => setIsComplaintVisible(false)}
-  onSubmit={(reason, description) => {
- 
-    handleReportSubmit(reason, description);
-    setIsComplaintVisible(false);
-  }}
-/>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <Feather name="arrow-left" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleUserPress} style={styles.userInfo}>
+            <Text style={styles.username}>
+              {recipient.firstName + " " + recipient.lastName}
+            </Text>
+          </TouchableOpacity>
 
-</KeyboardAvoidingView>
+          <Menu
+            visible={menuVisible}
+            onDismiss={() => setMenuVisible(false)}
+            anchor={
+              <TouchableOpacity onPress={() => setMenuVisible(true)}>
+                <Feather name="more-vertical" size={24} color="white" />
+              </TouchableOpacity>
+            }
+            contentStyle={styles.menuContainer}
+          >
+            <Menu.Item
+              onPress={() => {
+                setMenuVisible(false);
+                Alert.alert(
+                  t("chatUsers.deleteChat"),
+                  t("chatUsers.deleteChatConfirmation"),
+                  [
+                    {
+                      text: t("chatUsers.cancel"),
+                      style: "cancel",
+                    },
+                    {
+                      text: t("chatUsers.delete"),
+                      onPress: handleDeleteChat,
+                    },
+                  ]
+                );
+              }}
+              title={t("chatUsers.deleteChat")}
+              titleStyle={styles.menuItemText}
+              style={styles.menuItemContainer}
+            />
+            <Menu.Item
+              onPress={() => {
+                setMenuVisible(false);
+                setIsMuteModalVisible(true);
+              }}mute
+               title={t("chatUsers.mute")}
+              titleStyle={styles.menuItemText}
+            />
+            <Menu.Item
+              onPress={handleReport}
+              title={t("chatUsers.report")}
+              titleStyle={styles.menuItemText}
+              style={styles.menuItemContainer}
+            />
+          </Menu>
+        </View>
+
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessage}
+        />
+
+        <View style={styles.containerIg}>
+          <TouchableOpacity
+            onPress={handleCameraLaunch}
+            style={styles.iconButtonCamera}
+          >
+            <Ionicons name="camera-outline" size={20} color="white" />
+          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            value={message}
+            onChangeText={setMessage}
+            placeholder={t("chatUsers.writeMessage")}
+            placeholderTextColor="#999"
+          />
+          {message.trim() ? (
+            <TouchableOpacity
+              onPress={() => handleSend("text")}
+              style={styles.sendButton}
+            >
+              <FontAwesome name="send" size={20} color="white" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={pickMedia}
+              style={styles.iconButtonGaleria}
+            >
+              <Ionicons name="image-outline" size={30} color="#000" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <Modal
+          transparent={true}
+          visible={isMuteModalVisible}
+          animationType="fade"
+          onRequestClose={() => setIsMuteModalVisible(false)}
+        >
+          <TouchableWithoutFeedback
+            onPress={() => setIsMuteModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  Seleccioná la duración del silencio
+                </Text>
+                <TouchableOpacity
+                  style={styles.modalOption}
+                  onPress={() => {
+                    handleMuteChat(1);
+                    setIsMuteModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalText}>1 hora</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalOption}
+                  onPress={() => {
+                    handleMuteChat(4);
+                    setIsMuteModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalText}>4 horas</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalOption}
+                  onPress={() => {
+                    handleMuteChat(8);
+                    setIsMuteModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalText}>8 horas</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalOption}
+                  onPress={() => {
+                    handleMuteChat(24);
+                    setIsMuteModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalText}>24 horas</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
+        <Modal
+          visible={isModalVisible}
+          transparent={true}
+          onRequestClose={closeModal}
+        >
+          <TouchableWithoutFeedback onPress={closeModal}>
+            <View style={styles.modalBackground}>
+              {selectedImage && (
+                <Image
+                  source={{ uri: selectedImage }}
+                  style={styles.fullscreenMedia}
+                />
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+        <Complaints
+          isVisible={isComplaintVisible}
+          onClose={() => setIsComplaintVisible(false)}
+          onSubmit={(reason, description) => {
+            handleReportSubmit(reason, description);
+            setIsComplaintVisible(false);
+          }}
+        />
+      </KeyboardAvoidingView>
     </ImageBackground>
-
-
   );
 }

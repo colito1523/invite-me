@@ -166,22 +166,6 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       Alert.alert(t("dotIndicator.blockedUserError"));
       return;
     }
-
-    const currentUserRef = doc(database, "users", auth.currentUser.uid);
-    const currentUserDoc = await getDoc(currentUserRef);
-    const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
-
-    if (hideStoriesFrom.includes(uid)) {
-      const targetUserDoc = await getDoc(doc(database, "users", uid));
-      const targetUserData = targetUserDoc.data();
-      navigation.navigate("UserProfile", { selectedUser: { id: uid, ...targetUserData } });
-      return;
-    }
-  
-    if (auth.currentUser?.uid === uid) {
-      navigation.navigate("Profile", { selectedUser: auth.currentUser });
-      return;
-    }
   
     try {
       const userDoc = await getDoc(doc(database, "users", uid));
@@ -198,22 +182,23 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       const friendSnapshot = await getDocs(friendQuery);
       const isFriend = !friendSnapshot.empty;
   
+      // Datos predeterminados para navegación
+      const userProfileData = {
+        id: uid,
+        username: userData.username || t("dotIndicator.unknownUser"),
+        firstName: userData.firstName || t("dotIndicator.unknownUser"),
+        lastName: userData.lastName || t("dotIndicator.unknownUser"),
+        profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+        isPrivate: isPrivate,
+      };
+  
+      // Si el perfil es privado y no somos amigos, navegar directamente al perfil
       if (isPrivate && !isFriend) {
-        // Redirigir al perfil del usuario si es privado y no somos amigos
-        navigation.navigate("UserProfile", {
-          selectedUser: {
-            id: uid,
-            username: userData.username || t("dotIndicator.unknownUser"),
-            firstName: userData.firstName || t("dotIndicator.unknownUser"),
-            lastName: userData.lastName || t("dotIndicator.unknownUser"),
-            profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-            isPrivate: userData.isPrivate || false,
-          },
-        });
+        navigation.navigate("UserProfile", { selectedUser: userProfileData });
         return;
       }
   
-      // Si hay historias activas, mostrarlas
+      // Verificar historias activas
       const storiesRef = collection(database, "users", uid, "stories");
       const storiesSnapshot = await getDocs(storiesRef);
       const now = new Date();
@@ -226,6 +211,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         }))
         .filter((story) => new Date(story.expiresAt.toDate()) > now);
   
+      // Si hay historias activas, abrir el visor de historias
       if (activeStories.length > 0) {
         setSelectedStories([
           {
@@ -237,7 +223,8 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         ]);
         setIsModalVisible(true);
       } else {
-        navigation.navigate("UserProfile", { selectedUser: userData });
+        // Si no hay historias, navegar al perfil del usuario
+        navigation.navigate("UserProfile", { selectedUser: userProfileData });
       }
     } catch (error) {
       console.error(t("dotIndicator.errorHandlingUserClick"), error);
