@@ -127,6 +127,7 @@ export function StoryViewer({
     width: "100%",
     height: "100%",
   });
+  const [isLongPressActive, setIsLongPressActive] = useState(false); // Add this line
 
   const user = auth.currentUser;
 
@@ -697,6 +698,8 @@ export function StoryViewer({
   };
 
   const handleTap = (event) => {
+    if (isLongPressActive) return; // Add this line
+
     const { locationX } = event.nativeEvent;
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
 
@@ -778,6 +781,7 @@ export function StoryViewer({
   const handleLongPressIn = () => {
     longPressTimeout.current = setTimeout(() => {
       setIsPaused(true);
+      setIsLongPressActive(true); // Add this line
     }, 200);
   };
 
@@ -786,6 +790,7 @@ export function StoryViewer({
       clearTimeout(longPressTimeout.current);
     }
     setIsPaused(false);
+    setIsLongPressActive(false); // Add this line
   };
 
   const panResponder = createStoryPanResponder({
