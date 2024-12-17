@@ -35,6 +35,11 @@ import { ref, deleteObject } from "firebase/storage";
 import { useTranslation } from "react-i18next";
 import Complaints from "../Complaints/Complaints";
 import { KeyboardAvoidingView, Platform } from "react-native";
+import {
+  createStoryPanResponder,
+  handleNextUser,
+  handlePreviousUser,
+} from "./storyUtils"; // Importar las funciones
 
 const { width, height } = Dimensions.get("window"); // Add this line
 
@@ -176,7 +181,6 @@ export function StoryViewer({
       onClose(); // Cierra el visor si no hay una historia actual válida
     }
   }, [currentStory, onClose]);
-
   const handleThreeDotsPress = async (viewer) => {
     try {
       // Obtener los datos del espectador desde Firestore
@@ -784,17 +788,27 @@ export function StoryViewer({
     setIsPaused(false);
   };
 
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: (evt, gestureState) => {
-      return Math.abs(gestureState.dy) > 20;
-    },
-    onPanResponderRelease: (evt, gestureState) => {
-      if (gestureState.dy > 50) {
-        handleCloseViewer(); // Llama a `handleCloseViewer` al deslizar hacia abajo
-      } else if (gestureState.dy < -50 && isCurrentUserStory) {
-        handleOpenViewersModal();
-      }
-    },
+  const panResponder = createStoryPanResponder({
+    handleCloseViewer: () => onClose(unseenStories),
+    handleOpenViewersModal: () => console.log("Abrir modal de espectadores"),
+    handleNextUser: () =>
+      handleNextUser({
+        currentIndex,
+        setCurrentIndex,
+        setStoryIndex,
+        setProgress,
+        stories,
+        onClose,
+        localUnseenStories: unseenStories,
+      }),
+    handlePreviousUser: () =>
+      handlePreviousUser({
+        currentIndex,
+        setCurrentIndex,
+        setStoryIndex,
+        setProgress,
+      }),
+    isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
   });
 
   const handleOpenViewersModal = () => {
@@ -813,24 +827,24 @@ export function StoryViewer({
       const user = auth.currentUser;
       if (!user) {
         console.error("No user logged in");
-        Alert.alert(
-          t("storyViewer.error"),
-          t("storyViewer.dontAuthentication")
-        );
+        Alert.alert(t("storyViewer.error"), t("storyViewer.dontAuthentication"));
         return;
       }
-
+  
       const currentStory = stories[currentIndex]?.userStories[storyIndex];
       if (!currentStory) {
         console.error("Story not found");
-        Alert.alert(
-          t("storyViewer.error"),
-          t("storyViewer.storyNotFound")
-        );
+        Alert.alert(t("storyViewer.error"), t("storyViewer.storyNotFound"));
         return;
       }
-
-      // Elimina la historia de Firebase
+  
+      // Elimina la historia de Firebase Storage
+      const storyImageRef = ref(storage, currentStory.storyUrl);
+      await deleteObject(storyImageRef).catch(() => {
+        console.warn("Story image already deleted in Firebase Storage.");
+      });
+  
+      // Elimina la historia de Firestore
       const storyDocRef = doc(
         database,
         "users",
@@ -839,34 +853,28 @@ export function StoryViewer({
         currentStory.id
       );
       await deleteDoc(storyDocRef);
-
-      const storyImageRef = ref(storage, currentStory.storyUrl);
-      await deleteObject(storyImageRef);
-
-      // Actualiza el estado local
-      if (stories[currentIndex]?.userStories.length === 1) {
-        // Elimina el grupo de historias si era la última
-        stories.splice(currentIndex, 1);
-        if (stories.length === 0) {
-          onClose();
-          return;
-        }
-        setCurrentIndex((prev) => Math.max(0, prev - 1));
-        setStoryIndex(0);
+  
+      // Actualizar localmente
+      const updatedUserStories = stories[currentIndex].userStories.filter(
+        (story) => story.id !== currentStory.id
+      );
+  
+      if (updatedUserStories.length === 0) {
+        // Si no hay más historias, elimina el grupo de historias
+        const updatedStories = stories.filter((_, index) => index !== currentIndex);
+        onClose(updatedStories); // Llama a `onClose` con las historias actualizadas
       } else {
-        // Navegar a la siguiente historia o la anterior
-        setStoryIndex((prev) =>
-          prev < stories[currentIndex].userStories.length - 1 ? prev : prev - 1
-        );
+        // Si hay más historias en el grupo
+        const updatedStories = [...stories];
+        updatedStories[currentIndex].userStories = updatedUserStories;
+        onClose(updatedStories); // Llama a `onClose` con las historias actualizadas
       }
     } catch (error) {
       console.error("Error deleting story:", error);
-      Alert.alert(
-        t("storyViewer.error"),
-        t("storyViewer.deleteError")
-      );
+      Alert.alert(t("storyViewer.error"), t("storyViewer.deleteError"));
     }
   };
+  
 
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;
