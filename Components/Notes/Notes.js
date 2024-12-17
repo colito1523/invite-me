@@ -318,6 +318,7 @@ export default function Notes() {
             participants: [senderId, receiverId],
             createdAt: new Date(),
             lastMessage: "",
+            lastMessageTimestamp: new Date(), // Marca de tiempo inicial
           });
         }
         // Create the message
@@ -509,6 +510,7 @@ export default function Notes() {
         participants: [senderId, receiverId],
         createdAt: new Date(),
         lastMessage: "",
+        lastMessageTimestamp: new Date(), 
       });
     }
 

@@ -107,6 +107,9 @@ const { setHasUnreadMessages } = useUnreadMessages();
     navigation.setOptions({
       headerStyle: {
         backgroundColor: isNightMode ? "black" : "#fff",
+        borderBottomWidth: 0, 
+        elevation: 0, // Elimina sombra en Android
+    shadowOpacity: 0,
       },
       headerTintColor: isNightMode ? "#fff" : "#000",
       headerLeft: () => (
