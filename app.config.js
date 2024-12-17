@@ -29,9 +29,10 @@ export default {
         backgroundColor: "#ffffff"
       },
       notification: {
-        icon: "./assets/notification-icon.png",  // Actualiza el ícono de notificación para Android
-        color: "#FFFFFF" // Color de acento para las notificaciones (puedes personalizarlo)
-      }
+        icon: "./assets/notification-icon.png",
+        color: "#FFFFFF"
+      },
+      permissions: ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"] // Agrega permisos explícitos
     },
     web: {
       favicon: "./assets/Logo_Invite_Me.png"
@@ -48,10 +49,10 @@ export default {
       }
     },
     plugins: [
-      "expo-secure-store", // Mantén esto aquí
-      "expo-font"
+      "expo-secure-store",
+      "expo-font",
+      ["expo-camera"] // Agrega el plugin de expo-camera aquí
     ],
-
     updates: {
       url: "https://u.expo.dev/7e15b633-dd47-4035-86d3-96443bfdab66"
     },
