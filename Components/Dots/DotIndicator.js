@@ -55,14 +55,37 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
     fetchBlockedUsers();
   }, []);
+  
 
-  const navigateToUserProfile = (uid) => {
+  const navigateToUserProfile = async (uid) => {
     if (!uid) {
-        console.error("User ID is undefined");
-        return;
+      console.error("User ID is undefined");
+      return;
     }
-    navigation.navigate('UserProfile', { uid });
-};
+
+    if (uid === auth.currentUser.uid) {
+      navigation.navigate("Profile");
+      return;
+    }
+  
+    try {
+      const userDoc = await getDoc(doc(database, "users", uid));
+      const userData = userDoc.exists() ? userDoc.data() : {};
+  
+      navigation.navigate("UserProfile", {
+        selectedUser: {
+          id: uid,
+          username: userData.username || t("dotIndicatorBoxDetails.unknownUser"),
+          firstName: userData.firstName || t("dotIndicatorBoxDetails.unknownUser"),
+          lastName: userData.lastName || t("dotIndicatorBoxDetails.unknownUser"),
+          profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+          isPrivate: userData.isPrivate || false,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
 
   const checkStories = async () => {
     try {
