@@ -423,25 +423,25 @@ const handleDeleteEvent = () => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.editModalContent}>
-          <Text style={styles.editModalTitle}>Editar Evento</Text>
+          <Text style={styles.editModalTitle}>{t("indexBoxDetails.editEvent")}</Text>
           {/* Inputs para edición */}
           <TextInput
             style={styles.input}
             value={editedData.title}
             onChangeText={(text) => setEditedData({ ...editedData, title: text })}
-            placeholder="Título"
+            placeholder={t("indexBoxDetails.titlePlaceholder")}
           />
           <TextInput
             style={styles.input}
             value={editedData.address}
             onChangeText={(text) => setEditedData({ ...editedData, address: text })}
-            placeholder="Ubicación"
+            placeholder={t("indexBoxDetails.addressPlaceholder")}
           />
           <TextInput
             style={styles.input}
             value={editedData.description}
             onChangeText={(text) => setEditedData({ ...editedData, description: text })}
-            placeholder="Descripción"
+            placeholder={t("indexBoxDetails.descriptionPlaceholder")}
             multiline
           />
           {/* Botones */}
@@ -458,10 +458,7 @@ const handleDeleteEvent = () => {
               disabled={isProcessing}
             >
               <Text style={styles.editModalButtonText}>
-
-                
-                {isProcessing ?  t("storyViewer.saving")
-    : t("storyViewer.saver")}
+                {isProcessing ? t("storyViewer.saving") : t("storyViewer.saver")}
               </Text>
             </TouchableOpacity>
           </View>

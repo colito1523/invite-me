@@ -181,7 +181,10 @@
     "DontSeeMore": "Do not see more Stories",
     "Report": "Report",
     "showMyStories": "Show my stories.",
-    "hideMyStories": "Do not show my stories."
+    "hideMyStories": "Do not show my stories.",
+    "saver": "Saved",
+    "cancel" : "Cancel",
+    "saving": "Saving..."
   },
 
   "header": {

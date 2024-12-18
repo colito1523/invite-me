@@ -181,7 +181,10 @@
     "DontSeeMore": "No ver más Historias",
     "Report": "Denunciar",
     "showMyStories": "Mostrar mis historias",
-    "hideMyStories": "No Mostrar mis historias"
+    "hideMyStories": "No Mostrar mis historias",
+    "saver": "Guardar",
+    "cancel" : "Cancelar",
+    "saving": "Guardando..."
 
   },
 
@@ -230,7 +233,10 @@
     "dontPermission": "Se requieren permisos para acceder a tus fotos.",
     "saving": "Guardando...",
     "saver": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "titlePlaceholder": "Título",
+    "addressPlaceholder": "Ubicación",
+    "descriptionPlaceholder": "Descripción"
     
   },
 

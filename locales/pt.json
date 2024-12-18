@@ -180,7 +180,10 @@
       "DontSeeMore": "Não ver mais Histórias",
       "Report": "Denunciar",
       "showMyStories": "Mostrar minhas histórias.",
-    "hideMyStories": "Não mostrar minhas histórias."
+    "hideMyStories": "Não mostrar minhas histórias.",
+    "saver": "Salvar",
+    "cancel" : "Cancelar",
+     "saving": "Salvando..."
   },
 
   "header": {

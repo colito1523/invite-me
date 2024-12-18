@@ -322,7 +322,7 @@ export const styles = StyleSheet.create({
       backgroundColor: '#ccc',
     },
     saveButton: {
-      backgroundColor: '#007AFF',
+      backgroundColor: 'black',
     },
     editModalButtonText: {
       color: 'white',

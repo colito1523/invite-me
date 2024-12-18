@@ -217,7 +217,7 @@ export const handleAcceptRequest = async (params) => {
       return updatedNotifications.sort((a, b) => b.timestamp - a.timestamp);
     });
 
-    Alert.alert(t("notifications.FriendsAccepted"), t("notifications.FriendsAcceptedDescription"));
+
   } catch (error) {
     console.error("Error accepting request:", error);
     Alert.alert(t("notifications.error"), t("notifications.acceptRequestError"));
@@ -249,10 +249,6 @@ export const handleRejectRequest = async (params) => {
       prevNotifications.filter((notif) => notif.id !== request.id)
     );
 
-    Alert.alert(
-      t("notifications.invitationRejected"),
-      t("notifications.eventInvitationRejected")
-    );
   } catch (error) {
     console.error("Error rejecting request:", error);
     Alert.alert(
@@ -342,10 +338,6 @@ export const handleAcceptEventInvitation = async (params) => {
       prevNotifications.filter((n) => n.id !== notif.id)
     );
 
-    Alert.alert(
-      t("notifications.invitationAccepted"),
-      t("notifications.eventAddedToProfile")
-    );
   } catch (error) {
     console.error("Error accepting invitation:", error);
     Alert.alert(
@@ -434,11 +426,6 @@ export const handleRejectEventInvitation = async (params) => {
     // Remover la notificación del estado local
     setNotifications((prevNotifications) =>
       prevNotifications.filter((n) => n.id !== notif.id)
-    );
-
-    Alert.alert(
-      t("notifications.invitationRejected"),
-      t("notifications.eventInvitationRejected")
     );
   } catch (error) {
     console.error("Error rejecting invitation:", error);
@@ -555,10 +542,6 @@ export const handleAcceptPrivateEvent = async (params) => {
       )
     );
 
-    Alert.alert(
-      t("notifications.invitationAccepted"),
-      t("notifications.eventAddedToProfile")
-    );
   } catch (error) {
     console.error("Error accepting private event invitation:", error);
     Alert.alert(
@@ -599,7 +582,6 @@ export const handleRejectPrivateEvent = async (params) => {
       )
   );
 
-    Alert.alert("Rechazado", "Has rechazado la invitación al evento privado.");
   } catch (error) {
     console.error("Error al rechazar la invitación al evento privado:", error);
     Alert.alert("Error", "No se pudo rechazar la invitación.");
@@ -683,7 +665,6 @@ export const handleAcceptGeneralEvent = async (params) => {
         )
       );
 
-      Alert.alert("Confirmación", "El evento ha sido añadido a tu perfil.");
     }
   } catch (error) {
     console.error("Error al aceptar la invitación:", error);
@@ -729,7 +710,6 @@ export const handleRejectGeneralEvent = async (params) => {
       prevNotifications.filter((notif) => notif.id !== item.id)
     );
 
-    Alert.alert("Rechazado", "Has rechazado la invitación al evento general.");
   } catch (error) {
     console.error("Error al rechazar la invitación al evento general:", error);
     Alert.alert("Error", "No se pudo rechazar la invitación.");
