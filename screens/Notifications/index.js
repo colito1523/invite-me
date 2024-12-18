@@ -354,6 +354,8 @@ export default function NotificationsComponent() {
   };
 
   const renderNotificationItem = ({ item }) => {
+
+
     const isFriendRequest =
       item.type === "friendRequest" &&
       item.status !== "accepted" &&

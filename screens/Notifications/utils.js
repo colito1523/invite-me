@@ -498,8 +498,15 @@ export const handleAcceptPrivateEvent = async (params) => {
         expirationDate: eventData.expirationDate,
         hour: eventData.hour,
         status: "accepted",
+        dateArray: [eventData.date], 
       });
     }
+
+    // Función para convertir la fecha
+function convertDateToShortFormat(date) {
+  const options = { day: '2-digit', month: 'short' }; // Formato "26 Dec"
+  return new Date(date).toLocaleDateString('en-GB', options);
+}
 
     // Update the notification with the confirmation message
     const notifRef = doc(database, "users", user.uid, "notifications", item.id);

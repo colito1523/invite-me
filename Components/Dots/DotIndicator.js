@@ -165,7 +165,6 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
              };
            })
          );
-         console.log("Attendees Complete Details:", usersWithFullData);
          await checkStories();
        } catch (error) {
          console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
