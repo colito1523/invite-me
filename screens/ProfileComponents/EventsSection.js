@@ -46,12 +46,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     flexWrap: "wrap",
-    marginBottom: isSmallScreen ? 10 : isMediumScreen ? 60 : 80, // Diferentes márgenes según la categoría
+    marginBottom: isSmallScreen ? 10 : isMediumScreen ? 50 : 80, // Diferentes márgenes según la categoría
     gap: 10,
   },
   button: {
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingVertical: isSmallScreen ? 10 : isMediumScreen ? 13 : 15, // Diferentes márgenes según la categoría
+    paddingVertical: isSmallScreen ? 10 : isMediumScreen ? 10 : 15, // Diferentes márgenes según la categoría
     paddingHorizontal: 20,
     borderRadius: 20,
     margin: 5,

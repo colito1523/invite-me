@@ -4,8 +4,7 @@ import { auth, database } from "../../config/firebase";
 
 
 export const markNotificationsAsSeen = async (params) => {
-  const user = params.user;
-  const database = params.database;
+  const { user, database } = params;
 
   if (user) {
     const notificationsRef = collection(database, "users", user.uid, "notifications");
@@ -33,19 +32,23 @@ export const markNotificationsAsSeen = async (params) => {
 };
 
 export const handleDeleteNotification = (params) => {
-  const notificationId = params.notificationId
-  const setNotifications = params.setNotifications
+  const { notificationId, setNotifications, t } = params;
+
+  if (typeof t !== 'function') {
+    console.error("Translation function 't' is not defined or not a function.");
+    return;
+  }
 
   Alert.alert(
-    "Eliminar notificación",
-    "¿Estás seguro de que deseas eliminar esta notificación?",
+    t("notifications.deleteNotificationTitle"),
+    t("notifications.deleteNotificationMessage"),
     [
       {
-        text: "Cancelar",
+        text: t("notifications.cancel"),
         style: "cancel",
       },
       {
-        text: "Eliminar",
+        text: t("notifications.delete"),
         style: "destructive",
         onPress: async () => {
           try {
@@ -55,14 +58,14 @@ export const handleDeleteNotification = (params) => {
               prevNotifications.filter((notif) => notif.id !== notificationId)
             );
             Alert.alert(
-              "Notificación eliminada",
-              "La notificación ha sido eliminada."
+              t("notifications.notificationDeletedTitle"),
+              t("notifications.notificationDeletedMessage")
             );
           } catch (error) {
-            console.error("Error al eliminar la notificación:", error);
+            console.error("Error deleting notification:", error);
             Alert.alert(
-              "Error",
-              "No se pudo eliminar la notificación. Inténtalo de nuevo."
+              t("notifications.deleteNotificationErrorTitle"),
+              t("notifications.deleteNotificationErrorMessage")
             );
           }
         },
@@ -73,8 +76,7 @@ export const handleDeleteNotification = (params) => {
 };
 
 export const updateNotifications = (params) => {
-  const newNotifications = params.newNotifications
-  const setNotifications = params.setNotifications
+  const { newNotifications, setNotifications } = params;
 
   setNotifications((prevNotifications) => {
     const updatedNotifications = [...prevNotifications];
@@ -96,10 +98,8 @@ export const updateNotifications = (params) => {
 };
 
 export const handleUserPress = async (params) => {
+  const { uid, navigation, t } = params;
 
-  const uid = params.uid
-  const navigation = params.navigation
-  const t = params.t
   try {
     const userDoc = await getDoc(
       doc(database, "users", auth.currentUser.uid)
@@ -136,10 +136,7 @@ export const handleUserPress = async (params) => {
 };
 
 export const handleAcceptRequest = async (params) => {
-  const request = params.request;
-  const setLoadingEventId = params.setLoadingEventId;
-  const setNotifications = params.setNotifications;
-  const t = params.t;
+  const { request, setLoadingEventId, setNotifications, t } = params;
 
   setLoadingEventId(request.id);
   try {
@@ -227,10 +224,7 @@ export const handleAcceptRequest = async (params) => {
 };
 
 export const handleRejectRequest = async (params) => {
-  const request = params.request
-  const setLoadingEventId = params.setLoadingEventId
-  const setNotifications = params.setNotifications
-  const t = params.t
+  const { request, setLoadingEventId, setNotifications, t } = params;
 
   setLoadingEventId(request.id)
   try {
@@ -259,9 +253,7 @@ export const handleRejectRequest = async (params) => {
 };
 
 export const handleAcceptEventInvitation = async (params) => {
-  const notif = params.notif
-  const setNotifications = params.setNotifications
-  const t = params.t
+  const { notif, setNotifications, t } = params;
 
   const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
   const blockedUsers = userDoc.data()?.blockedUsers || [];
@@ -348,9 +340,7 @@ export const handleAcceptEventInvitation = async (params) => {
 };
 
 export const handleRejectEventInvitation = async (params) => {
-  const notif = params.notif
-  const setNotifications = params.setNotifications
-  const t = params.t
+  const { notif, setNotifications, t } = params;
 
   try {
     const user = auth.currentUser;
@@ -437,10 +427,7 @@ export const handleRejectEventInvitation = async (params) => {
 };
 
 export const handleAcceptPrivateEvent = async (params) => {
-  const setNotifications = params.setNotifications;
-  const setLoadingEventId = params.setLoadingEventId;
-  const item = params.item;
-  const t = params.t;
+  const { setNotifications, setLoadingEventId, item, t } = params;
 
   try {
     setLoadingEventId(item.id);
@@ -554,8 +541,7 @@ export const handleAcceptPrivateEvent = async (params) => {
 };
 
 export const handleRejectPrivateEvent = async (params) => {
-  const item = params.item
-  const setNotifications = params.setNotifications
+  const { item, setNotifications } = params;
 
   try {
     // Eliminar la notificación
@@ -589,9 +575,7 @@ export const handleRejectPrivateEvent = async (params) => {
 };
 
 export const handleAcceptGeneralEvent = async (params) => {
-  const item = params.item;
-  const setLoadingEventId = params.setLoadingEventId;
-  const setNotifications = params.setNotifications;
+  const { item, setLoadingEventId, setNotifications } = params;
 
   try {
     setLoadingEventId(item.id);
@@ -675,8 +659,7 @@ export const handleAcceptGeneralEvent = async (params) => {
 };
 
 export const handleRejectGeneralEvent = async (params) => {
-  const item = params.item
-  const setNotifications = params.setNotifications
+  const { item, setNotifications } = params;
 
   try {
     // Eliminar la notificación
@@ -717,9 +700,7 @@ export const handleRejectGeneralEvent = async (params) => {
 };
 
 export const handleCancelFriendRequestNotification = async (params) => {
-  const notificationId = params.notificationId;
-  const targetUserId = params.targetUserId; // Add targetUserId parameter
-  const setNotifications = params.setNotifications;
+  const { notificationId, targetUserId, setNotifications } = params;
 
   try {
     // Delete the notification from the current user's notifications

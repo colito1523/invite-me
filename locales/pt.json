@@ -324,6 +324,7 @@
     "userDetailsFetchError": "Houve um problema ao buscar os detalhes do usuário.",
     "friendRequestAccepted": "{{name}} aceitou seu pedido de amizade.",
     "youAreNowFriends": "Você e {{name}} agora são amigos.",
+    "acceptedEventInvitation": "Você aceitou o convite para o evento!",
     "acceptRequestError": "Não foi possível aceitar o pedido de amizade.",
     "rejectRequestError": "Não foi possível rejeitar o pedido de amizade.",
     "invalidEventId": "ID do evento inválido.",

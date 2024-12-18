@@ -43,7 +43,7 @@ export const styles = StyleSheet.create({
     },
     nameContainer: {
       position: "absolute",
-      top: isSmallScreen ? 510 : isMediumScreen ? 580 : 700, // Márgenes dinámicos
+      top: isSmallScreen ? 510 : isMediumScreen ? 530 : 700, // Márgenes dinámicos
       left: 20,
       right: 20,
       zIndex: 10,
@@ -91,7 +91,7 @@ export const styles = StyleSheet.create({
       borderRadius: 20,
       justifyContent: "center",
       alignItems: "center",
-      marginBottom: isSmallScreen ? 10 : isMediumScreen ? 30 : 40, // Diferentes márgenes según la categoría
+      marginBottom: isSmallScreen ? 10 : isMediumScreen ? 20 : 40, // Diferentes márgenes según la categoría
     },
     buttonText: {
       color: "#fff",

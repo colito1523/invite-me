@@ -328,6 +328,7 @@
     "userDetailsNotFound": "No se encontraron detalles para este usuario.",
     "userDetailsFetchError": "Hubo un problema al obtener los detalles del usuario.",
     "friendRequestAccepted": "{{name}} ha aceptado tu solicitud de amistad.",
+    "acceptedEventInvitation": "¡Has aceptado la invitación al evento!",
     "youAreNowFriends": "Tú y {{name}} ahora son amigos.",
     "acceptRequestError": "No se pudo aceptar la solicitud.",
     "rejectRequestError": "No se pudo rechazar la solicitud.",

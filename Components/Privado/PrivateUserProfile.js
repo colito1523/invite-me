@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
   },
   nameContainer: {
     position: "absolute",
-    top: isSmallScreen ? 510 : isMediumScreen ? 630 : 750, // Márgenes dinámicos
+    top: isSmallScreen ? 510 : isMediumScreen ? 600 : 750, // Márgenes dinámicos
     left: 20,
     right: 20,
     zIndex: 10,

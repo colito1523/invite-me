@@ -321,6 +321,7 @@
     "error": "Error",
     "userDetailsNotFound": "User details not found.",
     "userDetailsFetchError": "There was a problem fetching user details.",
+    "acceptedEventInvitation": "You have accepted the event invitation!",
     "friendRequestAccepted": "{{name}} has accepted your friend request.",
     "youAreNowFriends": "You and {{name}} are now friends.",
     "acceptRequestError": "Failed to accept the request.",
