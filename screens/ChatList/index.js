@@ -308,7 +308,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
         setSelectedStories([
           {
             uid: user.uid,
-            username: user.username || "Usuario desconocido",
+            username: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
             profileImage: user.photoUrls?.[0],
             userStories: stories,
           },

@@ -216,9 +216,9 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         setSelectedStories([
           {
             uid,
-            username: userData.username || t("dotIndicator.unknownUser"),
-            profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-            userStories: activeStories,
+    username: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
+    profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+    userStories: activeStories,
           },
         ]);
         setIsModalVisible(true);

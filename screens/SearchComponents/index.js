@@ -350,7 +350,7 @@ export default function Search() {
         if (userStories.length > 0) {
           setSelectedStories([{
             uid: item.id,
-            username: item.username,
+            username: `${item.firstName || ""} ${item.lastName || ""}`.trim() || item.username || t("unknownUser"),
             profileImage: item.profileImage,
             userStories: userStories
           }]);
@@ -429,7 +429,7 @@ export default function Search() {
                 if (userStories.length > 0) {
                   setSelectedStories([{
                     uid: item.id,
-                    username: item.username,
+                    username: `${item.firstName || ""} ${item.lastName || ""}`.trim() || item.username || t("unknownUser"),
                     profileImage: item.profileImage,
                     userStories: userStories
                   }]); //set the stories to display in the modal
