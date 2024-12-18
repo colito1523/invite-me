@@ -193,9 +193,10 @@
   },
 
   "SliderContent": {
+    "hours": "{{count}} hour",
+    "hours_plural": "{{count}} hours",
     "description": "Description",
     "descriptionNotAvailable": "Description not available",
-    "hours": "Hour",
     "day": "Day",
     "notAvailable": "Not available",
     "location": "Location:",
@@ -226,14 +227,13 @@
     "eventUpdateSuccess": "Event updated successfully",
     "eventDeleteSuccess": "Event deleted successfully",
     "dontPermission": "Permissions are required to access your photos",
-     "saving": "Saving...",
+    "saving": "Saving...",
     "cancel": "Cancel"
-
   },
 
   "indexChatList": {
     "success": "Success",
-    "chatsDeleted":"Chats Deleted",
+    "chatsDeleted": "Chats Deleted",
     "chatsDontDeleted": "Chats don't Deleted",
     "error": "Error",
     "dontFindResults": "No results found",
@@ -272,7 +272,6 @@
     "muteDurationSelected": "Muted for {{hours}} hours",
     "muteDurationNotSelected": "No duration selected",
     "tittle": "Messages"
-    
   },
 
   "chatUsers": {
@@ -305,8 +304,13 @@
     "hiddenChat": "The chat has been hidden",
     "youAnswered": "You answered to your story",
     "Answered": "Answered to your story",
-     "youAnsweredNote": "You answered to your Note",
-    "AnsweredNote": "Answered to your Note"
+    "youAnsweredNote": "You answered to your Note",
+    "AnsweredNote": "Answered to your Note",
+    "selectMuteDuration": "Select mute duration",
+    "oneHour": "1 hour",
+    "fourHours": "4 hours",
+    "eightHours": "8 hours",
+    "twentyFourHours": "24 hours"
   },
 
   "notifications": {

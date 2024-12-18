@@ -194,9 +194,10 @@
   },
 
   "SliderContent": {
+    "hours": "{{count}} hora",
+    "hours_plural": "{{count}} horas",
     "description": "Descripción",
     "descriptionNotAvailable": "Descripción no disponible",
-    "hours": "Hora",
     "day": "Día",
     "notAvailable": "No disponible",
     "location": "Ubicación:",
@@ -307,7 +308,12 @@
     "youAnswered": "Respondiste a su historia",
     "Answered": "Respondió a tu historia",
      "youAnsweredNote": "Respondiste a su Nota",
-    "AnsweredNote": "Respondió a tu Nota"
+    "AnsweredNote": "Respondió a tu Nota",
+    "selectMuteDuration": "Selecciona la duración del silencio",
+    "oneHour": "1 hora",
+    "fourHours": "4 horas",
+    "eightHours": "8 horas",
+    "twentyFourHours": "24 horas"
   },
 
   "notifications": {

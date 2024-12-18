@@ -185,7 +185,7 @@ export default function Component({ route, navigation }) {
   
       Alert.alert(
         t("userProfile.userBlocked"),
-        `${selectedUser.firstName} ${t("userProfile.isBlocked")}`
+        `${selectedUser.firstName} ${t("userProfilePrivate.isBlocked")}`
       );
     } catch (error) {
       console.error("Error blocking user:", error);

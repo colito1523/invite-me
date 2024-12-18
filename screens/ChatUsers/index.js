@@ -853,8 +853,8 @@ export default function Chat({ route }) {
               onPress={() => {
                 setMenuVisible(false);
                 setIsMuteModalVisible(true);
-              }}mute
-               title={t("chatUsers.mute")}
+              }}
+              title={t("chatUsers.mute")}
               titleStyle={styles.menuItemText}
             />
             <Menu.Item
@@ -916,7 +916,7 @@ export default function Chat({ route }) {
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>
-                  Seleccioná la duración del silencio
+                  {t("chatUsers.selectMuteDuration")}
                 </Text>
                 <TouchableOpacity
                   style={styles.modalOption}
@@ -925,7 +925,7 @@ export default function Chat({ route }) {
                     setIsMuteModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalText}>1 hora</Text>
+                  <Text style={styles.modalText}>{t("chatUsers.oneHour")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalOption}
@@ -934,7 +934,7 @@ export default function Chat({ route }) {
                     setIsMuteModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalText}>4 horas</Text>
+                  <Text style={styles.modalText}>{t("chatUsers.fourHours")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalOption}
@@ -943,7 +943,7 @@ export default function Chat({ route }) {
                     setIsMuteModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalText}>8 horas</Text>
+                  <Text style={styles.modalText}>{t("chatUsers.eightHours")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalOption}
@@ -952,7 +952,7 @@ export default function Chat({ route }) {
                     setIsMuteModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalText}>24 horas</Text>
+                  <Text style={styles.modalText}>{t("chatUsers.twentyFourHours")}</Text>
                 </TouchableOpacity>
               </View>
             </View>

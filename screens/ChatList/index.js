@@ -33,13 +33,6 @@ import { useTranslation } from "react-i18next";
 import StoryViewer from '../../Components/Stories/StoryViewer';
 import { useUnreadMessages } from '../../src/hooks/UnreadMessagesContext';
 
-const muteOptions = [
-  { label: "1 hora", value: 1 },
-  { label: "4 horas", value: 4 },
-  { label: "8 horas", value: 8 },
-  { label: "24 horas", value: 24 },
-];
-
 export default function ChatList() {
   const [chats, setChats] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -59,6 +52,13 @@ const [isModalVisible, setIsModalVisible] = useState(false);
 const { setHasUnreadMessages } = useUnreadMessages();
 
   const { t } = useTranslation();
+
+  const muteOptions = [
+    { label: t("SliderContent.hours", { count: 1 }), value: 1 },
+    { label: t("SliderContent.hours", { count: 4 }), value: 4 },
+    { label: t("SliderContent.hours", { count: 8 }), value: 8 },
+    { label: t("SliderContent.hours", { count: 24 }), value: 24 },
+  ];
 
   const user = auth.currentUser;
   const navigation = useNavigation();

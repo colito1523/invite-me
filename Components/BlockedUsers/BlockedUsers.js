@@ -44,8 +44,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
                 const data = userDoc.data();
                 usersData.push({
                   uid,
-                  firstName: data.firstName,
-                  lastName: data.lastName,
+                  username: data.username,
                   profileImage: data.photoUrls?.[0] || "https://via.placeholder.com/150",
                 });
               }
@@ -81,7 +80,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
       const currentUserDoc = await getDoc(currentUserRef);
   
       if (!currentUserDoc.exists()) {
-        Alert.alert(t("blockedUsers.noUserDataError"));
+      
         return;
       }
   
@@ -112,7 +111,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
       // Actualizar la lista localmente
       setUserDetails((prev) => prev.filter((user) => user.uid !== uid));
   
-      Alert.alert(t("blockedUsers.unblockSuccess"));
+    
     } catch (error) {
       console.error(t("blockedUsers.unblockError"), error);
       Alert.alert(t("blockedUsers.unblockError"));
@@ -136,7 +135,7 @@ export default function BlockedListModal({ isVisible, onClose, blockedUsers }) {
                   cachePolicy="memory-disk"
                 />
                 <Text style={styles.username}>
-                  {item.firstName} {item.lastName}
+                  {item.username}
                 </Text>
                 <TouchableOpacity
                   style={styles.unblockButton}

@@ -110,9 +110,9 @@ export const handleBlockUser = async (params) => {
     }
 
     Alert.alert(
-      t("userProfile.userBlocked"),
-      `${selectedUser.firstName} ${t("userProfile.isBlocked")}`
-    );
+            t("userProfile.userBlocked"),
+            `${selectedUser.firstName} ${t("userProfilePrivate.isBlocked")}`
+          );
   } catch (error) {
     console.error("Error blocking user:", error);
     Alert.alert(t("userProfile.error"), t("userProfile.blockError"));
@@ -523,7 +523,7 @@ export const handleToggleHiddenStories = async (params) => {
       });
       Alert.alert(
         t("userProfile.success"),
-        t("userProfile.removedFromHiddenStories")
+        t("userProfile.willSeeStories")
       );
     } else {
       // Si no está en la lista, lo añadimos
@@ -532,7 +532,7 @@ export const handleToggleHiddenStories = async (params) => {
       });
       Alert.alert(
         t("userProfile.success"),
-        t("userProfile.addedToHiddenStories")
+        t("userProfile.willNotSeeStories")
       );
     }
 
@@ -579,7 +579,7 @@ export const toggleHideMyStories = async (params) => {
           });
           Alert.alert(
               t("userProfile.success"),
-              t("userProfile.removedFromHideStories")
+              t("storyViewer.viewerCanSeeStories")
           );
       } else {
           // Si nuestro UID no está en su lista, lo añadimos
@@ -588,7 +588,7 @@ export const toggleHideMyStories = async (params) => {
           });
           Alert.alert(
               t("userProfile.success"),
-              t("userProfile.addedToHideStories")
+              t("userProfile.userCannotSeeStories")
           );
       }
 
