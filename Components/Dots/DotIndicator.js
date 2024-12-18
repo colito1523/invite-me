@@ -11,24 +11,27 @@ import {
   TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import {collection,
+import {
+  collection,
   getDocs,
   doc,
   query,
   where,
-  getDoc} from "firebase/firestore";
-  import { database, auth, } from "../../config/firebase";
+  getDoc,
+} from "firebase/firestore";
+import { database, auth } from "../../config/firebase";
 import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import StoryViewer from '../Stories/StoryViewer';
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import StoryViewer from "../Stories/StoryViewer";
 import { useTranslation } from "react-i18next";
+import { handleUserPress } from "./utils";
 
 const { width } = Dimensions.get("window");
 
 const DotIndicator = ({ profileImages, attendeesList }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredAttendees, setFilteredAttendees] = useState(attendeesList);
   const navigation = useNavigation();
   const [isNightMode, setIsNightMode] = useState(false);
@@ -36,7 +39,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   const [filteredImages, setFilteredImages] = useState(profileImages);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchBlockedUsers = async () => {
@@ -53,6 +56,14 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     fetchBlockedUsers();
   }, []);
 
+  const navigateToUserProfile = (uid) => {
+    if (!uid) {
+        console.error("User ID is undefined");
+        return;
+    }
+    navigation.navigate('UserProfile', { uid });
+};
+
   const checkStories = async () => {
     try {
       const currentUserRef = doc(database, "users", auth.currentUser.uid);
@@ -66,8 +77,8 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       }));
 
       for (const attendee of attendeesWithStories) {
-        // Exclude current user's stories and hidden stories
-        if (attendee.uid === auth.currentUser.uid || hideStoriesFrom.includes(attendee.uid)) {
+        // Ensure attendee is defined
+        if (!attendee || attendee.uid === auth.currentUser.uid || hideStoriesFrom.includes(attendee.uid)) {
           continue;
         }
 
@@ -79,25 +90,30 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
         const isPrivate = userData?.isPrivate || false;
 
+        // Verificar si somos amigos
         const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
         const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
         const friendSnapshot = await getDocs(friendQuery);
         const isFriend = !friendSnapshot.empty;
 
+        // Saltar si es privado y no somos amigos
+        if (isPrivate && !isFriend) {
+          continue;
+        }
+
+        // Cargar historias solo si el perfil es público o si somos amigos
         const storiesRef = collection(userDocRef, "stories");
         const storiesSnapshot = await getDocs(storiesRef);
-        const now = new Date();
 
-        const userStories = isPrivate && !isFriend
-          ? [] // Si es privado y no somos amigos, no hay historias
-          : storiesSnapshot.docs
-              .map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: doc.data().createdAt?.toDate(),
-                expiresAt: doc.data().expiresAt?.toDate(),
-              }))
-              .filter((story) => story.expiresAt > now);
+        const now = new Date();
+        const userStories = storiesSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate(),
+            expiresAt: doc.data().expiresAt?.toDate(),
+          }))
+          .filter((story) => story.expiresAt > now);
 
         if (userStories.length > 0) {
           attendee.hasStories = true;
@@ -107,15 +123,34 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
       setFilteredAttendees(attendeesWithStories);
     } catch (error) {
-      console.error(t("dotIndicator.errorCheckingStories"), error);
+      console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
     }
   };
 
-  useEffect(() => {
-    checkStories();
-  }, [attendeesList]);
-
-
+ useEffect(() => {
+     const fetchCompleteUserData = async () => {
+       try {
+         const usersWithFullData = await Promise.all(
+           attendeesList.map(async (attendee) => {
+             const userDoc = await getDoc(doc(database, "users", attendee.uid));
+             const userData = userDoc.exists() ? userDoc.data() : {};
+             return {
+               ...userData,
+               ...attendee,
+               hasStories: attendee.hasStories,
+               userStories: attendee.userStories
+             };
+           })
+         );
+         console.log("Attendees Complete Details:", usersWithFullData);
+         await checkStories();
+       } catch (error) {
+         console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
+       }
+     };
+ 
+     fetchCompleteUserData();
+   }, [attendeesList]);
 
   useEffect(() => {
     const updateFilteredImages = () => {
@@ -140,7 +175,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   }, []);
 
   useEffect(() => {
-    if (searchTerm.trim() === '') {
+    if (searchTerm.trim() === "") {
       setFilteredAttendees(
         attendeesList.filter(
           (attendee) => !blockedUsers.includes(attendee.uid) // Excluir usuarios bloqueados
@@ -156,122 +191,62 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     }
   }, [searchTerm, attendeesList, blockedUsers]);
 
-
-  const handlePress = () => {
+  const handlePresss = () => {
     setModalVisible(true);
   };
 
-  const handleUserPress = async (uid) => {
-    if (blockedUsers.includes(uid)) {
-      Alert.alert(t("dotIndicator.blockedUserError"));
-      return;
-    }
-  
-    try {
-      const userDoc = await getDoc(doc(database, "users", uid));
-      if (!userDoc.exists()) {
-        Alert.alert(t("dotIndicator.noDetailsFound"));
-        return;
-      }
-  
-      const userData = userDoc.data();
-      const isPrivate = userData?.isPrivate || false;
-  
-      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-      const friendQuery = query(friendsRef, where("friendId", "==", uid));
-      const friendSnapshot = await getDocs(friendQuery);
-      const isFriend = !friendSnapshot.empty;
-  
-      // Datos predeterminados para navegación
-      const userProfileData = {
-        id: uid,
-        username: userData.username || t("dotIndicator.unknownUser"),
-        firstName: userData.firstName || t("dotIndicator.unknownUser"),
-        lastName: userData.lastName || t("dotIndicator.unknownUser"),
-        profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-        isPrivate: isPrivate,
-      };
-  
-      // Si el perfil es privado y no somos amigos, navegar directamente al perfil
-      if (isPrivate && !isFriend) {
-        navigation.navigate("UserProfile", { selectedUser: userProfileData });
-        return;
-      }
-  
-      // Verificar historias activas
-      const storiesRef = collection(database, "users", uid, "stories");
-      const storiesSnapshot = await getDocs(storiesRef);
-      const now = new Date();
-      const activeStories = storiesSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt,
-          expiresAt: doc.data().expiresAt,
-        }))
-        .filter((story) => new Date(story.expiresAt.toDate()) > now);
-  
-      // Si hay historias activas, abrir el visor de historias
-      if (activeStories.length > 0) {
-        setSelectedStories([
-          {
-            uid,
-    username: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
-    profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-    userStories: activeStories,
-          },
-        ]);
-        setIsModalVisible(true);
-      } else {
-        // Si no hay historias, navegar al perfil del usuario
-        navigation.navigate("UserProfile", { selectedUser: userProfileData });
-      }
-    } catch (error) {
-      console.error(t("dotIndicator.errorHandlingUserClick"), error);
-      Alert.alert(t("dotIndicator.errorFetchingUserDetails"));
-    }
-  };
-  
+   const handlePress = async (uid) => {
+      await handleUserPress({
+        uid,
+        navigation,
+        blockedUsers,
+        t,
+        setSelectedStories,
+        setIsModalVisible,
+      });
+    };
 
+ 
 
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 
   return (
     <View style={currentStyles.container}>
-     <TouchableOpacity
-  onPress={handlePress}
-  style={currentStyles.imageContainer}
->
-  {filteredImages.slice(0, 6).map((imageUrl, index) => (
-    <Image
-      key={index}
-      source={{ uri: imageUrl }}
-      style={[
-        currentStyles.profileImage,
-        { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
-      ]}
-      cachePolicy="memory-disk" // Opcional: mejora la carga de imágenes
-    />
-  ))}
-  {filteredImages.length > 6 && (
-    <View style={currentStyles.moreContainer}>
-      <Text style={currentStyles.moreText}>
-        +{filteredImages.length - 6}
-      </Text>
-    </View>
-  )}
-</TouchableOpacity>
-
+      <TouchableOpacity
+        onPress={handlePresss}
+        style={currentStyles.imageContainer}
+      >
+        {filteredImages.slice(0, 6).map((imageUrl, index) => (
+          <Image
+            key={index}
+            source={{ uri: imageUrl }}
+            style={[
+              currentStyles.profileImage,
+              { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
+            ]}
+            cachePolicy="memory-disk" // Opcional: mejora la carga de imágenes
+          />
+        ))}
+        {filteredImages.length > 6 && (
+          <View style={currentStyles.moreContainer}>
+            <Text style={currentStyles.moreText}>
+              +{filteredImages.length - 6}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent={true} animationType="fade">
         <TouchableOpacity
           style={currentStyles.modalOverlay}
           onPress={() => setModalVisible(false)}
         >
-          <TouchableOpacity activeOpacity={1} >
+          <TouchableOpacity activeOpacity={1}>
             <LinearGradient
               colors={
-                isNightMode ? ["#1A1A1A", "#000000"] : ["rgba(0, 0, 0, 0.8)", "rgba(0, 0, 0, 0.8)"]
+                isNightMode
+                  ? ["#1A1A1A", "#000000"]
+                  : ["rgba(0, 0, 0, 0.8)", "rgba(0, 0, 0, 0.8)"]
               }
               style={currentStyles.modalContent}
             >
@@ -283,7 +258,10 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                   style={currentStyles.searchIcon}
                 />
                 <TextInput
-                  style={[currentStyles.searchInput, { color: isNightMode ? '#fff' : '#000' }]}
+                  style={[
+                    currentStyles.searchInput,
+                    { color: isNightMode ? "#fff" : "#000" },
+                  ]}
                   placeholder={t("dotIndicator.searchPlaceholder")}
                   placeholderTextColor="gray"
                   value={searchTerm}
@@ -292,58 +270,64 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
               </View>
 
               <FlatList
-  data={filteredAttendees}
-  keyExtractor={(item) => item.uid || item.username}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-    onPress={() => handleUserPress(item.uid)} // Reutilizamos handleUserPress
-    style={currentStyles.attendeeItem}
-  >
-      {/* Imagen de perfil, clic accede a las historias */}
-      <TouchableOpacity
-        onPress={() => handleUserPress(item.uid)} // Manejo de historias
-        style={currentStyles.attendeeImageContainer}
-      >
-        <Image
-          source={{
-            uri: item.profileImage || "https://via.placeholder.com/150",
-          }}
-          style={[
-            currentStyles.attendeeImage,
-            item.hasStories &&
-              (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
-                ...currentStyles.unseenStoryCircle,
-                borderColor: isNightMode ? "white" : "black",
-              },
-          ]}
-          cachePolicy="memory-disk"
-        />
-      </TouchableOpacity>
+                data={filteredAttendees}
+                keyExtractor={(item) => item.uid || item.username}
+                renderItem={({ item }) => (
+                  <View style={currentStyles.attendeeItem}>
+                    {/* Imagen de perfil: clic accede a las historias */}
+                    <TouchableOpacity
+                      onPress={() => handlePress(item.uid, false)} // No es texto, acceso a historias
+                      style={currentStyles.attendeeImageContainer}
+                    >
+                      <Image
+                        source={{
+                          uri:
+                            item.profileImage ||
+                            "https://via.placeholder.com/150",
+                        }}
+                        style={[
+                          currentStyles.attendeeImage,
+                          item.hasStories &&
+                            (!item.isPrivate ||
+                              (item.isPrivate && item.isFriend)) && {
+                              ...currentStyles.unseenStoryCircle,
+                              borderColor: isNightMode ? "white" : "black",
+                            },
+                        ]}
+                        cachePolicy="memory-disk"
+                      />
+                    </TouchableOpacity>
 
-      {/* Nombre del usuario */}
-      <Text style={currentStyles.attendeeName}>{item.username}</Text>
-    </TouchableOpacity>
-  )}
-/>
+                    {/* Texto del usuario: clic redirige al perfil */}
+                    <TouchableOpacity
+    onPress={() => navigateToUserProfile(item.uid)} // Redirige al perfil
+>
+    <Text style={currentStyles.attendeeName}>
+        {item.username}
+    </Text>
+</TouchableOpacity>
+                  </View>
+                )}
+              />
 
-{isModalVisible && (
-    <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={false}
-    >
-        <StoryViewer
-            stories={selectedStories}
-            initialIndex={0}
-            onClose={async () => {
-                setIsModalVisible(false);
-                await checkStories();
-            }}
-            unseenStories={{}}
-            navigation={navigation} 
-        />
-    </Modal>
-)}
+              {isModalVisible && (
+                <Modal
+                  visible={isModalVisible}
+                  animationType="slide"
+                  transparent={false}
+                >
+                  <StoryViewer
+                    stories={selectedStories}
+                    initialIndex={0}
+                    onClose={async () => {
+                      setIsModalVisible(false);
+                      await checkStories();
+                    }}
+                    unseenStories={{}}
+                    navigation={navigation}
+                  />
+                </Modal>
+              )}
             </LinearGradient>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -416,7 +400,7 @@ const baseStyles = {
   },
   searchIcon: {
     marginRight: 10,
-    color: '#3e3d3d'
+    color: "#3e3d3d",
   },
   searchInput: {
     flex: 1,
