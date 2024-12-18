@@ -161,31 +161,33 @@ export default function UserProfile({ route, navigation }) {
 
   const handleToggleFriendshipStatus = async () => {
     setIsProcessing(true);
-  
+
     // Actualización optimista
     const newFriendshipStatus = !friendshipStatus;
     const newPendingRequest = !pendingRequest;
-  
+
     setFriendshipStatus(newFriendshipStatus);
     setPendingRequest(newPendingRequest);
-  
+
     try {
       // Realiza la actualización real en el backend
-      const { friendshipStatus: updatedFriendshipStatus, pendingRequest: updatedPendingRequest } =
-        await toggleUserStatus({
-          user,
-          selectedUser,
-          friendCount,
-          t,
-          friendshipStatus,
-        });
-  
+      const {
+        friendshipStatus: updatedFriendshipStatus,
+        pendingRequest: updatedPendingRequest,
+      } = await toggleUserStatus({
+        user,
+        selectedUser,
+        friendCount,
+        t,
+        friendshipStatus,
+      });
+
       // Actualiza nuevamente con la respuesta real si es necesario
       setFriendshipStatus(updatedFriendshipStatus);
       setPendingRequest(updatedPendingRequest);
     } catch (error) {
       console.error("Error actualizando estado de amistad:", error);
-  
+
       // Revertir el estado si ocurre un error
       setFriendshipStatus(!newFriendshipStatus);
       setPendingRequest(!newPendingRequest);
@@ -193,9 +195,6 @@ export default function UserProfile({ route, navigation }) {
       setIsProcessing(false);
     }
   };
-  
-  
-  
 
   useEffect(() => {
     checkHiddenStatus({ user, selectedUser, setHideStories, setHideMyStories });
@@ -385,11 +384,7 @@ export default function UserProfile({ route, navigation }) {
               onPress={() => navigation.goBack()}
               accessibilityLabel={t("userProfile.backButton")}
             >
-              <Ionicons
-                name="arrow-back"
-                size={27}
-                color="white"
-              />
+              <Ionicons name="arrow-back" size={27} color="white" />
             </TouchableOpacity>
           )}
           <ScrollView
@@ -458,27 +453,30 @@ export default function UserProfile({ route, navigation }) {
                                 </View>
                               </View>
                               <View style={styles.iconsContainer}>
-                              <TouchableOpacity
-  style={styles.iconButton}
-  onPress={handleToggleFriendshipStatus}
-  disabled={isProcessing}
->
-  {isProcessing ? (
-    <ActivityIndicator size="small" color="#fff" />
-  ) : (
-    <AntDesign
-      name={
-        friendshipStatus
-          ? "deleteuser"
-          : pendingRequest
-          ? "clockcircle"
-          : "adduser"
-      }
-      size={27}
-      color="white"
-    />
-  )}
-</TouchableOpacity>
+                                <TouchableOpacity
+                                  style={styles.iconButton}
+                                  onPress={handleToggleFriendshipStatus}
+                                  disabled={isProcessing}
+                                >
+                                  {isProcessing ? (
+                                    <ActivityIndicator
+                                      size="small"
+                                      color="#fff"
+                                    />
+                                  ) : (
+                                    <AntDesign
+                                      name={
+                                        friendshipStatus
+                                          ? "deleteuser"
+                                          : pendingRequest
+                                          ? "clockcircle"
+                                          : "adduser"
+                                      }
+                                      size={27}
+                                      color="white"
+                                    />
+                                  )}
+                                </TouchableOpacity>
 
                                 <TouchableOpacity
                                   style={styles.iconButton}
@@ -551,7 +549,6 @@ export default function UserProfile({ route, navigation }) {
                 }
                 contentStyle={styles.menuContent}
               >
-              
                 <Menu.Item
                   onPress={() => {
                     handleBlockUser({ user, selectedUser, t }); // Llamar a la nueva función

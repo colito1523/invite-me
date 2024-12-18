@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingVertical: isSmallScreen ? 10 : isMediumScreen ? 13 : 30, // Diferentes márgenes según la categoría
+    paddingVertical: isSmallScreen ? 10 : isMediumScreen ? 13 : 15, // Diferentes márgenes según la categoría
     paddingHorizontal: 20,
     borderRadius: 20,
     margin: 5,

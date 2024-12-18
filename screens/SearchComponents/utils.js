@@ -206,7 +206,7 @@ export const sendFriendRequest = async (user, setStatus) => {
       // Request already exists
     }
   } else {
-    Alert.alert("Already friends", "You are already friends with this user.");
+    Alert.alert(t('alreadyFriends'), t('alreadyFriendsMessage'));
   }
 };
 

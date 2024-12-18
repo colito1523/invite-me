@@ -43,18 +43,18 @@ export const styles = StyleSheet.create({
     },
     nameContainer: {
       position: "absolute",
-      top: isSmallScreen ? 510 : isMediumScreen ? 580 : 80, // Márgenes dinámicos
+      top: isSmallScreen ? 510 : isMediumScreen ? 580 : 700, // Márgenes dinámicos
       left: 20,
       right: 20,
       zIndex: 10,
     },
     name: {
-      fontSize: isSmallScreen ? 19 : isMediumScreen ? 25 : 25, // Márgenes dinámicos
+      fontSize: isSmallScreen ? 19 : isMediumScreen ? 25 : 30, // Márgenes dinámicos
       fontWeight: "bold",
       color: "white",
     },
     friendCountText: {
-      fontSize: isSmallScreen ? 19 : isMediumScreen ? 28 : 28, // Márgenes dinámicos
+      fontSize: isSmallScreen ? 19 : isMediumScreen ? 28 : 30, // Márgenes dinámicos
       color: "white",
       fontWeight: "bold",
       marginTop: 5,
@@ -91,7 +91,7 @@ export const styles = StyleSheet.create({
       borderRadius: 20,
       justifyContent: "center",
       alignItems: "center",
-      marginBottom: isSmallScreen ? 10 : isMediumScreen ? 30 : 80, // Diferentes márgenes según la categoría
+      marginBottom: isSmallScreen ? 10 : isMediumScreen ? 30 : 40, // Diferentes márgenes según la categoría
     },
     buttonText: {
       color: "#fff",
@@ -128,7 +128,7 @@ export const styles = StyleSheet.create({
     },
     ovalText: {
       color: "white",
-      fontSize: isSmallScreen ? 12 : isMediumScreen ? 15 : 12, // Márgenes dinámicos
+      fontSize: isSmallScreen ? 12 : isMediumScreen ? 15 : 20, // Márgenes dinámicos
       fontWeight: "bold",
     },
     contentWrapper: {

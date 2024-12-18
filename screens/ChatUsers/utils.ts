@@ -1,25 +1,45 @@
-import { doc, updateDoc, getDoc } from "firebase/firestore";
-import { Alert } from "react-native";
+import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { database } from "../../config/firebase";
 
-export const muteChat = async (userId, chatId, hours, setMutedChats) => {
-  const muteUntil = new Date(Date.now() + hours * 60 * 60 * 1000);
-
+export const muteChat = async (
+  userId: string,
+  chatId: string,
+  hours: number,
+  setMutedChats: Function
+) => {
   try {
     const userRef = doc(database, "users", userId);
     const userSnapshot = await getDoc(userRef);
-    const mutedChats = userSnapshot.data()?.mutedChats || [];
+    const muteUntil = new Date();
+    muteUntil.setHours(muteUntil.getHours() + hours);
 
-    const updatedMutedChats = [
-      ...mutedChats,
-      { chatId: chatId, muteUntil },
-    ];
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data();
+      const mutedChats = userData.mutedChats || [];
 
-    await updateDoc(userRef, { mutedChats: updatedMutedChats });
-    setMutedChats(updatedMutedChats);
-    Alert.alert("Éxito", "El chat ha sido silenciado.");
+      // Buscar si ya existe el chatId
+      const chatIndex = mutedChats.findIndex(
+        (chat: any) => chat.chatId === chatId
+      );
+
+      if (chatIndex !== -1) {
+        // Actualizar la entrada existente
+        mutedChats[chatIndex].muteUntil = muteUntil;
+      } else {
+        // Agregar una nueva entrada si no existe
+        mutedChats.push({ chatId, muteUntil });
+      }
+
+      // Actualizar en Firestore
+      await updateDoc(userRef, {
+        mutedChats,
+      });
+
+      setMutedChats(mutedChats);
+    } else {
+      console.error("Usuario no encontrado");
+    }
   } catch (error) {
     console.error("Error al silenciar el chat:", error);
-    Alert.alert("Error", "No se pudo silenciar el chat.");
   }
 };

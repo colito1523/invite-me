@@ -343,6 +343,11 @@
     "on": "el"
   },
 
+  "searchIndex": {
+    
+  
+  },
+
   "_comment_Login.js": "Login.js",
 
   "accessPrivately": "Iniciar Sesion",

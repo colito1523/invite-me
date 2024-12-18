@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
   },
   nameContainer: {
     position: "absolute",
-    top: isSmallScreen ? 510 : isMediumScreen ? 630 : 630, // Márgenes dinámicos
+    top: isSmallScreen ? 510 : isMediumScreen ? 630 : 750, // Márgenes dinámicos
     left: 20,
     right: 20,
     zIndex: 10,
@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   name: {
-    fontSize: isSmallScreen ? 21 : isMediumScreen ? 25 : 25, // Márgenes dinámicos
+    fontSize: isSmallScreen ? 21 : isMediumScreen ? 25 : 30, // Márgenes dinámicos
     fontWeight: "bold",
     color: "white",
     marginRight: 10, // Add some space between the name and the button
@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   number: {
-    fontSize: isSmallScreen ? 19 : isMediumScreen ? 26 : 26, // Márgenes dinámicos,
+    fontSize: isSmallScreen ? 19 : isMediumScreen ? 26 : 30, // Márgenes dinámicos,
     fontWeight: "bold",
   },
   rectanglesContainer: {

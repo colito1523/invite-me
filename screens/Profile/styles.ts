@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     },
     nameContainer: {
       position: "absolute",
-      top: isSmallScreen ? 550 : isMediumScreen ? 580 : 0, // Márgenes dinámicos
+      top: isSmallScreen ? 550 : isMediumScreen ? 580 : 700, // Márgenes dinámicos
       left: 20,
       right: 20,
       zIndex: 10,
@@ -203,7 +203,7 @@ export const styles = StyleSheet.create({
     },
     ovalWrapper: {
       flex: 1,
-      marginBottom:isSmallScreen ? 0 : isMediumScreen ? 80 : 120, // Márgenes dinámicos
+      marginBottom:isSmallScreen ? 0 : isMediumScreen ? 80 : 80, // Márgenes dinámicos
     },
     iconsContainer: {
       flexDirection: "column",
@@ -211,7 +211,7 @@ export const styles = StyleSheet.create({
       alignItems: "flex-end",
       marginRight: 10,
       gap: 10,
-      marginBottom: isSmallScreen ? 0 : isMediumScreen ? 50 : 120,
+      marginBottom: isSmallScreen ? 0 : isMediumScreen ? 50 : 60,
     },
     iconButton: {
       borderRadius: 20,
