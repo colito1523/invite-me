@@ -234,8 +234,19 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
-const handleDeleteEvent = () => {
-  handleDeletePrivateEvent({ box, setMenuVisible, navigation });
+const handleDeleteEvent = async () => {
+  try {
+    setIsProcessing(true);
+    const eventRef = doc(database, "EventsPriv", box.id || box.title);
+    await deleteDoc(eventRef);
+    navigation.navigate("Home", { refresh: true });
+    Alert.alert(t("indexBoxDetails.succes"), t("indexBoxDetails.eventDeleteSuccess"));
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.eventDeleteError"));
+  } finally {
+    setIsProcessing(false);
+  }
 };
   
 
@@ -403,7 +414,7 @@ const handleDeleteEvent = () => {
         ...updatedData,
       }));
   
-      Alert.alert(t("indexBoxDetails.success"), t("indexBoxDetails.eventUpdateSuccess"));
+      Alert.alert(t("indexBoxDetails.succes"), t("indexBoxDetails.eventUpdateSuccess"));
       setEditModalVisible(false);
     } catch (error) {
       console.error("Error al actualizar el evento:", error);
