@@ -19,6 +19,7 @@ import { database, auth } from '../../config/firebase'; // Asegúrate de importa
 import { Image } from 'expo-image';
 import StoryViewer from '../Stories/StoryViewer';
 import { useTranslation } from "react-i18next";
+import { handleUserPress } from "./utils";
 
 const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [blockedUsers, setBlockedUsers] = useState([]);
@@ -174,99 +175,20 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleUserPress = async (uid) => {
-    if (blockedUsers.includes(uid)) {
-      Alert.alert(t("dotIndicatorBoxDetails.blockedUserError"));
-      return;
-    }
-
-    const userRef = doc(database, "users", auth.currentUser.uid);
-    const userDoc = await getDoc(userRef);
-    const userData = userDoc.data();
-    const hideStoriesFrom = userData?.hideStoriesFrom || [];
-
-    if (hideStoriesFrom.includes(uid)) {
-      const targetUserDoc = await getDoc(doc(database, "users", uid));
-      const targetUserData = targetUserDoc.data();
-      navigation.navigate("UserProfile", { selectedUser: { id: uid, ...targetUserData } });
-      return;
-    }
-  
-    if (auth.currentUser?.uid === uid) {
-      navigation.navigate("Profile", { selectedUser: auth.currentUser });
-      return;
-    }
-  
-    try {
-      const userDoc = await getDoc(doc(database, "users", uid));
-      if (!userDoc.exists()) {
-        Alert.alert(t("dotIndicatorBoxDetails.noDetailsFound"));
-        return;
-      }
-  
-      const userData = userDoc.data();
-      const isPrivate = userData?.isPrivate || false;
-      const hideStoriesFrom = userData?.hideStoriesFrom || [];
-  
-      // Check if the current user is in the hideStoriesFrom array
-      
-  
-      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-      const friendQuery = query(friendsRef, where("friendId", "==", uid));
-      const friendSnapshot = await getDocs(friendQuery);
-      const isFriend = !friendSnapshot.empty;
-  
-      if (isPrivate && !isFriend) {
-        navigation.navigate("UserProfile", {
-          selectedUser: {
-            id: uid,
-            username: userData.username || t("dotIndicatorBoxDetails.unknownUser"),
-            firstName: userData.firstName || t("dotIndicatorBoxDetails.unknownUser"),
-            lastName: userData.lastName || t("dotIndicatorBoxDetails.unknownUser"),
-            profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-            isPrivate: userData.isPrivate || false,
-          },
-        });
-        return;
-      }
-  
-      const storiesRef = collection(database, "users", uid, "stories");
-      const storiesSnapshot = await getDocs(storiesRef);
-      const now = new Date();
-      const activeStories = storiesSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt,
-          expiresAt: doc.data().expiresAt,
-        }))
-        .filter((story) => new Date(story.expiresAt.toDate()) > now);
-  
-      if (activeStories.length > 0) {
-        setSelectedStories([
-          {
-            uid,
-    username: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
-    profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-    userStories: activeStories,
-          },
-        ]);
-        setIsModalVisible(true);
-      } else {
-        navigation.navigate("UserProfile", { selectedUser: userData });
-      }
-    } catch (error) {
-      console.error(t("dotIndicatorBoxDetails.errorHandlingUserClick"), error);
-      Alert.alert(t("dotIndicatorBoxDetails.errorFetchingUserDetails"));
-    }
+  const handlePress = async (uid) => {
+    await handleUserPress({
+      uid,
+      navigation,
+      blockedUsers,
+      t,
+      setSelectedStories,
+      setIsModalVisible,
+    });
   };
 
   // Renderizar asistentes
   const renderItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => handleUserPress(item.uid)}
-      style={styles.itemContainer}
-    >
+    <TouchableOpacity onPress={() => handlePress(item.uid)} style={styles.itemContainer}>
       <View
         style={[
           styles.imageContainer,
