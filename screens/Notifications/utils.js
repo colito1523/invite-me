@@ -34,11 +34,6 @@ export const markNotificationsAsSeen = async (params) => {
 export const handleDeleteNotification = (params) => {
   const { notificationId, setNotifications, t } = params;
 
-  if (typeof t !== 'function') {
-    console.error("Translation function 't' is not defined or not a function.");
-    return;
-  }
-
   Alert.alert(
     t("notifications.deleteNotificationTitle"),
     t("notifications.deleteNotificationMessage"),
@@ -62,7 +57,7 @@ export const handleDeleteNotification = (params) => {
               t("notifications.notificationDeletedMessage")
             );
           } catch (error) {
-            console.error("Error deleting notification:", error);
+            console.error("Error al eliminar la notificación:", error);
             Alert.alert(
               t("notifications.deleteNotificationErrorTitle"),
               t("notifications.deleteNotificationErrorMessage")
@@ -74,6 +69,8 @@ export const handleDeleteNotification = (params) => {
     { cancelable: true }
   );
 };
+
+
 
 export const updateNotifications = (params) => {
   const { newNotifications, setNotifications } = params;
@@ -509,7 +506,7 @@ export const handleAcceptPrivateEvent = async (params) => {
     await setDoc(notifRef, {
       ...item,
       status: "confirmed",
-      message: "¡Has aceptado la invitación al evento privado!",
+      message: t("notifications.eventConfirmationMessage"), 
       timestamp: new Date(),
       type: "eventConfirmation",
     });
@@ -521,7 +518,7 @@ export const handleAcceptPrivateEvent = async (params) => {
           ? {
               ...notif,
               status: "confirmed",
-              message: "¡Has aceptado la invitación al evento privado!",
+              message: t("notifications.eventConfirmationMessage"),
               timestamp: new Date(),
               type: "eventConfirmation",
             }
@@ -541,7 +538,7 @@ export const handleAcceptPrivateEvent = async (params) => {
 };
 
 export const handleRejectPrivateEvent = async (params) => {
-  const { item, setNotifications } = params;
+  const { item, setNotifications, t } = params;
 
   try {
     // Eliminar la notificación
@@ -560,7 +557,7 @@ export const handleRejectPrivateEvent = async (params) => {
               ? {
                   ...notif,
                   status: "confirmed",
-                  message: "¡Has aceptado la invitación al evento privado!",
+                  message: t("notifications.eventPrivateConfirmationMessage"),
                   timestamp: new Date(),
                   type: "eventConfirmation",
               }
@@ -575,7 +572,7 @@ export const handleRejectPrivateEvent = async (params) => {
 };
 
 export const handleAcceptGeneralEvent = async (params) => {
-  const { item, setLoadingEventId, setNotifications } = params;
+  const { item, setLoadingEventId, setNotifications, t} = params;
 
   try {
     setLoadingEventId(item.id);
@@ -629,7 +626,7 @@ export const handleAcceptGeneralEvent = async (params) => {
       const notifRef = doc(database, "users", user.uid, "notifications", item.id);
       await updateDoc(notifRef, {
         status: "confirmed",
-        message: "¡Has aceptado la invitación al evento!", // Texto genérico
+        message: t("notifications.eventGeneralConfirmationMessage"), // Texto genérico
         timestamp: new Date(),
         type: "eventConfirmation",
       });
@@ -641,7 +638,7 @@ export const handleAcceptGeneralEvent = async (params) => {
             ? {
                 ...notif,
                 status: "confirmed",
-                message: "¡Has aceptado la invitación al evento!", // Reflejar el mensaje genérico
+                message: t("notifications.eventGeneralConfirmationMessage"), // Reflejar el mensaje genérico
                 timestamp: new Date(),
                 type: "eventConfirmation",
               }

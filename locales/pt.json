@@ -318,6 +318,17 @@
 
 
   "notifications": {
+    "deleteNotificationTitle": "Excluir notificação",
+  "deleteNotificationMessage": "Tem certeza de que deseja excluir esta notificação?",
+  "cancel": "Cancelar",
+  "delete": "Excluir",
+  "notificationDeletedTitle": "Notificação excluída",
+  "notificationDeletedMessage": "A notificação foi excluída.",
+  "deleteNotificationErrorTitle": "Erro",
+  "deleteNotificationErrorMessage": "Não foi possível excluir a notificação. Tente novamente.",
+    "eventConfirmationMessage": "You have accepted the private event invitation!",
+    "eventPrivateConfirmationMessage": "Você aceitou o convite para o evento privado!",
+  "eventGeneralConfirmationMessage": "Você aceitou o convite para o evento!",
     "title": "Notificações",
     "error": "Erro",
     "userDetailsNotFound": "Detalhes do usuário não encontrados.",

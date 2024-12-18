@@ -273,7 +273,8 @@ export default function NotificationsComponent() {
                 style={[styles.button, styles.rejectButton]}
                 onPress={() => handleRejectPrivateEvent({
                   item,
-                  setNotifications
+                  setNotifications,
+                  t: (key) => i18n.t(key) // o tu implementación de traducción
                 })}
               >
                 <Text style={styles.buttonText}>{t("notifications.reject")}</Text>
@@ -454,12 +455,11 @@ export default function NotificationsComponent() {
     return (
       item.status !== "rejected" && (
         <TouchableOpacity
-          onPress={handleNotificationPress}
-          onLongPress={() => handleDeleteNotification({
-            notificationId: item.id,
-            setNotifications,
-            targetUserId: item.fromId // Pass the targetUserId parameter
-          })}
+        onLongPress={() => handleDeleteNotification({
+          notificationId: item.id, // Asegúrate de pasar el ID de la notificación
+          setNotifications,
+          t
+        })}
         >
           <View
             style={[

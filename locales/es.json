@@ -323,6 +323,19 @@
   },
 
   "notifications": {
+
+
+    "deleteNotificationTitle": "Eliminar notificación",
+    "deleteNotificationMessage": "¿Estás seguro de que deseas eliminar esta notificación?",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "notificationDeletedTitle": "Notificación eliminada",
+    "notificationDeletedMessage": "La notificación ha sido eliminada.",
+    "deleteNotificationErrorTitle": "Error",
+    "deleteNotificationErrorMessage": "No se pudo eliminar la notificación. Inténtalo de nuevo.",
+     "eventConfirmationMessage": "¡Has aceptado la invitación al evento privado!",
+     "eventPrivateConfirmationMessage": "¡Has aceptado la invitación al evento privado!",
+  "eventGeneralConfirmationMessage": "¡Has aceptado la invitación al evento!",
     "title": "Notificaciones",
     "error": "Error",
     "userDetailsNotFound": "No se encontraron detalles para este usuario.",

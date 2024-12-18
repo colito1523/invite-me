@@ -317,6 +317,17 @@
   },
 
   "notifications": {
+    "deleteNotificationTitle": "Delete Notification",
+    "deleteNotificationMessage": "Are you sure you want to delete this notification?",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "notificationDeletedTitle": "Notification Deleted",
+    "notificationDeletedMessage": "The notification has been deleted.",
+    "deleteNotificationErrorTitle": "Error",
+    "deleteNotificationErrorMessage": "Failed to delete the notification. Please try again.",
+    "eventConfirmationMessage": "You have accepted the private event invitation!",
+    "eventPrivateConfirmationMessage": "You have accepted the private event invitation!",
+  "eventGeneralConfirmationMessage": "You have accepted the event invitation!",
     "title": "Notifications",
     "error": "Error",
     "userDetailsNotFound": "User details not found.",
