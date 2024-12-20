@@ -289,7 +289,7 @@ export default function Notes() {
           fromId: user.uid,
           fromName: userData.username,
           fromImage: userData.photoUrls[0],
-          message: t("notes.likedYourNote"),
+          messageKey: "notes.likedYourNote", // Envía la clave de traducción
           timestamp: new Date(),
           noteText: note.text,
           seen: false,

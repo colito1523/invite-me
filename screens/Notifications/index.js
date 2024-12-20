@@ -24,7 +24,7 @@ import { format, isToday, isYesterday } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
-import boxInfo from "../../src/data/boxInfo"
+import boxInfo from "../../src/data/boxInfo";
 import {
   markNotificationsAsSeen,
   handleDeleteNotification,
@@ -37,7 +37,7 @@ import {
   handleAcceptPrivateEvent,
   handleRejectPrivateEvent,
   handleAcceptGeneralEvent,
-  handleRejectGeneralEvent
+  handleRejectGeneralEvent,
 } from "./utils";
 import { styles } from "./styles";
 
@@ -97,7 +97,9 @@ export default function NotificationsComponent() {
           setNotifications((prevNotifications) => {
             const mergedNotifications = [...prevNotifications];
             notifList.forEach((newNotif) => {
-              const index = mergedNotifications.findIndex((n) => n.id === newNotif.id);
+              const index = mergedNotifications.findIndex(
+                (n) => n.id === newNotif.id
+              );
               if (index !== -1) {
                 mergedNotifications[index] = {
                   ...mergedNotifications[index],
@@ -107,7 +109,9 @@ export default function NotificationsComponent() {
                 mergedNotifications.push(newNotif);
               }
             });
-            return mergedNotifications.sort((a, b) => b.timestamp - a.timestamp);
+            return mergedNotifications.sort(
+              (a, b) => b.timestamp - a.timestamp
+            );
           });
         }
       );
@@ -129,7 +133,7 @@ export default function NotificationsComponent() {
 
           updateNotifications({
             newNotifications: requestList,
-            setNotifications
+            setNotifications,
           });
         }
       );
@@ -152,10 +156,9 @@ export default function NotificationsComponent() {
     checkTime();
     const interval = setInterval(checkTime, 60000);
 
-    fetchNotifications()
+    fetchNotifications();
 
     return () => clearInterval(interval);
-
   }, []);
 
   useFocusEffect(
@@ -167,7 +170,13 @@ export default function NotificationsComponent() {
         headerTintColor: isNightMode ? "#fff" : "#000",
         headerTitle: "", // Elimina el título por defecto
         headerLeft: () => (
-          <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 10 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginLeft: 10,
+            }}
+          >
             <Ionicons
               name="arrow-back"
               size={20}
@@ -175,7 +184,13 @@ export default function NotificationsComponent() {
               onPress={() => navigation.goBack()}
               style={{ marginRight: 10 }}
             />
-            <Text style={{ color: isNightMode ? "#fff" : "#000", fontSize: 18, fontWeight: "bold" }}>
+            <Text
+              style={{
+                color: isNightMode ? "#fff" : "#000",
+                fontSize: 18,
+                fontWeight: "bold",
+              }}
+            >
               {t("notifications.title")}
             </Text>
           </View>
@@ -184,15 +199,13 @@ export default function NotificationsComponent() {
     }, [isNightMode, navigation])
   );
 
-
   useFocusEffect(
     useCallback(() => {
-
       markNotificationsAsSeen({
         user,
         database,
         notifications,
-        setNotifications
+        setNotifications,
       });
     }, [user, notifications])
   );
@@ -204,80 +217,95 @@ export default function NotificationsComponent() {
   }, [fetchNotifications]);
 
   const renderPrivateEventNotification = ({ item }) => {
-
     const eventDate = item.date; // Use the date field instead of timestamp
     return (
       <TouchableOpacity
-            onPress={() => {
-                console.log("Navegando a BoxDetails con los siguientes datos:", {
-                    title: item.eventTitle,
-                    imageUrl: item.eventImage,
-                    date: eventDate,
-                    isPrivate: true,
-                    description: item.description,
-                    day: item.day,
-                    hour: item.hour,
-                    address: item.address,
-                    phoneNumber: item.phoneNumber,
-                    eventId: item.eventId,
-                    Admin: item.Admin, // Agregar Admin
-                    category: item.eventCategory, // Agregar eventCategory
-                });
-                navigation.navigate("BoxDetails", {
-                  box: {
-                    title: item.eventTitle,
-                    imageUrl: item.eventImage,
-                    date: eventDate,
-                    isPrivate: true,
-                    description: item.description,
-                    day: item.day,
-                    hour: item.hour,
-                    address: item.address,
-                    phoneNumber: item.phoneNumber,
-                    eventId: item.eventId,
-                    category: "EventoParaAmigos", // Agregar la categoría aquí
-                  },
-                  selectedDate: eventDate,
-                  isFromNotification: true,
-                });
-            }}
-            style={[styles.notificationContainer]}
-        >
+        onPress={() => {
+          console.log("Navegando a BoxDetails con los siguientes datos:", {
+            title: item.eventTitle,
+            imageUrl: item.eventImage,
+            date: eventDate,
+            isPrivate: true,
+            description: item.description,
+            day: item.day,
+            hour: item.hour,
+            address: item.address,
+            phoneNumber: item.phoneNumber,
+            eventId: item.eventId,
+            Admin: item.Admin, // Agregar Admin
+            category: item.eventCategory, // Agregar eventCategory
+          });
+          navigation.navigate("BoxDetails", {
+            box: {
+              title: item.eventTitle,
+              imageUrl: item.eventImage,
+              date: eventDate,
+              isPrivate: true,
+              description: item.description,
+              day: item.day,
+              hour: item.hour,
+              address: item.address,
+              phoneNumber: item.phoneNumber,
+              eventId: item.eventId,
+              category: "EventoParaAmigos", // Agregar la categoría aquí
+              Admin: item.Admin, // Agregar Admin
+            },
+            selectedDate: eventDate,
+            isFromNotification: true,
+          });
+        }}
+        style={[styles.notificationContainer]}
+      >
         <View style={styles.notificationContent}>
-          <Image
-            source={{ uri: item.fromImage }}
-            style={styles.profileImage}
-          />
+          <Image source={{ uri: item.fromImage }} style={styles.profileImage} />
           <View style={styles.textContainer}>
-            <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
-              <Text style={[styles.boldText]}>{item.fromName}</Text> {t("notifications.invitedToEvent", { eventTitle: item.eventTitle })} {t("notifications.on")} <Text style={[styles.boldText]}>{eventDate}</Text>
+            <Text
+              style={[
+                styles.notificationText,
+                { color: isNightMode ? "#fff" : "#000" },
+              ]}
+            >
+              <Text style={[styles.boldText]}>{item.fromName}</Text>{" "}
+              {t("notifications.invitedToEvent", {
+                eventTitle: item.eventTitle,
+              })}{" "}
+              {t("notifications.on")}{" "}
+              <Text style={[styles.boldText]}>{eventDate}</Text>
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.button, styles.acceptButton]}
-                onPress={() => handleAcceptPrivateEvent({
-                  item,
-                  setNotifications,
-                  setLoadingEventId,
-                  t
-                })}
+                onPress={() =>
+                  handleAcceptPrivateEvent({
+                    item,
+                    setNotifications,
+                    setLoadingEventId,
+                    t,
+                  })
+                }
                 disabled={loadingEventId === item.id}
               >
                 {loadingEventId === item.id ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>{t("notifications.accept")}</Text>
+                  <Text style={styles.buttonText}>
+                    {t("notifications.accept")}
+                  </Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.rejectButton]}
-                onPress={() => handleRejectPrivateEvent({
-                  item,
-                  setNotifications,
-                  t: (key) => i18n.t(key) // o tu implementación de traducción
-                })}
+                onPress={() =>
+                  handleRejectPrivateEvent({
+                    item,
+                    setNotifications,
+                    t: (key) => i18n.t(key), // o tu implementación de traducción
+                  })
+                }
               >
-                <Text style={styles.buttonText}>{t("notifications.reject")}</Text>
+                <Text style={styles.buttonText}>
+                  {t("notifications.reject")}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -287,11 +315,14 @@ export default function NotificationsComponent() {
   };
 
   const renderGeneralEventNotification = ({ item }) => {
-    const eventDate = typeof item.eventDate === 'object' && item.eventDate.seconds
-      ? new Date(item.eventDate.seconds * 1000).toLocaleString()
-      : item.eventDate; // Convert timestamp to string if necessary
+    const eventDate =
+      typeof item.eventDate === "object" && item.eventDate.seconds
+        ? new Date(item.eventDate.seconds * 1000).toLocaleString()
+        : item.eventDate; // Convert timestamp to string if necessary
     const matchedBox = boxInfo.find((box) => box.title === item.eventTitle);
-    const eventImage = matchedBox ? matchedBox.path : "https://via.placeholder.com/150";
+    const eventImage = matchedBox
+      ? matchedBox.path
+      : "https://via.placeholder.com/150";
     return (
       <TouchableOpacity
         onPress={() => {
@@ -312,39 +343,54 @@ export default function NotificationsComponent() {
         style={[styles.notificationContainer]}
       >
         <View style={styles.notificationContent}>
-          <Image
-            source={{ uri: item.fromImage }}
-            style={styles.profileImage}
-          />
+          <Image source={{ uri: item.fromImage }} style={styles.profileImage} />
           <View style={styles.textContainer}>
-            <Text style={[styles.notificationText, { color: isNightMode ? "#fff" : "#000" }]}>
-              <Text style={[styles.boldText]}>{item.fromName}</Text> {t("notifications.invitedToEvent", { eventTitle: item.eventTitle })} {t("notifications.on")} <Text style={[styles.boldText]}>{eventDate}</Text>
+            <Text
+              style={[
+                styles.notificationText,
+                { color: isNightMode ? "#fff" : "#000" },
+              ]}
+            >
+              <Text style={[styles.boldText]}>{item.fromName}</Text>{" "}
+              {t("notifications.invitedToEvent", {
+                eventTitle: item.eventTitle,
+              })}{" "}
+              {t("notifications.on")}{" "}
+              <Text style={[styles.boldText]}>{eventDate}</Text>
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.button, styles.acceptButton]}
-                onPress={() => handleAcceptGeneralEvent({
-                  item,
-                  setNotifications,
-                  setLoadingEventId,
-                  t
-                })}
+                onPress={() =>
+                  handleAcceptGeneralEvent({
+                    item,
+                    setNotifications,
+                    setLoadingEventId,
+                    t,
+                  })
+                }
                 disabled={loadingEventId === item.id}
               >
                 {loadingEventId === item.id ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>{t("notifications.accept")}</Text>
+                  <Text style={styles.buttonText}>
+                    {t("notifications.accept")}
+                  </Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.rejectButton]}
-                onPress={() => handleRejectGeneralEvent({
-                  item,
-                  setNotifications
-                })}
+                onPress={() =>
+                  handleRejectGeneralEvent({
+                    item,
+                    setNotifications,
+                  })
+                }
               >
-                <Text style={styles.buttonText}>{t("notifications.reject")}</Text>
+                <Text style={styles.buttonText}>
+                  {t("notifications.reject")}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -354,8 +400,6 @@ export default function NotificationsComponent() {
   };
 
   const renderNotificationItem = ({ item }) => {
-
-
     const isFriendRequest =
       item.type === "friendRequest" &&
       item.status !== "accepted" &&
@@ -388,7 +432,6 @@ export default function NotificationsComponent() {
     }
 
     const handleNotificationPress = () => {
-
       if (isEventInvitation) {
         if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
           navigation.navigate("BoxDetails", {
@@ -441,7 +484,7 @@ export default function NotificationsComponent() {
         handleUserPress({
           uid: item.fromId,
           navigation,
-          t
+          t,
         });
       }
     };
@@ -457,11 +500,13 @@ export default function NotificationsComponent() {
     return (
       item.status !== "rejected" && (
         <TouchableOpacity
-        onLongPress={() => handleDeleteNotification({
-          notificationId: item.id, // Asegúrate de pasar el ID de la notificación
-          setNotifications,
-          t
-        })}
+          onLongPress={() =>
+            handleDeleteNotification({
+              notificationId: item.id, // Asegúrate de pasar el ID de la notificación
+              setNotifications,
+              t,
+            })
+          }
         >
           <View
             style={[
@@ -492,117 +537,125 @@ export default function NotificationsComponent() {
                 cachePolicy="memory-disk"
                 style={styles.profileImage}
               />
-              <View style={styles.textContainer}>
-                <Text
-                  style={[
-                    styles.notificationText,
-                    { color: isNightMode ? "#fff" : "#333" },
-                  ]}
-                >
-                  {(item.type === "invitation" || item.type === "eventConfirmation") && (item.status === "accepted" || item.status === "confirmed") ? (
-                    item.message || t("notifications.acceptedInvitation", {
-                      name: item.fromName,
-                    })
-                  ) : (
-                    <>
-                      <Text
-                        style={[
-                          styles.boldText,
-                          { color: isNightMode ? "#fff" : "#000" },
-                        ]}
-                      >
-                        {item.fromName} {item.fromLastName || ""}
-                      </Text>{" "}
-                      {isFriendRequest && t("notifications.wantsToBeFriend")}
-                      {isEventInvitation &&
-                        t("notifications.invitedToEvent", {
-                          eventTitle: item.eventTitle,
-                        })}
-                      {isFriendRequestResponse &&
-                        (item.response === "accepted"
-                          ? t("notifications.nowFriends")
-                          : t("notifications.rejectedFriendRequest"))}
-                      {isLikeNotification && item.message}{" "}
-                      {/* Mostrar el mensaje de like */}
-                      {item.type === "storyLike" &&
-                        t("notifications.likedYourStory")}
-                      {isNoteLikeNotification && item.message}
-                    </>
-                  )}
-                </Text>
-                {(isFriendRequest || isEventInvitation) && (
-                  <View style={[styles.buttonContainer, styles.acceptButton]}>
-                    <TouchableOpacity
-                      disabled={loadingEventId === item.id}
-                      onPress={() =>
-                        isFriendRequest
-                          ? handleAcceptRequest({
-                            request: item,
-                            setLoadingEventId,
-                            setNotifications,
-                            t
-                          })
-                          : handleAcceptEventInvitation({
-                            notif: item,
-                            setNotifications,
-                            t
-                          })
-                      }
-                      style={[
-                        styles.acceptButton,
-                        {
-                          backgroundColor: isNightMode
-                            ? "rgba(255, 255, 255, 0.2)"
-                            : "rgba(128, 128, 128, 0.3)",
-                        },
-                      ]}
-                    >
-                      {loadingEventId === item.id ? (<ActivityIndicator size="small" color="#fff" />) : (<Text
-                        style={[
-                          styles.buttonText,
-                          { color: isNightMode ? "#fff" : "#000" },
-                        ]}
-                      >
-                        {t("notifications.accept")}
-                      </Text>)}
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      disabled={loadingEventId === item.id}
-                      onPress={() =>
-                        isFriendRequest
-                          ? handleRejectRequest({
-                            request: item,
-                            setLoadingEventId,
-                            setNotifications,
-                            t
-                          })
-                          : handleRejectEventInvitation({
-                            notif: item,
-                            setNotifications,
-                            t
-                          })
-                      }
-                      style={[
-                        styles.rejectButton,
-                        {
-                          backgroundColor: isNightMode
-                            ? "rgba(255, 255, 255, 0.2)"
-                            : "rgba(128, 128, 128, 0.3)",
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.buttonText,
-                          { color: isNightMode ? "#fff" : "#000" },
-                        ]}
-                      >
-                        {t("notifications.reject")}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
+            <View style={styles.textContainer}>
+  <Text
+    style={[
+      styles.notificationText,
+      { color: isNightMode ? "#fff" : "#333" },
+    ]}
+  >
+    {(item.type === "invitation" ||
+      item.type === "eventConfirmation") &&
+    (item.status === "accepted" || item.status === "confirmed") ? (
+      item.message ||
+      t("notifications.acceptedInvitation", {
+        name: item.fromName,
+      })
+    ) : (
+      <>
+        <Text
+          style={[
+            styles.boldText,
+            { color: isNightMode ? "#fff" : "#000" },
+          ]}
+        >
+          {item.fromName} {item.fromLastName || ""}
+        </Text>{" "}
+        {isFriendRequest && t("notifications.wantsToBeFriend")}
+        {isEventInvitation &&
+          t("notifications.invitedToEvent", {
+            eventTitle: item.eventTitle,
+          })}
+        {isFriendRequestResponse &&
+          (item.response === "accepted"
+            ? t("notifications.nowFriends")
+            : t("notifications.rejectedFriendRequest"))}
+        {isLikeNotification &&
+          t("userProfile.likedYourProfile")}
+        {item.type === "storyLike" &&
+          t("notifications.likedYourStory")}
+        {isNoteLikeNotification && t("notes.likedYourNote")}
+      </>
+    )}
+  </Text>
+  {(isFriendRequest || isEventInvitation) && (
+    <View style={[styles.buttonContainer, styles.acceptButton]}>
+      <TouchableOpacity
+        disabled={loadingEventId === item.id}
+        onPress={() =>
+          isFriendRequest
+            ? handleAcceptRequest({
+                request: item,
+                setLoadingEventId,
+                setNotifications,
+                t,
+              })
+            : handleAcceptEventInvitation({
+                notif: item,
+                setNotifications,
+                t,
+              })
+        }
+        style={[
+          styles.acceptButton,
+          {
+            backgroundColor: isNightMode
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(128, 128, 128, 0.3)",
+          },
+        ]}
+      >
+        {loadingEventId === item.id ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text
+            style={[
+              styles.buttonText,
+              { color: isNightMode ? "#fff" : "#000" },
+            ]}
+          >
+            {t("notifications.accept")}
+          </Text>
+        )}
+      </TouchableOpacity>
+      <TouchableOpacity
+        disabled={loadingEventId === item.id}
+        onPress={() =>
+          isFriendRequest
+            ? handleRejectRequest({
+                request: item,
+                setLoadingEventId,
+                setNotifications,
+                t,
+              })
+            : handleRejectEventInvitation({
+                notif: item,
+                setNotifications,
+                t,
+              })
+        }
+        style={[
+          styles.rejectButton,
+          {
+            backgroundColor: isNightMode
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(128, 128, 128, 0.3)",
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.buttonText,
+            { color: isNightMode ? "#fff" : "#000" },
+          ]}
+        >
+          {t("notifications.reject")}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  )}
+</View>
+
             </View>
           </View>
         </TouchableOpacity>
@@ -617,7 +670,7 @@ export default function NotificationsComponent() {
       </View>
     );
   }
-  console.log("las notis del render", notifications)
+  console.log("las notis del render", notifications);
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient

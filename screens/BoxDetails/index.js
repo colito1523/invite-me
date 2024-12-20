@@ -577,6 +577,7 @@ const handleDeleteEvent = async () => {
       status: "accepted",
       coordinates: box.coordinates || {} // Add coordinates
     };
+    
   
   
     if (isPrivateEvent) {

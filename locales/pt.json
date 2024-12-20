@@ -359,7 +359,9 @@
     "likedYourStory": "Goostou da sua história.",
     "accept": "Aceitar",
     "reject": "Rejeitar",
-    "on": "o"
+    "on": "o",
+     "alreadyInEvent": "Você já está no evento",
+     "alreadyParticipant": "Erro"
   },
 
 

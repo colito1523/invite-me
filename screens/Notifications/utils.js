@@ -726,3 +726,50 @@ export const handleCancelFriendRequestNotification = async (params) => {
     Alert.alert("Error", "No se pudo eliminar la notificación. Inténtalo de nuevo.");
   }
 };
+
+export const handleLikeNote = async (note) => {
+  try {
+    const likeRef = doc(
+      database,
+      "users",
+      note.friendId,
+      "note",
+      "current",
+      "likes",
+      user.uid
+    );
+    const likeDoc = await getDoc(likeRef);
+
+    if (likeDoc.exists()) {
+      await deleteDoc(likeRef);
+      note.isLiked = false;
+      note.likeCount--;
+    } else {
+      await setDoc(likeRef, { timestamp: new Date() });
+      note.isLiked = true;
+      note.likeCount++;
+
+      const notificationsRef = collection(
+        database,
+        "users",
+        note.friendId,
+        "notifications"
+      );
+      await addDoc(notificationsRef, {
+        type: "noteLike",
+        fromId: user.uid,
+        fromName: userData.username,
+        fromImage: userData.photoUrls[0],
+        messageKey: "notes.likedYourNote", // Envía la clave de traducción
+        timestamp: new Date(),
+        noteText: note.text,
+        seen: false,
+      });
+    }
+
+    setFriendsNotes([...friendsNotes]);
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    Alert.alert(t("notes.error"), t("notes.likeToggleError"));
+  }
+};

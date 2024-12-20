@@ -323,8 +323,6 @@
   },
 
   "notifications": {
-
-
     "deleteNotificationTitle": "Eliminar notificación",
     "deleteNotificationMessage": "¿Estás seguro de que deseas eliminar esta notificación?",
     "cancel": "Cancelar",
@@ -366,7 +364,9 @@
     "likedYourStory": "le ha dado like a tu historia.",
     "accept": "Aceptar",
     "reject": "Rechazar",
-    "on": "el"
+    "on": "el",
+    "alreadyInEvent": "Ya estás en este evento.",
+    "alreadyParticipant": "Erro"
   },
 
   "searchIndex": {

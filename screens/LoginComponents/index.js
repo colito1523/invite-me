@@ -292,7 +292,7 @@ export default function ElegantLogin({ navigation }) {
                   {t('createNewAccount')}
                 </Text>
                 <Text style={[styles.createAccountTextLarge, { color: theme.link }]}>
-                  {' Sign In'}
+                  {' Sign Up'}
                 </Text>
               </View>
             </TouchableOpacity>

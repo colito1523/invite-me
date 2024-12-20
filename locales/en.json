@@ -358,7 +358,9 @@
     "likedYourStory": "liked your story.",
     "accept": "Accept",
     "reject": "Reject",
-    "on": "on"
+    "on": "on",
+    "alreadyInEvent": "You are already in this event.",
+    "alreadyParticipant": "Error"   
   },
 
   "accessPrivately": "Log In",

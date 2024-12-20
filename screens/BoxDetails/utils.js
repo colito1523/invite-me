@@ -266,10 +266,6 @@ export const handleGeneralEventInvite = async (params) => {
       imageUrl: box.imageUrl || "https://via.placeholder.com/150"
     });
 
-    Alert.alert(
-      "Invitación enviada",
-      `Has invitado a un amigo al evento ${box.title} el día ${selectedDate}.`
-    );
   } catch (error) {
     console.error("Error al invitar al evento general:", error);
     Alert.alert("Error", "No se pudo enviar la invitación.");
