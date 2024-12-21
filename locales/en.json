@@ -231,7 +231,10 @@
     "eventDeleteSuccess": "Event deleted successfully",
     "dontPermission": "Permissions are required to access your photos",
     "saving": "Saving...",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "dontJoing": "You must join the event before inviting others",
+     "alreadyParticipantPerson": "This person are already a participant in this event.",
+     "dotnGetUserInfo": "Could not get user information."
   },
 
   "indexChatList": {

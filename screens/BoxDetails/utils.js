@@ -184,7 +184,7 @@ export const handleGeneralEventInvite = async (params) => {
   if (!user) return;
 
   if (!isEventSaved) {
-    Alert.alert("Error", "Debes unirte al evento antes de invitar a otros.");
+     Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.dontJoing'));
     return;
   }
 
@@ -193,7 +193,7 @@ export const handleGeneralEventInvite = async (params) => {
     const eventDoc = await getDoc(eventRef);
 
     if (!eventDoc.exists()) {
-      Alert.alert("Error", "El evento no existe.");
+      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.eventNotFound'));
       return;
     }
 
@@ -207,7 +207,7 @@ export const handleGeneralEventInvite = async (params) => {
     );
 
     if (existingInvitationOrAttendee) {
-      Alert.alert("Error", "Esta persona ya está invitada o asistiendo al evento.");
+      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.alreadyParticipantPerson'));
       return;
     }
 
@@ -215,7 +215,7 @@ export const handleGeneralEventInvite = async (params) => {
     const userDocSnapshot = await getDoc(userDocRef);
 
     if (!userDocSnapshot.exists()) {
-      Alert.alert("Error", "No se pudo obtener la información del usuario.");
+      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.dotnGetUserInfo'));
       return;
     }
 
@@ -268,7 +268,7 @@ export const handleGeneralEventInvite = async (params) => {
 
   } catch (error) {
     console.error("Error al invitar al evento general:", error);
-    Alert.alert("Error", "No se pudo enviar la invitación.");
+    Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.eventInviteError'));
   }
 };
 
@@ -294,7 +294,7 @@ export const handleInvite = async (params) => {
   if (!user) return;
 
   if (!isEventSaved) {
-    Alert.alert("Error", "Debes unirte al evento antes de invitar a otros.");
+    Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.dontJoing'));
     return;
   }
 
@@ -309,7 +309,8 @@ export const handleInvite = async (params) => {
     const eventDoc = await getDoc(eventRef);
 
     if (!eventDoc.exists()) {
-      Alert.alert("Error", "El evento no existe.");
+      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.eventNotFound'));
+      
       return;
     }
 
@@ -318,7 +319,7 @@ export const handleInvite = async (params) => {
     const attendees = eventData.attendees || [];
 
     if (invitedFriends.includes(friendId) || attendees.some(attendee => attendee.uid === friendId)) {
-      Alert.alert("Error", "Esta persona ya está invitada o asistiendo al evento.");
+      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.alreadyParticipantPerson'));
       return;
     }
 
@@ -414,13 +415,11 @@ export const handleInvite = async (params) => {
       timestamp: new Date(),
     });
 
-    Alert.alert(
-      t("boxDetails.invitationSent"),
-      `${t("boxDetails.invitationSentMessage")} el día ${eventData.date || selectedDate}.`
-    );
+  
   } catch (error) {
     console.error("Error al invitar al usuario:", error);
-    Alert.alert("Error", "No se pudo enviar la invitación.");
+
+    Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.eventInviteError'));
   }
 };
 
@@ -475,7 +474,7 @@ export const handleRemoveFromEvent = async (params) => {
     setAttendeesList((prev) => prev.filter((attendee) => attendee.uid !== user.uid));
   } catch (error) {
     console.error("Error al eliminar del evento:", error);
-    Alert.alert("Error", "No se pudo eliminar del evento, por favor intente más tarde.");
+    Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.eventDeleteError'));
   }
 };
 
@@ -508,37 +507,6 @@ const handleRemoveFromGoBoxs = async (boxTitle, selectedDate) => {
     console.error("Error eliminando el usuario de GoBoxs:", error);
   }
 };
-
-export const handleDeleteEvent = async (params) => {
-  const setMenuVisible = params.setMenuVisible
-  const navigation = params.navigation
-  const box = params.box
-
-  setMenuVisible(false);
-  Alert.alert(
-    "Eliminar Evento",
-    "¿Estás seguro de que deseas eliminar este evento?",
-    [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const eventRef = doc(database, "EventsPriv", box.id || box.title);
-            await deleteDoc(eventRef);
-            Alert.alert("Evento eliminado exitosamente");
-            navigation.goBack();
-          } catch (error) {
-            console.error("Error eliminando el evento:", error);
-            Alert.alert("Error", "No se pudo eliminar el evento.");
-          }
-        },
-      },
-    ]
-  );
-};
-
 
 export const handleAcceptGeneralEvent = async (params) => {
   const item = params.item;
@@ -632,70 +600,7 @@ export const handleAcceptGeneralEvent = async (params) => {
   }
 };
 
-export const handleDeletePrivateEvent = async (params) => {
-  const { box, setMenuVisible, navigation } = params;
 
-  setMenuVisible(false);
-
-  Alert.alert(
-    "Eliminar Evento",
-    "¿Estás seguro de que deseas eliminar este evento?",
-    [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const eventId = box.id || box.title;
-
-            // Eliminar el evento de la colección EventsPriv
-            const eventRef = doc(database, "EventsPriv", eventId);
-            await deleteDoc(eventRef);
-            console.log(`Evento ${eventId} eliminado de EventsPriv`);
-
-            // Obtener todos los usuarios
-            const usersRef = collection(database, "users");
-            const usersSnapshot = await getDocs(usersRef);
-
-            // Iterar sobre los usuarios para eliminar el evento de sus subcolecciones y las notificaciones
-            const promises = [];
-            usersSnapshot.forEach(async (userDoc) => {
-              const userId = userDoc.id;
-
-              // Eliminar el evento de la subcolección "events"
-              const userEventsRef = collection(database, "users", userId, "events");
-              const eventsQuery = query(userEventsRef, where("eventId", "==", eventId));
-              const userEventsSnapshot = await getDocs(eventsQuery);
-              userEventsSnapshot.forEach((eventDoc) => {
-                promises.push(deleteDoc(eventDoc.ref));
-              });
-
-              // Eliminar las notificaciones asociadas al eventId
-              const userNotificationsRef = collection(database, "users", userId, "notifications");
-              const notificationsQuery = query(userNotificationsRef, where("eventId", "==", eventId));
-              const userNotificationsSnapshot = await getDocs(notificationsQuery);
-              userNotificationsSnapshot.forEach((notificationDoc) => {
-                promises.push(deleteDoc(notificationDoc.ref));
-              });
-            });
-
-            // Esperar a que todas las promesas de eliminación se completen
-            await Promise.all(promises);
-            console.log(`Evento ${eventId} y sus notificaciones eliminados de todos los usuarios`);
-
-            // Mensaje de éxito
-            Alert.alert("Evento eliminado exitosamente");
-            navigation.goBack();
-          } catch (error) {
-            console.error("Error eliminando el evento y las notificaciones:", error);
-            Alert.alert("Error", "No se pudo eliminar el evento y las notificaciones.");
-          }
-        },
-      },
-    ]
-  );
-};
 
 
 

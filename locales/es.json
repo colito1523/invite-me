@@ -236,7 +236,10 @@
     "cancel": "Cancelar",
     "titlePlaceholder": "Título",
     "addressPlaceholder": "Ubicación",
-    "descriptionPlaceholder": "Descripción"
+    "descriptionPlaceholder": "Descripción",
+    "dontJoing": "Debes unirte al evento antes de invitar a otros.",
+    "alreadyParticipantPerson": "Esta persona ya está invitada o asistiendo al evento.",
+    "dotnGetUserInfo": "No se pudo obtener la información del usuario."
     
   },
 

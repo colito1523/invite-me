@@ -229,6 +229,9 @@
     "eventUpdateSuccess": "Evento atualizado com sucesso",
     "eventDeleteSuccess": "Evento excluído com sucesso",
     "dontPermission": "São necessárias permissões para acessar suas fotos.",
+     "dontJoing": "Deve participar no evento antes de convidar outras pessoas",
+      "alreadyParticipantPerson": "Esta pessoa já está participando do evento",
+      "dotnGetUserInfo": "Não foi possível obter as informações do usuário.",
     "saving": "Salvando...",
      "saver": "Salvar",
       "cancel": "Cancelar"
@@ -365,11 +368,6 @@
   },
 
 
-
-  
-
-  
-  
   "accessPrivately": "Entrar",
   "email": "Email",
   "password": "Senha",

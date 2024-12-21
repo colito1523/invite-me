@@ -30,6 +30,8 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
     setSelectedDate(formattedDate);
     setModalVisible(false);
 
+    console.log("Selected date:", dayjs(day.dateString).format("YYYY-MM-DD")); // Log the selected date in a different format
+
     if (onDateChange) {
       setLoading(true);
       onDateChange(formattedDate);

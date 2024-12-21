@@ -45,7 +45,6 @@ import {
   checkEventStatus,
   handleGeneralEventInvite,
   checkAndRemoveExpiredEvents,
-  handleDeletePrivateEvent 
 } from "./utils"
 
 export default memo(function BoxDetails({ route, navigation }) {
