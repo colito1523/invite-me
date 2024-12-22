@@ -539,14 +539,14 @@
     "showLess": "Ver menos",
     "showMore": "Ver más"
   },
-  "days": {
-    "Monday": "Lunes",
-    "Tuesday": "Martes",
-    "Wednesday": "Miércoles",
-    "Thursday": "Jueves",
-    "Friday": "Viernes",
-    "Saturday": "Sábado",
-    "Sunday": "Domingo"
+ "days": {
+    "lunes": "Lunes",
+    "martes": "Martes",
+    "miércoles": "Miércoles",
+    "jueves": "Jueves",
+    "viernes": "Viernes",
+    "sábado": "Sábado",
+    "domingo": "Domingo"
   },
   "profile": {
     "namePlaceholder": "Nombre",

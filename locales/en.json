@@ -522,13 +522,13 @@
     "showMore": "Show more"
   },
   "days": {
-    "Monday": "Monday",
-    "Tuesday": "Tuesday",
-    "Wednesday": "Wednesday",
-    "Thursday": "Thursday",
-    "Friday": "Friday",
-    "Saturday": "Saturday",
-    "Sunday": "Sunday"
+    "lunes": "Monday",
+    "martes": "Tuesday",
+    "miércoles": "Wednesday",
+    "jueves": "Thursday",
+    "viernes": "Friday",
+    "sábado": "Saturday",
+    "domingo": "Sunday"
   },
 
   "profile": {

@@ -95,13 +95,13 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
             </View>
           ) : (
             <View style={styles.hoursContent}>
-              <View style={styles.column}>
-                {Object.keys(boxData.hours || {}).map((day, index) => (
-                  <Text key={index} style={styles.dayText}>
-                    {day}
-                  </Text>
-                ))}
-              </View>
+             <View style={styles.column}>
+  {Object.keys(boxData.hours || {}).map((day, index) => (
+    <Text key={index} style={styles.dayText}>
+      {t(`days.${day.toLowerCase()}`)} {/* Traduce el día */}
+    </Text>
+  ))}
+</View>
               <View style={styles.column}>
                 {Object.values(boxData.hours || {}).map((time, index) => (
                   <Text key={index} style={styles.timeText}>

@@ -528,13 +528,13 @@
     "showMore": "Ver mais"
   },
   "days": {
-    "Monday": "Segunda-feira",
-    "Tuesday": "Terça-feira",
-    "Wednesday": "Quarta-feira",
-    "Thursday": "Quinta-feira",
-    "Friday": "Sexta-feira",
-    "Saturday": "Sábado",
-    "Sunday": "Domingo"
+    "lunes": "Segunda-feira",
+    "martes": "Terça-feira",
+    "miércoles": "Quarta-feira",
+    "jueves": "Quinta-feira",
+    "viernes": "Sexta-feira",
+    "sábado": "Sábado",
+    "domingo": "Domingo"
   },
 
   "profile": {
