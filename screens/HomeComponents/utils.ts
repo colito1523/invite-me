@@ -8,10 +8,9 @@ import * as Location from "expo-location";
 
 export const onSignOut = async (navigation, auth) => {
   try {
+    await SecureStore.deleteItemAsync("session_token"); // Elimina el token de sesión primero
     await signOut(auth); // Cierra la sesión de Firebase
-    await SecureStore.deleteItemAsync("session_token"); // Elimina el token de sesión
     console.log("Sign-out successful and session token cleared.");
-    navigation.navigate("Login");
   } catch (error) {
     console.log("Sign-out error:", error);
     Alert.alert("Error", "No se pudo cerrar la sesión correctamente.");

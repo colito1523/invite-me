@@ -69,7 +69,7 @@ i18n
 
 const { width, height } = Dimensions.get('window');
 
-export default function ElegantLogin({ navigation }) {
+export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isNightMode, setIsNightMode] = useState(false);
@@ -165,7 +165,7 @@ export default function ElegantLogin({ navigation }) {
       setPassword(null);
   
       setIsLoading(false);
-      navigation.navigate('Home');
+      // La navegación será manejada automáticamente por el RootNavigator
     } catch (error) {
       setIsLoading(false);
       setPassword(null);
