@@ -508,6 +508,8 @@ const handleRemoveFromGoBoxs = async (boxTitle, selectedDate) => {
   }
 };
 
+
+
 export const handleAcceptGeneralEvent = async (params) => {
   const item = params.item;
   const setLoadingEventId = params.setLoadingEventId;

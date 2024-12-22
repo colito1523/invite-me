@@ -93,6 +93,7 @@ export const sendInvitationNotifications = async (
             status: "pending",
             timestamp: new Date(),
             seen: false,
+            expirationDate: eventData.expirationDate, // Agregar expirationDate
           });
         }
       }

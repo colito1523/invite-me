@@ -127,7 +127,7 @@ export default memo(function BoxDetails({ route, navigation }) {
         isFromNotification,
       });
     } else {
-    
+      console.log("Datos del evento:", box); // Add this line to log all event data
     }
   }, [box, isFromNotification]);
 
@@ -576,6 +576,11 @@ const handleDeleteEvent = async () => {
       status: "accepted",
       coordinates: box.coordinates || {} // Add coordinates
     };
+    
+     // Agregar expirationDate solo para eventos privados
+     if (isPrivateEvent && box.expirationDate) {
+      eventData.expirationDate = box.expirationDate;
+  }
     
   
   
