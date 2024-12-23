@@ -1,19 +1,75 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Función para verificar si el usuario está autenticado
+    function isAuth() {
+      return request.auth != null;
+    }
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2024, 11, 22);
+    // Función para verificar si el usuario es el propietario del documento
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+
+    // Reglas para la colección users
+    match /users/{userId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // Reglas para subcollecciones de usuarios
+      match /friends/{friendId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+
+      match /friendRequests/{requestId} {
+        allow read: if isOwner(userId);
+        allow write: if isAuth();
+      }
+
+      match /events/{eventId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+
+      match /note/current {
+        allow read: if isAuth();
+        allow write: if isOwner(userId);
+        
+        match /likes/{likeId} {
+          allow read: if isAuth();
+          allow write: if isAuth();
+        }
+      }
+
+      match /stories/{storyId} {
+        allow read: if isAuth();
+        allow write: if isOwner(userId);
+        
+        match /responses/{responseId} {
+          allow read: if isAuth();
+          allow write: if isAuth();
+        }
+      }
+    }
+
+    // Reglas para eventos privados
+    match /EventsPriv/{eventId} {
+      allow read: if isAuth() && (
+        resource.data.createdBy == request.auth.uid ||
+        request.auth.uid in resource.data.attendees ||
+        request.auth.uid in resource.data.invitedUsers
+      );
+      allow create: if isAuth();
+      allow update: if isAuth() && (
+        resource.data.createdBy == request.auth.uid ||
+        request.auth.uid in resource.data.attendees
+      );
+      allow delete: if isAuth() && resource.data.createdBy == request.auth.uid;
     }
   }
 }

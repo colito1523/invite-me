@@ -196,6 +196,7 @@
   },
 
   "SliderContent": {
+    "hour": "Hour",
     "hours": "{{count}} hour",
     "hours_plural": "{{count}} hours",
     "description": "Description",

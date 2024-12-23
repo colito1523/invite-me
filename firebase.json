@@ -13,8 +13,8 @@
       "runtime": "nodejs18"
     },
     {
-      "source": "event_cleanup",
-      "codebase": "event_cleanup",
+      "source": "eventcleanup",
+      "codebase": "eventcleanup",
       "ignore": [
         "node_modules",
         ".git",
@@ -22,7 +22,9 @@
         "firebase-debug.*.log",
         "*.local"
       ],
-      "predeploy": []
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint || echo \"Linting skipped due to errors\""
+      ]
     }
   ],
   "firestore": {

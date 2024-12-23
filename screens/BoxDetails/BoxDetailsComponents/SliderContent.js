@@ -81,7 +81,7 @@ const SliderContent = ({ box, boxData, isNightMode, isFromNotification, showDesc
         <View style={styles.hoursContainer}>
           {box.category === "EventoParaAmigos" && box.day && box.hour ? (
             <View style={styles.notificationHours}>
-              <Text style={styles.hoursText}>{`${t('SliderContent.hours')}: ${box.hour}`}</Text>
+              <Text style={styles.hoursText}>{`${t('SliderContent.hour')}: ${box.hour}`}</Text>
               <Text style={styles.dayText}>{`${t('SliderContent.day')}: ${box.day}`}</Text>
             </View>
           ) : isFromNotification && (box.hour || box.day) ? (
