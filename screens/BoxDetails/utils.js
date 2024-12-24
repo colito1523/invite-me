@@ -375,25 +375,26 @@ export const handleInvite = async (params) => {
   };
   
   await addDoc(notificationRef, {
-      fromId: user.uid,
-      fromName: fromName,
-      fromImage: fromImage,
-      eventId: box.id,
-      eventTitle: box.title,
-      eventImage: eventImage,
-      day: eventData.day || formatDay(box.date || new Date()), // Usar `eventData.day` primero
-      eventDate: eventDateTimestamp,
-      date: eventDateFormatted,
-      eventCategory: eventCategory,
-      type: "invitation",
-      status: "pendiente",
-      timestamp: new Date(),
-      seen: false,
-      address: eventData.address || "Dirección no disponible",
-      description: eventData.description || "Descripción no disponible",
-      eventDateTime: `${eventData.day || "Fecha no disponible"} ${eventData.hour || "Hora no disponible"}`,
-      hour: box.category === "EventoParaAmigos" ? formatHour(box.hour || new Date()) : box.hours || {}
-  });
+    fromId: user.uid,
+    fromName: fromName,
+    fromImage: fromImage,
+    eventId: box.id,
+    eventTitle: box.title,
+    eventImage: eventImage,
+    day: eventData.day || formatDay(box.date || new Date()), // Usar `eventData.day` primero
+    eventDate: eventDateTimestamp,
+    date: eventDateFormatted,
+    expirationDate: eventData.expirationDate || box.expirationDate || null, // Incluir expirationDate aquí
+    eventCategory: eventCategory,
+    type: "invitation",
+    status: "pendiente",
+    timestamp: new Date(),
+    seen: false,
+    address: eventData.address || "Dirección no disponible",
+    description: eventData.description || "Descripción no disponible",
+    eventDateTime: `${eventData.day || "Fecha no disponible"} ${eventData.hour || "Hora no disponible"}`,
+    hour: box.category === "EventoParaAmigos" ? formatHour(box.hour || new Date()) : box.hours || {}
+});
   
 
     
