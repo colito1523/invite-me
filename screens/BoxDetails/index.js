@@ -11,7 +11,7 @@ import {
   TextInput,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import {  Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { auth, database } from "../../config/firebase";
 import {
   collection,
@@ -28,13 +28,14 @@ import {
   arrayUnion,
   onSnapshot,
   writeBatch,
+  Timestamp,
 } from "firebase/firestore";
 import { Image } from "expo-image";
 import DotIndicatorBoxDetails from "../../Components/Dots/DotIndicatorBoxDetails";
 import { useTranslation } from "react-i18next";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import * as ImagePicker from 'expo-image-picker';
-import Header from "./BoxDetailsComponents/Header"
+import * as ImagePicker from "expo-image-picker";
+import Header from "./BoxDetailsComponents/Header";
 import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
 import SliderContent from "./BoxDetailsComponents/SliderContent";
 import InviteFriendsModal from "./BoxDetailsComponents/InviteFriendsModal";
@@ -45,7 +46,7 @@ import {
   checkEventStatus,
   handleGeneralEventInvite,
   checkAndRemoveExpiredEvents,
-} from "./utils"
+} from "./utils";
 
 export default memo(function BoxDetails({ route, navigation }) {
   const { t } = useTranslation();
@@ -68,7 +69,7 @@ export default memo(function BoxDetails({ route, navigation }) {
     hour: "",
     day: new Date(),
   });
-  
+
   useEffect(() => {
     const start = Date.now(); // Marca el tiempo inicial
 
@@ -93,10 +94,10 @@ export default memo(function BoxDetails({ route, navigation }) {
       // Referencia al documento del evento
       const eventRef = doc(database, "EventsPriv", box.id || box.title);
       const eventSnapshot = await getDoc(eventRef);
-  
+
       if (eventSnapshot.exists()) {
         const eventData = eventSnapshot.data();
-        
+
         // Actualiza `setBoxData` con los datos obtenidos, incluidos Admin y category
         setBoxData((prevData) => ({
           ...prevData,
@@ -107,13 +108,11 @@ export default memo(function BoxDetails({ route, navigation }) {
           // ...otros campos necesarios
         }));
       } else {
-        
       }
     } catch (error) {
       console.error("Error fetching event details:", error);
     }
   };
-  
 
   useEffect(() => {
     if (box && !isFromNotification) {
@@ -133,10 +132,10 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   useEffect(() => {
     let unsubscribeAttendees;
-  
+
     const fetchDetailsAndAttendees = async () => {
       if (!box) return;
-  
+
       try {
         await Promise.allSettled([
           fetchEventDetails({ box, setBoxData }),
@@ -146,7 +145,7 @@ export default memo(function BoxDetails({ route, navigation }) {
             setAttendeesList,
           })),
         ]);
-  
+
         setTimeout(() => {
           fetchFriends();
           checkNightMode(setIsNightMode);
@@ -156,9 +155,9 @@ export default memo(function BoxDetails({ route, navigation }) {
         console.error("Error al cargar datos:", error);
       }
     };
-  
+
     fetchDetailsAndAttendees();
-  
+
     return () => {
       if (typeof unsubscribeAttendees === "function") {
         unsubscribeAttendees();
@@ -168,9 +167,13 @@ export default memo(function BoxDetails({ route, navigation }) {
 
   useEffect(() => {
     if (!box || box.category !== "EventoParaAmigos") return;
-  
-    const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
-  
+
+    const eventRef = doc(
+      database,
+      "EventsPriv",
+      box.eventId || box.id || box.title,
+    );
+
     const unsubscribe = onSnapshot(eventRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
         const eventData = docSnapshot.data();
@@ -180,10 +183,10 @@ export default memo(function BoxDetails({ route, navigation }) {
         }));
       }
     });
-  
+
     return () => unsubscribe();
   }, [box]);
-  
+
   const handleRemoveFromEvent = async () => {
     const user = auth.currentUser;
     if (!user || !box) return;
@@ -198,12 +201,15 @@ export default memo(function BoxDetails({ route, navigation }) {
         const batch = writeBatch(database);
         querySnapshot.forEach((doc) => batch.delete(doc.ref));
         await batch.commit();
-
       }
 
       // Eliminar del evento privado (EventsPriv)
       if (box.category === "EventoParaAmigos") {
-        const eventRef = doc(database, "EventsPriv", box.eventId || box.id || box.title);
+        const eventRef = doc(
+          database,
+          "EventsPriv",
+          box.eventId || box.id || box.title,
+        );
 
         // Obtén el documento del evento para identificar al usuario en la lista de attendees
         const eventSnapshot = await getDoc(eventRef);
@@ -211,7 +217,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           const eventData = eventSnapshot.data();
 
           const updatedAttendees = eventData.attendees.filter(
-            (attendee) => attendee.uid !== user.uid
+            (attendee) => attendee.uid !== user.uid,
           );
 
           // Actualiza la lista de asistentes sin el usuario
@@ -226,28 +232,38 @@ export default memo(function BoxDetails({ route, navigation }) {
 
       // Actualizamos el estado local para reflejar los cambios
       setIsEventSaved(false);
-      setAttendeesList((prev) => prev.filter((attendee) => attendee.uid !== user.uid));
+      setAttendeesList((prev) =>
+        prev.filter((attendee) => attendee.uid !== user.uid),
+      );
     } catch (error) {
       console.error("Error al eliminar del evento:", error);
-      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.eventDeleteError'));
+      Alert.alert(
+        t("indexBoxDetails.error"),
+        t("indexBoxDetails.eventDeleteError"),
+      );
     }
   };
 
-const handleDeleteEvent = async () => {
-  try {
-    setIsProcessing(true);
-    const eventRef = doc(database, "EventsPriv", box.id || box.title);
-    await deleteDoc(eventRef);
-    navigation.navigate("Home", { refresh: true });
-    Alert.alert(t("indexBoxDetails.succes"), t("indexBoxDetails.eventDeleteSuccess"));
-  } catch (error) {
-    console.error("Error deleting event:", error);
-    Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.eventDeleteError"));
-  } finally {
-    setIsProcessing(false);
-  }
-};
-  
+  const handleDeleteEvent = async () => {
+    try {
+      setIsProcessing(true);
+      const eventRef = doc(database, "EventsPriv", box.id || box.title);
+      await deleteDoc(eventRef);
+      navigation.navigate("Home", { refresh: true });
+      Alert.alert(
+        t("indexBoxDetails.succes"),
+        t("indexBoxDetails.eventDeleteSuccess"),
+      );
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      Alert.alert(
+        t("indexBoxDetails.error"),
+        t("indexBoxDetails.eventDeleteError"),
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const fetchFriends = async () => {
     const user = auth.currentUser;
@@ -273,7 +289,7 @@ const handleDeleteEvent = async () => {
             }
           }
           return null;
-        })
+        }),
       );
       const validFriends = friendsList.filter((friend) => friend !== null);
       setFriends(validFriends);
@@ -288,9 +304,13 @@ const handleDeleteEvent = async () => {
       return;
     }
 
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert(t('indexBoxDetails.error'), t('indexBoxDetails.dontPermission'));
+      Alert.alert(
+        t("indexBoxDetails.error"),
+        t("indexBoxDetails.dontPermission"),
+      );
       return;
     }
 
@@ -301,13 +321,20 @@ const handleDeleteEvent = async () => {
       quality: 1,
     });
 
-    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+    if (
+      !pickerResult.canceled &&
+      pickerResult.assets &&
+      pickerResult.assets.length > 0
+    ) {
       try {
         setIsProcessing(true);
 
         // Subir la nueva imagen a Firebase Storage
         const storage = getStorage();
-        const imageRef = ref(storage, `EventosParaAmigos/${boxData.id || boxData.title}_${Date.now()}.jpg`);
+        const imageRef = ref(
+          storage,
+          `EventosParaAmigos/${boxData.id || boxData.title}_${Date.now()}.jpg`,
+        );
         const uri = pickerResult.assets[0].uri;
         const response = await fetch(uri);
         const blob = await response.blob();
@@ -318,17 +345,26 @@ const handleDeleteEvent = async () => {
         const downloadURL = await getDownloadURL(imageRef);
 
         // Actualizar la imagen en Firebase Firestore
-        const eventRef = doc(database, "EventsPriv", boxData.id || boxData.title);
+        const eventRef = doc(
+          database,
+          "EventsPriv",
+          boxData.id || boxData.title,
+        );
         await updateDoc(eventRef, { image: downloadURL });
 
         // Navegar a Home con el parámetro de recarga
         navigation.navigate("Home", { refresh: true });
 
-        Alert.alert(t("indexBoxDetails.succes"), t("indexBoxDetails.eventUpdated"));
-
+        Alert.alert(
+          t("indexBoxDetails.succes"),
+          t("indexBoxDetails.eventUpdated"),
+        );
       } catch (error) {
         console.error("Error al subir la imagen:", error);
-        Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.eventUpdateError"));
+        Alert.alert(
+          t("indexBoxDetails.error"),
+          t("indexBoxDetails.eventUpdateError"),
+        );
       } finally {
         setIsProcessing(false);
       }
@@ -337,12 +373,15 @@ const handleDeleteEvent = async () => {
 
   const handleEditEvent = () => {
     const user = auth.currentUser;
-  
+
     if (!user || user.uid !== boxData.Admin) {
-      Alert.alert(t("indexBoxDetails.accessDenied"), t("indexBoxDetails.onlyAdminCanEdit"));
+      Alert.alert(
+        t("indexBoxDetails.accessDenied"),
+        t("indexBoxDetails.onlyAdminCanEdit"),
+      );
       return;
     }
-  
+
     setEditedData({
       title: boxData.title || "",
       address: boxData.address || "",
@@ -351,21 +390,21 @@ const handleDeleteEvent = async () => {
     setEditModalVisible(true);
     setMenuVisible(false);
   };
-  
+
   const handleSaveEdit = async () => {
     try {
       setIsProcessing(true);
-  
+
       const eventRef = doc(database, "EventsPriv", boxData.id || boxData.title);
       const updatedData = {
         title: editedData.title,
         address: editedData.address,
         description: editedData.description,
       };
-  
+
       // Actualizar en EventsPriv
       await updateDoc(eventRef, updatedData);
-  
+
       // Actualizar en cada usuario en /users/{userId}/events/{eventId}
       const attendees = boxData.attendees || [];
       for (const attendee of attendees) {
@@ -373,31 +412,37 @@ const handleDeleteEvent = async () => {
           database,
           "users",
           attendee.uid,
-          "events"
+          "events",
         );
-  
+
         // Buscar el documento que coincida con el `eventId`
         const querySnapshot = await getDocs(
-          query(eventsCollectionRef, where("eventId", "==", boxData.id || boxData.title))
+          query(
+            eventsCollectionRef,
+            where("eventId", "==", boxData.id || boxData.title),
+          ),
         );
-  
+
         querySnapshot.forEach(async (docSnapshot) => {
           // Actualizar el documento encontrado
           await updateDoc(docSnapshot.ref, updatedData);
         });
-  
+
         // Actualizar las notificaciones en /users/{userId}/notifications
         const notificationsCollectionRef = collection(
           database,
           "users",
           attendee.uid,
-          "notifications"
+          "notifications",
         );
-  
+
         const notificationsSnapshot = await getDocs(
-          query(notificationsCollectionRef, where("eventId", "==", boxData.id || boxData.title))
+          query(
+            notificationsCollectionRef,
+            where("eventId", "==", boxData.id || boxData.title),
+          ),
         );
-  
+
         notificationsSnapshot.forEach(async (notificationSnapshot) => {
           await updateDoc(notificationSnapshot.ref, {
             eventTitle: updatedData.title,
@@ -406,23 +451,28 @@ const handleDeleteEvent = async () => {
           });
         });
       }
-  
+
       // Actualizar el estado local
       setBoxData((prevData) => ({
         ...prevData,
         ...updatedData,
       }));
-  
-      Alert.alert(t("indexBoxDetails.succes"), t("indexBoxDetails.eventUpdateSuccess"));
+
+      Alert.alert(
+        t("indexBoxDetails.succes"),
+        t("indexBoxDetails.eventUpdateSuccess"),
+      );
       setEditModalVisible(false);
     } catch (error) {
       console.error("Error al actualizar el evento:", error);
-      Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.eventUpdateError"));
+      Alert.alert(
+        t("indexBoxDetails.error"),
+        t("indexBoxDetails.eventUpdateError"),
+      );
     } finally {
       setIsProcessing(false);
     }
   };
-  
 
   const renderEditModal = () => (
     <Modal
@@ -433,24 +483,32 @@ const handleDeleteEvent = async () => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.editModalContent}>
-          <Text style={styles.editModalTitle}>{t("indexBoxDetails.editEvent")}</Text>
+          <Text style={styles.editModalTitle}>
+            {t("indexBoxDetails.editEvent")}
+          </Text>
           {/* Inputs para edición */}
           <TextInput
             style={styles.input}
             value={editedData.title}
-            onChangeText={(text) => setEditedData({ ...editedData, title: text })}
+            onChangeText={(text) =>
+              setEditedData({ ...editedData, title: text })
+            }
             placeholder={t("indexBoxDetails.titlePlaceholder")}
           />
           <TextInput
             style={styles.input}
             value={editedData.address}
-            onChangeText={(text) => setEditedData({ ...editedData, address: text })}
+            onChangeText={(text) =>
+              setEditedData({ ...editedData, address: text })
+            }
             placeholder={t("indexBoxDetails.addressPlaceholder")}
           />
           <TextInput
             style={styles.input}
             value={editedData.description}
-            onChangeText={(text) => setEditedData({ ...editedData, description: text })}
+            onChangeText={(text) =>
+              setEditedData({ ...editedData, description: text })
+            }
             placeholder={t("indexBoxDetails.descriptionPlaceholder")}
             multiline
           />
@@ -460,7 +518,9 @@ const handleDeleteEvent = async () => {
               style={[styles.editModalButton, styles.cancelButton]}
               onPress={() => setEditModalVisible(false)}
             >
-              <Text style={styles.editModalButtonText}>{t("storyViewer.cancel")}</Text>
+              <Text style={styles.editModalButtonText}>
+                {t("storyViewer.cancel")}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.editModalButton, styles.saveButton]}
@@ -468,7 +528,9 @@ const handleDeleteEvent = async () => {
               disabled={isProcessing}
             >
               <Text style={styles.editModalButtonText}>
-                {isProcessing ? t("storyViewer.saving") : t("storyViewer.saver")}
+                {isProcessing
+                  ? t("storyViewer.saving")
+                  : t("storyViewer.saver")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -481,37 +543,40 @@ const handleDeleteEvent = async () => {
   const handleAddEvent = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
-  
+
     const user = auth.currentUser;
     if (!user || !box) {
       setIsProcessing(false);
       return;
     }
-  
+
     try {
       const eventsRef = collection(database, "users", user.uid, "events");
       const q = query(eventsRef, where("title", "==", box.title));
       const querySnapshot = await getDocs(q);
-  
-      const isPrivateEvent = box.category === "EventoParaAmigos" || box.isPrivate;
+
+      const isPrivateEvent =
+        box.category === "EventoParaAmigos" || box.isPrivate;
       const eventDate = isPrivateEvent ? box.date : selectedDate;
       const eventId = box.eventId || box.id || box.title; // Ensure eventId is defined
       const eventRef = doc(database, "EventsPriv", eventId);
-  
+
       if (!querySnapshot.empty) {
         // Check if the event for the selected date already exists
-        const existingEvent = querySnapshot.docs.find(doc => doc.data().dateArray.includes(eventDate));
+        const existingEvent = querySnapshot.docs.find((doc) =>
+          doc.data().dateArray.includes(eventDate),
+        );
         if (existingEvent) {
           // If the event for the selected date exists, remove it
           await deleteDoc(existingEvent.ref);
           setIsEventSaved(false);
-  
+
           if (isPrivateEvent) {
             const eventSnapshot = await getDoc(eventRef);
             if (eventSnapshot.exists()) {
               const eventData = eventSnapshot.data();
               const updatedAttendees = eventData.attendees.filter(
-                (attendee) => attendee.uid !== user.uid
+                (attendee) => attendee.uid !== user.uid,
               );
               await updateDoc(eventRef, {
                 attendees: updatedAttendees,
@@ -528,7 +593,7 @@ const handleDeleteEvent = async () => {
         // If no events exist, add the new event
         await addEventToUser(eventsRef, eventDate, eventRef, isPrivateEvent);
       }
-  
+
       setIsEventSaved(true);
     } catch (error) {
       console.error("Error al manejar el evento:", error);
@@ -538,18 +603,23 @@ const handleDeleteEvent = async () => {
     }
   };
 
-  const addEventToUser = async (eventsRef, eventDate, eventRef, isPrivateEvent) => {
+  const addEventToUser = async (
+    eventsRef,
+    eventDate,
+    eventRef,
+    isPrivateEvent,
+  ) => {
     const eventsSnapshot = await getDocs(eventsRef);
     if (eventsSnapshot.size >= 6) {
       Alert.alert(
         t("boxDetails.limitReached"),
         t("boxDetails.limitReachedMessage"),
-        [{ text: t("boxDetails.accept"), style: "default" }]
+        [{ text: t("boxDetails.accept"), style: "default" }],
       );
       setIsProcessing(false);
       return;
     }
-  
+
     const eventId = box.eventId || box.id || box.title; // Ensure eventId is defined
     if (!eventId) {
       console.error("Event ID is undefined");
@@ -557,14 +627,38 @@ const handleDeleteEvent = async () => {
       setIsProcessing(false);
       return;
     }
-  
+
+    // Convertir la fecha del evento a un objeto Date
+    const [day, month] = eventDate.split(" ");
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const monthIndex = monthNames.indexOf(month);
+    const year = new Date().getFullYear();
+    const selectedDateObj = new Date(year, monthIndex, parseInt(day));
+
+    // Calcular la fecha de expiración (24 horas después)
+    const expirationDate = new Date(selectedDateObj);
+    expirationDate.setHours(expirationDate.getHours() + 24);
+
     const eventData = {
+      expirationDate: Timestamp.fromDate(expirationDate),
       title: box.title,
       category: box.category || "General", // Ensure category is defined
       date: box.date,
       dateArray: [eventDate],
       description: box.description || "",
-      expirationDate: box.expiration || "",
       address: box.address || "",
       imageUrl: box.imageUrl || "",
       date: eventDate,
@@ -574,31 +668,38 @@ const handleDeleteEvent = async () => {
       uid: auth.currentUser.uid, // Add this line to include the uid
       eventId: eventId, // Ensure the correct eventId from the notification is used
       status: "accepted",
-      coordinates: box.coordinates || {} // Add coordinates
+      coordinates: box.coordinates || {}, // Add coordinates
     };
-    
-     // Agregar expirationDate solo para eventos privados
-     if (isPrivateEvent && box.expirationDate) {
+
+    // Agregar expirationDate solo para eventos privados
+    if (isPrivateEvent && box.expirationDate) {
       eventData.expirationDate = box.expirationDate;
-  }
-    
-  
-  
+    }
+
     if (isPrivateEvent) {
-      const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
-      const username = userDoc.exists() ? userDoc.data().username || "Anónimo" : "Anónimo";
+      const userDoc = await getDoc(
+        doc(database, "users", auth.currentUser.uid),
+      );
+      const username = userDoc.exists()
+        ? userDoc.data().username || "Anónimo"
+        : "Anónimo";
       const profileImage = userDoc.exists()
         ? userDoc.data().photoUrls?.[0] || "https://via.placeholder.com/150"
         : "https://via.placeholder.com/150";
-  
-      const attendeeData = { uid: auth.currentUser.uid, username, profileImage };
-  
+
+      const attendeeData = {
+        uid: auth.currentUser.uid,
+        username,
+        profileImage,
+      };
+
       const eventSnapshot = await getDoc(eventRef);
       if (eventSnapshot.exists()) {
         const eventDetails = eventSnapshot.data();
-        eventData.description = eventDetails.description || eventData.description;
+        eventData.description =
+          eventDetails.description || eventData.description;
         eventData.address = eventDetails.address || eventData.address;
-  
+
         await updateDoc(eventRef, {
           attendees: arrayUnion(attendeeData),
         });
@@ -609,9 +710,18 @@ const handleDeleteEvent = async () => {
         return;
       }
     } else {
-      await saveUserEvent(box.title, eventDate, box.day, eventData.phoneNumber, eventData.locationLink, eventData.hours, eventData.coordinates, eventData.imageUrl);
+      await saveUserEvent(
+        box.title,
+        eventDate,
+        box.day,
+        eventData.phoneNumber,
+        eventData.locationLink,
+        eventData.hours,
+        eventData.coordinates,
+        eventData.imageUrl,
+      );
     }
-  
+
     await addDoc(eventsRef, {
       ...eventData,
       dateArray: [eventDate],
@@ -626,18 +736,18 @@ const handleDeleteEvent = async () => {
     locationLink,
     hours,
     coordinates,
-    imageUrl
+    imageUrl,
   ) => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error("No user logged in");
-  
+
       const userDocRef = doc(database, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
-  
+
       let username = "Usuario desconocido";
       let profileImage = "https://via.placeholder.com/150";
-  
+
       if (userDoc.exists()) {
         const userData = userDoc.data();
         username = userData.username || username;
@@ -646,10 +756,10 @@ const handleDeleteEvent = async () => {
             ? userData.photoUrls[0]
             : profileImage;
       }
-  
+
       const boxRef = doc(database, "GoBoxs", boxTitle);
       const boxDoc = await getDoc(boxRef);
-  
+
       let existingData = [];
       if (boxDoc.exists()) {
         const data = boxDoc.data();
@@ -657,7 +767,7 @@ const handleDeleteEvent = async () => {
       } else {
         await setDoc(boxRef, { [selectedDate]: [] });
       }
-  
+
       const userDataToSave = {
         profileImage: profileImage,
         username: username,
@@ -666,13 +776,13 @@ const handleDeleteEvent = async () => {
         locationLink: locationLink,
         hours: hours,
         coordinates: coordinates, // Add coordinates
-        imageUrl: imageUrl // Add imageUrl
+        imageUrl: imageUrl, // Add imageUrl
       };
-  
+
       if (daySpecial) {
         userDataToSave.DaySpecial = daySpecial;
       }
-  
+
       await updateDoc(boxRef, {
         [selectedDate]: [...existingData, userDataToSave],
       });
@@ -692,7 +802,7 @@ const handleDeleteEvent = async () => {
 
         if (existingData) {
           const updatedData = existingData.filter(
-            (user) => user.uid !== auth.currentUser.uid
+            (user) => user.uid !== auth.currentUser.uid,
           );
 
           if (updatedData.length > 0) {
@@ -704,7 +814,6 @@ const handleDeleteEvent = async () => {
               [selectedDate]: deleteField(),
             });
           }
-
         }
       }
     } catch (error) {
@@ -712,30 +821,33 @@ const handleDeleteEvent = async () => {
     }
   };
 
-
   const renderFriendItem = ({ item }) => {
     let isInvited, hasBeenInvited, isDisabled;
-  
+
     if (box.category !== "EventoParaAmigos") {
       // Lógica para eventos generales
-      isInvited = attendeesList.some((attendee) => attendee.uid === item.friendId);
+      isInvited = attendeesList.some(
+        (attendee) => attendee.uid === item.friendId,
+      );
       hasBeenInvited = attendeesList.some(
         (attendee) =>
           attendee.invitations &&
           attendee.invitations.some(
             (invitation) =>
               invitation.invitedTo === item.friendId &&
-              invitation.invitedBy === auth.currentUser.uid
-          )
+              invitation.invitedBy === auth.currentUser.uid,
+          ),
       );
       isDisabled = isInvited || hasBeenInvited;
     } else {
       // Lógica para eventos privados
       isInvited = boxData.invitedFriends?.includes(item.friendId);
-      const isAttending = attendeesList.some((attendee) => attendee.uid === item.friendId);
+      const isAttending = attendeesList.some(
+        (attendee) => attendee.uid === item.friendId,
+      );
       isDisabled = isInvited || isAttending;
     }
-  
+
     return (
       <View
         style={[
@@ -750,7 +862,9 @@ const handleDeleteEvent = async () => {
           style={styles.friendImage}
           cachePolicy="memory-disk"
         />
-        <Text style={[styles.friendName, isNightMode && styles.friendNameNight]}>
+        <Text
+          style={[styles.friendName, isNightMode && styles.friendNameNight]}
+        >
           {item.friendName}
         </Text>
         {box.category !== "EventoParaAmigos" ? (
@@ -799,7 +913,7 @@ const handleDeleteEvent = async () => {
             disabled={isDisabled}
           >
             <Ionicons
-               name={isDisabled ? "close-sharp" : "paper-plane"}
+              name={isDisabled ? "close-sharp" : "paper-plane"}
               size={20}
               color={isNightMode ? "white" : "black"}
             />
@@ -808,14 +922,14 @@ const handleDeleteEvent = async () => {
       </View>
     );
   };
-  
+
   const handleSearch = (text) => {
     setSearchText(text);
     if (text === "") {
       setFilteredFriends(friends);
     } else {
       const filtered = friends.filter((friend) =>
-        friend.friendName.toLowerCase().includes(text.toLowerCase())
+        friend.friendName.toLowerCase().includes(text.toLowerCase()),
       );
       setFilteredFriends(filtered);
     }
@@ -862,15 +976,15 @@ const handleDeleteEvent = async () => {
 
             {/* Sección de botones */}
             <ButtonsSection
-  isEventSaved={isEventSaved}
-  isProcessing={isProcessing}
-  handleAddEvent={handleAddEvent}
-  handleRemoveFromEvent={handleRemoveFromEvent}
-  setModalVisible={setModalVisible}
-  t={t}
-  box={box}
-  boxData={boxData}
-/>
+              isEventSaved={isEventSaved}
+              isProcessing={isProcessing}
+              handleAddEvent={handleAddEvent}
+              handleRemoveFromEvent={handleRemoveFromEvent}
+              setModalVisible={setModalVisible}
+              t={t}
+              box={box}
+              boxData={boxData}
+            />
 
             {/* Slider de contenido */}
             <SliderContent
@@ -881,7 +995,6 @@ const handleDeleteEvent = async () => {
               isFromNotification={isFromNotification}
               showDescription={box.category === "EventoParaAmigos"} // Add this prop to control the display
             />
-
           </View>
         </ScrollView>
       </LinearGradient>
