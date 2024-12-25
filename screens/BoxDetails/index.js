@@ -665,11 +665,11 @@ export default memo(function BoxDetails({ route, navigation }) {
       phoneNumber: box.number || "Sin número",
       locationLink: box.locationLink || "Sin ubicación especificada",
       hours: box.hours || {},
-      uid: box.category === "EventoParaAmigos" ? box.Admin : auth.currentUser.uid,
-      eventId: eventId,
+      uid: box.Admin || auth.currentUser?.uid,
+      Admin: box.Admin || auth.currentUser?.uid,
+      eventId: box.eventId || box.id || box.title,
       status: "accepted",
       coordinates: box.coordinates || {},
-      ...(box.category === "EventoParaAmigos" && { Admin: box.Admin }), // Solo incluir Admin si es EventoParaAmigos
     };
 
     // Agregar expirationDate solo para eventos privados

@@ -268,7 +268,7 @@ const Home = React.memo(() => {
   const handleBoxPress = useCallback((box) => {
     const boxWithAdmin = {
       ...box,
-      Admin: box.category === "EventoParaAmigos" ? auth.currentUser.uid : undefined
+      Admin: box.Admin || box.uid || undefined  // Usar el Admin existente o el uid del evento
     };
     navigation.navigate("BoxDetails", { box: boxWithAdmin, selectedDate, attendees: box.attendees || [] });
   }, [navigation, selectedDate]);
