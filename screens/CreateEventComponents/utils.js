@@ -178,7 +178,7 @@ export const handleSubmit = async (
       const dateText = day.toLocaleDateString(t("locale"), {
         day: "numeric",
         month: "short",
-      });
+      }).split(' ').reverse().join(' ');
 
       const realFriendIds = await Promise.all(
         selectedFriends.map(async (friendDocId) => {
