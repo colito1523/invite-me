@@ -175,10 +175,11 @@ export const handleSubmit = async (
         eventDateTime.getTime() + 24 * 60 * 60 * 1000
       );
 
-      const dateText = day.toLocaleDateString(t("locale"), {
+      const dateText = day.toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
       }).split(' ').reverse().join(' ');
+      
 
       const realFriendIds = await Promise.all(
         selectedFriends.map(async (friendDocId) => {

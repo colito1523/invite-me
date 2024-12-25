@@ -266,7 +266,11 @@ const Home = React.memo(() => {
   
   // Función para manejar el evento de clic en el box
   const handleBoxPress = useCallback((box) => {
-    navigation.navigate("BoxDetails", { box, selectedDate, attendees: box.attendees || [] });
+    const boxWithAdmin = {
+      ...box,
+      Admin: box.category === "EventoParaAmigos" ? auth.currentUser.uid : undefined
+    };
+    navigation.navigate("BoxDetails", { box: boxWithAdmin, selectedDate, attendees: box.attendees || [] });
   }, [navigation, selectedDate]);
 
   const renderItem = useCallback(({ item }) => (
@@ -303,7 +307,7 @@ const Home = React.memo(() => {
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
     />
-  ), [menuVisible, toggleMenu, handleCategorySelect, handleCitySelect, onSignOut, isNightMode, searchQuery, setSearchQuery]);
+  ), [menuVisible, toggleMenu, handleCategorySelect, handleCitySelect, handleSignOut, isNightMode, searchQuery, setSearchQuery]);
 
   useEffect(() => {
     const unsubscribe = fetchUnreadNotifications({ setUnreadNotifications });
