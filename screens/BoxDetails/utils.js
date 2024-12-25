@@ -52,29 +52,28 @@ export const checkAndRemoveExpiredEvents = async (title) => {
 
 const parseCustomDate = (dateStr) => {
   try {
-    const [day, monthStr] = dateStr.split(" ");
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const monthIndex = monthNames.indexOf(monthStr);
-    if (monthIndex === -1) {
-      return null;
+    // Check if date is in DD/MM/YYYY format
+    if (dateStr.includes('/')) {
+      const [day, month, year] = dateStr.split('/');
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    } 
+    // Handle D MMM format
+    else {
+      const [day, monthStr] = dateStr.split(" ");
+      const monthNames = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
+      const monthIndex = monthNames.indexOf(monthStr);
+      if (monthIndex === -1) {
+        console.error(`Invalid month string: ${monthStr}`);
+        return null;
+      }
+      const year = new Date().getFullYear();
+      return new Date(year, monthIndex, parseInt(day));
     }
-    const year = new Date().getFullYear();
-    return new Date(year, monthIndex, parseInt(day));
   } catch (error) {
-    console.error(`Error al parsear la fecha ${dateStr}:`, error);
+    console.error(`Error parsing date ${dateStr}:`, error);
     return null;
   }
 };
