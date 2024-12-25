@@ -655,7 +655,7 @@ export default memo(function BoxDetails({ route, navigation }) {
     const eventData = {
       expirationDate: Timestamp.fromDate(expirationDate),
       title: box.title,
-      category: box.category || "General", // Ensure category is defined
+      category: box.category || "General",
       date: box.date,
       dateArray: [eventDate],
       description: box.description || "",
@@ -665,10 +665,11 @@ export default memo(function BoxDetails({ route, navigation }) {
       phoneNumber: box.number || "Sin número",
       locationLink: box.locationLink || "Sin ubicación especificada",
       hours: box.hours || {},
-      uid: auth.currentUser.uid, // Add this line to include the uid
-      eventId: eventId, // Ensure the correct eventId from the notification is used
+      uid: box.category === "EventoParaAmigos" ? box.Admin : auth.currentUser.uid,
+      eventId: eventId,
       status: "accepted",
-      coordinates: box.coordinates || {}, // Add coordinates
+      coordinates: box.coordinates || {},
+      ...(box.category === "EventoParaAmigos" && { Admin: box.Admin }), // Solo incluir Admin si es EventoParaAmigos
     };
 
     // Agregar expirationDate solo para eventos privados
