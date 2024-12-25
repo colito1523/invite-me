@@ -558,23 +558,14 @@ export const handleRejectPrivateEvent = async (params) => {
       invitedFriends: arrayRemove(auth.currentUser.uid)
     });
 
+    // Remover la notificación del estado local
     setNotifications((prevNotifications) =>
-      prevNotifications.map((notif) =>
-          notif.id === item.id
-              ? {
-                  ...notif,
-                  status: "confirmed",
-                  message: t("notifications.eventPrivateConfirmationMessage"),
-                  timestamp: new Date(),
-                  type: "eventConfirmation",
-              }
-              : notif
-      )
-  );
+      prevNotifications.filter((notif) => notif.id !== item.id)
+    );
 
   } catch (error) {
     console.error("Error al rechazar la invitación al evento privado:", error);
-    Alert.alert("Error", "No se pudo rechazar la invitación.");
+    Alert.alert(t("notifications.error"), t("notifications.rejectInvitationError"));
   }
 };
 
@@ -627,6 +618,7 @@ export const handleAcceptGeneralEvent = async (params) => {
         locationLink: "Sin ubicación especificada",
         phoneNumber: item.number,
         dateArray: [item.eventDate],
+        expirationDate: item.expirationDate || null,
       });
 
       // Actualizar la notificación existente

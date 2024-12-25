@@ -299,7 +299,7 @@ export default function NotificationsComponent() {
                   handleRejectPrivateEvent({
                     item,
                     setNotifications,
-                    t: (key) => i18n.t(key), // o tu implementación de traducción
+                    t, // Pass the t function here
                   })
                 }
               >

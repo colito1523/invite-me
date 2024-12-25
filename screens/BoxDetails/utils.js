@@ -278,6 +278,16 @@ export const handleGeneralEventInvite = async (params) => {
       friendId,
       "notifications",
     );
+
+    // Calculate expiration date (24 hours after event date)
+    const [day, month] = selectedDate.split(" ");
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthIndex = monthNames.indexOf(month);
+    const year = new Date().getFullYear();
+    const selectedDateObj = new Date(year, monthIndex, parseInt(day));
+    const expirationDate = new Date(selectedDateObj);
+    expirationDate.setHours(expirationDate.getHours() + 24);
+
     await addDoc(notificationRef, {
       fromId: user.uid,
       fromName: fromName,
@@ -289,10 +299,11 @@ export const handleGeneralEventInvite = async (params) => {
       status: "pendiente",
       timestamp: new Date(),
       hours: box.hours || {},
-      number: box.number || "Sin número", // Incluye el número aquí
+      number: box.number || "Sin número",
       coordinates: box.coordinates || {},
       seen: false,
       imageUrl: box.imageUrl || "https://via.placeholder.com/150",
+      expirationDate: expirationDate,
     });
   } catch (error) {
     console.error("Error al invitar al evento general:", error);
