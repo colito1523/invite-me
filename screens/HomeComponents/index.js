@@ -429,7 +429,7 @@ const Home = React.memo(() => {
     {hasUnreadMessages && (
       <View style={[
         styles.unreadIndicator,
-        { backgroundColor: isNightMode ? "blue" : "blue" }
+        { backgroundColor: isNightMode ? "white" : "black" }
       ]} />
     )}
   </TouchableOpacity>

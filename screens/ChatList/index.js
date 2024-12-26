@@ -447,10 +447,15 @@ const { setHasUnreadMessages } = useUnreadMessages();
 
     const muteUntil = new Date(Date.now() + selectedMuteHours * 60 * 60 * 1000);
     try {
-      const updatedMutedChats = [
-        ...mutedChats,
-        ...selectedChats.map((chatId) => ({ chatId, muteUntil })),
-      ];
+      let updatedMutedChats = [...mutedChats];
+      
+      // Procesar cada chat seleccionado
+      selectedChats.forEach((chatId) => {
+        // Remover entrada existente si existe
+        updatedMutedChats = updatedMutedChats.filter(mute => mute.chatId !== chatId);
+        // Agregar nueva entrada
+        updatedMutedChats.push({ chatId, muteUntil });
+      });
 
       // Actualiza Firebase
       const userRef = doc(database, "users", user.uid);

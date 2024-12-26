@@ -1,4 +1,3 @@
-
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const { Expo } = require('expo-server-sdk');
@@ -27,11 +26,19 @@ exports.sendChatNotification = functions.firestore
       // Get recipient (the user who didn't send the message)
       const recipientId = chatData.participants.find(id => id !== messageData.senderId);
       
-      // Get recipient's push token
+      // Get recipient's push token and muted chats
       const recipientDoc = await db.collection('users').doc(recipientId).get();
-      const expoPushToken = recipientDoc.data()?.expoPushToken;
+      const recipientData = recipientDoc.data();
+      const expoPushToken = recipientData?.expoPushToken;
+      const mutedChats = recipientData?.mutedChats || [];
 
-      if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
+      // Check if chat is muted and mute time hasn't expired
+      const isChatMuted = mutedChats.some(mute => 
+        mute.chatId === chatId && 
+        mute.muteUntil.toDate() > new Date()
+      );
+
+      if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken) || isChatMuted) return;
 
       const message = {
         to: expoPushToken,
