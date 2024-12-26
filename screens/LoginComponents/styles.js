@@ -44,14 +44,7 @@ export const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 16,
     color: '#333',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+  
   },
   loginButton: {
     width: '50%',
