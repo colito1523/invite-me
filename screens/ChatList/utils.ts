@@ -1,5 +1,17 @@
 
 import { Timestamp } from "firebase/firestore";
+import { Alert } from "react-native";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  doc,
+  updateDoc,
+  writeBatch,
+} from "firebase/firestore";
+import { database } from "../../config/firebase";
 
 export const formatTime = (timestamp: Timestamp): string => {
   if (!(timestamp instanceof Timestamp)) {
@@ -42,4 +54,195 @@ export const areChatsDifferent = (oldChats: any[], newChats: any[]): boolean => 
 export const checkNightMode = (): boolean => {
   const currentHour = new Date().getHours();
   return currentHour >= 19 || currentHour < 6;
+};
+
+export const handleDeleteChat = async (chat: any, userId: string, t: any) => {
+  try {
+    const batch = writeBatch(database);
+    const chatRef = doc(database, "chats", chat.id);
+    const messagesRef = collection(database, "chats", chat.id, "messages");
+
+    batch.update(chatRef, {
+      [`isHidden.${userId}`]: true,
+      [`deletedFor.${userId}`]: true,
+    });
+
+    const messagesSnapshot = await getDocs(messagesRef);
+    messagesSnapshot.forEach((messageDoc) => {
+      batch.update(messageDoc.ref, {
+        [`deletedFor.${userId}`]: true,
+      });
+    });
+
+    await batch.commit();
+    Alert.alert(t("indexChatList.success"), t("indexChatList.chatDeleted"));
+    return true;
+  } catch (error) {
+    console.error("Error deleting chat:", error);
+    Alert.alert(t("indexChatList.error"), t("indexChatList.chatDeleteError"));
+    return false;
+  }
+};
+
+export const handleMuteSelectedChats = async (
+  selectedChats: string[],
+  selectedMuteHours: number | null,
+  mutedChats: any[],
+  userId: string,
+  t: any
+) => {
+  if (!selectedMuteHours) {
+    Alert.alert(t("indexChatList.error"), t("indexChatList.muteDurationError"));
+    return null;
+  }
+
+  const muteUntil = new Date(Date.now() + selectedMuteHours * 60 * 60 * 1000);
+  try {
+    let updatedMutedChats = [...mutedChats];
+    
+    selectedChats.forEach((chatId) => {
+      updatedMutedChats = updatedMutedChats.filter(mute => mute.chatId !== chatId);
+      updatedMutedChats.push({ chatId, muteUntil });
+    });
+
+    const userRef = doc(database, "users", userId);
+    await updateDoc(userRef, { mutedChats: updatedMutedChats });
+
+    return updatedMutedChats;
+  } catch (error) {
+    console.error("Error muting chats:", error);
+    Alert.alert(t("indexChatList.error"), t("indexChatList.muteError"));
+    return null;
+  }
+};
+
+export const handleUnmuteChat = async (chatId: string, mutedChats: any[], userId: string, t: any) => {
+  try {
+    const updatedMutedChats = mutedChats.filter(
+      (mute) => mute.chatId !== chatId
+    );
+
+    const userRef = doc(database, "users", userId);
+    await updateDoc(userRef, { mutedChats: updatedMutedChats });
+
+    Alert.alert(t("indexChatList.success"), t("indexChatList.unmuteSuccess"));
+    return updatedMutedChats;
+  } catch (error) {
+    console.error("Error unmuting chat:", error);
+    Alert.alert(t("indexChatList.error"), t("indexChatList.unmuteError"));
+    return null;
+  }
+};
+
+export const handleChatPress = async (chat: any, userId: string) => {
+  try {
+    const messagesRef = collection(database, "chats", chat.id, "messages");
+    const unseenMessagesQuery = query(
+      messagesRef,
+      where("seen", "==", false),
+      where("senderId", "!=", userId)
+    );
+    const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+
+    unseenMessagesSnapshot.forEach(async (messageDoc) => {
+      await updateDoc(messageDoc.ref, { seen: true });
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error updating message seen status:", error);
+    return false;
+  }
+};
+
+export const checkStories = async (chats: any[], userId: string) => {
+  try {
+    const updatedChats = [];
+
+    for (const chat of chats) {
+      const userRef = doc(database, "users", chat.user.uid);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.exists() ? userDoc.data() : null;
+
+      if (!userData) continue;
+
+      const currentUserRef = doc(database, "users", userId);
+      const currentUserDoc = await getDoc(currentUserRef);
+      const currentUserData = currentUserDoc.data();
+
+      const isHidden = currentUserData?.hideStoriesFrom?.includes(chat.user.uid) || false;
+
+      const friendsRef = collection(database, "users", userId, "friends");
+      const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
+      const friendSnapshot = await getDocs(friendQuery);
+      const isFriend = !friendSnapshot.empty;
+
+      const isPrivate = userData?.isPrivate || false;
+
+      const storiesRef = collection(userRef, "stories");
+      const storiesSnapshot = await getDocs(storiesRef);
+      const now = new Date();
+
+      const userStories =
+        isPrivate && !isFriend
+          ? []
+          : isHidden
+          ? []
+          : storiesSnapshot.docs
+              .map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt instanceof Timestamp
+                  ? doc.data().createdAt.toDate()
+                  : new Date(0),
+                expiresAt: doc.data().expiresAt instanceof Timestamp
+                  ? doc.data().expiresAt.toDate()
+                  : new Date(),
+              }))
+              .filter((story) => story.expiresAt > now);
+
+      updatedChats.push({
+        ...chat,
+        user: {
+          ...chat.user,
+          hasStories: userStories.length > 0,
+          userStories,
+        },
+      });
+    }
+
+    return updatedChats;
+  } catch (error) {
+    console.error("Error checking stories:", error);
+    return null;
+  }
+};
+
+export const handleDeleteSelectedChats = async (selectedChats: string[], userId: string, t: any) => {
+  try {
+    const batch = writeBatch(database);
+
+    for (const chatId of selectedChats) {
+      const chatRef = doc(database, "chats", chatId);
+      const messagesRef = collection(database, "chats", chatId, "messages");
+
+      batch.update(chatRef, {
+        [`deletedFor.${userId}`]: true,
+        [`isHidden.${userId}`]: true,
+      });
+
+      const messagesSnapshot = await getDocs(messagesRef);
+      messagesSnapshot.forEach((messageDoc) => {
+        batch.update(messageDoc.ref, { [`deletedFor.${userId}`]: true });
+      });
+    }
+
+    await batch.commit();
+    Alert.alert(t("indexChatList.success"), t("indexChatList.chatsDeleted"));
+    return true;
+  } catch (error) {
+    console.error("Error deleting selected chats:", error);
+    Alert.alert(t("indexChatList.error"), t("indexChatList.chatsDontDeleted"));
+    return false;
+  }
 };

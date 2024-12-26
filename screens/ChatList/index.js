@@ -1,14 +1,14 @@
+
 import React, { useEffect, useState, useCallback } from "react";
-import { formatTime, truncateMessage, areChatsDifferent, checkNightMode } from './utils';
-import {
-  View,
-  Text,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  SafeAreaView,
-  Alert,
-  Modal,
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  TextInput, 
+  TouchableOpacity, 
+  SafeAreaView, 
+  Alert, 
+  Modal 
 } from "react-native";
 import { Image } from "expo-image";
 import {
@@ -33,6 +33,18 @@ import { styles, lightTheme, darkTheme } from "./styles";
 import { useTranslation } from "react-i18next";
 import StoryViewer from '../../Components/Stories/StoryViewer';
 import { useUnreadMessages } from '../../src/hooks/UnreadMessagesContext';
+import { 
+  formatTime, 
+  truncateMessage, 
+  areChatsDifferent, 
+  checkNightMode, 
+  handleDeleteChat,
+  handleMuteSelectedChats,
+  handleUnmuteChat,
+  handleChatPress,
+  checkStories,
+  handleDeleteSelectedChats
+} from './utils';
 
 export default function ChatList() {
   const [chats, setChats] = useState([]);
@@ -47,10 +59,12 @@ export default function ChatList() {
   const [selectedMuteHours, setSelectedMuteHours] = useState(null);
   const [mutedChats, setMutedChats] = useState([]);
   const [selectedStories, setSelectedStories] = useState([]);
-const [isModalVisible, setIsModalVisible] = useState(false);
-const { setHasUnreadMessages } = useUnreadMessages();
-
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const { setHasUnreadMessages } = useUnreadMessages();
   const { t } = useTranslation();
+  const user = auth.currentUser;
+  const navigation = useNavigation();
+  const theme = isNightMode ? darkTheme : lightTheme;
 
   const muteOptions = [
     { label: t("SliderContent.hours", { count: 1 }), value: 1 },
@@ -59,14 +73,9 @@ const { setHasUnreadMessages } = useUnreadMessages();
     { label: t("SliderContent.hours", { count: 24 }), value: 24 },
   ];
 
-  const user = auth.currentUser;
-  const navigation = useNavigation();
-  const theme = isNightMode ? darkTheme : lightTheme;
-
   useEffect(() => {
     const checkTime = () => {
-      const currentHour = new Date().getHours();
-      setIsNightMode(currentHour >= 19 || currentHour < 6);
+      setIsNightMode(checkNightMode());
     };
 
     checkTime();
@@ -74,25 +83,19 @@ const { setHasUnreadMessages } = useUnreadMessages();
     return () => clearInterval(interval);
   }, []);
 
-
   useEffect(() => {
     const fetchMutedChats = async () => {
       try {
         const userRef = doc(database, "users", user.uid);
         const userSnapshot = await getDoc(userRef);
-
-        // Verifica que mutedChats sea un array antes de usar .map()
         const fetchedMutedChats = (userSnapshot.data()?.mutedChats || []).map(
           (mute) => ({
             ...mute,
-            muteUntil:
-              mute.muteUntil instanceof Timestamp
-                ? mute.muteUntil.toDate()
-                : new Date(mute.muteUntil), // Convierte si es necesario
+            muteUntil: mute.muteUntil instanceof Timestamp
+              ? mute.muteUntil.toDate()
+              : new Date(mute.muteUntil),
           })
         );
-
-        console.log("Muted Chats:", fetchedMutedChats);
         setMutedChats(fetchedMutedChats);
       } catch (error) {
         console.error("Error fetching muted chats:", error);
@@ -106,9 +109,9 @@ const { setHasUnreadMessages } = useUnreadMessages();
     navigation.setOptions({
       headerStyle: {
         backgroundColor: isNightMode ? "black" : "#fff",
-        borderBottomWidth: 0, 
-        elevation: 0, // Elimina sombra en Android
-    shadowOpacity: 0,
+        borderBottomWidth: 0,
+        elevation: 0,
+        shadowOpacity: 0,
       },
       headerTintColor: isNightMode ? "#fff" : "#000",
       headerLeft: () => (
@@ -127,63 +130,42 @@ const { setHasUnreadMessages } = useUnreadMessages();
     useCallback(() => {
       const fetchChats = async () => {
         if (!user) return;
-  
+
         try {
           const userRef = doc(database, "users", user.uid);
           const userSnapshot = await getDoc(userRef);
           const blockedUsers = userSnapshot.data()?.blockedUsers || [];
-  
+
           const chatsRef = collection(database, "chats");
           const q = query(chatsRef, where("participants", "array-contains", user.uid));
-  
+
           const unsubscribe = onSnapshot(q, async (querySnapshot) => {
             let hasUnread = false;
-  
             const chatList = await Promise.all(
               querySnapshot.docs.map(async (docSnapshot) => {
                 const chatData = docSnapshot.data();
-  
-                if (
-                  chatData.isHidden?.[user.uid] ||
-                  blockedUsers.some((blockedUid) =>
-                    chatData.participants.includes(blockedUid)
-                  )
-                ) {
+                if (chatData.isHidden?.[user.uid] || blockedUsers.some((blockedUid) => 
+                  chatData.participants.includes(blockedUid))) {
                   return null;
                 }
-  
-                const otherUserId = chatData.participants.find(
-                  (uid) => uid !== user.uid
-                );
-  
-                const otherUserDoc = await getDoc(
-                  doc(database, "users", otherUserId)
-                );
-                if (!otherUserDoc.exists()) {
-                  return null;
-                }
-  
+
+                const otherUserId = chatData.participants.find((uid) => uid !== user.uid);
+                const otherUserDoc = await getDoc(doc(database, "users", otherUserId));
+                if (!otherUserDoc.exists()) return null;
+
                 const otherUserData = otherUserDoc.data();
-  
-                // Cálculo de mensajes no leídos
-                const messagesRef = collection(
-                  database,
-                  "chats",
-                  docSnapshot.id,
-                  "messages"
-                );
-  
+                const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
                 const unseenMessagesQuery = query(
                   messagesRef,
                   where("seen", "==", false),
                   where("senderId", "!=", user.uid)
                 );
                 const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
-  
+
                 if (unseenMessagesSnapshot.size > 0) {
                   hasUnread = true;
                 }
-  
+
                 return {
                   id: docSnapshot.id,
                   user: otherUserData,
@@ -193,7 +175,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                 };
               })
             );
-  
+
             const sortedChats = chatList
               .filter((chat) => chat !== null)
               .sort((a, b) => {
@@ -203,19 +185,19 @@ const { setHasUnreadMessages } = useUnreadMessages();
                 const dateB = b.lastMessageTimestamp
                   ? b.lastMessageTimestamp.toDate().getTime()
                   : 0;
-                return dateB - dateA; // Orden descendente
+                return dateB - dateA;
               });
-  
+
             setChats(sortedChats);
-            setHasUnreadMessages(hasUnread); // Actualiza el contexto global
+            setHasUnreadMessages(hasUnread);
           });
-  
+
           return () => unsubscribe();
         } catch (error) {
-          console.error("Error al obtener los chats:", error);
+          console.error("Error fetching chats:", error);
         }
       };
-  
+
       fetchChats();
     }, [user?.uid])
   );
@@ -227,217 +209,126 @@ const { setHasUnreadMessages } = useUnreadMessages();
     setFilteredChats(filtered);
   }, [chats, searchText]);
 
-  const handleDeleteChat = async (chat) => {
-    try {
-      const batch = writeBatch(database);
-      const chatRef = doc(database, "chats", chat.id);
-      const messagesRef = collection(database, "chats", chat.id, "messages");
-
-      // Actualizar isHidden y deletedFor en el documento del chat
-      batch.update(chatRef, {
-        [`isHidden.${user.uid}`]: true,
-        [`deletedFor.${user.uid}`]: true,
-      });
-
-      // Actualizar todos los mensajes como eliminados para el usuario actual
-      const messagesSnapshot = await getDocs(messagesRef);
-      messagesSnapshot.forEach((messageDoc) => {
-        batch.update(messageDoc.ref, {
-          [`deletedFor.${user.uid}`]: true,
-        });
-      });
-
-      // Confirmar los cambios en Firebase
-      await batch.commit();
-
-      // Actualizar el estado local para ocultar el chat
+  const handleDeleteChatLocal = async (chat) => {
+    const success = await handleDeleteChat(chat, user.uid, t);
+    if (success) {
       setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
-
-      Alert.alert(t("indexChatList.success"), t("indexChatList.chatDeleted"));
-    } catch (error) {
-      console.error("Error al eliminar el chat:", error);
-      Alert.alert(t("indexChatList.error"), t("indexChatList.chatDeleteError"));
     }
   };
 
-  const handleCloseMuteOptions = () => {
-    setShowMuteOptions(false); // Oculta las opciones de silenciar
-    setSelectedMuteHours(null); // Limpia la selección actual (opcional)
-  };
   const handleImagePress = async (chat) => {
-    const user = chat.user;
-  
+    const chatUser = chat.user;
+    
     try {
-      const userDoc = await getDoc(doc(database, "users", user.uid));
+      const userDoc = await getDoc(doc(database, "users", chatUser.uid));
       if (!userDoc.exists()) {
         Alert.alert(t("indexChatList.error"), t("indexChatList.dontFindResults"));
         return;
       }
-  
+
       const userData = userDoc.data();
       const isPrivate = userData?.isPrivate || false;
-  
+      
       const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-      const friendQuery = query(friendsRef, where("friendId", "==", user.uid));
+      const friendQuery = query(friendsRef, where("friendId", "==", chatUser.uid));
       const friendSnapshot = await getDocs(friendQuery);
       const isFriend = !friendSnapshot.empty;
-  
+
       if (isPrivate && !isFriend) {
-        // Si el perfil es privado y no somos amigos, redirigir al perfil del usuario
         navigation.navigate("UserProfile", {
           selectedUser: {
-            id: user.uid,
-            username: user.username || "Usuario desconocido",
+            id: chatUser.uid,
+            username: chatUser.username || "Usuario desconocido",
             firstName: userData.firstName || "Nombre desconocido",
             lastName: userData.lastName || "Apellido desconocido",
-            profileImage: user.photoUrls?.[0] || "https://via.placeholder.com/150",
+            profileImage: chatUser.photoUrls?.[0] || "https://via.placeholder.com/150",
             isPrivate: userData.isPrivate || false,
           },
         });
         return;
       }
-  
-      // Si hay historias disponibles
-      if (user.hasStories) {
-        const stories = user.userStories.map((story) => ({
+
+      if (chatUser.hasStories) {
+        const stories = chatUser.userStories.map((story) => ({
           ...story,
           createdAt: story.createdAt?.toDate ? story.createdAt : Timestamp.fromDate(new Date()),
           expiresAt: story.expiresAt?.toDate ? story.expiresAt : Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
         }));
         setSelectedStories([
           {
-            uid: user.uid,
+            uid: chatUser.uid,
             username: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
-            profileImage: user.photoUrls?.[0],
+            profileImage: chatUser.photoUrls?.[0],
             userStories: stories,
           },
         ]);
         setIsModalVisible(true);
       } else {
-        handleChatPress(chat); // Si no hay historias, abrir el chat
+        handleChatPressLocal(chat);
       }
     } catch (error) {
-      console.error("Error al manejar clic en imagen:", error);
+      console.error("Error handling image press:", error);
       Alert.alert(t("indexChatList.error"), t("indexChatList.dontProccessRequest"));
     }
   };
-  
-  
-  
-  
 
-  const handleChatPress = async (chat) => {
-    const isMuted = mutedChats.some((mute) => mute.chatId === chat.id);
-
-    try {
-      const messagesRef = collection(database, "chats", chat.id, "messages");
-      const unseenMessagesQuery = query(
-        messagesRef,
-        where("seen", "==", false),
-        where("senderId", "!=", user.uid)
-      );
-      const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
-
-      unseenMessagesSnapshot.forEach(async (messageDoc) => {
-        await updateDoc(messageDoc.ref, { seen: true });
-      });
-
+  const handleChatPressLocal = async (chat) => {
+    const success = await handleChatPress(chat, user.uid);
+    if (success) {
       navigation.navigate("ChatUsers", {
         currentChatId: chat.id,
         recipientUser: chat.user,
       });
-    } catch (error) {
-      console.error("Error updating message seen status:", error);
     }
   };
 
-  // Using imported utility functions from utils.ts
   const handleOptionsPress = () => {
     setShowOptionsMenu(!showOptionsMenu);
   };
 
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
-    if (!selectAll) {
-      setSelectedChats(chats.map((chat) => chat.id));
-    } else {
-      setSelectedChats([]);
-    }
+    setSelectedChats(selectAll ? [] : chats.map((chat) => chat.id));
   };
 
   const handleCancel = () => {
-    setShowMuteOptions(false); // Oculta las opciones de silenciar
-    setSelectedMuteHours(null); // Limpia la selección de horas
-    setIsSelectionMode(false); // Salir del modo de selección, si aplica
+    setShowMuteOptions(false);
+    setSelectedMuteHours(null);
+    setIsSelectionMode(false);
   };
 
-  const handleDeleteSelectedChats = async () => {
-    try {
-      const batch = writeBatch(database);
-
-      for (const chatId of selectedChats) {
-        const chatRef = doc(database, "chats", chatId);
-        const messagesRef = collection(database, "chats", chatId, "messages");
-
-        batch.update(chatRef, {
-          [`deletedFor.${user.uid}`]: true,
-          [`isHidden.${user.uid}`]: true,
-        });
-
-        const messagesSnapshot = await getDocs(messagesRef);
-        messagesSnapshot.forEach((messageDoc) => {
-          batch.update(messageDoc.ref, { [`deletedFor.${user.uid}`]: true });
-        });
-      }
-
-      await batch.commit();
-
-      setChats((prevChats) =>
-        prevChats.filter((chat) => !selectedChats.includes(chat.id))
-      );
+  const handleDeleteSelectedChatsLocal = async () => {
+    const success = await handleDeleteSelectedChats(selectedChats, user.uid, t);
+    if (success) {
+      setChats((prevChats) => prevChats.filter((chat) => !selectedChats.includes(chat.id)));
       setSelectedChats([]);
       setIsSelectionMode(false);
-
-      Alert.alert(t("indexChatList.success"), t("indexChatList.chatsDeleted"));
-    } catch (error) {
-      console.error("Error al eliminar los chats seleccionados:", error);
-      Alert.alert(t("indexChatList.error"), t("indexChatList.chatsDontDeleted"));
     }
   };
 
-  const handleMuteSelectedChats = async () => {
-    if (!selectedMuteHours) {
-      Alert.alert(t("indexChatList.error"), t("indexChatList.muteDurationError"));
-      return;
-    }
-
-    const muteUntil = new Date(Date.now() + selectedMuteHours * 60 * 60 * 1000);
-    try {
-      let updatedMutedChats = [...mutedChats];
-      
-      // Procesar cada chat seleccionado
-      selectedChats.forEach((chatId) => {
-        // Remover entrada existente si existe
-        updatedMutedChats = updatedMutedChats.filter(mute => mute.chatId !== chatId);
-        // Agregar nueva entrada
-        updatedMutedChats.push({ chatId, muteUntil });
-      });
-
-      // Actualiza Firebase
-      const userRef = doc(database, "users", user.uid);
-      await updateDoc(userRef, { mutedChats: updatedMutedChats });
-
-      // Actualiza el estado local
+  const handleMuteSelectedChatsLocal = async () => {
+    const updatedMutedChats = await handleMuteSelectedChats(
+      selectedChats,
+      selectedMuteHours,
+      mutedChats,
+      user.uid,
+      t
+    );
+    
+    if (updatedMutedChats) {
       setMutedChats(updatedMutedChats);
       setSelectedChats([]);
       setIsSelectionMode(false);
       setShowMuteOptions(false);
-    } catch (error) {
-      console.error("Error al silenciar los chats:", error);
-      Alert.alert(t("indexChatList.error"), t("indexChatList.muteError"));
     }
   };
-  
+
+  const handleUnmuteChatLocal = async (chatId) => {
+    const updatedMutedChats = await handleUnmuteChat(chatId, mutedChats, user.uid, t);
+    if (updatedMutedChats) {
+      setMutedChats(updatedMutedChats);
+    }
+  };
 
   const toggleChatSelection = (chatId) => {
     setSelectedChats((prevSelected) =>
@@ -447,115 +338,15 @@ const { setHasUnreadMessages } = useUnreadMessages();
     );
   };
 
-  const renderUnreadMessageCount = (chat) => {
-    if (chat.unreadCount && chat.unreadCount > 0) {
-      return (
-        <View style={styles.unreadCountContainer}>
-          <Text style={styles.unreadCountText}>{chat.unreadCount}</Text>
-        </View>
-      );
-    }
-    return null;
-  };
-
-  const handleUnmuteChat = async (chatId) => {
-    try {
-      const updatedMutedChats = mutedChats.filter(
-        (mute) => mute.chatId !== chatId
-      );
-
-      // Actualiza Firebase
-      const userRef = doc(database, "users", user.uid);
-      await updateDoc(userRef, { mutedChats: updatedMutedChats });
-
-      // Actualiza el estado local
-      setMutedChats(updatedMutedChats);
-      Alert.alert(t("indexChatList.success"), t("indexChatList.unmuteSuccess"));
-    } catch (error) {
-      console.error("Error al desactivar el silencio:", error);
-      Alert.alert(t("indexChatList.error"), t("indexChatList.unmuteError"));
-    }
-  };
-  
-  const checkStories = async () => {
-    try {
-      const updatedChats = [];
-  
-      for (const chat of chats) {
-        const userRef = doc(database, "users", chat.user.uid);
-        const userDoc = await getDoc(userRef);
-        const userData = userDoc.exists() ? userDoc.data() : null;
-  
-        if (!userData) continue;
-  
-        // Verificar si el UID del usuario está en hideStoriesFrom
-        const currentUserRef = doc(database, "users", auth.currentUser.uid);
-        const currentUserDoc = await getDoc(currentUserRef);
-        const currentUserData = currentUserDoc.data();
-  
-        const isHidden =
-          currentUserData?.hideStoriesFrom?.includes(chat.user.uid) || false;
-  
-        // Verificar si el usuario es amigo
-        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-        const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
-        const friendSnapshot = await getDocs(friendQuery);
-        const isFriend = !friendSnapshot.empty;
-  
-        // Si el perfil es privado y no son amigos, ocultar historias
-        const isPrivate = userData?.isPrivate || false;
-  
-        const storiesRef = collection(userRef, "stories");
-        const storiesSnapshot = await getDocs(storiesRef);
-        const now = new Date();
-  
-        const userStories =
-          isPrivate && !isFriend
-            ? [] // Ocultar historias si es privado y no son amigos
-            : isHidden
-            ? [] // Ocultar historias si está en hideStoriesFrom
-            : storiesSnapshot.docs
-                .map((doc) => {
-                  const data = doc.data();
-                  return {
-                    id: doc.id,
-                    ...data,
-                    createdAt: data.createdAt instanceof Timestamp
-                      ? data.createdAt.toDate()
-                      : new Date(0), // Fecha predeterminada para valores inválidos
-                    expiresAt: data.expiresAt instanceof Timestamp
-                      ? data.expiresAt.toDate()
-                      : new Date(), // Fecha predeterminada para evitar errores
-                  };
-                })
-                .filter((story) => story.expiresAt > now);
-  
-        updatedChats.push({
-          ...chat,
-          user: {
-            ...chat.user,
-            hasStories: userStories.length > 0, // Solo muestra si no está oculto
-            userStories,
-          },
-        });
-      }
-  
-      if (areChatsDifferent(chats, updatedChats)) {
-        setChats(updatedChats);
-      }
-    } catch (error) {
-      console.error("Error verificando historias en chats:", error);
-    }
-  };
-  
-  
-  
   useEffect(() => {
     if (chats.length > 0) {
-      const debounceCheckStories = setTimeout(() => {
-        checkStories();
-      }, 300); // Agregar un pequeño debounce para evitar llamadas excesivas
-  
+      const debounceCheckStories = setTimeout(async () => {
+        const updatedChats = await checkStories(chats, user.uid);
+        if (updatedChats && areChatsDifferent(chats, updatedChats)) {
+          setChats(updatedChats);
+        }
+      }, 300);
+
       return () => clearTimeout(debounceCheckStories);
     }
   }, [chats]);
@@ -565,12 +356,11 @@ const { setHasUnreadMessages } = useUnreadMessages();
       (mute) => mute.chatId === item.id && new Date(mute.muteUntil) > new Date()
     );
 
-
     return (
       <TouchableOpacity
         style={styles.chatItem}
         onPress={() =>
-          isSelectionMode ? toggleChatSelection(item.id) : handleChatPress(item)
+          isSelectionMode ? toggleChatSelection(item.id) : handleChatPressLocal(item)
         }
         onLongPress={() => {
           if (isMuted) {
@@ -581,7 +371,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                 { text: t("indexChatList.cancel"), style: "cancel" },
                 {
                   text: t("indexChatList.unmuteChat"),
-                  onPress: () => handleUnmuteChat(item.id),
+                  onPress: () => handleUnmuteChatLocal(item.id),
                 },
               ]
             );
@@ -591,7 +381,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
               t("indexChatList.deleteChatConfirmation"),
               [
                 { text: t("indexChatList.cancel"), style: "cancel" },
-                { text: t("indexChatList.delete"), onPress: () => handleDeleteChat(item) },
+                { text: t("indexChatList.delete"), onPress: () => handleDeleteChatLocal(item) },
               ]
             );
           }
@@ -608,18 +398,18 @@ const { setHasUnreadMessages } = useUnreadMessages();
           />
         )}
         <TouchableOpacity onPress={() => handleImagePress(item)}>
-        <Image
-          source={{
-            uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
-          }}
-          style={[
-            styles.userImage,
-            item.user.hasStories && {
-              ...styles.storyIndicator,
-              borderColor: isNightMode ? "white" : "black",
-            },
-          ]}
-        />
+          <Image
+            source={{
+              uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
+            }}
+            style={[
+              styles.userImage,
+              item.user.hasStories && {
+                ...styles.storyIndicator,
+                borderColor: isNightMode ? "white" : "black",
+              },
+            ]}
+          />
         </TouchableOpacity>
         <View style={styles.chatInfo}>
           <Text
@@ -680,33 +470,33 @@ const { setHasUnreadMessages } = useUnreadMessages();
       ]}
     >
       {muteOptions.map((option) => (
-         <TouchableOpacity
-         key={option.value}
-         style={[
-           styles.muteOption,
-           {
-             backgroundColor:
-               selectedMuteHours === option.value
-                 ? "transparent" // Fondo transparente si está seleccionado
-                 : isNightMode
-                 ? "white"
-                 : "black", // Fondo dinámico si no está seleccionado
-             borderWidth: selectedMuteHours === option.value ? 1 : 0, // Opcional para delinear
-             borderColor: isNightMode ? "transparent" : "transparent", // Borde para contraste
-           },
-         ]}
-         onPress={() => setSelectedMuteHours(option.value)}
-       >
-        <Text
+        <TouchableOpacity
+          key={option.value}
           style={[
-            styles.muteOptionText,
+            styles.muteOption,
             {
-              color: selectedMuteHours === option.value
-                ? (isNightMode ? "white" : "black") // Color de texto dinámico según el fondo
-                : (isNightMode ? "black" : "white"), // Texto para no seleccionados
+              backgroundColor:
+                selectedMuteHours === option.value
+                  ? "transparent"
+                  : isNightMode
+                  ? "white"
+                  : "black",
+              borderWidth: selectedMuteHours === option.value ? 1 : 0,
+              borderColor: isNightMode ? "transparent" : "transparent",
             },
           ]}
+          onPress={() => setSelectedMuteHours(option.value)}
         >
+          <Text
+            style={[
+              styles.muteOptionText,
+              {
+                color: selectedMuteHours === option.value
+                  ? (isNightMode ? "white" : "black")
+                  : (isNightMode ? "black" : "white"),
+              },
+            ]}
+          >
             {option.label}
           </Text>
         </TouchableOpacity>
@@ -743,7 +533,9 @@ const { setHasUnreadMessages } = useUnreadMessages();
           </View>
 
           <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: theme.text }]}>{t("indexChatList.tittle")}</Text>
+            <Text style={[styles.title, { color: theme.text }]}>
+              {t("indexChatList.tittle")}
+            </Text>
             <Menu
               visible={showOptionsMenu}
               onDismiss={() => setShowOptionsMenu(false)}
@@ -785,10 +577,9 @@ const { setHasUnreadMessages } = useUnreadMessages();
               onPress={handleSelectAll}
             >
               <Text style={[styles.selectAllText, { color: theme.buttonText }]}>
-                {selectAll   ? t("indexChatList.selectAll")
-    : t("indexChatList.deselectAll")}
-
-                
+                {selectAll
+                  ? t("indexChatList.selectAll")
+                  : t("indexChatList.deselectAll")}
               </Text>
             </TouchableOpacity>
           )}
@@ -813,7 +604,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                   styles.selectionModeButton,
                   { backgroundColor: theme.selectionModeButtonBackground },
                 ]}
-                onPress={handleDeleteSelectedChats}
+                onPress={handleDeleteSelectedChatsLocal}
               >
                 <Text
                   style={[
@@ -829,7 +620,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                   styles.selectionModeButton,
                   { backgroundColor: theme.selectionModeButtonBackground },
                 ]}
-                onPress={handleMuteSelectedChats}
+                onPress={handleMuteSelectedChatsLocal}
               >
                 <Text
                   style={[
@@ -837,7 +628,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
                     { color: theme.selectionModeButtonText },
                   ]}
                 >
-                   {t("indexChatList.mute")}
+                  {t("indexChatList.mute")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -858,24 +649,25 @@ const { setHasUnreadMessages } = useUnreadMessages();
               </TouchableOpacity>
             </View>
           )}
-      {isModalVisible && (
-          <Modal
+
+          {isModalVisible && (
+            <Modal
               visible={isModalVisible}
               animationType="slide"
               transparent={false}
-          >
+            >
               <StoryViewer
-                  stories={selectedStories}
-                  initialIndex={0}
-                  onClose={async () => {
-                      setIsModalVisible(false);
-                      await checkStories();
-                  }}
-                  unseenStories={{}}
-                  navigation={navigation} 
+                stories={selectedStories}
+                initialIndex={0}
+                onClose={async () => {
+                  setIsModalVisible(false);
+                  await checkStories(chats, user.uid);
+                }}
+                unseenStories={{}}
+                navigation={navigation}
               />
-          </Modal>
-      )}
+            </Modal>
+          )}
         </LinearGradient>
       </SafeAreaView>
     </Provider>
