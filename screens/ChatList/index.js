@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { formatTime, truncateMessage, areChatsDifferent, checkNightMode } from './utils';
 import {
   View,
   Text,
@@ -38,8 +39,6 @@ export default function ChatList() {
   const [searchText, setSearchText] = useState("");
   const [filteredChats, setFilteredChats] = useState([]);
   const [isNightMode, setIsNightMode] = useState(false);
-  const [hiddenChats, setHiddenChats] = useState([]);
-  const [showHiddenChats, setShowHiddenChats] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [selectedChats, setSelectedChats] = useState([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -352,40 +351,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
     }
   };
 
-  const formatTime = (timestamp) => {
-    if (!(timestamp instanceof Timestamp)) {
-      console.error("Invalid timestamp:", timestamp);
-      return "";
-    }
-
-    const now = new Date();
-    const messageDate = timestamp.toDate();
-    const diff = now.getTime() - messageDate.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const weeks = Math.floor(days / 7);
-
-    if (days === 0) {
-      return messageDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-    } else if (days === 1) {
-      return "Ayer";
-    } else if (days < 7) {
-      return `${days} días`;
-    } else if (weeks === 1) {
-      return "1 sem";
-    } else {
-      return `${weeks} sem`;
-    }
-  };
-
-  const truncateMessage = (message, maxLength = 10) => {
-    if (message.length <= maxLength) return message;
-    return message.substring(0, maxLength) + "...";
-  };
-
+  // Using imported utility functions from utils.ts
   const handleOptionsPress = () => {
     setShowOptionsMenu(!showOptionsMenu);
   };
@@ -509,10 +475,6 @@ const { setHasUnreadMessages } = useUnreadMessages();
       console.error("Error al desactivar el silencio:", error);
       Alert.alert(t("indexChatList.error"), t("indexChatList.unmuteError"));
     }
-  };
-
-  const areChatsDifferent = (oldChats, newChats) => {
-    return JSON.stringify(oldChats) !== JSON.stringify(newChats);
   };
   
   const checkStories = async () => {
@@ -834,7 +796,7 @@ const { setHasUnreadMessages } = useUnreadMessages();
           {showMuteOptions && renderMuteOptions()}
 
           <FlatList
-            data={showHiddenChats ? hiddenChats : filteredChats}
+            data={filteredChats}
             keyExtractor={(item) => item.id}
             renderItem={renderChatItem}
           />
