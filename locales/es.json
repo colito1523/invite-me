@@ -207,6 +207,7 @@
     "location": "Ubicación:",
     "locationNotAvailable": "Ubicación no disponible",
     "contact": "Contacto",
+    "closed": "Cerrado",
     "noContactNumber": "Sin número de contacto"
   },
 
@@ -549,7 +550,8 @@
     "jueves": "Jueves",
     "viernes": "Viernes",
     "sábado": "Sábado",
-    "domingo": "Domingo"
+    "domingo": "Domingo",
+     "closed": "Cerrado"
   },
   "profile": {
     "namePlaceholder": "Nombre",

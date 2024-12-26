@@ -90,15 +90,13 @@ const SliderContent = ({
       {/* Segundo Slider: Horarios */}
       <View style={styles.sliderPart}>
         <View style={styles.hoursContainer}>
-          {box.category === "EventoParaAmigos" && box.day && box.hour ? (
-            <View style={styles.notificationHours}>
-              <Text style={styles.hoursText}>{`${t("SliderContent.hour")}: ${
-                box.hour
-              }`}</Text>
-              <Text style={styles.dayText}>{`${t("SliderContent.day")}: ${
-                box.day
-              }`}</Text>
-            </View>
+        {box.category === "EventoParaAmigos" && box.day && box.hour ? (
+  <View style={styles.notificationHours}>
+    <Text style={styles.hoursText}>{`${t("SliderContent.hour")}: ${
+      box.hour
+    }`}</Text>
+    <Text style={styles.dayText}>{box.day}</Text> {/* Mostrar solo la fecha */}
+  </View>
           ) : isFromNotification && (box.hour || box.day) ? (
             <View style={styles.notificationHours}>
               <Text style={styles.hoursText}>
@@ -114,21 +112,28 @@ const SliderContent = ({
             </View>
           ) : (
             <View style={styles.hoursContent}>
-              <View style={styles.column}>
-                {Object.keys(boxData.hours || {}).map((day, index) => (
-                  <Text key={index} style={styles.dayText}>
-                    {t(`days.${day.toLowerCase()}`)} {/* Traduce el día */}
-                  </Text>
-                ))}
-              </View>
-              <View style={styles.column}>
-                {Object.values(boxData.hours || {}).map((time, index) => (
-                  <Text key={index} style={styles.timeText}>
-                    {time}
-                  </Text>
-                ))}
-              </View>
+            <View style={styles.column}>
+            {Object.keys(boxData.hours || {}).map((day, index) => (
+  <Text key={index} style={styles.dayText}>
+    {box.category === "EventoParaAmigos"
+      ? day // Muestra directamente el valor sin traducir
+      : t(`days.${day.toLowerCase()}`)} {/* Traduce el día si no es EventoParaAmigos */}
+  </Text>
+))}
             </View>
+            <View style={styles.column}>
+              {Object.keys(boxData.hours || {}).map((day, index) => (
+                <Text key={index} style={styles.timeText}>
+                  {boxData.hours[day] === "Cerrado" ||
+                  boxData.hours[day] === "Fechado" ||
+                  boxData.hours[day] === "Closed"
+                    ? t("SliderContent.closed")
+                    : boxData.hours[day] || t("SliderContent.notAvailable")}
+                </Text>
+              ))}
+            </View>
+          </View>
+          
           )}
         </View>
       </View>
@@ -191,7 +196,6 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 10,
   },
-  
   mapContainer: {
     width: width * 0.75,
     height: 180,
@@ -236,7 +240,6 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     paddingLeft: 0,
   },
-
   contactContainer: {
     padding: 15,
     alignItems: "center",
@@ -278,7 +281,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
   },
-
   notificationHours: {
     alignItems: "center",
     justifyContent: "center",

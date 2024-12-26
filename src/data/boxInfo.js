@@ -1,3 +1,4 @@
+
 const boxInfo = [
   {
     path: require("../../assets/Lisboa/Praia No Parque.jpg"),

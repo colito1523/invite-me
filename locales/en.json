@@ -206,6 +206,7 @@
     "location": "Location:",
     "locationNotAvailable": "Location not available",
     "contact": "Contact",
+    "closed": "Closed",
     "noContactNumber": "No contact number"
   },
 
@@ -532,7 +533,8 @@
     "jueves": "Thursday",
     "viernes": "Friday",
     "sábado": "Saturday",
-    "domingo": "Sunday"
+    "domingo": "Sunday",
+     "closed": "Closed"
   },
 
   "profile": {
