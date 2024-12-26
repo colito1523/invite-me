@@ -71,7 +71,11 @@ export default function Chat({ route }) {
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
   const { t } = useTranslation();
 
-  useEffect(() => {}, [messages.length]);
+  useEffect(() => {
+    if (messages.length > 0) {
+      flatListRef.current?.scrollToEnd({ animated: false });
+    }
+  }, [messages.length]);
 
   const handleMuteChat = (hours) => {
     muteChat(user.uid, chatId, hours, setMutedChats);
@@ -108,11 +112,16 @@ export default function Chat({ route }) {
 
         // Marcar los mensajes como leídos
         markMessagesAsRead(messagesList);
+        
+        // Scroll to the last message after messages are loaded
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: false });
+        }, 100);
       });
 
       return () => unsubscribe();
     }
-  }, [chatId, messages.length]);
+  }, [chatId]);
 
   const markMessagesAsRead = async (messages) => {
     try {
@@ -864,6 +873,16 @@ export default function Chat({ route }) {
           data={messages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
+          maxToRenderPerBatch={50}
+          windowSize={21}
+          removeClippedSubviews={false}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          initialNumToRender={messages.length}
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+            autoscrollToTopThreshold: 10
+          }}
         />
 
         <View style={styles.containerIg}>

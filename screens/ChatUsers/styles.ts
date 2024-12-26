@@ -347,5 +347,19 @@ export const styles = StyleSheet.create({
       fontSize: 16,
       color: "#333",
     },
+    unreadHeader: {
+      backgroundColor: '#f0f0f0',
+      padding: 10,
+      marginBottom: 10,
+      borderRadius: 8,
+      marginHorizontal: 15,
+      marginTop: 10,
+    },
+    unreadText: {
+      color: '#333',
+      fontSize: 14,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
     
 });
