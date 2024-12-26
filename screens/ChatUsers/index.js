@@ -727,7 +727,9 @@ export default function Chat({ route }) {
                   disabled={item.viewedBy?.includes(user.uid)} // Desactivar si ya fue vista
                 >
                   <Text style={styles.imageStatusText}>
-                    {item.viewedBy?.includes(user.uid) ? "Ya Vista" : "Ver"}
+                    {item.viewedBy?.includes(user.uid)
+                      ? t("chatUsers.alreadyViewed")
+                      : t("chatUsers.view")}
                   </Text>
                 </TouchableOpacity>
               ) : (
@@ -741,15 +743,6 @@ export default function Chat({ route }) {
                     source={{ uri: item.mediaUrl }}
                     style={styles.messageImage}
                   />
-                  {item.senderId === user.uid &&
-                    item.viewedBy?.includes(recipient.uid) && (
-                      <Ionicons
-                        name="checkmark-done-sharp"
-                        size={16}
-                        color="black"
-                        style={styles.seenIcon}
-                      />
-                    )}
                 </TouchableOpacity>
               ))}
 
@@ -934,7 +927,9 @@ export default function Chat({ route }) {
                     setIsMuteModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalText}>{t("chatUsers.fourHours")}</Text>
+                  <Text style={styles.modalText}>
+                    {t("chatUsers.fourHours")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalOption}
@@ -943,7 +938,9 @@ export default function Chat({ route }) {
                     setIsMuteModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalText}>{t("chatUsers.eightHours")}</Text>
+                  <Text style={styles.modalText}>
+                    {t("chatUsers.eightHours")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalOption}
@@ -952,7 +949,9 @@ export default function Chat({ route }) {
                     setIsMuteModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalText}>{t("chatUsers.twentyFourHours")}</Text>
+                  <Text style={styles.modalText}>
+                    {t("chatUsers.twentyFourHours")}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>

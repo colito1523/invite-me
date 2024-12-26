@@ -317,7 +317,10 @@
     "oneHour": "1 hour",
     "fourHours": "4 hours",
     "eightHours": "8 hours",
-    "twentyFourHours": "24 hours"
+    "twentyFourHours": "24 hours",
+    "alreadyViewed": "Seen",
+    "view":"View"
+
   },
 
   "notifications": {

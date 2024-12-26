@@ -44,7 +44,7 @@ exports.sendChatNotification = functions.firestore
         to: expoPushToken,
         sound: 'default',
         title: `${senderData.firstName} ${senderData.lastName}`,
-        body: messageData.text || 'Nuevo mensaje recibido',
+        body: messageData.image ? '📷 Imagen' : (messageData.text || 'Nuevo mensaje recibido'),
         data: { 
           chatId, 
           messageId: snapshot.id,

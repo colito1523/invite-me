@@ -113,14 +113,6 @@ export const styles = StyleSheet.create({
       textAlign: "left",
       paddingLeft: 0,
     },
-    hoursTitle: {
-      color: "white",
-      fontSize: 18,
-      fontWeight: "bold",
-      marginBottom: 10,
-      textAlign: "center",
-      width: "100%",
-    },
     contactContainer: {
       padding: 15,
       alignItems: "center",
