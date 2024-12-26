@@ -245,7 +245,7 @@ useEffect(() => {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  <ActivityIndicator size={50} color={theme.text} />
+                  <ActivityIndicator size={20} color={theme.text} />
                 ) : (
                   <Text style={[styles.submitButtonText, { color: theme.text }]}>
                     {t("createEvent.createEvent")}

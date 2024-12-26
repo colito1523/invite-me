@@ -268,7 +268,7 @@ export default function Login({ navigation }) {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator size={50} color="#333" />
+                <ActivityIndicator size={20} color="#333" />
               ) : (
                 <Text style={styles.loginButtonText}>{t('logIn')}</Text>
               )}
