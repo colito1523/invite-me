@@ -75,7 +75,7 @@ export const handleDeleteChat = async (chat: any, userId: string, t: any) => {
     });
 
     await batch.commit();
-    Alert.alert(t("indexChatList.success"), t("indexChatList.chatDeleted"));
+    Alert.alert(t("indexChatList.success"), t("indexChatList.chatsDeleted"));
     return true;
   } catch (error) {
     console.error("Error deleting chat:", error);
