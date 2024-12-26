@@ -330,6 +330,8 @@ export default function Chat({ route }) {
           lastMessageTimestamp: messageData.createdAt,
           lastMessageSenderId: user.uid,
           lastMessageSenderName: user.displayName || "Anónimo",
+          [`isHidden.${user.uid}`]: false,
+          [`deletedFor.${user.uid}`]: false,
           [`isHidden.${otherParticipantId}`]: false,
         });
       }

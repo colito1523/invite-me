@@ -1,5 +1,5 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, Timestamp, updateDoc, where, writeBatch } from "firebase/firestore";
-import { database } from "../../config/firebase";
+import { database, auth } from "../../config/firebase";
 import { Alert } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -458,10 +458,10 @@ export const fetchMutualFriends = async (params) => {
 };
 
 export const handleSendMessage = async (params) => {
-  const blockedUsers = params.blockedUsers
-  const selectedUser = params.selectedUser
-  const navigation = params.navigation
-  const t = params.t
+  const blockedUsers = params.blockedUsers;
+  const selectedUser = params.selectedUser;
+  const navigation = params.navigation;
+  const t = params.t;
 
   if (blockedUsers.includes(selectedUser.id)) {
     Alert.alert(
@@ -471,16 +471,39 @@ export const handleSendMessage = async (params) => {
     return;
   }
 
-  const currentParams = {
-    recipientUser: selectedUser,
-  };
+  try {
+    // Buscar si existe un chat entre los usuarios
+    const user = auth.currentUser;
+    const chatsRef = collection(database, "chats");
+    const q = query(
+      chatsRef,
+      where("participants", "array-contains", user.uid)
+    );
 
-  // Solo pasar imageUri si es necesario
-  if (selectedUser.profileImage) {
-    currentParams.imageUri = selectedUser.profileImage;
+    const querySnapshot = await getDocs(q);
+    let existingChatId = null;
+
+    querySnapshot.forEach((doc) => {
+      const chatData = doc.data();
+      if (chatData.participants.includes(selectedUser.id)) {
+        existingChatId = doc.id;
+      }
+    });
+
+    const currentParams = {
+      recipientUser: selectedUser,
+      currentChatId: existingChatId
+    };
+
+    if (selectedUser.profileImage) {
+      currentParams.imageUri = selectedUser.profileImage;
+    }
+
+    navigation.navigate("ChatUsers", currentParams);
+  } catch (error) {
+    console.error("Error navigating to chat:", error);
+    Alert.alert(t("userProfile.error"), t("userProfile.chatError"));
   }
-
-  navigation.navigate("ChatUsers", currentParams);
 };
 
 export const handleBoxPress = (params) => {
