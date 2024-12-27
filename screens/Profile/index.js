@@ -390,9 +390,15 @@ export default function Profile({ navigation }) {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{flex: 1}}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+        keyboardVerticalOffset={0}
       >
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <ScrollView 
+          contentContainerStyle={[
+            styles.scrollViewContent,
+            {flexGrow: 1}
+          ]}
+          keyboardShouldPersistTaps="handled"
+        >
         <View style={styles.container}>
           {isElementsVisible && (
             <TouchableOpacity

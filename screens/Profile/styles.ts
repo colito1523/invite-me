@@ -3,8 +3,8 @@ import { Dimensions, StyleSheet, Platform } from "react-native";
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 // Definir categorías de pantalla
-const isSmallScreen = screenWidth <= 411 && screenHeight <= 850; // Pantallas pequeñas
-const isMediumScreen = screenWidth > 411 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
+const isSmallScreen = screenWidth <= 412 && screenHeight <= 850; // Pantallas pequeñas
+const isMediumScreen = screenWidth > 412 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
 
 export const styles = StyleSheet.create({
     scrollViewContent: {
@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     },
     nameContainer: {
       position: "absolute",
-      top: isSmallScreen ? 550 : isMediumScreen ? 530 : 700, // Márgenes dinámicos
+      top: isSmallScreen ? 550 : isMediumScreen ? 600 : 700, // Márgenes dinámicos
       left: 20,
       right: 20,
       zIndex: 10,
