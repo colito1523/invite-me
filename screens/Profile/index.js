@@ -8,7 +8,9 @@ import {
   Alert,
   Pressable,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -385,7 +387,12 @@ export default function Profile({ navigation }) {
 
   return (
     <Provider>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{flex: 1}}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+      >
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.container}>
           {isElementsVisible && (
             <TouchableOpacity
@@ -546,6 +553,7 @@ export default function Profile({ navigation }) {
           />
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
 
       <FriendListModal
         isVisible={isFriendListVisible}
