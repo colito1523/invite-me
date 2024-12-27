@@ -41,7 +41,7 @@ import {
   handlePinViewer,
   handleUserPress,
   handleThreeDotsPress,
-  toggleHideMyStories 
+  toggleHideMyStories,
 } from "./storyUtils"; // Importar las funciones
 
 const { width, height } = Dimensions.get("window"); // Add this line
@@ -343,7 +343,6 @@ export function StoryViewer({
     }
   };
 
-
   const handleSearch = (query) => {
     setSearchQuery(query);
   };
@@ -487,7 +486,6 @@ export function StoryViewer({
     });
     setViewersModalVisible(true);
   };
-  
 
   const handleCloseViewersModal = () => {
     setViewersModalVisible(false);
@@ -516,23 +514,23 @@ export function StoryViewer({
 
     return (
       <TouchableOpacity
-      style={styles.viewerItem}
-      onPress={() =>
-        handleUserPress({
-          selectedUser: {
-            id: item.uid,
-            username: item.username,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            profileImage: item.profileImage,
-            hasStories: item.hasStories || false,
-          },
-          database,
-          navigation,
-          t,
-        })
-      }
-    >
+        style={styles.viewerItem}
+        onPress={() =>
+          handleUserPress({
+            selectedUser: {
+              id: item.uid,
+              username: item.username,
+              firstName: item.firstName,
+              lastName: item.lastName,
+              profileImage: item.profileImage,
+              hasStories: item.hasStories || false,
+            },
+            database,
+            navigation,
+            t,
+          })
+        }
+      >
         <Image
           source={{ uri: item.profileImage }}
           style={styles.viewerImage}
@@ -568,16 +566,16 @@ export function StoryViewer({
           />
         </TouchableOpacity>
         <TouchableOpacity
-  onPress={() =>
-    handleThreeDotsPress({
-      viewer: item,
-      database,
-      setSelectedViewer,
-      setIsHideStoryModalVisible,
-      user: auth.currentUser,
-    })
-  }
->
+          onPress={() =>
+            handleThreeDotsPress({
+              viewer: item,
+              database,
+              setSelectedViewer,
+              setIsHideStoryModalVisible,
+              user: auth.currentUser,
+            })
+          }
+        >
           <Entypo name="dots-three-horizontal" size={18} color="#000" />
         </TouchableOpacity>
       </TouchableOpacity>
@@ -973,19 +971,18 @@ export function StoryViewer({
             <View style={styles.modalOverlay2}>
               <TouchableWithoutFeedback>
                 <View style={styles.simpleModalContainer}>
-                <TouchableOpacity
-  onPress={() => {
-    toggleHideMyStories({
-      viewer: selectedViewer,
-      user: auth.currentUser,
-      database,
-      setSelectedViewer,
-      t,
-    });
-    setIsHideStoryModalVisible(false);
-  }}
->
-
+                  <TouchableOpacity
+                    onPress={() => {
+                      toggleHideMyStories({
+                        viewer: selectedViewer,
+                        user: auth.currentUser,
+                        database,
+                        setSelectedViewer,
+                        t,
+                      });
+                      setIsHideStoryModalVisible(false);
+                    }}
+                  >
                     <Text style={styles.simpleModalText}>
                       {selectedViewer?.hideStoriesFrom?.includes(user.uid)
                         ? t("storyViewer.showMyStories")
