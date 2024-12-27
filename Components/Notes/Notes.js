@@ -153,7 +153,9 @@ export default function Notes() {
           const likesSnapshot = await getDocs(likesRef);
           const isLiked = likesSnapshot.docs.some((doc) => doc.id === user.uid);
 
-          const friendDoc = await getDoc(doc(database, "users", friend.friendId));
+          const friendDoc = await getDoc(
+            doc(database, "users", friend.friendId)
+          );
           const friendData = friendDoc.data();
 
           return {
@@ -181,10 +183,7 @@ export default function Notes() {
       setNote(text);
       setShowSendButton(text.trim() !== "");
     } else {
-      Alert.alert(
-        t("notes.error"),
-        t("notes.emptyNoteError")
-      );
+      Alert.alert(t("notes.error"), t("notes.emptyNoteError"));
     }
   };
 
@@ -351,30 +350,27 @@ export default function Notes() {
 
   const getChatId = async (user1Id, user2Id) => {
     const chatsRef = collection(database, "chats");
-  
+
     // Query for a chat that includes both user1Id and user2Id
-    const q = query(
-      chatsRef,
-      where("participants", "array-contains", user1Id)
-    );
-  
+    const q = query(chatsRef, where("participants", "array-contains", user1Id));
+
     const querySnapshot = await getDocs(q);
-  
+
     for (const doc of querySnapshot.docs) {
       const chatParticipants = doc.data().participants;
       if (chatParticipants.includes(user2Id)) {
         return doc.id; // Return existing chat ID
       }
     }
-  
+
     // If no chat exists, return a new chat ID based on user IDs
     // This part is for creating a new chat if none exists
     const user1Doc = await getDoc(doc(database, "users", user1Id));
     const user2Doc = await getDoc(doc(database, "users", user2Id));
-  
+
     const user1Name = user1Doc.data().username;
     const user2Name = user2Doc.data().username;
-  
+
     return user1Name > user2Name
       ? `${user1Name}_${user2Name}`
       : `${user2Name}_${user1Name}`;
@@ -409,10 +405,7 @@ export default function Notes() {
       style={styles.storyContainer}
     >
       <Text
-        style={[
-          styles.usernameText,
-          { color: isNightMode ? "#fff" : "black" },
-        ]}
+        style={[styles.usernameText, { color: isNightMode ? "#fff" : "black" }]}
       >
         {isUser ? " " : note.username}
       </Text>
@@ -449,7 +442,6 @@ export default function Notes() {
       </View>
     </TouchableOpacity>
   );
-  
 
   const handleSendResponse = async () => {
     if (responseMessage.trim() === "") {
@@ -510,7 +502,7 @@ export default function Notes() {
         participants: [senderId, receiverId],
         createdAt: new Date(),
         lastMessage: "",
-        lastMessageTimestamp: new Date(), 
+        lastMessageTimestamp: new Date(),
       });
     }
 
@@ -578,7 +570,11 @@ export default function Notes() {
                           }
                           size={24}
                           color={
-                            selectedNoteFullScreen.isLiked ? "red" : "white"
+                            selectedNoteFullScreen.isLiked
+                              ? "red"
+                              : isNightMode
+                              ? "white"
+                              : "black"
                           }
                         />
                       </TouchableOpacity>
@@ -601,12 +597,12 @@ export default function Notes() {
                     <TextInput
                       style={[
                         styles.responseInput,
-                        { color: isNightMode ? "white" : "black" },
+                        { borderColor: isNightMode ? "white" : "black" }, // Borde dinámico según el modo
                       ]}
                       value={responseMessage}
                       onChangeText={setResponseMessage}
                       placeholder={t("notes.typePlaceholder")}
-                      placeholderTextColor={isNightMode ? "#ccc" : "black"}
+                      placeholderTextColor={isNightMode ? "white" : "black"}
                       multiline
                     />
                     {responseMessage.trim() !== "" && (
@@ -687,7 +683,7 @@ export default function Notes() {
                         }}
                         blurOnSubmit={false}
                         onKeyPress={({ nativeEvent }) => {
-                          if (nativeEvent.key === 'Enter') {
+                          if (nativeEvent.key === "Enter") {
                             handleSubmitNote();
                           }
                         }}
