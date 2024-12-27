@@ -33,6 +33,9 @@ exports.sendEventNotification = functions.firestore
       if (notificationData.type === 'invitation' && notificationData.eventTitle) {
         title = '¡Nueva Invitación a Evento Privado!';
         body = `${notificationData.fromName} te ha invitado a ${notificationData.eventTitle}`;
+      } else if (notificationData.type === 'generalEventInvitation' && notificationData.eventTitle) {
+        title = '¡Nueva Invitación a Evento!';
+        body = `${notificationData.fromName} te ha invitado a ${notificationData.eventTitle}`;
       } else {
         console.log('Tipo de notificación desconocido o datos incompletos:', notificationData);
         return;
@@ -48,6 +51,10 @@ exports.sendEventNotification = functions.firestore
           eventTitle: notificationData.eventTitle || '',
           eventDate: notificationData.eventDate || '',
           fromName: notificationData.fromName || '',
+          coordinates: notificationData.coordinates || null,
+          hours: notificationData.hours || {},
+          number: notificationData.number || '',
+          imageUrl: notificationData.imageUrl || '',
           _displayInNotificationScreen: true
         },
         priority: 'high'
