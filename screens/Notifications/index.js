@@ -416,18 +416,18 @@ export default function NotificationsComponent() {
       ? item.timestamp.toDate()
       : new Date(item.timestamp);
 
-    let formattedTime = "";
+    let formattedTime = item.formattedTime || "";
 
-    if (timestamp) {
+    if (!formattedTime && timestamp) {
       if (isToday(timestamp)) {
-        formattedTime = format(timestamp, "HH:mm"); // Hora y minutos para hoy
+        formattedTime = format(timestamp, "HH:mm");
       } else if (isYesterday(timestamp)) {
         formattedTime = `${t("notifications.yesterday")} ${format(
           timestamp,
           "HH:mm"
-        )}`; // Ayer con hora
+        )}`;
       } else {
-        formattedTime = format(timestamp, "dd/MM/yyyy HH:mm"); // Fecha completa con hora
+        formattedTime = format(timestamp, "dd/MM/yyyy HH:mm");
       }
     }
 
@@ -537,125 +537,124 @@ export default function NotificationsComponent() {
                 cachePolicy="memory-disk"
                 style={styles.profileImage}
               />
-            <View style={styles.textContainer}>
-  <Text
-    style={[
-      styles.notificationText,
-      { color: isNightMode ? "#fff" : "#333" },
-    ]}
-  >
-    {(item.type === "invitation" ||
-      item.type === "eventConfirmation") &&
-    (item.status === "accepted" || item.status === "confirmed") ? (
-      item.message ||
-      t("notifications.acceptedInvitation", {
-        name: item.fromName,
-      })
-    ) : (
-      <>
-        <Text
-          style={[
-            styles.boldText,
-            { color: isNightMode ? "#fff" : "#000" },
-          ]}
-        >
-          {item.fromName} {item.fromLastName || ""}
-        </Text>{" "}
-        {isFriendRequest && t("notifications.wantsToBeFriend")}
-        {isEventInvitation &&
-          t("notifications.invitedToEvent", {
-            eventTitle: item.eventTitle,
-          })}
-        {isFriendRequestResponse &&
-          (item.response === "accepted"
-            ? t("notifications.nowFriends")
-            : t("notifications.rejectedFriendRequest"))}
-        {isLikeNotification &&
-          t("userProfile.likedYourProfile")}
-        {item.type === "storyLike" &&
-          t("notifications.likedYourStory")}
-        {isNoteLikeNotification && t("notes.likedYourNote")}
-      </>
-    )}
-  </Text>
-  {(isFriendRequest || isEventInvitation) && (
-    <View style={[styles.buttonContainer, styles.acceptButton]}>
-      <TouchableOpacity
-        disabled={loadingEventId === item.id}
-        onPress={() =>
-          isFriendRequest
-            ? handleAcceptRequest({
-                request: item,
-                setLoadingEventId,
-                setNotifications,
-                t,
-              })
-            : handleAcceptEventInvitation({
-                notif: item,
-                setNotifications,
-                t,
-              })
-        }
-        style={[
-          styles.acceptButton,
-          {
-            backgroundColor: isNightMode
-              ? "rgba(255, 255, 255, 0.2)"
-              : "rgba(128, 128, 128, 0.3)",
-          },
-        ]}
-      >
-        {loadingEventId === item.id ? (
-          <ActivityIndicator size="small" color="#fff" />
-        ) : (
-          <Text
-            style={[
-              styles.buttonText,
-              { color: isNightMode ? "#fff" : "#000" },
-            ]}
-          >
-            {t("notifications.accept")}
-          </Text>
-        )}
-      </TouchableOpacity>
-      <TouchableOpacity
-        disabled={loadingEventId === item.id}
-        onPress={() =>
-          isFriendRequest
-            ? handleRejectRequest({
-                request: item,
-                setLoadingEventId,
-                setNotifications,
-                t,
-              })
-            : handleRejectEventInvitation({
-                notif: item,
-                setNotifications,
-                t,
-              })
-        }
-        style={[
-          styles.rejectButton,
-          {
-            backgroundColor: isNightMode
-              ? "rgba(255, 255, 255, 0.2)"
-              : "rgba(128, 128, 128, 0.3)",
-          },
-        ]}
-      >
-        <Text
-          style={[
-            styles.buttonText,
-            { color: isNightMode ? "#fff" : "#000" },
-          ]}
-        >
-          {t("notifications.reject")}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  )}
-</View>
-
+              <View style={styles.textContainer}>
+                <Text
+                  style={[
+                    styles.notificationText,
+                    { color: isNightMode ? "#fff" : "#333" },
+                  ]}
+                >
+                  {(item.type === "invitation" ||
+                    item.type === "eventConfirmation") &&
+                  (item.status === "accepted" ||
+                    item.status === "confirmed") ? (
+                    item.message ||
+                    t("notifications.acceptedInvitation", {
+                      name: item.fromName,
+                    })
+                  ) : (
+                    <>
+                      <Text
+                        style={[
+                          styles.boldText,
+                          { color: isNightMode ? "#fff" : "#000" },
+                        ]}
+                      >
+                        {item.fromName} {item.fromLastName || ""}
+                      </Text>{" "}
+                      {isFriendRequest && t("notifications.wantsToBeFriend")}
+                      {isEventInvitation &&
+                        t("notifications.invitedToEvent", {
+                          eventTitle: item.eventTitle,
+                        })}
+                      {isFriendRequestResponse &&
+                        (item.response === "accepted"
+                          ? t("notifications.nowFriends")
+                          : t("notifications.rejectedFriendRequest"))}
+                      {isLikeNotification && t("userProfile.likedYourProfile")}
+                      {item.type === "storyLike" &&
+                        t("notifications.likedYourStory")}
+                      {isNoteLikeNotification && t("notes.likedYourNote")}
+                    </>
+                  )}
+                </Text>
+                {(isFriendRequest || isEventInvitation) && (
+                  <View style={[styles.buttonContainer, styles.acceptButton]}>
+                    <TouchableOpacity
+                      disabled={loadingEventId === item.id}
+                      onPress={() =>
+                        isFriendRequest
+                          ? handleAcceptRequest({
+                              request: item,
+                              setLoadingEventId,
+                              setNotifications,
+                              t,
+                            })
+                          : handleAcceptEventInvitation({
+                              notif: item,
+                              setNotifications,
+                              t,
+                            })
+                      }
+                      style={[
+                        styles.acceptButton,
+                        {
+                          backgroundColor: isNightMode
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(128, 128, 128, 0.3)",
+                        },
+                      ]}
+                    >
+                      {loadingEventId === item.id ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Text
+                          style={[
+                            styles.buttonText,
+                            { color: isNightMode ? "white" : "white" },
+                          ]}
+                        >
+                          {t("notifications.accept")}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      disabled={loadingEventId === item.id}
+                      onPress={() =>
+                        isFriendRequest
+                          ? handleRejectRequest({
+                              request: item,
+                              setLoadingEventId,
+                              setNotifications,
+                              t,
+                            })
+                          : handleRejectEventInvitation({
+                              notif: item,
+                              setNotifications,
+                              t,
+                            })
+                      }
+                      style={[
+                        styles.rejectButton,
+                        {
+                          backgroundColor: isNightMode
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(128, 128, 128, 0.3)",
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.buttonText,
+                          { color: isNightMode ? "white" : "white" },
+                        ]}
+                      >
+                        {t("notifications.reject")}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             </View>
           </View>
         </TouchableOpacity>
