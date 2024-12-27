@@ -15,7 +15,7 @@ exports.sendLikeNotification = functions.firestore
     const { userId } = context.params;
     const notificationData = snapshot.data();
 
-    if (notificationData.type !== 'like') return;
+    if (notificationData.type !== 'like' && notificationData.type !== 'noteLike') return; //Added condition for noteLike
 
     try {
       const userDoc = await db.collection('users').doc(userId).get();
@@ -23,13 +23,25 @@ exports.sendLikeNotification = functions.firestore
 
       if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
 
-      const message = {
-        to: expoPushToken,
-        sound: 'default',
-        title: 'Te han dado un Like',
-        body: `${notificationData.fromName} ha dado like a tu publicación.`,
-        data: notificationData,
-      };
+      let message;
+      if (notificationData.type === 'noteLike') {
+        message = {
+          to: expoPushToken,
+          sound: 'default',
+          title: 'Nuevo Like',
+          body: `A ${notificationData.fromName} le gustó tu estado de ánimo`,
+          data: notificationData,
+        };
+      } else if (notificationData.type === 'like') {
+        message = {
+          to: expoPushToken,
+          sound: 'default',
+          title: 'Nuevo Like',
+          body: `A ${notificationData.fromName} le gustó tu perfil`,
+          data: notificationData,
+        };
+      }
+
 
       await expo.sendPushNotificationsAsync([message]);
     } catch (error) {

@@ -26,9 +26,13 @@ exports.sendEventNotification = functions.firestore
       const message = {
         to: expoPushToken,
         sound: 'default',
-        title: 'Evento',
-        body: `${notificationData.fromName} te ha invitado a un evento.`,
-        data: notificationData,
+        title: '¡Nueva Invitación!',
+        body: `${notificationData.fromName} te ha invitado a ${notificationData.eventTitle} el ${notificationData.eventDate}`,
+        data: {
+          ...notificationData,
+          _displayInNotificationScreen: true,
+          _displayType: 'event_invitation'
+        },
       };
 
       await expo.sendPushNotificationsAsync([message]);
