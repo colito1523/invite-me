@@ -13,6 +13,8 @@ import {
   TouchableWithoutFeedback,
   FlatList,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import {
   collection,
@@ -519,6 +521,11 @@ export default function Notes() {
         animationType="fade"
         onRequestClose={() => setSelectedNoteFullScreen(null)}
       >
+     <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
+    keyboardVerticalOffset={Platform.OS === "ios" ? -130 : 0}
+    style={{ flex: 1 }}
+  >
         <TouchableWithoutFeedback
           onPress={() => setSelectedNoteFullScreen(null)}
         >
@@ -617,8 +624,10 @@ export default function Notes() {
                 )}
               </View>
             </TouchableWithoutFeedback>
+
           </View>
         </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
     );
   };

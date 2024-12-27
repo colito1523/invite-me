@@ -1014,9 +1014,7 @@ export function StoryViewer({
                 }}
               />
 
-              {isImageLoading && (
-                <ActivityIndicator size={50} color="#FFFFFF" />
-              )}
+             
               <View style={styles.userInfo}>
                 <TouchableOpacity
                   style={styles.userDetails}
