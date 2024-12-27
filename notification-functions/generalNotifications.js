@@ -15,7 +15,7 @@ exports.sendGeneralNotification = functions.firestore
     const { userId } = context.params;
     const notificationData = snapshot.data();
 
-    if (['friend_request', 'like', 'event_invitation', 'noteLike'].includes(notificationData.type)) return;
+    if (['friend_request', 'like', 'event_invitation', 'noteLike', 'generalEventInvitation', 'invitation'].includes(notificationData.type)) return;
 
     try {
       const userDoc = await db.collection('users').doc(userId).get();
