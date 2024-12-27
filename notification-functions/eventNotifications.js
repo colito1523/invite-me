@@ -1,4 +1,3 @@
-
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const { Expo } = require('expo-server-sdk');
@@ -34,9 +33,6 @@ exports.sendEventNotification = functions.firestore
       if (notificationData.type === 'invitation' && notificationData.eventTitle) {
         title = '¡Nueva Invitación a Evento Privado!';
         body = `${notificationData.fromName} te ha invitado a ${notificationData.eventTitle}`;
-      } else if (notificationData.type === 'like') {
-        title = 'Nuevo Like';
-        body = `${notificationData.fromName} le gustó tu perfil.`;
       } else {
         console.log('Tipo de notificación desconocido o datos incompletos:', notificationData);
         return;
@@ -69,4 +65,3 @@ exports.sendEventNotification = functions.firestore
       console.error('Error en notificación:', error);
     }
   });
-

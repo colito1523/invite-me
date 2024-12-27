@@ -400,6 +400,11 @@ export default function NotificationsComponent() {
   };
 
   const renderNotificationItem = ({ item }) => {
+    // Skip rendering friend_request type notifications
+    if (item.type === "friend_request") {
+      return null;
+    }
+    
     const isFriendRequest =
       item.type === "friendRequest" &&
       item.status !== "accepted" &&
