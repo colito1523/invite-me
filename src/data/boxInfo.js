@@ -530,27 +530,27 @@ const boxInfo = [
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
   },
-  // {
-  //   path: require("../../assets/Lisboa/faz-frio.webp"),
-  //   title: "Faz Frio",
-  //   category: "Restaurants & Rooftops",
-  //   hours: {
-  //     Lunes: "8:00 AM - 8:00 PM",
-  //     Martes: "8:00 AM - 8:00 PM",
-  //     Miércoles: "8:00 AM - 8:00 PM",
-  //     Jueves: "8:00 AM - 8:00 PM",
-  //     Viernes: "8:00 AM - 10:00 PM",
-  //     Sábado: "10:00 AM - 10:00 PM",
-  //     Domingo: "Cerrado",
-  //   },
-  //   number: "1160419607",
-  //   coordinates: {
-  //     latitude: 38.7160092,
-  //     longitude: -9.1469233,
-  //   },
-  //   country: "Portugal", // Agregar esta propiedad
-  //   city: "Lisboa", // Agregado el campo de ciuda
-  // },
+  {
+    path: require("../../assets/Lisboa/faz frio.jpg"),
+    title: "Faz Frio",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "8:00 AM - 8:00 PM",
+      Martes: "8:00 AM - 8:00 PM",
+      Miércoles: "8:00 AM - 8:00 PM",
+      Jueves: "8:00 AM - 8:00 PM",
+      Viernes: "8:00 AM - 10:00 PM",
+      Sábado: "10:00 AM - 10:00 PM",
+      Domingo: "Cerrado",
+    },
+    number: "1160419607",
+    coordinates: {
+      latitude: 38.7160092,
+      longitude: -9.1469233,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
   {
     path: require("../../assets/Lisboa/Lx Factory.jpg"),
     title: "Lx Factory",

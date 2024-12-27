@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   View,
   Text,
@@ -6,13 +12,9 @@ import {
   RefreshControl,
   ActivityIndicator,
   TouchableOpacity, // Necesario para el TabBar
-  Image
+  Image,
 } from "react-native";
-import {
-  auth,
-  storage,
-  database,
-} from "../../config/firebase";
+import { auth, storage, database } from "../../config/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 import Box from "../../Components/Boxs/Box";
@@ -22,11 +24,42 @@ import dayjs from "dayjs";
 import { useLocationAndTime } from "../../src/hooks/useLocationAndTime";
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
-import Header from "./Header"; // Importamos el nuevo componente
-import { useTranslation } from 'react-i18next';
+import CalendarPicker from "../CalendarPicker";
+import { useTranslation } from "react-i18next";
 import { dayStyles, nightStyles, styles } from "./styles";
-import { useUnreadMessages } from '../../src/hooks/UnreadMessagesContext';
-import {fetchUnreadNotifications, fetchData, fetchProfileImage, onSignOut, subscribeToUserProfile, fetchBoxData, fetchPrivateEvents, getFilteredBoxData   } from "./utils";
+import { useUnreadMessages } from "../../src/hooks/UnreadMessagesContext";
+import {
+  fetchUnreadNotifications,
+  fetchData,
+  fetchProfileImage,
+  onSignOut,
+  subscribeToUserProfile,
+  fetchBoxData,
+  fetchPrivateEvents,
+  getFilteredBoxData,
+} from "./utils";
+
+const Header = ({ isNightMode, toggleMenu, handleDateChange, setLoading }) => {
+  const currentStyles = isNightMode ? nightStyles : dayStyles;
+
+  return (
+    <View style={currentStyles.headerContainer}>
+      <TouchableOpacity style={{ marginLeft: 10 }} onPress={toggleMenu}>
+        <Ionicons
+          name="menu"
+          size={24}
+          color={isNightMode ? "white" : "black"}
+        />
+      </TouchableOpacity>
+
+      <CalendarPicker
+        onDateChange={handleDateChange}
+        style={currentStyles.calendarPicker}
+        setLoading={setLoading}
+      />
+    </View>
+  );
+};
 
 const Home = React.memo(() => {
   const { locationGranted, country, isNightMode } = useLocationAndTime();
@@ -47,13 +80,16 @@ const Home = React.memo(() => {
   const { t } = useTranslation();
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(false);
-  const currentStyles = useMemo(() => isNightMode ? nightStyles : dayStyles, [isNightMode]);
+  const currentStyles = useMemo(
+    () => (isNightMode ? nightStyles : dayStyles),
+    [isNightMode],
+  );
   const { hasUnreadMessages } = useUnreadMessages();
   const navigateToProfile = useCallback(() => {
     navigation.navigate("Profile");
   }, [navigation]);
 
- useEffect(() => {
+  useEffect(() => {
     fetchUnreadNotifications();
   }, [navigation]);
 
@@ -73,8 +109,15 @@ const Home = React.memo(() => {
         setPrivateEvents,
       });
     }
-  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
-  
+  }, [
+    auth.currentUser,
+    database,
+    storage,
+    boxInfo,
+    setBoxData,
+    selectedDateRef,
+    fetchPrivateEvents,
+  ]);
 
   useEffect(() => {
     if (route.params?.selectedCategory) {
@@ -83,58 +126,79 @@ const Home = React.memo(() => {
   }, [route.params?.selectedCategory]);
 
   useEffect(() => {
-  const unsubscribe = navigation.addListener('focus', () => {
-    fetchProfileImage({setProfileImage}); // Asegúrate de definir esta función para obtener la imagen
-  });
-  return unsubscribe;
-}, [navigation]);
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchProfileImage({ setProfileImage }); // Asegúrate de definir esta función para obtener la imagen
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     if (country) {
-      setSelectedCity(country === 'Portugal' ? 'Lisboa' : 'Madrid');
+      setSelectedCity(country === "Portugal" ? "Lisboa" : "Madrid");
     }
   }, [country]);
 
   useEffect(() => {
-    navigation.setOptions({
-      headerStyle: {
-        backgroundColor: isNightMode ? "black" : "white",
-      },
-      headerTintColor: isNightMode ? "white" : "black",
-      headerTitle: () => (
-        <Header
-          isNightMode={isNightMode}
-          toggleMenu={toggleMenu}
-          handleDateChange={handleDateChange}
-          setLoading={setLoading}
-        />
-      ),
-    });
-  }, [navigation, isNightMode]);
+    const updateHeader = () => {
+      if (navigation.isFocused()) {
+        navigation.setOptions({
+          headerStyle: {
+            backgroundColor: isNightMode ? "black" : "white",
+          },
+          headerTintColor: isNightMode ? "white" : "black",
+          headerTitle: () => (
+            <Header
+              isNightMode={isNightMode}
+              toggleMenu={toggleMenu}
+              handleDateChange={handleDateChange}
+              setLoading={setLoading}
+            />
+          ),
+        });
+      }
+    };
 
-  const handleDateChange = useCallback(async (date) => {
-    selectedDateRef.current = date;
-    setSelectedDate(date);
-    setLoading(true);
-  
-    const user = auth.currentUser;
-    if (user) {
-      await fetchBoxData({
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
+    updateHeader();
+    
+    const focusUnsubscribe = navigation.addListener("focus", updateHeader);
+    const blurUnsubscribe = navigation.addListener("blur", () => {
+      navigation.setOptions({
+        headerTitle: null
       });
-    }
-  
-    setLoading(false);
-  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef]);
-  
+    });
+
+    return () => {
+      focusUnsubscribe();
+      blurUnsubscribe();
+    };
+  }, [navigation, isNightMode, toggleMenu, handleDateChange, setLoading]);
+
+  const handleDateChange = useCallback(
+    async (date) => {
+      selectedDateRef.current = date;
+      setSelectedDate(date);
+      setLoading(true);
+
+      const user = auth.currentUser;
+      if (user) {
+        await fetchBoxData({
+          database,
+          storage,
+          boxInfo,
+          user,
+          setBoxData,
+          selectedDate: selectedDateRef.current,
+        });
+      }
+
+      setLoading(false);
+    },
+    [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef],
+  );
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true); // Mostrar el indicador de recarga
-  
+
     const user = auth.currentUser;
     if (user) {
       try {
@@ -151,19 +215,25 @@ const Home = React.memo(() => {
           selectedDate: selectedDateRef.current,
           setPrivateEvents,
         });
-  
+
         // Actualizar la imagen de perfil
         await fetchProfileImage({ setProfileImage });
-  
+
         // (Opcional) Si necesitas más tareas programáticas, inclúyelas aquí
       } catch (error) {
         console.error("Error al recargar datos:", error);
       }
     }
-  
+
     setRefreshing(false); // Ocultar el indicador de recarga
-  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef]);
-  
+  }, [
+    auth.currentUser,
+    database,
+    storage,
+    boxInfo,
+    setBoxData,
+    selectedDateRef,
+  ]);
 
   const toggleMenu = useCallback(() => {
     setMenuVisible((prev) => !prev);
@@ -179,7 +249,7 @@ const Home = React.memo(() => {
         }, 300);
       }
     },
-    [navigation]
+    [navigation],
   );
 
   const handleCitySelect = useCallback((city) => {
@@ -193,7 +263,7 @@ const Home = React.memo(() => {
 
   useEffect(() => {
     const user = auth.currentUser;
-  
+
     if (user) {
       fetchBoxData({
         database,
@@ -204,7 +274,15 @@ const Home = React.memo(() => {
         selectedDate: selectedDateRef.current,
       });
     }
-  }, [selectedCategory, auth.currentUser, database, storage, boxInfo, selectedDateRef, setBoxData]);
+  }, [
+    selectedCategory,
+    auth.currentUser,
+    database,
+    storage,
+    boxInfo,
+    selectedDateRef,
+    setBoxData,
+  ]);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -222,17 +300,24 @@ const Home = React.memo(() => {
         setPrivateEvents, // Este valor debe pasar correctamente
       });
     }
-  }, [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
-   
+  }, [
+    auth.currentUser,
+    database,
+    storage,
+    boxInfo,
+    setBoxData,
+    selectedDateRef,
+    fetchPrivateEvents,
+  ]);
+
   // para modulizar inicio
 
   const filteredBoxData = useMemo(() => {
     return getFilteredBoxData(boxData, selectedCity, selectedCategory, t);
   }, [boxData, selectedCity, selectedCategory, t]);
 
-
   // para modulizar final
-  
+
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
@@ -245,17 +330,25 @@ const Home = React.memo(() => {
         selectedDate: selectedDateRef.current,
       });
     }
-  
+
     fetchPrivateEvents();
-  }, [selectedDate, auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, fetchPrivateEvents]);
-  
+  }, [
+    selectedDate,
+    auth.currentUser,
+    database,
+    storage,
+    boxInfo,
+    setBoxData,
+    selectedDateRef,
+    fetchPrivateEvents,
+  ]);
 
   useEffect(() => {
     const user = auth.currentUser;
-  
+
     // Llama a la función modularizada.
     const unsubscribe = subscribeToUserProfile(database, user, setProfileImage);
-  
+
     // Devuelve la función de limpieza.
     return () => {
       if (typeof unsubscribe === "function") {
@@ -263,56 +356,78 @@ const Home = React.memo(() => {
       }
     };
   }, [auth.currentUser]); // Dependencia del usuario autenticado.
-  
-  // Función para manejar el evento de clic en el box
-  const handleBoxPress = useCallback((box) => {
-    const boxWithAdmin = {
-      ...box,
-      Admin: box.Admin || box.uid || undefined  // Usar el Admin existente o el uid del evento
-    };
-    navigation.navigate("BoxDetails", { box: boxWithAdmin, selectedDate, attendees: box.attendees || [] });
-  }, [navigation, selectedDate]);
 
-  const renderItem = useCallback(({ item }) => (
-    <View style={styles.boxContainer}>
-      <Box
-  imageUrl={item.imageUrl}
-  title={item.title}
-  onPress={() => handleBoxPress(item)}
-  selectedDate={selectedDate}
-  date={item.date}
-  isPrivateEvent={item.category === "EventoParaAmigos"}
-/>
-      {item.attendees && item.attendees.length > 0 && (
-        <DotIndicator
-          profileImages={item.attendees.map(
-            (attendee) => attendee.profileImage
-          )}
-          attendeesList={item.attendees}
+  // Función para manejar el evento de clic en el box
+  const handleBoxPress = useCallback(
+    (box) => {
+      const boxWithAdmin = {
+        ...box,
+        Admin: box.Admin || box.uid || undefined, // Usar el Admin existente o el uid del evento
+      };
+      navigation.navigate("BoxDetails", {
+        box: boxWithAdmin,
+        selectedDate,
+        attendees: box.attendees || [],
+      });
+    },
+    [navigation, selectedDate],
+  );
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <View style={styles.boxContainer}>
+        <Box
+          imageUrl={item.imageUrl}
+          title={item.title}
+          onPress={() => handleBoxPress(item)}
+          selectedDate={selectedDate}
+          date={item.date}
+          isPrivateEvent={item.category === "EventoParaAmigos"}
         />
-      )}
-    </View>
-  ), [handleBoxPress, selectedDate]);
+        {item.attendees && item.attendees.length > 0 && (
+          <DotIndicator
+            profileImages={item.attendees.map(
+              (attendee) => attendee.profileImage,
+            )}
+            attendeesList={item.attendees}
+          />
+        )}
+      </View>
+    ),
+    [handleBoxPress, selectedDate],
+  );
 
   const keyExtractor = useCallback((item) => item.id || item.title, []);
 
-  const memoizedMenu = useMemo(() => (
-    <Menu
-      isVisible={menuVisible}
-      onClose={toggleMenu}
-      onCategorySelect={handleCategorySelect}
-      onCitySelect={handleCitySelect}
-      onSignOut={handleSignOut} // Aquí pasamos la función
-      isNightMode={isNightMode}
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
-    />
-  ), [menuVisible, toggleMenu, handleCategorySelect, handleCitySelect, handleSignOut, isNightMode, searchQuery, setSearchQuery]);
+  const memoizedMenu = useMemo(
+    () => (
+      <Menu
+        isVisible={menuVisible}
+        onClose={toggleMenu}
+        onCategorySelect={handleCategorySelect}
+        onCitySelect={handleCitySelect}
+        onSignOut={handleSignOut} // Aquí pasamos la función
+        isNightMode={isNightMode}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
+    ),
+    [
+      menuVisible,
+      toggleMenu,
+      handleCategorySelect,
+      handleCitySelect,
+      handleSignOut,
+      isNightMode,
+      searchQuery,
+      setSearchQuery,
+    ],
+  );
 
   useEffect(() => {
     const unsubscribe = fetchUnreadNotifications({ setUnreadNotifications });
     return () => {
-      if (typeof unsubscribe === 'function') {
+      if (typeof unsubscribe === "function") {
         unsubscribe();
       }
     };
@@ -336,7 +451,7 @@ const Home = React.memo(() => {
     <View style={currentStyles.container}>
       {memoizedMenu}
       <FlatList
-        data={filteredBoxData.flatMap(group => group.data)}
+        data={filteredBoxData.flatMap((group) => group.data)}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.container}
@@ -360,7 +475,7 @@ const Home = React.memo(() => {
                 {event.attendees && event.attendees.length > 0 && (
                   <DotIndicator
                     profileImages={event.attendees.map(
-                      (attendee) => attendee.profileImage
+                      (attendee) => attendee.profileImage,
                     )}
                     attendeesList={event.attendees}
                   />
@@ -371,70 +486,81 @@ const Home = React.memo(() => {
         }
       />
 
-{loading && (
-  <View
-    style={[
-      styles.loadingOverlay,
-      { backgroundColor: isNightMode ? "rgba(0, 0, 0, 0.8)" : "rgba(255, 255, 255, 0.5)" },
-    ]}
-  >
-    <ActivityIndicator size="large" color={isNightMode ? "white" : "black"} />
-  </View>
-)}
+      {loading && (
+        <View
+          style={[
+            styles.loadingOverlay,
+            {
+              backgroundColor: isNightMode
+                ? "rgba(0, 0, 0, 0.8)"
+                : "rgba(255, 255, 255, 0.5)",
+            },
+          ]}
+        >
+          <ActivityIndicator
+            size="large"
+            color={isNightMode ? "white" : "black"}
+          />
+        </View>
+      )}
 
-<View style={currentStyles.tabBar}>
-  <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-    <Ionicons
-      name="home"
-      size={24}
-      color={isNightMode ? "white" : "black"}
-    />
-  </TouchableOpacity>
-  <TouchableOpacity onPress={() => navigation.navigate("Search")}>
-    <Ionicons
-      name="search"
-      size={24}
-      color={isNightMode ? "white" : "black"}
-    />
-  </TouchableOpacity>
-  <TouchableOpacity onPress={navigateToProfile}>
-    {profileImage ? (
-      <Image
-        source={{ uri: profileImage }}
-        style={styles.profileImage}
-      />
-    ) : (
-      <Ionicons
-        name="person-circle"
-        size={24}
-        color={isNightMode ? "white" : "black"}
-      />
-    )}
-  </TouchableOpacity>
-  <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
-    <Ionicons
-      name="notifications"
-      size={24}
-      color={isNightMode ? "white" : "black"}
-    />
-    {unreadNotifications && (
-      <View style={[
-        styles.unreadIndicator,
-        { backgroundColor: isNightMode ? "white" : "black" }
-      ]} />
-    )}
-  </TouchableOpacity>
-  <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
-    <Ionicons name="mail" size={25} color={isNightMode ? "white" : "black"} />
-    {hasUnreadMessages && (
-      <View style={[
-        styles.unreadIndicator,
-        { backgroundColor: isNightMode ? "white" : "black" }
-      ]} />
-    )}
-  </TouchableOpacity>
-</View>
-
+      <View style={currentStyles.tabBar}>
+        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+          <Ionicons
+            name="home"
+            size={24}
+            color={isNightMode ? "white" : "black"}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Search")}>
+          <Ionicons
+            name="search"
+            size={24}
+            color={isNightMode ? "white" : "black"}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={navigateToProfile}>
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          ) : (
+            <Ionicons
+              name="person-circle"
+              size={24}
+              color={isNightMode ? "white" : "black"}
+            />
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
+          <Ionicons
+            name="notifications"
+            size={24}
+            color={isNightMode ? "white" : "black"}
+          />
+          {unreadNotifications && (
+            <View
+              style={[
+                styles.unreadIndicator,
+                { backgroundColor: isNightMode ? "white" : "black" },
+              ]}
+            />
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
+          <Ionicons
+            name="mail"
+            size={25}
+            color={isNightMode ? "white" : "black"}
+          />
+          {hasUnreadMessages && (
+            <View
+              style={[
+                styles.unreadIndicator,
+                { backgroundColor: isNightMode ? "white" : "black" },
+              ]}
+            />
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 });
