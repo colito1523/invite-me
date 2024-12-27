@@ -4,26 +4,22 @@ import {
   TouchableOpacity,
   Text,
   TextInput,
-  PanResponder,
   Modal,
   FlatList,
   TouchableWithoutFeedback,
   Alert,
   Keyboard,
   SafeAreaView,
-  ActivityIndicator,
   Dimensions, // Add this import
   Image,
 } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../config/firebase";
 import {
-  deleteDoc,
   doc,
   updateDoc,
   arrayUnion,
   getDoc,
-  setDoc,
   addDoc,
   collection,
   query,
@@ -31,7 +27,6 @@ import {
   getDocs,
 } from "firebase/firestore";
 import styles from "./StoryViewStyles";
-import { ref, deleteObject } from "firebase/storage";
 import { useTranslation } from "react-i18next";
 import Complaints from "../Complaints/Complaints";
 import { KeyboardAvoidingView, Platform } from "react-native";
@@ -39,6 +34,14 @@ import {
   createStoryPanResponder,
   handleNextUser,
   handlePreviousUser,
+  handleLikeStory,
+  deleteStory,
+  handleSendMessage,
+  loadViewers,
+  handlePinViewer,
+  handleUserPress,
+  handleThreeDotsPress,
+  toggleHideMyStories 
 } from "./storyUtils"; // Importar las funciones
 
 const { width, height } = Dimensions.get("window"); // Add this line
@@ -103,6 +106,7 @@ export function StoryViewer({
     return unseenIndex !== -1 ? unseenIndex : 0;
   });
   const [progress, setProgress] = useState(0);
+  const [localStories, setLocalStories] = useState(() => [...stories]);
   const [localUnseenStories, setLocalUnseenStories] = useState(unseenStories);
   const [message, setMessage] = useState("");
   const [viewersModalVisible, setViewersModalVisible] = useState(false);
@@ -114,10 +118,8 @@ export function StoryViewer({
   const [pinnedViewers, setPinnedViewers] = useState([]);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [loadedImages, setLoadedImages] = useState({});
-  const [isImageLoading, setIsImageLoading] = useState(true);
   const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
   const [isComplaintsVisible, setIsComplaintsVisible] = useState(false);
-  const [hideStories, setHideStories] = useState(false);
   const [showSendConfirmation, setShowSendConfirmation] = useState(false);
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
@@ -131,86 +133,11 @@ export function StoryViewer({
 
   const user = auth.currentUser;
 
-  const toggleHideMyStories = async (viewer) => {
-    if (!user || !viewer) return;
-
-    const viewerRef = doc(database, "users", viewer.uid);
-
-    try {
-      const viewerDoc = await getDoc(viewerRef);
-      const viewerData = viewerDoc.data();
-      const hideStoriesFrom = viewerData.hideStoriesFrom || [];
-
-      let updatedHideStoriesFrom;
-      if (hideStoriesFrom.includes(user.uid)) {
-        updatedHideStoriesFrom = hideStoriesFrom.filter(
-          (uid) => uid !== user.uid
-        );
-        await updateDoc(viewerRef, {
-          hideStoriesFrom: updatedHideStoriesFrom,
-        });
-        Alert.alert(
-          t("storyViewer.success"),
-          t("storyViewer.viewerCanSeeStories")
-        );
-      } else {
-        updatedHideStoriesFrom = [...hideStoriesFrom, user.uid];
-        await updateDoc(viewerRef, {
-          hideStoriesFrom: updatedHideStoriesFrom,
-        });
-        Alert.alert(
-          t("storyViewer.success"),
-          t("storyViewer.viewerCannotSeeStories")
-        );
-      }
-
-      setSelectedViewer((prev) => ({
-        ...prev,
-        hideStoriesFrom: updatedHideStoriesFrom,
-      }));
-    } catch (error) {
-      console.error("Error updating hideStoriesFrom:", error);
-      Alert.alert(
-        t("storyViewer.error"),
-        t("storyViewer.storySettingsUpdateError")
-      );
-    }
-  };
-
   useEffect(() => {
     if (!currentStory) {
       onClose(); // Cierra el visor si no hay una historia actual válida
     }
   }, [currentStory, onClose]);
-  const handleThreeDotsPress = async (viewer) => {
-    try {
-      // Obtener los datos del espectador desde Firestore
-      const viewerRef = doc(database, "users", viewer.uid);
-      const viewerDoc = await getDoc(viewerRef);
-
-      if (viewerDoc.exists()) {
-        const viewerData = viewerDoc.data();
-
-        // Actualizar el estado de `selectedViewer` con los datos más recientes
-        setSelectedViewer({ ...viewer, ...viewerData });
-
-        // Verificar si el campo `hideStoriesFrom` incluye el UID del usuario actual
-        if (
-          viewerData.hideStoriesFrom &&
-          viewerData.hideStoriesFrom.includes(user.uid)
-        ) {
-        } else {
-        }
-
-        // Mostrar el modal para ocultar o mostrar historias
-        setIsHideStoryModalVisible(true);
-      } else {
-        console.error("No se encontró el documento del espectador.");
-      }
-    } catch (error) {
-      console.error("Error al obtener el documento del espectador:", error);
-    }
-  };
 
   const getChatId = async (user1Id, user2Id) => {
     const chatsRef = collection(database, "chats");
@@ -350,48 +277,6 @@ export function StoryViewer({
     }
   };
 
-  const handlePinViewer = async (viewer) => {
-    try {
-      const userRef = doc(database, "users", auth.currentUser.uid);
-
-      // Carga los espectadores fijados actuales
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-      let updatedPinnedViewers = userData?.pinnedViewers || [];
-
-      // Encuentra el índice del espectador en la lista actual
-      const viewerIndex = updatedPinnedViewers.findIndex(
-        (v) => v.uid === viewer.uid
-      );
-
-      if (viewerIndex !== -1) {
-        // Desfijar si ya está en la lista
-        updatedPinnedViewers.splice(viewerIndex, 1);
-      } else {
-        // Fijar al espectador
-        if (updatedPinnedViewers.length >= 3) {
-          // Mantener el límite de tres espectadores
-          updatedPinnedViewers.shift();
-        }
-        updatedPinnedViewers.push({
-          uid: viewer.uid,
-          firstName: viewer.firstName,
-          lastName: viewer.lastName,
-          profileImage: viewer.profileImage,
-        });
-      }
-
-      // Actualiza Firestore con la lista de espectadores fijados
-      await updateDoc(userRef, { pinnedViewers: updatedPinnedViewers });
-
-      // Actualiza el estado local
-      setPinnedViewers(updatedPinnedViewers);
-    } catch (error) {
-      console.error("Error al fijar/desfijar espectador:", error);
-      Alert.alert(t("storyViewer.error"), t("storyViewer.pinUnpinError"));
-    }
-  };
-
   const toggleHideStories = async () => {
     if (!user || !currentStory) return;
 
@@ -458,171 +343,6 @@ export function StoryViewer({
     }
   };
 
-  const handleLikeStory = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-
-      const currentStory = stories[currentIndex]?.userStories[storyIndex];
-      if (!currentStory) return;
-
-      const storyRef = doc(
-        database,
-        "users",
-        currentStory.uid,
-        "stories",
-        currentStory.id
-      );
-
-      const userRef = doc(database, "users", currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      const userData = userSnap.data();
-
-      if (hasLiked) {
-        // Eliminar el like
-        const storySnap = await getDoc(storyRef);
-        const storyData = storySnap.data();
-
-        if (storyData?.likes) {
-          const updatedLikes = storyData.likes.filter(
-            (like) => like.uid !== currentUser.uid
-          );
-          await updateDoc(storyRef, { likes: updatedLikes });
-        }
-        setHasLiked(false);
-      } else {
-        // Agregar el like
-        const likeData = {
-          uid: currentUser.uid,
-          firstName: userData.firstName || "Usuario",
-          lastName: userData.lastName || "",
-          profileImage: userData.photoUrls?.[0] || "default-image-url",
-          timestamp: new Date(),
-        };
-
-        await updateDoc(storyRef, {
-          likes: arrayUnion(likeData),
-        });
-
-        // Enviar notificación al propietario de la historia
-        const notificationRef = collection(
-          database,
-          "users",
-          currentStory.uid,
-          "notifications"
-        );
-
-        await addDoc(notificationRef, {
-          type: "storyLike",
-          fromId: currentUser.uid,
-          fromName: `${userData.firstName} ${userData.lastName}`.trim(),
-          fromImage: userData.photoUrls?.[0] || "default-image-url",
-          storyId: currentStory.id,
-          message: `${userData.firstName} ${userData.lastName} te dio like en tu historia.`,
-          timestamp: new Date(),
-          seen: false, // Marcamos la notificación como no vista
-        });
-
-        setHasLiked(true);
-      }
-    } catch (error) {
-      console.error("Error al gestionar el like:", error);
-      Alert.alert(
-              t('storyViewer.error'),
-              t('storyViewer.errorLike')
-            );
-    }
-  };
-
-  const handleUserPress = async (selectedUser) => {
-    if (selectedUser.hasStories) {
-      try {
-        const storiesRef = collection(
-          database,
-          "users",
-          selectedUser.id,
-          "stories"
-        );
-        const storiesSnapshot = await getDocs(storiesRef);
-  
-        const now = new Date();
-        const userStories = storiesSnapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() }))
-          .filter((story) => new Date(story.expiresAt?.toDate()) > now);
-  
-        if (userStories.length > 0) {
-          navigation.navigate("StoryViewer", {
-            stories: [
-              {
-                uid: selectedUser.id,
-                username: selectedUser.username,
-                userStories,
-              },
-            ],
-            initialIndex: 0,
-          });
-          return;
-        }
-      } catch (error) {
-        console.error("Error loading stories:", error);
-        Alert.alert(
-          t("storyViewer.error"),
-          t("storyViewer.userDetailsNotFound")
-        );
-      }
-    }
-  
-    // Si no tiene historias, proceder a su perfil
-    navigation.navigate("UserProfile", { selectedUser });
-  };
-  
-
-  const loadViewers = async () => {
-    const currentStory = stories[currentIndex]?.userStories[storyIndex];
-    if (currentStory) {
-      const storyRef = doc(
-        database,
-        "users",
-        stories[currentIndex].uid,
-        "stories",
-        currentStory.id
-      );
-      const storySnap = await getDoc(storyRef);
-      if (storySnap.exists()) {
-        const storyData = storySnap.data();
-
-        // Obtener los espectadores fijados desde el documento del usuario
-        const userRef = doc(database, "users", auth.currentUser.uid);
-        const userDoc = await getDoc(userRef);
-        const userData = userDoc.data();
-        const pinnedViewers = userData?.pinnedViewers || [];
-
-        // Combina y ordena espectadores: fijados primero
-        const allViewers = [
-          ...(storyData.viewers || []),
-          ...(storyData.likes || []),
-        ];
-
-        const uniqueViewers = allViewers.filter(
-          (viewer, index, self) =>
-            index === self.findIndex((t) => t.uid === viewer.uid) &&
-            viewer.uid !== stories[currentIndex].uid
-        );
-
-        const sortedViewers = uniqueViewers.sort((a, b) => {
-          const aIsPinned = pinnedViewers.some((pv) => pv.uid === a.uid);
-          const bIsPinned = pinnedViewers.some((pv) => pv.uid === b.uid);
-
-          if (aIsPinned && !bIsPinned) return -1;
-          if (!aIsPinned && bIsPinned) return 1;
-
-          return b.timestamp - a.timestamp;
-        });
-
-        setViewers(sortedViewers);
-      }
-    }
-  };
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -716,68 +436,6 @@ export function StoryViewer({
     }
   };
 
-  const handleSendMessage = async () => {
-    if (message.trim()) {
-      const currentStory = stories[currentIndex]?.userStories[storyIndex];
-      if (currentStory) {
-        try {
-          // Obtener los IDs de usuario
-          const senderId = user.uid;
-          const receiverId = currentStory.uid;
-
-          // Verificar si ya existe un chat entre estos dos usuarios
-          const chatId = await getChatId(senderId, receiverId);
-          const chatRef = doc(database, "chats", chatId);
-          const chatDoc = await getDoc(chatRef);
-
-          if (!chatDoc.exists()) {
-            // Crear un nuevo chat si no existe
-            await setDoc(chatRef, {
-              participants: [senderId, receiverId],
-              createdAt: new Date(),
-              lastMessage: "",
-            });
-          }
-
-          // Crear el mensaje de respuesta a la historia
-          const messagesRef = collection(database, "chats", chatId, "messages");
-          const newMessage = {
-            text: message,
-            senderId: user.uid,
-            senderName: user.displayName || t("storyViewer.anonymous"),
-            createdAt: new Date(),
-            seen: false, // Cambiar de array a boolean
-            storyUrl: currentStory.storyUrl,
-            isStoryResponse: true, // Indicar que es una respuesta a una historia
-          };
-
-          // Guardar el mensaje en la colección de chats
-          await addDoc(messagesRef, newMessage);
-
-          // Actualizar el último mensaje en la referencia del chat
-          await updateDoc(chatRef, {
-            lastMessage: message,
-            lastMessageSenderId: user.uid,
-            lastMessageTimestamp: new Date(),
-          });
-
-          // Vaciar el campo de mensaje, cerrar el teclado y continuar la historia
-          setMessage("");
-          Keyboard.dismiss(); // Cerrar el teclado
-          setIsPaused(false); // Continuar la historia
-          setShowSendConfirmation(true); // Mostrar mensaje de confirmación
-          setTimeout(() => setShowSendConfirmation(false), 2000);
-        } catch (error) {
-          console.error("Error sending response:", error);
-          Alert.alert(
-            t("storyViewer.error"),
-            t("storyViewer.sendResponseError")
-          );
-        }
-      }
-    }
-  };
-
   const handleLongPressIn = () => {
     longPressTimeout.current = setTimeout(() => {
       setIsPaused(true);
@@ -818,68 +476,23 @@ export function StoryViewer({
 
   const handleOpenViewersModal = () => {
     setIsPaused(true);
-    loadViewers();
+    loadViewers({
+      auth,
+      database,
+      stories: localStories,
+      currentIndex,
+      storyIndex,
+      setViewers,
+      t,
+    });
     setViewersModalVisible(true);
   };
+  
 
   const handleCloseViewersModal = () => {
     setViewersModalVisible(false);
     setIsPaused(false);
   };
-
-  const deleteStory = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        console.error("No user logged in");
-        Alert.alert(t("storyViewer.error"), t("storyViewer.dontAuthentication"));
-        return;
-      }
-  
-      const currentStory = stories[currentIndex]?.userStories[storyIndex];
-      if (!currentStory) {
-        console.error("Story not found");
-        Alert.alert(t("storyViewer.error"), t("storyViewer.storyNotFound"));
-        return;
-      }
-  
-      // Elimina la historia de Firebase Storage
-      const storyImageRef = ref(storage, currentStory.storyUrl);
-      await deleteObject(storyImageRef).catch(() => {
-        console.warn("Story image already deleted in Firebase Storage.");
-      });
-  
-      // Elimina la historia de Firestore
-      const storyDocRef = doc(
-        database,
-        "users",
-        user.uid,
-        "stories",
-        currentStory.id
-      );
-      await deleteDoc(storyDocRef);
-  
-      // Actualizar localmente
-      const updatedUserStories = stories[currentIndex].userStories.filter(
-        (story) => story.id !== currentStory.id
-      );
-  
-      if (updatedUserStories.length === 0) {
-        // Si no hay más historias, elimina el grupo de historias
-        const updatedStories = stories.filter((_, index) => index !== currentIndex);
-        onClose(updatedStories); // Llama a `onClose` con las historias actualizadas
-      } else {
-        // Si hay más historias en el grupo
-        const updatedStories = [...stories];
-        updatedStories[currentIndex].userStories = updatedUserStories;
-        onClose(updatedStories); // Llama a `onClose` con las historias actualizadas
-      }
-    } catch (error) {
-      console.error("Error deleting story:", error);
-      Alert.alert(t("storyViewer.error"), t("storyViewer.deleteError"));
-    }
-  };
-  
 
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;
@@ -903,18 +516,23 @@ export function StoryViewer({
 
     return (
       <TouchableOpacity
-  style={styles.viewerItem}
-  onPress={() =>
-    handleUserPress({
-      id: item.uid,
-      username: item.username,
-      firstName: item.firstName,
-      lastName: item.lastName,
-      profileImage: item.profileImage,
-      hasStories: item.hasStories || false, // Asegúrate de tener esta propiedad
-    })
-  }
->
+      style={styles.viewerItem}
+      onPress={() =>
+        handleUserPress({
+          selectedUser: {
+            id: item.uid,
+            username: item.username,
+            firstName: item.firstName,
+            lastName: item.lastName,
+            profileImage: item.profileImage,
+            hasStories: item.hasStories || false,
+          },
+          database,
+          navigation,
+          t,
+        })
+      }
+    >
         <Image
           source={{ uri: item.profileImage }}
           style={styles.viewerImage}
@@ -933,7 +551,15 @@ export function StoryViewer({
         )}
         <TouchableOpacity
           style={styles.viewerEditButton}
-          onPress={() => handlePinViewer(item)}
+          onPress={() =>
+            handlePinViewer({
+              viewer: item,
+              auth,
+              database,
+              setPinnedViewers,
+              t,
+            })
+          }
         >
           <AntDesign
             name="pushpino"
@@ -941,7 +567,17 @@ export function StoryViewer({
             color={isPinned ? "#007AFF" : "#000"}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleThreeDotsPress(item)}>
+        <TouchableOpacity
+  onPress={() =>
+    handleThreeDotsPress({
+      viewer: item,
+      database,
+      setSelectedViewer,
+      setIsHideStoryModalVisible,
+      user: auth.currentUser,
+    })
+  }
+>
           <Entypo name="dots-three-horizontal" size={18} color="#000" />
         </TouchableOpacity>
       </TouchableOpacity>
@@ -1014,7 +650,6 @@ export function StoryViewer({
                 }}
               />
 
-             
               <View style={styles.userInfo}>
                 <TouchableOpacity
                   style={styles.userDetails}
@@ -1068,7 +703,9 @@ export function StoryViewer({
 
           {showSendConfirmation && (
             <View style={styles.sendConfirmation}>
-              <Text style={styles.sendConfirmationText}>{t('storyViewer.sendMenssage')}</Text>
+              <Text style={styles.sendConfirmationText}>
+                {t("storyViewer.sendMenssage")}
+              </Text>
             </View>
           )}
 
@@ -1100,14 +737,39 @@ export function StoryViewer({
               {message.trim().length > 0 && (
                 <TouchableOpacity
                   style={styles.iconButton}
-                  onPress={handleSendMessage}
+                  onPress={() =>
+                    handleSendMessage({
+                      auth,
+                      database,
+                      t,
+                      stories,
+                      currentIndex,
+                      storyIndex,
+                      message,
+                      setMessage,
+                      Keyboard,
+                      setIsPaused,
+                      setShowSendConfirmation,
+                    })
+                  }
                 >
                   <Ionicons name="send" size={24} color="#FFFFFF" />
                 </TouchableOpacity>
               )}
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={handleLikeStory}
+                onPress={() =>
+                  handleLikeStory({
+                    auth,
+                    stories,
+                    currentIndex,
+                    storyIndex,
+                    hasLiked,
+                    setHasLiked,
+                    database,
+                    t,
+                  })
+                }
               >
                 <Ionicons
                   name={hasLiked ? "heart" : "heart-outline"}
@@ -1159,7 +821,19 @@ export function StoryViewer({
                         </View>
                         <TouchableOpacity
                           style={styles.deleteButton}
-                          onPress={deleteStory}
+                          onPress={() =>
+                            deleteStory({
+                              auth,
+                              stories: localStories, // Usar localStories
+                              currentIndex,
+                              storyIndex,
+                              setStories: setLocalStories, // Usar setLocalStories
+                              onClose,
+                              database,
+                              storage,
+                              t,
+                            })
+                          }
                         >
                           <Ionicons
                             name="trash-outline"
@@ -1202,11 +876,22 @@ export function StoryViewer({
                       style={styles.deleteButton}
                       onPress={() => {
                         setIsOptionsModalVisible(false);
-                        deleteStory(); // Llamamos a la función de eliminar historia
+                        deleteStory({
+                          auth,
+                          stories: localStories, // Usar localStories
+                          currentIndex,
+                          storyIndex,
+                          setStories: setLocalStories, // Usar setLocalStories
+                          onClose,
+                          database,
+                          storage,
+                          t,
+                        });
                       }}
                     >
-                      <Text style={styles.deleteButtonText}>{t('storyViewer.Delete')}</Text>
-                      
+                      <Text style={styles.deleteButtonText}>
+                        {t("storyViewer.Delete")}
+                      </Text>
                     </TouchableOpacity>
                   ) : (
                     // Opciones para otros usuarios
@@ -1219,7 +904,7 @@ export function StoryViewer({
                         }}
                       >
                         <Text style={styles.optionButtonText}>
-                        {t('storyViewer.DontSeeMore')}
+                          {t("storyViewer.DontSeeMore")}
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -1229,8 +914,9 @@ export function StoryViewer({
                           setIsComplaintsVisible(true); // Abre el modal de denuncias
                         }}
                       >
-                        <Text style={styles.optionButtonText}>{t('storyViewer.Report')}</Text>
-                        
+                        <Text style={styles.optionButtonText}>
+                          {t("storyViewer.Report")}
+                        </Text>
                       </TouchableOpacity>
                     </>
                   )}
@@ -1251,10 +937,7 @@ export function StoryViewer({
 
               // Validación para asegurar que `currentStory` y sus datos están disponibles
               if (!currentStory || !currentStory.uid || !currentStory.id) {
-                Alert.alert(
-                  t("storyViewer.error"),
-                  t("storyViewer.hideError")
-                );
+                Alert.alert(t("storyViewer.error"), t("storyViewer.hideError"));
                 setIsSubmittingReport(false);
                 return;
               }
@@ -1290,16 +973,23 @@ export function StoryViewer({
             <View style={styles.modalOverlay2}>
               <TouchableWithoutFeedback>
                 <View style={styles.simpleModalContainer}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      toggleHideMyStories(selectedViewer);
-                      setIsHideStoryModalVisible(false);
-                    }}
-                  >
+                <TouchableOpacity
+  onPress={() => {
+    toggleHideMyStories({
+      viewer: selectedViewer,
+      user: auth.currentUser,
+      database,
+      setSelectedViewer,
+      t,
+    });
+    setIsHideStoryModalVisible(false);
+  }}
+>
+
                     <Text style={styles.simpleModalText}>
                       {selectedViewer?.hideStoriesFrom?.includes(user.uid)
                         ? t("storyViewer.showMyStories")
-    : t("storyViewer.hideMyStories")}
+                        : t("storyViewer.hideMyStories")}
                     </Text>
                   </TouchableOpacity>
                 </View>
