@@ -402,7 +402,7 @@ export const handlePinViewer = async ({
       updatedPinnedViewers.splice(viewerIndex, 1);
     } else {
       // Fijar al espectador
-      if (updatedPinnedViewers.length >= 3) {
+      if (updatedPinnedViewers.length >= 7) {
     
         return;
       }

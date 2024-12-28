@@ -438,7 +438,7 @@ const Home = React.memo(() => {
       <View style={currentStyles.centeredView}>
         <ActivityIndicator size={50} color={Colors.primary} />
         <Text style={currentStyles.loadingText}>
-          Solicitando permisos de ubicación...
+          {t('HomeIndex.requestingLocationPermissions')}
         </Text>
         {errorMessage && (
           <Text style={currentStyles.errorText}>{errorMessage}</Text>

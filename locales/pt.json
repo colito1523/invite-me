@@ -1,4 +1,7 @@
 {
+  "HomeIndex": {
+    "requestingLocationPermissions" : "Solicitando permissões de localização..."
+  },
   "complaints": {
     "reportUser": "Denunciar usuário",
     "reportUserConfirmation": "Tem certeza de que deseja denunciar este usuário?",
@@ -149,6 +152,7 @@
   },
 
   "storyViewer": {
+    "info": "Informações",
     "error": "Erro",
     "user": "Usuário",
     "anonymous": "Anônimo",
