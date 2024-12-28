@@ -49,6 +49,9 @@ import {
   handlePrevious,
   handleTap,
   handleNext,
+  preloadNextStory,
+  handleCloseViewersModal,
+  fetchBlockedUsers 
 } from "./storyUtils"; // Importar las funciones
 
 const { width, height } = Dimensions.get("window"); // Add this line
@@ -138,6 +141,8 @@ export function StoryViewer({
 
   const user = auth.currentUser;
 
+  const currentStory = stories[currentIndex]?.userStories[storyIndex];
+
   useEffect(() => {
     if (!currentStory) {
       onClose(); // Cierra el visor si no hay una historia actual válida
@@ -153,20 +158,7 @@ export function StoryViewer({
   }, [isComplaintsVisible, isOptionsModalVisible, isKeyboardVisible]);
 
   useEffect(() => {
-    const fetchBlockedUsers = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const userDoc = await getDoc(doc(database, "users", user.uid));
-        const blockedList = userDoc.data()?.blockedUsers || [];
-        setBlockedUsers(blockedList);
-      } catch (error) {
-        console.error("Error fetching blocked users:", error);
-      }
-    };
-
-    fetchBlockedUsers();
+    fetchBlockedUsers({ auth, database, setBlockedUsers });
   }, []);
 
   const handleNextWrapper = () => {
@@ -179,6 +171,7 @@ export function StoryViewer({
       setProgress,
       onClose,
       localUnseenStories,
+      setLocalUnseenStories,
     });
   };
 
@@ -189,7 +182,17 @@ export function StoryViewer({
         if (progress < 1) {
           setProgress((prev) => prev + 0.004);
         } else {
-          handleNextWrapper();
+          handleNextWrapper({
+            stories,
+            currentIndex,
+            setCurrentIndex,
+            storyIndex,
+            setStoryIndex,
+            setProgress,
+            onClose,
+            localUnseenStories,
+            setLocalUnseenStories,
+          });
         }
       }, 20);
     }
@@ -249,24 +252,14 @@ export function StoryViewer({
     }
 
     // Pre-cargar la siguiente historia si existe
-    preloadNextStory();
+    preloadNextStory({
+      currentIndex,
+      storyIndex,
+      stories,
+      loadedImages,
+      setLoadedImages,
+    });
   }, [currentIndex, storyIndex]);
-
-  const preloadNextStory = () => {
-    let nextStoryUrl = null;
-    if (storyIndex < stories[currentIndex]?.userStories.length - 1) {
-      nextStoryUrl =
-        stories[currentIndex]?.userStories[storyIndex + 1]?.storyUrl;
-    } else if (currentIndex < stories.length - 1) {
-      nextStoryUrl = stories[currentIndex + 1]?.userStories[0]?.storyUrl;
-    }
-
-    if (nextStoryUrl && !loadedImages[nextStoryUrl]) {
-      Image.prefetch(nextStoryUrl).then(() => {
-        setLoadedImages((prev) => ({ ...prev, [nextStoryUrl]: true }));
-      });
-    }
-  };
 
   useEffect(() => {
     if (auth && auth.currentUser && currentStory?.id && currentStory?.uid) {
@@ -280,16 +273,12 @@ export function StoryViewer({
       console.error("auth o auth.currentUser no está disponible.");
     }
   }, [currentStory, auth, database]);
-  
- 
 
   const filteredViewers = viewers.filter((viewer) =>
     `${viewer.firstName} ${viewer.lastName}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
-
-
 
   const panResponder = createStoryPanResponder({
     handleCloseViewer: () => onClose(unseenStories),
@@ -316,12 +305,6 @@ export function StoryViewer({
     isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
   });
 
-
-  const handleCloseViewersModal = () => {
-    setViewersModalVisible(false);
-    setIsPaused(false);
-  };
-
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;
   const isFirstStory = currentIndex === 0 && storyIndex === 0;
@@ -330,7 +313,12 @@ export function StoryViewer({
     currentIndex === stories.length - 1 &&
     storyIndex === stories[currentIndex]?.userStories.length - 1;
 
-  const currentStory = stories[currentIndex]?.userStories[storyIndex];
+  if (!currentStory) {
+    console.error("Historia actual no válida:", currentStory);
+    onClose?.();
+    return null;
+  }
+
   const hoursAgo = currentStory
     ? Math.floor(
         (Date.now() - currentStory.createdAt.toDate()) / (1000 * 60 * 60)
@@ -425,7 +413,7 @@ export function StoryViewer({
       >
         <View style={styles.container} {...panResponder.panHandlers}>
           <TouchableWithoutFeedback
-             onPressIn={() =>
+            onPressIn={() =>
               handleLongPressIn({
                 longPressTimeout,
                 setIsPaused,
@@ -682,9 +670,21 @@ export function StoryViewer({
             animationType="slide"
             transparent={true}
             visible={viewersModalVisible}
-            onRequestClose={handleCloseViewersModal}
+            onRequestClose={() =>
+              handleCloseViewersModal({
+                setViewersModalVisible,
+                setIsPaused,
+              })
+            }
           >
-            <TouchableWithoutFeedback onPress={handleCloseViewersModal}>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                handleCloseViewersModal({
+                  setViewersModalVisible,
+                  setIsPaused,
+                })
+              }
+            >
               <View style={styles.modalOverlay}>
                 <TouchableWithoutFeedback>
                   <View style={styles.viewersModalContainer}>

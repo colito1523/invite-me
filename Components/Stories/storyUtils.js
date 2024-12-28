@@ -1,4 +1,7 @@
-import { PanResponder } from "react-native";
+import { PanResponder,
+  Alert,
+  Image,
+ } from "react-native";
 import {
   doc,
   updateDoc,
@@ -12,7 +15,6 @@ import {
   where,
   setDoc,
 } from "firebase/firestore";
-import { Alert } from "react-native";
 import { ref, deleteObject } from "firebase/storage";
 import { auth, database, storage } from "../../config/firebase";
 
@@ -746,6 +748,7 @@ export const handleNext = ({
   setProgress,
   onClose,
   localUnseenStories,
+  setLocalUnseenStories,
 }) => {
   try {
     // Verificar que existan historias y el índice sea válido
@@ -761,6 +764,12 @@ export const handleNext = ({
     }
 
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
+
+    if (!currentStory) {
+      console.error("Historia actual no válida:", currentStory);
+      onClose(localUnseenStories);
+      return;
+    }
 
     // Actualizar historias no vistas
     if (currentStory && localUnseenStories[currentStory.uid]?.length > 0) {
@@ -792,6 +801,48 @@ export const handleNext = ({
     onClose(localUnseenStories);
   }
 };
+
+export const preloadNextStory = ({
+  currentIndex,
+  storyIndex,
+  stories,
+  loadedImages,
+  setLoadedImages,
+}) => {
+  let nextStoryUrl = null;
+
+  if (storyIndex < stories[currentIndex]?.userStories.length - 1) {
+    nextStoryUrl = stories[currentIndex]?.userStories[storyIndex + 1]?.storyUrl;
+  } else if (currentIndex < stories.length - 1) {
+    nextStoryUrl = stories[currentIndex + 1]?.userStories[0]?.storyUrl;
+  }
+
+  if (nextStoryUrl && !loadedImages[nextStoryUrl]) {
+    Image.prefetch(nextStoryUrl).then(() => {
+      setLoadedImages((prev) => ({ ...prev, [nextStoryUrl]: true }));
+    });
+  }
+};
+
+export const handleCloseViewersModal = ({ setViewersModalVisible, setIsPaused }) => {
+  setViewersModalVisible(false);
+  setIsPaused(false);
+};
+
+
+export const fetchBlockedUsers = async ({ auth, database, setBlockedUsers }) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const userDoc = await getDoc(doc(database, "users", user.uid));
+    const blockedList = userDoc.data()?.blockedUsers || [];
+    setBlockedUsers(blockedList);
+  } catch (error) {
+    console.error("Error fetching blocked users:", error);
+  }
+};
+
 
 
 
