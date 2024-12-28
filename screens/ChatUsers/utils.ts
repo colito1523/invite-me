@@ -1,4 +1,4 @@
-import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc,  } from "firebase/firestore";
 import { database } from "../../config/firebase";
 
 export const muteChat = async (
@@ -41,5 +41,56 @@ export const muteChat = async (
     }
   } catch (error) {
     console.error("Error al silenciar el chat:", error);
+  }
+};
+
+export const handleDeleteMessage = async (database, chatId, user, messageId, recipientUser, setMessages) => {
+  try {
+    const messageRef = doc(database, "chats", chatId, "messages", messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      console.error("Mensaje no encontrado");
+      return;
+    }
+
+    const messageData = messageDoc.data();
+
+    if (messageData.senderId === user.uid) {
+      // Si es nuestro mensaje, marcarlo como eliminado para ambos usuarios
+      await updateDoc(messageRef, {
+        deletedFor: {
+          [user.uid]: true,
+          [recipientUser.id]: true,
+        },
+      });
+    } else {
+      // Si es mensaje del otro usuario, marcarlo como eliminado solo para nosotros
+      await updateDoc(messageRef, {
+        [`deletedFor.${user.uid}`]: true,
+      });
+    }
+
+    // Actualizar el estado local
+    setMessages((prevMessages) =>
+      prevMessages.map((message) => {
+        if (message.id === messageId) {
+          return {
+            ...message,
+            deletedFor: {
+              ...(message.deletedFor || {}),
+              [user.uid]: true,
+              ...(messageData.senderId === user.uid
+                ? { [recipientUser.id]: true }
+                : {}),
+            },
+          };
+        }
+        return message;
+      })
+    );
+  } catch (error) {
+    console.error("Error al eliminar el mensaje:", error);
+    throw new Error("No se pudo eliminar el mensaje");
   }
 };

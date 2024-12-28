@@ -41,7 +41,7 @@ import { ImageBackground } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
-import { muteChat } from "./utils";
+import { muteChat, handleDeleteMessage  } from "./utils";
 
 import Complaints from "../../Components/Complaints/Complaints";
 import { useTranslation } from "react-i18next";
@@ -541,7 +541,7 @@ export default function Chat({ route }) {
           },
           {
             text: t("chatUsers.delete"),
-            onPress: () => handleDeleteMessage(message.id),
+            onPress: () => onDeleteMessage(message.id),
             style: "destructive",
           },
         ]
@@ -549,11 +549,9 @@ export default function Chat({ route }) {
     }
   };
 
-  const handleDeleteMessage = (messageId) => {
-    setMessages((prevMessages) =>
-      prevMessages.filter((message) => message.id !== messageId)
-    );
-    setSelectedMessageId(null);
+  const onDeleteMessage = (messageId) => {
+    handleDeleteMessage(database, chatId, user, messageId, recipientUser, setMessages)
+      .catch((error) => Alert.alert("Error", error.message));
   };
 
   const renderDate = (date) => {
@@ -586,7 +584,8 @@ export default function Chat({ route }) {
 
     const isOwnMessage = item.senderId === user.uid;
 
-    if (item.deletedFor && item.deletedFor[user.uid]) {
+    const isDeleted = item.deletedFor?.[user.uid];
+    if (isDeleted) {
       return null;
     }
 
