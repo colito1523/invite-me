@@ -690,6 +690,9 @@ export const handleTap = ({
   stories,
   currentIndex,
   storyIndex,
+  setStoryIndex, // Ensure setStoryIndex is included
+  setCurrentIndex,
+  setProgress,
 }) => {
   if (isLongPressActive) return;
 
@@ -705,9 +708,91 @@ export const handleTap = ({
   if (locationX > width / 2) {
     handleNext();
   } else {
-    handlePrevious();
+    handlePrevious({
+      storyIndex,
+      setStoryIndex,
+      currentIndex,
+      setCurrentIndex,
+      stories,
+      setProgress,
+    });
   }
 };
+
+export const handlePrevious = ({
+  storyIndex,
+  setStoryIndex,
+  currentIndex,
+  setCurrentIndex,
+  stories,
+  setProgress,
+}) => {
+  if (storyIndex > 0) {
+    setStoryIndex((prev) => prev - 1);
+    setProgress(0);
+  } else if (currentIndex > 0) {
+    setCurrentIndex((prev) => prev - 1);
+    setStoryIndex(stories[currentIndex - 1]?.userStories.length - 1 || 0);
+    setProgress(0);
+  }
+};
+
+export const handleNext = ({
+  stories,
+  currentIndex,
+  setCurrentIndex,
+  storyIndex,
+  setStoryIndex,
+  setProgress,
+  onClose,
+  localUnseenStories,
+}) => {
+  try {
+    // Verificar que existan historias y el índice sea válido
+    if (!stories || !Array.isArray(stories) || stories.length === 0) {
+      onClose(localUnseenStories);
+      return;
+    }
+
+    // Verificar que el índice actual sea válido
+    if (currentIndex >= stories.length) {
+      onClose(localUnseenStories);
+      return;
+    }
+
+    const currentStory = stories[currentIndex]?.userStories[storyIndex];
+
+    // Actualizar historias no vistas
+    if (currentStory && localUnseenStories[currentStory.uid]?.length > 0) {
+      setLocalUnseenStories((prev) => ({
+        ...prev,
+        [currentStory.uid]: prev[currentStory.uid].filter(
+          (story) => story.id !== currentStory.id
+        ),
+      }));
+    }
+
+    // Determinar si hay más historias
+    const hasMoreStoriesInCurrentUser =
+      storyIndex < stories[currentIndex]?.userStories?.length - 1;
+    const hasMoreUsers = currentIndex < stories.length - 1;
+
+    if (hasMoreStoriesInCurrentUser) {
+      setStoryIndex((prev) => prev + 1);
+      setProgress(0);
+    } else if (hasMoreUsers) {
+      setCurrentIndex((prev) => prev + 1);
+      setStoryIndex(0);
+      setProgress(0);
+    } else {
+      onClose(localUnseenStories);
+    }
+  } catch (error) {
+    console.error("Error al navegar a la siguiente historia:", error);
+    onClose(localUnseenStories);
+  }
+};
+
 
 
 

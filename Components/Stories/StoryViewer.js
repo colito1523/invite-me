@@ -46,7 +46,9 @@ import {
   handleOpenViewersModal,
   handleLongPressIn,
   handleLongPressOut,
+  handlePrevious,
   handleTap,
+  handleNext,
 } from "./storyUtils"; // Importar las funciones
 
 const { width, height } = Dimensions.get("window"); // Add this line
@@ -60,7 +62,6 @@ export function StoryViewer({
 }) {
   const { t } = useTranslation();
 
-  // Add logging to debug the issue
   useEffect(() => {
     console.log("StoryViewer props:", { stories, initialIndex, unseenStories });
     if (!stories || !Array.isArray(stories)) {
@@ -87,7 +88,6 @@ export function StoryViewer({
     }
   }, [stories, initialIndex, unseenStories]);
 
-  // Deserialize the createdAt and expiresAt fields
   const deserializedStories = stories.map((storyGroup) => ({
     ...storyGroup,
     userStories: storyGroup.userStories.map((story) => ({
@@ -144,34 +144,6 @@ export function StoryViewer({
     }
   }, [currentStory, onClose]);
 
-  const getChatId = async (user1Id, user2Id) => {
-    const chatsRef = collection(database, "chats");
-
-    // Query for a chat that includes both user1Id and user2Id
-    const q = query(chatsRef, where("participants", "array-contains", user1Id));
-
-    const querySnapshot = await getDocs(q);
-
-    for (const doc of querySnapshot.docs) {
-      const chatParticipants = doc.data().participants;
-      if (chatParticipants.includes(user2Id)) {
-        return doc.id; // Return existing chat ID
-      }
-    }
-
-    // If no chat exists, return a new chat ID based on user IDs
-    // This part is for creating a new chat if none exists
-    const user1Doc = await getDoc(doc(database, "users", user1Id));
-    const user2Doc = await getDoc(doc(database, "users", user2Id));
-
-    const user1Name = user1Doc.data().username;
-    const user2Name = user2Doc.data().username;
-
-    return user1Name > user2Name
-      ? `${user1Name}_${user2Name}`
-      : `${user2Name}_${user1Name}`;
-  };
-
   useEffect(() => {
     if (isComplaintsVisible) {
       setIsPaused(true);
@@ -197,6 +169,19 @@ export function StoryViewer({
     fetchBlockedUsers();
   }, []);
 
+  const handleNextWrapper = () => {
+    handleNext({
+      stories,
+      currentIndex,
+      setCurrentIndex,
+      storyIndex,
+      setStoryIndex,
+      setProgress,
+      onClose,
+      localUnseenStories,
+    });
+  };
+
   useEffect(() => {
     let timer;
     if (!isPaused && !isKeyboardVisible && !isComplaintsVisible) {
@@ -204,7 +189,7 @@ export function StoryViewer({
         if (progress < 1) {
           setProgress((prev) => prev + 0.004);
         } else {
-          handleNext();
+          handleNextWrapper();
         }
       }, 20);
     }
@@ -304,63 +289,6 @@ export function StoryViewer({
       .includes(searchQuery.toLowerCase())
   );
 
-  const handleNext = () => {
-    try {
-      // Verificar que existan historias y el índice sea válido
-      if (!stories || !Array.isArray(stories) || stories.length === 0) {
-        onClose(localUnseenStories);
-        return;
-      }
-
-      // Verificar que el índice actual sea válido
-      if (currentIndex >= stories.length) {
-        onClose(localUnseenStories);
-        return;
-      }
-
-      const currentStory = stories[currentIndex]?.userStories[storyIndex];
-
-      // Actualizar historias no vistas
-      if (currentStory && localUnseenStories[currentStory.uid]?.length > 0) {
-        setLocalUnseenStories((prev) => ({
-          ...prev,
-          [currentStory.uid]: prev[currentStory.uid].filter(
-            (story) => story.id !== currentStory.id
-          ),
-        }));
-      }
-
-      // Determinar si hay más historias
-      const hasMoreStoriesInCurrentUser =
-        storyIndex < stories[currentIndex]?.userStories?.length - 1;
-      const hasMoreUsers = currentIndex < stories.length - 1;
-
-      if (hasMoreStoriesInCurrentUser) {
-        setStoryIndex((prev) => prev + 1);
-        setProgress(0);
-      } else if (hasMoreUsers) {
-        setCurrentIndex((prev) => prev + 1);
-        setStoryIndex(0);
-        setProgress(0);
-      } else {
-        onClose(localUnseenStories);
-      }
-    } catch (error) {
-      console.error("Error al navegar a la siguiente historia:", error);
-      onClose(localUnseenStories);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (storyIndex > 0) {
-      setStoryIndex((prev) => prev - 1);
-      setProgress(0);
-    } else if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1);
-      setStoryIndex(stories[currentIndex - 1]?.userStories.length - 1);
-      setProgress(0);
-    }
-  };
 
 
   const panResponder = createStoryPanResponder({
@@ -377,10 +305,12 @@ export function StoryViewer({
         localUnseenStories: unseenStories,
       }),
     handlePreviousUser: () =>
-      handlePreviousUser({
+      handlePrevious({
+        storyIndex,
+        setStoryIndex,
         currentIndex,
         setCurrentIndex,
-        setStoryIndex,
+        stories: localStories,
         setProgress,
       }),
     isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
@@ -514,12 +444,26 @@ export function StoryViewer({
                 event,
                 width: Dimensions.get("window").width,
                 isLongPressActive,
-                handleNext,
-                handlePrevious,
+                handleNext: handleNextWrapper,
+                handlePrevious: () => {
+                  if (currentStory) {
+                    handlePrevious({
+                      storyIndex,
+                      setStoryIndex,
+                      currentIndex,
+                      setCurrentIndex,
+                      stories: localStories,
+                      setProgress,
+                    });
+                  }
+                },
                 onClose,
                 stories: localStories,
                 currentIndex,
                 storyIndex,
+                setStoryIndex, // Ensure setStoryIndex is passed
+                setCurrentIndex,
+                setProgress,
               })
             }
           >
@@ -634,14 +578,23 @@ export function StoryViewer({
           {!isFirstStory && (
             <TouchableOpacity
               style={[styles.navButton, styles.leftButton]}
-              onPress={handlePrevious}
+              onPress={() =>
+                handlePrevious({
+                  storyIndex,
+                  setStoryIndex,
+                  currentIndex,
+                  setCurrentIndex,
+                  stories: localStories,
+                  setProgress,
+                })
+              }
             ></TouchableOpacity>
           )}
 
           {!isLastStory && (
             <TouchableOpacity
               style={[styles.navButton, styles.rightButton]}
-              onPress={handleNext}
+              onPress={handleNextWrapper}
             ></TouchableOpacity>
           )}
 
