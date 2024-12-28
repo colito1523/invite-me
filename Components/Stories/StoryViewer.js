@@ -17,8 +17,6 @@ import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../config/firebase";
 import {
   doc,
-  updateDoc,
-  arrayUnion,
   getDoc,
   addDoc,
   collection,
@@ -42,6 +40,13 @@ import {
   handleUserPress,
   handleThreeDotsPress,
   toggleHideMyStories,
+  toggleHideStories,
+  addViewerToStory,
+  handleSearch,
+  handleOpenViewersModal,
+  handleLongPressIn,
+  handleLongPressOut,
+  handleTap,
 } from "./storyUtils"; // Importar las funciones
 
 const { width, height } = Dimensions.get("window"); // Add this line
@@ -175,10 +180,6 @@ export function StoryViewer({
     }
   }, [isComplaintsVisible, isOptionsModalVisible, isKeyboardVisible]);
 
-  const handleCloseViewer = () => {
-    onClose(localUnseenStories); // Envía el estado actualizado de `localUnseenStories` a `StorySlider.js`
-  };
-
   useEffect(() => {
     const fetchBlockedUsers = async () => {
       try {
@@ -250,7 +251,12 @@ export function StoryViewer({
     }
 
     if (auth.currentUser) {
-      addViewerToStory(currentStory.id, currentStory.uid);
+      addViewerToStory({
+        storyId: currentStory.id,
+        storyOwnerId: currentStory.uid,
+        auth,
+        database,
+      });
       const userHasLiked = currentStory.likes?.some(
         (like) => like.uid === auth.currentUser.uid
       );
@@ -277,86 +283,26 @@ export function StoryViewer({
     }
   };
 
-  const toggleHideStories = async () => {
-    if (!user || !currentStory) return;
-
-    const userRef = doc(database, "users", user.uid);
-
-    try {
-      // Obtener el documento del usuario actual
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-      const hiddenStories = userData.hiddenStories || [];
-
-      // Verificar si el UID ya está en la lista
-      if (hiddenStories.includes(currentStory.uid)) {
-        Alert.alert(t("storyViewer.info"), t("storyViewer.alreadyHidden"));
-      } else {
-        // Agregar el UID al campo `hiddenStories`
-        await updateDoc(userRef, {
-          hiddenStories: arrayUnion(currentStory.uid),
-        });
-
-        Alert.alert(
-          t("storyViewer.success"),
-          t("storyViewer.hiddenSuccessfully")
-        );
-
-        // Cerrar el visor de historias después de agregar el UID
-        onClose(localUnseenStories); // Llama a la función `onClose` para cerrar el visor
-      }
-    } catch (error) {
-      console.error("Error updating hidden stories:", error);
-      Alert.alert(t("storyViewer.error"), t("storyViewer.hideError"));
+  useEffect(() => {
+    if (auth && auth.currentUser && currentStory?.id && currentStory?.uid) {
+      addViewerToStory({
+        storyId: currentStory.id,
+        storyOwnerId: currentStory.uid,
+        auth,
+        database,
+      });
+    } else {
+      console.error("auth o auth.currentUser no está disponible.");
     }
-  };
-
-  const addViewerToStory = async (storyId, storyOwnerId) => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser || currentUser.uid === storyOwnerId) return;
-
-      const userRef = doc(database, "users", currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      const userData = userSnap.data();
-
-      const viewerData = {
-        uid: currentUser.uid,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        profileImage:
-          userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-        timestamp: new Date(),
-      };
-
-      const storyRef = doc(database, "users", storyOwnerId, "stories", storyId);
-      const storySnap = await getDoc(storyRef);
-      const storyData = storySnap.data();
-
-      if (!storyData.viewers?.some((v) => v.uid === currentUser.uid)) {
-        await updateDoc(storyRef, {
-          viewers: arrayUnion(viewerData),
-        });
-      }
-    } catch (error) {
-      console.error("Error adding viewer to story:", error);
-    }
-  };
-
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-  };
+  }, [currentStory, auth, database]);
+  
+ 
 
   const filteredViewers = viewers.filter((viewer) =>
     `${viewer.firstName} ${viewer.lastName}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
-
-  const handleClose = () => {
-    if (onClose) onClose();
-    navigation.goBack();
-  };
 
   const handleNext = () => {
     try {
@@ -416,39 +362,6 @@ export function StoryViewer({
     }
   };
 
-  const handleTap = (event) => {
-    if (isLongPressActive) return; // Add this line
-
-    const { locationX } = event.nativeEvent;
-    const currentStory = stories[currentIndex]?.userStories[storyIndex];
-
-    if (!currentStory) {
-      console.error("Historia actual no válida:", currentStory);
-      onClose?.();
-      return;
-    }
-
-    if (locationX > width / 2) {
-      handleNext();
-    } else {
-      handlePrevious();
-    }
-  };
-
-  const handleLongPressIn = () => {
-    longPressTimeout.current = setTimeout(() => {
-      setIsPaused(true);
-      setIsLongPressActive(true); // Add this line
-    }, 200);
-  };
-
-  const handleLongPressOut = () => {
-    if (longPressTimeout.current) {
-      clearTimeout(longPressTimeout.current);
-    }
-    setIsPaused(false);
-    setIsLongPressActive(false); // Add this line
-  };
 
   const panResponder = createStoryPanResponder({
     handleCloseViewer: () => onClose(unseenStories),
@@ -473,19 +386,6 @@ export function StoryViewer({
     isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
   });
 
-  const handleOpenViewersModal = () => {
-    setIsPaused(true);
-    loadViewers({
-      auth,
-      database,
-      stories: localStories,
-      currentIndex,
-      storyIndex,
-      setViewers,
-      t,
-    });
-    setViewersModalVisible(true);
-  };
 
   const handleCloseViewersModal = () => {
     setViewersModalVisible(false);
@@ -595,9 +495,33 @@ export function StoryViewer({
       >
         <View style={styles.container} {...panResponder.panHandlers}>
           <TouchableWithoutFeedback
-            onPressIn={handleLongPressIn}
-            onPressOut={handleLongPressOut}
-            onPress={handleTap}
+             onPressIn={() =>
+              handleLongPressIn({
+                longPressTimeout,
+                setIsPaused,
+                setIsLongPressActive,
+              })
+            }
+            onPressOut={() =>
+              handleLongPressOut({
+                longPressTimeout,
+                setIsPaused,
+                setIsLongPressActive,
+              })
+            }
+            onPress={(event) =>
+              handleTap({
+                event,
+                width: Dimensions.get("window").width,
+                isLongPressActive,
+                handleNext,
+                handlePrevious,
+                onClose,
+                stories: localStories,
+                currentIndex,
+                storyIndex,
+              })
+            }
           >
             <View style={styles.storyContainer}>
               <View style={styles.progressContainer}>
@@ -728,7 +652,9 @@ export function StoryViewer({
                 placeholder={t("storyViewer.typePlaceholder")}
                 placeholderTextColor="#FFFFFF"
                 value={message}
-                onChangeText={(text) => setMessage(text)}
+                onChangeText={(query) => {
+                  setSearchQuery(query);
+                }}
                 onFocus={() => setIsPaused(true)}
                 onBlur={() => setIsPaused(false)}
               />
@@ -781,7 +707,20 @@ export function StoryViewer({
           {isCurrentUserStory && (
             <TouchableOpacity
               style={styles.viewersButton}
-              onPress={handleOpenViewersModal}
+              onPress={() =>
+                handleOpenViewersModal({
+                  setIsPaused,
+                  loadViewers,
+                  auth,
+                  database,
+                  stories: localStories,
+                  currentIndex,
+                  storyIndex,
+                  setViewers,
+                  setViewersModalVisible,
+                  t,
+                })
+              }
             >
               <Entypo name="chevron-thin-up" size={24} color="white" />
             </TouchableOpacity>
@@ -897,8 +836,15 @@ export function StoryViewer({
                       <TouchableOpacity
                         style={styles.optionButton}
                         onPress={() => {
+                          toggleHideStories({
+                            user: auth.currentUser,
+                            currentStory,
+                            database,
+                            onClose,
+                            localUnseenStories,
+                            t,
+                          });
                           setIsOptionsModalVisible(false);
-                          toggleHideStories(); // Llama a la función para ocultar historias y cerrar el visor
                         }}
                       >
                         <Text style={styles.optionButtonText}>

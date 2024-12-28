@@ -14,6 +14,8 @@ import {
 } from "firebase/firestore";
 import { Alert } from "react-native";
 import { ref, deleteObject } from "firebase/storage";
+import { auth, database, storage } from "../../config/firebase";
+
 
 export const createStoryPanResponder = ({
   handleCloseViewer,
@@ -541,6 +543,175 @@ export const toggleHideMyStories = async ({
     );
   }
 };
+
+export const toggleHideStories = async ({
+  user,
+  currentStory,
+  database,
+  onClose,
+  localUnseenStories,
+  t,
+}) => {
+  if (!user || !currentStory) return;
+
+  const userRef = doc(database, "users", user.uid);
+
+  try {
+    // Obtener el documento del usuario actual
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data();
+    const hiddenStories = userData.hiddenStories || [];
+
+    // Verificar si el UID ya está en la lista
+    if (hiddenStories.includes(currentStory.uid)) {
+      Alert.alert(t("storyViewer.info"), t("storyViewer.alreadyHidden"));
+    } else {
+      // Agregar el UID al campo `hiddenStories`
+      await updateDoc(userRef, {
+        hiddenStories: arrayUnion(currentStory.uid),
+      });
+
+      Alert.alert(
+        t("storyViewer.success"),
+        t("storyViewer.hiddenSuccessfully")
+      );
+
+      // Cerrar el visor de historias después de agregar el UID
+      onClose(localUnseenStories); // Llama a la función `onClose` para cerrar el visor
+    }
+  } catch (error) {
+    console.error("Error updating hidden stories:", error);
+    Alert.alert(t("storyViewer.error"), t("storyViewer.hideError"));
+  }
+};
+
+export const addViewerToStory = async ({ storyId, storyOwnerId, auth, database }) => {
+  try {
+    if (!auth || !auth.currentUser) {
+      console.error("Usuario no autenticado o referencia a auth inválida.");
+      return;
+    }
+
+    const currentUser = auth.currentUser;
+    if (currentUser.uid === storyOwnerId) return;
+
+    const userRef = doc(database, "users", currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+
+    const viewerData = {
+      uid: currentUser.uid,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+      timestamp: new Date(),
+    };
+
+    const storyRef = doc(database, "users", storyOwnerId, "stories", storyId);
+    const storySnap = await getDoc(storyRef);
+    const storyData = storySnap.data();
+
+    if (!storyData.viewers?.some((v) => v.uid === currentUser.uid)) {
+      await updateDoc(storyRef, {
+        viewers: arrayUnion(viewerData),
+      });
+    }
+  } catch (error) {
+    console.error("Error adding viewer to story:", error);
+  }
+};
+
+export const handleSearch = ({ query, setSearchQuery }) => {
+  if (typeof query === "string") {
+    setSearchQuery(query);
+  } else {
+    console.warn("El valor proporcionado no es una cadena válida.");
+  }
+};
+
+
+export const handleOpenViewersModal = async ({
+  setIsPaused,
+  loadViewers,
+  auth,
+  database,
+  stories,
+  currentIndex,
+  storyIndex,
+  setViewers,
+  setViewersModalVisible,
+  t,
+}) => {
+  try {
+    setIsPaused(true);
+    await loadViewers({
+      auth,
+      database,
+      stories,
+      currentIndex,
+      storyIndex,
+      setViewers,
+      t,
+    });
+    setViewersModalVisible(true);
+  } catch (error) {
+    console.error("Error al abrir el modal de espectadores:", error);
+  }
+};
+
+export const handleLongPressIn = ({
+  longPressTimeout,
+  setIsPaused,
+  setIsLongPressActive,
+}) => {
+  longPressTimeout.current = setTimeout(() => {
+    setIsPaused(true);
+    setIsLongPressActive(true);
+  }, 200);
+};
+
+export const handleLongPressOut = ({
+  longPressTimeout,
+  setIsPaused,
+  setIsLongPressActive,
+}) => {
+  clearTimeout(longPressTimeout.current);
+  setIsPaused(false);
+  setIsLongPressActive(false);
+};
+
+export const handleTap = ({
+  event,
+  width,
+  isLongPressActive,
+  handleNext,
+  handlePrevious,
+  onClose,
+  stories,
+  currentIndex,
+  storyIndex,
+}) => {
+  if (isLongPressActive) return;
+
+  const { locationX } = event.nativeEvent;
+  const currentStory = stories[currentIndex]?.userStories[storyIndex];
+
+  if (!currentStory) {
+    console.error("Historia actual no válida:", currentStory);
+    onClose?.();
+    return;
+  }
+
+  if (locationX > width / 2) {
+    handleNext();
+  } else {
+    handlePrevious();
+  }
+};
+
+
+
+
 
 
 
