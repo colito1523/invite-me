@@ -10,8 +10,9 @@ import {
   Alert,
   Keyboard,
   SafeAreaView,
-  Dimensions, // Add this import
+  Dimensions,
   Image,
+  BackHandler,
 } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../config/firebase";
@@ -403,6 +404,20 @@ export function StoryViewer({
   if (!currentStory) {
     return null;
   }
+
+  useEffect(() => {
+    const backAction = () => {
+      onClose(localUnseenStories);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [onClose, localUnseenStories]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
