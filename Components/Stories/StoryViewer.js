@@ -52,7 +52,8 @@ import {
   handleNext,
   preloadNextStory,
   handleCloseViewersModal,
-  fetchBlockedUsers 
+  fetchBlockedUsers,
+  fetchPinnedViewers
 } from "./storyUtils"; // Importar las funciones
 
 const { width, height } = Dimensions.get("window"); // Add this line
@@ -161,6 +162,10 @@ export function StoryViewer({
   useEffect(() => {
     fetchBlockedUsers({ auth, database, setBlockedUsers });
   }, []);
+
+  useEffect(() => {
+    fetchPinnedViewers({ auth, database, setPinnedViewers });
+  }, [auth.currentUser.uid, database]);
 
   const handleNextWrapper = () => {
     handleNext({

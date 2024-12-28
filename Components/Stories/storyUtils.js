@@ -317,6 +317,7 @@ export const loadViewers = async ({
   currentIndex,
   storyIndex,
   setViewers,
+  setPinnedViewers,
   t,
 }) => {
   const currentStory = stories[currentIndex]?.userStories[storyIndex];
@@ -339,28 +340,34 @@ export const loadViewers = async ({
         const userData = userDoc.data();
         const pinnedViewers = userData?.pinnedViewers || [];
 
-        // Combina y ordena espectadores: fijados primero
-        const allViewers = [
-          ...(storyData.viewers || []),
-          ...(storyData.likes || []),
-        ];
+        // Obtener viewers y likes
+        const viewers = storyData.viewers || [];
+        const likes = storyData.likes || [];
 
-        const uniqueViewers = allViewers.filter(
+        // Combinar viewers y likes eliminando duplicados
+        const allViewers = [...viewers, ...likes].filter(
           (viewer, index, self) =>
             index === self.findIndex((t) => t.uid === viewer.uid) &&
             viewer.uid !== stories[currentIndex].uid
         );
 
-        const sortedViewers = uniqueViewers.sort((a, b) => {
-          const aIsPinned = pinnedViewers.some((pv) => pv.uid === a.uid);
-          const bIsPinned = pinnedViewers.some((pv) => pv.uid === b.uid);
+        // Separar viewers pinneados y no pinneados
+        const pinnedViewersWithActivity = allViewers.filter(viewer => 
+          pinnedViewers.some(pv => pv.uid === viewer.uid)
+        );
 
-          if (aIsPinned && !bIsPinned) return -1;
-          if (!aIsPinned && bIsPinned) return 1;
+        const nonPinnedViewers = allViewers.filter(viewer => 
+          !pinnedViewers.some(pv => pv.uid === viewer.uid)
+        );
 
-          return b.timestamp - a.timestamp;
-        });
+        // Ordenar cada grupo por timestamp
+        const sortByTimestamp = (a, b) => b.timestamp - a.timestamp;
+        pinnedViewersWithActivity.sort(sortByTimestamp);
+        nonPinnedViewers.sort(sortByTimestamp);
 
+        // Combinar los grupos: pinneados primero, luego el resto
+        const sortedViewers = [...pinnedViewersWithActivity, ...nonPinnedViewers];
+        
         setViewers(sortedViewers);
       }
     } catch (error) {
@@ -396,8 +403,8 @@ export const handlePinViewer = async ({
     } else {
       // Fijar al espectador
       if (updatedPinnedViewers.length >= 3) {
-        // Mantener el límite de tres espectadores
-        updatedPinnedViewers.shift();
+    
+        return;
       }
       updatedPinnedViewers.push({
         uid: viewer.uid,
@@ -415,6 +422,18 @@ export const handlePinViewer = async ({
   } catch (error) {
     console.error("Error al fijar/desfijar espectador:", error);
     Alert.alert(t("storyViewer.error"), t("storyViewer.pinUnpinError"));
+  }
+};
+
+
+export const fetchPinnedViewers = async ({ auth, database, setPinnedViewers }) => {
+  try {
+    const userRef = doc(database, "users", auth.currentUser.uid);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data();
+    setPinnedViewers(userData?.pinnedViewers || []);
+  } catch (error) {
+    console.error("Error fetching pinned viewers:", error);
   }
 };
 
@@ -641,6 +660,7 @@ export const handleOpenViewersModal = async ({
   currentIndex,
   storyIndex,
   setViewers,
+  setPinnedViewers,
   setViewersModalVisible,
   t,
 }) => {
@@ -653,6 +673,7 @@ export const handleOpenViewersModal = async ({
       currentIndex,
       storyIndex,
       setViewers,
+      setPinnedViewers,
       t,
     });
     setViewersModalVisible(true);
@@ -842,13 +863,3 @@ export const fetchBlockedUsers = async ({ auth, database, setBlockedUsers }) => 
     console.error("Error fetching blocked users:", error);
   }
 };
-
-
-
-
-
-
-
-
-
-
