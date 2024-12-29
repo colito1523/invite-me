@@ -54,11 +54,14 @@ export const handleDeleteMessage = async (database, chatId, user, messageId, rec
       return;
     }
 
+    const messageData = messageDoc.data();
+    const otherUserId = messageData.senderId === user.uid ? recipientUser.id : user.uid;
+
     // Mark the message as deleted for both users
     await updateDoc(messageRef, {
       deletedFor: {
         [user.uid]: true,
-        [recipientUser.id]: true,
+        [otherUserId]: true,
       },
     });
 
@@ -70,7 +73,7 @@ export const handleDeleteMessage = async (database, chatId, user, messageId, rec
             ...message,
             deletedFor: {
               [user.uid]: true,
-              [recipientUser.id]: true,
+              [otherUserId]: true,
             },
           };
         }
