@@ -243,7 +243,17 @@ export default function StorySlider() {
         }
       }
 
-      setStories(loadedStories);
+      // Reorganizar las historias basado en si tienen historias sin ver
+      const sortedStories = loadedStories.sort((a, b) => {
+        const aHasUnseen = unseenStoriesTemp[a.uid]?.length > 0;
+        const bHasUnseen = unseenStoriesTemp[b.uid]?.length > 0;
+        
+        if (aHasUnseen && !bHasUnseen) return -1;
+        if (!aHasUnseen && bHasUnseen) return 1;
+        return 0;
+      });
+
+      setStories(sortedStories);
       setUnseenStories(unseenStoriesTemp);
     } catch (error) {
       console.error(t("storySlider.loadStoriesError"), error);
@@ -510,6 +520,16 @@ export default function StorySlider() {
               setStoryViewerVisible(false);
               setTimeout(() => {
                 updateUnseenStories(updatedUnseenStories);
+                // Reorganizar historias después de ver
+                setStories(prev => {
+                  return [...prev].sort((a, b) => {
+                    const aHasUnseen = updatedUnseenStories[a.uid]?.length > 0;
+                    const bHasUnseen = updatedUnseenStories[b.uid]?.length > 0;
+                    if (aHasUnseen && !bHasUnseen) return -1;
+                    if (!aHasUnseen && bHasUnseen) return 1;
+                    return 0;
+                  });
+                });
                 loadExistingStories();
               }, 0);
             }}
