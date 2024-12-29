@@ -830,19 +830,35 @@ export const preloadNextStory = ({
   loadedImages,
   setLoadedImages,
 }) => {
-  let nextStoryUrl = null;
-
-  if (storyIndex < stories[currentIndex]?.userStories.length - 1) {
-    nextStoryUrl = stories[currentIndex]?.userStories[storyIndex + 1]?.storyUrl;
-  } else if (currentIndex < stories.length - 1) {
-    nextStoryUrl = stories[currentIndex + 1]?.userStories[0]?.storyUrl;
+  const urlsToPreload = [];
+  
+  // Precargar las siguientes 3 historias del usuario actual
+  for (let i = 1; i <= 3; i++) {
+    if (storyIndex + i < stories[currentIndex]?.userStories.length) {
+      urlsToPreload.push(stories[currentIndex].userStories[storyIndex + i].storyUrl);
+    }
   }
 
-  if (nextStoryUrl && !loadedImages[nextStoryUrl]) {
-    Image.prefetch(nextStoryUrl).then(() => {
-      setLoadedImages((prev) => ({ ...prev, [nextStoryUrl]: true }));
-    });
+  // Precargar las primeras 2 historias del siguiente usuario
+  if (currentIndex + 1 < stories.length) {
+    const nextUserStories = stories[currentIndex + 1].userStories;
+    for (let i = 0; i < Math.min(2, nextUserStories.length); i++) {
+      urlsToPreload.push(nextUserStories[i].storyUrl);
+    }
   }
+
+  // Precargar todas las URLs recolectadas
+  urlsToPreload.forEach(url => {
+    if (url && !loadedImages[url]) {
+      Image.prefetch(url)
+        .then(() => {
+          setLoadedImages(prev => ({ ...prev, [url]: true }));
+        })
+        .catch(error => {
+          console.warn('Error precargando imagen:', error);
+        });
+    }
+  });
 };
 
 export const handleCloseViewersModal = ({ setViewersModalVisible, setIsPaused }) => {
