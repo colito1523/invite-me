@@ -246,3 +246,32 @@ export const handleDeleteSelectedChats = async (selectedChats: string[], userId:
     return false;
   }
 };
+
+export const handleChatPressLocal = async ({
+  chat,
+  setChats,
+  navigation,
+  handleChatPress,
+  userId,
+}) => {
+  try {
+    // Actualizar estado local
+    setChats((prevChats) =>
+      prevChats.map((c) =>
+        c.id === chat.id ? { ...c, unseenMessagesCount: 0 } : c
+      )
+    );
+
+    // Navegar al chat
+    navigation.navigate("ChatUsers", {
+      currentChatId: chat.id,
+      recipientUser: chat.user,
+    });
+
+    // Actualizar en backend
+    await handleChatPress(chat, userId);
+  } catch (error) {
+    console.error("Error al procesar el chat:", error);
+    Alert.alert("Error", "No se pudo abrir el chat.");
+  }
+};

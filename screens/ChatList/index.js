@@ -41,7 +41,8 @@ import {
   handleUnmuteChat,
   handleChatPress,
   checkStories,
-  handleDeleteSelectedChats
+  handleDeleteSelectedChats,
+  handleChatPressLocal 
 } from './utils';
 
 export default function ChatList() {
@@ -262,7 +263,7 @@ export default function ChatList() {
         ]);
         setIsModalVisible(true);
       } else {
-        handleChatPressLocal(chat);
+        handleChatPressLocalWrapper(chat);
       }
     } catch (error) {
       console.error("Error handling image press:", error);
@@ -270,14 +271,14 @@ export default function ChatList() {
     }
   };
 
-  const handleChatPressLocal = async (chat) => {
-    const success = await handleChatPress(chat, user.uid);
-    if (success) {
-      navigation.navigate("ChatUsers", {
-        currentChatId: chat.id,
-        recipientUser: chat.user,
-      });
-    }
+  const handleChatPressLocalWrapper = (chat) => {
+    handleChatPressLocal({
+      chat,
+      setChats,
+      navigation,
+      handleChatPress,
+      userId: user.uid,
+    });
   };
 
   const handleOptionsPress = () => {
@@ -358,7 +359,7 @@ export default function ChatList() {
       <TouchableOpacity
         style={styles.chatItem}
         onPress={() =>
-          isSelectionMode ? toggleChatSelection(item.id) : handleChatPressLocal(item)
+          isSelectionMode ? toggleChatSelection(item.id) : handleChatPressLocalWrapper(item)
         }
         onLongPress={() => {
           if (isMuted) {
