@@ -280,7 +280,7 @@ export default function SignUp() {
       const validValue = value
         .replace(/[^\p{L}\p{Zs}]/gu, "")
         .slice(0, 15);
-  
+
       setAnswers((prev) => ({ ...prev, [id]: validValue }));
     } else if (
       id === "hobby1" ||
@@ -295,7 +295,7 @@ export default function SignUp() {
           ""
         )
         .slice(0, 15);
-  
+
       setAnswers((prev) => ({ ...prev, [id]: validValue }));
     } else if (id === "username") {
       // Eliminar espacios al inicio o final
@@ -305,7 +305,7 @@ export default function SignUp() {
       setAnswers((prev) => ({ ...prev, [id]: value }));
     }
   };
-  
+
 
   const validateName = (name) => {
     const nameRegex = /^[a-zA-ZÀ-ÿãÃçÇñÑ ]+$/;
@@ -333,8 +333,8 @@ export default function SignUp() {
     const hobbyInterestRegex = /^[\p{L}\p{N}\p{P}\p{Zs}\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F700-\u1F77F]+$/u;
     return hobbyInterestRegex.test(word) && [...word].length <= 15; // Contar correctamente caracteres compuestos
   };
-  
-  
+
+
 
   const handleNext = async () => {
     setIsLoading(true);
@@ -494,7 +494,7 @@ export default function SignUp() {
       }
 
       const userData = {
-        uid: user.uid, // Add uid property
+        uid: user.uid,
         age: answers.age,
         email: emailToLower,
         firstName: answers.firstName,
@@ -506,6 +506,7 @@ export default function SignUp() {
         secondInterest: answers.interest2,
         photoUrls: photoUrls,
         username: usernameToLower,
+        preferredLanguage: i18n.language // Guarda el idioma seleccionado
       };
 
       await setDoc(doc(database, "users", user.uid), userData);
@@ -533,12 +534,12 @@ export default function SignUp() {
       allowsEditing: true, // Habilita la edición para permitir redimensionamiento
       quality: 1, // Máxima calidad
     });
-  
+
     if (!result.canceled) {
       handleAnswer(`photo${photoNumber}`, result.assets[0].uri);
       handleNext();
     } else {
-    
+
     }
   };
 

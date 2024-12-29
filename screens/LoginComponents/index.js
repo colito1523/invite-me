@@ -13,7 +13,8 @@ import {
   Dimensions
 } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../config/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import { auth, database } from '../../config/firebase';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -90,22 +91,22 @@ export default function Login({ navigation }) {
         console.error('Error al verificar el token de sesión:', error);
       }
     };
-  
+
     checkSession(); // Verifica el token al montar el componente
-  
+
     const checkTime = () => {
       const currentHour = new Date().getHours();
       setIsNightMode(currentHour >= 19 || currentHour < 6);
     };
-  
+
     checkTime();
     const interval = setInterval(checkTime, 60000);
-  
+
     loadSavedLanguage();
-  
+
     return () => clearInterval(interval); // Limpia el intervalo cuando se desmonta
   }, []);
-  
+
 
   const loadSavedLanguage = async () => {
     try {
@@ -118,17 +119,18 @@ export default function Login({ navigation }) {
       console.error('Error loading saved language:', error);
     }
   };
-  
-  const changeLanguage = async (lang) => {
+
+ const changeLanguage = async (lang) => {
     await i18n.changeLanguage(lang);
     setSelectedLanguage(lang);
+    console.log(`Idioma seleccionado: ${lang}`); // Agregado para mostrar el idioma seleccionado en la consola
     try {
-      await SecureStore.setItemAsync(LANGUAGE_KEY, lang);
+        await SecureStore.setItemAsync(LANGUAGE_KEY, lang);
     } catch (error) {
-      console.error('Error saving language:', error);
+        console.error('Error saving language:', error);
     }
     setIsLanguageOptionsVisible(false);
-  };
+};
 
 
   const onHandleLogin = async () => {
@@ -138,43 +140,49 @@ export default function Login({ navigation }) {
     }
 
     const emailToLower = email.trim().toLowerCase();
-  
+
     // Sanitización y validación con validator.js
     const emailSanitized = validator.normalizeEmail(email.trim()); // Normaliza el email
     const passwordSanitized = validator.escape(password); // Escapa caracteres peligrosos
-  
+
     // Validación con RegEx y validator.js
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // RegEx para validar email
     if (!emailRegex.test(emailSanitized) || !validator.isEmail(emailSanitized)) {
       Alert.alert(t('errorTitle'), t('invalidCredentials')); // Mensaje genérico
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, emailSanitized, passwordSanitized);
-      
-       // Obtén el token de sesión desde Firebase
-    const token = await userCredential.user.getIdToken();
 
-     // Almacena el token de sesión de manera segura
-     await storeSessionToken(token);
+      // Obtén el token de sesión desde Firebase
+      const token = await userCredential.user.getIdToken();
+
+      // Almacena el token de sesión de manera segura
+      await storeSessionToken(token);
+
+      // Guarda el idioma seleccionado en el perfil del usuario
+      const userRef = doc(database, "users", userCredential.user.uid);
+      await updateDoc(userRef, {
+        preferredLanguage: i18n.language
+      });
 
       // Elimina la contraseña de la memoria después de autenticación exitosa
       setPassword(null);
-  
+
       setIsLoading(false);
       // La navegación será manejada automáticamente por el RootNavigator
     } catch (error) {
       setIsLoading(false);
       setPassword(null);
-  
+
       Alert.alert(t('errorTitle'), t('invalidCredentials')); // Mensaje genérico
     }
   };
-  
-  
+
+
 
   const theme = isNightMode ? darkTheme : lightTheme;
 
@@ -233,7 +241,7 @@ export default function Login({ navigation }) {
                 cachePolicy="memory-disk" 
               />
             </View>
-            
+
             <Text style={[styles.title, { color: theme.text }]}>
               {t('accessPrivately')}
             </Text>
