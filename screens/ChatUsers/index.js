@@ -528,25 +528,23 @@ export default function Chat({ route }) {
   };
 
   const handleLongPressMessage = (message) => {
-    if (message.senderId === user.uid) {
-      // Allow deletion of messages sent by the current user
-      Alert.alert(
-        t("chatUsers.messageOptions"),
-        t("chatUsers.messageOptionsPrompt"),
-        [
-          {
-            text: t("chatUsers.cancel"),
-            onPress: () => setSelectedMessageId(null),
-            style: "cancel",
-          },
-          {
-            text: t("chatUsers.delete"),
-            onPress: () => onDeleteMessage(message.id),
-            style: "destructive",
-          },
-        ]
-      );
-    }
+    // Allow deletion of messages sent by the current user or received from the other user
+    Alert.alert(
+      t("chatUsers.messageOptions"),
+      t("chatUsers.messageOptionsPrompt"),
+      [
+        {
+          text: t("chatUsers.cancel"),
+          onPress: () => setSelectedMessageId(null),
+          style: "cancel",
+        },
+        {
+          text: t("chatUsers.delete"),
+          onPress: () => onDeleteMessage(message.id),
+          style: "destructive",
+        },
+      ]
+    );
   };
 
   const onDeleteMessage = (messageId) => {
