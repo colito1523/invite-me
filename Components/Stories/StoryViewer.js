@@ -502,6 +502,7 @@ export function StoryViewer({
                   styles.image,
                   imageDimensions, // Aplica dimensiones dinámicas
                 ]}
+                fadeDuration={0}
                 resizeMode="cover" // Siempre usar "cover"
                 onLoad={(event) => {
                   const { width: imgWidth, height: imgHeight } =
