@@ -407,6 +407,7 @@ export default function StorySlider() {
         style={[
           styles.storyCircle,
           hasUnseenStories && styles.unseenStoryCircle, // Aplica borde gris si hay historias no vistas
+          { borderColor: isNightMode ? "white" : "black" }, // Change border color based on night mode
         ]}
         onPress={() => {
           if (hasStories) {
@@ -645,7 +646,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   unseenStoryCircle: {
-    borderColor: "black",
     borderWidth: 3,
     borderRadius: 40,
   },
