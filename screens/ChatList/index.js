@@ -659,7 +659,10 @@ export default function ChatList() {
                 initialIndex={0}
                 onClose={async () => {
                   setIsModalVisible(false);
-                  await checkStories(chats, user.uid);
+                  const updatedChats = await checkStories(chats, user.uid);
+                  if (updatedChats) {
+                    setChats(updatedChats);
+                  }
                 }}
                 unseenStories={{}}
                 navigation={navigation}

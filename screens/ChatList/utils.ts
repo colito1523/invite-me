@@ -1,4 +1,3 @@
-
 import { Timestamp } from "firebase/firestore";
 import { Alert } from "react-native";
 import {
@@ -71,6 +70,7 @@ export const handleDeleteChat = async (chat: any, userId: string, t: any) => {
     messagesSnapshot.forEach((messageDoc) => {
       batch.update(messageDoc.ref, {
         [`deletedFor.${userId}`]: true,
+        seen: true
       });
     });
 
