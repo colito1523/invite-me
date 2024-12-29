@@ -23,11 +23,32 @@ exports.sendGeneralNotification = functions.firestore
 
       if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
 
+      const getNotificationText = (lang) => {
+        const texts = {
+          'es': {
+            title: 'Notificación General',
+            defaultMessage: 'Tienes una nueva notificación.'
+          },
+          'en': {
+            title: 'General Notification',
+            defaultMessage: 'You have a new notification.'
+          },
+          'pt': {
+            title: 'Notificação Geral',
+            defaultMessage: 'Você tem uma nova notificação.'
+          }
+        };
+        return texts[lang] || texts['en'];
+      };
+
+      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
+      const texts = getNotificationText(preferredLanguage);
+
       const message = {
         to: expoPushToken,
         sound: 'default',
-        title: 'Notificación General',
-        body: notificationData.message || 'Tienes una nueva notificación.',
+        title: texts.title,
+        body: notificationData.message || texts.defaultMessage,
         data: notificationData,
       };
 

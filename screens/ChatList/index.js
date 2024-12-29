@@ -19,9 +19,7 @@ import {
   getDocs,
   getDoc,
   doc,
-  updateDoc,
   Timestamp,
-  writeBatch,
 } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import { auth, database } from "../../config/firebase";

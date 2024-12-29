@@ -26,16 +26,42 @@ exports.sendEventNotification = functions.firestore
         return;
       }
 
-      // Verifica si es una invitación a un evento privado y el campo eventTitle tiene valor válido
-      let title = '¡Nueva Notificación!';
+      const getNotificationText = (lang) => {
+        const texts = {
+          'es': {
+            defaultTitle: '¡Nueva Notificación!',
+            privateEventTitle: '¡Nueva Invitación a Evento Privado!',
+            generalEventTitle: '¡Nueva Invitación a Evento!',
+            inviteText: (from, event) => `${from} te ha invitado a ${event}`
+          },
+          'en': {
+            defaultTitle: 'New Notification!',
+            privateEventTitle: 'New Private Event Invitation!',
+            generalEventTitle: 'New Event Invitation!',
+            inviteText: (from, event) => `${from} has invited you to ${event}`
+          },
+          'pt': {
+            defaultTitle: 'Nova Notificação!',
+            privateEventTitle: 'Novo Convite para Evento Privado!',
+            generalEventTitle: 'Novo Convite para Evento!',
+            inviteText: (from, event) => `${from} convidou você para ${event}`
+          }
+        };
+        return texts[lang] || texts['en'];
+      };
+
+      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
+      const texts = getNotificationText(preferredLanguage);
+      
+      let title = texts.defaultTitle;
       let body = '';
 
       if (notificationData.type === 'invitation' && notificationData.eventTitle) {
-        title = '¡Nueva Invitación a Evento Privado!';
-        body = `${notificationData.fromName} te ha invitado a ${notificationData.eventTitle}`;
+        title = texts.privateEventTitle;
+        body = texts.inviteText(notificationData.fromName, notificationData.eventTitle);
       } else if (notificationData.type === 'generalEventInvitation' && notificationData.eventTitle) {
-        title = '¡Nueva Invitación a Evento!';
-        body = `${notificationData.fromName} te ha invitado a ${notificationData.eventTitle}`;
+        title = texts.generalEventTitle;
+        body = texts.inviteText(notificationData.fromName, notificationData.eventTitle);
       } else {
         console.log('Tipo de notificación desconocido o datos incompletos:', notificationData);
         return;

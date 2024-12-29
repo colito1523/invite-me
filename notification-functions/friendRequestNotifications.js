@@ -1,4 +1,3 @@
-
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const { Expo } = require('expo-server-sdk');
@@ -22,11 +21,32 @@ exports.sendFriendRequestNotification = functions.firestore
 
       if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
 
+      const getNotificationText = (lang) => {
+        const texts = {
+          'es': {
+            title: 'Nueva solicitud de amistad',
+            body: (name) => `${name} te ha enviado una solicitud de amistad`
+          },
+          'en': {
+            title: 'New friend request',
+            body: (name) => `${name} sent you a friend request`
+          },
+          'pt': {
+            title: 'Nova solicitação de amizade',
+            body: (name) => `${name} enviou uma solicitação de amizade`
+          }
+        };
+        return texts[lang] || texts['en'];
+      };
+
+      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
+      const texts = getNotificationText(preferredLanguage);
+
       const message = {
         to: expoPushToken,
         sound: 'default',
-        title: 'Nueva solicitud de amistad',
-        body: `${requestData.fromName} te ha enviado una solicitud de amistad`,
+        title: texts.title,
+        body: texts.body(requestData.fromName),
         data: {
           type: 'friend_request',
           fromId: requestData.fromId,

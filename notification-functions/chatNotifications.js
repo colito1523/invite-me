@@ -40,11 +40,26 @@ exports.sendChatNotification = functions.firestore
 
       if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken) || isChatMuted) return;
 
+      const getMessageBody = (lang, isImage) => {
+        if (isImage) {
+          return {
+            'es': '📷 Imagen',
+            'en': '📷 Image',
+            'pt': '📷 Imagem'
+          }[lang] || '📷 Image';
+        }
+        return {
+          'es': 'Nuevo mensaje recibido',
+          'en': 'New message received',
+          'pt': 'Nova mensagem recebida'
+        }[lang] || 'New message received';
+      };
+
       const message = {
         to: expoPushToken,
         sound: 'default',
         title: `${senderData.firstName} ${senderData.lastName}`,
-        body: messageData.image ? '📷 Imagen' : (messageData.text || 'Nuevo mensaje recibido'),
+        body: messageData.image ? getMessageBody(recipientData.preferredLanguage, true) : (messageData.text || getMessageBody(recipientData.preferredLanguage, false)),
         data: { 
           chatId, 
           messageId: snapshot.id,

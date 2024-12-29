@@ -23,21 +23,45 @@ exports.sendLikeNotification = functions.firestore
 
       if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
 
+      const getNotificationText = (lang) => {
+        const texts = {
+          'es': {
+            title: 'Nuevo Like',
+            noteLikeBody: (name) => `A ${name} le gustó tu estado de ánimo`,
+            profileLikeBody: (name) => `A ${name} le gustó tu perfil`
+          },
+          'en': {
+            title: 'New Like',
+            noteLikeBody: (name) => `${name} liked your mood`,
+            profileLikeBody: (name) => `${name} liked your profile`
+          },
+          'pt': {
+            title: 'Novo Like',
+            noteLikeBody: (name) => `${name} curtiu seu humor`,
+            profileLikeBody: (name) => `${name} curtiu seu perfil`
+          }
+        };
+        return texts[lang] || texts['en'];
+      };
+
+      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
+      const texts = getNotificationText(preferredLanguage);
+
       let message;
       if (notificationData.type === 'noteLike') {
         message = {
           to: expoPushToken,
           sound: 'default',
-          title: 'Nuevo Like',
-          body: `A ${notificationData.fromName} le gustó tu estado de ánimo`,
+          title: texts.title,
+          body: texts.noteLikeBody(notificationData.fromName),
           data: notificationData,
         };
       } else if (notificationData.type === 'like') {
         message = {
           to: expoPushToken,
           sound: 'default',
-          title: 'Nuevo Like',
-          body: `A ${notificationData.fromName} le gustó tu perfil`,
+          title: texts.title,
+          body: texts.profileLikeBody(notificationData.fromName),
           data: notificationData,
         };
       }
