@@ -593,44 +593,46 @@ export default function Chat({ route }) {
           {!isSameDay && renderDate(currentMessageDate)}
 
           {/* Renderizar respuesta de historia */}
-          <View
-            style={[
-              styles.message,
-              item.senderId === user.uid
-                ? styles.sent // A la derecha si el remitente eres tú
-                : styles.received, // A la izquierda si el remitente es el destinatario
-              styles.storyResponseContainer,
-            ]}
-          >
-            <Text style={styles.storyResponseText}>
-              {item.senderId === user.uid
-                ? t("chatUsers.youAnswered")
-                : t("chatUsers.Answered")}
-            </Text>
-            <Image
-              source={{ uri: item.storyUrl }}
-              style={styles.storyResponseImage}
-            />
-            <Text style={styles.messageText}>{item.text}</Text>
-            {item.senderId === user.uid && item.seen && (
-              <View style={styles.messageFooter}>
-                <Text style={styles.timeText}>
-                  {currentMessageDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-                {item.senderId === user.uid && item.seen && (
-                  <Ionicons
-                    name="checkmark-done-sharp"
-                    size={16}
-                    color="black"
-                    style={styles.seenIcon}
-                  />
-                )}
-              </View>
-            )}
-          </View>
+          <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
+            <View
+              style={[
+                styles.message,
+                item.senderId === user.uid
+                  ? styles.sent // A la derecha si el remitente eres tú
+                  : styles.received, // A la izquierda si el remitente es el destinatario
+                styles.storyResponseContainer,
+              ]}
+            >
+              <Text style={styles.storyResponseText}>
+                {item.senderId === user.uid
+                  ? t("chatUsers.youAnswered")
+                  : t("chatUsers.Answered")}
+              </Text>
+              <Image
+                source={{ uri: item.storyUrl }}
+                style={styles.storyResponseImage}
+              />
+              <Text style={styles.messageText}>{item.text}</Text>
+              {item.senderId === user.uid && item.seen && (
+                <View style={styles.messageFooter}>
+                  <Text style={styles.timeText}>
+                    {currentMessageDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                  {item.senderId === user.uid && item.seen && (
+                    <Ionicons
+                      name="checkmark-done-sharp"
+                      size={16}
+                      color="black"
+                      style={styles.seenIcon}
+                    />
+                  )}
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
         </>
       );
     }
@@ -640,56 +642,58 @@ export default function Chat({ route }) {
         <>
           {!isSameDay && renderDate(currentMessageDate)}
 
-          <View
-            style={[
-              styles.message,
-              isOwnMessage ? styles.sent : styles.received,
-              styles.noteResponseContainer,
-            ]}
-          >
-            <Text style={styles.noteResponseText}>
-              {isOwnMessage
-                ? t("chatUsers.youAnsweredNote")
-                : t("chatUsers.AnsweredNote")}
-            </Text>
-
-            <Image
-              source={require("../../assets/flecha-curva.png")}
+          <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
+            <View
               style={[
-                styles.arrowImage,
-                isOwnMessage
-                  ? styles.arrowImageSent
-                  : styles.arrowImageReceived,
+                styles.message,
+                isOwnMessage ? styles.sent : styles.received,
+                styles.noteResponseContainer,
               ]}
-            />
-            <View>
-              <Text style={styles.originalNoteText}>
-                {item.noteText || "Nota no disponible"}
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              onPress={() => navigation.navigate("FullNote", { note: item })}
             >
-              <Text style={styles.messageTextNotas}>{item.text}</Text>
-            </TouchableOpacity>
-            <View style={styles.messageFooter}>
-              <Text style={styles.timeText}>
-                {currentMessageDate.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+              <Text style={styles.noteResponseText}>
+                {isOwnMessage
+                  ? t("chatUsers.youAnsweredNote")
+                  : t("chatUsers.AnsweredNote")}
               </Text>
-              {isOwnMessage && item.seen && (
-                <Ionicons
-                  name="checkmark-done-sharp"
-                  size={16}
-                  color="black"
-                  style={styles.seenIcon}
-                />
-              )}
+
+              <Image
+                source={require("../../assets/flecha-curva.png")}
+                style={[
+                  styles.arrowImage,
+                  isOwnMessage
+                    ? styles.arrowImageSent
+                    : styles.arrowImageReceived,
+                ]}
+              />
+              <View>
+                <Text style={styles.originalNoteText}>
+                  {item.noteText || "Nota no disponible"}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("FullNote", { note: item })}
+              >
+                <Text style={styles.messageTextNotas}>{item.text}</Text>
+              </TouchableOpacity>
+              <View style={styles.messageFooter}>
+                <Text style={styles.timeText}>
+                  {currentMessageDate.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+                {isOwnMessage && item.seen && (
+                  <Ionicons
+                    name="checkmark-done-sharp"
+                    size={16}
+                    color="black"
+                    style={styles.seenIcon}
+                  />
+                )}
+              </View>
             </View>
-          </View>
+          </TouchableOpacity>
         </>
       );
     }
@@ -746,6 +750,7 @@ export default function Chat({ route }) {
                     handleMediaPress(item.mediaUrl, "image", item.id, false)
                   }
                   style={styles.normalImageContainer}
+                  onLongPress={() => handleLongPressMessage(item)} // Add long press handler for images
                 >
                   <Image
                     source={{ uri: item.mediaUrl }}
