@@ -54,35 +54,23 @@ export const handleDeleteMessage = async (database, chatId, user, messageId, rec
       return;
     }
 
-    const messageData = messageDoc.data();
+    // Mark the message as deleted for both users
+    await updateDoc(messageRef, {
+      deletedFor: {
+        [user.uid]: true,
+        [recipientUser.id]: true,
+      },
+    });
 
-    if (messageData.senderId === user.uid) {
-      // Si es nuestro mensaje, marcarlo como eliminado para ambos usuarios
-      await updateDoc(messageRef, {
-        deletedFor: {
-          [user.uid]: true,
-          [recipientUser.id]: true,
-        },
-      });
-    } else {
-      // Si es mensaje del otro usuario, marcarlo como eliminado solo para nosotros
-      await updateDoc(messageRef, {
-        [`deletedFor.${user.uid}`]: true,
-      });
-    }
-
-    // Actualizar el estado local
+    // Update local state
     setMessages((prevMessages) =>
       prevMessages.map((message) => {
         if (message.id === messageId) {
           return {
             ...message,
             deletedFor: {
-              ...(message.deletedFor || {}),
               [user.uid]: true,
-              ...(messageData.senderId === user.uid
-                ? { [recipientUser.id]: true }
-                : {}),
+              [recipientUser.id]: true,
             },
           };
         }

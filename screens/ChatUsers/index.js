@@ -529,7 +529,7 @@ export default function Chat({ route }) {
 
   const handleLongPressMessage = (message) => {
     if (message.senderId === user.uid) {
-      // Solo permitir eliminación de mensajes enviados por el usuario actual
+      // Allow deletion of messages sent by the current user
       Alert.alert(
         t("chatUsers.messageOptions"),
         t("chatUsers.messageOptionsPrompt"),
