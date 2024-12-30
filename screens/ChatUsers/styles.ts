@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
       marginVertical: 8,
       maxWidth: "80%",
       flexDirection: "column",
-      alignSelf: "flex-start", // Cambia dinámicamente con sent/received
+      alignSelf: "flex-start", 
       backgroundColor: "rgba(240, 240, 240, 1)",
     },
     iconButtonGaleria: {
@@ -54,8 +54,8 @@ export const styles = StyleSheet.create({
       backgroundColor: "rgba(255, 255, 255, 0.8)",
     },
     timeText: {
-      fontSize: 10, // Reduce el tamaño
-      color: "#888", // Color más tenue
+      fontSize: 10, 
+      color: "#888", 
       fontWeight: "bold",
     },
   
@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
     messageFooter: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "flex-end", // Alinea el contenido hacia la derecha
+      justifyContent: "flex-end", 
       marginTop: 5,
       gap: "20px",
     },
@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
       padding: 0,
     },
     seenIcon: {
-      marginLeft: 7, // Ajusta el espacio entre el horario y el ícono
+      marginLeft: 7, 
     },
     messageText: {
       marginTop: 20,
@@ -156,8 +156,36 @@ export const styles = StyleSheet.create({
     },
     fullscreenMedia: {
       width: "100%",
-      height: "80%",
+      height: "100%",
       resizeMode: "contain",
+    },
+    videoControlsContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 40,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    playButton: {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: [{translateX: -25}, {translateY: -25}],
+      width: 50,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 2,
+    },
+    progressBar: {
+      width: '100%',
+      height: 3,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    progress: {
+      height: '100%',
+      backgroundColor: '#fff',
     },
     closeModalButton: {
       position: 'absolute',
@@ -282,7 +310,7 @@ export const styles = StyleSheet.create({
       justifyContent: "center",
       alignItems: "center",
       borderRadius: 30,
-      backgroundColor: "rgba(0, 0, 0, 0.8)", // Background color for view once images
+      backgroundColor: "rgba(0, 0, 0, 0.8)", 
     },
     imageNotViewed: {
       backgroundColor: "rgba(240, 240, 240, 1)",
@@ -313,7 +341,7 @@ export const styles = StyleSheet.create({
       fontSize: 12,
     },
     noBackground: {
-      backgroundColor: "transparent", // Fondo transparente para imágenes
+      backgroundColor: "transparent", 
     },
     dateContainer: {
       alignItems: "center",
@@ -385,5 +413,20 @@ export const styles = StyleSheet.create({
       fontWeight: 'bold',
       textAlign: 'center',
     },
-    
+    videoContainer: {
+      flex: 1,
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'black',
+    },
+    fullScreenTouchable: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
 });

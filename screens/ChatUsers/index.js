@@ -65,6 +65,11 @@ export default function Chat({ route }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [isComplaintVisible, setIsComplaintVisible] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const videoRef = useRef(null);
   const [mutedChats, setMutedChats] = useState([]);
   const [isMuteModalVisible, setIsMuteModalVisible] = useState(false);
 
@@ -1008,19 +1013,67 @@ export default function Chat({ route }) {
             <View style={styles.mediaContainer}>
               {selectedImage && (
                 typeof selectedImage === 'object' && selectedImage.mediaType === "video" ? (
-                  <Video
-                    source={{ uri: selectedImage.uri }}
-                    style={styles.fullscreenMedia}
-                    useNativeControls
-                    resizeMode="contain"
-                    shouldPlay={true}
-                    isLooping={false}
-                    onPlaybackStatusUpdate={(status) => {
-                      if (status.didJustFinish) {
-                        status.positionMillis = 0;
-                      }
-                    }}
-                  />
+                  <View style={styles.videoContainer}>
+                    <Video
+                      source={{ uri: selectedImage.uri }}
+                      style={styles.fullscreenMedia}
+                      resizeMode="contain"
+                      shouldPlay={true}
+                      isLooping={false}
+                      useNativeControls={false}
+                      onPlaybackStatusUpdate={(status) => {
+                        if (status.didJustFinish) {
+                          videoRef.current.setPositionAsync(0);
+                          setIsPlaying(false);
+                          setControlsVisible(true);
+                          videoRef.current.pauseAsync();
+                        }
+                        if (status.isLoaded) {
+                          setDuration(status.durationMillis);
+                          setCurrentTime(status.positionMillis);
+                          setIsPlaying(status.isPlaying);
+                        }
+                      }}
+                      ref={videoRef}
+                    />
+                    <TouchableWithoutFeedback 
+                      onPress={() => setControlsVisible(prev => !prev)}
+                    >
+                      <View style={styles.fullScreenTouchable}>
+                        {controlsVisible && (
+                          <TouchableOpacity 
+                            style={styles.playButton}
+                            onPress={() => {
+                              if (videoRef.current) {
+                                if (isPlaying) {
+                                  videoRef.current.pauseAsync();
+                                } else {
+                                  videoRef.current.playAsync();
+                                }
+                                setIsPlaying(!isPlaying);
+                              }
+                            }}
+                          >
+                            <Ionicons 
+                              name={isPlaying ? "pause" : "play"} 
+                              size={50} 
+                              color="white" 
+                            />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </TouchableWithoutFeedback>
+                    <View style={styles.videoControlsContainer}>
+                      <View style={styles.progressBar}>
+                        <View 
+                          style={[
+                            styles.progress, 
+                            { width: `${(currentTime / duration) * 100}%` }
+                          ]} 
+                        />
+                      </View>
+                    </View>
+                  </View>
                 ) : (
                   <TouchableWithoutFeedback onPress={closeModal}>
                     <Image
