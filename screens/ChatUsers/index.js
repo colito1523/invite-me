@@ -112,7 +112,7 @@ export default function Chat({ route }) {
 
         // Marcar los mensajes como leídos
         markMessagesAsRead(messagesList);
-        
+
         // Scroll to the last message after messages are loaded
         setTimeout(() => {
           flatListRef.current?.scrollToEnd({ animated: false });
@@ -998,8 +998,14 @@ export default function Chat({ route }) {
           transparent={true}
           onRequestClose={closeModal}
         >
-          <TouchableWithoutFeedback onPress={closeModal}>
-            <View style={styles.modalBackground}>
+          <View style={styles.modalBackground}>
+            <TouchableOpacity 
+              style={styles.closeModalButton} 
+              onPress={closeModal}
+            >
+              <Ionicons name="close" size={28} color="white" />
+            </TouchableOpacity>
+            <View style={styles.mediaContainer}>
               {selectedImage && (
                 typeof selectedImage === 'object' && selectedImage.mediaType === "video" ? (
                   <Video
@@ -1008,17 +1014,24 @@ export default function Chat({ route }) {
                     useNativeControls
                     resizeMode="contain"
                     shouldPlay={true}
-                    isLooping={true}
+                    isLooping={false}
+                    onPlaybackStatusUpdate={(status) => {
+                      if (status.didJustFinish) {
+                        status.positionMillis = 0;
+                      }
+                    }}
                   />
                 ) : (
-                  <Image
-                    source={{ uri: typeof selectedImage === 'object' ? selectedImage.uri : selectedImage }}
-                    style={styles.fullscreenMedia}
-                  />
+                  <TouchableWithoutFeedback onPress={closeModal}>
+                    <Image
+                      source={{ uri: typeof selectedImage === 'object' ? selectedImage.uri : selectedImage }}
+                      style={styles.fullscreenMedia}
+                    />
+                  </TouchableWithoutFeedback>
                 )
               )}
             </View>
-          </TouchableWithoutFeedback>
+          </View>
         </Modal>
         <Complaints
           isVisible={isComplaintVisible}

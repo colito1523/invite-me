@@ -148,6 +148,9 @@ export const styles = StyleSheet.create({
     modalBackground: {
       flex: 1,
       backgroundColor: "black",
+    },
+    mediaContainer: {
+      flex: 1,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -155,6 +158,13 @@ export const styles = StyleSheet.create({
       width: "100%",
       height: "80%",
       resizeMode: "contain",
+    },
+    closeModalButton: {
+      position: 'absolute',
+      top: 40,
+      right: 20,
+      zIndex: 1,
+      padding: 10,
     },
     playButtonOverlay: {
       ...StyleSheet.absoluteFillObject,
