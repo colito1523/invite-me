@@ -761,12 +761,24 @@ export default function Chat({ route }) {
 
             {item.mediaType === "video" && (
               <>
-                <Video
-                  source={{ uri: item.mediaUrl }}
-                  style={styles.messageVideo}
-                  useNativeControls
-                  resizeMode="contain"
-                />
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedImage({uri: item.mediaUrl, mediaType: item.mediaType});
+                    setIsModalVisible(true);
+                  }}
+                  style={styles.videoThumbnailContainer}
+                >
+                  <Video
+                    source={{ uri: item.mediaUrl }}
+                    style={styles.messageVideo}
+                    posterSource={{ uri: item.mediaUrl }}
+                    usePoster={true}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.playIconOverlay}>
+                    <Ionicons name="play-circle" size={40} color="white" />
+                  </View>
+                </TouchableOpacity>
                 {item.senderId === user.uid &&
                   item.viewedBy?.includes(recipient.uid) && (
                     <Ionicons
@@ -989,10 +1001,21 @@ export default function Chat({ route }) {
           <TouchableWithoutFeedback onPress={closeModal}>
             <View style={styles.modalBackground}>
               {selectedImage && (
-                <Image
-                  source={{ uri: selectedImage }}
-                  style={styles.fullscreenMedia}
-                />
+                typeof selectedImage === 'object' && selectedImage.mediaType === "video" ? (
+                  <Video
+                    source={{ uri: selectedImage.uri }}
+                    style={styles.fullscreenMedia}
+                    useNativeControls
+                    resizeMode="contain"
+                    shouldPlay={true}
+                    isLooping={true}
+                  />
+                ) : (
+                  <Image
+                    source={{ uri: typeof selectedImage === 'object' ? selectedImage.uri : selectedImage }}
+                    style={styles.fullscreenMedia}
+                  />
+                )
               )}
             </View>
           </TouchableWithoutFeedback>
