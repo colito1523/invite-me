@@ -854,79 +854,77 @@ export const preloadNextStory = ({
   const currentStory = stories[currentIndex]?.userStories[storyIndex];
   if (!currentStory) return;
 
-  // Primero cargar la historia actual
+  // Usar Promise.all para cargar múltiples imágenes en paralelo
+  const preloadPromises = [];
+  const urlsToPreload = new Set();
+  const loadStartTime = Date.now();
+  const loadTimeout = 1500; // Reducir timeout a 1.5 segundos
+
+  // Precargar la historia actual con alta prioridad
   const currentUrl = currentStory.storyUrl;
   if (currentUrl && !loadedImages[currentUrl]) {
-    Image.prefetch(currentUrl).then(() => {
-      setLoadedImages(prev => ({
-        ...prev,
-        [currentUrl]: { loaded: true, loadTime: 0 }
-      }));
-    });
+    const currentLoadPromise = Image.prefetch(currentUrl)
+      .then(() => {
+        setLoadedImages(prev => ({
+          ...prev,
+          [currentUrl]: { loaded: true, loadTime: Date.now() - loadStartTime }
+        }));
+      });
+    preloadPromises.push(currentLoadPromise);
   }
 
-  const urlsToPreload = new Set(); // Usar Set para evitar duplicados
-  const loadStartTime = Date.now();
-  const loadTimeout = 5000; // Timeout de 5 segundos
-  
-  // Precargar historias propias si están al inicio
-  if (currentIndex === 0 && stories[0]?.uid === auth.currentUser?.uid) {
-    const ownStories = stories[0].userStories;
-    for (let i = storyIndex + 1; i < Math.min(storyIndex + 4, ownStories.length); i++) {
-      urlsToPreload.add(ownStories[i].storyUrl);
-    }
-  }
-
-  // Precargar las siguientes historias del usuario actual
-  for (let i = 1; i <= 3; i++) {
+  // Precargar las siguientes historias del mismo usuario
+  for (let i = 1; i <= preloadBuffer; i++) {
     if (storyIndex + i < stories[currentIndex]?.userStories.length) {
       urlsToPreload.add(stories[currentIndex].userStories[storyIndex + i].storyUrl);
     }
   }
 
-  // Precargar las primeras 2 historias del siguiente usuario
-  if (currentIndex + 1 < stories.length) {
-    const nextUserStories = stories[currentIndex + 1].userStories;
-    for (let i = 0; i < Math.min(2, nextUserStories.length); i++) {
-      urlsToPreload.add(nextUserStories[i].storyUrl);
+  // Precargar historias de los siguientes 2 usuarios
+  for (let i = 1; i <= 2; i++) {
+    if (currentIndex + i < stories.length) {
+      const nextUserStories = stories[currentIndex + i].userStories;
+      for (let j = 0; j < Math.min(3, nextUserStories.length); j++) {
+        urlsToPreload.add(nextUserStories[j].storyUrl);
+      }
     }
   }
 
-  // Precargar todas las URLs únicas recolectadas con monitoreo de tiempo
+  // Precargar todas las URLs en paralelo con timeout
   Array.from(urlsToPreload).forEach(url => {
     if (url && !loadedImages[url]) {
-      const startTime = Date.now();
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Timeout')), loadTimeout)
       );
       
-      Promise.race([
+      const loadPromise = Promise.race([
         Image.prefetch(url),
         timeoutPromise
       ])
         .then(() => {
-          const loadTime = Date.now() - startTime;
-          console.log(`Historia cargada en ${loadTime}ms:`, url);
-          setLoadedImages(prev => ({ 
-            ...prev, 
-            [url]: {
-              loaded: true,
-              loadTime: loadTime
-            }
+          setLoadedImages(prev => ({
+            ...prev,
+            [url]: { loaded: true, loadTime: Date.now() - loadStartTime }
           }));
         })
         .catch(error => {
-          if (error.message === 'Timeout') {
-            console.warn('Timeout precargando imagen:', url);
-          } else {
-            console.warn('Error precargando imagen:', error, url);
+          if (error.message !== 'Timeout') {
+            console.warn('Error precargando:', url, error);
           }
         });
+
+      preloadPromises.push(loadPromise);
     }
   });
 
-  const totalTime = Date.now() - loadStartTime;
-  console.log(`Tiempo total de precarga: ${totalTime}ms para ${urlsToPreload.length} historias`);
+  // Ejecutar todas las promesas en paralelo
+  Promise.all(preloadPromises)
+    .then(() => {
+      console.log(`Precarga completada en ${Date.now() - loadStartTime}ms`);
+    })
+    .catch(error => {
+      console.warn('Error en precarga:', error);
+    });
 };
 
 export const handleCloseViewersModal = ({ setViewersModalVisible, setIsPaused }) => {

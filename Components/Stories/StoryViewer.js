@@ -517,6 +517,9 @@ export function StoryViewer({
                   priority="high"
                   loadingIndicatorSource={require('../../assets/notification-icon.png')}
                   resizeMode="cover" // Siempre usar "cover"
+                  cachePolicy="memory-disk"
+                  progressiveRenderingEnabled={true}
+                  memoryCachePolicy="aggressive"
                   onLoadStart={() => {
                     currentStory.loadStartTime = Date.now();
                   }}
