@@ -285,7 +285,19 @@ export function StoryViewer({
 
   const panResponder = createStoryPanResponder({
     handleCloseViewer: () => onClose(unseenStories),
-    handleOpenViewersModal: () => console.log("Abrir modal de espectadores"),
+    handleOpenViewersModal: () =>
+      handleOpenViewersModal({
+        setIsPaused,
+        loadViewers,
+        auth,
+        database,
+        stories: localStories,
+        currentIndex,
+        storyIndex,
+        setViewers,
+        setViewersModalVisible,
+        t,
+      }),
     handleNextUser: () =>
       handleNextUser({
         currentIndex,
@@ -296,16 +308,16 @@ export function StoryViewer({
         onClose,
         localUnseenStories: unseenStories,
       }),
-      handlePreviousUser: () =>
-        handlePreviousUser({
-          currentIndex,
-          setCurrentIndex,
-          setStoryIndex,
-          setProgress,
-        }),
+    handlePreviousUser: () =>
+      handlePreviousUser({
+        currentIndex,
+        setCurrentIndex,
+        setStoryIndex,
+        setProgress,
+      }),
     isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
   });
-
+  
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;
   const isFirstStory = currentIndex === 0 && storyIndex === 0;
@@ -671,7 +683,7 @@ export function StoryViewer({
             </View>
           )}
 
-          {isCurrentUserStory && (
+          {/* {isCurrentUserStory && (
             <TouchableOpacity
               style={styles.viewersButton}
               onPress={() =>
@@ -691,7 +703,7 @@ export function StoryViewer({
             >
               <Entypo name="chevron-thin-up" size={24} color="white" />
             </TouchableOpacity>
-          )}
+          )} */}
           <Modal
             animationType="slide"
             transparent={true}

@@ -26,18 +26,18 @@ export const createStoryPanResponder = ({
   handlePreviousUser,
   isCurrentUserStory,
 }) => {
+  const swipeThreshold = 2; // Umbral de distancia (menor valor = más sensible)
+  const velocityThreshold = 0.1; // Umbral de velocidad (menor valor = más sensible)
+
   return PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (evt, gestureState) => {
       return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
     },
     onPanResponderMove: (evt, gestureState) => {
-      // Puedes usar esto para mostrar una vista previa del gesto
+      // Aquí puedes añadir lógica de previsualización si es necesario
     },
     onPanResponderRelease: (evt, gestureState) => {
-      const swipeThreshold = 2; // Reduce el umbral de distancia
-      const velocityThreshold = 0.1; // Reduce el umbral de velocidad
-    
       if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
         // Gesto horizontal
         if (gestureState.dx > swipeThreshold || gestureState.vx > velocityThreshold) {
