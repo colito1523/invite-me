@@ -829,6 +829,7 @@ export const preloadNextStory = ({
   stories,
   loadedImages,
   setLoadedImages,
+  preloadBuffer = 3, // Valor por defecto ajustado a 3
 }) => {
   const urlsToPreload = [];
   

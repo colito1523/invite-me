@@ -68,7 +68,6 @@ export function StoryViewer({
   const { t } = useTranslation();
 
   useEffect(() => {
-    console.log("StoryViewer props:", { stories, initialIndex, unseenStories });
     if (!stories || !Array.isArray(stories)) {
       console.error("Prop 'stories' no es un array válido:", stories);
       onClose?.();
@@ -186,7 +185,7 @@ export function StoryViewer({
     if (!isPaused && !isKeyboardVisible && !isComplaintsVisible) {
       timer = setInterval(() => {
         if (progress < 1) {
-          setProgress((prev) => prev + 0.004);
+          setProgress((prev) => prev + 0.002);
         } else {
           handleNextWrapper({
             stories,
@@ -200,7 +199,7 @@ export function StoryViewer({
             setLocalUnseenStories,
           });
         }
-      }, 20);
+      }, 10);
     }
 
     return () => clearInterval(timer);
@@ -256,6 +255,8 @@ export function StoryViewer({
       );
       setHasLiked(userHasLiked || false);
     }
+    
+    const preloadBuffer = 5; // Aumentar el buffer de prefetch
 
     // Pre-cargar la siguiente historia si existe
     preloadNextStory({
@@ -264,6 +265,7 @@ export function StoryViewer({
       stories,
       loadedImages,
       setLoadedImages,
+      preloadBuffer,
     });
   }, [currentIndex, storyIndex]);
 

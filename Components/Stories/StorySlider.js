@@ -255,10 +255,18 @@ export default function StorySlider() {
 
       setStories(sortedStories);
       setUnseenStories(unseenStoriesTemp);
-    } catch (error) {
-      console.error(t("storySlider.loadStoriesError"), error);
-    }
-  };
+    // Precargar las imágenes de las primeras historias
+    sortedStories.forEach((storyGroup) => {
+      storyGroup.userStories.forEach((story) => {
+        Image.prefetch(story.storyUrl).catch((error) =>
+          console.warn("Error pre-cargando imagen:", error)
+        );
+      });
+    });
+  } catch (error) {
+    console.error(t("storySlider.loadStoriesError"), error);
+  }
+};
 
   const handleOpenViewer = async (index) => {
     const userStories = stories[index].userStories;
