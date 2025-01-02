@@ -64,27 +64,27 @@ const boxInfo = [
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
   },
-  // {
-  //   path: require("../../assets/Lisboa/corner.webp"),
-  //   title: "Corner",
-  //   category: "Bars & Clubs",
-  //   hours: {
-  //     Lunes: "8:00 AM - 8:00 PM",
-  //     Martes: "8:00 AM - 8:00 PM",
-  //     Miércoles: "8:00 AM - 8:00 PM",
-  //     Jueves: "8:00 AM - 8:00 PM",
-  //     Viernes: "8:00 AM - 10:00 PM",
-  //     Sábado: "10:00 AM - 10:00 PM",
-  //     Domingo: "Cerrado",
-  //   },
-  //   number: "1160419607",
-  //   coordinates: {
-  //     latitude: 38.7253583,
-  //     longitude: -9.1535022,
-  //   },
-  //   country: "Portugal", // Agregar esta propiedad
-  //   city: "Lisboa", // Agregado el campo de ciuda
-  // },
+  {
+    path: require("../../assets/Lisboa/corner2.jpg"),
+    title: "Corner",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "8:00 AM - 8:00 PM",
+      Martes: "8:00 AM - 8:00 PM",
+      Miércoles: "8:00 AM - 8:00 PM",
+      Jueves: "8:00 AM - 8:00 PM",
+      Viernes: "8:00 AM - 10:00 PM",
+      Sábado: "10:00 AM - 10:00 PM",
+      Domingo: "Cerrado",
+    },
+    number: "1160419607",
+    coordinates: {
+      latitude: 38.7253583,
+      longitude: -9.1535022,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
   {
     path: require("../../assets/Lisboa/Praca dąs flores.jpg"),
     title: "Praça das Flores",
@@ -102,6 +102,28 @@ const boxInfo = [
     coordinates: {
       latitude: 38.714855,
       longitude: -9.1516277,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+
+  {
+    path: require("../../assets/Lisboa/Rumu.jpg"),
+    title: "Rumu",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "07:00 PM - 01:00 AM",
+      Martes: "07:00 PM - 01:00 AM",
+      Miércoles: "07:00 PM - 01:00 AM",
+      Jueves: "07:00 PM - 02:00 AM",
+      Viernes: "07:00 PM - 02:00 AM",
+      Sábado: "04:00 PM - 01:00 AM",
+      Domingo: "07:00 PM - 01:00 AM",
+    },
+    number: "914 023 304",
+    coordinates: {
+      latitude: 38.7203755,
+      longitude: -9.1491488,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -361,6 +383,27 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
+    path: require("../../assets/Lisboa/Beca Beca.jpg"),
+    title: "Beca Beca",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "19:00 PM - 12:00 AM",
+      Martes: "19:00 PM - 12:00 AM",
+      Miércoles: "19:00 PM - 12:00 AM",
+      Jueves: "19:00 PM - 12:00 AM",
+      Viernes: "19:00 PM - 12:00 AM",
+      Sábado: "12:00 PM - 01:00 AM",
+      Domingo: "19:00 PM - 12:00 AM",
+    },
+    number: "21 054 7981",
+    coordinates: {
+      latitude: 38.7078843,
+      longitude: -9.1470788,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+  {
     path: require("../../assets/Lisboa/Bairro alto.webp"),
     title: "Bairro Alto",
     category: "Bars & Clubs",
@@ -610,27 +653,6 @@ const boxInfo = [
     coordinates: {
       latitude: 38.6994781,
       longitude: -9.1774925,
-    },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-  },
-  {
-    path: require("../../assets/Lisboa/Ponto Final.jpg"),
-    title: "Ponto Final",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "7:00 PM - 11:00 PM",
-      Martes: "Cerrado",
-      Miércoles: "7:00 PM - 11:00 PM",
-      Jueves: "7:00 PM - 11:00 PM",
-      Viernes: "7:00 PM - 11:00 PM",
-      Sábado: "7:00 PM - 11:00 PM",
-      Domingo: "7:00 PM - 11:00 PM",
-    },
-    number: "936 869 031",
-    coordinates: {
-      latitude: 38.6849737,
-      longitude: -9.1577017,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda

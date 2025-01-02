@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   expo: {
     name: "Invite Me",
-    slug: "ChatApp-Tutorial",
+    slug: "invite-me",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/Logo_Invite_Me.png",  
