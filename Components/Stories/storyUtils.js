@@ -829,14 +829,38 @@ export const preloadNextStory = ({
   stories,
   loadedImages,
   setLoadedImages,
-  preloadBuffer = 3, // Valor por defecto ajustado a 3
+  preloadBuffer = 3,
 }) => {
-  const urlsToPreload = [];
+  const currentStory = stories[currentIndex]?.userStories[storyIndex];
+  if (!currentStory) return;
+
+  // Primero cargar la historia actual
+  const currentUrl = currentStory.storyUrl;
+  if (currentUrl && !loadedImages[currentUrl]) {
+    Image.prefetch(currentUrl).then(() => {
+      setLoadedImages(prev => ({
+        ...prev,
+        [currentUrl]: { loaded: true, loadTime: 0 }
+      }));
+    });
+  }
+
+  const urlsToPreload = new Set(); // Usar Set para evitar duplicados
+  const loadStartTime = Date.now();
+  const loadTimeout = 5000; // Timeout de 5 segundos
   
-  // Precargar las siguientes 3 historias del usuario actual
+  // Precargar historias propias si están al inicio
+  if (currentIndex === 0 && stories[0]?.uid === auth.currentUser?.uid) {
+    const ownStories = stories[0].userStories;
+    for (let i = storyIndex + 1; i < Math.min(storyIndex + 4, ownStories.length); i++) {
+      urlsToPreload.add(ownStories[i].storyUrl);
+    }
+  }
+
+  // Precargar las siguientes historias del usuario actual
   for (let i = 1; i <= 3; i++) {
     if (storyIndex + i < stories[currentIndex]?.userStories.length) {
-      urlsToPreload.push(stories[currentIndex].userStories[storyIndex + i].storyUrl);
+      urlsToPreload.add(stories[currentIndex].userStories[storyIndex + i].storyUrl);
     }
   }
 
@@ -844,22 +868,45 @@ export const preloadNextStory = ({
   if (currentIndex + 1 < stories.length) {
     const nextUserStories = stories[currentIndex + 1].userStories;
     for (let i = 0; i < Math.min(2, nextUserStories.length); i++) {
-      urlsToPreload.push(nextUserStories[i].storyUrl);
+      urlsToPreload.add(nextUserStories[i].storyUrl);
     }
   }
 
-  // Precargar todas las URLs recolectadas
-  urlsToPreload.forEach(url => {
+  // Precargar todas las URLs únicas recolectadas con monitoreo de tiempo
+  Array.from(urlsToPreload).forEach(url => {
     if (url && !loadedImages[url]) {
-      Image.prefetch(url)
+      const startTime = Date.now();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), loadTimeout)
+      );
+      
+      Promise.race([
+        Image.prefetch(url),
+        timeoutPromise
+      ])
         .then(() => {
-          setLoadedImages(prev => ({ ...prev, [url]: true }));
+          const loadTime = Date.now() - startTime;
+          console.log(`Historia cargada en ${loadTime}ms:`, url);
+          setLoadedImages(prev => ({ 
+            ...prev, 
+            [url]: {
+              loaded: true,
+              loadTime: loadTime
+            }
+          }));
         })
         .catch(error => {
-          console.warn('Error precargando imagen:', error);
+          if (error.message === 'Timeout') {
+            console.warn('Timeout precargando imagen:', url);
+          } else {
+            console.warn('Error precargando imagen:', error, url);
+          }
         });
     }
   });
+
+  const totalTime = Date.now() - loadStartTime;
+  console.log(`Tiempo total de precarga: ${totalTime}ms para ${urlsToPreload.length} historias`);
 };
 
 export const handleCloseViewersModal = ({ setViewersModalVisible, setIsPaused }) => {

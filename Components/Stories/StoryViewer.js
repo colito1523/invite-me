@@ -502,17 +502,24 @@ export function StoryViewer({
                 source={{ uri: currentStory.storyUrl }}
                 style={[
                   styles.image,
-                  imageDimensions, // Aplica dimensiones dinámicas
+                  imageDimensions,
                 ]}
                 fadeDuration={0}
+                priority="high"
+                loadingIndicatorSource={require('../../assets/notification-icon.png')}
                 resizeMode="cover" // Siempre usar "cover"
+                onLoadStart={() => {
+                  currentStory.loadStartTime = Date.now();
+                }}
                 onLoad={(event) => {
+                  const loadTime = Date.now() - (currentStory.loadStartTime || Date.now());
+                  console.log(`Historia ${currentStory.id} cargada en ${loadTime}ms`);
+                  
                   const { width: imgWidth, height: imgHeight } =
                     event.nativeEvent.source;
                   const screenAspectRatio = width / height;
                   const imageAspectRatio = imgWidth / imgHeight;
 
-                  // Si la imagen es horizontal, ajustamos dinámicamente el tamaño
                   if (imageAspectRatio > screenAspectRatio) {
                     setImageDimensions({
                       width: "100%",
@@ -524,6 +531,9 @@ export function StoryViewer({
                       height: "100%",
                     });
                   }
+                }}
+                onError={(error) => {
+                  console.error(`Error cargando historia ${currentStory.id}:`, error);
                 }}
               />
 
