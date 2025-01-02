@@ -27,19 +27,31 @@ export const createStoryPanResponder = ({
   isCurrentUserStory,
 }) => {
   return PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (evt, gestureState) => {
-      // Detecta movimientos verticales y horizontales
-      return Math.abs(gestureState.dy) > 20 || Math.abs(gestureState.dx) > 20;
+      return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      // Puedes usar esto para mostrar una vista previa del gesto
     },
     onPanResponderRelease: (evt, gestureState) => {
-      if (gestureState.dy > 50) {
-        handleCloseViewer(); // Deslizar hacia abajo
-      } else if (gestureState.dy < -50 && isCurrentUserStory) {
-        handleOpenViewersModal(); // Deslizar hacia arriba
-      } else if (gestureState.dx > 50) {
-        handlePreviousUser(); // Deslizar a la derecha
-      } else if (gestureState.dx < -50) {
-        handleNextUser(); // Deslizar a la izquierda
+      const swipeThreshold = 2; // Reduce el umbral de distancia
+      const velocityThreshold = 0.1; // Reduce el umbral de velocidad
+    
+      if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
+        // Gesto horizontal
+        if (gestureState.dx > swipeThreshold || gestureState.vx > velocityThreshold) {
+          handlePreviousUser(); // Deslizar a la derecha
+        } else if (gestureState.dx < -swipeThreshold || gestureState.vx < -velocityThreshold) {
+          handleNextUser(); // Deslizar a la izquierda
+        }
+      } else {
+        // Gesto vertical
+        if (gestureState.dy > swipeThreshold) {
+          handleCloseViewer(); // Deslizar hacia abajo
+        } else if (gestureState.dy < -swipeThreshold && isCurrentUserStory) {
+          handleOpenViewersModal(); // Deslizar hacia arriba
+        }
       }
     },
   });
