@@ -66,7 +66,7 @@ export default function StorySlider() {
               const rotatedImage = await ImageManipulator.manipulateAsync(
                 uri,
                 [{ rotate: 90 }],
-                { compress: 1, format: ImageManipulator.SaveFormat.JPEG },
+                { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
               );
               resolve(rotatedImage.uri);
             } catch (error) {
@@ -80,10 +80,10 @@ export default function StorySlider() {
         (error) => {
           console.error(
             "Error al obtener las dimensiones de la imagen:",
-            error,
+            error
           );
           reject(error);
-        },
+        }
       );
     });
   };
@@ -191,8 +191,8 @@ export default function StorySlider() {
         unseenStoriesTemp[user.uid] = userStories.filter(
           (story) =>
             !story.viewers?.some(
-              (viewer) => viewer.uid === auth.currentUser.uid,
-            ),
+              (viewer) => viewer.uid === auth.currentUser.uid
+            )
         );
       }
 
@@ -210,7 +210,7 @@ export default function StorySlider() {
           database,
           "users",
           friend.friendId,
-          "stories",
+          "stories"
         );
         const friendStoriesSnapshot = await getDocs(friendStoriesRef);
         const friendStories = friendStoriesSnapshot.docs
@@ -227,8 +227,8 @@ export default function StorySlider() {
             unseenStoriesTemp[friend.friendId] = friendStories.filter(
               (story) =>
                 !story.viewers?.some(
-                  (viewer) => viewer.uid === auth.currentUser.uid,
-                ),
+                  (viewer) => viewer.uid === auth.currentUser.uid
+                )
             );
 
             loadedStories.push({
@@ -247,7 +247,7 @@ export default function StorySlider() {
       const sortedStories = loadedStories.sort((a, b) => {
         const aHasUnseen = unseenStoriesTemp[a.uid]?.length > 0;
         const bHasUnseen = unseenStoriesTemp[b.uid]?.length > 0;
-        
+
         if (aHasUnseen && !bHasUnseen) return -1;
         if (!aHasUnseen && bHasUnseen) return 1;
         return 0;
@@ -264,7 +264,7 @@ export default function StorySlider() {
     const userStories = stories[index].userStories;
     const unseenIndex = userStories.findIndex(
       (story) =>
-        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid),
+        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
     );
 
     setSelectedStoryIndex(index);
@@ -377,7 +377,7 @@ export default function StorySlider() {
           console.error(t("storySlider.uploadError"), error);
           Alert.alert(
             t("storySlider.error"),
-            t("storySlider.storyUploadError"),
+            t("storySlider.storyUploadError")
           );
           setIsUploading(false);
         },
@@ -398,7 +398,7 @@ export default function StorySlider() {
 
           loadExistingStories();
           setIsUploading(false);
-        },
+        }
       );
     } catch (error) {
       console.error(t("storySlider.uploadError"), error);
@@ -435,9 +435,9 @@ export default function StorySlider() {
               />
             )}
             <View style={styles.progressCircle}>
-              <Text
-                style={styles.progressText}
-              >{`${Math.round(uploadProgress)}%`}</Text>
+              <Text style={styles.progressText}>{`${Math.round(
+                uploadProgress
+              )}%`}</Text>
             </View>
           </View>
         ) : (
@@ -521,7 +521,7 @@ export default function StorySlider() {
               setTimeout(() => {
                 updateUnseenStories(updatedUnseenStories);
                 // Reorganizar historias después de ver
-                setStories(prev => {
+                setStories((prev) => {
                   return [...prev].sort((a, b) => {
                     const aHasUnseen = updatedUnseenStories[a.uid]?.length > 0;
                     const bHasUnseen = updatedUnseenStories[b.uid]?.length > 0;
@@ -539,35 +539,27 @@ export default function StorySlider() {
           />
         </Modal>
         <Modal
-          animationType="slide"
+         
           transparent={true}
           visible={isModalVisible}
           onRequestClose={() => setIsModalVisible(false)}
         >
           <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
             <View style={styles.modalContainer}>
-              <TouchableWithoutFeedback>
-                <View style={styles.modalContent}>
-                  <TouchableOpacity
-                    style={styles.option}
-                    onPress={handleCamera}
-                  >
-                    <Ionicons name="camera-outline" size={24} color="black" />
-                    <Text style={styles.optionText}>
-                      {t("storySlider.camera")}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.option}
-                    onPress={handleGallery}
-                  >
-                    <Ionicons name="images-outline" size={24} color="black" />
-                    <Text style={styles.optionText}>
-                      {t("storySlider.gallery")}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <TouchableOpacity style={styles.option} onPress={handleCamera}>
+                  <Ionicons name="camera-outline" size={24} color="black" />
+                  <Text style={styles.optionText}>
+                    {t("storySlider.camera")}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.option} onPress={handleGallery}>
+                  <Ionicons name="images-outline" size={24} color="black" />
+                  <Text style={styles.optionText}>
+                    {t("storySlider.gallery")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </TouchableWithoutFeedback>
         </Modal>
