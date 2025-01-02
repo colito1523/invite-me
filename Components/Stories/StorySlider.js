@@ -42,6 +42,17 @@ export default function StorySlider() {
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
+
+  // Precargar historias cuando cambia el array de stories
+  useEffect(() => {
+    stories.forEach(item => {
+      if (item.userStories?.[0]?.storyUrl) {
+        Image.prefetch(item.userStories[0].storyUrl);
+      }
+    });
+  }, [stories]);
+
+
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -256,12 +267,17 @@ export default function StorySlider() {
       setStories(sortedStories);
       setUnseenStories(unseenStoriesTemp);
     // Precargar las imágenes de las primeras historias
+    // Precargar solo la primera historia de cada usuario
     sortedStories.forEach((storyGroup) => {
-      storyGroup.userStories.forEach((story) => {
-        Image.prefetch(story.storyUrl).catch((error) =>
-          console.warn("Error pre-cargando imagen:", error)
-        );
-      });
+      if (storyGroup.userStories && storyGroup.userStories[0]) {
+        Image.prefetch(storyGroup.userStories[0].storyUrl)
+          .then(() => {
+            console.log(`Primera historia de ${storyGroup.username} precargada`);
+          })
+          .catch((error) =>
+            console.warn(`Error precargando historia de ${storyGroup.username}:`, error)
+          );
+      }
     });
   } catch (error) {
     console.error(t("storySlider.loadStoriesError"), error);
@@ -418,7 +434,7 @@ export default function StorySlider() {
   const renderStory = ({ item, index }) => {
     const isCurrentUserStory = item.uid === auth.currentUser.uid;
     const hasStories = item.userStories && item.userStories.length > 0;
-    const hasUnseenStories = unseenStories[item.uid]?.length > 0; // Verifica si hay historias no vistas
+    const hasUnseenStories = unseenStories[item.uid]?.length > 0;
 
     return (
       <TouchableOpacity
