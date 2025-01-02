@@ -83,7 +83,7 @@ export const handlePreviousUser = ({
 }) => {
   if (currentIndex > 0) {
     setCurrentIndex((prev) => prev - 1);
-    setStoryIndex(0); // Reinicia al primer índice de la historia anterior
+    setStoryIndex(0);
     setProgress(0);
   }
 };
@@ -763,14 +763,18 @@ export const handlePrevious = ({
   setProgress,
 }) => {
   if (storyIndex > 0) {
+    // Navegar a la historia anterior del mismo usuario
     setStoryIndex((prev) => prev - 1);
     setProgress(0);
   } else if (currentIndex > 0) {
+    // Navegar al último índice del usuario anterior
     setCurrentIndex((prev) => prev - 1);
-    setStoryIndex(stories[currentIndex - 1]?.userStories.length - 1 || 0);
+    const previousUserStories = stories[currentIndex - 1]?.userStories || [];
+    setStoryIndex(previousUserStories.length - 1); // Última historia del usuario anterior
     setProgress(0);
   }
 };
+
 
 export const handleNext = ({
   stories,

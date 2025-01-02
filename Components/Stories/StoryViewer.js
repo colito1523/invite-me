@@ -17,13 +17,8 @@ import {
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../config/firebase";
 import {
-  doc,
-  getDoc,
   addDoc,
   collection,
-  query,
-  where,
-  getDocs,
 } from "firebase/firestore";
 import styles from "./StoryViewStyles";
 import { useTranslation } from "react-i18next";
@@ -301,15 +296,13 @@ export function StoryViewer({
         onClose,
         localUnseenStories: unseenStories,
       }),
-    handlePreviousUser: () =>
-      handlePrevious({
-        storyIndex,
-        setStoryIndex,
-        currentIndex,
-        setCurrentIndex,
-        stories: localStories,
-        setProgress,
-      }),
+      handlePreviousUser: () =>
+        handlePreviousUser({
+          currentIndex,
+          setCurrentIndex,
+          setStoryIndex,
+          setProgress,
+        }),
     isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
   });
 
