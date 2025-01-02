@@ -698,10 +698,12 @@ export const handleLongPressIn = ({
   longPressTimeout,
   setIsPaused,
   setIsLongPressActive,
+  setIsUIVisible,
 }) => {
   longPressTimeout.current = setTimeout(() => {
     setIsPaused(true);
     setIsLongPressActive(true);
+    setIsUIVisible(false);
   }, 200);
 };
 
@@ -709,10 +711,12 @@ export const handleLongPressOut = ({
   longPressTimeout,
   setIsPaused,
   setIsLongPressActive,
+  setIsUIVisible,
 }) => {
   clearTimeout(longPressTimeout.current);
   setIsPaused(false);
   setIsLongPressActive(false);
+  setIsUIVisible(true);
 };
 
 export const handleTap = ({

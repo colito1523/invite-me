@@ -133,7 +133,8 @@ export function StoryViewer({
     width: "100%",
     height: "100%",
   });
-  const [isLongPressActive, setIsLongPressActive] = useState(false); // Add this line
+  const [isLongPressActive, setIsLongPressActive] = useState(false);
+  const [isUIVisible, setIsUIVisible] = useState(true);
 
   const user = auth.currentUser;
 
@@ -440,20 +441,22 @@ export function StoryViewer({
       >
         <View style={styles.container} {...panResponder.panHandlers}>
           <TouchableWithoutFeedback
-            onPressIn={() =>
+            onPressIn={() => {
               handleLongPressIn({
                 longPressTimeout,
                 setIsPaused,
                 setIsLongPressActive,
-              })
-            }
-            onPressOut={() =>
+                setIsUIVisible,
+              });
+            }}
+            onPressOut={() => {
               handleLongPressOut({
                 longPressTimeout,
                 setIsPaused,
                 setIsLongPressActive,
-              })
-            }
+                setIsUIVisible,
+              });
+            }}
             onPress={(event) =>
               handleTap({
                 event,
@@ -483,66 +486,68 @@ export function StoryViewer({
             }
           >
             <View style={styles.storyContainer}>
-              <View style={styles.progressContainer}>
-                {stories[currentIndex]?.userStories.map((_, index) => (
-                  <View key={index} style={styles.progressBar}>
-                    <View
-                      style={[
-                        styles.progress,
-                        {
-                          width:
-                            index === storyIndex
-                              ? `${progress * 100}%`
-                              : index < storyIndex
-                              ? "100%"
-                              : "0%",
-                        },
-                      ]}
-                    />
-                  </View>
-                ))}
+              <View>
+                {isUIVisible && <View style={styles.progressContainer}>
+                  {stories[currentIndex]?.userStories.map((_, index) => (
+                    <View key={index} style={styles.progressBar}>
+                      <View
+                        style={[
+                          styles.progress,
+                          {
+                            width:
+                              index === storyIndex
+                                ? `${progress * 100}%`
+                                : index < storyIndex
+                                ? "100%"
+                                : "0%",
+                          },
+                        ]}
+                      />
+                    </View>
+                  ))}
+                </View>}
+                <Image
+                  key={currentStory.id}
+                  source={{ uri: currentStory.storyUrl }}
+                  style={[
+                    styles.image,
+                    imageDimensions,
+                  ]}
+                  fadeDuration={0}
+                  priority="high"
+                  loadingIndicatorSource={require('../../assets/notification-icon.png')}
+                  resizeMode="cover" // Siempre usar "cover"
+                  onLoadStart={() => {
+                    currentStory.loadStartTime = Date.now();
+                  }}
+                  onLoad={(event) => {
+                    const loadTime = Date.now() - (currentStory.loadStartTime || Date.now());
+                    console.log(`Historia ${currentStory.id} cargada en ${loadTime}ms`);
+                    
+                    const { width: imgWidth, height: imgHeight } =
+                      event.nativeEvent.source;
+                    const screenAspectRatio = width / height;
+                    const imageAspectRatio = imgWidth / imgHeight;
+
+                    if (imageAspectRatio > screenAspectRatio) {
+                      setImageDimensions({
+                        width: "100%",
+                        height: "100%",
+                      });
+                    } else {
+                      setImageDimensions({
+                        width: "100%",
+                        height: "100%",
+                      });
+                    }
+                  }}
+                  onError={(error) => {
+                    console.error(`Error cargando historia ${currentStory.id}:`, error);
+                  }}
+                />
               </View>
-              <Image
-                key={currentStory.id}
-                source={{ uri: currentStory.storyUrl }}
-                style={[
-                  styles.image,
-                  imageDimensions,
-                ]}
-                fadeDuration={0}
-                priority="high"
-                loadingIndicatorSource={require('../../assets/notification-icon.png')}
-                resizeMode="cover" // Siempre usar "cover"
-                onLoadStart={() => {
-                  currentStory.loadStartTime = Date.now();
-                }}
-                onLoad={(event) => {
-                  const loadTime = Date.now() - (currentStory.loadStartTime || Date.now());
-                  console.log(`Historia ${currentStory.id} cargada en ${loadTime}ms`);
-                  
-                  const { width: imgWidth, height: imgHeight } =
-                    event.nativeEvent.source;
-                  const screenAspectRatio = width / height;
-                  const imageAspectRatio = imgWidth / imgHeight;
 
-                  if (imageAspectRatio > screenAspectRatio) {
-                    setImageDimensions({
-                      width: "100%",
-                      height: "100%",
-                    });
-                  } else {
-                    setImageDimensions({
-                      width: "100%",
-                      height: "100%",
-                    });
-                  }
-                }}
-                onError={(error) => {
-                  console.error(`Error cargando historia ${currentStory.id}:`, error);
-                }}
-              />
-
-              <View style={styles.userInfo}>
+              {isUIVisible && <View style={styles.userInfo}>
                 <TouchableOpacity
                   style={styles.userDetails}
                   onPress={() => {
@@ -589,7 +594,7 @@ export function StoryViewer({
                     />
                   </TouchableOpacity>
                 </View>
-              </View>
+              </View>}
             </View>
           </TouchableWithoutFeedback>
 
@@ -624,15 +629,15 @@ export function StoryViewer({
             ></TouchableOpacity>
           )}
 
-          {!isCurrentUserStory && (
+          {!isCurrentUserStory && isUIVisible && (
             <View style={styles.messageContainer}>
               <TextInput
                 style={styles.messageInput}
                 placeholder={t("storyViewer.typePlaceholder")}
                 placeholderTextColor="#FFFFFF"
                 value={message}
-                onChangeText={(query) => {
-                  setSearchQuery(query);
+                onChangeText={(text) => {
+                  setMessage(text);
                 }}
                 onFocus={() => setIsPaused(true)}
                 onBlur={() => setIsPaused(false)}
@@ -740,7 +745,7 @@ export function StoryViewer({
                             placeholder={t("storyViewer.searchPlaceholder")}
                             placeholderTextColor="black"
                             value={searchQuery}
-                            onChangeText={handleSearch}
+                            onChangeText={(query) => handleSearch({ query, setSearchQuery })}
                           />
                           <View style={styles.searchInputDivider} />
                           <Text style={styles.searchInputCount}>

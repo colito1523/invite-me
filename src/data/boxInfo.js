@@ -1,7 +1,7 @@
 
 const boxInfo = [
   {
-    path: require("../../assets/Lisboa/Praia No Parque.jpg"),
+    path: require("../../assets/Lisboa/praia no parquee.jpg"),
     title: "Praia No Parque",
     category: "Restaurants & Rooftops",
     hours: {
@@ -69,12 +69,12 @@ const boxInfo = [
     title: "Corner",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "8:00 AM - 8:00 PM",
-      Martes: "8:00 AM - 8:00 PM",
-      Miércoles: "8:00 AM - 8:00 PM",
-      Jueves: "8:00 AM - 8:00 PM",
-      Viernes: "8:00 AM - 10:00 PM",
-      Sábado: "10:00 AM - 10:00 PM",
+      Lunes: "12:00 PM - 12:00 AM",
+      Martes: "12:00 PM - 12:00 AM",
+      Miércoles: "12:00 PM - 2:00 AM",
+      Jueves: "12:00 PM - 2:00 AM",
+      Viernes: "12:00 PM - 2:00 AM",
+      Sábado: "12:00 PM - 2:00 AM",
       Domingo: "Cerrado",
     },
     number: "1160419607",
@@ -112,13 +112,13 @@ const boxInfo = [
     title: "Rumu",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "07:00 PM - 01:00 AM",
-      Martes: "07:00 PM - 01:00 AM",
-      Miércoles: "07:00 PM - 01:00 AM",
-      Jueves: "07:00 PM - 02:00 AM",
-      Viernes: "07:00 PM - 02:00 AM",
-      Sábado: "04:00 PM - 01:00 AM",
-      Domingo: "07:00 PM - 01:00 AM",
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "Cerrado",
+      Viernes: "8:00 PM - 4:00 AM",
+      Sábado: "8:00 PM - 4:00 AM",
+      Domingo: "Cerrado",
     },
     number: "914 023 304",
     coordinates: {
@@ -1023,7 +1023,7 @@ const boxInfo = [
     city: "Madrid", // Cambiado a Madrid
   },
   {
-    path: require("../../assets/Madrid/SLVJ.jpg"),
+    path: require("../../assets/Madrid/slvj2.jpg"),
     title: "SLVJ",
     category: "Restaurants & Rooftops",
     hours: {
