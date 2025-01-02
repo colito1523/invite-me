@@ -313,8 +313,8 @@ const Home = React.memo(() => {
   // para modulizar inicio
 
   const filteredBoxData = useMemo(() => {
-    return getFilteredBoxData(boxData, selectedCity, selectedCategory, t);
-  }, [boxData, selectedCity, selectedCategory, t]);
+    return getFilteredBoxData(boxData, selectedCity, selectedCategory, t, selectedDate);
+  }, [boxData, selectedCity, selectedCategory, t, selectedDate]);
 
   // para modulizar final
 
@@ -345,16 +345,17 @@ const Home = React.memo(() => {
 
   useEffect(() => {
     const user = auth.currentUser;
+    if (user) {
+      // Llama a la función modularizada.
+      const unsubscribe = subscribeToUserProfile(database, user, setProfileImage);
 
-    // Llama a la función modularizada.
-    const unsubscribe = subscribeToUserProfile(database, user, setProfileImage);
-
-    // Devuelve la función de limpieza.
-    return () => {
-      if (typeof unsubscribe === "function") {
-        unsubscribe();
-      }
-    };
+      // Devuelve la función de limpieza.
+      return () => {
+        if (typeof unsubscribe === "function") {
+          unsubscribe();
+        }
+      };
+    }
   }, [auth.currentUser]); // Dependencia del usuario autenticado.
 
   // Función para manejar el evento de clic en el box

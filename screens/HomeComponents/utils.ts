@@ -359,7 +359,7 @@ export const fetchPrivateEvents = async ({ database, user, setPrivateEvents }) =
   }
 };
 
-export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t) => {
+export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t, selectedDate) => {
   if (!boxData || !Array.isArray(boxData)) {
     return [];
   }
@@ -369,6 +369,14 @@ export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t) =
   if (selectedCity && selectedCity !== "All Cities") {
     filteredData = filteredData.filter((box) => box.city === selectedCity);
   }
+
+  // Filtrar eventos especiales según la fecha seleccionada
+  filteredData = filteredData.filter(box => {
+    if (box.category === "Events") {
+      return box.availableDates && box.availableDates.includes(selectedDate);
+    }
+    return true;
+  });
 
   // Filtrado adicional según categoría, ignorando la opción "Todos"
   if (selectedCategory && selectedCategory !== t("categories.all")) {

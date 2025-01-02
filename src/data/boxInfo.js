@@ -1598,6 +1598,31 @@ const boxInfo = [
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
   },
+
+  {
+    path: require("../../assets/Madrid/Inclan Brutal Bar.jpg"),
+    title: "Inclan Brutal Baaaar",
+    category: "Eventos",
+    hours: {
+      Lunes: "1:00 PM - 1:30 AM",
+      Martes: "1:00 PM - 1:30 AM",
+      Miércoles: "1:00 PM - 1:30 AM",
+      Jueves: "1:00 PM - 1:30 AM",
+      Viernes: "1:00 PM - 2:00 AM",
+      Sábado: "1:00 PM - 2:00 AM",
+      Domingo: "1:00 PM - 1:30 AM",
+    },
+    number: "910 238 038",
+    coordinates: {
+      latitude: 40.4225554,
+      longitude: -3.6908309,
+    },
+    availableDates: ["15 Jan", "16 Jan", "17 Jan"],
+    DaySpecial: "Evento Especial",
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+
 ];
 
 export default boxInfo;
