@@ -166,6 +166,21 @@ export default function StorySlider() {
     });
   };
 
+  const compressImage = async (uri, quality = 0.7, width = 1080) => {
+    try {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width } }], // Cambia el tamaño de la imagen
+        { compress: quality, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      return manipulatedImage.uri;
+    } catch (error) {
+      console.error("Error al comprimir la imagen:", error);
+      throw error;
+    }
+  };
+  
+
   const loadExistingStories = async () => {
     try {
       const user = auth.currentUser;
@@ -303,22 +318,23 @@ export default function StorySlider() {
 
   const handleCamera = async () => {
     setPendingAction(() => async () => {
-      // Asigna una función válida
       try {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== "granted") {
           Alert.alert(t("storySlider.error"), t("storySlider.camera"));
           return;
         }
-
+  
         const result = await ImagePicker.launchCameraAsync({
           mediaType: "photo",
           quality: 1,
           allowsEditing: false,
         });
-
+  
         if (!result.canceled && result.assets?.length > 0) {
-          const processedUri = await processImage(result.assets[0].uri);
+          // Comprimir la imagen antes de procesarla
+          const compressedUri = await compressImage(result.assets[0].uri);
+          const processedUri = await processImage(compressedUri);
           setSelectedImage(processedUri);
         }
       } catch (error) {
@@ -326,29 +342,29 @@ export default function StorySlider() {
         Alert.alert(t("storySlider.error"), t("storySlider.storyUploadError"));
       }
     });
-
+  
     setIsModalVisible(false); // Cierra el modal
   };
 
   const handleGallery = async () => {
     setPendingAction(() => async () => {
-      // Asigna una función válida
       try {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
           Alert.alert(t("storySlider.error"), t("storySlider.gallery"));
           return;
         }
-
+  
         const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: false,
           quality: 1,
         });
-
+  
         if (!result.canceled && result.assets?.length > 0) {
-          const processedUri = await processImage(result.assets[0].uri);
+          // Comprimir la imagen antes de procesarla
+          const compressedUri = await compressImage(result.assets[0].uri);
+          const processedUri = await processImage(compressedUri);
           setSelectedImage(processedUri);
         }
       } catch (error) {
@@ -356,7 +372,7 @@ export default function StorySlider() {
         Alert.alert(t("storySlider.error"), t("storySlider.storyUploadError"));
       }
     });
-
+  
     setIsModalVisible(false); // Cierra el modal
   };
 
@@ -517,14 +533,15 @@ export default function StorySlider() {
               <Ionicons name="close" size={30} color="white" />
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.acceptButtonContainer}
-              onPress={() => {
-                uploadStory(selectedImage); // Sube la imagen
-                setSelectedImage(null); // Cierra el modal
-              }}
-            >
-              <Ionicons name="arrow-forward" size={30} color="black" />
-            </TouchableOpacity>
+  style={styles.acceptButtonContainer}
+  onPress={() => {
+    uploadStory(selectedImage); // Sube la imagen
+    setSelectedImage(null); // Cierra el modal
+  }}
+>
+  <Text style={styles.acceptButtonText}>Adicionar</Text>
+  <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
+</TouchableOpacity>
           </View>
         </Modal>
 
@@ -674,15 +691,21 @@ const styles = StyleSheet.create({
   acceptButtonContainer: {
     position: "absolute",
     bottom: 40,
-    right: 20,
+    right: 10,
     backgroundColor: "white",
-    padding: 10,
-    borderRadius: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+   
   },
-  unseenStoryCircle: {
-    borderWidth: 3,
-    borderRadius: 40,
+  acceptButtonText: {
+    color: "rgba(0, 0, 0, 0.6)",
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 15,
   },
+
 });
