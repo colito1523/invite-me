@@ -77,7 +77,7 @@ const boxInfo = [
       Sábado: "12:00 PM - 2:00 AM",
       Domingo: "Cerrado",
     },
-    number: "1160419607",
+    number: "-",
     coordinates: {
       latitude: 38.72535830,
       longitude: -9.15350220,
@@ -98,7 +98,7 @@ const boxInfo = [
       Sábado: "10:00 AM - 10:00 PM",
       Domingo: "Cerrado",
     },
-    number: "1160419607",
+    number: "-",
     coordinates: {
       latitude: 38.71485500,
       longitude: -9.15162770,
@@ -120,7 +120,7 @@ const boxInfo = [
       Sábado: "8:00 PM - 4:00 AM",
       Domingo: "Cerrado",
     },
-    number: "914 023 304",
+    number: "963 048 787",
     coordinates: {
       latitude: 38.71135190,
       longitude: -9.14240330,
@@ -395,7 +395,7 @@ const boxInfo = [
       Sábado: "12:00 PM - 01:00 AM",
       Domingo: "19:00 PM - 12:00 AM",
     },
-    number: "21 054 7981",
+    number: "914 103 112",
     coordinates: {
       latitude: 38.72830010,
       longitude: -9.15268280,
@@ -416,7 +416,7 @@ const boxInfo = [
       Sábado: "10:00 AM - 10:00 PM",
       Domingo: "Cerrado",
     },
-    number: "1160419607",
+    number: "-",
     coordinates: {
       latitude: 38.71283310,
       longitude: -9.14505820,
@@ -522,7 +522,7 @@ const boxInfo = [
       Sábado: "10:00 AM - 10:00 PM",
       Domingo: "Cerrado",
     },
-    number: "21 887 1481",
+    number: "910 271 177",
     coordinates: {
       latitude: 38.71848900,
       longitude: -9.13223270,
@@ -586,7 +586,7 @@ const boxInfo = [
       Sábado: "10:00 AM - 10:00 PM",
       Domingo: "Cerrado",
     },
-    number: "1160419607",
+    number: "21 581 4296",
     coordinates: {
       latitude: 38.71600920,
       longitude: -9.14692330,
@@ -607,7 +607,7 @@ const boxInfo = [
       Sábado: "10:00 AM - 10:00 PM",
       Domingo: "Cerrado",
     },
-    number: "1160419607",
+    number: "-",
     coordinates: {
       latitude: 38.70349790,
       longitude: -9.17887300 ,
@@ -628,7 +628,7 @@ const boxInfo = [
       Sábado: "7:00 PM - 12:00 AM",
       Domingo: "7:00 PM - 12:00 AM",
     },
-    number: "21 396 3535",
+    number: "213 963 535",
     coordinates: {
       latitude: 38.69947810,
       longitude: -9.17749250,
