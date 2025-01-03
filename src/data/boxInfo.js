@@ -15,8 +15,8 @@ const boxInfo = [
     },
     number: "968 842 888",
     coordinates: {
-      latitude: 38.7283001,
-      longitude: -9.1526828,
+      latitude: 38.73010710,
+      longitude: -9.15323050,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -36,8 +36,8 @@ const boxInfo = [
     },
     number: "21 010 1184",
     coordinates: {
-      latitude: 38.7096823,
-      longitude: -9.143029,
+      latitude: 38.70968230,
+      longitude: -9.14302900,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -58,8 +58,8 @@ const boxInfo = [
     },
     number: "21 054 9899",
     coordinates: {
-      latitude: 38.7208955,
-      longitude: -9.1523714,
+      latitude: 38.72089550,
+      longitude: -9.15237140,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -79,8 +79,8 @@ const boxInfo = [
     },
     number: "1160419607",
     coordinates: {
-      latitude: 38.7253583,
-      longitude: -9.1535022,
+      latitude: 38.72535830,
+      longitude: -9.15350220,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -100,8 +100,8 @@ const boxInfo = [
     },
     number: "1160419607",
     coordinates: {
-      latitude: 38.714855,
-      longitude: -9.1516277,
+      latitude: 38.71485500,
+      longitude: -9.15162770,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -122,8 +122,8 @@ const boxInfo = [
     },
     number: "914 023 304",
     coordinates: {
-      latitude: 38.7203755,
-      longitude: -9.1491488,
+      latitude: 38.71135190,
+      longitude: -9.14240330,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -144,8 +144,8 @@ const boxInfo = [
     },
     number: "914 023 304",
     coordinates: {
-      latitude: 38.7203755,
-      longitude: -9.1491488,
+      latitude: 38.72037550,
+      longitude: -9.14914880,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -165,8 +165,8 @@ const boxInfo = [
     },
     number: "21 936 9900",
     coordinates: {
-      latitude: 38.719472,
-      longitude: -9.1441149,
+      latitude: 38.72028000,
+      longitude: -9.14499590,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -186,8 +186,8 @@ const boxInfo = [
     },
     number: "21 936 9900",
     coordinates: {
-      latitude: 38.72028,
-      longitude: -9.1449959,
+      latitude: 38.72028000,
+      longitude: -9.14499590,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -291,8 +291,8 @@ const boxInfo = [
     },    
     number: "21 346 1117",
     coordinates: {
-      latitude: 38.7074149,
-      longitude: -9.1461322,
+      latitude: 38.70741490,
+      longitude: -9.14613220,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -312,8 +312,8 @@ const boxInfo = [
     },
     number: "911 126 402",
     coordinates: {
-      latitude: 38.7063889,
-      longitude: -9.1575,
+      latitude: 38.70638890,
+      longitude: -9.15750000,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -334,8 +334,8 @@ const boxInfo = [
     },
     number: "-",
     coordinates: {
-      latitude: 38.7411311,
-      longitude: -9.145745,
+      latitude:38.74113110,
+      longitude:-9.14574500,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -355,8 +355,8 @@ const boxInfo = [
     },
     number: "21 346 2265",
     coordinates: {
-      latitude: 38.7053888,
-      longitude: -9.1467954,
+      latitude: 38.70538880,
+      longitude: -9.14679540,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -376,8 +376,8 @@ const boxInfo = [
     },
     number: "926 286 634",
     coordinates: {
-      latitude: 38.7071959,
-      longitude: -9.1538892,
+      latitude: 38.70719590,
+      longitude: -9.15388920,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -397,8 +397,8 @@ const boxInfo = [
     },
     number: "21 054 7981",
     coordinates: {
-      latitude: 38.7078843,
-      longitude: -9.1470788,
+      latitude: 38.72830010,
+      longitude: -9.15268280,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -418,8 +418,8 @@ const boxInfo = [
     },
     number: "1160419607",
     coordinates: {
-      latitude: 38.7128331,
-      longitude: -9.1450582,
+      latitude: 38.71283310,
+      longitude: -9.14505820,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -440,8 +440,8 @@ const boxInfo = [
     
     number: "21 096 5775",
     coordinates: {
-      latitude: 38.7209984,
-      longitude: -9.147139,
+      latitude: 38.72099840,
+      longitude: -9.14713900,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -461,8 +461,8 @@ const boxInfo = [
     },
     number: "21 130 5393",
     coordinates: {
-      latitude: 38.7122647,
-      longitude: -9.1423781,
+      latitude: 38.71226680,
+      longitude: -9.14240250,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -482,8 +482,8 @@ const boxInfo = [
     },
     number: "21 159 2700",
     coordinates: {
-      latitude: 38.6963541,
-      longitude: -9.1917573,
+      latitude: 38.69635410,
+      longitude: -9.19175730,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -503,8 +503,8 @@ const boxInfo = [
     },    
     number: "935 945 545",
     coordinates: {
-      latitude: 38.7076621,
-      longitude: -9.1468819,
+      latitude: 38.70766210,
+      longitude: -9.14688190,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -524,8 +524,8 @@ const boxInfo = [
     },
     number: "21 887 1481",
     coordinates: {
-      latitude: 38.4625994,
-      longitude: -9.1917603,
+      latitude: 38.71848900,
+      longitude: -9.13223270,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -545,8 +545,8 @@ const boxInfo = [
     },    
     number: "914 110 791",
     coordinates: {
-      latitude: 38.7031048,
-      longitude: -9.1620528,
+      latitude: 38.70308270,
+      longitude: -9.16203800,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -567,8 +567,8 @@ const boxInfo = [
     },
     number: "21 342 4033",
     coordinates: {
-      latitude: 38.7141649,
-      longitude: -9.1497258,
+      latitude: 38.71416490,
+      longitude: -9.14972580,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -588,8 +588,8 @@ const boxInfo = [
     },
     number: "1160419607",
     coordinates: {
-      latitude: 38.7160092,
-      longitude: -9.1469233,
+      latitude: 38.71600920,
+      longitude: -9.14692330,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -609,8 +609,8 @@ const boxInfo = [
     },
     number: "1160419607",
     coordinates: {
-      latitude: 38.7034979,
-      longitude: -9.178873,
+      latitude: 38.70349790,
+      longitude: -9.17887300 ,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -630,8 +630,8 @@ const boxInfo = [
     },
     number: "21 396 3535",
     coordinates: {
-      latitude: 38.6994781,
-      longitude: -9.1774925,
+      latitude: 38.69947810,
+      longitude: -9.17749250,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -651,8 +651,8 @@ const boxInfo = [
     },
     number: "21 594 1117",
     coordinates: {
-      latitude: 38.6994781,
-      longitude: -9.1774925,
+      latitude: 38.70656810,
+      longitude: -9.17238790,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -672,8 +672,8 @@ const boxInfo = [
     },
     number: "935 190 438",
     coordinates: {
-      latitude: 38.6997337,
-      longitude: -9.1785392,
+      latitude: 38.69973370,
+      longitude: -9.17853920,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -693,8 +693,8 @@ const boxInfo = [
     },
     number: "963 982 094",
     coordinates: {
-      latitude: 38.7073563,
-      longitude: -9.1435333,
+      latitude: 38.70735630,
+      longitude: -9.14353330,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -714,8 +714,8 @@ const boxInfo = [
     },
     number: "913 808 371",
     coordinates: {
-      latitude: 38.6982479,
-      longitude: -9.4217619,
+      latitude: 38.70742840,
+      longitude: -9.14410890,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -735,8 +735,8 @@ const boxInfo = [
     },    
     number: "967 643 319",
     coordinates: {
-      latitude: 38.6982479,
-      longitude: -9.4217619,
+      latitude: 38.69825780,
+      longitude: -9.42175430,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -756,8 +756,8 @@ const boxInfo = [
     },
     number: "915 546 537",
     coordinates: {
-      latitude: 38.6962004,
-      longitude: -9.42026,
+      latitude: 38.69620040,
+      longitude: -9.42026000,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
