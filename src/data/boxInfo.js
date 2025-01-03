@@ -1205,7 +1205,7 @@ const boxInfo = [
       Sábado: "10:00 AM - 10:00 PM",
       Domingo: "Cerrado",
     },
-    number: "1160419607",
+    number: "603 482 073",
     coordinates: {
       latitude: 40.42904970,
       longitude: -3.68733600,
