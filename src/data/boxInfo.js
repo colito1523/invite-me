@@ -1,4 +1,3 @@
-
 const boxInfo = [
   {
     path: require("../../assets/Lisboa/praia no parquee.jpg"),
@@ -15,8 +14,8 @@ const boxInfo = [
     },
     number: "968 842 888",
     coordinates: {
-      latitude: 38.73010710,
-      longitude: -9.15323050,
+      latitude: 38.7301071,
+      longitude: -9.1532305,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -36,8 +35,8 @@ const boxInfo = [
     },
     number: "21 010 1184",
     coordinates: {
-      latitude: 38.70968230,
-      longitude: -9.14302900,
+      latitude: 38.7096823,
+      longitude: -9.143029,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -48,18 +47,18 @@ const boxInfo = [
     title: "Mama Shelter",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "8:00 AM - 8:00 PM",
-      Martes: "8:00 AM - 8:00 PM",
-      Miércoles: "8:00 AM - 8:00 PM",
-      Jueves: "8:00 AM - 8:00 PM",
-      Viernes: "8:00 AM - 10:00 PM",
-      Sábado: "10:00 AM - 10:00 PM",
-      Domingo: "Cerrado",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-",
     },
     number: "21 054 9899",
     coordinates: {
-      latitude: 38.72089550,
-      longitude: -9.15237140,
+      latitude: 38.7208955,
+      longitude: -9.1523714,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -79,8 +78,8 @@ const boxInfo = [
     },
     number: "-",
     coordinates: {
-      latitude: 38.72535830,
-      longitude: -9.15350220,
+      latitude: 38.7253583,
+      longitude: -9.1535022,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -90,18 +89,18 @@ const boxInfo = [
     title: "Praça das Flores",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "8:00 AM - 8:00 PM",
-      Martes: "8:00 AM - 8:00 PM",
-      Miércoles: "8:00 AM - 8:00 PM",
-      Jueves: "8:00 AM - 8:00 PM",
-      Viernes: "8:00 AM - 10:00 PM",
-      Sábado: "10:00 AM - 10:00 PM",
-      Domingo: "Cerrado",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-",
     },
     number: "-",
     coordinates: {
-      latitude: 38.71485500,
-      longitude: -9.15162770,
+      latitude: 38.714855,
+      longitude: -9.1516277,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -115,15 +114,15 @@ const boxInfo = [
       Lunes: "Cerrado",
       Martes: "Cerrado",
       Miércoles: "Cerrado",
-      Jueves: "Cerrado",
+      Jueves: "8:00 PM - 3:00 AM",
       Viernes: "8:00 PM - 4:00 AM",
       Sábado: "8:00 PM - 4:00 AM",
       Domingo: "Cerrado",
     },
     number: "963 048 787",
     coordinates: {
-      latitude: 38.71135190,
-      longitude: -9.14240330,
+      latitude: 38.7113519,
+      longitude: -9.1424033,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -144,8 +143,8 @@ const boxInfo = [
     },
     number: "914 023 304",
     coordinates: {
-      latitude: 38.72037550,
-      longitude: -9.14914880,
+      latitude: 38.7203755,
+      longitude: -9.1491488,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -165,8 +164,8 @@ const boxInfo = [
     },
     number: "21 936 9900",
     coordinates: {
-      latitude: 38.72028000,
-      longitude: -9.14499590,
+      latitude: 38.72028,
+      longitude: -9.1449959,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -186,8 +185,8 @@ const boxInfo = [
     },
     number: "21 936 9900",
     coordinates: {
-      latitude: 38.72028000,
-      longitude: -9.14499590,
+      latitude: 38.72028,
+      longitude: -9.1449959,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -263,7 +262,7 @@ const boxInfo = [
       Lunes: "12:00 AM - 6:00 AM",
       Martes: "Cerrado",
       Miércoles: "12:00 AM - 6:00 AM",
-      Jueves: "Abierto las 24 horas",
+      Jueves: "12:00 AM - 11:59 PM",
       Viernes: "12:00 AM - 7:00 AM",
       Sábado: "12:00 AM - 6:00 AM",
       Domingo: "12:00 AM - 6:00 AM",
@@ -288,11 +287,11 @@ const boxInfo = [
       Viernes: "11:00 PM - 12:00 AM",
       Sábado: "11:00 PM - 12:00 AM",
       Domingo: "8:00 PM - 12:00 AM",
-    },    
+    },
     number: "21 346 1117",
     coordinates: {
-      latitude: 38.70741490,
-      longitude: -9.14613220,
+      latitude: 38.7074149,
+      longitude: -9.1461322,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -303,17 +302,17 @@ const boxInfo = [
     category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
-  Martes: "Cerrado",
-  Miércoles: "11:59 PM - 12:00 AM",
-  Jueves: "12:00 AM - 6:00 AM",
-  Viernes: "11:59 PM - 12:00 AM",
-  Sábado: "11:59 PM - 12:00 AM",
-  Domingo: "12:00 AM - 6:00 AM",
+      Martes: "Cerrado",
+      Miércoles: "11:59 PM - 12:00 AM",
+      Jueves: "12:00 AM - 6:00 AM",
+      Viernes: "11:59 PM - 12:00 AM",
+      Sábado: "11:59 PM - 12:00 AM",
+      Domingo: "12:00 AM - 6:00 AM",
     },
     number: "911 126 402",
     coordinates: {
-      latitude: 38.70638890,
-      longitude: -9.15750000,
+      latitude: 38.7063889,
+      longitude: -9.1575,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -334,8 +333,8 @@ const boxInfo = [
     },
     number: "-",
     coordinates: {
-      latitude:38.74113110,
-      longitude:-9.14574500,
+      latitude: 38.7411311,
+      longitude: -9.145745,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -355,8 +354,8 @@ const boxInfo = [
     },
     number: "21 346 2265",
     coordinates: {
-      latitude: 38.70538880,
-      longitude: -9.14679540,
+      latitude: 38.7053888,
+      longitude: -9.1467954,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -376,29 +375,29 @@ const boxInfo = [
     },
     number: "926 286 634",
     coordinates: {
-      latitude: 38.70719590,
-      longitude: -9.15388920,
+      latitude: 38.7071959,
+      longitude: -9.1538892,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Beca Beca.jpg"),
+    path: require("../../assets/Lisboa/Beca Beca 2.jpg"),
     title: "Beca Beca",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "19:00 PM - 12:00 AM",
-      Martes: "19:00 PM - 12:00 AM",
-      Miércoles: "19:00 PM - 12:00 AM",
-      Jueves: "19:00 PM - 12:00 AM",
-      Viernes: "19:00 PM - 12:00 AM",
-      Sábado: "12:00 PM - 01:00 AM",
-      Domingo: "19:00 PM - 12:00 AM",
+      Lunes: "11:00 AM - 9:00 PM",
+      Martes: "11:00 AM - 9:00 PM",
+      Miércoles: "11:00 AM - 9:00 PM",
+      Jueves: "11:00 AM - 9:00 PM",
+      Viernes: "11:00 AM - 9:00 PM",
+      Sábado: "11:00 AM - 9:00 PM",
+      Domingo: "11:00 AM - 9:00 PM",
     },
     number: "914 103 112",
     coordinates: {
-      latitude: 38.72830010,
-      longitude: -9.15268280,
+      latitude: 38.7283001,
+      longitude: -9.1526828,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -418,8 +417,8 @@ const boxInfo = [
     },
     number: "-",
     coordinates: {
-      latitude: 38.71283310,
-      longitude: -9.14505820,
+      latitude: 38.7128331,
+      longitude: -9.1450582,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -437,11 +436,11 @@ const boxInfo = [
       Sábado: "12:30 PM - 2:00 AM",
       Domingo: "12:30 PM - 1:00 AM",
     },
-    
+
     number: "21 096 5775",
     coordinates: {
-      latitude: 38.72099840,
-      longitude: -9.14713900,
+      latitude: 38.7209984,
+      longitude: -9.147139,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -461,8 +460,8 @@ const boxInfo = [
     },
     number: "21 130 5393",
     coordinates: {
-      latitude: 38.71226680,
-      longitude: -9.14240250,
+      latitude: 38.7122668,
+      longitude: -9.1424025,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -482,8 +481,8 @@ const boxInfo = [
     },
     number: "21 159 2700",
     coordinates: {
-      latitude: 38.69635410,
-      longitude: -9.19175730,
+      latitude: 38.6963541,
+      longitude: -9.1917573,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -493,18 +492,18 @@ const boxInfo = [
     title: "Java Rooftop",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "12:00 PM - 1:00 AM",
-      Martes: "12:00 PM - 1:00 AM",
-      Miércoles: "12:00 PM - 1:00 AM",
-      Jueves: "12:00 PM - 1:00 AM",
-      Viernes: "12:00 PM - 1:00 AM",
-      Sábado: "12:00 PM - 1:00 AM",
-      Domingo: "12:00 PM - 1:00 AM",
-    },    
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-",
+    },
     number: "935 945 545",
     coordinates: {
-      latitude: 38.70766210,
-      longitude: -9.14688190,
+      latitude: 38.7076621,
+      longitude: -9.1468819,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -524,8 +523,8 @@ const boxInfo = [
     },
     number: "910 271 177",
     coordinates: {
-      latitude: 38.71848900,
-      longitude: -9.13223270,
+      latitude: 38.718489,
+      longitude: -9.1322327,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -542,11 +541,11 @@ const boxInfo = [
       Viernes: "5:00 PM - 12:00 AM",
       Sábado: "5:00 PM - 12:00 AM",
       Domingo: "5:00 PM - 12:00 AM",
-    },    
+    },
     number: "914 110 791",
     coordinates: {
-      latitude: 38.70308270,
-      longitude: -9.16203800,
+      latitude: 38.7030827,
+      longitude: -9.162038,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -567,8 +566,8 @@ const boxInfo = [
     },
     number: "21 342 4033",
     coordinates: {
-      latitude: 38.71416490,
-      longitude: -9.14972580,
+      latitude: 38.7141649,
+      longitude: -9.1497258,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -578,18 +577,18 @@ const boxInfo = [
     title: "Faz Frio",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "8:00 AM - 8:00 PM",
-      Martes: "8:00 AM - 8:00 PM",
-      Miércoles: "8:00 AM - 8:00 PM",
-      Jueves: "8:00 AM - 8:00 PM",
-      Viernes: "8:00 AM - 10:00 PM",
-      Sábado: "10:00 AM - 10:00 PM",
-      Domingo: "Cerrado",
+      Lunes: "12:00 PM - 12:00 AM",
+      Martes: "12:00 PM - 12:00 AM",
+      Miércoles: "12:00 PM - 12:00 AM",
+      Jueves: "12:00 PM - 12:00 AM",
+      Viernes: "12:00 PM - 2:00 AM",
+      Sábado: "12:00 PM - 2:00 AM",
+      Domingo: "12:00 PM - 12:00 AM",
     },
     number: "21 581 4296",
     coordinates: {
-      latitude: 38.71600920,
-      longitude: -9.14692330,
+      latitude: 38.7160092,
+      longitude: -9.1469233,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -599,18 +598,18 @@ const boxInfo = [
     title: "Lx Factory",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "8:00 AM - 8:00 PM",
-      Martes: "8:00 AM - 8:00 PM",
-      Miércoles: "8:00 AM - 8:00 PM",
-      Jueves: "8:00 AM - 8:00 PM",
-      Viernes: "8:00 AM - 10:00 PM",
-      Sábado: "10:00 AM - 10:00 PM",
-      Domingo: "Cerrado",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-",
     },
     number: "-",
     coordinates: {
-      latitude: 38.70349790,
-      longitude: -9.17887300 ,
+      latitude: 38.7034979,
+      longitude: -9.178873,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -626,12 +625,12 @@ const boxInfo = [
       Jueves: "7:00 PM - 12:00 AM",
       Viernes: "7:00 PM - 12:00 AM",
       Sábado: "7:00 PM - 12:00 AM",
-      Domingo: "7:00 PM - 12:00 AM",
+      Domingo: "12:00 PM - 5:00 PM",
     },
     number: "213 963 535",
     coordinates: {
-      latitude: 38.69947810,
-      longitude: -9.17749250,
+      latitude: 38.6994781,
+      longitude: -9.1774925,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -641,18 +640,18 @@ const boxInfo = [
     title: "Go A Lisboa Rooftop",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "8:00 AM - 8:00 PM",
-      Martes: "8:00 AM - 8:00 PM",
-      Miércoles: "8:00 AM - 8:00 PM",
-      Jueves: "8:00 AM - 8:00 PM",
-      Viernes: "8:00 AM - 10:00 PM",
-      Sábado: "10:00 AM - 10:00 PM",
-      Domingo: "Cerrado",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-",
     },
     number: "21 594 1117",
     coordinates: {
-      latitude: 38.70656810,
-      longitude: -9.17238790,
+      latitude: 38.7065681,
+      longitude: -9.1723879,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -672,8 +671,8 @@ const boxInfo = [
     },
     number: "935 190 438",
     coordinates: {
-      latitude: 38.69973370,
-      longitude: -9.17853920,
+      latitude: 38.6997337,
+      longitude: -9.1785392,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -693,8 +692,8 @@ const boxInfo = [
     },
     number: "963 982 094",
     coordinates: {
-      latitude: 38.70735630,
-      longitude: -9.14353330,
+      latitude: 38.7073563,
+      longitude: -9.1435333,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -714,8 +713,8 @@ const boxInfo = [
     },
     number: "913 808 371",
     coordinates: {
-      latitude: 38.70742840,
-      longitude: -9.14410890,
+      latitude: 38.7074284,
+      longitude: -9.1441089,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -732,11 +731,11 @@ const boxInfo = [
       Viernes: "12:00 PM - 2:00 AM",
       Sábado: "12:00 PM - 2:00 AM",
       Domingo: "12:00 PM - 12:00 AM",
-    },    
+    },
     number: "967 643 319",
     coordinates: {
-      latitude: 38.69825780,
-      longitude: -9.42175430,
+      latitude: 38.6982578,
+      longitude: -9.4217543,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -756,8 +755,51 @@ const boxInfo = [
     },
     number: "915 546 537",
     coordinates: {
-      latitude: 38.69620040,
-      longitude: -9.42026000,
+      latitude: 38.6962004,
+      longitude: -9.42026,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+
+  {
+    path: require("../../assets/Lisboa/K Urban Beach.jpg"),
+    title: "K Urban Beach",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "11:00 PM - 12:00 AM",
+      Viernes: "11:00 PM - 12:00 AM",
+      Sábado: "11:00 PM - 12:00 AM",
+      Domingo: "12:00 AM - 6:00 AM",
+    },
+    number: "961 312 719",
+    coordinates: {
+      latitude: 38.70487280,
+      longitude: -9.15498770,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+  {
+    path: require("../../assets/Lisboa/Ministerium Club.jpg"),
+    title: "Ministerium Club",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "11:30 PM - 12:00 AM",
+      Viernes: "11:30 PM - 12:00 AM",
+      Sábado: "11:30 PM - 12:00 AM",
+      Domingo: "12:00 AM - 8:00 AM",
+    },
+    number: "-",
+    coordinates: {
+      latitude: 38.70716500,
+      longitude: -9.13718600,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
@@ -787,7 +829,7 @@ const boxInfo = [
     city: "Madrid", // Cambiado a Madrid
     isPrivate: false, // Evento general
   },
-  
+
   {
     path: require("../../assets/Madrid/Giselle.jpg"),
     title: "Giselle",
@@ -822,7 +864,7 @@ const boxInfo = [
       Viernes: "1:00 PM - 2:30 AM",
       Sábado: "1:00 PM - 2:30 AM",
       Domingo: "1:00 PM - 2:30 AM",
-    },    
+    },
     number: "915 154 332",
     coordinates: {
       latitude: 40.423715,
@@ -843,7 +885,7 @@ const boxInfo = [
       Viernes: "8:00 PM - 4:00 AM",
       Sábado: "8:00 PM - 4:00 AM",
       Domingo: "8:00 PM - 4:00 AM",
-    },    
+    },
     number: "915 154 332",
     coordinates: {
       latitude: 40.423715,
@@ -1037,8 +1079,8 @@ const boxInfo = [
     },
     number: "911 088 818",
     coordinates: {
-      latitude: 40.42821500,
-      longitude: -3.68321820,
+      latitude: 40.428215,
+      longitude: -3.6832182,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1059,8 +1101,8 @@ const boxInfo = [
     },
     number: "910 889 330",
     coordinates: {
-      latitude: 40.41952930,
-      longitude: -3.68959320,
+      latitude: 40.4195293,
+      longitude: -3.6895932,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1080,8 +1122,8 @@ const boxInfo = [
     },
     number: "919 900 299",
     coordinates: {
-      latitude: 40.43656050,
-      longitude: -3.69921030,
+      latitude: 40.4365605,
+      longitude: -3.6992103,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1101,8 +1143,8 @@ const boxInfo = [
     },
     number: "910 513 592",
     coordinates: {
-      latitude: 40.41790180,
-      longitude: -3.69626770,
+      latitude: 40.4179018,
+      longitude: -3.6962677,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1122,8 +1164,8 @@ const boxInfo = [
     },
     number: "917 372 017",
     coordinates: {
-      latitude: 40.42536040,
-      longitude: -3.69177440,
+      latitude: 40.4253604,
+      longitude: -3.6917744,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1143,8 +1185,8 @@ const boxInfo = [
     },
     number: "-",
     coordinates: {
-      latitude: 40.42205980,
-      longitude: -3.68591640,
+      latitude: 40.4220598,
+      longitude: -3.6859164,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1165,8 +1207,8 @@ const boxInfo = [
     },
     number: "915 320 011",
     coordinates: {
-      latitude: 40.42263390,
-      longitude: -3.69476750,
+      latitude: 40.4226339,
+      longitude: -3.6947675,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1186,8 +1228,8 @@ const boxInfo = [
     },
     number: "919 930 385",
     coordinates: {
-      latitude: 40.42519220,
-      longitude: -3.67791260,
+      latitude: 40.4251922,
+      longitude: -3.6779126,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1207,8 +1249,8 @@ const boxInfo = [
     },
     number: "603 482 073",
     coordinates: {
-      latitude: 40.42904970,
-      longitude: -3.68733600,
+      latitude: 40.4290497,
+      longitude: -3.687336,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1226,11 +1268,11 @@ const boxInfo = [
       Viernes: "12:00 AM - 6:00 AM",
       Sábado: "12:00 AM - 6:00 AM",
       Domingo: "12:00 AM - 6:00 AM",
-    },    
+    },
     number: "913 192 651",
     coordinates: {
-      latitude: 40.43442440,
-      longitude: -3.68995410,
+      latitude: 40.4344244,
+      longitude: -3.6899541,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1250,12 +1292,11 @@ const boxInfo = [
     },
     number: "682 182 405",
     coordinates: {
-      latitude: 40.42251370,
-      longitude: -3.68984400,
+      latitude: 40.4225137,
+      longitude: -3.689844,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
-    
   },
   {
     path: require("../../assets/Madrid/Gabana.jpg"),
@@ -1272,8 +1313,8 @@ const boxInfo = [
     },
     number: "919 992 323",
     coordinates: {
-      latitude: 40.43765590,
-      longitude: -3.67967240,
+      latitude: 40.4376559,
+      longitude: -3.6796724,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1294,8 +1335,8 @@ const boxInfo = [
     },
     number: "910 562 953",
     coordinates: {
-      latitude: 40.42260660,
-      longitude: -3.69100730,
+      latitude: 40.4226066,
+      longitude: -3.6910073,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1315,8 +1356,8 @@ const boxInfo = [
     },
     number: "917 37 80 40",
     coordinates: {
-      latitude: 40.42137890,
-      longitude: -3.70714200,
+      latitude: 40.4213789,
+      longitude: -3.707142,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1336,8 +1377,8 @@ const boxInfo = [
     },
     number: "913 082 931",
     coordinates: {
-      latitude: 40.42864490,
-      longitude: -3.69443380,
+      latitude: 40.4286449,
+      longitude: -3.6944338,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1357,8 +1398,8 @@ const boxInfo = [
     },
     number: "916 859 719",
     coordinates: {
-      latitude: 40.42335210,
-      longitude: -3.68399740,
+      latitude: 40.4233521,
+      longitude: -3.6839974,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1375,11 +1416,11 @@ const boxInfo = [
       Viernes: "1:00 PM - 2:00 AM",
       Sábado: "1:00 PM - 2:00 AM",
       Domingo: "1:00 PM - 2:00 AM",
-    },    
+    },
     number: " 911 988 880",
     coordinates: {
-      latitude: 40.42642390,
-      longitude: -3.68954750,
+      latitude: 40.4264239,
+      longitude: -3.6895475,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1391,17 +1432,17 @@ const boxInfo = [
     category: "Restaurants & Rooftops",
     hours: {
       Lunes: "1:00 PM - 1:00 AM",
-  Martes: "1:00 PM - 1:00 AM",
-  Miércoles: "1:00 PM - 1:00 AM",
-  Jueves: "1:00 PM - 1:00 AM",
-  Viernes: "1:00 PM - 2:00 AM",
-  Sábado: "12:15 PM - 2:00 AM",
-  Domingo: "12:15 PM - 1:00 AM",
+      Martes: "1:00 PM - 1:00 AM",
+      Miércoles: "1:00 PM - 1:00 AM",
+      Jueves: "1:00 PM - 1:00 AM",
+      Viernes: "1:00 PM - 2:00 AM",
+      Sábado: "12:15 PM - 2:00 AM",
+      Domingo: "12:15 PM - 1:00 AM",
     },
     number: "915 301 761",
     coordinates: {
-      latitude: 40.41977910,
-      longitude: -3.70122130,
+      latitude: 40.4197791,
+      longitude: -3.7012213,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1421,8 +1462,8 @@ const boxInfo = [
     },
     number: "911 721 841",
     coordinates: {
-      latitude: 40.43246180,
-      longitude: -3.68780340,
+      latitude: 40.4324618,
+      longitude: -3.6878034,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1443,8 +1484,8 @@ const boxInfo = [
     },
     number: "616 844 224",
     coordinates: {
-      latitude: 40.43703870,
-      longitude: -3.68090160,
+      latitude: 40.4370387,
+      longitude: -3.6809016,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1456,17 +1497,17 @@ const boxInfo = [
     category: "Restaurants & Rooftops",
     hours: {
       Lunes: "1:30 PM - 1:00 AM",
-  Martes: "1:30 PM - 1:00 AM",
-  Miércoles: "1:30 PM - 1:00 AM",
-  Jueves: "1:30 PM - 12:00 AM",
-  Viernes: "1:30 PM - 1:00 AM",
-  Sábado: "1:30 PM - 1:00 AM",
-  Domingo: "1:30 PM - 1:00 AM",
+      Martes: "1:30 PM - 1:00 AM",
+      Miércoles: "1:30 PM - 1:00 AM",
+      Jueves: "1:30 PM - 12:00 AM",
+      Viernes: "1:30 PM - 1:00 AM",
+      Sábado: "1:30 PM - 1:00 AM",
+      Domingo: "1:30 PM - 1:00 AM",
     },
     number: "910 881 541",
     coordinates: {
-      latitude: 40.43235760,
-      longitude: -3.68703190,
+      latitude: 40.4323576,
+      longitude: -3.6870319,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1486,8 +1527,8 @@ const boxInfo = [
     },
     number: "619 585 012",
     coordinates: {
-      latitude: 40.42126500,
-      longitude: -3.69015710,
+      latitude: 40.421265,
+      longitude: -3.6901571,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1507,8 +1548,8 @@ const boxInfo = [
     },
     number: "-",
     coordinates: {
-      latitude: 40.42839530,
-      longitude: -3.68407410,
+      latitude: 40.4283953,
+      longitude: -3.6840741,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1528,8 +1569,8 @@ const boxInfo = [
     },
     number: "915 759 254",
     coordinates: {
-      latitude: 40.42784550,
-      longitude: -3.68850960,
+      latitude: 40.4278455,
+      longitude: -3.6885096,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1549,8 +1590,8 @@ const boxInfo = [
     },
     number: "917 377 775",
     coordinates: {
-      latitude: 40.43373430,
-      longitude: -3.70279220,
+      latitude: 40.4337343,
+      longitude: -3.7027922,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1567,11 +1608,11 @@ const boxInfo = [
       Viernes: "1:00 PM - 2:30 AM",
       Sábado: "1:00 PM - 2:30 AM",
       Domingo: "1:00 PM - 1:00 AM",
-    },    
+    },
     number: "911 088 881",
     coordinates: {
-      latitude: 40.42609180,
-      longitude: -3.69226320,
+      latitude: 40.4260918,
+      longitude: -3.6922632,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1592,37 +1633,12 @@ const boxInfo = [
     },
     number: "910 238 038",
     coordinates: {
-      latitude: 40.41506230,
-      longitude: -3.70191350,
+      latitude: 40.4150623,
+      longitude: -3.7019135,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
   },
-
-  {
-    path: require("../../assets/Madrid/Inclan Brutal Bar.jpg"),
-    title: "Inclan Brutal Baaaar",
-    category: "Eventos",
-    hours: {
-      Lunes: "1:00 PM - 1:30 AM",
-      Martes: "1:00 PM - 1:30 AM",
-      Miércoles: "1:00 PM - 1:30 AM",
-      Jueves: "1:00 PM - 1:30 AM",
-      Viernes: "1:00 PM - 2:00 AM",
-      Sábado: "1:00 PM - 2:00 AM",
-      Domingo: "1:00 PM - 1:30 AM",
-    },
-    number: "910 238 038",
-    coordinates: {
-      latitude: 40.4225554,
-      longitude: -3.6908309,
-    },
-    availableDates: ["15 Jan", "16 Jan", "17 Jan"],
-    DaySpecial: "Evento Especial",
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-  },
-
 ];
 
 export default boxInfo;
