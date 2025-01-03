@@ -1037,8 +1037,8 @@ const boxInfo = [
     },
     number: "911 088 818",
     coordinates: {
-      latitude: 40.428215,
-      longitude: -3.6832182,
+      latitude: 40.42821500,
+      longitude: -3.68321820,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1059,8 +1059,8 @@ const boxInfo = [
     },
     number: "910 889 330",
     coordinates: {
-      latitude: 40.4195293,
-      longitude: -3.6895932,
+      latitude: 40.41952930,
+      longitude: -3.68959320,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1080,8 +1080,8 @@ const boxInfo = [
     },
     number: "919 900 299",
     coordinates: {
-      latitude: 40.4365605,
-      longitude: -3.6992103,
+      latitude: 40.43656050,
+      longitude: -3.69921030,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1101,8 +1101,8 @@ const boxInfo = [
     },
     number: "910 513 592",
     coordinates: {
-      latitude: 40.4225554,
-      longitude: -3.6908309,
+      latitude: 40.41790180,
+      longitude: -3.69626770,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1122,8 +1122,8 @@ const boxInfo = [
     },
     number: "917 372 017",
     coordinates: {
-      latitude: 40.4253604,
-      longitude: -3.6917744,
+      latitude: 40.42536040,
+      longitude: -3.69177440,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1143,8 +1143,8 @@ const boxInfo = [
     },
     number: "-",
     coordinates: {
-      latitude: 40.4253604,
-      longitude: -3.6917744,
+      latitude: 40.42205980,
+      longitude: -3.68591640,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1165,8 +1165,8 @@ const boxInfo = [
     },
     number: "915 320 011",
     coordinates: {
-      latitude: 40.4226339,
-      longitude: -3.6947675,
+      latitude: 40.42263390,
+      longitude: -3.69476750,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1186,8 +1186,8 @@ const boxInfo = [
     },
     number: "919 930 385",
     coordinates: {
-      latitude: 40.4251922,
-      longitude: -3.6779126,
+      latitude: 40.42519220,
+      longitude: -3.67791260,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1207,8 +1207,8 @@ const boxInfo = [
     },
     number: "1160419607",
     coordinates: {
-      latitude: 40.4290497,
-      longitude: -3.687336,
+      latitude: 40.42904970,
+      longitude: -3.68733600,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1229,8 +1229,8 @@ const boxInfo = [
     },    
     number: "913 192 651",
     coordinates: {
-      latitude: 40.4344244,
-      longitude: -3.6899541,
+      latitude: 40.43442440,
+      longitude: -3.68995410,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1250,8 +1250,8 @@ const boxInfo = [
     },
     number: "682 182 405",
     coordinates: {
-      latitude: 40.4225137,
-      longitude: -3.689844,
+      latitude: 40.42251370,
+      longitude: -3.68984400,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1272,8 +1272,8 @@ const boxInfo = [
     },
     number: "919 992 323",
     coordinates: {
-      latitude: 40.4376559,
-      longitude: -3.6796724,
+      latitude: 40.43765590,
+      longitude: -3.67967240,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1294,8 +1294,8 @@ const boxInfo = [
     },
     number: "910 562 953",
     coordinates: {
-      latitude: 40.4226066,
-      longitude: -3.6910073,
+      latitude: 40.42260660,
+      longitude: -3.69100730,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1315,8 +1315,8 @@ const boxInfo = [
     },
     number: "917 37 80 40",
     coordinates: {
-      latitude: 40.4213789,
-      longitude: -3.707142,
+      latitude: 40.42137890,
+      longitude: -3.70714200,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1336,8 +1336,8 @@ const boxInfo = [
     },
     number: "913 082 931",
     coordinates: {
-      latitude: 40.4286449,
-      longitude: -3.6944338,
+      latitude: 40.42864490,
+      longitude: -3.69443380,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1357,8 +1357,8 @@ const boxInfo = [
     },
     number: "916 859 719",
     coordinates: {
-      latitude: 40.4233521,
-      longitude: -3.6839974,
+      latitude: 40.42335210,
+      longitude: -3.68399740,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1378,8 +1378,8 @@ const boxInfo = [
     },    
     number: " 911 988 880",
     coordinates: {
-      latitude: 40.4264239,
-      longitude: -3.6895475,
+      latitude: 40.42642390,
+      longitude: -3.68954750,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1400,8 +1400,8 @@ const boxInfo = [
     },
     number: "915 301 761",
     coordinates: {
-      latitude: 40.4197791,
-      longitude: -3.7012213,
+      latitude: 40.41977910,
+      longitude: -3.70122130,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1421,8 +1421,8 @@ const boxInfo = [
     },
     number: "911 721 841",
     coordinates: {
-      latitude: 40.4324618,
-      longitude: -3.6878034,
+      latitude: 40.43246180,
+      longitude: -3.68780340,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1443,8 +1443,8 @@ const boxInfo = [
     },
     number: "616 844 224",
     coordinates: {
-      latitude: 40.4286449,
-      longitude: -3.6944338,
+      latitude: 40.43703870,
+      longitude: -3.68090160,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1465,8 +1465,8 @@ const boxInfo = [
     },
     number: "910 881 541",
     coordinates: {
-      latitude: 40.4324618,
-      longitude: -3.6878034,
+      latitude: 40.43235760,
+      longitude: -3.68703190,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1486,8 +1486,8 @@ const boxInfo = [
     },
     number: "619 585 012",
     coordinates: {
-      latitude: 40.421265,
-      longitude: -3.6901571,
+      latitude: 40.42126500,
+      longitude: -3.69015710,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1507,8 +1507,8 @@ const boxInfo = [
     },
     number: "-",
     coordinates: {
-      latitude: 40.4283953,
-      longitude: -3.6840741,
+      latitude: 40.42839530,
+      longitude: -3.68407410,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1528,8 +1528,8 @@ const boxInfo = [
     },
     number: "915 759 254",
     coordinates: {
-      latitude: 40.4278455,
-      longitude: -3.6885096,
+      latitude: 40.42784550,
+      longitude: -3.68850960,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1549,8 +1549,8 @@ const boxInfo = [
     },
     number: "917 377 775",
     coordinates: {
-      latitude: 40.4225554,
-      longitude: -3.6908309,
+      latitude: 40.43373430,
+      longitude: -3.70279220,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1570,8 +1570,8 @@ const boxInfo = [
     },    
     number: "911 088 881",
     coordinates: {
-      latitude: 40.4225554,
-      longitude: -3.6908309,
+      latitude: 40.42609180,
+      longitude: -3.69226320,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
@@ -1592,8 +1592,8 @@ const boxInfo = [
     },
     number: "910 238 038",
     coordinates: {
-      latitude: 40.4225554,
-      longitude: -3.6908309,
+      latitude: 40.41506230,
+      longitude: -3.70191350,
     },
     country: "España", // Cambiado a España
     city: "Madrid", // Cambiado a Madrid
