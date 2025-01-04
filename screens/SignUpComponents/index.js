@@ -167,8 +167,6 @@ function GenderSelector({ onGenderChange, initialGender }) {
     );
   };
 
-  const infiniteGenders = [...genders, ...genders, ...genders];
-
   return (
     <View style={styles.genderContainer}>
       <View style={styles.selectedOverlay} />
@@ -181,7 +179,7 @@ function GenderSelector({ onGenderChange, initialGender }) {
         contentContainerStyle={styles.genderScrollViewContent}
         nestedScrollEnabled={true}
       >
-        {infiniteGenders.map((gender, index) =>
+        {genders.map((gender, index) =>
           renderGenderItem(gender, index)
         )}
       </ScrollView>
@@ -199,7 +197,7 @@ export default function SignUp() {
     username: "",
     password: "",
     age: "18",
-    gender: "Prefer not to say",
+    gender: "Other",
     about: "",
     hobby1: "",
     hobby2: "",
