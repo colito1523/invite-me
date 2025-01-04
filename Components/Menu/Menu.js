@@ -5,6 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import i18n from 'i18next';
+import { doc, updateDoc } from 'firebase/firestore';
+import { auth, database } from '../../config/firebase'; // Ajusta el path según tu configuración
+
 
 export default function Menu({
   isVisible,
@@ -14,15 +17,14 @@ export default function Menu({
   searchQuery,
   setSearchQuery,
   onCitySelect,
-  country // País detectado del usuario
+  country
 }) {
   const [isNightMode, setIsNightMode] = useState(false);
   const { t } = useTranslation();
   const navigation = useNavigation();
-  
-  // Configuración de ciudad inicial en base al país
   const [selectedCity, setSelectedCity] = useState(country === 'Portugal' ? 'Lisboa' : 'Madrid');
-  const [filteredCities, setFilteredCities] = useState([]); // Estado para almacenar las ciudades filtradas
+  const [filteredCities, setFilteredCities] = useState([]);
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
 
   useEffect(() => {
     const updateNightMode = () => {
@@ -31,7 +33,7 @@ export default function Menu({
     };
 
     updateNightMode();
-    const interval = setInterval(updateNightMode, 60000); // Check every minute
+    const interval = setInterval(updateNightMode, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -45,51 +47,50 @@ export default function Menu({
     t('categories.events'),
     t('categories.createOwnEvent'),
     t('categories.suggestSpace'),
-    t('categories.support'), // Nueva entrada para soporte
+    t('categories.support'),
+    t('categories.changeLanguage'), // Nueva categoría para cambiar el idioma
   ];
 
-  const cities = ['Lisboa', 'Madrid']; // Lista de ciudades disponibles para el autocompletado
+  const cities = ['Lisboa', 'Madrid'];
 
-  // Función para manejar cambios en el campo de búsqueda y actualizar sugerencias
   const handleSearchChange = useCallback((text) => {
     setSearchQuery(text);
-
-    // Filtrar las ciudades que coincidan con el texto ingresado
     if (text.length > 0) {
       const matches = cities.filter(city => city.toLowerCase().startsWith(text.toLowerCase()));
       setFilteredCities(matches);
     } else {
-      setFilteredCities([]); // Limpiar sugerencias si no hay texto
+      setFilteredCities([]);
     }
   }, [cities]);
 
-  // Función para seleccionar una ciudad de la lista de autocompletado
   const handleCitySelect = useCallback((city) => {
-    setSelectedCity(city); // Actualizar la ciudad seleccionada
-    onCitySelect(city); // Llama a la función para actualizar los datos de la ciudad
-    setSearchQuery(city); // Muestra la ciudad seleccionada en el campo de búsqueda
-    setFilteredCities([]); // Ocultar sugerencias después de seleccionar una ciudad
+    setSelectedCity(city);
+    onCitySelect(city);
+    setSearchQuery(city);
+    setFilteredCities([]);
   }, [onCitySelect]);
 
   const handleCategorySelect = useCallback((category) => {
     if (category === t('categories.createOwnEvent')) {
-        onClose();
-        navigation.navigate('CreateEvent');
+      onClose();
+      navigation.navigate('CreateEvent');
     } else if (category === t('categories.suggestSpace')) {
-        onClose();
-        navigation.navigate('EventRecommendations'); // Cambiar a 'EventRecommendations'
-      } else if (category === t('categories.support')) {
-        onClose();
-        handleSupportPress(); // Función para abrir el correo de soporte
+      onClose();
+      navigation.navigate('EventRecommendations');
+    } else if (category === t('categories.support')) {
+      onClose();
+      handleSupportPress();
+    } else if (category === t('categories.changeLanguage')) {
+      setShowLanguageSelector(true);
     } else {
-        onCategorySelect(category);
+      onCategorySelect(category);
     }
   }, [onClose, navigation, onCategorySelect]);
 
   const handleSupportPress = useCallback(async () => {
-    const email = "info@invitemembers.com"; // Cambiar por el correo de soporte
+    const email = "info@invitemembers.com";
     const subject = "User support";
-    const body = "Hi, I need help with..."; // Texto predefinido del mensaje
+    const body = "Hi, I need help with...";
     const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   
     const supported = await Linking.canOpenURL(emailUrl);
@@ -99,6 +100,52 @@ export default function Menu({
       Alert.alert("Error", "No se pudo abrir el cliente de correo.");
     }
   }, []);
+
+  const handleLanguageChange = async (language) => {
+    i18n.changeLanguage(language);
+    setShowLanguageSelector(false);
+    try {
+      const user = auth.currentUser; // Obtén el usuario autenticado
+      if (user) {
+        const userRef = doc(database, "users", user.uid);
+        await updateDoc(userRef, { preferredLanguage: language });
+        console.log("Idioma preferido actualizado en Firebase:", language);
+      }
+    } catch (error) {
+      console.error("Error al actualizar el idioma en Firebase:", error);
+    }
+  };
+  
+
+  const LanguageSelector = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={showLanguageSelector}
+      onRequestClose={() => setShowLanguageSelector(false)}
+    >
+      <TouchableWithoutFeedback onPress={() => setShowLanguageSelector(false)}>
+        <View style={currentStyles.modalOverlay}>
+          <TouchableWithoutFeedback>
+            <View style={currentStyles.modalContent}>
+              {['en', 'es', 'pt'].map((lang) => (
+                <TouchableOpacity
+                  key={lang}
+                  style={currentStyles.menuItemContainer}
+                  onPress={() => handleLanguageChange(lang)}
+                >
+                  <Text style={currentStyles.menuItemText}>
+                    {lang === 'en' ? 'English' : lang === 'es' ? 'Español' : 'Português'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+  
 
   return (
     <Modal
@@ -121,7 +168,6 @@ export default function Menu({
               />
             </View>
 
-            {/* Lista de autocompletado */}
             {filteredCities.length > 0 && (
               <FlatList
                 data={filteredCities}
@@ -157,6 +203,7 @@ export default function Menu({
           </View>
         </View>
       </TouchableWithoutFeedback>
+      <LanguageSelector />
     </Modal>
   );
 }
@@ -326,3 +373,4 @@ const nightStyles = StyleSheet.create({
     color: 'white',
   },
 });
+

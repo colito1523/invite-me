@@ -472,7 +472,8 @@
     "events": "Events",
     "createOwnEvent": "Create My Own Event",
     "suggestSpace": "Suggest a Space",
-    "support": "Support"
+    "support": "Support",
+    "changeLanguage": "Change Language"
   },
 
   "searchPlaceholder": "Search...",

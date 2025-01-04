@@ -552,7 +552,7 @@ export default memo(function BoxDetails({ route, navigation }) {
 
     try {
       const eventsRef = collection(database, "users", user.uid, "events");
-      const q = query(eventsRef, where("title", "==", box.title));
+      const q = query(eventsRef, where("eventId", "==", box.eventId || box.id || box.title));
       const querySnapshot = await getDocs(q);
 
       const isPrivateEvent =

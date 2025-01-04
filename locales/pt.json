@@ -476,7 +476,8 @@
     "events": "Eventos",
     "createOwnEvent": "Crie meu próprio evento",
     "suggestSpace": "Sugira um espaço",
-    "support": "Apoio"
+    "support": "Apoio",
+    "changeLanguage": "Mudar idioma"
   },
 
   "searchPlaceholder": "Procura...",

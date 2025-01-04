@@ -53,16 +53,26 @@ export const checkAndRemoveExpiredEvents = async (title) => {
 const parseCustomDate = (dateStr) => {
   try {
     // Check if date is in DD/MM/YYYY format
-    if (dateStr.includes('/')) {
-      const [day, month, year] = dateStr.split('/');
+    if (dateStr.includes("/")) {
+      const [day, month, year] = dateStr.split("/");
       return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    } 
+    }
     // Handle D MMM format
     else {
       const [day, monthStr] = dateStr.split(" ");
       const monthNames = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
       const monthIndex = monthNames.indexOf(monthStr);
       if (monthIndex === -1) {
@@ -90,7 +100,7 @@ export const checkEventStatus = async (params) => {
   const user = auth.currentUser;
   if (user && box && box.title) {
     const eventsRef = collection(database, "users", user.uid, "events");
-    const q = query(eventsRef, where("title", "==", box.title));
+    const q = query(eventsRef, where("eventId", "==", box.eventId || box.id || box.title));
     const querySnapshot = await getDocs(q);
 
     const isPrivateEvent = box.category === "EventoParaAmigos";
@@ -280,7 +290,20 @@ export const handleGeneralEventInvite = async (params) => {
 
     // Calculate expiration date (24 hours after event date)
     const [day, month] = selectedDate.split(" ");
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const monthIndex = monthNames.indexOf(month);
     const year = new Date().getFullYear();
     const selectedDateObj = new Date(year, monthIndex, parseInt(day));

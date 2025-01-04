@@ -488,7 +488,8 @@
     "events": "Eventos",
     "createOwnEvent": "Crea tu propio evento",
     "suggestSpace": "Sugerir un espacio",
-     "support": "Soporte"
+     "support": "Soporte",
+     "changeLanguage": "Cambiar Idioma"
   },
   "searchPlaceholder": "Busca tu ciudad ...",
   "signOut": "Terminar Sesión",
