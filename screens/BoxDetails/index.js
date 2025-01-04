@@ -126,7 +126,14 @@ export default memo(function BoxDetails({ route, navigation }) {
         isFromNotification,
       });
     } else {
-      console.log("Datos del evento:", box); // Add this line to log all event data
+      console.log("Datos del evento:", {
+        ...box,
+        selectedDate,
+        eventId: box.eventId || box.id || box.title,
+        date: box.date,
+        dateArray: box.dateArray || [],
+        isPrivateEvent: box.category === "EventoParaAmigos",
+      });
     }
   }, [box, isFromNotification]);
 
