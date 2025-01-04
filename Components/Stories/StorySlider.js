@@ -539,7 +539,7 @@ export default function StorySlider() {
     setSelectedImage(null); // Cierra el modal
   }}
 >
-  <Text style={styles.acceptButtonText}>Adicionar</Text>
+  <Text style={styles.acceptButtonText}> {t("storySlider.addStory")}</Text>
   <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
 </TouchableOpacity>
           </View>

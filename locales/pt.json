@@ -148,7 +148,8 @@
     "storyUploadError": "Houve um erro ao enviar sua história.",
     "camera": "Câmera",
     "gallery": "Galeria",
-    "loadStoriesError": "Erro ao carregar histórias:"
+    "loadStoriesError": "Erro ao carregar histórias:",
+     "addStory": "Adicionar"
   },
 
   "storyViewer": {

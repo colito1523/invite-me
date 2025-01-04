@@ -149,7 +149,9 @@
     "storyUploadError": "There was an error uploading your story.",
     "camera": "Camera",
     "gallery": "Gallery",
-    "loadStoriesError": "Error loading stories:"
+    "loadStoriesError": "Error loading stories:",
+    "addStory": "Add"
+
   },
 
   "storyViewer": {
