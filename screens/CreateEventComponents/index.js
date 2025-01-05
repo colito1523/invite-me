@@ -277,15 +277,7 @@ useEffect(() => {
                 maximumDate={maxDate}
                 textColor={theme.text}
               />
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: theme.buttonBackground }]}
-                onPress={() => {
-                  setShowDatePicker(false);
-                  setShowTimePicker(false);
-                }}
-              >
-                <Text style={[styles.modalButtonText, { color: theme.text }]}>{t("common.done")}</Text>
-              </TouchableOpacity>
+             
             </View>
           </View>
         </Modal>
