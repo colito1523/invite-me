@@ -201,7 +201,11 @@ export default memo(function BoxDetails({ route, navigation }) {
     try {
       // Eliminar de la colección del usuario
       const userEventsRef = collection(database, "users", user.uid, "events");
-      const q = query(userEventsRef, where("title", "==", box.title));
+      const q = query(
+        userEventsRef, 
+        where("eventId", "==", box.eventId || box.id || box.title),
+        where("dateArray", "array-contains", selectedDate)
+      );
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
