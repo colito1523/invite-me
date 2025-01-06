@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useDate } from "../src/hooks/DateContext"; // Importa el contexto
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Dimensions } from "react-native";
 import { Calendar } from "react-native-calendars";
 import dayjs from "dayjs";
@@ -7,7 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 const { width } = Dimensions.get("window");
 
 const CalendarPicker = ({ onDateChange, setLoading }) => {
-  const [selectedDate, setSelectedDate] = useState(dayjs().format("D MMM"));
+  const { selectedDate, setSelectedDate } = useDate(); // Usa el contexto
   const [modalVisible, setModalVisible] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
 

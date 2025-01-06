@@ -14,6 +14,7 @@ import useNotifications from "./src/hooks/useNotifications"; // Importa el hook 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Importa esto
 import { UnreadMessagesProvider } from './src/hooks/UnreadMessagesContext';
+import { DateProvider } from "./src/hooks/DateContext";
 
 
 import Login from "./screens/LoginComponents/index";
@@ -71,6 +72,7 @@ const AuthenticatedUserProvider = ({ children }) => {
 function ChatStack() {
   return (
     <BlockProvider>
+       <DateProvider>
       <Stack.Navigator>
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Profile" component={Profile} />
@@ -87,6 +89,7 @@ function ChatStack() {
         <Stack.Screen name="Tutorial" component={Tutorial} options={{ headerShown: false }} />
         <Stack.Screen name="StoryViewer" component={StoryViewer} options={{ headerShown: false }} />
       </Stack.Navigator>
+      </DateProvider>
     </BlockProvider>
   );
 }
