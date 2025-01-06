@@ -242,7 +242,7 @@ export default function Login({ navigation }) {
               />
             </View>
 
-            <Text style={[styles.title, { color: theme.text }]}>
+            <Text style={[styles.title, { color: "black" }]}>
               {t('accessPrivately')}
             </Text>
 
