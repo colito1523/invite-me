@@ -125,7 +125,7 @@ export default function Menu({
       onRequestClose={() => setShowLanguageSelector(false)}
     >
       <TouchableWithoutFeedback onPress={() => setShowLanguageSelector(false)}>
-        <View style={currentStyles.modalOverlay}>
+        <View style={currentStyles.modalOverlay2}>
           <TouchableWithoutFeedback>
             <View style={currentStyles.modalContent}>
               {['en', 'es', 'pt'].map((lang) => (
@@ -217,6 +217,12 @@ const commonInputStyles = {
 };
 
 const dayStyles = StyleSheet.create({
+  modalOverlay2: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -296,6 +302,12 @@ const dayStyles = StyleSheet.create({
 });
 
 const nightStyles = StyleSheet.create({
+  modalOverlay2: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",

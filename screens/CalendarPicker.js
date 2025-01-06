@@ -18,9 +18,13 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
         const storedDate = await AsyncStorage.getItem('selectedDate');
         if (storedDate) {
           setSelectedDate(storedDate);
+        } else {
+          const currentDate = dayjs().format("D MMM");
+          setSelectedDate(currentDate);
+          await AsyncStorage.setItem('selectedDate', currentDate);
         }
       } catch (error) {
-        console.error('Error loading stored date:', error);
+        console.error('Error loading date:', error);
       }
     };
     loadStoredDate();
