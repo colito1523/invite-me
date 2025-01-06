@@ -4,31 +4,11 @@ import { Calendar } from "react-native-calendars";
 import dayjs from "dayjs";
 import { LinearGradient } from "expo-linear-gradient";
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 const { width } = Dimensions.get("window");
 
 const CalendarPicker = ({ onDateChange, setLoading }) => {
   const [selectedDate, setSelectedDate] = useState(dayjs().format("D MMM"));
   const [modalVisible, setModalVisible] = useState(false);
-
-  useEffect(() => {
-    const loadStoredDate = async () => {
-      try {
-        const storedDate = await AsyncStorage.getItem('selectedDate');
-        if (storedDate) {
-          setSelectedDate(storedDate);
-        } else {
-          const currentDate = dayjs().format("D MMM");
-          setSelectedDate(currentDate);
-          await AsyncStorage.setItem('selectedDate', currentDate);
-        }
-      } catch (error) {
-        console.error('Error loading date:', error);
-      }
-    };
-    loadStoredDate();
-  }, []);
   const [isNightMode, setIsNightMode] = useState(false);
 
   useEffect(() => {
@@ -45,14 +25,9 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   const today = dayjs().format("YYYY-MM-DD");
   const maxDate = dayjs().add(2, "month").format("YYYY-MM-DD");
 
-  const handleDayPress = async (day) => {
+  const handleDayPress = (day) => {
     const formattedDate = dayjs(day.dateString).format("D MMM");
     setSelectedDate(formattedDate);
-    try {
-      await AsyncStorage.setItem('selectedDate', formattedDate);
-    } catch (error) {
-      console.error('Error saving date:', error);
-    }
     setModalVisible(false);
 
     console.log("Selected date:", dayjs(day.dateString).format("YYYY-MM-DD")); // Log the selected date in a different format
