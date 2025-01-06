@@ -23,6 +23,7 @@ export default StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     padding: 20,
+    paddingTop: 60, // Add this line to increase the top padding
   },
   title: {
     fontSize: 25,
@@ -50,7 +51,7 @@ export default StyleSheet.create({
     fontSize: 15,
     marginVertical: 65,
     textAlign: "center",
-    color: "black",
+    color: "#333333", // Change to a lighter shade of black
     fontWeight: "bold",
   },
   ageQuestion: {
@@ -58,7 +59,7 @@ export default StyleSheet.create({
     marginTop: 65,
     marginBottom: 35,
     textAlign: "center",
-    color: "black",
+    color: "#333333", // Change to a lighter shade of black
     fontWeight: "bold",
   },
   GenderQuestion: {
@@ -66,7 +67,7 @@ export default StyleSheet.create({
     marginVertical: 20,
     marginTop: 110,
     textAlign: "center",
-    color: "black",
+    color: "#333333", // Change to a lighter shade of black
     fontWeight: "bold",
   },
   questionHobies: {
@@ -74,7 +75,7 @@ export default StyleSheet.create({
     marginTop: 0,
     marginBottom: 35,
     textAlign: "center",
-    color: "black",
+    color: "#333333", // Change to a lighter shade of black
     fontWeight: "bold",
   },
   questionInterests: {
@@ -82,7 +83,7 @@ export default StyleSheet.create({
     marginTop: 30,
     marginBottom: 35,
     textAlign: "center",
-    color: "black",
+    color: "#333333", // Change to a lighter shade of black
     fontWeight: "bold",
   },
   nameContainer: {
@@ -183,7 +184,7 @@ export default StyleSheet.create({
   rowInputs: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 60, // Increase this value to add more vertical space
   },
   halfInput: {
     width: "48%",
@@ -382,7 +383,7 @@ export default StyleSheet.create({
   },
   languageContainer: {
     position: 'absolute',
-    top: 40,
+    top: 60, // Adjust this value to move the language selector down
     right: 20,
     zIndex: 1,
   },
@@ -428,5 +429,8 @@ export default StyleSheet.create({
   selectedLanguageText: {
     fontWeight: 'bold',
     color: '#000',
+  },
+  aboutContainer: {
+    paddingTop: 40, // Add this style to increase the top padding for the about question
   },
 });

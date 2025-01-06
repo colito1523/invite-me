@@ -757,20 +757,17 @@ export default function SignUp() {
         )}
 
         {currentQuestion.id === "about" && (
-          <View>
-            <Text style={styles.questionHobies}>
-              {t('signup.questions.hobbies')}
-            </Text>
+          <View style={styles.aboutContainer}> 
             <View style={styles.rowInputs}>
               <TextInput
-                style={[styles.halfInput, { color: "#4b4b4b" }]}
+                style={[styles.halfInput, { color: "black" }]}
                 placeholder={t('signup.placeholders.hobby1')}
                 placeholderTextColor="#4b4b4b"
                 onChangeText={(text) => handleAnswer("hobby1", text)}
                 value={answers.hobby1}
               />
               <TextInput
-                style={[styles.halfInput, { color: "#4b4b4b" }]}
+                style={[styles.halfInput, { color: "black" }]}
                 placeholder={t('signup.placeholders.hobby2')}
                 placeholderTextColor="#4b4b4b"
                 onChangeText={(text) => handleAnswer("hobby2", text)}
@@ -778,19 +775,17 @@ export default function SignUp() {
               />
             </View>
 
-            <Text style={styles.questionInterests}>
-              {t('signup.questions.interests')}
-            </Text>
+            
             <View style={styles.rowInputs}>
               <TextInput
-                style={[styles.halfInput, { color: "#4b4b4b" }]}
+                style={[styles.halfInput, { color: "black" }]}
                 placeholder={t('signup.placeholders.interest1')}
                 placeholderTextColor="#4b4b4b"
                 onChangeText={(text) => handleAnswer("interest1", text)}
                 value={answers.interest1}
               />
               <TextInput
-                style={[styles.halfInput, { color: "#4b4b4b" }]}
+                style={[styles.halfInput, { color: "black" }]}
                 placeholder={t('signup.placeholders.interest2')}
                 placeholderTextColor="#4b4b4b"
                 onChangeText={(text) => handleAnswer("interest2", text)}

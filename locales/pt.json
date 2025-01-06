@@ -711,10 +711,10 @@
 
   "signup": {
     "questions": {
-      "account": "Vamos criar sua conta juntos!",
-      "ageGender": "Qual é a sua idade?",
+      "account": "Vamos criar a tua conta juntos!",
+      "ageGender": "Qual é a tua idade?",
       "gender": "Qual é o seu gênero?",
-      "about": "Compartilhe um pouco sobre você, seus hobbies, interesses e o que você mais gosta. Isso ajudará a personalizar seu perfil!",
+      "about": "Para te conhecermos melhor e personalizar o teu perfil, partilha 4 coisas que te definem: os teus interesses, hobbies, desportos que praticas ou aquilo de que mais gostas!",
       "photos": "Escolha 3 fotos que melhor representem você e seu estilo!",
       "preview1": "Veja como seu perfil está até agora",
       "preview2": "Veja como seu perfil está com duas fotos",
@@ -729,10 +729,10 @@
       "email": "E-mail",
       "username": "Nome de usuário",
       "password": "Senha",
-      "hobby1": "Caminhadas matinais",
-      "hobby2": "Fotografia",
-      "interest1": "Viajar",
-      "interest2": "Surfar"
+      "hobby1": "Arte",
+      "hobby2": "Viagens",
+      "interest1": "Desporto",
+      "interest2": "Música"
     },
     "genders": {
       "male": "Masculino",
