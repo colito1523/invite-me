@@ -137,7 +137,7 @@ useEffect(() => {
         <FlatList
           ListHeaderComponent={
             <>
-              <Text style={[styles.title, { color: theme.text }]}>{t("createEvent.title")}</Text>
+             
               <TouchableOpacity onPress={() => pickImage(setImage)} style={styles.imagePicker}>
                 {image ? (
                   <Image

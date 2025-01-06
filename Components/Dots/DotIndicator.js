@@ -252,7 +252,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         {filteredImages.length > 6 && (
           <View style={currentStyles.moreContainer}>
             <Text style={currentStyles.moreText}>
-              +{filteredImages.length - 6}
+              +72 {/* Change this to always display +72 */}
             </Text>
           </View>
         )}
@@ -461,7 +461,9 @@ const nightStyles = StyleSheet.create({
   },
   moreContainer: {
     ...baseStyles.moreContainer,
-    backgroundColor: "#black",
+    backgroundColor: "#000", // Change to black
+    borderWidth: 2, // Add border
+    borderColor: "#000", // Border color black
   },
   moreText: {
     ...baseStyles.moreText,

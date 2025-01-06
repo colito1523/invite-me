@@ -124,7 +124,7 @@ export default function EventRecommendationForm() {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <LinearGradient colors={theme.gradient} style={styles.container}>
           <Text style={[styles.title, { color: theme.text }]}>
-            {t('eventRecommendation.suggestSpace')}
+           
           </Text>
 
           <TouchableOpacity
@@ -179,17 +179,17 @@ export default function EventRecommendationForm() {
           <TouchableOpacity
             style={[
               styles.submitButton,
-              { backgroundColor: theme.buttonBackground },
+              { backgroundColor: '#fff' },
             ]}
             onPress={isLoading ? null : handleSubmit}
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color={isNightMode ? theme.text : '#fff'} />
+              <ActivityIndicator color={isNightMode ? theme.text : '#000'} />
             ) : (
               <Text
                 style={{
-                  color: isNightMode ? theme.text : '#fff',
+                  color: '#000',
                   fontWeight: 'bold',
                 }}
               >

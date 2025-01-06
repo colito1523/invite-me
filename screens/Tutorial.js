@@ -18,29 +18,33 @@ export default function Tutorial() {
       id: '1', 
       type: 'welcome',
       text: t('tutorial.slides.1.text'),
-      description: t('tutorial.slides.1.description')
+      description: t('tutorial.slides.1.description'),
+      image: require('../assets/Logo_Invite_Me.png'),
+      imageStyle: styles.imageStyle1
     },
     { 
       id: '2', 
       type: 'info',
       topText: t('tutorial.slides.2.topText'),
-      bottomText: t('tutorial.slides.2.bottomText')
+      image: require('../assets/tutorial/1.jpg'),
+      imageStyle: styles.imageStyle2,
+      textStyle: styles.textStyle2
     },
     { 
       id: '3', 
       type: 'info',
-      topText: t('tutorial.slides.3.topText')
+      topText: t('tutorial.slides.3.topText'),
+      image: require('../assets/tutorial/2.jpg'),
+      imageStyle: styles.imageStyle3,
+      textStyle: styles.textStyle3
     },
     { 
       id: '4', 
       type: 'info',
-      topText: t('tutorial.slides.4.topText')
-    },
-    { 
-      id: '5', 
-      type: 'info',
-      topText: t('tutorial.slides.5.topText'),
-      bottomText: t('tutorial.slides.5.bottomText')
+      topText: t('tutorial.slides.4.topText'),
+      image: require('../assets/tutorial/3.jpg'),
+      imageStyle: styles.imageStyle4,
+      textStyle: styles.textStyle4
     },
   ];
 
@@ -49,8 +53,8 @@ export default function Tutorial() {
       {item.type === 'welcome' ? (
         <>
           <Image
-            source={require('../assets/Logo_Invite_Me.png')}
-            style={styles.logo}
+            source={item.image}
+            style={[styles.logo, item.imageStyle]}
             contentFit="contain"
           />
           <Text style={styles.welcomeText}>{item.text}</Text>
@@ -58,10 +62,10 @@ export default function Tutorial() {
         </>
       ) : (
         <>
-          <Text style={styles.infoText}>{item.topText}</Text>
+          <Text style={[styles.infoText, item.textStyle]}>{item.topText}</Text>
           <Image
-            source={require('../assets/Logo_Invite_Me.png')}
-            style={styles.logo}
+            source={item.image}
+            style={[styles.logo, item.imageStyle]}
             contentFit="contain"
           />
           <Text style={styles.infoText}>{item.bottomText}</Text>
@@ -172,7 +176,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   infoText: {
-    fontSize: 16,
+    fontSize: 12,
     textAlign: 'center',
     color: '#4d4d4d',
     paddingHorizontal: 20,
@@ -205,5 +209,46 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  imageStyle1: {
+    // Add specific styles for the first image
+  },
+  imageStyle2: {
+    top: 40, // Adjust the margin top to move the second image down
+    width: 640,
+    height: 640,
+    marginBottom: 20,
+    borderRadius: 100,
+  },
+  imageStyle3: {
+    top: 40, // Adjust the margin top to move the second image down
+    width: 600,
+    height: 600,
+    marginBottom: 20,
+    borderRadius: 100,
+  },
+  imageStyle4: {
+    top: 40, // Adjust the margin top to move the second image down
+    width: 647,
+    height: 647,
+    marginBottom: 20,
+    borderRadius: 100,
+  },
+  textStyle2: {
+    top: 60,
+    fontSize:14 // Adjust the margin top to move the second image down
+    // Add specific styles for the second top text
+  },
+  textStyle3: {
+    top: 40,
+    fontSize:14 // Adjust the margin top to move the second image down
+    // Add specific styles for the second top text
+  },
+  textStyle4: {
+    top: 50,
+    fontSize:14 // Adjust the margin top to move the second image down
+    // Add specific styles for the second top text
+    
+    // Add specific styles for the fourth top text
   },
 });

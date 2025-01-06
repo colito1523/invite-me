@@ -83,9 +83,9 @@
     "error": "Erro",
     "emptyNoteError": "Por favor, insira uma nota antes de enviar.",
     "postNoteError": "Falha ao compartilhar seu humor. Por favor, tente novamente.",
-    "deleteNoteError": "Não foi possível excluir a nota e os curtidas. Por favor, tente novamente.",
+    "deleteNoteError": "Não foi possível excluir a nota e as curtidas. Por favor, tente novamente.",
     "deleteMood": "Excluir humor",
-    "deleteMoodConfirm": "Tem certeza de que deseja excluir seu humor?",
+    "deleteMoodConfirm": "Tem certeza de que deseja e seu humor?",
     "cancel": "Cancelar",
     "ok": "OK",
     "likedYourNote": "curtiu sua nota de humor.",
@@ -99,9 +99,9 @@
     "emptyResponseError": "Por favor, insira uma mensagem antes de enviar.",
     "responseSent": "Sua resposta foi enviada!",
     "typeMoodPlaceholder": "Digite seu humor...",
-    "shareMoodPlaceholder": "Compartilhe seu humor...",
-    "hideMoodOptions": "Ocultar opções de humor",
-    "showMoodOptions": "Mostrar opções de humor",
+    "shareMoodPlaceholder": "Compartilhe o teu humor...",
+    "hideMoodOptions": "Ocultar opções",
+    "showMoodOptions": "Mostrar opções",
     "respondToNotePlaceholder": "Responder à nota...",
     "moodOptions": {
       "Movie night": "Noite de cinema",
@@ -366,7 +366,7 @@
     "coordinatesNotAvailable": "Coordenadas não disponíveis",
     "wantsToBeFriend": "quer ser seu amigo.",
     "invitedToEvent": "Te convidou para o evento {{eventTitle}}",
-    "nowFriends": "e voce agora são amigos.",
+    "nowFriends": "e tu agora são amigos.",
     "rejectedFriendRequest": "Rejeitou o seu pedido de amizade.",
     "likedYourStory": "Goostou da sua história.",
     "accept": "Aceitar",
@@ -475,8 +475,8 @@
     "restaurantsBars": "Restaurantes & Rooftops",
     "clubs": "Bares & Clubes",
     "events": "Eventos",
-    "createOwnEvent": "Crie meu próprio evento",
-    "suggestSpace": "Sugira um espaço",
+    "createOwnEvent": "Criar evento",
+    "suggestSpace": "Sugerir um espaço",
     "support": "Apoio",
     "changeLanguage": "Mudar idioma"
   },
@@ -486,7 +486,7 @@
 
   "_comment_createEvent.js": "createEvent.js",
   "createEvent": {
-    "title": "Crie Seu Próprio Evento",
+    "title": "Criar Evento",
     "eventTitle": "Título",
     "date": "Data",
     "time": "Hora",
@@ -576,7 +576,7 @@
     "noLocation": "Sem localização especificada",
     "change": "Alterar",
     "add": "Adicionar",
-    "editProfile": "Editar meu perfil",
+    "editProfile": "Editar o meu perfil",
     "makePublic": "Tornar perfil público",
     "makePrivate": "Tornar perfil privado",
     "saveChanges": "Salvar alterações",
@@ -587,7 +587,7 @@
     "dontInteract": "Você não pode interagir com este usuário."
   },
   "profileMenuSections": {
-    "deleteAccount": "Excluir conta",
+    "deleteAccount": "Apagar conta",
     "deleteAccountQuestions": "Tem certeza de que deseja excluir sua conta? Esta ação não pode ser desfeita.",
     "success": "Sucesso",
     "accountDeleted": "Sua conta foi excluída com sucesso.",
@@ -634,10 +634,10 @@
     "addFriend": "Adicionar amigo",
     "block": "Bloquear",
     "report": "Denunciar",
-    "seeTheirStories": "Ver suas histórias",
-    "hideTheirStories": "Ocultar suas histórias",
-    "showMyStories": "Mostrar minhas histórias",
-    "hideMyStories": "Ocultar minhas histórias",
+    "seeTheirStories": "Ver as suas histórias",
+    "hideTheirStories": "Ocultar as suas histórias",
+    "showMyStories": "Mostrar as minhas histórias",
+    "hideMyStories": "Ocultar as minhas histórias",
     "TheyAreAlreadyFriends": "Este utilizador já lhe enviou um pedido de amizade. Verifique as suas notificações."
   },
   "months": ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
@@ -771,16 +771,12 @@
         "description": "Desliza para descobrir como utilizar a aplicação e aproveitar ao máximo a tua experiência."
       },
       "2": {
-        "topText": "A Home serve para explorares os melhores lugares da cidade, aderir a eventos e ver quem vai também!",
-        "bottomText": "Seleciona onde vais estar para que os teus amigos saibam o que estás a fazer enquanto aproveitas os eventos mais incríveis da cidade!"
+        "topText": "A Home serve para explorares os melhores lugares da cidade, aderir a eventos e ver quem vai também! Ao selecionares onde vais estar, o teu perfil vai mostrar os teus planos, para que os outros possam vê-los e se juntarem a ti!."
       },
       "3": {
-        "topText": "Ao selecionares onde vais, o teu perfil vai mostrar os teus planos, para que os outros possam vê-los e se juntarem a ti! Tudo se trata dos teus lugares favoritos, aqueles que adoraste e que combinam contigo."
-      },
-      "4": {
         "topText": "Se preferires, podes tornar o teu perfil privado. Assim, só os teus amigos podem ver onde vais estar."
       },
-      "5": {
+      "4": {
         "topText": "No menu, podes criar o teu evento privado, personalizar os detalhes e convidar quem quiseres. O objetivo é reunir as pessoas certas!",
         "bottomText": "Também podes explorar outras cidades, descobrir os espaços que a Invite Me sugere e ver quem vai a cada um. Assim, se tiveres a planear uma viagem, saberás onde ir e quem podes vir a encontrar."
       }

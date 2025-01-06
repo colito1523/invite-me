@@ -36,13 +36,12 @@ import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 
 const moodOptions = [
-  "Movie night",
-  "Dinner out",
-  "Wine glass",
-  "Late night talks",
-  "Evening Walk",
-  "Ice Cream Outing",
-  "Cozy night in",
+  "Caminhada matinal",
+  "Pipocas e filme", 
+  "Jantar fora",
+  "Coffee break",
+  "out for a drink"// New mood option
+
 ];
 
 export default function Notes() {
