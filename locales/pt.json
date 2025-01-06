@@ -715,7 +715,7 @@
       "ageGender": "Qual é a tua idade?",
       "gender": "Qual é o seu gênero?",
       "about": "Para te conhecermos melhor e personalizar o teu perfil, partilha 4 coisas que te definem: os teus interesses, hobbies, desportos que praticas ou aquilo de que mais gostas!",
-      "photos": "Escolha 3 fotos que melhor representem você e seu estilo!",
+      "photos": "Escolhe 3 fotografias que te representam melhor",
       "preview1": "Veja como seu perfil está até agora",
       "preview2": "Veja como seu perfil está com duas fotos",
       "finalPreview": "Aqui está seu perfil completo",
@@ -767,34 +767,22 @@
     "understood": "Entendido",
     "slides": {
       "1": {
-        "text": "Você está oficialmente convidado, Bem-vindo!",
-        "description": "Deslize para descobrir os recursos do aplicativo e aprender como aproveitar ao máximo sua experiência."
+        "text": "Bem-vindo(a)! Estás oficialmente invited!",
+        "description": "Desliza para descobrir como utilizar a aplicação e aproveitar ao máximo a tua experiência."
       },
       "2": {
-        "topText": "A página inicial é o seu ponto de partida para explorar seus lugares favoritos e os eventos mais quentes da cidade.",
-        "bottomText": "Selecione onde você estará para que seus amigos possam ver facilmente o que você está fazendo enquanto mergulha nos acontecimentos mais legais da cidade!"
+        "topText": "A Home serve para explorares os melhores lugares da cidade, aderir a eventos e ver quem vai também!",
+        "bottomText": "Seleciona onde vais estar para que os teus amigos saibam o que estás a fazer enquanto aproveitas os eventos mais incríveis da cidade!"
       },
       "3": {
-        "topText": "Ao selecionar os eventos que você planeja participar na página inicial, seu perfil mostrará para onde você está indo, permitindo que outros se juntem à diversão e vejam seus planos empolgantes!",
-        "bottomText": "Também é tudo sobre seus lugares favoritos - os lugares que você ama e que combinam perfeitamente com sua vibe. Além disso, captura quem você é, celebrando todos os detalhes únicos que fazem você ser você."
+        "topText": "Ao selecionares onde vais, o teu perfil vai mostrar os teus planos, para que os outros possam vê-los e se juntarem a ti! Tudo se trata dos teus lugares favoritos, aqueles que adoraste e que combinam contigo."
       },
       "4": {
-        "topText": "Se preferir, você pode configurar sua conta como privada. Outros que não são seus amigos a verão assim.",
-        "bottomText": "Isso também significa que apenas seus amigos poderão ver para onde você está indo, tanto aqui quanto na página inicial."
+        "topText": "Se preferires, podes tornar o teu perfil privado. Assim, só os teus amigos podem ver onde vais estar."
       },
       "5": {
-        "topText": "Na seção de Chat, compartilhe seu humor e veja como os outros estão se sentindo! Responda ou curta as vibrações deles e conecte-se com amigos de uma maneira divertida."
-      },
-      "6": {
-        "topText": "Em Histórias, você pode ver quem está compartilhando seus momentos, e se quiser manter seus favoritos por perto, basta fixar alguém! Eles sempre aparecerão no topo para fácil acesso."
-      },
-      "7": {
-        "topText": "No menu, você pode encontrar exatamente o que está com vontade, seja jantar fora, tomar uma bebida ou ir a uma balada. Você também pode criar seus próprios eventos e explorar muito mais.",
-        "bottomText": "Além disso, você pode pesquisar em outras cidades para ver o que está acontecendo em outros lugares. Seja planejando uma viagem ou apenas curioso sobre o que está acontecendo, você pode conferir eventos com antecedência e ver quem você pode conhecer lá."
-      },
-      "8": {
-        "topText": "Com 'Criar Meu Próprio Evento', você tem a liberdade de organizar seus próprios encontros, seja uma festa privada ou uma celebração especial.",
-        "bottomText": "Você pode personalizar os detalhes do evento e até torná-lo um evento privado convidando apenas as pessoas com quem deseja compartilhar a experiência. É o seu evento, do seu jeito - projetado para reunir as pessoas certas."
+        "topText": "No menu, podes criar o teu evento privado, personalizar os detalhes e convidar quem quiseres. O objetivo é reunir as pessoas certas!",
+        "bottomText": "Também podes explorar outras cidades, descobrir os espaços que a Invite Me sugere e ver quem vai a cada um. Assim, se tiveres a planear uma viagem, saberás onde ir e quem podes vir a encontrar."
       }
     }
   }

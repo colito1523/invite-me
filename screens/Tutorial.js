@@ -29,36 +29,18 @@ export default function Tutorial() {
     { 
       id: '3', 
       type: 'info',
-      topText: t('tutorial.slides.3.topText'),
-      bottomText: t('tutorial.slides.3.bottomText')
+      topText: t('tutorial.slides.3.topText')
     },
     { 
       id: '4', 
       type: 'info',
-      topText: t('tutorial.slides.4.topText'),
-      bottomText: t('tutorial.slides.4.bottomText')
+      topText: t('tutorial.slides.4.topText')
     },
     { 
       id: '5', 
       type: 'info',
       topText: t('tutorial.slides.5.topText'),
-    },
-    { 
-      id: '6', 
-      type: 'info',
-      topText: t('tutorial.slides.6.topText'),
-    },
-    { 
-      id: '7', 
-      type: 'info',
-      topText: t('tutorial.slides.7.topText'),
-      bottomText: t('tutorial.slides.7.bottomText')
-    },
-    { 
-      id: '8', 
-      type: 'info',
-      topText: t('tutorial.slides.8.topText'),
-      bottomText: t('tutorial.slides.8.bottomText')
+      bottomText: t('tutorial.slides.5.bottomText')
     },
   ];
 
