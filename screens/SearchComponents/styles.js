@@ -66,10 +66,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   userImage: {
-    width: 55,
+    width: 55, // Tamaño de la imagen
     height: 55,
-    borderRadius: 27.5,
-    marginRight: 12,
+    borderRadius: 27.5, // Hace que la imagen sea circular
   },
   resultItem: {
     flexDirection: "row",
@@ -94,10 +93,13 @@ export const styles = StyleSheet.create({
     borderRadius: 5,
   },
   unseenStoryCircle: {
+    marginRight: 10,
     borderWidth: 2,
-    borderColor: "red", // Color para destacar que hay historias
-    borderRadius: 30, // Hace que el contenedor sea circular
-    padding: 5, // Espaciado alrededor del círculo
+    borderColor: "transparent", // Predeterminado sin borde
+    borderRadius: 33, // Controla el tamaño del contenedor circular
+    padding: 3, // Espacio entre la imagen y el borde
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

@@ -18,24 +18,30 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import StorySlider from "../../Components/Stories/StorySlider";
-import { useTranslation } from 'react-i18next';
-import { getAuth } from "firebase/auth"; 
-import { fetchUsers, fetchRecommendations, sendFriendRequest, saveSearchHistory, cancelFriendRequest  } from './utils';
+import { useTranslation } from "react-i18next";
+import { getAuth } from "firebase/auth";
+import {
+  fetchUsers,
+  fetchRecommendations,
+  sendFriendRequest,
+  saveSearchHistory,
+  cancelFriendRequest,
+} from "./utils";
 import { ActivityIndicator } from "react-native";
-import { database} from "../../config/firebase";
+import { database } from "../../config/firebase";
 import {
   collection,
   query,
   where,
   getDocs,
   doc,
-  getDoc
+  getDoc,
 } from "firebase/firestore";
 import StoryViewer from "../../Components/Stories/StoryViewer"; // Added import
-import { styles, lightTheme, darkTheme } from './styles';
+import { styles, lightTheme, darkTheme } from "./styles";
 
 export default function Search() {
-  const auth = getAuth(); 
+  const auth = getAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
@@ -78,14 +84,13 @@ export default function Search() {
   );
 
   const theme = isNightMode ? darkTheme : lightTheme;
-  
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
-      fetchUsers(searchTerm, setResults), 
+      fetchUsers(searchTerm, setResults),
       fetchRecommendations(user, setRecommendations),
-      storySliderRef.current?.loadExistingStories()
+      storySliderRef.current?.loadExistingStories(),
     ]);
     setRefreshing(false);
   }, [fetchUsers, fetchRecommendations, searchTerm, user]);
@@ -130,14 +135,22 @@ export default function Search() {
   const renderRecommendationItem = ({ item, index }) => {
     const [status, setStatus] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
-  
+
     useEffect(() => {
       const fetchFriendRequestStatus = async () => {
         try {
-          const requestRef = collection(database, "users", item.id, "friendRequests");
-          const existingRequestQuery = query(requestRef, where("fromId", "==", auth.currentUser.uid));
+          const requestRef = collection(
+            database,
+            "users",
+            item.id,
+            "friendRequests"
+          );
+          const existingRequestQuery = query(
+            requestRef,
+            where("fromId", "==", auth.currentUser.uid)
+          );
           const existingRequestSnapshot = await getDocs(existingRequestQuery);
-  
+
           if (!existingRequestSnapshot.empty) {
             const existingRequest = existingRequestSnapshot.docs[0].data();
             setStatus(existingRequest.status);
@@ -148,27 +161,25 @@ export default function Search() {
           console.error(t("errorCheckingFriendRequestStatus"), error);
         }
       };
-  
+
       fetchFriendRequestStatus();
     }, [item]);
-  
-  const toggleFriendRequest = async () => {
-  setIsProcessing(true);
 
-  try {
-    if (status === "pending") {
-      await cancelFriendRequest(item, setStatus, t); // Pasa 't' aquí
-    } else {
-      await sendFriendRequest(item, setStatus);
-    }
-  } catch (error) {
-    console.error(t("errorHandlingFriendRequest"), error);
-  } finally {
-    setIsProcessing(false);
-  }
-};
+    const toggleFriendRequest = async () => {
+      setIsProcessing(true);
 
-    
+      try {
+        if (status === "pending") {
+          await cancelFriendRequest(item, setStatus, t); // Pasa 't' aquí
+        } else {
+          await sendFriendRequest(item, setStatus);
+        }
+      } catch (error) {
+        console.error(t("errorHandlingFriendRequest"), error);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
 
     return (
       <TouchableOpacity
@@ -177,36 +188,43 @@ export default function Search() {
         onPress={() => handleUserPress(item)}
       >
         <Image
-          source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
+          source={{
+            uri: item.profileImage || "https://via.placeholder.com/150",
+          }}
           style={styles.userImage}
           cachePolicy="memory-disk"
         />
         <View style={styles.textContainer}>
-          <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
+          <Text style={[styles.resultText, { color: theme.text }]}>
+            {item.username}
+          </Text>
           {item.firstName && item.lastName && (
-            <Text style={[styles.fullName, { color: theme.textSecondary }]}> 
+            <Text style={[styles.fullName, { color: theme.textSecondary }]}>
               {`${item.firstName} ${item.lastName}`}
             </Text>
           )}
         </View>
         <TouchableOpacity
-        style={[styles.addFriendButton, { backgroundColor: theme.buttonBackground }]}
-        onPress={toggleFriendRequest}
-        disabled={isProcessing || status === "accepted"}
-      >
-        {isProcessing ? (
-          <ActivityIndicator size="small" color="black" />
-        ) : status === "pending" ? (
-          <Ionicons name="time" size={20} color="black" />
-        ) : status === "accepted" ? (
-          <Ionicons name="checkmark" size={20} color="black" />
-        ) : (
-          <Ionicons name="person-add" size={24} color="black" />
-        )}
+          style={[
+            styles.addFriendButton,
+            { backgroundColor: theme.buttonBackground },
+          ]}
+          onPress={toggleFriendRequest}
+          disabled={isProcessing || status === "accepted"}
+        >
+          {isProcessing ? (
+            <ActivityIndicator size="small" color="black" />
+          ) : status === "pending" ? (
+            <Ionicons name="time" size={20} color="black" />
+          ) : status === "accepted" ? (
+            <Ionicons name="checkmark" size={20} color="black" />
+          ) : (
+            <Ionicons name="person-add" size={24} color="black" />
+          )}
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
-  );
-};
+    );
+  };
 
   useEffect(() => {
     const loadSearchHistory = async () => {
@@ -217,7 +235,7 @@ export default function Search() {
           );
           if (savedHistory !== null) {
             const parsedHistory = JSON.parse(savedHistory);
-  
+
             const updatedHistory = await Promise.all(
               parsedHistory.map(async (item) => {
                 // Verificar el estado actual del perfil
@@ -226,20 +244,32 @@ export default function Search() {
                 if (!userDoc.exists()) {
                   return null; // Eliminar usuarios que ya no existen
                 }
-  
+
                 const userData = userDoc.data();
                 const isPrivate = userData?.isPrivate || false;
-  
+
                 // Verificar si es amigo
-                const friendsRef = collection(database, "users", user.uid, "friends");
-                const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
+                const friendsRef = collection(
+                  database,
+                  "users",
+                  user.uid,
+                  "friends"
+                );
+                const friendsSnapshot = await getDocs(
+                  query(friendsRef, where("friendId", "==", item.id))
+                );
                 const isFriend = !friendsSnapshot.empty;
-  
+
                 // Validar historias solo si es amigo o no es privado
-                const storiesRef = collection(database, "users", item.id, "stories");
+                const storiesRef = collection(
+                  database,
+                  "users",
+                  item.id,
+                  "stories"
+                );
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
-  
+
                 const hasStories = storiesSnapshot.docs.some((storyDoc) => {
                   const storyData = storyDoc.data();
                   return (
@@ -247,7 +277,7 @@ export default function Search() {
                     (!isPrivate || isFriend)
                   );
                 });
-  
+
                 return {
                   ...item,
                   hasStories,
@@ -256,12 +286,12 @@ export default function Search() {
                 };
               })
             );
-  
+
             // Filtrar usuarios bloqueados o eliminados
             const filteredHistory = updatedHistory.filter(
               (item) => item && !blockedUsers.includes(item.id)
             );
-  
+
             setSearchHistory(filteredHistory);
           }
         } catch (error) {
@@ -269,30 +299,28 @@ export default function Search() {
         }
       }
     };
-  
+
     loadSearchHistory();
   }, [user, blockedUsers]);
-  
-  
-  
-  
 
   const handleUserPress = (selectedUser) => {
     if (blockedUsers.includes(selectedUser.id)) {
       Alert.alert(t("error"), t("cannotInteractWithUser"));
       return;
     }
-  
+
     // Agregar al historial si no existe ya
     const updatedHistory = [...searchHistory];
-    const existingUser = updatedHistory.find((item) => item.id === selectedUser.id);
+    const existingUser = updatedHistory.find(
+      (item) => item.id === selectedUser.id
+    );
     if (!existingUser) {
       updatedHistory.unshift(selectedUser);
       if (updatedHistory.length > 10) updatedHistory.pop();
       setSearchHistory(updatedHistory);
       saveSearchHistory(auth.currentUser, updatedHistory, blockedUsers);
     }
-  
+
     navigation.navigate("UserProfile", {
       selectedUser: {
         ...selectedUser,
@@ -301,7 +329,6 @@ export default function Search() {
       },
     });
   };
-  
 
   const removeFromHistory = (userId) => {
     const updatedHistory = searchHistory.filter((user) => user.id !== userId);
@@ -311,89 +338,109 @@ export default function Search() {
   };
 
   const renderHistoryItem = ({ item, index }) => (
-    <View 
-      key={`history-${item.id}-${index}`}
-      style={styles.historyItem}
-    >
+    <View key={`history-${item.id}-${index}`} style={styles.historyItem}>
       <TouchableOpacity
-        onPress={() => navigation.navigate("UserProfile", { selectedUser: item })}
+        onPress={() =>
+          navigation.navigate("UserProfile", { selectedUser: item })
+        }
         style={styles.historyTextContainer}
       >
-      <TouchableOpacity
-  onPress={async () => {
-    if (item.isPrivate) {
-      const friendsRef = collection(database, "users", user.uid, "friends");
-      const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
-      if (friendsSnapshot.empty) {
-        navigation.navigate("UserProfile", { selectedUser: item });
-        return;
-      }
-    }
-    if (!item.hasStories) {
-      navigation.navigate("UserProfile", { selectedUser: item });
-    } else {
-      try {
-        const storiesRef = collection(database, "users", item.id, "stories");
-        const storiesSnapshot = await getDocs(storiesRef);
-        const now = new Date();
+        <TouchableOpacity
+          onPress={async () => {
+            if (item.isPrivate) {
+              const friendsRef = collection(
+                database,
+                "users",
+                user.uid,
+                "friends"
+              );
+              const friendsSnapshot = await getDocs(
+                query(friendsRef, where("friendId", "==", item.id))
+              );
+              if (friendsSnapshot.empty) {
+                navigation.navigate("UserProfile", { selectedUser: item });
+                return;
+              }
+            }
+            if (!item.hasStories) {
+              navigation.navigate("UserProfile", { selectedUser: item });
+            } else {
+              try {
+                const storiesRef = collection(
+                  database,
+                  "users",
+                  item.id,
+                  "stories"
+                );
+                const storiesSnapshot = await getDocs(storiesRef);
+                const now = new Date();
 
-        const userStories = storiesSnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt,
-            expiresAt: doc.data().expiresAt,
-            storyUrl: doc.data().storyUrl,
-            profileImage: doc.data().profileImage || item.profileImage,
-            uid: item.id,
-            username: doc.data().username || item.username || t("unknownUser"),
-            viewers: doc.data().viewers || [],
-            likes: doc.data().likes || []
-          }))
-          .filter((story) => new Date(story.expiresAt.toDate()) > now);
+                const userStories = storiesSnapshot.docs
+                  .map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt,
+                    expiresAt: doc.data().expiresAt,
+                    storyUrl: doc.data().storyUrl,
+                    profileImage: doc.data().profileImage || item.profileImage,
+                    uid: item.id,
+                    username:
+                      doc.data().username || item.username || t("unknownUser"),
+                    viewers: doc.data().viewers || [],
+                    likes: doc.data().likes || [],
+                  }))
+                  .filter((story) => new Date(story.expiresAt.toDate()) > now);
 
-        if (userStories.length > 0) {
-          setSelectedStories([{
-            uid: item.id,
-            username: `${item.firstName || ""} ${item.lastName || ""}`.trim() || item.username || t("unknownUser"),
-            profileImage: item.profileImage,
-            userStories: userStories
-          }]);
-          setIsModalVisible(true);
-        } else {
-          navigation.navigate("UserProfile", { selectedUser: item });
-        }
-      } catch (error) {
-        console.error(t("errorLoadingStories"), error);
-        Alert.alert(t("error"), t("errorLoadingStories"));
-      }
-    }
-  }}
->
-<Image
-  key={`history-image-${item.id}`}
-  source={{
-    uri: item.profileImage || "https://via.placeholder.com/150",
-  }}
-  style={[
-    styles.userImage,
-    item.hasStories &&
-    (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
-      ...styles.unseenStoryCircle,
-      borderColor: isNightMode ? "white" : "black",
-    },
-  ]}
-/>
-
+                if (userStories.length > 0) {
+                  setSelectedStories([
+                    {
+                      uid: item.id,
+                      username:
+                        `${item.firstName || ""} ${
+                          item.lastName || ""
+                        }`.trim() ||
+                        item.username ||
+                        t("unknownUser"),
+                      profileImage: item.profileImage,
+                      userStories: userStories,
+                    },
+                  ]);
+                  setIsModalVisible(true);
+                } else {
+                  navigation.navigate("UserProfile", { selectedUser: item });
+                }
+              } catch (error) {
+                console.error(t("errorLoadingStories"), error);
+                Alert.alert(t("error"), t("errorLoadingStories"));
+              }
+            }
+          }}
+        >
+          <View
+            style={[
+              styles.unseenStoryCircle,
+              item.hasStories && {
+                borderColor: isNightMode ? "white" : "black", // Color dinámico
+              },
+            ]}
+          >
+            <Image
+              source={{
+                uri: item.profileImage || "https://via.placeholder.com/150",
+              }}
+              style={styles.userImage} // Solo dimensiones, sin borde adicional
+            />
+          </View>
         </TouchableOpacity>
-        <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
+        <Text style={[styles.resultText, { color: theme.text }]}>
+          {item.username}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => removeFromHistory(item.id)}>
         <Ionicons name="close" size={20} color={theme.text} />
       </TouchableOpacity>
     </View>
   );
-  
 
   const renderUserItem = ({ item, index }) => {
     return (
@@ -415,7 +462,7 @@ export default function Search() {
                 const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
-
+  
                 const userStories = storiesSnapshot.docs
                   .map((doc) => ({
                     id: doc.id,
@@ -430,15 +477,15 @@ export default function Search() {
                     likes: doc.data().likes || []
                   }))
                   .filter((story) => new Date(story.expiresAt.toDate()) > now);
-
+  
                 if (userStories.length > 0) {
                   setSelectedStories([{
                     uid: item.id,
                     username: `${item.firstName || ""} ${item.lastName || ""}`.trim() || item.username || t("unknownUser"),
                     profileImage: item.profileImage,
                     userStories: userStories
-                  }]); //set the stories to display in the modal
-                  setIsModalVisible(true); //show the modal
+                  }]);
+                  setIsModalVisible(true);
                 } else {
                   handleUserPress(item);
                 }
@@ -450,20 +497,21 @@ export default function Search() {
             }
           }}
         >
-          <Image
-  source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
-  style={[
-    styles.userImage,
-    item.hasStories &&
-      (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
-        ...styles.unseenStoryCircle,
-        borderColor: isNightMode ? "white" : "black",
-      },
-  ]}
-  cachePolicy="memory-disk"
-/>
+          <View
+            style={[
+              styles.unseenStoryCircle,
+              item.hasStories && {
+                borderColor: isNightMode ? "white" : "black", // Color dinámico del borde
+              },
+            ]}
+          >
+            <Image
+              source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
+              style={styles.userImage} // Imagen interna sin borde adicional
+            />
+          </View>
         </TouchableOpacity>
-
+  
         <TouchableOpacity
           onPress={() => handleUserPress(item)}
           style={styles.textContainer}
@@ -478,16 +526,16 @@ export default function Search() {
       </View>
     );
   };
-
+  
 
   const sectionsData = [
     {
-      title: t('recent'),
+      title: t("recent"),
       data: searchHistory,
       renderItem: renderHistoryItem,
     },
     {
-      title: t('suggestionsForYou'),
+      title: t("suggestionsForYou"),
       data: recommendations,
       renderItem: renderRecommendationItem,
     },
@@ -507,7 +555,7 @@ export default function Search() {
         <View style={styles.header}>
           <StorySlider
             ref={storySliderRef}
-            eventTitle={t('exampleEvent')}
+            eventTitle={t("exampleEvent")}
             selectedDate={new Date()}
           />
         </View>
@@ -523,7 +571,7 @@ export default function Search() {
               styles.searchInput,
               { color: isNightMode ? "#fff" : "#000" },
             ]}
-            placeholder={t('search')}
+            placeholder={t("search")}
             placeholderTextColor="#333333"
             value={searchTerm}
             onChangeText={setSearchTerm}
@@ -543,13 +591,13 @@ export default function Search() {
               ) : null
             }
             renderSectionFooter={({ section }) =>
-              section.title === t('recent') ? (
+              section.title === t("recent") ? (
                 <View style={styles.sectionSeparator} />
               ) : null
             }
             ListEmptyComponent={
               <Text style={{ color: theme.text }}>
-                {t('noRecommendationsOrHistory')}
+                {t("noRecommendationsOrHistory")}
               </Text>
             }
             refreshControl={
@@ -590,7 +638,7 @@ export default function Search() {
                 await loadExistingStories();
               }}
               unseenStories={{}}
-              navigation={navigation} 
+              navigation={navigation}
             />
           </Modal>
         )}
