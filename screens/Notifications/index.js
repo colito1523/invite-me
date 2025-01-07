@@ -674,7 +674,6 @@ export default function NotificationsComponent() {
       </View>
     );
   }
-  console.log("las notis del render", notifications);
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient

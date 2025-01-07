@@ -71,15 +71,6 @@ export default memo(function BoxDetails({ route, navigation }) {
   });
 
   useEffect(() => {
-    const start = Date.now(); // Marca el tiempo inicial
-
-    return () => {
-      const end = Date.now(); // Marca el tiempo al desmontar
-      console.log(`Tiempo de desmontaje: ${end - start}ms`);
-    };
-  }, []);
-
-  useEffect(() => {
     if (box) {
       checkEventStatus({ box, selectedDate, setIsEventSaved });
     }
@@ -124,15 +115,6 @@ export default memo(function BoxDetails({ route, navigation }) {
         box,
         selectedDate,
         isFromNotification,
-      });
-    } else {
-      console.log("Datos del evento:", {
-        ...box,
-        selectedDate,
-        eventId: box.eventId || box.id || box.title,
-        date: box.date,
-        dateArray: box.dateArray || [],
-        isPrivateEvent: box.category === "EventoParaAmigos",
       });
     }
   }, [box, isFromNotification]);

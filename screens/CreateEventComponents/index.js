@@ -44,6 +44,8 @@ export default function CreateEvent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [tempDate, setTempDate] = useState(new Date());
+  const [tempTime, setTempTime] = useState(new Date());
 
   const today = new Date();
   const maxDate = new Date(today.getTime() + 2 * 30 * 24 * 60 * 60 * 1000); // Max 2 months from today
@@ -269,15 +271,51 @@ useEffect(() => {
           <View style={styles.centeredView}>
             <View style={[styles.modalView, { backgroundColor: theme.background }]}>
               <DateTimePicker
-                value={showDatePicker ? day : hour}
+                value={showDatePicker ? tempDate : tempTime}
                 mode={showDatePicker ? "date" : "time"}
                 display="spinner"
-                onChange={showDatePicker ? (event, selectedDate) => onChangeDate(event, selectedDate, setShowDatePicker, setDay, day) : (event, selectedTime) => onChangeTime(event, selectedTime, setShowTimePicker, setHour, hour)}
+                onChange={(event, selectedValue) => {
+                  if (showDatePicker) {
+                    setTempDate(selectedValue || tempDate);
+                  } else {
+                    setTempTime(selectedValue || tempTime);
+                  }
+                }}
                 minimumDate={today}
                 maximumDate={maxDate}
                 textColor={theme.text}
               />
-             
+              {Platform.OS === "ios" && (
+                <View style={{ flexDirection: "row", marginTop: 20 }}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: theme.buttonBackground, marginRight: 10 }]}
+                    onPress={() => {
+                      setShowDatePicker(false);
+                      setShowTimePicker(false);
+                    }}
+                  >
+                    <Text style={[styles.modalButtonText, { color: theme.text }]}>
+                      {t("createEvent.cancel")}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: theme.buttonBackground }]}
+                    onPress={() => {
+                      if (showDatePicker) {
+                        setDay(tempDate);
+                      } else {
+                        setHour(tempTime);
+                      }
+                      setShowDatePicker(false);
+                      setShowTimePicker(false);
+                    }}
+                  >
+                    <Text style={[styles.modalButtonText, { color: theme.text }]}>
+                      {t("createEvent.accept")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </View>
         </Modal>
