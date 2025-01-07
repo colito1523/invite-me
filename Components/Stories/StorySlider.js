@@ -492,7 +492,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
     );
   };
   return (
-    <ScrollView>
+   
       <View style={styles.sliderContainer}>
         <TouchableOpacity
           onPress={handleAddStory}
@@ -606,7 +606,6 @@ export default React.forwardRef(function StorySlider(props, ref) {
           </TouchableWithoutFeedback>
         </Modal>
       </View>
-    </ScrollView>
   );
 });
 

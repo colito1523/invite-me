@@ -547,7 +547,7 @@ export default function Search() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+
       <LinearGradient
         colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
         style={styles.container}
@@ -643,6 +643,5 @@ export default function Search() {
           </Modal>
         )}
       </LinearGradient>
-    </SafeAreaView>
   );
 }

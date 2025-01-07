@@ -7,15 +7,16 @@ export const styles = StyleSheet.create({
       position: "relative",
     },
     backgroundImage: {
-      ...StyleSheet.absoluteFillObject,
-      width: null,
-      height: null,
-      contentFit: "cover",
-    },
-    gradient: {
-      flex: 1,
-      justifyContent: "flex-start",
-    },
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      resizeMode: "cover", // Asegúrate de cubrir completamente el fondo
+  },
+  gradient: {
+    ...StyleSheet.absoluteFillObject, // Esto asegura que ocupe todo el espacio
+},
     scrollViewContent: {
       flexGrow: 1,
       justifyContent: "flex-start",
