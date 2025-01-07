@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   TextInput,
@@ -47,6 +47,7 @@ export default function Search() {
   const [selectedStories, setSelectedStories] = useState(null); // Added state
   const blockedUsers = useBlockedUsers();
   const { t } = useTranslation();
+  const storySliderRef = useRef(); // Added ref
 
   const user = auth.currentUser;
   const navigation = useNavigation();
@@ -81,9 +82,13 @@ export default function Search() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([fetchUsers(searchTerm, setResults), fetchRecommendations(user, setRecommendations)]);
+    await Promise.all([
+      fetchUsers(searchTerm, setResults), 
+      fetchRecommendations(user, setRecommendations),
+      storySliderRef.current?.loadExistingStories()
+    ]);
     setRefreshing(false);
-  }, [fetchUsers, fetchRecommendations]);
+  }, [fetchUsers, fetchRecommendations, searchTerm, user]);
 
   useEffect(() => {
     fetchUsers(searchTerm, setResults);
@@ -501,6 +506,7 @@ export default function Search() {
       >
         <View style={styles.header}>
           <StorySlider
+            ref={storySliderRef}
             eventTitle={t('exampleEvent')}
             selectedDate={new Date()}
           />

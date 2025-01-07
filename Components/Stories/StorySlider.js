@@ -9,7 +9,6 @@ import {
   Modal,
   Platform,
   TouchableWithoutFeedback,
-  RefreshControl,
   ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -33,8 +32,10 @@ import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImageManipulator from "expo-image-manipulator";
 
-export default function StorySlider() {
-  const [refreshing, setRefreshing] = useState(false);
+export default React.forwardRef(function StorySlider(props, ref) {
+  React.useImperativeHandle(ref, () => ({
+    loadExistingStories
+  }));
   const { t } = useTranslation();
   const navigation = useNavigation();
   const [stories, setStories] = useState([]);
@@ -116,11 +117,6 @@ export default function StorySlider() {
     fetchBlockedUsers();
   }, []);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadExistingStories(); // Recargar las historias
-    setRefreshing(false);
-  };
 
   useEffect(() => {
     const checkTime = () => {
@@ -179,7 +175,7 @@ export default function StorySlider() {
       throw error;
     }
   };
-  
+
 
   const loadExistingStories = async () => {
     try {
@@ -324,13 +320,13 @@ export default function StorySlider() {
           Alert.alert(t("storySlider.error"), t("storySlider.camera"));
           return;
         }
-  
+
         const result = await ImagePicker.launchCameraAsync({
           mediaType: "photo",
           quality: 1,
           allowsEditing: false,
         });
-  
+
         if (!result.canceled && result.assets?.length > 0) {
           // Comprimir la imagen antes de procesarla
           const compressedUri = await compressImage(result.assets[0].uri);
@@ -342,7 +338,7 @@ export default function StorySlider() {
         Alert.alert(t("storySlider.error"), t("storySlider.storyUploadError"));
       }
     });
-  
+
     setIsModalVisible(false); // Cierra el modal
   };
 
@@ -354,13 +350,13 @@ export default function StorySlider() {
           Alert.alert(t("storySlider.error"), t("storySlider.gallery"));
           return;
         }
-  
+
         const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: false,
           quality: 1,
         });
-  
+
         if (!result.canceled && result.assets?.length > 0) {
           // Comprimir la imagen antes de procesarla
           const compressedUri = await compressImage(result.assets[0].uri);
@@ -372,7 +368,7 @@ export default function StorySlider() {
         Alert.alert(t("storySlider.error"), t("storySlider.storyUploadError"));
       }
     });
-  
+
     setIsModalVisible(false); // Cierra el modal
   };
 
@@ -493,11 +489,7 @@ export default function StorySlider() {
     );
   };
   return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <ScrollView>
       <View style={styles.sliderContainer}>
         <TouchableOpacity
           onPress={handleAddStory}
@@ -580,7 +572,7 @@ export default function StorySlider() {
           />
         </Modal>
         <Modal
-         
+
           transparent={true}
           visible={isModalVisible}
           onRequestClose={() => setIsModalVisible(false)}
@@ -607,7 +599,7 @@ export default function StorySlider() {
       </View>
     </ScrollView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   sliderContainer: {
@@ -699,7 +691,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-   
+
   },
   acceptButtonText: {
     color: "rgba(0, 0, 0, 0.6)",
