@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { ref as storageRef, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import {
   collection,
   doc,
@@ -34,7 +34,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 
 export default React.forwardRef(function StorySlider(props, ref) {
   React.useImperativeHandle(ref, () => ({
-    loadExistingStories
+    loadExistingStories,
   }));
   const { t } = useTranslation();
   const navigation = useNavigation();
@@ -46,13 +46,12 @@ export default React.forwardRef(function StorySlider(props, ref) {
 
   // Precargar historias cuando cambia el array de stories
   useEffect(() => {
-    stories.forEach(item => {
+    stories.forEach((item) => {
       if (item.userStories?.[0]?.storyUrl) {
         Image.prefetch(item.userStories[0].storyUrl);
       }
     });
   }, [stories]);
-
 
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -78,7 +77,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
               const rotatedImage = await ImageManipulator.manipulateAsync(
                 uri,
                 [{ rotate: 90 }],
-                { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+                { compress: 1, format: ImageManipulator.SaveFormat.JPEG },
               );
               resolve(rotatedImage.uri);
             } catch (error) {
@@ -92,10 +91,10 @@ export default React.forwardRef(function StorySlider(props, ref) {
         (error) => {
           console.error(
             "Error al obtener las dimensiones de la imagen:",
-            error
+            error,
           );
           reject(error);
-        }
+        },
       );
     });
   };
@@ -116,7 +115,6 @@ export default React.forwardRef(function StorySlider(props, ref) {
 
     fetchBlockedUsers();
   }, []);
-
 
   useEffect(() => {
     const checkTime = () => {
@@ -167,7 +165,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
       const manipulatedImage = await ImageManipulator.manipulateAsync(
         uri,
         [{ resize: { width } }], // Cambia el tamaño de la imagen
-        { compress: quality, format: ImageManipulator.SaveFormat.JPEG }
+        { compress: quality, format: ImageManipulator.SaveFormat.JPEG },
       );
       return manipulatedImage.uri;
     } catch (error) {
@@ -175,7 +173,6 @@ export default React.forwardRef(function StorySlider(props, ref) {
       throw error;
     }
   };
-
 
   const loadExistingStories = async () => {
     try {
@@ -213,8 +210,8 @@ export default React.forwardRef(function StorySlider(props, ref) {
         unseenStoriesTemp[user.uid] = userStories.filter(
           (story) =>
             !story.viewers?.some(
-              (viewer) => viewer.uid === auth.currentUser.uid
-            )
+              (viewer) => viewer.uid === auth.currentUser.uid,
+            ),
         );
       }
 
@@ -232,7 +229,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
           database,
           "users",
           friend.friendId,
-          "stories"
+          "stories",
         );
         const friendStoriesSnapshot = await getDocs(friendStoriesRef);
         const friendStories = friendStoriesSnapshot.docs
@@ -249,8 +246,8 @@ export default React.forwardRef(function StorySlider(props, ref) {
             unseenStoriesTemp[friend.friendId] = friendStories.filter(
               (story) =>
                 !story.viewers?.some(
-                  (viewer) => viewer.uid === auth.currentUser.uid
-                )
+                  (viewer) => viewer.uid === auth.currentUser.uid,
+                ),
             );
 
             loadedStories.push({
@@ -277,29 +274,34 @@ export default React.forwardRef(function StorySlider(props, ref) {
 
       setStories(sortedStories);
       setUnseenStories(unseenStoriesTemp);
-    // Precargar las imágenes de las primeras historias
-    // Precargar solo la primera historia de cada usuario
-    sortedStories.forEach((storyGroup) => {
-      if (storyGroup.userStories && storyGroup.userStories[0]) {
-        Image.prefetch(storyGroup.userStories[0].storyUrl)
-          .then(() => {
-            console.log(`Primera historia de ${storyGroup.username} precargada`);
-          })
-          .catch((error) =>
-            console.warn(`Error precargando historia de ${storyGroup.username}:`, error)
-          );
-      }
-    });
-  } catch (error) {
-    console.error(t("storySlider.loadStoriesError"), error);
-  }
-};
+      // Precargar las imágenes de las primeras historias
+      // Precargar solo la primera historia de cada usuario
+      sortedStories.forEach((storyGroup) => {
+        if (storyGroup.userStories && storyGroup.userStories[0]) {
+          Image.prefetch(storyGroup.userStories[0].storyUrl)
+            .then(() => {
+              console.log(
+                `Primera historia de ${storyGroup.username} precargada`,
+              );
+            })
+            .catch((error) =>
+              console.warn(
+                `Error precargando historia de ${storyGroup.username}:`,
+                error,
+              ),
+            );
+        }
+      });
+    } catch (error) {
+      console.error(t("storySlider.loadStoriesError"), error);
+    }
+  };
 
   const handleOpenViewer = async (index) => {
     const userStories = stories[index].userStories;
     const unseenIndex = userStories.findIndex(
       (story) =>
-        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
+        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid),
     );
 
     setSelectedStoryIndex(index);
@@ -345,7 +347,8 @@ export default React.forwardRef(function StorySlider(props, ref) {
   const handleGallery = async () => {
     setPendingAction(() => async () => {
       try {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
           Alert.alert(t("storySlider.error"), t("storySlider.gallery"));
           return;
@@ -393,7 +396,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
       const profileImage = userData.photoUrls?.[0] || "default-image-url";
 
       const storyId = Date.now().toString();
-      const storyRef = ref(storage, `historias/${user.uid}/${storyId}`);
+      const storyRef = storageRef(storage, `historias/${user.uid}/${storyId}`);
       const response = await fetch(imageUri);
       const blob = await response.blob();
 
@@ -413,7 +416,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
           console.error(t("storySlider.uploadError"), error);
           Alert.alert(
             t("storySlider.error"),
-            t("storySlider.storyUploadError")
+            t("storySlider.storyUploadError"),
           );
           setIsUploading(false);
         },
@@ -434,7 +437,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
 
           loadExistingStories();
           setIsUploading(false);
-        }
+        },
       );
     } catch (error) {
       console.error(t("storySlider.uploadError"), error);
@@ -472,7 +475,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
             )}
             <View style={styles.progressCircle}>
               <Text style={styles.progressText}>{`${Math.round(
-                uploadProgress
+                uploadProgress,
               )}%`}</Text>
             </View>
           </View>
@@ -525,15 +528,22 @@ export default React.forwardRef(function StorySlider(props, ref) {
               <Ionicons name="close" size={30} color="white" />
             </TouchableOpacity>
             <TouchableOpacity
-  style={styles.acceptButtonContainer}
-  onPress={() => {
-    uploadStory(selectedImage); // Sube la imagen
-    setSelectedImage(null); // Cierra el modal
-  }}
->
-  <Text style={styles.acceptButtonText}> {t("storySlider.addStory")}</Text>
-  <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
-</TouchableOpacity>
+              style={styles.acceptButtonContainer}
+              onPress={() => {
+                uploadStory(selectedImage); // Sube la imagen
+                setSelectedImage(null); // Cierra el modal
+              }}
+            >
+              <Text style={styles.acceptButtonText}>
+                {" "}
+                {t("storySlider.addStory")}
+              </Text>
+              <Ionicons
+                name="arrow-forward"
+                size={24}
+                color="rgba(0, 0, 0, 0.6)"
+              />
+            </TouchableOpacity>
           </View>
         </Modal>
 
@@ -572,7 +582,6 @@ export default React.forwardRef(function StorySlider(props, ref) {
           />
         </Modal>
         <Modal
-
           transparent={true}
           visible={isModalVisible}
           onRequestClose={() => setIsModalVisible(false)}
@@ -615,6 +624,11 @@ const styles = StyleSheet.create({
   storyCircle: {
     marginRight: 10,
     alignItems: "center",
+  },
+  unseenStoryCircle: {
+    borderWidth: 2,
+    borderRadius: 35,
+    padding: 2,
   },
   storyImage: {
     width: 65,
@@ -688,16 +702,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   acceptButtonText: {
     color: "rgba(0, 0, 0, 0.6)",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginRight: 15,
   },
-
 });

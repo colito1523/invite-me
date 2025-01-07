@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from "react";
 import { 
   View, 
@@ -397,18 +396,23 @@ export default function ChatList() {
           />
         )}
         <TouchableOpacity onPress={() => handleImagePress(item)}>
-          <Image
-            source={{
-              uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
-            }}
-            style={[
-              styles.userImage,
-              item.user.hasStories && {
-                ...styles.storyIndicator,
-                borderColor: isNightMode ? "white" : "black",
-              },
-            ]}
-          />
+        <View
+  style={[
+    styles.userImageContainer, // Nuevo estilo base para todos
+    item.user.hasStories && {
+      ...styles.storyIndicator, // Aplica el borde al contenedor
+      borderColor: isNightMode ? "white" : "black",
+    },
+    { padding: 2 }, // Espacio interno adicional
+  ]}
+>
+  <Image
+    source={{
+      uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
+    }}
+    style={styles.userImage} // Mantén solo el estilo de la imagen aquí
+  />
+</View>
         </TouchableOpacity>
         <View style={styles.chatInfo}>
           <Text
@@ -587,7 +591,7 @@ export default function ChatList() {
 
           <FlatList
             data={filteredChats}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => `chat-${item.id}`} // Añadir prefijo 'chat-'
             renderItem={renderChatItem}
           />
 

@@ -47,8 +47,7 @@ export const styles = StyleSheet.create({
   userImage: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    marginRight: 15,
+    borderRadius: 25, // La imagen también debe ser redonda
   },
   chatInfo: {
     flex: 1,
@@ -58,10 +57,13 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  userImageContainer: {
+    marginRight: 15, // Se aplica siempre
+  },
 
   storyIndicator: {
     borderWidth: 2,
-    borderRadius: 25,
+    borderRadius: 30, // Ajusta para que el contenedor sea redondo
   },
 
   unseenCountContainer: {
