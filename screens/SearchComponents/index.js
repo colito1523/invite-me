@@ -579,36 +579,38 @@ export default function Search() {
         </View>
 
         {searchTerm.length === 0 ? (
-          <SectionList
-            sections={sectionsData}
-            keyExtractor={(item, index) => item.id + index.toString()}
-            renderItem={({ section, item }) => section.renderItem({ item })}
-            renderSectionHeader={({ section }) =>
-              section.data.length > 0 ? (
-                <Text style={[styles.sectionTitle, { color: theme.text }]}>
-                  {section.title}
-                </Text>
-              ) : null
-            }
-            renderSectionFooter={({ section }) =>
-              section.title === t("recent") ? (
-                <View style={styles.sectionSeparator} />
-              ) : null
-            }
-            ListEmptyComponent={
-              <Text style={{ color: theme.text }}>
-                {t("noRecommendationsOrHistory")}
-              </Text>
-            }
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[theme.icon]}
-                tintColor={theme.icon}
-              />
-            }
-          />
+         <SectionList
+         sections={sectionsData}
+         keyExtractor={(item, index) => item.id + index.toString()}
+         renderItem={({ section, item }) => section.renderItem({ item })}
+         renderSectionHeader={({ section }) =>
+             section.data.length > 0 ? (
+                 <Text style={[styles.sectionTitle, { color: theme.text }]}>
+                     {section.title}
+                 </Text>
+             ) : null
+         }
+         renderSectionFooter={({ section }) =>
+             section.title === t("recent") ? (
+                 <View style={styles.sectionSeparator} />
+             ) : null
+         }
+         ListEmptyComponent={
+             <Text style={{ color: theme.text }}>
+                 {t("noRecommendationsOrHistory")}
+             </Text>
+         }
+         stickySectionHeadersEnabled={false} // Agrega esta línea
+         refreshControl={
+             <RefreshControl
+                 refreshing={refreshing}
+                 onRefresh={onRefresh}
+                 colors={[theme.icon]}
+                 tintColor={theme.icon}
+             />
+         }
+     />
+     
         ) : (
           <FlatList
             data={results}

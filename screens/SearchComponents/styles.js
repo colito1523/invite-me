@@ -7,6 +7,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingTop: 40, // Aumenta el espacio superior si es necesario
   },
   header: {
     flexDirection: "row",
@@ -37,10 +38,11 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: "700",
-    marginVertical: 15,
+    marginVertical: 15, // Puedes aumentar este valor
     letterSpacing: 1,
     color: "#4d4d4d",
-  },
+},
+
   sectionSeparator: {
     height: 40,
   },
