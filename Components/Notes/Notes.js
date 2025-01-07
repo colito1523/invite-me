@@ -401,7 +401,7 @@ export default function Notes() {
   };
   const renderMoodNote = (note, isUser = false) => (
     <TouchableOpacity
-      key={note.id}
+      key={`note-${note.friendId}-${note.id}`} // Añadir prefijo 'note-' y friendId
       onPress={isUser ? handlePress : () => setSelectedNoteFullScreen(note)}
       style={styles.storyContainer}
     >
@@ -1050,8 +1050,7 @@ const darkTheme = {
   text: "#fff",
   textSecondary: "#ccc",
   inputBackground: "#1a1a1a",
-  placeholder: "white",
-  icon: "#C0A368",
+  placeholder: "white",  icon: "#C0A368",
   borderColor: "#444",
   noteBackground: "rgba(64, 64, 64, 0.7)",
   sendButtonBackground: "rgba(255, 255, 255, 0.5)",
