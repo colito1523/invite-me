@@ -7,7 +7,8 @@ import {
   TouchableOpacity, 
   SafeAreaView, 
   Alert, 
-  Modal 
+  Modal,
+  RefreshControl
 } from "react-native";
 import { Image } from "expo-image";
 import {
@@ -58,7 +59,23 @@ export default function ChatList() {
   const [mutedChats, setMutedChats] = useState([]);
   const [selectedStories, setSelectedStories] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const { setHasUnreadMessages } = useUnreadMessages();
+
+  const onRefresh = useCallback(async () => {
+    if (!user) return;
+    
+    setRefreshing(true);
+    try {
+      const updatedChats = await checkStories(chats, user.uid);
+      if (updatedChats) {
+        setChats(updatedChats);
+      }
+    } catch (error) {
+      console.error("Error refreshing:", error);
+    }
+    setRefreshing(false);
+  }, [chats, user]);
   const { t } = useTranslation();
   const user = auth.currentUser;
   const navigation = useNavigation();
@@ -591,8 +608,16 @@ export default function ChatList() {
 
           <FlatList
             data={filteredChats}
-            keyExtractor={(item) => `chat-${item.id}`} // Añadir prefijo 'chat-'
+            keyExtractor={(item) => `chat-${item.id}`}
             renderItem={renderChatItem}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[isNightMode ? "#fff" : "#000"]}
+                tintColor={isNightMode ? "#fff" : "#000"}
+              />
+            }
           />
 
           {isSelectionMode && (
