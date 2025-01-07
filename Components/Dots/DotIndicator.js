@@ -292,45 +292,48 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
               </View>
 
               <FlatList
-                data={filteredAttendees}
-                keyExtractor={(item) => item.uid || item.username}
-                renderItem={({ item }) => (
-                  <View style={currentStyles.attendeeItem}>
-                    {/* Imagen de perfil: clic accede a las historias */}
-                    <TouchableOpacity
-                      onPress={() => handlePress(item.uid, false)} // No es texto, acceso a historias
-                      style={currentStyles.attendeeImageContainer}
-                    >
-                      <Image
-                        source={{
-                          uri:
-                            item.profileImage ||
-                            "https://via.placeholder.com/150",
-                        }}
-                        style={[
-                          currentStyles.attendeeImage,
-                          item.hasStories &&
-                            (!item.isPrivate ||
-                              (item.isPrivate && item.isFriend)) && {
-                              ...currentStyles.unseenStoryCircle,
-                              borderColor: isNightMode ? "white" : "black",
-                            },
-                        ]}
-                        cachePolicy="memory-disk"
-                      />
-                    </TouchableOpacity>
+  data={filteredAttendees}
+  keyExtractor={(item) => item.uid || item.username}
+  renderItem={({ item }) => (
+    <View style={currentStyles.attendeeItem}>
+      {/* Imagen de perfil con borde separado */}
+      <TouchableOpacity
+        onPress={() => handlePress(item.uid, false)} // Acceso a historias
+        style={[currentStyles.attendeeImageContainer,{ marginRight:20,}]}
+      >
+        <View
+          style={[
+            currentStyles.unseenStoryCircle, // Borde externo
+            item.hasStories && {
+              borderColor: "white",
+              // Color dinámico del borde
+            },
+          ]}
+        >
+          <Image
+            source={{
+              uri:
+                item.profileImage ||
+                "https://via.placeholder.com/150",
+            }}
+            style={currentStyles.attendeeImage} // Imagen interna
+            cachePolicy="memory-disk"
+          />
+        </View>
+      </TouchableOpacity>
 
-                    {/* Texto del usuario: clic redirige al perfil */}
-                    <TouchableOpacity
-    onPress={() => navigateToUserProfile(item.uid)} // Redirige al perfil
->
-    <Text style={currentStyles.attendeeName}>
-        {item.username}
-    </Text>
-</TouchableOpacity>
-                  </View>
-                )}
-              />
+      {/* Texto del usuario: clic redirige al perfil */}
+      <TouchableOpacity
+        onPress={() => navigateToUserProfile(item.uid)} // Redirige al perfil
+      >
+        <Text style={currentStyles.attendeeName}>
+          {item.username}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  )}
+/>
+
 
               {isModalVisible && (
                 <Modal
@@ -402,11 +405,11 @@ const baseStyles = {
     marginBottom: 15,
   },
   attendeeImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 15,
+    width: 46, // Ajusta según tus necesidades
+    height: 46,
+    borderRadius: 23, // Mantén el radio de la imagen
   },
+  
   attendeeName: {
     fontSize: 18,
   },
@@ -430,8 +433,11 @@ const baseStyles = {
   },
   unseenStoryCircle: {
     borderWidth: 2,
-    borderColor: "red", // Indica historias disponibles
-    borderRadius: 25,
+    borderColor: "transparent", // Color predeterminado
+    borderRadius: 28, // Asegúrate de que sea mayor que attendeeImage
+    padding: 3, // Margen interno entre la imagen y el borde
+    alignItems: "center",
+    justifyContent: "center",
   },
 };
 
