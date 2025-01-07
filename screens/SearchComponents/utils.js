@@ -89,7 +89,19 @@ export const fetchRecommendations = async (user, setRecommendations) => {
   if (!user) return;
 
   try {
-    // Cargar usuarios bloqueados
+    // Try to get cached recommendations first
+    const cachedData = await AsyncStorage.getItem(`recommendations_${user.uid}`);
+    if (cachedData) {
+      const { recommendations, timestamp } = JSON.parse(cachedData);
+      const now = new Date().getTime();
+      // Use cache if less than 5 minutes old
+      if (now - timestamp < 60 * 60 * 1000) {
+        setRecommendations(recommendations);
+        return;
+      }
+    }
+
+    // If no valid cache, proceed with normal fetch
     const userRef = doc(database, "users", user.uid);
     const userSnapshot = await getDoc(userRef);
     const blockedUsers = userSnapshot.data()?.blockedUsers || [];
@@ -140,6 +152,12 @@ export const fetchRecommendations = async (user, setRecommendations) => {
     }
 
     setRecommendations(recommendedUsers);
+
+    // Save to cache
+    await AsyncStorage.setItem(`recommendations_${user.uid}`, JSON.stringify({
+      recommendations: recommendedUsers,
+      timestamp: new Date().getTime()
+    }));
   } catch (error) {
     console.error("Error fetching friend recommendations:", error);
   }
@@ -282,4 +300,3 @@ export const saveSearchHistory = async (currentUser, history, blockedUsers) => {
     console.error("Error al guardar el historial de búsqueda:", error);
   }
 };
-
