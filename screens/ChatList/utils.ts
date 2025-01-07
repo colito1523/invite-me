@@ -42,6 +42,7 @@ export const formatTime = (timestamp: Timestamp): string => {
 };
 
 export const truncateMessage = (message: string, maxLength: number = 10): string => {
+  if (message === 'media') return 'Foto';
   if (message.length <= maxLength) return message;
   return message.substring(0, maxLength) + "...";
 };

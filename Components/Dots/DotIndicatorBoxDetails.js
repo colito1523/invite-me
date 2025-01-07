@@ -286,19 +286,27 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   imageContainer: {
-    width: 70,
-    height: 70,
+    width: 75,
+    height: 75,
     borderRadius: 40,
     overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
+    width: 65,
+    height: 65,
+    borderRadius: 35,
   },
   unseenStoryCircle: {
     borderWidth: 2,
-    borderColor: "white", // Cambia el color según tu diseño
-    borderRadius: 35,
+    borderColor: "white",
+    borderRadius: 40,
+    padding: 3,
+    width: 75,
+    height: 75,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

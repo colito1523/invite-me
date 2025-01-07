@@ -331,7 +331,7 @@ export default function Chat({ route }) {
 
         // Establecer isHidden a false para el receptor
         await updateDoc(chatDocRef, {
-          lastMessage: messageData.text || "Media",
+          lastMessage: messageData.text || "Image",
           lastMessageTimestamp: messageData.createdAt,
           lastMessageSenderId: user.uid,
           lastMessageSenderName: user.displayName || "Anónimo",
