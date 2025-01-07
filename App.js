@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -66,6 +66,58 @@ const AuthenticatedUserProvider = ({ children }) => {
     <AuthenticatedUserContext.Provider value={{ user, setUser }}>
       {children}
     </AuthenticatedUserContext.Provider>
+  );
+};
+
+export const LanguageContext = createContext(); // Export LanguageContext
+
+const LanguageProvider = ({ children }) => {
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+
+  useEffect(() => {
+    const loadSavedLanguage = async () => {
+      try {
+        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+        if (savedLanguage) {
+          i18n.changeLanguage(savedLanguage);
+          setSelectedLanguage(savedLanguage);
+        } else if (auth.currentUser) {
+          const userRef = doc(database, "users", auth.currentUser.uid);
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            const preferredLanguage = userDoc.data().preferredLanguage;
+            if (preferredLanguage) {
+              i18n.changeLanguage(preferredLanguage);
+              setSelectedLanguage(preferredLanguage);
+              await AsyncStorage.setItem(LANGUAGE_KEY, preferredLanguage);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved language:', error);
+      }
+    };
+    loadSavedLanguage();
+  }, []);
+
+  const changeLanguage = async (lang) => {
+    await i18n.changeLanguage(lang);
+    setSelectedLanguage(lang);
+    try {
+      await AsyncStorage.setItem(LANGUAGE_KEY, lang);
+      if (auth.currentUser) {
+        const userRef = doc(database, "users", auth.currentUser.uid);
+        await updateDoc(userRef, { preferredLanguage: lang });
+      }
+    } catch (error) {
+      console.error('Error saving language:', error);
+    }
+  };
+
+  return (
+    <LanguageContext.Provider value={{ selectedLanguage, changeLanguage }}>
+      {children}
+    </LanguageContext.Provider>
   );
 };
 
@@ -183,6 +235,17 @@ export default function App() {
         const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
         if (savedLanguage) {
           await i18n.changeLanguage(savedLanguage);
+        } else if (auth.currentUser) {
+          // Fetch preferred language from Firestore
+          const userRef = doc(database, "users", auth.currentUser.uid);
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            const preferredLanguage = userDoc.data().preferredLanguage;
+            if (preferredLanguage) {
+              await i18n.changeLanguage(preferredLanguage);
+              await AsyncStorage.setItem(LANGUAGE_KEY, preferredLanguage);
+            }
+          }
         }
         setIsI18nInitialized(true);
       } catch (error) {
@@ -222,7 +285,9 @@ export default function App() {
     <AuthenticatedUserProvider>
     <UnreadMessagesProvider> 
       <PaperProvider>
+        <LanguageProvider>
         <RootNavigator />
+        </LanguageProvider>
       </PaperProvider>
       </UnreadMessagesProvider>
     </AuthenticatedUserProvider>

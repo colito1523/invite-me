@@ -509,7 +509,7 @@ export default function Search() {
           <Ionicons
             name="search"
             size={20}
-            color="gray"
+            color="#333333"
             style={styles.searchIcon}
           />
           <TextInput
@@ -518,7 +518,7 @@ export default function Search() {
               { color: isNightMode ? "#fff" : "#000" },
             ]}
             placeholder={t('search')}
-            placeholderTextColor="gray"
+            placeholderTextColor="#333333"
             value={searchTerm}
             onChangeText={setSearchTerm}
           />

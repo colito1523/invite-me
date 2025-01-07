@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   SafeAreaView,
   Text,
@@ -10,10 +10,11 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { auth, database } from '../../config/firebase';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,7 +24,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import * as SecureStore from 'expo-secure-store';
 import validator from 'validator'; // Importar la biblioteca validator
-
+import { LanguageContext } from "../../App"; // Ensure correct import of LanguageContext
 
 import es from '../../locales/es.json';
 import en from '../../locales/en.json';
@@ -76,8 +77,8 @@ export default function Login({ navigation }) {
   const [isNightMode, setIsNightMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('es');
   const { t, i18n } = useTranslation();
+  const { selectedLanguage, changeLanguage } = useContext(LanguageContext); // Use LanguageContext
 
   useEffect(() => {
     const checkSession = async () => {
@@ -92,46 +93,22 @@ export default function Login({ navigation }) {
       }
     };
 
-    checkSession(); // Verifica el token al montar el componente
-
     const checkTime = () => {
       const currentHour = new Date().getHours();
       setIsNightMode(currentHour >= 19 || currentHour < 6);
     };
 
+    checkSession(); // Verifica el token al montar el componente
     checkTime();
-    const interval = setInterval(checkTime, 60000);
 
-    loadSavedLanguage();
+    const interval = setInterval(checkTime, 60000);
 
     return () => clearInterval(interval); // Limpia el intervalo cuando se desmonta
   }, []);
 
-
-  const loadSavedLanguage = async () => {
-    try {
-      const savedLanguage = await SecureStore.getItemAsync(LANGUAGE_KEY);
-      if (savedLanguage) {
-        i18n.changeLanguage(savedLanguage);
-        setSelectedLanguage(savedLanguage); // Actualiza el selector de idioma
-      }
-    } catch (error) {
-      console.error('Error loading saved language:', error);
-    }
-  };
-
- const changeLanguage = async (lang) => {
-    await i18n.changeLanguage(lang);
-    setSelectedLanguage(lang);
-    console.log(`Idioma seleccionado: ${lang}`); // Agregado para mostrar el idioma seleccionado en la consola
-    try {
-        await SecureStore.setItemAsync(LANGUAGE_KEY, lang);
-    } catch (error) {
-        console.error('Error saving language:', error);
-    }
-    setIsLanguageOptionsVisible(false);
-};
-
+  useEffect(() => {
+    i18n.changeLanguage(selectedLanguage);
+  }, [selectedLanguage]);
 
   const onHandleLogin = async () => {
     if (email.trim() === '' || password === '') {
@@ -182,7 +159,16 @@ export default function Login({ navigation }) {
     }
   };
 
+  const handleLanguageChange = (langCode) => {
+    changeLanguage(langCode);
+    setIsLanguageOptionsVisible(false);
+  };
 
+  const handleOutsideClick = () => {
+    if (isLanguageOptionsVisible) {
+      setIsLanguageOptionsVisible(false);
+    }
+  };
 
   const theme = isNightMode ? darkTheme : lightTheme;
 
@@ -193,120 +179,122 @@ export default function Login({ navigation }) {
   ];
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#fff' }]}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView contentContainerStyle={styles.scrollView}>
-          <LinearGradient
-            colors={['#fff', '#fff']}
-            style={styles.container}
-          >
-            <View style={styles.languageContainer}>
-              <TouchableOpacity
-                style={styles.languageSelector}
-                onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
-              >
-                <Ionicons name="globe-outline" size={24} color="#000" />
-                <Text style={styles.selectedLanguage}>
-                  {languages.find(lang => lang.code === selectedLanguage)?.name}
-                </Text>
-                <Ionicons name="chevron-down" size={24} color="#000" />
-              </TouchableOpacity>
-              {isLanguageOptionsVisible && (
-                <View style={styles.languageOptions}>
-                  {languages.map((lang) => (
-                    <TouchableOpacity
-                      key={lang.code}
-                      style={styles.languageOption}
-                      onPress={() => changeLanguage(lang.code)}
-                    >
-                      <Text style={[
-                        styles.languageOptionText,
-                        selectedLanguage === lang.code && styles.selectedLanguageText
-                      ]}>
-                        {lang.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-            <View style={styles.logoContainer}>
-              <Image
-                source={require('../../assets/Logo_Invite_Me.png')}
-                style={styles.logo}
-                contentFit="cover"
-                cachePolicy="memory-disk" 
-              />
-            </View>
-
-            <Text style={[styles.title, { color: "black" }]}>
-              {t('accessPrivately')}
-            </Text>
-
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder={t('email')}
-                placeholderTextColor="#999"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                textContentType="emailAddress"
-                value={email}
-                onChangeText={setEmail}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder={t('password')}
-                placeholderTextColor="#999"
-                autoCapitalize="none"
-                autoCorrect={false}
-                secureTextEntry={true}
-                textContentType="password"
-                value={password}
-                onChangeText={setPassword}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.loginButton, { backgroundColor: theme.buttonBackground }]}
-              onPress={onHandleLogin}
-              disabled={isLoading}
+    <TouchableWithoutFeedback onPress={handleOutsideClick}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#fff' }]}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView contentContainerStyle={styles.scrollView}>
+            <LinearGradient
+              colors={['#fff', '#fff']}
+              style={styles.container}
             >
-              {isLoading ? (
-                <ActivityIndicator size={20} color="#333" />
-              ) : (
-                <Text style={styles.loginButtonText}>{t('logIn')}</Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.forgotPasswordButton}
-              onPress={() => navigation.navigate('ForgotPassword')}
-            >
-              <Text style={[styles.forgotPasswordText, { color: theme.link }]}>
-                {t('forgotPassword')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.createAccountButton}
-              onPress={() => navigation.navigate('Signup')}
-            >
-              <View style={styles.createAccountTextContainer}>
-                <Text style={[styles.createAccountTextSmall, { color: theme.link }]}>
-                  {t('createNewAccount')}
-                </Text>
-                <Text style={[styles.createAccountTextLarge, { color: theme.link }]}>
-                  {' Sign Up'}
-                </Text>
+              <View style={styles.languageContainer}>
+                <TouchableOpacity
+                  style={styles.languageSelector}
+                  onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
+                >
+                  <Ionicons name="globe-outline" size={24} color="#000" />
+                  <Text style={styles.selectedLanguage}>
+                    {languages.find(lang => lang.code === selectedLanguage)?.name}
+                  </Text>
+                  <Ionicons name="chevron-down" size={24} color="#000" />
+                </TouchableOpacity>
+                {isLanguageOptionsVisible && (
+                  <View style={styles.languageOptions}>
+                    {languages.map((lang) => (
+                      <TouchableOpacity
+                        key={lang.code}
+                        style={styles.languageOption}
+                        onPress={() => handleLanguageChange(lang.code)}
+                      >
+                        <Text style={[
+                          styles.languageOptionText,
+                          selectedLanguage === lang.code && styles.selectedLanguageText
+                        ]}>
+                          {lang.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
-            </TouchableOpacity>
-          </LinearGradient>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('../../assets/Logo_Invite_Me.png')}
+                  style={styles.logo}
+                  contentFit="cover"
+                  cachePolicy="memory-disk" 
+                />
+              </View>
+
+              <Text style={[styles.title, { color: "black" }]}>
+                {t('accessPrivately')}
+              </Text>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder={t('email')}
+                  placeholderTextColor="#999"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder={t('password')}
+                  placeholderTextColor="#999"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  secureTextEntry={true}
+                  textContentType="password"
+                  value={password}
+                  onChangeText={setPassword}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.loginButton, { backgroundColor: theme.buttonBackground }]}
+                onPress={onHandleLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size={20} color="#333" />
+                ) : (
+                  <Text style={styles.loginButtonText}>{t('logIn')}</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.forgotPasswordButton}
+                onPress={() => navigation.navigate('ForgotPassword')}
+              >
+                <Text style={[styles.forgotPasswordText, { color: theme.link }]}>
+                  {t('forgotPassword')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.createAccountButton}
+                onPress={() => navigation.navigate('Signup')}
+              >
+                <View style={styles.createAccountTextContainer}>
+                  <Text style={[styles.createAccountTextSmall, { color: theme.link }]}>
+                    {t('createNewAccount')}
+                  </Text>
+                  <Text style={[styles.createAccountTextLarge, { color: theme.link }]}>
+                    {' Sign Up'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </LinearGradient>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }

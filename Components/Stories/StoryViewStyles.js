@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: "#333333",
     borderRadius: 20,
     marginRight: 10,
     paddingHorizontal: 10,
@@ -159,20 +159,20 @@ const styles = StyleSheet.create({
   searchInputDivider: {
     width: 1,
     height: "60%",
-    backgroundColor: "black",
+    backgroundColor: "#333333",
     marginHorizontal: 8,
   },
   searchInputCount: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "black",
+    color: "#333333",
   },
   deleteButton: {
     padding: 4,
     marginBottom: 10,
   },
   viewersTitle: {
-    color: "black",
+    color: "#333333",
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 10,

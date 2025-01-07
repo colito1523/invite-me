@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -11,7 +11,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../config/firebase';
@@ -21,6 +22,8 @@ import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { database } from '../config/firebase';
 
 import es from '../locales/es.json';
 import en from '../locales/en.json';
@@ -46,13 +49,15 @@ i18n
 
 const { width, height } = Dimensions.get('window');
 
+import { LanguageContext } from "../App"; // Ensure correct import of LanguageContext
+
 export default function ElegantForgotPassword({ navigation }) {
   const [email, setEmail] = useState('');
   const [isNightMode, setIsNightMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('es');
   const { t } = useTranslation();
+  const { selectedLanguage, changeLanguage } = useContext(LanguageContext); // Use LanguageContext
 
   useEffect(() => {
     const checkTime = () => {
@@ -63,34 +68,12 @@ export default function ElegantForgotPassword({ navigation }) {
     checkTime();
     const interval = setInterval(checkTime, 60000);
 
-    loadSavedLanguage();
-
     return () => clearInterval(interval);
   }, []);
 
-  const loadSavedLanguage = async () => {
-    try {
-      const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
-      if (savedLanguage) {
-        i18n.changeLanguage(savedLanguage);
-        setSelectedLanguage(savedLanguage);  // Actualiza el selector de idioma
-      }
-    } catch (error) {
-      console.error('Error loading saved language:', error);
-    }
-  };
-  
-
-  const changeLanguage = async (lang) => {
-    await i18n.changeLanguage(lang);
-    setSelectedLanguage(lang);
-    try {
-      await AsyncStorage.setItem(LANGUAGE_KEY, lang);
-    } catch (error) {
-      console.error('Error saving language:', error);
-    }
-    setIsLanguageOptionsVisible(false);
-  };
+  useEffect(() => {
+    i18n.changeLanguage(selectedLanguage);
+  }, [selectedLanguage]);
 
   const onResetPassword = () => {
     if (email.trim() === '') {
@@ -123,6 +106,17 @@ export default function ElegantForgotPassword({ navigation }) {
       });
   };
 
+  const handleLanguageChange = (langCode) => {
+    changeLanguage(langCode);
+    setIsLanguageOptionsVisible(false);
+  };
+
+  const handleOutsideClick = () => {
+    if (isLanguageOptionsVisible) {
+      setIsLanguageOptionsVisible(false);
+    }
+  };
+
   const theme = isNightMode ? darkTheme : lightTheme;
 
   const languages = [
@@ -132,92 +126,94 @@ export default function ElegantForgotPassword({ navigation }) {
   ];
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#fff' }]}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView contentContainerStyle={styles.scrollView}>
-          <LinearGradient
-            colors={['#fff', '#fff']}
-            style={styles.container}
-          >
-             <View style={styles.languageContainer}>
-              <TouchableOpacity
-                style={styles.languageSelector}
-                onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
-              >
-                <Ionicons name="globe-outline" size={24} color="#000" />
-                <Text style={styles.selectedLanguage}>
-                  {languages.find(lang => lang.code === selectedLanguage)?.name}
-                </Text>
-                <Ionicons name="chevron-down" size={24} color="#000" />
-              </TouchableOpacity>
-              {isLanguageOptionsVisible && (
-                <View style={styles.languageOptions}>
-                  {languages.map((lang) => (
-                    <TouchableOpacity
-                      key={lang.code}
-                      style={styles.languageOption}
-                      onPress={() => changeLanguage(lang.code)}
-                    >
-                      <Text style={[
-                        styles.languageOptionText,
-                        selectedLanguage === lang.code && styles.selectedLanguageText
-                      ]}>
-                        {lang.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-            
-            <Text style={[styles.title, { color: theme.text }]}>
-              {t('forgotPassword')}
-            </Text>
-            
-            <Text style={[styles.subtitle, { color: theme.text }]}>
-              {t('enterEmailToReset')}
-            </Text>
-
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder={t('email')}
-                placeholderTextColor="#999"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                textContentType="emailAddress"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.resetButton, { backgroundColor: theme.buttonBackground }]}
-              onPress={onResetPassword}
-              disabled={isLoading}
+    <TouchableWithoutFeedback onPress={handleOutsideClick}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#fff' }]}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView contentContainerStyle={styles.scrollView}>
+            <LinearGradient
+              colors={['#fff', '#fff']}
+              style={styles.container}
             >
-              {isLoading ? (
-                <ActivityIndicator size={50} color="#333" />
-              ) : (
-                <Text style={styles.resetButtonText}>{t('resetPassword')}</Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.navigate('Login')}
-            >
-              <Text style={[styles.backButtonText, { color: theme.link }]}>
-                {t('backToLogin')}
+              <View style={styles.languageContainer}>
+                <TouchableOpacity
+                  style={styles.languageSelector}
+                  onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
+                >
+                  <Ionicons name="globe-outline" size={24} color="#000" />
+                  <Text style={styles.selectedLanguage}>
+                    {languages.find(lang => lang.code === selectedLanguage)?.name}
+                  </Text>
+                  <Ionicons name="chevron-down" size={24} color="#000" />
+                </TouchableOpacity>
+                {isLanguageOptionsVisible && (
+                  <View style={styles.languageOptions}>
+                    {languages.map((lang) => (
+                      <TouchableOpacity
+                        key={lang.code}
+                        style={styles.languageOption}
+                        onPress={() => handleLanguageChange(lang.code)}
+                      >
+                        <Text style={[
+                          styles.languageOptionText,
+                          selectedLanguage === lang.code && styles.selectedLanguageText
+                        ]}>
+                          {lang.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+              
+              <Text style={[styles.title, { color: theme.text }]}>
+                {t('forgotPassword')}
               </Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+              
+              <Text style={[styles.subtitle, { color: theme.text }]}>
+                {t('enterEmailToReset')}
+              </Text>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder={t('email')}
+                  placeholderTextColor="#999"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.resetButton, { backgroundColor: theme.buttonBackground }]}
+                onPress={onResetPassword}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size={50} color="#333" />
+                ) : (
+                  <Text style={styles.resetButtonText}>{t('resetPassword')}</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.navigate('Login')}
+              >
+                <Text style={[styles.backButtonText, { color: theme.link }]}>
+                  {t('backToLogin')}
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
