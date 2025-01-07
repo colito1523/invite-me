@@ -282,7 +282,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                 <TextInput
                   style={[
                     currentStyles.searchInput,
-                    { color: isNightMode ? "#fff" : "#000" },
+                    { color: isNightMode ? "#fff" : "gray" },
                   ]}
                   placeholder={t("dotIndicator.searchPlaceholder")}
                   placeholderTextColor="gray"

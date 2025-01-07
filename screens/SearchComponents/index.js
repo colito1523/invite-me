@@ -191,7 +191,7 @@ export default function Search() {
           source={{
             uri: item.profileImage || "https://via.placeholder.com/150",
           }}
-          style={styles.userImage}
+          style={[styles.userImage, { marginRight: 13 }]} // Estilo en línea
           cachePolicy="memory-disk"
         />
         <View style={styles.textContainer}>
