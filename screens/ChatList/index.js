@@ -31,6 +31,7 @@ import { styles, lightTheme, darkTheme } from "./styles";
 import { useTranslation } from "react-i18next";
 import StoryViewer from '../../Components/Stories/StoryViewer';
 import { useUnreadMessages } from '../../src/hooks/UnreadMessagesContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   formatTime, 
   truncateMessage, 
@@ -64,12 +65,20 @@ export default function ChatList() {
 
   const onRefresh = useCallback(async () => {
     if (!user) return;
-    
+
     setRefreshing(true);
     try {
       const updatedChats = await checkStories(chats, user.uid);
       if (updatedChats) {
         setChats(updatedChats);
+        const serializedChats = updatedChats.map(chat => ({
+          ...chat,
+          lastMessageTimestamp: chat.lastMessageTimestamp ? {
+            seconds: chat.lastMessageTimestamp.seconds,
+            nanoseconds: chat.lastMessageTimestamp.nanoseconds
+          } : null
+        }));
+        await AsyncStorage.setItem('chats', JSON.stringify(serializedChats));
       }
     } catch (error) {
       console.error("Error refreshing:", error);
@@ -147,6 +156,18 @@ export default function ChatList() {
         if (!user) return;
 
         try {
+          const cachedChats = await AsyncStorage.getItem('chats');
+          if (cachedChats) {
+            const parsedChats = JSON.parse(cachedChats);
+            const deserializedChats = parsedChats.map(chat => ({
+              ...chat,
+              lastMessageTimestamp: chat.lastMessageTimestamp ? 
+                new Timestamp(chat.lastMessageTimestamp.seconds, chat.lastMessageTimestamp.nanoseconds) 
+                : null
+            }));
+            setChats(deserializedChats);
+          }
+
           const userRef = doc(database, "users", user.uid);
           const userSnapshot = await getDoc(userRef);
           const blockedUsers = userSnapshot.data()?.blockedUsers || [];
@@ -203,8 +224,17 @@ export default function ChatList() {
                 return dateB - dateA;
               });
 
-            setChats(sortedChats);
+            const updatedChats = await checkStories(sortedChats, user.uid);
+            setChats(updatedChats);
             setHasUnreadMessages(hasUnread);
+            const serializedChats = updatedChats.map(chat => ({
+              ...chat,
+              lastMessageTimestamp: chat.lastMessageTimestamp ? {
+                seconds: chat.lastMessageTimestamp.seconds,
+                nanoseconds: chat.lastMessageTimestamp.nanoseconds
+              } : null
+            }));
+            await AsyncStorage.setItem('chats', JSON.stringify(serializedChats));
           });
 
           return () => unsubscribe();
@@ -228,12 +258,20 @@ export default function ChatList() {
     const success = await handleDeleteChat(chat, user.uid, t);
     if (success) {
       setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
+      const serializedChats = chats.map(chat => ({
+        ...chat,
+        lastMessageTimestamp: chat.lastMessageTimestamp ? {
+          seconds: chat.lastMessageTimestamp.seconds,
+          nanoseconds: chat.lastMessageTimestamp.nanoseconds
+        } : null
+      }));
+      await AsyncStorage.setItem('chats', JSON.stringify(chats.filter((c) => c.id !== chat.id)));
     }
   };
 
   const handleImagePress = async (chat) => {
     const chatUser = chat.user;
-    
+
     try {
       const userDoc = await getDoc(doc(database, "users", chatUser.uid));
       if (!userDoc.exists()) {
@@ -243,7 +281,7 @@ export default function ChatList() {
 
       const userData = userDoc.data();
       const isPrivate = userData?.isPrivate || false;
-      
+
       const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
       const friendQuery = query(friendsRef, where("friendId", "==", chatUser.uid));
       const friendSnapshot = await getDocs(friendQuery);
@@ -315,9 +353,18 @@ export default function ChatList() {
   const handleDeleteSelectedChatsLocal = async () => {
     const success = await handleDeleteSelectedChats(selectedChats, user.uid, t);
     if (success) {
-      setChats((prevChats) => prevChats.filter((chat) => !selectedChats.includes(chat.id)));
+      const updatedChats = chats.filter((chat) => !selectedChats.includes(chat.id));
+      setChats(updatedChats);
       setSelectedChats([]);
       setIsSelectionMode(false);
+      const serializedChats = updatedChats.map(chat => ({
+        ...chat,
+        lastMessageTimestamp: chat.lastMessageTimestamp ? {
+          seconds: chat.lastMessageTimestamp.seconds,
+          nanoseconds: chat.lastMessageTimestamp.nanoseconds
+        } : null
+      }));
+      await AsyncStorage.setItem('chats', JSON.stringify(serializedChats));
     }
   };
 
@@ -329,7 +376,7 @@ export default function ChatList() {
       user.uid,
       t
     );
-    
+
     if (updatedMutedChats) {
       setMutedChats(updatedMutedChats);
       setSelectedChats([]);
@@ -357,8 +404,16 @@ export default function ChatList() {
     if (chats.length > 0) {
       const debounceCheckStories = setTimeout(async () => {
         const updatedChats = await checkStories(chats, user.uid);
-        if (updatedChats && areChatsDifferent(chats, updatedChats)) {
+        if (updatedChats.some((chat, index) => chat !== chats[index])) {
           setChats(updatedChats);
+          const serializedChats = updatedChats.map(chat => ({
+            ...chat,
+            lastMessageTimestamp: chat.lastMessageTimestamp ? {
+              seconds: chat.lastMessageTimestamp.seconds,
+              nanoseconds: chat.lastMessageTimestamp.nanoseconds
+            } : null
+          }));
+          await AsyncStorage.setItem('chats', JSON.stringify(serializedChats));
         }
       }, 300);
 

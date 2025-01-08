@@ -13,7 +13,7 @@ import {
 import { database } from "../../config/firebase";
 
 export const formatTime = (timestamp: Timestamp): string => {
-  if (!(timestamp instanceof Timestamp)) {
+  if (!(timestamp instanceof Timestamp) || isNaN(timestamp.seconds) || isNaN(timestamp.nanoseconds)) {
     console.error("Invalid timestamp:", timestamp);
     return "";
   }
@@ -158,64 +158,68 @@ export const handleChatPress = async (chat: any, userId: string) => {
 
 export const checkStories = async (chats: any[], userId: string) => {
   try {
-    const updatedChats = [];
+    const updatedChats = await Promise.all(
+      chats.map(async (chat) => {
+        const userRef = doc(database, "users", chat.user.uid);
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.exists() ? userDoc.data() : null;
 
-    for (const chat of chats) {
-      const userRef = doc(database, "users", chat.user.uid);
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.exists() ? userDoc.data() : null;
+        if (!userData) return chat;
 
-      if (!userData) continue;
+        const currentUserRef = doc(database, "users", userId);
+        const currentUserDoc = await getDoc(currentUserRef);
+        const currentUserData = currentUserDoc.data();
 
-      const currentUserRef = doc(database, "users", userId);
-      const currentUserDoc = await getDoc(currentUserRef);
-      const currentUserData = currentUserDoc.data();
+        const isHidden = currentUserData?.hideStoriesFrom?.includes(chat.user.uid) || false;
 
-      const isHidden = currentUserData?.hideStoriesFrom?.includes(chat.user.uid) || false;
+        const friendsRef = collection(database, "users", userId, "friends");
+        const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
+        const friendSnapshot = await getDocs(friendQuery);
+        const isFriend = !friendSnapshot.empty;
 
-      const friendsRef = collection(database, "users", userId, "friends");
-      const friendQuery = query(friendsRef, where("friendId", "==", chat.user.uid));
-      const friendSnapshot = await getDocs(friendQuery);
-      const isFriend = !friendSnapshot.empty;
+        const isPrivate = userData?.isPrivate || false;
 
-      const isPrivate = userData?.isPrivate || false;
+        const storiesRef = collection(userRef, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+        const now = new Date();
 
-      const storiesRef = collection(userRef, "stories");
-      const storiesSnapshot = await getDocs(storiesRef);
-      const now = new Date();
+        const userStories =
+          isPrivate && !isFriend
+            ? []
+            : isHidden
+            ? []
+            : storiesSnapshot.docs
+                .map((doc) => {
+                  const createdAt = doc.data().createdAt instanceof Timestamp
+                    ? doc.data().createdAt.toDate()
+                    : new Date(0);
+                  const expiresAt = doc.data().expiresAt instanceof Timestamp
+                    ? doc.data().expiresAt.toDate()
+                    : new Date();
+                  return {
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt,
+                    expiresAt,
+                  };
+                })
+                .filter((story) => story.expiresAt > now);
 
-      const userStories =
-        isPrivate && !isFriend
-          ? []
-          : isHidden
-          ? []
-          : storiesSnapshot.docs
-              .map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: doc.data().createdAt instanceof Timestamp
-                  ? doc.data().createdAt.toDate()
-                  : new Date(0),
-                expiresAt: doc.data().expiresAt instanceof Timestamp
-                  ? doc.data().expiresAt.toDate()
-                  : new Date(),
-              }))
-              .filter((story) => story.expiresAt > now);
-
-      updatedChats.push({
-        ...chat,
-        user: {
-          ...chat.user,
-          hasStories: userStories.length > 0,
-          userStories,
-        },
-      });
-    }
+        return {
+          ...chat,
+          user: {
+            ...chat.user,
+            hasStories: userStories.length > 0,
+            userStories,
+          },
+        };
+      })
+    );
 
     return updatedChats;
   } catch (error) {
     console.error("Error checking stories:", error);
-    return null;
+    return chats;
   }
 };
 

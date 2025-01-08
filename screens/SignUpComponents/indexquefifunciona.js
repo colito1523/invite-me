@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,14 +11,13 @@ import {
   Animated,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback
+  Platform
 } from "react-native";
 import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database, storage } from "../../config/firebase";
-import { doc, setDoc, getDocs, query, where, collection, getDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDocs, query, where, collection  } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
@@ -34,8 +33,6 @@ import styles from './styles';
 import es from '../../locales/es.json';
 import en from '../../locales/en.json';
 import pt from '../../locales/pt.json';
-
-import { LanguageContext } from "../../App"; // Ensure correct import of LanguageContext
 
 const LANGUAGE_KEY = '@app_language';
 
@@ -170,6 +167,8 @@ function GenderSelector({ onGenderChange, initialGender }) {
     );
   };
 
+  const infiniteGenders = [...genders, ...genders, ...genders];
+
   return (
     <View style={styles.genderContainer}>
       <View style={styles.selectedOverlay} />
@@ -182,7 +181,7 @@ function GenderSelector({ onGenderChange, initialGender }) {
         contentContainerStyle={styles.genderScrollViewContent}
         nestedScrollEnabled={true}
       >
-        {genders.map((gender, index) =>
+        {infiniteGenders.map((gender, index) =>
           renderGenderItem(gender, index)
         )}
       </ScrollView>
@@ -192,7 +191,6 @@ function GenderSelector({ onGenderChange, initialGender }) {
 
 export default function SignUp() {
   const { t } = useTranslation();
-  const { selectedLanguage, changeLanguage } = useContext(LanguageContext); // Use LanguageContext
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({
     firstName: "",
@@ -201,7 +199,7 @@ export default function SignUp() {
     username: "",
     password: "",
     age: "18",
-    gender: "Other",
+    gender: "Prefer not to say",
     about: "",
     hobby1: "",
     hobby2: "",
@@ -215,27 +213,43 @@ export default function SignUp() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
-  const [isNightMode, setIsNightMode] = useState(false);
   const navigation = useNavigation();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loadSavedLanguage = async () => {
+      try {
+        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+        if (savedLanguage) {
+          i18n.changeLanguage(savedLanguage);
+          setSelectedLanguage(savedLanguage);  // Actualiza el selector de idioma
+        }
+      } catch (error) {
+        console.error('Error loading saved language:', error);
+      }
+    };
+    loadSavedLanguage(); // Llama a la función al montar el componente
+  }, []);
+
+  const changeLanguage = async (lang) => {
+    await i18n.changeLanguage(lang);
+    setSelectedLanguage(lang);
+    try {
+      await AsyncStorage.setItem(LANGUAGE_KEY, lang);
+    } catch (error) {
+      console.error('Error saving language:', error);
+    }
+    setIsLanguageOptionsVisible(false);
+  };
 
   const languages = [
     { code: 'en', name: 'English' },
     { code: 'es', name: 'Español' },
     { code: 'pt', name: 'Português' }
   ];
-
-  useEffect(() => {
-    i18n.changeLanguage(selectedLanguage);
-  }, [selectedLanguage]);
-
-  const handleLanguageChange = (langCode) => {
-    changeLanguage(langCode);
-    setIsLanguageOptionsVisible(false);
-  };
-
 
   const questions = [
     { id: "account", question: t('signup.questions.account') },
@@ -259,18 +273,6 @@ export default function SignUp() {
       }).start();
     }
   }, [currentQuestionIndex]);
-
-  useEffect(() => {
-    const checkTime = () => {
-      const currentHour = new Date().getHours();
-      setIsNightMode(currentHour >= 19 || currentHour < 6);
-    };
-
-    checkTime();
-    const interval = setInterval(checkTime, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handleAnswer = (id, value) => {
     if (id === "firstName" || id === "lastName") {
@@ -605,328 +607,331 @@ export default function SignUp() {
   const progress = (currentQuestionIndex + 1) / questions.length;
 
   return (
-
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height" }
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Image
-            source={require("../../assets/Logo_Invite_Me.png")}
-            style={styles.logo}
-            contentFit="contain"
-          />
-          <View style={styles.languageContainer}>
-            <TouchableOpacity
-              style={styles.languageSelector}
-              onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
-            >
-              <Ionicons name="globe-outline" size={24} color="#000" />
-              <Text style={styles.selectedLanguage}>
-                {languages.find(lang => lang.code === selectedLanguage)?.name}
-              </Text>
-              <Ionicons name="chevron-down" size={24} color="#000" />
-            </TouchableOpacity>
-            {isLanguageOptionsVisible && (
-              <View style={styles.languageOptions}>
-                {languages.map((lang) => (
-                  <TouchableOpacity
-                    key={lang.code}
-                    style={styles.languageOption}
-                    onPress={() => handleLanguageChange(lang.code)}
-                  >
-                    <Text style={[ 
-                      styles.languageOptionText,
-                      selectedLanguage === lang.code && styles.selectedLanguageText
-                    ]}>
-                      {lang.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-          {currentQuestion.id !== "welcome" && (
-            <ProgressBar
-              progress={progress}
-              color="#333"
-              style={styles.progressBar}
-            />
-          )}
-          {currentQuestion.id !== "preview1" &&
-            currentQuestion.id !== "preview2" &&
-            currentQuestion.id !== "finalPreview" &&
-            currentQuestion.id !== "welcome" && (
-              <Text
-                style={
-                  currentQuestion.id === "ageGender"
-                    ? styles.ageQuestion
-                    : styles.question
-                }
-              >
-                {currentQuestion.question}
-              </Text>
-            )}
-
-          {currentQuestion.id === "account" && (
-            <View>
-              <View style={styles.nameContainer}>
-                <TextInput
-                  style={[styles.nameInput, { color: "#4b4b4b" }]}
-                  placeholder={t('signup.placeholders.firstName')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("firstName", text)}
-                  value={answers.firstName}
-                />
-                <TextInput
-                  style={[styles.nameInput, { color: "#4b4b4b" }]}
-                  placeholder={t('signup.placeholders.lastName')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("lastName", text)}
-                  value={answers.lastName}
-                />
-              </View>
-              <TextInput
-                style={[styles.input, { color: "#4b4b4b" }]}
-                placeholder={t('signup.placeholders.email')}
-                placeholderTextColor="#4b4b4b"
-                onChangeText={(text) => handleAnswer("email", text)}
-                value={answers.email}
-                keyboardType="email-address"
-              />
-              <TextInput
-                style={[styles.inputShort, { color: "#4b4b4b" }]}
-                placeholder={t('signup.placeholders.username')}
-                placeholderTextColor="#4b4b4b"
-                onChangeText={(text) => handleAnswer("username", text)}
-                value={answers.username}
-              />
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={[styles.passwordInput, { color: "#4b4b4b" }]}
-                  placeholder={t('signup.placeholders.password')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("password", text)}
-                  value={answers.password}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity
-                  style={styles.eyeIconButton}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Ionicons
-                    name={showPassword ? "eye-off" : "eye"}
-                    size={20}
-                    color="gray"
-                  />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.termsContainer}>
-                <TouchableOpacity
-                  style={styles.checkbox}
-                  onPress={() => setAcceptedTerms(!acceptedTerms)}
-                >
-                  {acceptedTerms && (
-                    <Ionicons name="checkmark" size={20} color="black" />
-                  )}
-                </TouchableOpacity>
-                <View style={styles.termsTextContainer}>
-                  <Text style={styles.termsText}>
-                    {t('signup.termsAndConditions.acceptText')}{' '}
-                  </Text>
-                  <TermsAndConditionsModal />
-                </View>
-              </View>
-            </View>
-          )}
-
-          {currentQuestion.id === "ageGender" && (
-            <Animated.View
-              style={[styles.ageGenderContainer, { opacity: fadeAnim }]}
-            >
-              <AgeSelector
-                onAgeChange={(age) => handleAnswer("age", age.toString())}
-                initialAge={parseInt(answers.age)}
-              />
-
-              <Text style={styles.GenderQuestion}>{t('signup.questions.gender')}</Text>
-              <GenderSelector
-                onGenderChange={(gender) => handleAnswer("gender", gender)}
-                initialGender={answers.gender}
-              />
-            </Animated.View>
-          )}
-
-          {currentQuestion.id === "about" && (
-            <View style={styles.aboutContainer}> 
-              <View style={styles.rowInputs}>
-                <TextInput
-                  style={[styles.halfInput, { color: "black" }]}
-                  placeholder={t('signup.placeholders.hobby1')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("hobby1", text)}
-                  value={answers.hobby1}
-                />
-                <TextInput
-                  style={[styles.halfInput, { color: "black" }]}
-                  placeholder={t('signup.placeholders.hobby2')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("hobby2", text)}
-                  value={answers.hobby2}
-                />
-              </View>
-
-              
-              <View style={styles.rowInputs}>
-                <TextInput
-                  style={[styles.halfInput, { color: "black" }]}
-                  placeholder={t('signup.placeholders.interest1')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("interest1", text)}
-                  value={answers.interest1}
-                />
-                <TextInput
-                  style={[styles.halfInput, { color: "black" }]}
-                  placeholder={t('signup.placeholders.interest2')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("interest2", text)}
-                  value={answers.interest2}
-                />
-              </View>
-            </View>
-          )}
-
-          {currentQuestion.id === "photos" && (
-            <View style={styles.photoContainer}>
-              <TouchableOpacity
-                style={styles.photoPlaceholder}
-                onPress={() => pickImage(1)}
-              >
-                {answers.photo1 ? (
-                  <Image
-                    source={{ uri: answers.photo1 }}
-                    style={styles.photo}
-                    cachePolicy="memory-disk"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="add-photo-alternate"
-                    size={70}
-                    color="gray"
-                  />
-                )}
-                <View style={styles.numberContainer}>
-                  <Text style={styles.numberText}>1</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {currentQuestion.id === "preview1" && renderPreview(1)}
-
-          {currentQuestion.id === "photos2" && (
-            <View style={styles.photoContainer}>
-              <TouchableOpacity
-                style={styles.photoPlaceholder}
-                onPress={() => pickImage(2)}
-              >
-                {answers.photo2 ? (
-                  <Image
-                    source={{ uri: answers.photo2 }}
-                    style={styles.photo}
-                    cachePolicy="memory-disk"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="add-photo-alternate"
-                    size={70}
-                    color="gray"
-                  />
-                )}
-                <View style={styles.numberContainer}>
-                  <Text style={styles.numberText}>2</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {currentQuestion.id === "preview2" && renderPreview(2)}
-
-          {currentQuestion.id === "photos3" && (
-            <View style={styles.photoContainer}>
-              <TouchableOpacity
-                style={styles.photoPlaceholder}
-                onPress={() => pickImage(3)}
-              >
-                {answers.photo3 ? (
-                  <Image
-                    source={{ uri: answers.photo3 }}
-                    style={styles.photo}
-                    cachePolicy="memory-disk"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="add-photo-alternate"
-                    size={70}
-                    color="gray"
-                  />
-                )}
-                <View style={styles.numberContainer}>
-                  <Text style={styles.numberText}>3</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {currentQuestion.id === "finalPreview" && renderPreview(3, true)}
-
-          {currentQuestion.id === "welcome" && (
-            <View style={styles.welcomeContainer}>
-              {isSubmitting ? (
-                <ActivityIndicator size={50} color="#0000ff" />
-              ) : (
-                <>
-                  <Text style={styles.welcomeTitle}>{t('signup.welcome.title')}</Text>
-                  <Text style={styles.welcomeSubtitle}>
-                    {t('signup.welcome.subtitle')}
-                  </Text>
-                </>
-              )}
-            </View>
-          )}
-
-          <View
-            style={
-              currentQuestionIndex === 0 || currentQuestion.id === "welcome"
-                ? styles.buttonContainerCentered
-                : styles.buttonContainer
-            }
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : "height" }
+>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Image
+          source={require("../../assets/Logo_Invite_Me.png")}
+          style={styles.logo}
+          contentFit="contain"
+        />
+        <View style={styles.languageContainer}>
+          <TouchableOpacity
+            style={styles.languageSelector}
+            onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
           >
-            {currentQuestionIndex > 0 && currentQuestion.id !== "welcome" && (
+            <Ionicons name="globe-outline" size={24} color="#000" />
+            <Text style={styles.selectedLanguage}>
+              {languages.find(lang => lang.code === selectedLanguage)?.name}
+            </Text>
+            <Ionicons name="chevron-down" size={24} color="#000" />
+          </TouchableOpacity>
+          {isLanguageOptionsVisible && (
+            <View style={styles.languageOptions}>
+              {languages.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={styles.languageOption}
+                  onPress={() => changeLanguage(lang.code)}
+                >
+                  <Text style={[ 
+                    styles.languageOptionText,
+                    selectedLanguage === lang.code && styles.selectedLanguageText
+                  ]}>
+                    {lang.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+        {currentQuestion.id !== "welcome" && (
+          <ProgressBar
+            progress={progress}
+            color="#333"
+            style={styles.progressBar}
+          />
+        )}
+        {currentQuestion.id !== "preview1" &&
+          currentQuestion.id !== "preview2" &&
+          currentQuestion.id !== "finalPreview" &&
+          currentQuestion.id !== "welcome" && (
+            <Text
+              style={
+                currentQuestion.id === "ageGender"
+                  ? styles.ageQuestion
+                  : styles.question
+              }
+            >
+              {currentQuestion.question}
+            </Text>
+          )}
+
+        {currentQuestion.id === "account" && (
+          <View>
+            <View style={styles.nameContainer}>
+              <TextInput
+                style={[styles.nameInput, { color: "#4b4b4b" }]}
+                placeholder={t('signup.placeholders.firstName')}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("firstName", text)}
+                value={answers.firstName}
+              />
+              <TextInput
+                style={[styles.nameInput, { color: "#4b4b4b" }]}
+                placeholder={t('signup.placeholders.lastName')}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("lastName", text)}
+                value={answers.lastName}
+              />
+            </View>
+            <TextInput
+              style={[styles.input, { color: "#4b4b4b" }]}
+              placeholder={t('signup.placeholders.email')}
+              placeholderTextColor="#4b4b4b"
+              onChangeText={(text) => handleAnswer("email", text)}
+              value={answers.email}
+              keyboardType="email-address"
+            />
+            <TextInput
+              style={[styles.inputShort, { color: "#4b4b4b" }]}
+              placeholder={t('signup.placeholders.username')}
+              placeholderTextColor="#4b4b4b"
+              onChangeText={(text) => handleAnswer("username", text)}
+              value={answers.username}
+            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[styles.passwordInput, { color: "#4b4b4b" }]}
+                placeholder={t('signup.placeholders.password')}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("password", text)}
+                value={answers.password}
+                secureTextEntry={!showPassword}
+              />
               <TouchableOpacity
-                style={styles.backButton}
-                onPress={handleBack}
-                disabled={isLoading}
+                style={styles.eyeIconButton}
+                onPress={() => setShowPassword(!showPassword)}
               >
-                <AntDesign name="left" size={24} color="black" />
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color="gray"
+                />
               </TouchableOpacity>
-            )}
-            {currentQuestionIndex < questions.length - 1 && (
+            </View>
+            <View style={styles.termsContainer}>
               <TouchableOpacity
-                style={styles.nextButton}
-                onPress={handleNext}
-                disabled={isLoading}
+                style={styles.checkbox}
+                onPress={() => setAcceptedTerms(!acceptedTerms)}
               >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#000" />
-                ) : (
-                  <AntDesign name="right" size={24} color="black" />
+                {acceptedTerms && (
+                  <Ionicons name="checkmark" size={20} color="black" />
                 )}
               </TouchableOpacity>
+              <View style={styles.termsTextContainer}>
+                <Text style={styles.termsText}>
+                  {t('signup.termsAndConditions.acceptText')}{' '}
+                </Text>
+                <TermsAndConditionsModal />
+              </View>
+            </View>
+          </View>
+        )}
+
+        {currentQuestion.id === "ageGender" && (
+          <Animated.View
+            style={[styles.ageGenderContainer, { opacity: fadeAnim }]}
+          >
+            <AgeSelector
+              onAgeChange={(age) => handleAnswer("age", age.toString())}
+              initialAge={parseInt(answers.age)}
+            />
+
+            <Text style={styles.GenderQuestion}>{t('signup.questions.gender')}</Text>
+            <GenderSelector
+              onGenderChange={(gender) => handleAnswer("gender", gender)}
+              initialGender={answers.gender}
+            />
+          </Animated.View>
+        )}
+
+        {currentQuestion.id === "about" && (
+          <View>
+            <Text style={styles.questionHobies}>
+              {t('signup.questions.hobbies')}
+            </Text>
+            <View style={styles.rowInputs}>
+              <TextInput
+                style={[styles.halfInput, { color: "#4b4b4b" }]}
+                placeholder={t('signup.placeholders.hobby1')}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("hobby1", text)}
+                value={answers.hobby1}
+              />
+              <TextInput
+                style={[styles.halfInput, { color: "#4b4b4b" }]}
+                placeholder={t('signup.placeholders.hobby2')}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("hobby2", text)}
+                value={answers.hobby2}
+              />
+            </View>
+
+            <Text style={styles.questionInterests}>
+              {t('signup.questions.interests')}
+            </Text>
+            <View style={styles.rowInputs}>
+              <TextInput
+                style={[styles.halfInput, { color: "#4b4b4b" }]}
+                placeholder={t('signup.placeholders.interest1')}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("interest1", text)}
+                value={answers.interest1}
+              />
+              <TextInput
+                style={[styles.halfInput, { color: "#4b4b4b" }]}
+                placeholder={t('signup.placeholders.interest2')}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("interest2", text)}
+                value={answers.interest2}
+              />
+            </View>
+          </View>
+        )}
+
+        {currentQuestion.id === "photos" && (
+          <View style={styles.photoContainer}>
+            <TouchableOpacity
+              style={styles.photoPlaceholder}
+              onPress={() => pickImage(1)}
+            >
+              {answers.photo1 ? (
+                <Image
+                  source={{ uri: answers.photo1 }}
+                  style={styles.photo}
+                  cachePolicy="memory-disk"
+                />
+              ) : (
+                <MaterialIcons
+                  name="add-photo-alternate"
+                  size={70}
+                  color="gray"
+                />
+              )}
+              <View style={styles.numberContainer}>
+                <Text style={styles.numberText}>1</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {currentQuestion.id === "preview1" && renderPreview(1)}
+
+        {currentQuestion.id === "photos2" && (
+          <View style={styles.photoContainer}>
+            <TouchableOpacity
+              style={styles.photoPlaceholder}
+              onPress={() => pickImage(2)}
+            >
+              {answers.photo2 ? (
+                <Image
+                  source={{ uri: answers.photo2 }}
+                  style={styles.photo}
+                  cachePolicy="memory-disk"
+                />
+              ) : (
+                <MaterialIcons
+                  name="add-photo-alternate"
+                  size={70}
+                  color="gray"
+                />
+              )}
+              <View style={styles.numberContainer}>
+                <Text style={styles.numberText}>2</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {currentQuestion.id === "preview2" && renderPreview(2)}
+
+        {currentQuestion.id === "photos3" && (
+          <View style={styles.photoContainer}>
+            <TouchableOpacity
+              style={styles.photoPlaceholder}
+              onPress={() => pickImage(3)}
+            >
+              {answers.photo3 ? (
+                <Image
+                  source={{ uri: answers.photo3 }}
+                  style={styles.photo}
+                  cachePolicy="memory-disk"
+                />
+              ) : (
+                <MaterialIcons
+                  name="add-photo-alternate"
+                  size={70}
+                  color="gray"
+                />
+              )}
+              <View style={styles.numberContainer}>
+                <Text style={styles.numberText}>3</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {currentQuestion.id === "finalPreview" && renderPreview(3, true)}
+
+        {currentQuestion.id === "welcome" && (
+          <View style={styles.welcomeContainer}>
+            {isSubmitting ? (
+              <ActivityIndicator size={50} color="#0000ff" />
+            ) : (
+              <>
+                <Text style={styles.welcomeTitle}>{t('signup.welcome.title')}</Text>
+                <Text style={styles.welcomeSubtitle}>
+                  {t('signup.welcome.subtitle')}
+                </Text>
+              </>
             )}
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        )}
 
+        <View
+          style={
+            currentQuestionIndex === 0 || currentQuestion.id === "welcome"
+              ? styles.buttonContainerCentered
+              : styles.buttonContainer
+          }
+        >
+          {currentQuestionIndex > 0 && currentQuestion.id !== "welcome" && (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              disabled={isLoading}
+            >
+              <AntDesign name="left" size={24} color="black" />
+            </TouchableOpacity>
+          )}
+          {currentQuestionIndex < questions.length - 1 && (
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={handleNext}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#000" />
+              ) : (
+                <AntDesign name="right" size={24} color="black" />
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
