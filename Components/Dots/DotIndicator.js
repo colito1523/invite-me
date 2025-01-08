@@ -64,6 +64,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     }
 
     if (uid === auth.currentUser.uid) {
+      setModalVisible(false); // Close the modal
       navigation.navigate("Profile");
       return;
     }
@@ -72,6 +73,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       const userDoc = await getDoc(doc(database, "users", uid));
       const userData = userDoc.exists() ? userDoc.data() : {};
   
+      setModalVisible(false); // Close the modal
       navigation.navigate("UserProfile", {
         selectedUser: {
           id: uid,

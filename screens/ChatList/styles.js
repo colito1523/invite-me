@@ -1,8 +1,11 @@
 import { StyleSheet } from "react-native";
 
+const isNight = new Date().getHours() >= 19 || new Date().getHours() < 6;
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: isNight ? "black" : "white",
   },
   searchContainer: {
     flexDirection: "row",
