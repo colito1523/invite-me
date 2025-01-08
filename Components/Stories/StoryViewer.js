@@ -333,9 +333,9 @@ export function StoryViewer({
     return null;
   }
 
-  const hoursAgo = currentStory
+  const hoursAgo = currentStory?.createdAt
     ? Math.floor(
-        (Date.now() - currentStory.createdAt.toDate()) / (1000 * 60 * 60)
+        (Date.now() - (currentStory.createdAt.toDate?.() || new Date(currentStory.createdAt))) / (1000 * 60 * 60)
       )
     : 0;
 
