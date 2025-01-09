@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { auth } from "../../../config/firebase";
 
 const ButtonsSection = ({
@@ -40,6 +40,17 @@ const ButtonsSection = ({
     }
   };
 
+  const handleInvitePress = () => {
+    if (isEventSaved) {
+      setModalVisible(true);
+    } else {
+      Alert.alert(
+        t("boxDetails.error"),
+        t("boxDetails.attendFirstMessage")
+      );
+    }
+  };
+
   return (
     <View style={styles.buttonContainer}>
       {/* Botón Participar/No Participar */}
@@ -59,14 +70,14 @@ const ButtonsSection = ({
 
       {/* Botón Invitar Amigos */}
       {showInviteButton && (
-  <TouchableOpacity
-    style={styles.button}
-    onPress={() => setModalVisible(true)}
-    disabled={isProcessing}
-  >
-    <Text style={styles.buttonText}>{t("boxDetails.inviteButton")}</Text>
-  </TouchableOpacity>
-)}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleInvitePress}
+          disabled={isProcessing}
+        >
+          <Text style={styles.buttonText}>{t("boxDetails.inviteButton")}</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

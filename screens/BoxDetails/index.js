@@ -845,6 +845,31 @@ export default memo(function BoxDetails({ route, navigation }) {
       isDisabled = isInvited || isAttending;
     }
 
+    const handleInvitePress = () => {
+      if (box.category !== "EventoParaAmigos") {
+        handleGeneralEventInvite({
+          friendId: item.friendId,
+          isEventSaved,
+          box,
+          selectedDate,
+        });
+      } else {
+        handleInvite({
+          box,
+          friends,
+          isEventSaved,
+          selectedDate,
+          friendId: item.friendId,
+          setFriends,
+          t,
+        });
+      }
+      Alert.alert(
+        t("boxDetails.success"),
+        t("boxDetails.friendInvitedMessage")
+      );
+    };
+
     return (
       <View
         style={[
@@ -864,58 +889,21 @@ export default memo(function BoxDetails({ route, navigation }) {
         >
           {item.friendName}
         </Text>
-        {box.category !== "EventoParaAmigos" ? (
-          // Botón para eventos generales
-          <TouchableOpacity
-            style={[
-              styles.shareButton,
-              isDisabled && styles.invitedButton,
-              isNightMode && styles.shareButtonNight,
-            ]}
-            onPress={() =>
-              handleGeneralEventInvite({
-                friendId: item.friendId,
-                isEventSaved,
-                box,
-                selectedDate,
-              })
-            }
-            disabled={isDisabled}
-          >
-            <Ionicons
-              name={isDisabled ? "close-sharp" : "paper-plane"}
-              size={20}
-              color={isNightMode ? "white" : "black"}
-            />
-          </TouchableOpacity>
-        ) : (
-          // Botón para eventos privados
-          <TouchableOpacity
-            style={[
-              styles.shareButton,
-              isDisabled && styles.invitedButton,
-              isNightMode && styles.shareButtonNight,
-            ]}
-            onPress={() =>
-              handleInvite({
-                box,
-                friends,
-                isEventSaved,
-                selectedDate,
-                friendId: item.friendId,
-                setFriends,
-                t,
-              })
-            }
-            disabled={isDisabled}
-          >
-            <Ionicons
-              name={isDisabled ? "close-sharp" : "paper-plane"}
-              size={20}
-              color={isNightMode ? "white" : "black"}
-            />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={[
+            styles.shareButton,
+            isDisabled && styles.invitedButton,
+            isNightMode && styles.shareButtonNight,
+          ]}
+          onPress={handleInvitePress}
+          disabled={isDisabled}
+        >
+          <Ionicons
+            name={isDisabled ? "close-sharp" : "paper-plane"}
+            size={20}
+            color={isNightMode ? "white" : "black"}
+          />
+        </TouchableOpacity>
       </View>
     );
   };

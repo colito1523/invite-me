@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -31,6 +32,10 @@ const InviteFriendsModal = ({
 
   const handleInvite = (friendId) => {
     setInvitedFriends([...invitedFriends, friendId]);
+    Alert.alert(
+      t("boxDetails.success"),
+      t("boxDetails.friendInvitedMessage")
+    );
   };
 
   const renderFriendItemWithInvite = ({ item }) => {
