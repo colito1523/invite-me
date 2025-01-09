@@ -485,6 +485,12 @@ export default function NotificationsComponent() {
             selectedDate: item.eventDate,
           });
         }
+      } else if (isFriendRequestResponse) {
+        handleUserPress({
+          uid: item.fromId,
+          navigation,
+          t,
+        });
       } else {
         handleUserPress({
           uid: item.fromId,
@@ -512,6 +518,7 @@ export default function NotificationsComponent() {
               t,
             })
           }
+          onPress={handleNotificationPress}
         >
           <View
             style={[
