@@ -247,7 +247,7 @@ const renderStory = ({ item, index }) => {
       {hasStories ? (
         <Image
           source={{
-            uri: item.profileImage || "https://via.placeholder.com/100",
+            uri: `${item.profileImage}?alt=media&w=50&h=50&q=2` || "https://via.placeholder.com/50",
           }}
           style={styles.storyImage}
           defaultSource={require("../../assets/perfil.jpg")} // Reemplaza con tu imagen local si la tienes

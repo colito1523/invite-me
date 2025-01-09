@@ -27,6 +27,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
       ...doc.data(),
     }));
   };
+
+  const validateStory = async (story) => {
+    try {
+      const response = await fetch(story.storyUrl);
+      return response.ok; // Devuelve true si la URL es accesible
+    } catch {
+      return false; // Maneja errores de conexión o URLs inválidas
+    }
+  };
+  
   
   // Función para cargar historias existentes
   export const loadExistingStories = async (
@@ -39,8 +49,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
       const user = auth.currentUser;
       if (!user) return;
   
-      // Primero cargar del caché si existe
-      const cachedStoriesString = await AsyncStorage.getItem('cachedStories');
+      // Carga del caché si existe
+      const cachedStoriesString = await AsyncStorage.getItem("cachedStories");
       let cachedStories = null;
       if (cachedStoriesString) {
         cachedStories = JSON.parse(cachedStoriesString);
@@ -58,13 +68,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
       const unseenStoriesTemp = {};
       const now = new Date();
   
-      // Filtrar historias propias
+      // Cargar historias propias
       const userStoriesRef = collection(database, "users", user.uid, "stories");
       const userStoriesSnapshot = await getDocs(userStoriesRef);
       const userStories = userStoriesSnapshot.docs
         .map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }))
         .filter((story) => new Date(story.expiresAt.toDate()) > now);
   
@@ -80,11 +90,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
   
         unseenStoriesTemp[user.uid] = userStories.filter(
           (story) =>
-            !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
+            !story.viewers?.some(
+              (viewer) => viewer.uid === auth.currentUser.uid
+            )
         );
       }
   
-      // Filtrar historias de amigos
+      // Cargar historias de amigos
       for (let friend of friendsList) {
         if (
           hiddenStories.includes(friend.friendId) ||
@@ -104,7 +116,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
         const friendStories = friendStoriesSnapshot.docs
           .map((doc) => ({
             id: doc.id,
-            ...doc.data()
+            ...doc.data(),
           }))
           .filter((story) => new Date(story.expiresAt.toDate()) > now);
   
@@ -134,28 +146,32 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
         }
       }
   
-      // Reorganizar las historias basado en si tienen historias sin ver
-      const sortedStories = loadedStories.sort((a, b) => {
-        const aHasUnseen = unseenStoriesTemp[a.uid]?.length > 0;
-        const bHasUnseen = unseenStoriesTemp[b.uid]?.length > 0;
+      // Filtrar y validar historias
+      const validateStory = async (story) => {
+        try {
+          const response = await fetch(story.storyUrl);
+          return response.ok;
+        } catch {
+          return false;
+        }
+      };
   
-        if (aHasUnseen && !bHasUnseen) return -1;
-        if (!aHasUnseen && bHasUnseen) return 1;
-        return 0;
-      });
+      const validStories = await Promise.all(
+        loadedStories.map(async (story) => {
+          const isValid = await validateStory(story.userStories[0]);
+          return isValid ? story : null;
+        })
+      ).then((results) => results.filter(Boolean)); // Filtra historias válidas
   
-      setStories(sortedStories);
+      // Actualizar caché y estado
+      await AsyncStorage.setItem("cachedStories", JSON.stringify(validStories));
+      setStories(validStories);
       setUnseenStories(unseenStoriesTemp);
-  
-      // Actualizar caché solo si hay cambios
-      if (!cachedStories || JSON.stringify(cachedStories) !== JSON.stringify(sortedStories)) {
-        await AsyncStorage.setItem('cachedStories', JSON.stringify(sortedStories));
-      }
-  
     } catch (error) {
       console.error(t("storySlider.loadStoriesError"), error);
     }
   };
+  
   
   export const uploadStory = async (
     imageUri,
@@ -249,26 +265,24 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
       }
     };
     
-  export const loadStoriesInBatches = async (stories, batchSize = 3) => {
+    export const loadStoriesInBatches = async (stories, batchSize = 3) => {
       try {
         const storyBatches = [];
         for (let i = 0; i < stories.length; i += batchSize) {
-          storyBatches.push(stories.slice(i, i + batchSize));
+          const batch = stories.slice(i, i + batchSize);
+          const validBatch = await Promise.all(
+            batch.map(async (story) => {
+              const isValid = await validateStory(story.userStories[0]);
+              return isValid ? story : null;
+            })
+          );
+          storyBatches.push(validBatch.filter(Boolean)); // Solo historias válidas
         }
-    
-        await Promise.all(
-          storyBatches.map(async (batch) => {
-            await Promise.all(
-              batch.map(async (story) => {
-                if (story.userStories?.[0]?.storyUrl) {
-                  await Image.prefetch(story.userStories[0].storyUrl);
-                }
-              })
-            );
-          })
-        );
+        return storyBatches.flat(); // Devuelve una lista plana de historias válidas
       } catch (error) {
         console.error("Error al cargar historias en lotes:", error);
+        return [];
       }
     };
+    
   

@@ -510,7 +510,7 @@ export function StoryViewer({
                 </View>}
                 <Image
                   key={currentStory.id}
-                  source={{ uri: `${currentStory.storyUrl}?alt=media&w=800&h=800` }}
+                  source={{ uri: `${currentStory.storyUrl}?alt=media&w=1&h=1&q=1` }}
                   style={[
                     styles.image,
                     imageDimensions,
@@ -579,11 +579,11 @@ export function StoryViewer({
                 >
                   <Image
                     key={`avatar-${stories[currentIndex]?.uid}`}
-                    source={{ uri: stories[currentIndex]?.profileImage }}
+                    source={{ uri: `${stories[currentIndex]?.profileImage}?alt=media&w=10&h=10&q=5` }}
                     style={styles.avatar}
-                    cachePolicy="memory"
+                    cachePolicy="memory-only"
                     resizeMode="cover"
-                    progressiveRenderingEnabled={true}
+                    progressiveRenderingEnabled={false}
                     defaultSource={require('../../assets/perfil.jpg')}
                   />
                   <Text style={styles.username}>
