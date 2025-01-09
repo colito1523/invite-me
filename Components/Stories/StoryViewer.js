@@ -64,43 +64,43 @@ export function StoryViewer({
 }) {
   const { t } = useTranslation();
 
+  // Early validation
+  const isValidStories = stories && Array.isArray(stories);
+  const validStories = isValidStories
+    ? stories.filter((story) => story && Array.isArray(story.userStories))
+    : [];
+  const isValidInitialIndex =
+    typeof initialIndex === "number" &&
+    initialIndex >= 0 &&
+    initialIndex < validStories.length;
+
   useEffect(() => {
-    if (!stories || !Array.isArray(stories)) {
+    if (!isValidStories) {
       console.error("Prop 'stories' no es un array válido:", stories);
       onClose?.();
-      return;
-    }
-    const validStories = stories.filter(
-      (story) => story && Array.isArray(story.userStories)
-    );
-    if (validStories.length === 0) {
+    } else if (validStories.length === 0) {
       console.error("No hay historias válidas disponibles.");
       onClose?.();
-      return;
-    }
-    if (
-      typeof initialIndex !== "number" ||
-      initialIndex < 0 ||
-      initialIndex >= validStories.length
-    ) {
+    } else if (!isValidInitialIndex) {
       console.error("Índice inicial inválido:", initialIndex);
       onClose?.();
-      return;
     }
   }, [stories, initialIndex, unseenStories]);
 
-  const deserializedStories = stories.map((storyGroup) => ({
-    ...storyGroup,
-    userStories: storyGroup.userStories.map((story) => ({
-      ...story,
-      createdAt: story.createdAt?.toDate
-        ? story.createdAt.toDate()
-        : new Date(story.createdAt),
-      expiresAt: story.expiresAt?.toDate
-        ? story.expiresAt.toDate()
-        : new Date(story.expiresAt),
-    })),
-  }));
+  const deserializedStories = isValidStories
+    ? stories.map((storyGroup) => ({
+        ...storyGroup,
+        userStories: storyGroup.userStories.map((story) => ({
+          ...story,
+          createdAt: story.createdAt?.toDate
+            ? story.createdAt.toDate()
+            : new Date(story.createdAt),
+          expiresAt: story.expiresAt?.toDate
+            ? story.expiresAt.toDate()
+            : new Date(story.expiresAt),
+        })),
+      }))
+    : [];
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [storyIndex, setStoryIndex] = useState(() => {
@@ -143,10 +143,10 @@ export function StoryViewer({
   const currentStory = stories[currentIndex]?.userStories[storyIndex];
 
   useEffect(() => {
-    if (!currentStory) {
-      onClose(); // Cierra el visor si no hay una historia actual válida
+    if (!stories[currentIndex]?.userStories[storyIndex]) {
+      onClose?.(localUnseenStories);
     }
-  }, [currentStory, onClose]);
+  }, [currentIndex, storyIndex, stories, onClose, localUnseenStories]);
 
   useEffect(() => {
     if (isComplaintsVisible) {
@@ -341,12 +341,6 @@ export function StoryViewer({
     currentIndex === stories.length - 1 &&
     storyIndex === stories[currentIndex]?.userStories.length - 1;
 
-  if (!currentStory) {
-    console.error("Historia actual no válida:", currentStory);
-    onClose?.();
-    return null;
-  }
-
   const hoursAgo = currentStory?.createdAt
     ? Math.floor(
         (Date.now() - (currentStory.createdAt.toDate?.() || new Date(currentStory.createdAt))) / (1000 * 60 * 60)
@@ -429,10 +423,6 @@ export function StoryViewer({
       </TouchableOpacity>
     );
   };
-
-  if (!currentStory) {
-    return null;
-  }
 
   useEffect(() => {
     const backAction = () => {
