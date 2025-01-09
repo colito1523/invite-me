@@ -235,11 +235,15 @@ const renderStory = ({ item, index }) => {
     <View
       style={[
         styles.storyImageWrapper,
-        hasUnseenStories && {
+        hasStories ? {
           borderWidth: 2,
-          borderColor: isNightMode ? "white" : "black",
+          borderStyle: hasUnseenStories ? 'solid' : 'dotted',
+          borderColor: 'white',
           borderRadius: styles.storyCircle.borderRadius + 2,
-        },
+          opacity: hasUnseenStories ? 1 : 0.7,
+        } : {
+          borderWidth: 0
+        }
       ]}
     >
       <TouchableOpacity
