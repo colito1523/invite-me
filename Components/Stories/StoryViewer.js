@@ -251,7 +251,7 @@ export function StoryViewer({
       );
       setHasLiked(userHasLiked || false);
     }
-    
+
     const preloadBuffer = 5; // Aumentar el buffer de prefetch
 
     // Pre-cargar la siguiente historia si existe
@@ -318,7 +318,7 @@ export function StoryViewer({
       }),
     isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
   });
-  
+
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;
   const isFirstStory = currentIndex === 0 && storyIndex === 0;
@@ -364,9 +364,11 @@ export function StoryViewer({
         }
       >
         <Image
-          source={{ uri: item.profileImage }}
+          progressiveRenderingEnabled={true}
+          source={{ uri: `${stories[currentIndex]?.profileImage}?alt=media&w=100&h=100` }}
           style={styles.viewerImage}
           cachePolicy="memory-disk"
+          resizeMode="cover"
         />
         <Text
           style={styles.viewerName}
@@ -508,7 +510,7 @@ export function StoryViewer({
                 </View>}
                 <Image
                   key={currentStory.id}
-                  source={{ uri: currentStory.storyUrl }}
+                  source={{ uri: `${currentStory.storyUrl}?alt=media&w=800&h=800` }}
                   style={[
                     styles.image,
                     imageDimensions,
@@ -526,7 +528,7 @@ export function StoryViewer({
                   onLoad={(event) => {
                     const loadTime = Date.now() - (currentStory.loadStartTime || Date.now());
                     console.log(`Historia ${currentStory.id} cargada en ${loadTime}ms`);
-                    
+
                     const { width: imgWidth, height: imgHeight } =
                       event.nativeEvent.source;
                     const screenAspectRatio = width / height;
@@ -576,9 +578,13 @@ export function StoryViewer({
                   }}
                 >
                   <Image
+                    key={`avatar-${stories[currentIndex]?.uid}`}
                     source={{ uri: stories[currentIndex]?.profileImage }}
                     style={styles.avatar}
-                    cachePolicy="memory-disk"
+                    cachePolicy="memory"
+                    resizeMode="cover"
+                    progressiveRenderingEnabled={true}
+                    defaultSource={require('../../assets/perfil.jpg')}
                   />
                   <Text style={styles.username}>
                     {`${stories[currentIndex]?.username} ${
