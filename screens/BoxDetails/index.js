@@ -184,9 +184,9 @@ export default memo(function BoxDetails({ route, navigation }) {
       // Eliminar de la colección del usuario
       const userEventsRef = collection(database, "users", user.uid, "events");
       const q = query(
-        userEventsRef, 
+        userEventsRef,
         where("eventId", "==", box.eventId || box.id || box.title),
-        where("dateArray", "array-contains", selectedDate)
+        where("dateArray", "array-contains", selectedDate),
       );
       const querySnapshot = await getDocs(q);
 
@@ -545,7 +545,10 @@ export default memo(function BoxDetails({ route, navigation }) {
 
     try {
       const eventsRef = collection(database, "users", user.uid, "events");
-      const q = query(eventsRef, where("eventId", "==", box.eventId || box.id || box.title));
+      const q = query(
+        eventsRef,
+        where("eventId", "==", box.eventId || box.id || box.title),
+      );
       const querySnapshot = await getDocs(q);
 
       const isPrivateEvent =
@@ -944,7 +947,14 @@ export default memo(function BoxDetails({ route, navigation }) {
         style={styles.gradient}
       >
         {/* Contenedor principal */}
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContent}
+          bounces={false}
+          alwaysBounceVertical={false}
+          showsVerticalScrollIndicator={true}
+          scrollEnabled={true}
+          overScrollMode="never"
+        >
           {/* Header */}
           <Header
             navigation={navigation}

@@ -512,8 +512,11 @@ export default function SignUp() {
       setCurrentQuestionIndex(questions.length - 1);
       setIsSubmitting(false);
 
-      navigation.navigate("Tutorial");
-  } catch (error) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Tutorial' }],
+      });
+    } catch (error) {
       setIsSubmitting(false);
 
       if (error.code === "auth/email-already-in-use") {

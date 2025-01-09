@@ -125,8 +125,9 @@ function ChatStack() {
   return (
     <BlockProvider>
        <DateProvider>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={Home} />
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Tutorial" component={Tutorial} options={{ headerShown: false }} />
+        <Stack.Screen name="Home" component={Home} options={{ headerShown: true, headerTitle: "" }} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Search" component={Search} options={{ headerTitle: "" }} />
         <Stack.Screen name="Notifications" component={Notifications} />
@@ -138,7 +139,6 @@ function ChatStack() {
         <Stack.Screen name="ChatList" component={ChatList} options={{ headerTitle: "" }} />
         <Stack.Screen name="PrivateUserProfile" component={PrivateUserProfile} options={{ headerShown: false }} />
         <Stack.Screen name="AudioPlayer" component={AudioPlayer} />
-        <Stack.Screen name="Tutorial" component={Tutorial} options={{ headerShown: false }} />
         <Stack.Screen name="StoryViewer" component={StoryViewer} options={{ headerShown: false }} />
       </Stack.Navigator>
       </DateProvider>

@@ -75,7 +75,10 @@ export default function Tutorial() {
   );
 
   const handleNavigation = () => {
-    navigation.navigate('Home');
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home' }],
+    });
   };
 
   const handleScroll = (event) => {
