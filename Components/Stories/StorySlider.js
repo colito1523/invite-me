@@ -232,35 +232,42 @@ const renderStory = ({ item, index }) => {
   const hasUnseenStories = unseenStories[item.uid]?.length > 0;
 
   return (
-    <TouchableOpacity
+    <View
       style={[
-        styles.storyCircle,
-        hasUnseenStories && styles.unseenStoryCircle, // Aplica borde gris si hay historias no vistas
-        { borderColor: isNightMode ? "white" : "black" },
+        styles.storyImageWrapper,
+        hasUnseenStories && {
+          borderWidth: 2,
+          borderColor: isNightMode ? "white" : "black",
+          borderRadius: styles.storyCircle.borderRadius + 2,
+        },
       ]}
-      onPress={() => {
-        if (hasStories) {
-          handleOpenViewer(index);
-        }
-      }}
     >
-      {hasStories ? (
-        <Image
-          source={{
-            uri: `${item.profileImage}?alt=media&w=50&h=50&q=2` || "https://via.placeholder.com/50",
-          }}
-          style={styles.storyImage}
-          defaultSource={require("../../assets/perfil.jpg")} // Reemplaza con tu imagen local si la tienes
-          resizeMode="cover"
-        />
-      ) : (
-        <Image
-          source={{ uri: "https://via.placeholder.com/100" }}
-          style={styles.storyImage}
-          resizeMode="cover"
-        />
-      )}
-    </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.storyCircle}
+        onPress={() => {
+          if (hasStories) {
+            handleOpenViewer(index);
+          }
+        }}
+      >
+        {hasStories ? (
+          <Image
+            source={{
+              uri: `${item.profileImage}?alt=media&w=50&h=50&q=2` || "https://via.placeholder.com/50",
+            }}
+            style={[styles.storyImage]}
+            defaultSource={require("../../assets/perfil.jpg")}
+            resizeMode="cover"
+          />
+        ) : (
+          <Image
+            source={{ uri: "https://via.placeholder.com/100" }}
+            style={styles.storyImage}
+            resizeMode="cover"
+          />
+        )}
+      </TouchableOpacity>
+    </View>
   );
 };
 

@@ -14,19 +14,25 @@ const styles = StyleSheet.create({
   centeredAddStoryCircle: {
     justifyContent: "center",
   },
+  storyImageWrapper: {
+    marginHorizontal: 5,
+    padding: 2,
+  },
   storyCircle: {
-    marginRight: 10,
-    alignItems: "center",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: "hidden",
+  },
+  storyImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 30,
+    borderWidth: 2, // Added borderWidth
+    borderColor: "transparent", // Default border color, can be dynamically set
   },
   unseenStoryCircle: {
     borderWidth: 2,
-    borderRadius: 35,
-    padding: 2,
-  },
-  storyImage: {
-    width: 65,
-    height: 65,
-    borderRadius: 35,
   },
   modalContainer: {
     flex: 1,
