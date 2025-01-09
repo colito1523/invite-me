@@ -268,19 +268,24 @@ const renderStory = ({ item, index }) => {
   return (
     <ScrollView>
       <View style={styles.sliderContainer}>
-        <TouchableOpacity
-          onPress={handleAddStory}
-          style={styles.addStoryCircle}
-        >
-          <Ionicons
-            name="add-circle-outline"
-            size={40}
-            color={isNightMode ? "#bbb7b7" : "black"}
-          />
-        </TouchableOpacity>
         <FlatList
-          data={stories}
-          renderItem={renderStory}
+          data={[{ uid: "addStory" }, ...stories]}
+          renderItem={({ item, index }) =>
+            item.uid === "addStory" ? (
+              <TouchableOpacity
+                onPress={handleAddStory}
+                style={[styles.addStoryCircle, styles.centeredAddStoryCircle]}
+              >
+                <Ionicons
+                  name="add-circle-outline"
+                  size={40}
+                  color={isNightMode ? "#bbb7b7" : "black"}
+                />
+              </TouchableOpacity>
+            ) : (
+              renderStory({ item, index: index - 1 })
+            )
+          }
           keyExtractor={(item) => item.uid}
           horizontal
           showsHorizontalScrollIndicator={false}

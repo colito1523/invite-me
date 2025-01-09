@@ -11,6 +11,9 @@ const styles = StyleSheet.create({
   addStoryCircle: {
     marginRight: 10,
   },
+  centeredAddStoryCircle: {
+    justifyContent: "center",
+  },
   storyCircle: {
     marginRight: 10,
     alignItems: "center",
