@@ -1,7 +1,4 @@
-import { PanResponder,
-  Alert,
-  Image,
- } from "react-native";
+import { PanResponder, Alert, Image } from "react-native";
 import {
   doc,
   updateDoc,
@@ -17,7 +14,6 @@ import {
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import { auth, database, storage } from "../../config/firebase";
-
 
 export const createStoryPanResponder = ({
   handleCloseViewer,
@@ -40,9 +36,15 @@ export const createStoryPanResponder = ({
     onPanResponderRelease: (evt, gestureState) => {
       if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
         // Gesto horizontal
-        if (gestureState.dx > swipeThreshold || gestureState.vx > velocityThreshold) {
+        if (
+          gestureState.dx > swipeThreshold ||
+          gestureState.vx > velocityThreshold
+        ) {
           handlePreviousUser(); // Deslizar a la derecha
-        } else if (gestureState.dx < -swipeThreshold || gestureState.vx < -velocityThreshold) {
+        } else if (
+          gestureState.dx < -swipeThreshold ||
+          gestureState.vx < -velocityThreshold
+        ) {
           handleNextUser(); // Deslizar a la izquierda
         }
       } else {
@@ -110,7 +112,7 @@ export const handleLikeStory = async ({
       "users",
       currentStory.uid,
       "stories",
-      currentStory.id
+      currentStory.id,
     );
 
     const userRef = doc(database, "users", currentUser.uid);
@@ -126,11 +128,11 @@ export const handleLikeStory = async ({
 
       if (storyData?.likes) {
         const updatedLikes = storyData.likes.filter(
-          (like) => like.uid !== currentUser.uid
+          (like) => like.uid !== currentUser.uid,
         );
         await updateDoc(storyRef, { likes: updatedLikes });
       }
-      setLikedStories(prev => ({...prev, [currentStory.id]: false}));
+      setLikedStories((prev) => ({ ...prev, [currentStory.id]: false }));
     } else {
       // Agregar el like
       const likeData = {
@@ -150,7 +152,7 @@ export const handleLikeStory = async ({
         database,
         "users",
         currentStory.uid,
-        "notifications"
+        "notifications",
       );
 
       await addDoc(notificationRef, {
@@ -164,7 +166,7 @@ export const handleLikeStory = async ({
         seen: false, // Marcamos la notificación como no vista
       });
 
-      setLikedStories(prev => ({...prev, [currentStory.id]: true}));
+      setLikedStories((prev) => ({ ...prev, [currentStory.id]: true }));
     }
   } catch (error) {
     console.error("Error al gestionar el like:", error);
@@ -210,18 +212,20 @@ export const deleteStory = async ({
       "users",
       user.uid,
       "stories",
-      currentStory.id
+      currentStory.id,
     );
     await deleteDoc(storyDocRef);
 
     // Actualizar localmente
     const updatedUserStories = stories[currentIndex].userStories.filter(
-      (story) => story.id !== currentStory.id
+      (story) => story.id !== currentStory.id,
     );
 
     if (updatedUserStories.length === 0) {
       // Si no hay más historias, elimina el grupo de historias
-      const updatedStories = stories.filter((_, index) => index !== currentIndex);
+      const updatedStories = stories.filter(
+        (_, index) => index !== currentIndex,
+      );
       setStories(updatedStories);
       onClose(updatedStories); // Llama a `onClose` con las historias actualizadas
     } else {
@@ -260,7 +264,10 @@ export const handleSendMessage = async ({
 
         // Verificar si ya existe un chat entre estos dos usuarios
         const chatsRef = collection(database, "chats");
-        const q = query(chatsRef, where("participants", "array-contains", senderId));
+        const q = query(
+          chatsRef,
+          where("participants", "array-contains", senderId),
+        );
         const querySnapshot = await getDocs(q);
 
         let chatId = null;
@@ -289,7 +296,8 @@ export const handleSendMessage = async ({
         const newMessage = {
           text: message,
           senderId: senderId,
-          senderName: auth.currentUser.displayName || t("storyViewer.anonymous"),
+          senderName:
+            auth.currentUser.displayName || t("storyViewer.anonymous"),
           createdAt: new Date(),
           seen: false, // Cambiar de array a boolean
           storyUrl: currentStory.storyUrl,
@@ -315,10 +323,7 @@ export const handleSendMessage = async ({
         setTimeout(() => setShowSendConfirmation(false), 2000);
       } catch (error) {
         console.error("Error sending response:", error);
-        Alert.alert(
-          t("storyViewer.error"),
-          t("storyViewer.sendResponseError")
-        );
+        Alert.alert(t("storyViewer.error"), t("storyViewer.sendResponseError"));
       }
     }
   }
@@ -342,7 +347,7 @@ export const loadViewers = async ({
         "users",
         stories[currentIndex].uid,
         "stories",
-        currentStory.id
+        currentStory.id,
       );
       const storySnap = await getDoc(storyRef);
       if (storySnap.exists()) {
@@ -362,16 +367,16 @@ export const loadViewers = async ({
         const allViewers = [...viewers, ...likes].filter(
           (viewer, index, self) =>
             index === self.findIndex((t) => t.uid === viewer.uid) &&
-            viewer.uid !== stories[currentIndex].uid
+            viewer.uid !== stories[currentIndex].uid,
         );
 
         // Separar viewers pinneados y no pinneados
-        const pinnedViewersWithActivity = allViewers.filter(viewer => 
-          pinnedViewers.some(pv => pv.uid === viewer.uid)
+        const pinnedViewersWithActivity = allViewers.filter((viewer) =>
+          pinnedViewers.some((pv) => pv.uid === viewer.uid),
         );
 
-        const nonPinnedViewers = allViewers.filter(viewer => 
-          !pinnedViewers.some(pv => pv.uid === viewer.uid)
+        const nonPinnedViewers = allViewers.filter(
+          (viewer) => !pinnedViewers.some((pv) => pv.uid === viewer.uid),
         );
 
         // Ordenar cada grupo por timestamp
@@ -380,8 +385,11 @@ export const loadViewers = async ({
         nonPinnedViewers.sort(sortByTimestamp);
 
         // Combinar los grupos: pinneados primero, luego el resto
-        const sortedViewers = [...pinnedViewersWithActivity, ...nonPinnedViewers];
-        
+        const sortedViewers = [
+          ...pinnedViewersWithActivity,
+          ...nonPinnedViewers,
+        ];
+
         setViewers(sortedViewers);
       }
     } catch (error) {
@@ -408,7 +416,7 @@ export const handlePinViewer = async ({
 
     // Encuentra el índice del espectador en la lista actual
     const viewerIndex = updatedPinnedViewers.findIndex(
-      (v) => v.uid === viewer.uid
+      (v) => v.uid === viewer.uid,
     );
 
     if (viewerIndex !== -1) {
@@ -417,7 +425,6 @@ export const handlePinViewer = async ({
     } else {
       // Fijar al espectador
       if (updatedPinnedViewers.length >= 7) {
-    
         return;
       }
       updatedPinnedViewers.push({
@@ -439,8 +446,11 @@ export const handlePinViewer = async ({
   }
 };
 
-
-export const fetchPinnedViewers = async ({ auth, database, setPinnedViewers }) => {
+export const fetchPinnedViewers = async ({
+  auth,
+  database,
+  setPinnedViewers,
+}) => {
   try {
     const userRef = doc(database, "users", auth.currentUser.uid);
     const userDoc = await getDoc(userRef);
@@ -451,7 +461,6 @@ export const fetchPinnedViewers = async ({ auth, database, setPinnedViewers }) =
   }
 };
 
-
 export const handleUserPress = async ({
   selectedUser,
   database,
@@ -460,7 +469,12 @@ export const handleUserPress = async ({
 }) => {
   if (selectedUser.hasStories) {
     try {
-      const storiesRef = collection(database, "users", selectedUser.id, "stories");
+      const storiesRef = collection(
+        database,
+        "users",
+        selectedUser.id,
+        "stories",
+      );
       const storiesSnapshot = await getDocs(storiesRef);
 
       const now = new Date();
@@ -546,14 +560,14 @@ export const toggleHideMyStories = async ({
     let updatedHideStoriesFrom;
     if (hideStoriesFrom.includes(user.uid)) {
       updatedHideStoriesFrom = hideStoriesFrom.filter(
-        (uid) => uid !== user.uid
+        (uid) => uid !== user.uid,
       );
       await updateDoc(viewerRef, {
         hideStoriesFrom: updatedHideStoriesFrom,
       });
       Alert.alert(
         t("storyViewer.success"),
-        t("storyViewer.viewerCanSeeStories")
+        t("storyViewer.viewerCanSeeStories"),
       );
     } else {
       updatedHideStoriesFrom = [...hideStoriesFrom, user.uid];
@@ -562,7 +576,7 @@ export const toggleHideMyStories = async ({
       });
       Alert.alert(
         t("storyViewer.success"),
-        t("storyViewer.viewerCannotSeeStories")
+        t("storyViewer.viewerCannotSeeStories"),
       );
     }
 
@@ -574,7 +588,7 @@ export const toggleHideMyStories = async ({
     console.error("Error updating hideStoriesFrom:", error);
     Alert.alert(
       t("storyViewer.error"),
-      t("storyViewer.storySettingsUpdateError")
+      t("storyViewer.storySettingsUpdateError"),
     );
   }
 };
@@ -592,35 +606,46 @@ export const toggleHideStories = async ({
   const userRef = doc(database, "users", user.uid);
 
   try {
-    // Obtener el documento del usuario actual
     const userDoc = await getDoc(userRef);
     const userData = userDoc.data();
     const hiddenStories = userData.hiddenStories || [];
 
-    // Verificar si el UID ya está en la lista
     if (hiddenStories.includes(currentStory.uid)) {
       Alert.alert(t("storyViewer.info"), t("storyViewer.alreadyHidden"));
-    } else {
-      // Agregar el UID al campo `hiddenStories`
-      await updateDoc(userRef, {
-        hiddenStories: arrayUnion(currentStory.uid),
-      });
-
-      Alert.alert(
-        t("storyViewer.success"),
-        t("storyViewer.hiddenSuccessfully")
-      );
-
-      // Cerrar el visor de historias después de agregar el UID
-      onClose(localUnseenStories); // Llama a la función `onClose` para cerrar el visor
+      return;
     }
+
+    await updateDoc(userRef, {
+      hiddenStories: arrayUnion(currentStory.uid),
+    });
+
+    // Actualizar el estado local antes de cerrar
+    const updatedUnseenStories = { ...localUnseenStories };
+    if (updatedUnseenStories[currentStory.uid]) {
+      delete updatedUnseenStories[currentStory.uid];
+    }
+
+    Alert.alert(t("storyViewer.success"), t("storyViewer.hiddenSuccessfully"), [
+      {
+        text: "OK",
+        onPress: () => {
+          // Cerrar el visor solo después de que el usuario confirme
+          onClose(updatedUnseenStories);
+        },
+      },
+    ]);
   } catch (error) {
     console.error("Error updating hidden stories:", error);
     Alert.alert(t("storyViewer.error"), t("storyViewer.hideError"));
   }
 };
 
-export const addViewerToStory = async ({ storyId, storyOwnerId, auth, database }) => {
+export const addViewerToStory = async ({
+  storyId,
+  storyOwnerId,
+  auth,
+  database,
+}) => {
   try {
     if (!auth || !auth.currentUser) {
       console.error("Usuario no autenticado o referencia a auth inválida.");
@@ -638,7 +663,8 @@ export const addViewerToStory = async ({ storyId, storyOwnerId, auth, database }
       uid: currentUser.uid,
       firstName: userData.firstName,
       lastName: userData.lastName,
-      profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+      profileImage:
+        userData.photoUrls?.[0] || "https://via.placeholder.com/150",
       timestamp: new Date(),
     };
 
@@ -663,7 +689,6 @@ export const handleSearch = ({ query, setSearchQuery }) => {
     console.warn("El valor proporcionado no es una cadena válida.");
   }
 };
-
 
 export const handleOpenViewersModal = async ({
   setIsPaused,
@@ -781,7 +806,6 @@ export const handlePrevious = ({
   }
 };
 
-
 export const handleNext = ({
   stories,
   currentIndex,
@@ -819,7 +843,7 @@ export const handleNext = ({
       setLocalUnseenStories((prev) => ({
         ...prev,
         [currentStory.uid]: prev[currentStory.uid].filter(
-          (story) => story.id !== currentStory.id
+          (story) => story.id !== currentStory.id,
         ),
       }));
     }
@@ -865,20 +889,21 @@ export const preloadNextStory = ({
   // Precargar la historia actual con alta prioridad
   const currentUrl = currentStory.storyUrl;
   if (currentUrl && !loadedImages[currentUrl]) {
-    const currentLoadPromise = Image.prefetch(currentUrl)
-      .then(() => {
-        setLoadedImages(prev => ({
-          ...prev,
-          [currentUrl]: { loaded: true, loadTime: Date.now() - loadStartTime }
-        }));
-      });
+    const currentLoadPromise = Image.prefetch(currentUrl).then(() => {
+      setLoadedImages((prev) => ({
+        ...prev,
+        [currentUrl]: { loaded: true, loadTime: Date.now() - loadStartTime },
+      }));
+    });
     preloadPromises.push(currentLoadPromise);
   }
 
   // Precargar las siguientes historias del mismo usuario
   for (let i = 1; i <= preloadBuffer; i++) {
     if (storyIndex + i < stories[currentIndex]?.userStories.length) {
-      urlsToPreload.add(stories[currentIndex].userStories[storyIndex + i].storyUrl);
+      urlsToPreload.add(
+        stories[currentIndex].userStories[storyIndex + i].storyUrl,
+      );
     }
   }
 
@@ -893,25 +918,22 @@ export const preloadNextStory = ({
   }
 
   // Precargar todas las URLs en paralelo con timeout
-  Array.from(urlsToPreload).forEach(url => {
+  Array.from(urlsToPreload).forEach((url) => {
     if (url && !loadedImages[url]) {
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), loadTimeout)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), loadTimeout),
       );
-      
-      const loadPromise = Promise.race([
-        Image.prefetch(url),
-        timeoutPromise
-      ])
+
+      const loadPromise = Promise.race([Image.prefetch(url), timeoutPromise])
         .then(() => {
-          setLoadedImages(prev => ({
+          setLoadedImages((prev) => ({
             ...prev,
-            [url]: { loaded: true, loadTime: Date.now() - loadStartTime }
+            [url]: { loaded: true, loadTime: Date.now() - loadStartTime },
           }));
         })
-        .catch(error => {
-          if (error.message !== 'Timeout') {
-            console.warn('Error precargando:', url, error);
+        .catch((error) => {
+          if (error.message !== "Timeout") {
+            console.warn("Error precargando:", url, error);
           }
         });
 
@@ -924,18 +946,24 @@ export const preloadNextStory = ({
     .then(() => {
       console.log(`Precarga completada en ${Date.now() - loadStartTime}ms`);
     })
-    .catch(error => {
-      console.warn('Error en precarga:', error);
+    .catch((error) => {
+      console.warn("Error en precarga:", error);
     });
 };
 
-export const handleCloseViewersModal = ({ setViewersModalVisible, setIsPaused }) => {
+export const handleCloseViewersModal = ({
+  setViewersModalVisible,
+  setIsPaused,
+}) => {
   setViewersModalVisible(false);
   setIsPaused(false);
 };
 
-
-export const fetchBlockedUsers = async ({ auth, database, setBlockedUsers }) => {
+export const fetchBlockedUsers = async ({
+  auth,
+  database,
+  setBlockedUsers,
+}) => {
   try {
     const user = auth.currentUser;
     if (!user) return;
