@@ -504,18 +504,19 @@ export default function SignUp() {
         secondInterest: answers.interest2,
         photoUrls: photoUrls,
         username: usernameToLower,
-        preferredLanguage: i18n.language // Guarda el idioma seleccionado
+        preferredLanguage: i18n.language,
+        hasSeenTutorial: false // Campo para controlar si ya vio el tutorial
       };
 
       await setDoc(doc(database, "users", user.uid), userData);
-
-      setCurrentQuestionIndex(questions.length - 1);
-      setIsSubmitting(false);
 
       navigation.reset({
         index: 0,
         routes: [{ name: 'Tutorial' }],
       });
+      
+      setCurrentQuestionIndex(questions.length - 1);
+      setIsSubmitting(false);
     } catch (error) {
       setIsSubmitting(false);
 

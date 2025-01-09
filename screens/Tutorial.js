@@ -1,5 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { auth, database } from '../config/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Image } from 'expo-image';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -74,11 +76,21 @@ export default function Tutorial() {
     </View>
   );
 
-  const handleNavigation = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
+  const handleNavigation = async () => {
+    try {
+      if (auth.currentUser) {
+        const userRef = doc(database, "users", auth.currentUser.uid);
+        await updateDoc(userRef, {
+          hasSeenTutorial: true
+        });
+      }
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
   };
 
   const handleScroll = (event) => {

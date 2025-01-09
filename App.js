@@ -122,10 +122,25 @@ const LanguageProvider = ({ children }) => {
 };
 
 function ChatStack() {
+  const [initialRoute, setInitialRoute] = React.useState(null);
+  
+  React.useEffect(() => {
+    const checkTutorialStatus = async () => {
+      if (auth.currentUser) {
+        const userDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
+        const userData = userDoc.data();
+        setInitialRoute(userData?.hasSeenTutorial ? "Home" : "Tutorial");
+      }
+    };
+    checkTutorialStatus();
+  }, []);
+
+  if (!initialRoute) return null;
+
   return (
     <BlockProvider>
        <DateProvider>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen name="Tutorial" component={Tutorial} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={Home} options={{ headerShown: true, headerTitle: "" }} />
         <Stack.Screen name="Profile" component={Profile} />
