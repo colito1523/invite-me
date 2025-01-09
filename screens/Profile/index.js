@@ -398,6 +398,7 @@ export default function Profile({ navigation }) {
             {flexGrow: 1}
           ]}
           keyboardShouldPersistTaps="handled"
+          scrollEnabled={false} // Disable vertical scrolling
         >
         <View style={styles.container}>
           {isElementsVisible && (
@@ -428,135 +429,141 @@ export default function Profile({ navigation }) {
           )}
 
           {/* FlatList en lugar de ScrollView */}
-          <FlatList
-            data={photoUrls.filter((url) => url)} // Filtra URLs válidas
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={(event) => {
-              const contentOffset = event.nativeEvent.contentOffset;
-              const viewSize = event.nativeEvent.layoutMeasurement;
-              setCurrentImageIndex(Math.floor(contentOffset.x / viewSize.width));
-            }}
-            keyExtractor={(item, index) => `photo-${index}`}
-            renderItem={({ item, index }) => (
-              <Pressable
-                style={styles.imageContainer}
-                onLongPress={handleLongPress}
-                onPressOut={handlePressOut}
-              >
-                <Image
-                  source={{ uri: item }}
-                  style={styles.backgroundImage}
-                  contentFit="cover"
-                 cachePolicy="memory-disk"
-                  placeholder={{ uri: "placeholder-image-url" }} // Placeholder
-                />
-                {isElementsVisible && (
-                  <View style={styles.overlay}>
-                    <NameDisplay
-                      name={name}
-                      surname={surname}
-                      friendCount={friendCount}
-                      isEditing={isEditing}
-                      setName={setName}
-                      setSurname={setSurname}
-                      nameInputRef={nameInputRef}
-                      surnameInputRef={surnameInputRef}
-                      handleFriendCountClick={() => setIsFriendListVisible(true)}
-                      displayFriendCount={index === 0}
-                    />
-                    {index === 0 && !isEditing && (
-                      <EventsSection
-                        events={events.slice(0, 4)}
-                        handleBoxPress={(event) => handleBoxPress({ event, navigation, t })} // Pass event correctly
-                        t={t}
+          <View style={{ flex: 1 }}>
+            <FlatList
+              data={photoUrls.filter((url) => url)} // Filtra URLs válidas
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              scrollEventThrottle={16}
+              directionalLockEnabled={true}
+              scrollEnabled={true} // Ensure horizontal scrolling is enabled
+              bounces={false}
+              onScroll={(event) => {
+                const contentOffset = event.nativeEvent.contentOffset;
+                const viewSize = event.nativeEvent.layoutMeasurement;
+                setCurrentImageIndex(Math.floor(contentOffset.x / viewSize.width));
+              }}
+              keyExtractor={(item, index) => `photo-${index}`}
+              renderItem={({ item, index }) => (
+                <Pressable
+                  style={styles.imageContainer}
+                  onLongPress={handleLongPress}
+                  onPressOut={handlePressOut}
+                >
+                  <Image
+                    source={{ uri: item }}
+                    style={styles.backgroundImage}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    placeholder={{ uri: "placeholder-image-url" }} // Placeholder
+                  />
+                  {isElementsVisible && (
+                    <View style={styles.overlay}>
+                      <NameDisplay
+                        name={name}
+                        surname={surname}
+                        friendCount={friendCount}
+                        isEditing={isEditing}
+                        setName={setName}
+                        setSurname={setSurname}
+                        nameInputRef={nameInputRef}
+                        surnameInputRef={surnameInputRef}
+                        handleFriendCountClick={() => setIsFriendListVisible(true)}
+                        displayFriendCount={index === 0}
                       />
-                    )}
-                    {index === 0 && isEditing && (
-                      <>
-                        {renderPhotoEditor()}
-                        {renderSaveButton()}
-                      </>
-                    )}
-                    {index === 1 && (
-                      <EventsSection
-                        events={events.slice(4, 6)}
-                        handleBoxPress={(event) => handleBoxPress({ event, navigation, t })} // Pass event correctly
-                        t={t}
-                      />
-                    )}
-                    {index === 2 && (
-                      <>
-                        <View style={styles.contentWrapper}>
-                          <View style={styles.ovalAndIconsContainer}>
-                            <View style={styles.ovalWrapper}>
-                              <View style={styles.ovalContainer}>
-                                {renderEditableOval(
-                                  firstHobby,
-                                  setFirstHobby,
-                                  t("profile.hobby1")
-                                )}
-                                {renderEditableOval(
-                                  secondHobby,
-                                  setSecondHobby,
-                                  t("profile.hobby2")
-                                )}
+                      {index === 0 && !isEditing && (
+                        <EventsSection
+                          events={events.slice(0, 4)}
+                          handleBoxPress={(event) => handleBoxPress({ event, navigation, t })} // Pass event correctly
+                          t={t}
+                        />
+                      )}
+                      {index === 0 && isEditing && (
+                        <>
+                          {renderPhotoEditor()}
+                          {renderSaveButton()}
+                        </>
+                      )}
+                      {index === 1 && (
+                        <EventsSection
+                          events={events.slice(4, 6)}
+                          handleBoxPress={(event) => handleBoxPress({ event, navigation, t })} // Pass event correctly
+                          t={t}
+                        />
+                      )}
+                      {index === 2 && (
+                        <>
+                          <View style={styles.contentWrapper}>
+                            <View style={styles.ovalAndIconsContainer}>
+                              <View style={styles.ovalWrapper}>
+                                <View style={styles.ovalContainer}>
+                                  {renderEditableOval(
+                                    firstHobby,
+                                    setFirstHobby,
+                                    t("profile.hobby1")
+                                  )}
+                                  {renderEditableOval(
+                                    secondHobby,
+                                    setSecondHobby,
+                                    t("profile.hobby2")
+                                  )}
+                                </View>
+
+                                <View style={styles.ovalContainer}>
+                                  {renderEditableOval(
+                                    firstInterest,
+                                    setFirstInterest,
+                                    t("profile.interest1")
+                                  )}
+                                  {renderEditableOval(
+                                    secondInterest,
+                                    setSecondInterest,
+                                    t("profile.interest2")
+                                  )}
+                                </View>
                               </View>
 
-                              <View style={styles.ovalContainer}>
-                                {renderEditableOval(
-                                  firstInterest,
-                                  setFirstInterest,
-                                  t("profile.interest1")
-                                )}
-                                {renderEditableOval(
-                                  secondInterest,
-                                  setSecondInterest,
-                                  t("profile.interest2")
-                                )}
+                              <View style={styles.iconsContainer}>
+                                <TouchableOpacity style={styles.iconButton}>
+                                  <AntDesign
+                                    name="adduser"
+                                    size={27}
+                                    color="white"
+                                  />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={styles.iconButton}
+                                  onPress={() => handleHeartPress({isHearted, heartCount, setIsHearted, setHeartCount})}
+                                >
+                                  <AntDesign
+                                    name={isHearted ? "heart" : "hearto"}
+                                    size={27}
+                                    color="white"
+                                  />
+                                  <Text style={styles.heartCountText}>
+                                    {heartCount}
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.iconButton}>
+                                  <AntDesign
+                                    name="message1"
+                                    size={27}
+                                    color="white"
+                                  />
+                                </TouchableOpacity>
                               </View>
-                            </View>
-
-                            <View style={styles.iconsContainer}>
-                            <TouchableOpacity style={styles.iconButton}>
-                                <AntDesign
-                                  name="adduser"
-                                  size={27}
-                                  color="white"
-                                />
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                style={styles.iconButton}
-                                onPress={() => handleHeartPress({isHearted, heartCount, setIsHearted, setHeartCount})}
-                              >
-                                <AntDesign
-                                  name={isHearted ? "heart" : "hearto"}
-                                  size={27}
-                                  color="white"
-                                />
-                                <Text style={styles.heartCountText}>
-                                  {heartCount}
-                                </Text>
-                              </TouchableOpacity>
-                              <TouchableOpacity style={styles.iconButton}>
-                                <AntDesign
-                                  name="message1"
-                                  size={27}
-                                  color="white"
-                                />
-                              </TouchableOpacity>
                             </View>
                           </View>
-                        </View>
-                        {isEditing && renderSaveButton()}
-                      </>
-                    )}
-                  </View>
-                )}
-              </Pressable>
-            )}
-          />
+                          {isEditing && renderSaveButton()}
+                        </>
+                      )}
+                    </View>
+                  )}
+                </Pressable>
+              )}
+            />
+          </View>
         </View>
       </ScrollView>
       </KeyboardAvoidingView>
