@@ -93,8 +93,8 @@ export const handleLikeStory = async ({
   stories,
   currentIndex,
   storyIndex,
-  hasLiked,
-  setHasLiked,
+  likedStories,
+  setLikedStories,
   database,
   t,
 }) => {
@@ -117,6 +117,8 @@ export const handleLikeStory = async ({
     const userSnap = await getDoc(userRef);
     const userData = userSnap.data();
 
+    const hasLiked = likedStories[currentStory?.id];
+
     if (hasLiked) {
       // Eliminar el like
       const storySnap = await getDoc(storyRef);
@@ -128,7 +130,7 @@ export const handleLikeStory = async ({
         );
         await updateDoc(storyRef, { likes: updatedLikes });
       }
-      setHasLiked(false);
+      setLikedStories(prev => ({...prev, [currentStory.id]: false}));
     } else {
       // Agregar el like
       const likeData = {
@@ -162,7 +164,7 @@ export const handleLikeStory = async ({
         seen: false, // Marcamos la notificación como no vista
       });
 
-      setHasLiked(true);
+      setLikedStories(prev => ({...prev, [currentStory.id]: true}));
     }
   } catch (error) {
     console.error("Error al gestionar el like:", error);

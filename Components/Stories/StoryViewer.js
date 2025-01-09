@@ -19,6 +19,8 @@ import { auth, database, storage } from "../../config/firebase";
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import styles from "./StoryViewStyles";
 import { useTranslation } from "react-i18next";
@@ -116,7 +118,7 @@ export function StoryViewer({
   const [viewersModalVisible, setViewersModalVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const longPressTimeout = useRef(null);
-  const [hasLiked, setHasLiked] = useState(false);
+  const [likedStories, setLikedStories] = useState({}); // Estado para likes por historia
   const [viewers, setViewers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [pinnedViewers, setPinnedViewers] = useState([]);
@@ -246,10 +248,22 @@ export function StoryViewer({
         auth,
         database,
       });
-      const userHasLiked = currentStory.likes?.some(
-        (like) => like.uid === auth.currentUser.uid
-      );
-      setHasLiked(userHasLiked || false);
+
+      // Obtener el estado actual del like desde Firestore
+      const fetchLikeStatus = async () => {
+        const storyRef = doc(database, "users", currentStory.uid, "stories", currentStory.id);
+        const storySnap = await getDoc(storyRef);
+        const storyData = storySnap.data();
+        const userHasLiked = storyData?.likes?.some(
+          (like) => like.uid === auth.currentUser.uid
+        );
+        setLikedStories((prevLikedStories) => ({
+          ...prevLikedStories,
+          [currentStory.id]: userHasLiked,
+        }));
+      };
+
+      fetchLikeStatus();
     }
 
     const preloadBuffer = 5; // Aumentar el buffer de prefetch
@@ -684,43 +698,23 @@ export function StoryViewer({
                     stories,
                     currentIndex,
                     storyIndex,
-                    hasLiked,
-                    setHasLiked,
+                    likedStories,
+                    setLikedStories,
                     database,
                     t,
                   })
                 }
               >
                 <Ionicons
-                  name={hasLiked ? "heart" : "heart-outline"}
+                  name={likedStories[currentStory?.id] ? "heart" : "heart-outline"}
                   size={24}
-                  color={hasLiked ? "red" : "#FFFFFF"}
+                  color={likedStories[currentStory?.id] ? "red" : "#FFFFFF"}
                 />
               </TouchableOpacity>
             </View>
           )}
 
-          {/* {isCurrentUserStory && (
-            <TouchableOpacity
-              style={styles.viewersButton}
-              onPress={() =>
-                handleOpenViewersModal({
-                  setIsPaused,
-                  loadViewers,
-                  auth,
-                  database,
-                  stories: localStories,
-                  currentIndex,
-                  storyIndex,
-                  setViewers,
-                  setViewersModalVisible,
-                  t,
-                })
-              }
-            >
-              <Entypo name="chevron-thin-up" size={24} color="white" />
-            </TouchableOpacity>
-          )} */}
+
           <Modal
             animationType="slide"
             transparent={true}
