@@ -376,7 +376,14 @@ export default function UserProfile({ route, navigation }) {
 
   return (
     <Provider>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView 
+          contentContainerStyle={[
+            styles.scrollViewContent,
+            {flexGrow: 1}
+          ]}
+          keyboardShouldPersistTaps="handled"
+          scrollEnabled={false}
+          >
         <View style={styles.container}>
           {isElementsVisible && (
             <TouchableOpacity

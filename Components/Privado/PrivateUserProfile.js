@@ -472,7 +472,11 @@ export default function Component({ route, navigation }) {
         colors={isNightMode ? ["#1a1a1a", "#000"] : ["#fff", "#f0f0f0"]}
         style={styles.container}
       >
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <ScrollView 
+        contentContainerStyle={[styles.scrollViewContent, {flexGrow: 1}]}
+        keyboardShouldPersistTaps="handled"
+        scrollEnabled={false}
+      >
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
