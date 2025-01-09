@@ -553,22 +553,25 @@ export function StoryViewer({
               {isUIVisible && <View style={styles.userInfo}>
                 <TouchableOpacity
                   style={styles.userDetails}
-                  onPress={() => {
+                  onPress={async () => {
                     const currentStory = stories[currentIndex];
                     if (currentStory) {
-                      if (currentStory.uid === auth.currentUser.uid) {
-                        navigation.navigate("Profile");
-                      } else {
-                        navigation.navigate("UserProfile", {
-                          selectedUser: {
-                            id: currentStory.uid,
-                            username: currentStory.username,
-                            firstName: currentStory.username,
-                            lastName: currentStory.lastName || "",
-                            profileImage: currentStory.profileImage,
-                          },
-                        });
-                      }
+                      await onClose(localUnseenStories);
+                      setTimeout(() => {
+                        if (currentStory.uid === auth.currentUser.uid) {
+                          navigation.navigate("Profile");
+                        } else {
+                          navigation.navigate("UserProfile", {
+                            selectedUser: {
+                              id: currentStory.uid,
+                              username: currentStory.username,
+                              firstName: currentStory.username,
+                              lastName: currentStory.lastName || "",
+                              profileImage: currentStory.profileImage,
+                            },
+                          });
+                        }
+                      }, 100);
                     }
                   }}
                 >

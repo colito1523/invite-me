@@ -72,7 +72,6 @@ export const fetchUsers = async (searchTerm, setResults) => {
            user.lastName.toLowerCase().includes(normalizedSearchTerm))
       );
 
-      console.log("Users with available stories:", filteredList);
 
       setResults(filteredList);
     } catch (error) {
