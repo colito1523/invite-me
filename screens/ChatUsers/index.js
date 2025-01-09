@@ -41,7 +41,7 @@ import { ImageBackground } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
-import { muteChat, handleDeleteMessage  } from "./utils";
+import { muteChat, handleDeleteMessage } from "./utils";
 
 import Complaints from "../../Components/Complaints/Complaints";
 import { useTranslation } from "react-i18next";
@@ -149,7 +149,7 @@ export default function Chat({ route }) {
             "chats",
             chatId,
             "messages",
-            message.id
+            message.id,
           );
           batch.update(messageRef, {
             viewedBy: arrayUnion(user.uid),
@@ -187,7 +187,7 @@ export default function Chat({ route }) {
       const participants = chatData.participants || [];
 
       const recipientId = participants.find(
-        (participant) => participant !== user.uid
+        (participant) => participant !== user.uid,
       );
 
       if (!recipientId) {
@@ -225,7 +225,7 @@ export default function Chat({ route }) {
         const chatsRef = collection(database, "chats");
         const q = query(
           chatsRef,
-          where("participants", "array-contains", user.uid)
+          where("participants", "array-contains", user.uid),
         );
 
         const querySnapshot = await getDocs(q);
@@ -266,7 +266,7 @@ export default function Chat({ route }) {
   const handleSend = async (
     messageType = "text",
     mediaUri = null,
-    isViewOnce = false // Este parámetro se pasará desde donde se llama a la función
+    isViewOnce = false, // Este parámetro se pasará desde donde se llama a la función
   ) => {
     if (isUploading) {
       Alert.alert(t("chatUsers.uploading"), t("chatUsers.waitForUpload"));
@@ -283,7 +283,7 @@ export default function Chat({ route }) {
         database,
         "chats",
         chatIdToUse,
-        "messages"
+        "messages",
       );
 
       let messageData = {
@@ -313,8 +313,8 @@ export default function Chat({ route }) {
         setIsUploading(false);
         setMessages((prevMessages) =>
           prevMessages.map((message) =>
-            message.id === tempId ? { ...messageData, id: tempId } : message
-          )
+            message.id === tempId ? { ...messageData, id: tempId } : message,
+          ),
         );
       }
       await addDoc(messagesRef, messageData);
@@ -326,7 +326,7 @@ export default function Chat({ route }) {
       if (chatDoc.exists()) {
         const chatData = chatDoc.data();
         const otherParticipantId = chatData.participants.find(
-          (participant) => participant !== user.uid
+          (participant) => participant !== user.uid,
         );
 
         // Establecer isHidden a false para el receptor
@@ -390,7 +390,7 @@ export default function Chat({ route }) {
       const blob = await response.blob();
       const storageRef = ref(
         storage,
-        `media/${user.uid}/${new Date().getTime()}`
+        `media/${user.uid}/${new Date().getTime()}`,
       );
       await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(storageRef);
@@ -409,7 +409,7 @@ export default function Chat({ route }) {
     if (status !== "granted") {
       Alert.alert(
         t("chatUsers.permissionDenied"),
-        t("chatUsers.cameraPermission")
+        t("chatUsers.cameraPermission"),
       );
       return;
     }
@@ -430,7 +430,7 @@ export default function Chat({ route }) {
     if (status !== "granted") {
       Alert.alert(
         t("chatUsers.permissionDenied"),
-        t("chatUsers.galleryPermission")
+        t("chatUsers.galleryPermission"),
       );
       return;
     }
@@ -467,7 +467,7 @@ export default function Chat({ route }) {
 
       // Obtener el ID del destinatario desde los participantes
       const otherParticipantId = chatData.participants.find(
-        (participantId) => participantId !== user.uid
+        (participantId) => participantId !== user.uid,
       );
 
       if (!otherParticipantId) {
@@ -489,7 +489,7 @@ export default function Chat({ route }) {
     mediaUrl,
     mediaType,
     messageId,
-    isViewOnce
+    isViewOnce,
   ) => {
     try {
       const messageRef = doc(database, "chats", chatId, "messages", messageId);
@@ -548,13 +548,19 @@ export default function Chat({ route }) {
           onPress: () => onDeleteMessage(message.id),
           style: "destructive",
         },
-      ]
+      ],
     );
   };
 
   const onDeleteMessage = (messageId) => {
-    handleDeleteMessage(database, chatId, user, messageId, recipientUser, setMessages)
-      .catch((error) => Alert.alert("Error", error.message));
+    handleDeleteMessage(
+      database,
+      chatId,
+      user,
+      messageId,
+      recipientUser,
+      setMessages,
+    ).catch((error) => Alert.alert("Error", error.message));
   };
 
   const renderDate = (date) => {
@@ -732,7 +738,7 @@ export default function Chat({ route }) {
                       item.mediaUrl,
                       "image",
                       item.id,
-                      item.isViewOnce
+                      item.isViewOnce,
                     )
                   }
                   style={[
@@ -768,7 +774,10 @@ export default function Chat({ route }) {
               <>
                 <TouchableOpacity
                   onPress={() => {
-                    setSelectedImage({uri: item.mediaUrl, mediaType: item.mediaType});
+                    setSelectedImage({
+                      uri: item.mediaUrl,
+                      mediaType: item.mediaType,
+                    });
                     setIsModalVisible(true);
                   }}
                   style={styles.videoThumbnailContainer}
@@ -821,7 +830,7 @@ export default function Chat({ route }) {
   };
 
   return (
-    <ImageBackground source={{ uri: backgroundImage }} style={styles.container}>
+    <ImageBackground source={require('../../assets/fondo chat.jpg')} style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -865,7 +874,7 @@ export default function Chat({ route }) {
                       text: t("chatUsers.delete"),
                       onPress: handleDeleteChat,
                     },
-                  ]
+                  ],
                 );
               }}
               title={t("chatUsers.deleteChat")}
@@ -897,12 +906,14 @@ export default function Chat({ route }) {
           maxToRenderPerBatch={50}
           windowSize={21}
           removeClippedSubviews={false}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          onContentSizeChange={() =>
+            flatListRef.current?.scrollToEnd({ animated: false })
+          }
           onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
           initialNumToRender={messages.length}
           maintainVisibleContentPosition={{
             minIndexForVisible: 0,
-            autoscrollToTopThreshold: 10
+            autoscrollToTopThreshold: 10,
           }}
         />
 
@@ -1004,15 +1015,16 @@ export default function Chat({ route }) {
           onRequestClose={closeModal}
         >
           <View style={styles.modalBackground}>
-            <TouchableOpacity 
-              style={styles.closeModalButton} 
+            <TouchableOpacity
+              style={styles.closeModalButton}
               onPress={closeModal}
             >
               <Ionicons name="close" size={28} color="white" />
             </TouchableOpacity>
             <View style={styles.mediaContainer}>
-              {selectedImage && (
-                typeof selectedImage === 'object' && selectedImage.mediaType === "video" ? (
+              {selectedImage &&
+                (typeof selectedImage === "object" &&
+                selectedImage.mediaType === "video" ? (
                   <View style={styles.videoContainer}>
                     <Video
                       source={{ uri: selectedImage.uri }}
@@ -1036,12 +1048,12 @@ export default function Chat({ route }) {
                       }}
                       ref={videoRef}
                     />
-                    <TouchableWithoutFeedback 
-                      onPress={() => setControlsVisible(prev => !prev)}
+                    <TouchableWithoutFeedback
+                      onPress={() => setControlsVisible((prev) => !prev)}
                     >
                       <View style={styles.fullScreenTouchable}>
                         {controlsVisible && (
-                          <TouchableOpacity 
+                          <TouchableOpacity
                             style={styles.playButton}
                             onPress={() => {
                               if (videoRef.current) {
@@ -1054,10 +1066,10 @@ export default function Chat({ route }) {
                               }
                             }}
                           >
-                            <Ionicons 
-                              name={isPlaying ? "pause" : "play"} 
-                              size={50} 
-                              color="white" 
+                            <Ionicons
+                              name={isPlaying ? "pause" : "play"}
+                              size={50}
+                              color="white"
                             />
                           </TouchableOpacity>
                         )}
@@ -1065,11 +1077,11 @@ export default function Chat({ route }) {
                     </TouchableWithoutFeedback>
                     <View style={styles.videoControlsContainer}>
                       <View style={styles.progressBar}>
-                        <View 
+                        <View
                           style={[
-                            styles.progress, 
-                            { width: `${(currentTime / duration) * 100}%` }
-                          ]} 
+                            styles.progress,
+                            { width: `${(currentTime / duration) * 100}%` },
+                          ]}
                         />
                       </View>
                     </View>
@@ -1077,12 +1089,16 @@ export default function Chat({ route }) {
                 ) : (
                   <TouchableWithoutFeedback onPress={closeModal}>
                     <Image
-                      source={{ uri: typeof selectedImage === 'object' ? selectedImage.uri : selectedImage }}
+                      source={{
+                        uri:
+                          typeof selectedImage === "object"
+                            ? selectedImage.uri
+                            : selectedImage,
+                      }}
                       style={styles.fullscreenMedia}
                     />
                   </TouchableWithoutFeedback>
-                )
-              )}
+                ))}
             </View>
           </View>
         </Modal>
