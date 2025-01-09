@@ -11,8 +11,11 @@ export const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 15,
+  alignItems: "center",
+  alignSelf: "center",
+  padding: 0, // Elimina todo el padding
+  margin: 0, // Elimina cualquier margen
+  width: "110%", // Asegúrate de ocupar todo el ancho disponible
   },
   searchContainer: {
     flexDirection: "row",
