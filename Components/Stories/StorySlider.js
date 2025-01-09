@@ -347,20 +347,8 @@ const renderStory = ({ item, index }) => {
             initialIndex={selectedStoryIndex}
             onClose={(updatedUnseenStories) => {
               setStoryViewerVisible(false);
-              setTimeout(() => {
-                updateUnseenStories(updatedUnseenStories);
-                // Reorganizar historias después de ver
-                setStories((prev) => {
-                  return [...prev].sort((a, b) => {
-                    const aHasUnseen = updatedUnseenStories[a.uid]?.length > 0;
-                    const bHasUnseen = updatedUnseenStories[b.uid]?.length > 0;
-                    if (aHasUnseen && !bHasUnseen) return -1;
-                    if (!aHasUnseen && bHasUnseen) return 1;
-                    return 0;
-                  });
-                });
-                loadExistingStories();
-              }, 0);
+              updateUnseenStories(updatedUnseenStories);
+              loadExistingStories(t, setStories, setUnseenStories, isUploading);
             }}
             onStoryDeleted={handleStoryDeleted}
             unseenStories={unseenStories}
