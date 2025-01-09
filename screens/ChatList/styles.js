@@ -5,7 +5,7 @@ const isNight = new Date().getHours() >= 19 || new Date().getHours() < 6;
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: isNight ? "black" : "white",
+    backgroundColor: isNight ? "black" : "#f0f0f0", // Updated color
   },
   searchContainer: {
     flexDirection: "row",
@@ -198,7 +198,7 @@ export const styles = StyleSheet.create({
 });
 
 export const lightTheme = {
-  background: "#fff",
+  background: "#f0f0f0", // Updated color
   text: "#333",
   textSecondary: "#666",
   inputBackground: "#f5f5f5",

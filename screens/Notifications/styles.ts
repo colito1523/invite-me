@@ -5,7 +5,7 @@ const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
 export const styles = StyleSheet.create({
     safeArea: {
       flex: 1,
-      backgroundColor: isNight ? "black" : "white",
+      backgroundColor: isNight ? "black" : "#f0f0f0", // Updated color
     },
     container: {
       flex: 1,

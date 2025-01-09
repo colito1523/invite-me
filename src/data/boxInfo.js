@@ -150,6 +150,27 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
+    path: require("../../assets/Lisboa/SEEN.jpg"),
+    title: "SEEN",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "06:30 PM - 01:00 AM",
+      Martes: "06:30 PM - 01:00 AM",
+      Miércoles: "06:30 PM - 01:00 AM",
+      Jueves: "06:30 PM - 01:00 AM",
+      Viernes: "06:30 PM - 02:00 AM",
+      Sábado: "06:30 PM - 02:00 AM",
+      Domingo: "06:30 PM - 01:00 AM",
+    },
+    number: "210 965 775",
+    coordinates: {
+      latitude: 38.72105140,
+      longitude: -9.14728440,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+  {
     path: require("../../assets/Lisboa/Jncquoi club.jpg"),
     title: "Jncquoi Club",
     category: "Bars & Clubs",
@@ -546,6 +567,27 @@ const boxInfo = [
     coordinates: {
       latitude: 38.7030827,
       longitude: -9.162038,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+  {
+    path: require("../../assets/Lisboa/cerbejaria liberdade.jpg"),
+    title: "Cervejaria Liberdade",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "12:30 PM - 11:30 PM",
+      Martes: "12:30 PM - 11:30 PM",
+      Miércoles: "12:30 PM - 11:30 PM",
+      Jueves: "12:30 PM - 11:30 PM",
+      Viernes: "12:30 PM - 11:30 PM",
+      Sábado: "12:30 PM - 11:30 PM",
+      Domingo: "12:30 PM - 11:30 PM",
+    },
+    number: "213 198 620",
+    coordinates: {
+      latitude: 38.72102950,
+      longitude: -9.14693150,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
