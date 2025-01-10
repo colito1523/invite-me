@@ -754,7 +754,8 @@
       "invalidInterests": "Os interesses devem ser palavras únicas sem espaços ou números",
       "emailInUse": "Este e-mail já está em uso.",
       "weakPassword": "A senha é muito fraca.",
-      "generic": "Ocorreu um erro. Por favor, tente novamente."
+      "generic": "Ocorreu um erro. Por favor, tente novamente.",
+        "emailContainsSpaces": "O e-mail não pode conter espaços"
     },
     "welcome": {
       "title": "Você está dentro!",

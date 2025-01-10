@@ -349,6 +349,11 @@ export default function SignUp() {
         setIsLoading(false);
         return;
       }
+      if (answers.email.includes(' ')) {
+        Alert.alert(t('signup.errors.emailContainsSpaces'));
+        setIsLoading(false);
+        return;
+      }
       if (!answers.email || !validateEmail(answers.email)) {
         Alert.alert(t('signup.errors.invalidEmail'));
         setIsLoading(false);

@@ -765,7 +765,8 @@
       "invalidInterests": "Los intereses deben ser palabras individuales sin espacios ni números",
       "emailInUse": "Este correo electrónico ya está en uso.",
       "weakPassword": "La contraseña es demasiado débil.",
-      "generic": "Ocurrió un error. Por favor, inténtalo de nuevo."
+      "generic": "Ocurrió un error. Por favor, inténtalo de nuevo.",
+      "emailContainsSpaces": "El correo electrónico no puede contener espacios"
     },
     "welcome": {
       "title": "¡Estás dentro!",

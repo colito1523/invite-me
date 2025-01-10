@@ -777,7 +777,8 @@
       "invalidInterests": "Interests must be single words without spaces or numbers",
       "emailInUse": "This email is already in use.",
       "weakPassword": "The password is too weak.",
-      "generic": "An error occurred. Please try again."
+      "generic": "An error occurred. Please try again.",
+      "emailContainsSpaces": "Email cannot contain spaces"
     },
     "welcome": {
       "title": "You're in!",
