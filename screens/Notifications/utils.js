@@ -296,6 +296,7 @@ export const handleAcceptEventInvitation = async (params) => {
       isPrivate: true,
       eventId: notif.eventId,
       category: eventData.category,
+   
     });
 
     // 3. Get updated user data
@@ -619,6 +620,7 @@ export const handleAcceptGeneralEvent = async (params) => {
         phoneNumber: item.number,
         dateArray: [item.eventDate],
         expirationDate: item.expirationDate || null,
+        eventId: item.eventTitle, // Add this line
       });
 
       // Actualizar la notificación existente

@@ -750,19 +750,21 @@ export function StoryViewer({
                         </View>
                         <TouchableOpacity
                           style={styles.deleteButton}
-                          onPress={() =>
+                          onPress={() => {
+                            setViewersModalVisible(false);
+                            setIsPaused(false);
                             deleteStory({
                               auth,
-                              stories: localStories, // Usar localStories
+                              stories: localStories,
                               currentIndex,
                               storyIndex,
-                              setStories: setLocalStories, // Usar setLocalStories
+                              setStories: setLocalStories,
                               onClose,
                               database,
                               storage,
                               t,
-                            })
-                          }
+                            });
+                          }}
                         >
                           <Ionicons
                             name="trash-outline"
