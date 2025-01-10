@@ -269,7 +269,7 @@ export default function UserProfile({ route, navigation }) {
       );
     }
 
-    const containerWidth = mutualFriends.length * 40;
+    const containerWidth = Math.min(mutualFriends.length * 32, 130);
 
     return (
       <TouchableOpacity
