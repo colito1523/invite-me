@@ -514,7 +514,9 @@
     "fillAllFields": "Por favor, completa todos los campos y selecciona al menos un amigo.",
     "success": "Evento Creado",
     "eventCreated": "Tu evento ha sido creado exitosamente y se han enviado las invitaciones.",
-    "eventCreationError": "Hubo un problema al crear el evento."
+    "eventCreationError": "Hubo un problema al crear el evento.",
+    "cancel": "Cancelar",
+    "accept": "Aceptar"
   },
   "locale": "es-ES",
 
