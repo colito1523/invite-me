@@ -45,9 +45,10 @@ export default {
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId: process.env.APP_ID,
       eas: {
-        projectId: "7e15b633-dd47-4035-86d3-96443bfdab66"
+        projectId: "e905a76a-da8d-4b9e-86fe-b9f370734b84" // ID del proyecto de EAS
       }
     },
+    owner: "colo.magan",
     plugins: [
       "expo-secure-store",
       "expo-font",

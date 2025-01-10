@@ -1,0 +1,40 @@
+{
+    "config": {
+      "target": "https://firestore.googleapis.com/v1/projects/invite-me-32a07/databases/(default)/documents",
+      "phases": [
+        { "duration": 60, "arrivalRate": 50 }
+      ]
+    },
+    "scenarios": [
+      {
+        "flow": [
+          {
+            "get": {
+              "url": "/users"
+            }
+          },
+          {
+            "get": {
+              "url": "/GoBoxs"
+            }
+          },
+          {
+            "get": {
+              "url": "/EventsPriv"
+            }
+          },
+          {
+            "get": {
+              "url": "/chats"
+            }
+          },
+          {
+            "get": {
+              "url": "/reports"
+            }
+          }
+        ]
+      }
+    ]
+  }
+  
