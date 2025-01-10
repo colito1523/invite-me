@@ -15,21 +15,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   storyImageWrapper: {
-    marginHorizontal: 5,
-    padding: 2,
+    marginHorizontal: 6,
+    padding: 3,
   },
   storyCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     overflow: "hidden",
   },
   storyImage: {
     width: "100%",
     height: "100%",
-    borderRadius: 30,
-    borderWidth: 2, // Added borderWidth
-    borderColor: "transparent", // Default border color, can be dynamically set
+    borderRadius: 40,
+    borderWidth: 2, 
+    borderColor: "transparent", 
   },
   unseenStoryCircle: {
     borderWidth: 2,
