@@ -117,7 +117,7 @@ const SliderContent = ({
   <Text key={index} style={styles.dayText}>
     {box.category === "EventoParaAmigos"
       ? day // Muestra directamente el valor sin traducir
-      : t(`days.${day.toLowerCase()}`)} {/* Traduce el día si no es EventoParaAmigos */}
+      : t(`days.${day.toLowerCase()}`)} 
   </Text>
 ))}
             </View>
