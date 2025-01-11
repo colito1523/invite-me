@@ -9,7 +9,6 @@ import {
   getDocs,
   onSnapshot,
   query,
-  setDoc,
   updateDoc,
   where,
   writeBatch,
@@ -17,6 +16,8 @@ import {
 } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
 import { Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export const checkAndRemoveExpiredEvents = async (title) => {
   const boxRef = doc(database, "GoBoxs", title);
@@ -723,5 +724,284 @@ export const handleAcceptGeneralEvent = async (params) => {
     );
   } finally {
     setLoadingEventId(null);
+  }
+};
+
+export const handleSaveEdit = async ({
+  editedData,
+  boxData,
+  setBoxData,
+  setEditModalVisible,
+  setIsProcessing,
+  t,
+}) => {
+  try {
+    setIsProcessing(true);
+
+    const eventRef = doc(database, "EventsPriv", boxData.id || boxData.title);
+    const updatedData = {
+      title: editedData.title,
+      address: editedData.address,
+      description: editedData.description,
+      category: boxData.category || "EventoParaAmigos",
+    };
+
+    // Actualizar en EventsPriv
+    await updateDoc(eventRef, updatedData);
+
+    // Actualizar en cada usuario en /users/{userId}/events/{eventId}
+    const attendees = boxData.attendees || [];
+    for (const attendee of attendees) {
+      const eventsCollectionRef = collection(
+        database,
+        "users",
+        attendee.uid,
+        "events"
+      );
+
+      const querySnapshot = await getDocs(
+        query(
+          eventsCollectionRef,
+          where("eventId", "==", boxData.id || boxData.title)
+        )
+      );
+
+      querySnapshot.forEach(async (docSnapshot) => {
+        await updateDoc(docSnapshot.ref, {
+          title: updatedData.title,
+          description: updatedData.description,
+          address: updatedData.address,
+          category: updatedData.category,
+        });
+      });
+    }
+
+      // Actualizar las notificaciones en /users/{userId}/notifications/{notificationId}
+      const invitedFriends = boxData.invitedFriends || [];
+      for (const friendId of invitedFriends) {
+        const notificationsRef = collection(
+          database,
+          "users",
+          friendId,
+          "notifications"
+        );
+
+        const notificationsSnapshot = await getDocs(
+          query(
+            notificationsRef,
+            where("eventId", "==", boxData.id || boxData.title)
+          )
+        );
+
+        notificationsSnapshot.forEach(async (docSnapshot) => {
+          await updateDoc(docSnapshot.ref, {
+            eventTitle: updatedData.title,
+            description: updatedData.description,
+            address: updatedData.address,
+          });
+        });
+      }
+
+
+    // Actualizar el estado local
+    setBoxData((prevData) => ({
+      ...prevData,
+      ...updatedData,
+    }));
+
+    Alert.alert(
+      t("indexBoxDetails.succes"),
+      t("indexBoxDetails.eventUpdateSuccess")
+    );
+    setEditModalVisible(false);
+  } catch (error) {
+    console.error("Error al actualizar el evento:", error);
+    Alert.alert(
+      t("indexBoxDetails.error"),
+      t("indexBoxDetails.eventUpdateError")
+    );
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
+export const handleEditImage = async ({
+  boxData,
+  setIsProcessing,
+  t,
+}) => {
+  const user = auth.currentUser;
+
+  if (!user || user.uid !== boxData.Admin) {
+    return;
+  }
+
+  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permissionResult.granted) {
+    Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.dontPermission"));
+    return;
+  }
+
+  const pickerResult = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+    try {
+      setIsProcessing(true);
+
+      // Subir la nueva imagen a Firebase Storage
+      const storage = getStorage();
+      const imageRef = ref(
+        storage,
+        `EventosParaAmigos/${boxData.id || boxData.title}_${Date.now()}.jpg`
+      );
+      const uri = pickerResult.assets[0].uri;
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      await uploadBytes(imageRef, blob);
+
+      // Obtener la URL de descarga
+      const downloadURL = await getDownloadURL(imageRef);
+
+      // Actualizar la imagen en el evento principal
+      const eventRef = doc(database, "EventsPriv", boxData.id || boxData.title);
+      await updateDoc(eventRef, { image: downloadURL });
+
+      // Actualizar la imagen en las subcolecciones de los asistentes
+      const attendees = boxData.attendees || [];
+      for (const attendee of attendees) {
+        const userEventRef = collection(
+          database,
+          "users",
+          attendee.uid,
+          "events"
+        );
+
+        const querySnapshot = await getDocs(
+          query(userEventRef, where("eventId", "==", boxData.id || boxData.title))
+        );
+
+        querySnapshot.forEach(async (docSnapshot) => {
+          await updateDoc(docSnapshot.ref, { imageUrl: downloadURL });
+        });
+      }
+
+       // Actualizar la imagen en las notificaciones
+       const invitedFriends = boxData.invitedFriends || [];
+       for (const friendId of invitedFriends) {
+         const notificationsRef = collection(
+           database,
+           "users",
+           friendId,
+           "notifications"
+         );
+ 
+         const notificationsSnapshot = await getDocs(
+           query(notificationsRef, where("eventId", "==", boxData.id || boxData.title))
+         );
+ 
+         notificationsSnapshot.forEach(async (docSnapshot) => {
+           await updateDoc(docSnapshot.ref, { eventImage: downloadURL });
+         });
+       }
+
+      Alert.alert(
+        t("indexBoxDetails.succes"),
+        t("indexBoxDetails.eventUpdated")
+      );
+    } catch (error) {
+      console.error("Error al subir la imagen:", error);
+      Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.eventUpdateError"));
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+};
+export const handleDeleteEvent = async ({
+  box,
+  setIsProcessing,
+  navigation,
+  t,
+}) => {
+  try {
+    setIsProcessing(true);
+
+    // Referencia al documento del evento privado
+    const eventRef = doc(database, "EventsPriv", box.id || box.title);
+    const eventSnapshot = await getDoc(eventRef);
+
+    if (eventSnapshot.exists()) {
+      const eventData = eventSnapshot.data();
+      const attendees = eventData.attendees || []; // Lista de asistentes
+      const invitedFriends = eventData.invitedFriends || []; // Lista de invitados
+
+      // Eliminar el evento de las subcolecciones de los usuarios asistentes
+      for (const attendee of attendees) {
+        const userEventRef = collection(
+          database,
+          "users",
+          attendee.uid,
+          "events"
+        );
+
+        const querySnapshot = await getDocs(
+          query(userEventRef, where("eventId", "==", box.id || box.title))
+        );
+
+        const batch = writeBatch(database);
+        querySnapshot.forEach((docSnapshot) => {
+          batch.delete(docSnapshot.ref); // Eliminar el documento del usuario
+        });
+        await batch.commit();
+      }
+
+       // Eliminar notificaciones de los invitados
+       for (const friendId of invitedFriends) {
+        const notificationsRef = collection(
+          database,
+          "users",
+          friendId,
+          "notifications",
+        );
+
+        const notificationsSnapshot = await getDocs(
+          query(notificationsRef, where("eventId", "==", box.id || box.title)),
+        );
+
+        const notificationsBatch = writeBatch(database);
+        notificationsSnapshot.forEach((docSnapshot) => {
+          notificationsBatch.delete(docSnapshot.ref); // Eliminar la notificación
+        });
+        await notificationsBatch.commit();
+      }
+
+      // Eliminar el evento de la colección principal (EventsPriv)
+      await deleteDoc(eventRef);
+
+      // Redirigir a la pantalla principal y mostrar un mensaje de éxito
+      navigation.navigate("Home", { refresh: true });
+      Alert.alert(
+        t("indexBoxDetails.succes"),
+        t("indexBoxDetails.eventDeleteSuccess")
+      );
+    } else {
+      Alert.alert(
+        t("indexBoxDetails.error"),
+        t("indexBoxDetails.eventNotFound")
+      );
+    }
+  } catch (error) {
+    console.error("Error al eliminar el evento:", error);
+    Alert.alert(
+      t("indexBoxDetails.error"),
+      t("indexBoxDetails.eventDeleteError")
+    );
+  } finally {
+    setIsProcessing(false);
   }
 };

@@ -33,8 +33,6 @@ import {
 import { Image } from "expo-image";
 import DotIndicatorBoxDetails from "../../Components/Dots/DotIndicatorBoxDetails";
 import { useTranslation } from "react-i18next";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import * as ImagePicker from "expo-image-picker";
 import Header from "./BoxDetailsComponents/Header";
 import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
 import SliderContent from "./BoxDetailsComponents/SliderContent";
@@ -46,6 +44,9 @@ import {
   checkEventStatus,
   handleGeneralEventInvite,
   checkAndRemoveExpiredEvents,
+  handleSaveEdit,
+  handleEditImage,
+  handleDeleteEvent 
 } from "./utils";
 
 export default memo(function BoxDetails({ route, navigation }) {
@@ -237,26 +238,16 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
-  const handleDeleteEvent = async () => {
-    try {
-      setIsProcessing(true);
-      const eventRef = doc(database, "EventsPriv", box.id || box.title);
-      await deleteDoc(eventRef);
-      navigation.navigate("Home", { refresh: true });
-      Alert.alert(
-        t("indexBoxDetails.succes"),
-        t("indexBoxDetails.eventDeleteSuccess"),
-      );
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      Alert.alert(
-        t("indexBoxDetails.error"),
-        t("indexBoxDetails.eventDeleteError"),
-      );
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleDeleteEventWrapper = () => {
+    handleDeleteEvent({
+      box,
+      setIsProcessing,
+      navigation,
+      t,
+    });
   };
+  
+  
 
   const fetchFriends = async () => {
     const user = auth.currentUser;
@@ -290,79 +281,16 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
-  const handleEditImage = async () => {
-    const user = auth.currentUser;
 
-    if (!user || user.uid !== boxData.Admin) {
-      return;
-    }
-
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert(
-        t("indexBoxDetails.error"),
-        t("indexBoxDetails.dontPermission"),
-      );
-      return;
-    }
-
-    const pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+  const handleEditImageWrapper = () => {
+    handleEditImage({
+      boxData,
+      setIsProcessing,
+      t,
     });
-
-    if (
-      !pickerResult.canceled &&
-      pickerResult.assets &&
-      pickerResult.assets.length > 0
-    ) {
-      try {
-        setIsProcessing(true);
-
-        // Subir la nueva imagen a Firebase Storage
-        const storage = getStorage();
-        const imageRef = ref(
-          storage,
-          `EventosParaAmigos/${boxData.id || boxData.title}_${Date.now()}.jpg`,
-        );
-        const uri = pickerResult.assets[0].uri;
-        const response = await fetch(uri);
-        const blob = await response.blob();
-
-        await uploadBytes(imageRef, blob);
-
-        // Obtener la URL de descarga
-        const downloadURL = await getDownloadURL(imageRef);
-
-        // Actualizar la imagen en Firebase Firestore
-        const eventRef = doc(
-          database,
-          "EventsPriv",
-          boxData.id || boxData.title,
-        );
-        await updateDoc(eventRef, { image: downloadURL });
-
-        // Navegar a Home con el parámetro de recarga
-        navigation.navigate("Home", { refresh: true });
-
-        Alert.alert(
-          t("indexBoxDetails.succes"),
-          t("indexBoxDetails.eventUpdated"),
-        );
-      } catch (error) {
-        console.error("Error al subir la imagen:", error);
-        Alert.alert(
-          t("indexBoxDetails.error"),
-          t("indexBoxDetails.eventUpdateError"),
-        );
-      } finally {
-        setIsProcessing(false);
-      }
-    }
   };
+
+  
 
   const handleEditEvent = () => {
     const user = auth.currentUser;
@@ -384,88 +312,17 @@ export default memo(function BoxDetails({ route, navigation }) {
     setMenuVisible(false);
   };
 
-  const handleSaveEdit = async () => {
-    try {
-      setIsProcessing(true);
-
-      const eventRef = doc(database, "EventsPriv", boxData.id || boxData.title);
-      const updatedData = {
-        title: editedData.title,
-        address: editedData.address,
-        description: editedData.description,
-      };
-
-      // Actualizar en EventsPriv
-      await updateDoc(eventRef, updatedData);
-
-      // Actualizar en cada usuario en /users/{userId}/events/{eventId}
-      const attendees = boxData.attendees || [];
-      for (const attendee of attendees) {
-        const eventsCollectionRef = collection(
-          database,
-          "users",
-          attendee.uid,
-          "events",
-        );
-
-        // Buscar el documento que coincida con el `eventId`
-        const querySnapshot = await getDocs(
-          query(
-            eventsCollectionRef,
-            where("eventId", "==", boxData.id || boxData.title),
-          ),
-        );
-
-        querySnapshot.forEach(async (docSnapshot) => {
-          // Actualizar el documento encontrado
-          await updateDoc(docSnapshot.ref, updatedData);
-        });
-
-        // Actualizar las notificaciones en /users/{userId}/notifications
-        const notificationsCollectionRef = collection(
-          database,
-          "users",
-          attendee.uid,
-          "notifications",
-        );
-
-        const notificationsSnapshot = await getDocs(
-          query(
-            notificationsCollectionRef,
-            where("eventId", "==", boxData.id || boxData.title),
-          ),
-        );
-
-        notificationsSnapshot.forEach(async (notificationSnapshot) => {
-          await updateDoc(notificationSnapshot.ref, {
-            eventTitle: updatedData.title,
-            description: updatedData.description,
-            address: updatedData.address,
-          });
-        });
-      }
-
-      // Actualizar el estado local
-      setBoxData((prevData) => ({
-        ...prevData,
-        ...updatedData,
-      }));
-
-      Alert.alert(
-        t("indexBoxDetails.succes"),
-        t("indexBoxDetails.eventUpdateSuccess"),
-      );
-      setEditModalVisible(false);
-    } catch (error) {
-      console.error("Error al actualizar el evento:", error);
-      Alert.alert(
-        t("indexBoxDetails.error"),
-        t("indexBoxDetails.eventUpdateError"),
-      );
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleSaveEditWrapper = () => {
+    handleSaveEdit({
+      editedData,
+      boxData,
+      setBoxData,
+      setEditModalVisible,
+      setIsProcessing,
+      t,
+    });
   };
+  
 
   const renderEditModal = () => (
     <Modal
@@ -517,7 +374,7 @@ export default memo(function BoxDetails({ route, navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.editModalButton, styles.saveButton]}
-              onPress={handleSaveEdit}
+              onPress={handleSaveEditWrapper}
               disabled={isProcessing}
             >
               <Text style={styles.editModalButtonText}>
@@ -950,9 +807,9 @@ export default memo(function BoxDetails({ route, navigation }) {
             isNightMode={isNightMode}
             menuVisible={menuVisible}
             toggleMenu={() => setMenuVisible(!menuVisible)}
-            handleEditImage={handleEditImage}
+            handleEditImage={handleEditImageWrapper}
             handleEditEvent={handleEditEvent}
-            handleDeleteEvent={handleDeleteEvent}
+            handleDeleteEvent={handleDeleteEventWrapper}
             isProcessing={isProcessing}
           />
 
