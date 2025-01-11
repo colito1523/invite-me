@@ -7,8 +7,6 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
-  Modal,
-  TextInput,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,6 +34,7 @@ import { useTranslation } from "react-i18next";
 import Header from "./BoxDetailsComponents/Header";
 import ButtonsSection from "./BoxDetailsComponents/ButtonsSection";
 import SliderContent from "./BoxDetailsComponents/SliderContent";
+import EditModal from "./BoxDetailsComponents/EditModal";
 import InviteFriendsModal from "./BoxDetailsComponents/InviteFriendsModal";
 import {
   handleInvite,
@@ -247,8 +246,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     });
   };
   
-  
-
   const fetchFriends = async () => {
     const user = auth.currentUser;
     if (user) {
@@ -281,7 +278,6 @@ export default memo(function BoxDetails({ route, navigation }) {
     }
   };
 
-
   const handleEditImageWrapper = () => {
     handleEditImage({
       boxData,
@@ -289,8 +285,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       t,
     });
   };
-
-  
 
   const handleEditEvent = () => {
     const user = auth.currentUser;
@@ -323,70 +317,17 @@ export default memo(function BoxDetails({ route, navigation }) {
     });
   };
   
-
   const renderEditModal = () => (
-    <Modal
+    <EditModal
       visible={editModalVisible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setEditModalVisible(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.editModalContent}>
-          <Text style={styles.editModalTitle}>
-            {t("indexBoxDetails.editEvent")}
-          </Text>
-          {/* Inputs para edición */}
-          <TextInput
-            style={styles.input}
-            value={editedData.title}
-            onChangeText={(text) =>
-              setEditedData({ ...editedData, title: text })
-            }
-            placeholder={t("indexBoxDetails.titlePlaceholder")}
-          />
-          <TextInput
-            style={styles.input}
-            value={editedData.address}
-            onChangeText={(text) =>
-              setEditedData({ ...editedData, address: text })
-            }
-            placeholder={t("indexBoxDetails.addressPlaceholder")}
-          />
-          <TextInput
-            style={styles.input}
-            value={editedData.description}
-            onChangeText={(text) =>
-              setEditedData({ ...editedData, description: text })
-            }
-            placeholder={t("indexBoxDetails.descriptionPlaceholder")}
-            multiline
-          />
-          {/* Botones */}
-          <View style={styles.editModalButtons}>
-            <TouchableOpacity
-              style={[styles.editModalButton, styles.cancelButton]}
-              onPress={() => setEditModalVisible(false)}
-            >
-              <Text style={styles.editModalButtonText}>
-                {t("storyViewer.cancel")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.editModalButton, styles.saveButton]}
-              onPress={handleSaveEditWrapper}
-              disabled={isProcessing}
-            >
-              <Text style={styles.editModalButtonText}>
-                {isProcessing
-                  ? t("storyViewer.saving")
-                  : t("storyViewer.saver")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
+      onClose={() => setEditModalVisible(false)}
+      onSave={handleSaveEditWrapper}
+      editedData={editedData}
+      setEditedData={setEditedData}
+      isProcessing={isProcessing}
+      styles={styles}
+      t={t}
+    />
   );
 
   // ...existing code...
