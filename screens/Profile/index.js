@@ -213,23 +213,25 @@ export default function Profile({ navigation }) {
         const updatedPhotoUrls = await Promise.all(
           photoUrls.map(async (url, index) => {
             try {
-              if (url.startsWith("file://")) {
+              if (url.startsWith("file://") || !url.includes("profileImages")) {
+                // Asegúrate de que todas las imágenes estén en la carpeta `profileImages`
                 const imageRef = ref(
                   storage,
-                  `profileImages/${user.uid}_${index}.jpg`
+                  `photos/${user.uid}_${index}.jpg`
                 );
                 const response = await fetch(url);
                 const blob = await response.blob();
                 await uploadBytes(imageRef, blob);
                 return await getDownloadURL(imageRef);
               }
-              return url;
+              return url; // Mantén las URLs ya correctas
             } catch (error) {
               console.error("Error al cargar la imagen:", error);
-              throw error; // Propaga el error para que el catch principal lo capture
+              throw error;
             }
           })
         );
+        
 
         const updatedData = {
           firstName: name,

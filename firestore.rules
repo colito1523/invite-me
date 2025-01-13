@@ -1,75 +1,149 @@
-
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Función para verificar si el usuario está autenticado
-    function isAuth() {
-      return request.auth != null;
-    }
-
-    // Función para verificar si el usuario es el propietario del documento
-    function isOwner(userId) {
-      return isAuth() && request.auth.uid == userId;
-    }
-
-    // Reglas para la colección users
+    // Reglas para la colección /users
     match /users/{userId} {
-      allow read: if isAuth();
-      allow create: if isAuth() && request.auth.uid == userId;
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
+      // Permitir lectura (solo usuarios autenticados)
+      allow read: if request.auth != null;
 
-      // Reglas para subcollecciones de usuarios
-      match /friends/{friendId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
-      }
+      // Permitir escritura (solo el dueño del documento)
+      allow write: if request.auth != null && request.auth.uid == userId;
 
-      match /friendRequests/{requestId} {
-        allow read: if isOwner(userId);
-        allow write: if isAuth();
-      }
-
+      // Reglas para la subcolección /events
       match /events/{eventId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
+        // Permitir lectura para cualquier usuario autenticado
+        allow read: if request.auth != null;
+
+        // Permitir escritura (crear, editar, eliminar) solo al dueño del perfil
+        allow write: if request.auth != null && request.auth.uid == userId;
       }
 
-      match /note/current {
-        allow read: if isAuth();
-        allow write: if isOwner(userId);
-        
+      // Reglas para la subcolección /friends
+      match /friends/{friendId} {
+        // Permitir lectura a cualquier usuario autenticado
+        allow read: if request.auth != null;
+
+        // Permitir escritura (agregar o eliminarse a sí mismo de la lista)
+        allow write: if request.auth != null && (
+          request.auth.uid == userId ||  // Dueño del perfil
+          request.auth.uid == friendId   // Usuario gestionando su propia entrada
+        );
+      }
+
+      // Reglas para la subcolección /likes
+      match /likes/{likeId} {
+        // Permitir lectura a cualquier usuario autenticado
+        allow read: if request.auth != null;
+
+        // Permitir creación de likes por cualquier usuario autenticado
+        allow create: if request.auth != null;
+
+        // Permitir eliminación de likes:
+        // - Si el dueño del perfil los elimina
+        // - Si el usuario que dio el like lo elimina
+        allow delete: if request.auth != null && (
+          request.auth.uid == userId ||         // Dueño del perfil
+          request.auth.uid == resource.data.userId // Usuario que dio el like
+        );
+
+        // Permitir edición de likes por el dueño del perfil o el usuario que dio el like
+        allow write: if request.auth != null && (
+          request.auth.uid == userId ||         // Dueño del perfil
+          request.auth.uid == resource.data.userId // Usuario que dio el like
+        );
+      }
+
+      // Reglas para la subcolección /friendRequests
+      match /friendRequests/{requestId} {
+        // Permitir lectura si el usuario es el remitente o el destinatario
+        allow read: if request.auth != null && (
+          request.auth.uid == userId ||              // Destinatario
+          request.auth.uid == resource.data.fromId  // Remitente
+        );
+
+        // Permitir escritura:
+        // - Cualquier usuario autenticado puede crear solicitudes
+        // - El remitente o el destinatario pueden editar o eliminar solicitudes
+        allow create: if request.auth != null;
+        allow write: if request.auth != null && (
+          request.auth.uid == userId ||              // Destinatario
+          request.auth.uid == resource.data.fromId   // Remitente
+        );
+      }
+
+      // Reglas para la subcolección /note
+      match /note/{noteId} {
+        // Permitir lectura a cualquier usuario autenticado
+        allow read: if request.auth != null;
+
+        // Permitir escritura (editar o eliminar) solo al dueño del perfil
+        allow write: if request.auth != null && request.auth.uid == userId;
+
+        // Reglas para la subcolección /likes dentro de /note
         match /likes/{likeId} {
-          allow read: if isAuth();
-          allow write: if isAuth();
+          // Permitir lectura a cualquier usuario autenticado
+          allow read: if request.auth != null;
+
+          // Permitir creación de likes por cualquier usuario autenticado
+          allow create: if request.auth != null;
+
+          // Permitir eliminación de likes:
+          // - Si el dueño de la nota los elimina
+          // - Si el usuario que dio el like lo elimina
+          allow delete: if request.auth != null && (
+            request.auth.uid == userId ||              // Dueño de la nota
+            request.auth.uid == resource.data.userId   // Usuario que dio el like
+          );
+
+          // Permitir edición de likes por el dueño de la nota o el usuario que dio el like
+          allow write: if request.auth != null && (
+            request.auth.uid == userId ||              // Dueño de la nota
+            request.auth.uid == resource.data.userId   // Usuario que dio el like
+          );
         }
       }
 
+      // Reglas para la subcolección /stories
       match /stories/{storyId} {
-        allow read: if isAuth();
-        allow write: if isOwner(userId);
-        
-        match /responses/{responseId} {
-          allow read: if isAuth();
-          allow write: if isAuth();
-        }
+        // Permitir lectura si el usuario está autenticado
+        allow read: if request.auth != null;
+
+        // Permitir escritura (crear, editar o eliminar) solo al dueño de la historia
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Reglas para la subcolección /notifications
+      match /notifications/{notificationId} {
+        // Permitir lectura solo al dueño del perfil
+        allow read: if request.auth != null && request.auth.uid == userId;
+
+        // Permitir escritura (editar o eliminar) al dueño del perfil o al usuario con fromId
+        allow write: if request.auth != null && (
+          request.auth.uid == userId ||              // Dueño del perfil
+          request.auth.uid == resource.data.fromId   // Usuario con fromId
+        );
+      }
+
+      // Reglas para la subcolección /blockedUsers
+      match /blockedUsers/{blockedUserId} {
+        // Permitir lectura a cualquier usuario autenticado
+        allow read: if request.auth != null;
+
+        // Permitir escritura (agregar o eliminarse a sí mismo de la lista)
+        allow write: if request.auth != null && (
+          request.auth.uid == blockedUserId ||  // Usuario gestionando su propia entrada
+          request.auth.uid == userId            // Dueño del perfil
+        );
       }
     }
 
-    // Reglas para eventos privados
-    match /EventsPriv/{eventId} {
-      allow read: if isAuth() && (
-        resource.data.createdBy == request.auth.uid ||
-        request.auth.uid in resource.data.attendees ||
-        request.auth.uid in resource.data.invitedUsers
-      );
-      allow create: if isAuth();
-      allow update: if isAuth() && (
-        resource.data.createdBy == request.auth.uid ||
-        request.auth.uid in resource.data.attendees
-      );
-      allow delete: if isAuth() && resource.data.createdBy == request.auth.uid;
+    // Reglas para la colección /complaints
+    match /complaints/{complaintId} {
+      // Permitir escritura solo a usuarios autenticados
+      allow create: if request.auth != null;
+
+      // Permitir lectura a cualquier usuario autenticado
+      allow read: if request.auth != null;
     }
   }
 }
