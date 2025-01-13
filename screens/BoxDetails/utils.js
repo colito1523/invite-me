@@ -101,7 +101,10 @@ export const checkEventStatus = async (params) => {
   const user = auth.currentUser;
   if (user && box && box.title) {
     const eventsRef = collection(database, "users", user.uid, "events");
-    const q = query(eventsRef, where("eventId", "==", box.eventId || box.id || box.title));
+    const q = query(
+      eventsRef,
+      where("eventId", "==", box.eventId || box.id || box.title),
+    );
     const querySnapshot = await getDocs(q);
 
     const isPrivateEvent = box.category === "EventoParaAmigos";
@@ -465,10 +468,10 @@ export const handleInvite = async (params) => {
       eventId: box.id,
       eventTitle: box.title,
       eventImage: eventImage,
-      day: eventData.day || formatDay(box.date || new Date()), // Usar `eventData.day` primero
+      day: eventData.day || formatDay(box.date || new Date()),
       eventDate: eventDateTimestamp,
       date: eventDateFormatted,
-      expirationDate: eventData.expirationDate || box.expirationDate || null, // Incluir expirationDate aquí
+      expirationDate: eventData.expirationDate || box.expirationDate || null,
       eventCategory: eventCategory,
       type: "invitation",
       status: "pendiente",
@@ -477,6 +480,7 @@ export const handleInvite = async (params) => {
       address: eventData.address || "Dirección no disponible",
       description: eventData.description || "Descripción no disponible",
       eventDateTime: `${eventData.day || "Fecha no disponible"} ${eventData.hour || "Hora no disponible"}`,
+      Admin: user.uid, // Add the Admin field with sender's UID
       hour:
         box.category === "EventoParaAmigos"
           ? formatHour(box.hour || new Date())
@@ -756,14 +760,14 @@ export const handleSaveEdit = async ({
         database,
         "users",
         attendee.uid,
-        "events"
+        "events",
       );
 
       const querySnapshot = await getDocs(
         query(
           eventsCollectionRef,
-          where("eventId", "==", boxData.id || boxData.title)
-        )
+          where("eventId", "==", boxData.id || boxData.title),
+        ),
       );
 
       querySnapshot.forEach(async (docSnapshot) => {
@@ -776,32 +780,31 @@ export const handleSaveEdit = async ({
       });
     }
 
-      // Actualizar las notificaciones en /users/{userId}/notifications/{notificationId}
-      const invitedFriends = boxData.invitedFriends || [];
-      for (const friendId of invitedFriends) {
-        const notificationsRef = collection(
-          database,
-          "users",
-          friendId,
-          "notifications"
-        );
+    // Actualizar las notificaciones en /users/{userId}/notifications/{notificationId}
+    const invitedFriends = boxData.invitedFriends || [];
+    for (const friendId of invitedFriends) {
+      const notificationsRef = collection(
+        database,
+        "users",
+        friendId,
+        "notifications",
+      );
 
-        const notificationsSnapshot = await getDocs(
-          query(
-            notificationsRef,
-            where("eventId", "==", boxData.id || boxData.title)
-          )
-        );
+      const notificationsSnapshot = await getDocs(
+        query(
+          notificationsRef,
+          where("eventId", "==", boxData.id || boxData.title),
+        ),
+      );
 
-        notificationsSnapshot.forEach(async (docSnapshot) => {
-          await updateDoc(docSnapshot.ref, {
-            eventTitle: updatedData.title,
-            description: updatedData.description,
-            address: updatedData.address,
-          });
+      notificationsSnapshot.forEach(async (docSnapshot) => {
+        await updateDoc(docSnapshot.ref, {
+          eventTitle: updatedData.title,
+          description: updatedData.description,
+          address: updatedData.address,
         });
-      }
-
+      });
+    }
 
     // Actualizar el estado local
     setBoxData((prevData) => ({
@@ -811,34 +814,34 @@ export const handleSaveEdit = async ({
 
     Alert.alert(
       t("indexBoxDetails.succes"),
-      t("indexBoxDetails.eventUpdateSuccess")
+      t("indexBoxDetails.eventUpdateSuccess"),
     );
     setEditModalVisible(false);
   } catch (error) {
     console.error("Error al actualizar el evento:", error);
     Alert.alert(
       t("indexBoxDetails.error"),
-      t("indexBoxDetails.eventUpdateError")
+      t("indexBoxDetails.eventUpdateError"),
     );
   } finally {
     setIsProcessing(false);
   }
 };
 
-export const handleEditImage = async ({
-  boxData,
-  setIsProcessing,
-  t,
-}) => {
+export const handleEditImage = async ({ boxData, setIsProcessing, t }) => {
   const user = auth.currentUser;
 
   if (!user || user.uid !== boxData.Admin) {
     return;
   }
 
-  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const permissionResult =
+    await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permissionResult.granted) {
-    Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.dontPermission"));
+    Alert.alert(
+      t("indexBoxDetails.error"),
+      t("indexBoxDetails.dontPermission"),
+    );
     return;
   }
 
@@ -849,7 +852,11 @@ export const handleEditImage = async ({
     quality: 1,
   });
 
-  if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+  if (
+    !pickerResult.canceled &&
+    pickerResult.assets &&
+    pickerResult.assets.length > 0
+  ) {
     try {
       setIsProcessing(true);
 
@@ -857,7 +864,7 @@ export const handleEditImage = async ({
       const storage = getStorage();
       const imageRef = ref(
         storage,
-        `EventosParaAmigos/${boxData.id || boxData.title}_${Date.now()}.jpg`
+        `EventosParaAmigos/${boxData.id || boxData.title}_${Date.now()}.jpg`,
       );
       const uri = pickerResult.assets[0].uri;
       const response = await fetch(uri);
@@ -879,11 +886,14 @@ export const handleEditImage = async ({
           database,
           "users",
           attendee.uid,
-          "events"
+          "events",
         );
 
         const querySnapshot = await getDocs(
-          query(userEventRef, where("eventId", "==", boxData.id || boxData.title))
+          query(
+            userEventRef,
+            where("eventId", "==", boxData.id || boxData.title),
+          ),
         );
 
         querySnapshot.forEach(async (docSnapshot) => {
@@ -891,32 +901,38 @@ export const handleEditImage = async ({
         });
       }
 
-       // Actualizar la imagen en las notificaciones
-       const invitedFriends = boxData.invitedFriends || [];
-       for (const friendId of invitedFriends) {
-         const notificationsRef = collection(
-           database,
-           "users",
-           friendId,
-           "notifications"
-         );
- 
-         const notificationsSnapshot = await getDocs(
-           query(notificationsRef, where("eventId", "==", boxData.id || boxData.title))
-         );
- 
-         notificationsSnapshot.forEach(async (docSnapshot) => {
-           await updateDoc(docSnapshot.ref, { eventImage: downloadURL });
-         });
-       }
+      // Actualizar la imagen en las notificaciones
+      const invitedFriends = boxData.invitedFriends || [];
+      for (const friendId of invitedFriends) {
+        const notificationsRef = collection(
+          database,
+          "users",
+          friendId,
+          "notifications",
+        );
+
+        const notificationsSnapshot = await getDocs(
+          query(
+            notificationsRef,
+            where("eventId", "==", boxData.id || boxData.title),
+          ),
+        );
+
+        notificationsSnapshot.forEach(async (docSnapshot) => {
+          await updateDoc(docSnapshot.ref, { eventImage: downloadURL });
+        });
+      }
 
       Alert.alert(
         t("indexBoxDetails.succes"),
-        t("indexBoxDetails.eventUpdated")
+        t("indexBoxDetails.eventUpdated"),
       );
     } catch (error) {
       console.error("Error al subir la imagen:", error);
-      Alert.alert(t("indexBoxDetails.error"), t("indexBoxDetails.eventUpdateError"));
+      Alert.alert(
+        t("indexBoxDetails.error"),
+        t("indexBoxDetails.eventUpdateError"),
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -946,11 +962,11 @@ export const handleDeleteEvent = async ({
           database,
           "users",
           attendee.uid,
-          "events"
+          "events",
         );
 
         const querySnapshot = await getDocs(
-          query(userEventRef, where("eventId", "==", box.id || box.title))
+          query(userEventRef, where("eventId", "==", box.id || box.title)),
         );
 
         const batch = writeBatch(database);
@@ -960,8 +976,8 @@ export const handleDeleteEvent = async ({
         await batch.commit();
       }
 
-       // Eliminar notificaciones de los invitados
-       for (const friendId of invitedFriends) {
+      // Eliminar notificaciones de los invitados
+      for (const friendId of invitedFriends) {
         const notificationsRef = collection(
           database,
           "users",
@@ -987,19 +1003,19 @@ export const handleDeleteEvent = async ({
       navigation.navigate("Home", { refresh: true });
       Alert.alert(
         t("indexBoxDetails.succes"),
-        t("indexBoxDetails.eventDeleteSuccess")
+        t("indexBoxDetails.eventDeleteSuccess"),
       );
     } else {
       Alert.alert(
         t("indexBoxDetails.error"),
-        t("indexBoxDetails.eventNotFound")
+        t("indexBoxDetails.eventNotFound"),
       );
     }
   } catch (error) {
     console.error("Error al eliminar el evento:", error);
     Alert.alert(
       t("indexBoxDetails.error"),
-      t("indexBoxDetails.eventDeleteError")
+      t("indexBoxDetails.eventDeleteError"),
     );
   } finally {
     setIsProcessing(false);

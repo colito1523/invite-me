@@ -499,7 +499,8 @@ export const handleAcceptPrivateEvent = async (params) => {
         expirationDate: eventData.expirationDate,
         hour: eventData.hour,
         status: "accepted",
-        dateArray: [eventData.date], 
+        dateArray: [eventData.date],
+        Admin: item.Admin || eventData.Admin, // Add Admin field from notification or event data
       });
     }
 
