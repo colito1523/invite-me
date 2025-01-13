@@ -59,12 +59,22 @@ service cloud.firestore {
 
       match /stories/{storyId} {
         allow read: if request.auth != null;
-        allow write: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null;
+        allow update: if request.auth != null && (
+          request.auth.uid == userId || // Allow owner to update
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewers']) || // Allow updating viewers array
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']) // Allow updating likes array
+        );
+        allow delete: if request.auth != null && request.auth.uid == userId; // Only owner can delete
       }
 
       match /notifications/{notificationId} {
         allow read: if request.auth != null && request.auth.uid == userId;
         allow write: if request.auth != null;
+        allow delete: if request.auth != null && (
+          request.auth.uid == userId ||
+          request.auth.uid == resource.data.fromId
+        );
       }
 
       match /blockedUsers/{blockedUserId} {
@@ -92,11 +102,45 @@ service cloud.firestore {
         request.auth.uid in (resource.data.invitedFriends || []) ||
         request.resource.data.diff(resource.data).affectedKeys().hasAny(['image', 'imageUrl', 'eventImage', 'title', 'description', 'address'])
       );
-      allow delete: if request.auth != null && request.auth.uid == resource.data.Admin;
+      allow delete: if request.auth != null && (
+        request.auth.uid == resource.data.Admin ||
+        request.auth.uid in (resource.data.attendees || []).uid ||
+        request.auth.uid in (resource.data.invitedFriends || []).uid
+      );
     }
+
+    match /users/{userId}/events/{eventId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && (
+        request.auth.uid == userId ||
+        request.auth.uid == resource.data.Admin ||
+        request.auth.uid == resource.data.uid
+      );
+    }
+
+    match /users/{userId}/notifications/{notificationId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && (
+        request.auth.uid == userId ||
+        request.auth.uid == resource.data.fromId
+      );
+    }
+
     match /complaints/{complaintId} {
       allow create: if request.auth != null;
       allow read: if request.auth != null;
+    }
+
+    match /reports/{reportId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.reportedBy || 
+        request.auth.uid == resource.data.storyOwner
+      );
+      allow update: if false;
+      allow delete: if false;
     }
   }
 }
