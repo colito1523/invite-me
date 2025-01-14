@@ -200,8 +200,11 @@ const styles = StyleSheet.create({
     padding: 5,
     marginRight: 5,
   },
-  viewerMenuButton: {
-    padding: 5,
+  dotsButton: {
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 5,
   },
   optionsModalContainer: {
     backgroundColor: "transparent",
@@ -267,4 +270,3 @@ const styles = StyleSheet.create({
 });
 
 export default styles;
-

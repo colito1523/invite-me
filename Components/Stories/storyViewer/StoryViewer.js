@@ -357,6 +357,7 @@ export function StoryViewer({
         item={item}
         currentStory={stories[currentIndex]?.userStories[storyIndex]}
         pinnedViewers={pinnedViewers}
+        setPinnedViewers={setPinnedViewers}
         handleUserPress={handleUserPress}
         handlePinViewer={handlePinViewer}
         handleThreeDotsPress={handleThreeDotsPress}

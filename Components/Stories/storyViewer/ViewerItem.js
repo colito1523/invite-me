@@ -7,6 +7,7 @@ const ViewerItem = ({
   item,
   currentStory,
   pinnedViewers,
+  setPinnedViewers,
   handleUserPress,
   handlePinViewer,
   handleThreeDotsPress,
@@ -76,6 +77,7 @@ const ViewerItem = ({
         />
       </TouchableOpacity>
       <TouchableOpacity
+        style={styles.dotsButton}
         onPress={() =>
           handleThreeDotsPress({
             viewer: item,
@@ -85,8 +87,9 @@ const ViewerItem = ({
             user: auth.currentUser,
           })
         }
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Entypo name="dots-three-horizontal" size={18} color="#000" />
+        <Entypo name="dots-three-horizontal" size={20} color="#000" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
