@@ -1,7 +1,8 @@
-import React from "react";
-import { TouchableOpacity, Text, Image } from "react-native";
-import { Ionicons, AntDesign, Entypo } from "@expo/vector-icons";
+import React, { useState, useEffect } from "react";
+import { TouchableOpacity, Text, Image, Alert } from "react-native";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 import styles from "./StoryViewStyles";
+import { doc, getDoc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 
 const ViewerItem = ({
   item,
@@ -18,9 +19,77 @@ const ViewerItem = ({
   t,
   setSelectedViewer,
   setIsHideStoryModalVisible,
+  hideStories,
 }) => {
   const hasLiked = currentStory?.likes?.some((like) => like.uid === item.uid);
   const isPinned = pinnedViewers.some((pv) => pv.uid === item.uid);
+  const [isHidden, setIsHidden] = useState(false);
+
+  useEffect(() => {
+    const checkHideStatus = async () => {
+      const selectedUserRef = doc(database, "users", item.uid);
+      const selectedUserDoc = await getDoc(selectedUserRef);
+      const selectedUserData = selectedUserDoc.data();
+      const currentHideStoriesFrom = selectedUserData.hideStoriesFrom || [];
+      setIsHidden(currentHideStoriesFrom.includes(auth.currentUser.uid));
+    };
+
+    checkHideStatus();
+  }, [item.uid, auth.currentUser.uid, database]);
+
+  const handleToggleHiddenStories = async () => {
+    const userRef = doc(database, "users", auth.currentUser.uid);
+
+    try {
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+      const currentHiddenStories = userData.hiddenStories || [];
+
+      if (currentHiddenStories.includes(item.uid)) {
+        await updateDoc(userRef, {
+          hiddenStories: arrayRemove(item.uid),
+        });
+        Alert.alert(t("userProfile.success"), t("userProfile.willSeeStories"));
+      } else {
+        await updateDoc(userRef, {
+          hiddenStories: arrayUnion(item.uid),
+        });
+        Alert.alert(t("userProfile.success"), t("userProfile.willNotSeeStories"));
+      }
+
+      setIsHidden(!isHidden);
+    } catch (error) {
+      console.error("Error updating hidden stories:", error);
+      Alert.alert(t("userProfile.error"), t("userProfile.hiddenStoriesUpdateError"));
+    }
+  };
+
+  const handleToggleHideMyStories = async () => {
+    const selectedUserRef = doc(database, "users", item.uid);
+
+    try {
+      const selectedUserDoc = await getDoc(selectedUserRef);
+      const selectedUserData = selectedUserDoc.data();
+      const currentHideStoriesFrom = selectedUserData.hideStoriesFrom || [];
+
+      if (currentHideStoriesFrom.includes(auth.currentUser.uid)) {
+        await updateDoc(selectedUserRef, {
+          hideStoriesFrom: arrayRemove(auth.currentUser.uid),
+        });
+        Alert.alert(t("userProfile.success"), t("storyViewer.viewerCanSeeStories"));
+      } else {
+        await updateDoc(selectedUserRef, {
+          hideStoriesFrom: arrayUnion(auth.currentUser.uid),
+        });
+        Alert.alert(t("userProfile.success"), t("userProfile.userCannotSeeStories"));
+      }
+
+      setIsHidden(!isHidden);
+    } catch (error) {
+      console.error("Error updating hide stories:", error);
+      Alert.alert(t("userProfile.error"), t("userProfile.hideStoriesUpdateError"));
+    }
+  };
 
   return (
     <TouchableOpacity
@@ -79,17 +148,27 @@ const ViewerItem = ({
       <TouchableOpacity
         style={styles.dotsButton}
         onPress={() =>
-          handleThreeDotsPress({
-            viewer: item,
-            database,
-            setSelectedViewer,
-            setIsHideStoryModalVisible,
-            user: auth.currentUser,
-          })
+          Alert.alert(
+            isHidden ? "Mostrar historias" : "Ocultar historias",
+            "",
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "OK",
+                onPress: async () => {
+                  await handleToggleHideMyStories();
+                },
+              },
+            ],
+            { cancelable: true }
+          )
         }
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Entypo name="dots-three-horizontal" size={20} color="#000" />
+        <Text style={{ fontSize: 15, color: "#000" }}>...</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
