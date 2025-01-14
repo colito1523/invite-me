@@ -3,6 +3,7 @@ import { TouchableOpacity, Text, Image, Alert } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import styles from "./StoryViewStyles";
 import { doc, getDoc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
+import i18next from 'i18next';
 
 const ViewerItem = ({
   item,
@@ -16,7 +17,7 @@ const ViewerItem = ({
   setIsPaused,
   auth,
   database,
-  t,
+  t = i18next.t,
   setSelectedViewer,
   setIsHideStoryModalVisible,
   hideStories,
@@ -149,15 +150,15 @@ const ViewerItem = ({
         style={styles.dotsButton}
         onPress={() =>
           Alert.alert(
-            isHidden ? "Mostrar historias" : "Ocultar historias",
+            isHidden ? t("userProfile.showMyStories") : t("userProfile.hideMyStories"),
             "",
             [
               {
-                text: "Cancel",
+                text: t("notes.cancel"),
                 style: "cancel",
               },
               {
-                text: "OK",
+                text: t("notes.ok"),
                 onPress: async () => {
                   await handleToggleHideMyStories();
                 },

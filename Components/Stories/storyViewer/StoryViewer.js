@@ -861,42 +861,6 @@ export function StoryViewer({
             }
           }}
         />
-
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={isHideStoryModalVisible}
-          onRequestClose={() => setIsHideStoryModalVisible(false)}
-        >
-          <TouchableWithoutFeedback
-            onPress={() => setIsHideStoryModalVisible(false)}
-          >
-            <View style={styles.modalOverlay2}>
-              <TouchableWithoutFeedback>
-                <View style={styles.simpleModalContainer}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      toggleHideMyStories({
-                        viewer: selectedViewer,
-                        user: auth.currentUser,
-                        database,
-                        setSelectedViewer,
-                        t,
-                      });
-                      setIsHideStoryModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.simpleModalText}>
-                      {selectedViewer?.hideStoriesFrom?.includes(user.uid)
-                        ? t("storyViewer.showMyStories")
-                        : t("storyViewer.hideMyStories")}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
