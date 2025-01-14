@@ -15,19 +15,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   storyImageWrapper: {
-    marginHorizontal: 6,
-    padding: 3,
+    marginHorizontal: 3,
+    padding: 1,
   },
   storyCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
     overflow: "hidden",
+   
   },
   storyImage: {
     width: "100%",
     height: "100%",
-    borderRadius: 40,
+    borderRadius: 38,
     borderWidth: 2, 
     borderColor: "transparent", 
   },
