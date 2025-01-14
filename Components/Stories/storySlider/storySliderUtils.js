@@ -7,7 +7,7 @@ import {
   setDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { auth, database, storage } from "../../config/firebase";
+import { auth, database, storage } from "../../../config/firebase";
 import { Alert, Image } from "react-native";
 import {
   ref as storageRef,

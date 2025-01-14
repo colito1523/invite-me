@@ -17,9 +17,10 @@ import {
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 import { auth, database, storage } from "../../../config/firebase";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
-import styles from "./StoryViewStylesS";
+import styles from "./StoryViewStyles";
 import { useTranslation } from "react-i18next";
 import Complaints from "../../Complaints/Complaints";
+import ViewerItem from "./ViewerItem";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import {
   createStoryPanResponder,
@@ -46,7 +47,7 @@ import {
   handleCloseViewersModal,
   fetchBlockedUsers,
   fetchPinnedViewers,
-} from "../storyUtils"; // Importar las funciones
+} from "./storyUtils"; // Fix import path
 
 const { width, height } = Dimensions.get("window"); // Add this line
 
@@ -351,91 +352,23 @@ export function StoryViewer({
       )
     : 0;
 
-  const renderViewerItem = ({ item }) => {
-    const currentStory = stories[currentIndex]?.userStories[storyIndex];
-    const hasLiked = currentStory?.likes?.some((like) => like.uid === item.uid);
-    const isPinned = pinnedViewers.some((pv) => pv.uid === item.uid);
-
-    return (
-      <TouchableOpacity
-      style={styles.viewerItem}
-      onPress={async () => {
-        // Cerrar el modal de visualizadores
-        setViewersModalVisible(false);
-        setIsPaused(false);
-
-        // Esperar un momento para asegurarse de que los modales se cierren correctamente
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        // Navegar al perfil o visor de historias del usuario
-        handleUserPress({
-          selectedUser: {
-            id: item.uid,
-            username: item.username,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            profileImage: item.profileImage,
-            hasStories: item.hasStories || false,
-          },
-          database,
-          navigation,
-          t,
-        });
-      }}
-    >
-        <Image
-          progressiveRenderingEnabled={true}
-          source={{ uri: `${item.profileImage}?alt=media&w=30&h=30&q=1` }}
-          style={styles.viewerImage}
-          cachePolicy="memory-disk"
-          resizeMode="cover"
-          defaultSource={require("../../assets/perfil.jpg")}
-        />
-        <Text
-          style={styles.viewerName}
-        >{`${item.firstName} ${item.lastName}`}</Text>
-        {hasLiked && (
-          <Ionicons
-            name="heart"
-            size={18}
-            color="red"
-            style={styles.likeIcon}
-          />
-        )}
-        <TouchableOpacity
-          style={styles.viewerEditButton}
-          onPress={() =>
-            handlePinViewer({
-              viewer: item,
-              auth,
-              database,
-              setPinnedViewers,
-              t,
-            })
-          }
-        >
-          <AntDesign
-            name="pushpino"
-            size={18}
-            color={isPinned ? "#007AFF" : "#000"}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() =>
-            handleThreeDotsPress({
-              viewer: item,
-              database,
-              setSelectedViewer,
-              setIsHideStoryModalVisible,
-              user: auth.currentUser,
-            })
-          }
-        >
-          <Entypo name="dots-three-horizontal" size={18} color="#000" />
-        </TouchableOpacity>
-      </TouchableOpacity>
+    const renderViewerItem = ({ item }) => (
+      <ViewerItem
+        item={item}
+        currentStory={stories[currentIndex]?.userStories[storyIndex]}
+        pinnedViewers={pinnedViewers}
+        handleUserPress={handleUserPress}
+        handlePinViewer={handlePinViewer}
+        handleThreeDotsPress={handleThreeDotsPress}
+        setViewersModalVisible={setViewersModalVisible}
+        setIsPaused={setIsPaused}
+        auth={auth}
+        database={database}
+        t={t}
+        setSelectedViewer={setSelectedViewer}
+        setIsHideStoryModalVisible={setIsHideStoryModalVisible}
+      />
     );
-  };
 
   useEffect(() => {
     const backAction = () => {
@@ -535,7 +468,7 @@ export function StoryViewer({
                   style={[styles.image, imageDimensions]}
                   fadeDuration={0}
                   priority="high"
-                  loadingIndicatorSource={require("../../assets/notification-icon.png")}
+                  loadingIndicatorSource={require("../../../assets/notification-icon.png")}
                   resizeMode="cover" // Siempre usar "cover"
                   cachePolicy="memory-disk"
                   progressiveRenderingEnabled={true}
@@ -613,7 +546,7 @@ export function StoryViewer({
                       cachePolicy="memory-only"
                       resizeMode="cover"
                       progressiveRenderingEnabled={false}
-                      defaultSource={require("../../assets/perfil.jpg")}
+                      defaultSource={require("../../../assets/perfil.jpg")}
                     />
                     <Text style={styles.username}>
                       {`${stories[currentIndex]?.username} ${

@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { loadExistingStories, uploadStory, loadStoriesInBatches, compressImage  } from '../storySliderUtils';
+import { loadExistingStories, uploadStory, loadStoriesInBatches, compressImage  } from './storySliderUtils';
 import {
   doc,
   getDoc,
@@ -260,7 +260,7 @@ const renderStory = ({ item, index }) => {
               uri: `${item.profileImage}?alt=media&w=50&h=50&q=2` || "https://via.placeholder.com/50",
             }}
             style={[styles.storyImage]}
-            defaultSource={require("../../assets/perfil.jpg")}
+            defaultSource={require("../../../assets/perfil.jpg")}
             resizeMode="cover"
           />
         ) : (

@@ -13,7 +13,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
-import { auth, database, storage } from "../../config/firebase";
+import { auth, database, storage } from "../../../config/firebase";
 
 export const createStoryPanResponder = ({
   handleCloseViewer,
