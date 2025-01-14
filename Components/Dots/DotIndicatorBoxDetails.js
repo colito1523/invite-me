@@ -17,7 +17,7 @@ import { collection,
   getDoc} from 'firebase/firestore';
 import { database, auth } from '../../config/firebase'; // Asegúrate de importar correctamente `auth`
 import { Image } from 'expo-image';
-import StoryViewer from '../Stories/StoryViewer';
+import StoryViewer from '../Stories/storyViewer/StoryViewer';
 import { useTranslation } from "react-i18next";
 import { handleUserPress } from "./utils";
 

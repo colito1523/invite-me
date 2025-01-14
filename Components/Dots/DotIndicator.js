@@ -23,7 +23,7 @@ import { database, auth } from "../../config/firebase";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import StoryViewer from "../Stories/StoryViewer";
+import StoryViewer from "../Stories/storyViewer/StoryViewer";
 import { useTranslation } from "react-i18next";
 import { handleUserPress } from "./utils";
 

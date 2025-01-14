@@ -29,7 +29,7 @@ import { Menu, Provider } from "react-native-paper";
 import Notes from "../../Components/Notes/Notes";
 import { styles, lightTheme, darkTheme } from "./styles";
 import { useTranslation } from "react-i18next";
-import StoryViewer from '../../Components/Stories/StoryViewer';
+import StoryViewer from '../../Components/Stories/storyViewer/StoryViewer';
 import { useUnreadMessages } from '../../src/hooks/UnreadMessagesContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 

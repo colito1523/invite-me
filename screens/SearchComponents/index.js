@@ -17,7 +17,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
-import StorySlider from "../../Components/Stories/StorySlider";
+import StorySlider from "../../Components/Stories/storySlider/StorySlider";
 import { useTranslation } from "react-i18next";
 import { getAuth } from "firebase/auth";
 import {
@@ -37,7 +37,7 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import StoryViewer from "../../Components/Stories/StoryViewer"; // Added import
+import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer"; // Added import
 import { styles, lightTheme, darkTheme } from "./styles";
 
 export default function Search() {

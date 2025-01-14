@@ -33,7 +33,7 @@ import ChatList from "./screens/ChatList/index";
 import AudioPlayer from "./screens/AudioPlayer";
 import Tutorial from './screens/Tutorial';
 import EventRecommendations from './Components/EventRecomendation/event-recommendations';
-import StoryViewer from './Components/Stories/StoryViewer';
+import StoryViewer from './Components/Stories/storyViewer/StoryViewer';
 
 import { auth, database } from "./config/firebase";
 

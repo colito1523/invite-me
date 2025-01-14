@@ -11,13 +11,13 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { loadExistingStories, uploadStory, loadStoriesInBatches, compressImage  } from './storySliderUtils';
+import { loadExistingStories, uploadStory, loadStoriesInBatches, compressImage  } from '../storySliderUtils';
 import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { auth, database, storage } from "../../config/firebase";
-import StoryViewer from "./StoryViewer";
+import { auth, database, storage } from "../../../config/firebase";
+import StoryViewer from "../storyViewer/StoryViewer";
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "react-native";
 import { useTranslation } from "react-i18next";

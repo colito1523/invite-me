@@ -15,16 +15,11 @@ import {
   BackHandler,
 } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
-import { auth, database, storage } from "../../config/firebase";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-} from "firebase/firestore";
-import styles from "./StoryViewStyles";
+import { auth, database, storage } from "../../../config/firebase";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import styles from "./StoryViewStylesS";
 import { useTranslation } from "react-i18next";
-import Complaints from "../Complaints/Complaints";
+import Complaints from "../../Complaints/Complaints";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import {
   createStoryPanResponder,
@@ -50,8 +45,8 @@ import {
   preloadNextStory,
   handleCloseViewersModal,
   fetchBlockedUsers,
-  fetchPinnedViewers
-} from "./storyUtils"; // Importar las funciones
+  fetchPinnedViewers,
+} from "../storyUtils"; // Importar las funciones
 
 const { width, height } = Dimensions.get("window"); // Add this line
 
@@ -107,7 +102,7 @@ export function StoryViewer({
     const userStories = deserializedStories[initialIndex]?.userStories || [];
     const unseenIndex = userStories.findIndex(
       (story) =>
-        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
+        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid),
     );
     return unseenIndex !== -1 ? unseenIndex : 0;
   });
@@ -217,14 +212,14 @@ export function StoryViewer({
       () => {
         setIsKeyboardVisible(true);
         setIsPaused(true);
-      }
+      },
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
         setIsKeyboardVisible(false);
         setIsPaused(false);
-      }
+      },
     );
 
     return () => {
@@ -251,11 +246,17 @@ export function StoryViewer({
 
       // Obtener el estado actual del like desde Firestore
       const fetchLikeStatus = async () => {
-        const storyRef = doc(database, "users", currentStory.uid, "stories", currentStory.id);
+        const storyRef = doc(
+          database,
+          "users",
+          currentStory.uid,
+          "stories",
+          currentStory.id,
+        );
         const storySnap = await getDoc(storyRef);
         const storyData = storySnap.data();
         const userHasLiked = storyData?.likes?.some(
-          (like) => like.uid === auth.currentUser.uid
+          (like) => like.uid === auth.currentUser.uid,
         );
         setLikedStories((prevLikedStories) => ({
           ...prevLikedStories,
@@ -295,7 +296,7 @@ export function StoryViewer({
   const filteredViewers = viewers.filter((viewer) =>
     `${viewer.firstName} ${viewer.lastName}`
       .toLowerCase()
-      .includes(searchQuery.toLowerCase())
+      .includes(searchQuery.toLowerCase()),
   );
 
   const panResponder = createStoryPanResponder({
@@ -343,7 +344,10 @@ export function StoryViewer({
 
   const hoursAgo = currentStory?.createdAt
     ? Math.floor(
-        (Date.now() - (currentStory.createdAt.toDate?.() || new Date(currentStory.createdAt))) / (1000 * 60 * 60)
+        (Date.now() -
+          (currentStory.createdAt.toDate?.() ||
+            new Date(currentStory.createdAt))) /
+          (1000 * 60 * 60),
       )
     : 0;
 
@@ -354,29 +358,38 @@ export function StoryViewer({
 
     return (
       <TouchableOpacity
-        style={styles.viewerItem}
-        onPress={() =>
-          handleUserPress({
-            selectedUser: {
-              id: item.uid,
-              username: item.username,
-              firstName: item.firstName,
-              lastName: item.lastName,
-              profileImage: item.profileImage,
-              hasStories: item.hasStories || false,
-            },
-            database,
-            navigation,
-            t,
-          })
-        }
-      >
+      style={styles.viewerItem}
+      onPress={async () => {
+        // Cerrar el modal de visualizadores
+        setViewersModalVisible(false);
+        setIsPaused(false);
+
+        // Esperar un momento para asegurarse de que los modales se cierren correctamente
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Navegar al perfil o visor de historias del usuario
+        handleUserPress({
+          selectedUser: {
+            id: item.uid,
+            username: item.username,
+            firstName: item.firstName,
+            lastName: item.lastName,
+            profileImage: item.profileImage,
+            hasStories: item.hasStories || false,
+          },
+          database,
+          navigation,
+          t,
+        });
+      }}
+    >
         <Image
           progressiveRenderingEnabled={true}
-          source={{ uri: `${stories[currentIndex]?.profileImage}?alt=media&w=100&h=100` }}
+          source={{ uri: `${item.profileImage}?alt=media&w=30&h=30&q=1` }}
           style={styles.viewerImage}
           cachePolicy="memory-disk"
           resizeMode="cover"
+          defaultSource={require("../../assets/perfil.jpg")}
         />
         <Text
           style={styles.viewerName}
@@ -431,8 +444,8 @@ export function StoryViewer({
     };
 
     const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction
+      "hardwareBackPress",
+      backAction,
     );
 
     return () => backHandler.remove();
@@ -493,35 +506,36 @@ export function StoryViewer({
           >
             <View style={styles.storyContainer}>
               <View>
-                {isUIVisible && <View style={styles.progressContainer}>
-                  {stories[currentIndex]?.userStories.map((_, index) => (
-                    <View key={index} style={styles.progressBar}>
-                      <View
-                        style={[
-                          styles.progress,
-                          {
-                            width:
-                              index === storyIndex
-                                ? `${progress * 100}%`
-                                : index < storyIndex
-                                ? "100%"
-                                : "0%",
-                          },
-                        ]}
-                      />
-                    </View>
-                  ))}
-                </View>}
+                {isUIVisible && (
+                  <View style={styles.progressContainer}>
+                    {stories[currentIndex]?.userStories.map((_, index) => (
+                      <View key={index} style={styles.progressBar}>
+                        <View
+                          style={[
+                            styles.progress,
+                            {
+                              width:
+                                index === storyIndex
+                                  ? `${progress * 100}%`
+                                  : index < storyIndex
+                                    ? "100%"
+                                    : "0%",
+                            },
+                          ]}
+                        />
+                      </View>
+                    ))}
+                  </View>
+                )}
                 <Image
                   key={currentStory.id}
-                  source={{ uri: `${currentStory.storyUrl}?alt=media&w=1&h=1&q=1` }}
-                  style={[
-                    styles.image,
-                    imageDimensions,
-                  ]}
+                  source={{
+                    uri: `${currentStory.storyUrl}?alt=media&w=1&h=1&q=1`,
+                  }}
+                  style={[styles.image, imageDimensions]}
                   fadeDuration={0}
                   priority="high"
-                  loadingIndicatorSource={require('../../assets/notification-icon.png')}
+                  loadingIndicatorSource={require("../../assets/notification-icon.png")}
                   resizeMode="cover" // Siempre usar "cover"
                   cachePolicy="memory-disk"
                   progressiveRenderingEnabled={true}
@@ -530,8 +544,11 @@ export function StoryViewer({
                     currentStory.loadStartTime = Date.now();
                   }}
                   onLoad={(event) => {
-                    const loadTime = Date.now() - (currentStory.loadStartTime || Date.now());
-                    console.log(`Historia ${currentStory.id} cargada en ${loadTime}ms`);
+                    const loadTime =
+                      Date.now() - (currentStory.loadStartTime || Date.now());
+                    console.log(
+                      `Historia ${currentStory.id} cargada en ${loadTime}ms`,
+                    );
 
                     const { width: imgWidth, height: imgHeight } =
                       event.nativeEvent.source;
@@ -551,66 +568,75 @@ export function StoryViewer({
                     }
                   }}
                   onError={(error) => {
-                    console.error(`Error cargando historia ${currentStory.id}:`, error);
+                    console.error(
+                      `Error cargando historia ${currentStory.id}:`,
+                      error,
+                    );
                   }}
                 />
               </View>
 
-              {isUIVisible && <View style={styles.userInfo}>
-                <TouchableOpacity
-                  style={styles.userDetails}
-                  onPress={async () => {
-                    const currentStory = stories[currentIndex];
-                    if (currentStory) {
-                      await onClose(localUnseenStories);
-                      setTimeout(() => {
-                        if (currentStory.uid === auth.currentUser.uid) {
-                          navigation.navigate("Profile");
-                        } else {
-                          navigation.navigate("UserProfile", {
-                            selectedUser: {
-                              id: currentStory.uid,
-                              username: currentStory.username,
-                              firstName: currentStory.username,
-                              lastName: currentStory.lastName || "",
-                              profileImage: currentStory.profileImage,
-                            },
-                          });
-                        }
-                      }, 100);
-                    }
-                  }}
-                >
-                  <Image
-                    key={`avatar-${stories[currentIndex]?.uid}`}
-                    source={{ uri: `${stories[currentIndex]?.profileImage}?alt=media&w=10&h=10&q=5` }}
-                    style={styles.avatar}
-                    cachePolicy="memory-only"
-                    resizeMode="cover"
-                    progressiveRenderingEnabled={false}
-                    defaultSource={require('../../assets/perfil.jpg')}
-                  />
-                  <Text style={styles.username}>
-                    {`${stories[currentIndex]?.username} ${
-                      stories[currentIndex]?.lastName || ""
-                    }`}
-                  </Text>
-                </TouchableOpacity>
-                <View style={styles.rightInfo}>
-                  <Text style={styles.timeAgo}>
-                    {t("storyViewer.hoursAgo", { hours: hoursAgo })}
-                  </Text>
+              {isUIVisible && (
+                <View style={styles.userInfo}>
                   <TouchableOpacity
-                    onPress={() => setIsOptionsModalVisible(true)}
+                    style={styles.userDetails}
+                    onPress={async () => {
+                      const currentStory = stories[currentIndex];
+                      if (currentStory) {
+                        await onClose(localUnseenStories);
+                        if (currentStory.uid === auth.currentUser.uid) {
+                          setTimeout(() => {
+                            navigation.navigate("Profile");
+                          }, 100);
+                        } else {
+                          setTimeout(() => {
+                            navigation.navigate("UserProfile", {
+                              selectedUser: {
+                                id: currentStory.uid,
+                                username: currentStory.username,
+                                firstName: currentStory.username,
+                                lastName: currentStory.lastName || "",
+                                profileImage: currentStory.profileImage,
+                              },
+                            });
+                          }, 100);
+                        }
+                      }
+                    }}
                   >
-                    <Ionicons
-                      name="ellipsis-horizontal"
-                      size={24}
-                      color="white"
+                    <Image
+                      key={`avatar-${stories[currentIndex]?.uid}`}
+                      source={{
+                        uri: `${stories[currentIndex]?.profileImage}?alt=media&w=10&h=10&q=5`,
+                      }}
+                      style={styles.avatar}
+                      cachePolicy="memory-only"
+                      resizeMode="cover"
+                      progressiveRenderingEnabled={false}
+                      defaultSource={require("../../assets/perfil.jpg")}
                     />
+                    <Text style={styles.username}>
+                      {`${stories[currentIndex]?.username} ${
+                        stories[currentIndex]?.lastName || ""
+                      }`}
+                    </Text>
                   </TouchableOpacity>
+                  <View style={styles.rightInfo}>
+                    <Text style={styles.timeAgo}>
+                      {t("storyViewer.hoursAgo", { hours: hoursAgo })}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => setIsOptionsModalVisible(true)}
+                    >
+                      <Ionicons
+                        name="ellipsis-horizontal"
+                        size={24}
+                        color="white"
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>}
+              )}
             </View>
           </TouchableWithoutFeedback>
 
@@ -696,14 +722,15 @@ export function StoryViewer({
                 }
               >
                 <Ionicons
-                  name={likedStories[currentStory?.id] ? "heart" : "heart-outline"}
+                  name={
+                    likedStories[currentStory?.id] ? "heart" : "heart-outline"
+                  }
                   size={24}
                   color={likedStories[currentStory?.id] ? "red" : "#FFFFFF"}
                 />
               </TouchableOpacity>
             </View>
           )}
-
 
           <Modal
             animationType="slide"
@@ -741,7 +768,9 @@ export function StoryViewer({
                             placeholder={t("storyViewer.searchPlaceholder")}
                             placeholderTextColor="black"
                             value={searchQuery}
-                            onChangeText={(query) => handleSearch({ query, setSearchQuery })}
+                            onChangeText={(query) =>
+                              handleSearch({ query, setSearchQuery })
+                            }
                           />
                           <View style={styles.searchInputDivider} />
                           <Text style={styles.searchInputCount}>
