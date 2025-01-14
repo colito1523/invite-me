@@ -8,8 +8,24 @@ import * as Location from "expo-location";
 
 export const onSignOut = async (navigation, auth) => {
   try {
-    await SecureStore.deleteItemAsync("session_token"); // Elimina el token de sesión primero
-    await signOut(auth); // Cierra la sesión de Firebase
+    // Cleanup all listeners before sign out
+    const unsubscribes = navigation.getState()?.unsubscribes || [];
+    for (const unsubscribe of unsubscribes) {
+      if (typeof unsubscribe === 'function') {
+        try {
+          unsubscribe();
+        } catch (error) {
+          console.log("Error al desuscribirse:", error);
+        }
+      }
+    }
+    
+    // Clear all listeners
+    navigation.getState().unsubscribes = [];
+    
+    // Clear session and sign out
+    await SecureStore.deleteItemAsync("session_token");
+    await signOut(auth);
     console.log("Sign-out successful and session token cleared.");
   } catch (error) {
     console.log("Sign-out error:", error);
