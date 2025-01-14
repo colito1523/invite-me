@@ -142,7 +142,19 @@ function ChatStack() {
        <DateProvider>
       <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen name="Tutorial" component={Tutorial} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={Home} options={{ headerShown: true, headerTitle: "" }} />
+        <Stack.Screen 
+  name="Home" 
+  component={Home} 
+  options={{ 
+    headerShown: true, 
+    headerTitle: "",
+    headerStyle: {
+      elevation: 0,
+      shadowOpacity: 0,
+      borderBottomWidth: 0,
+    }
+  }} 
+/>
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Search" component={Search} options={{ headerTitle: "" }} />
         <Stack.Screen name="Notifications" component={Notifications} />

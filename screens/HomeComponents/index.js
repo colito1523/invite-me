@@ -144,6 +144,9 @@ const Home = React.memo(() => {
         navigation.setOptions({
           headerStyle: {
             backgroundColor: isNightMode ? "black" : "white",
+            shadowColor: 'transparent',
+            borderBottomWidth: 0,
+            elevation: 0,
           },
           headerTintColor: isNightMode ? "white" : "black",
           headerTitle: () => (
