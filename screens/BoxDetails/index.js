@@ -658,7 +658,7 @@ export default memo(function BoxDetails({ route, navigation }) {
         });
       }
       Alert.alert(
-        t("boxDetails.success"),
+        t("userProfile.success"),
         t("boxDetails.friendInvitedMessage")
       );
     };

@@ -541,7 +541,9 @@
     "accept": "Aceptar",
     "error": "Error",
     "eventDeletionError": "Hubo un problema al eliminar el evento.",
-    "eventSavingError": "Hubo un problema al guardar el evento."
+    "eventSavingError": "Hubo un problema al guardar el evento.",
+     "attendFirstMessage": "Primero tienes que estar en el evento.",
+     "friendInvitedMessage": "Amigo invitado"
   },
 
   "businessHours": {

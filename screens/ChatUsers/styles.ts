@@ -21,6 +21,13 @@ export const styles = StyleSheet.create({
       alignItems: "center",
       color: "white",
       flex: 1,
+      gap: 10,
+    },
+    profileImage: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: "#ccc",
     },
     username: {
       fontSize: 20,

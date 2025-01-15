@@ -32,7 +32,7 @@ const InviteFriendsModal = ({
   const handleInvite = (friendId) => {
     setInvitedFriends([...invitedFriends, friendId]);
     Alert.alert(
-      t("boxDetails.success"),
+      t("userProfile.success"),
       t("boxDetails.friendInvitedMessage")
     );
   };

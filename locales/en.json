@@ -525,7 +525,9 @@
     "accept": "Accept",
     "error": "Error",
     "eventDeletionError": "There was a problem deleting the event.",
-    "eventSavingError": "There was a problem saving the event."
+    "eventSavingError": "There was a problem saving the event.",
+    "attendFirstMessage": "First you have to be at the event.",
+    "friendInvitedMessage": "You have invited your friend."
   },
 
   "businessHours": {

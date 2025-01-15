@@ -844,6 +844,10 @@ export default function Chat({ route }) {
             <Feather name="arrow-left" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleUserPress} style={styles.userInfo}>
+            <Image
+              source={{ uri: recipient?.photoUrls?.[0] || 'https://via.placeholder.com/150' }}
+              style={styles.profileImage}
+            />
             <Text style={styles.username}>
               {recipient.firstName + " " + recipient.lastName}
             </Text>
