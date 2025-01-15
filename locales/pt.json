@@ -103,15 +103,13 @@
   "hideMoodOptions": "Ocultar opções",
   "showMoodOptions": "Mostrar opções",
   "respondToNotePlaceholder": "Responder à nota...",
-  "moodOptions": {
-    "Movie night": "Noite de cinema",
-    "Dinner out": "Jantar fora",
-    "Wine glass": "Copo de vinho",
-    "Late night talks": "Conversas noturnas",
-    "Evening Walk": "Caminhada noturna",
-    "Ice Cream Outing": "Passeio para tomar gelado",
-    "Cozy night in": "Noite acolhedora em casa"
-  }
+ "moodOptions": {
+      "morning_walk": "Caminhada matinal",
+      "movie_night": "Pipocas e filme",
+      "dining_out": "Jantar fora",
+      "coffee_break": "Cofee break",
+      "out_for_a_drink": "Out for a drink"
+    }
 },
     "userProfilePrivate": {
   "userBlocked": "Utilizador bloqueado",

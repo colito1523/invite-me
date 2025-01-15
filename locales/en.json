@@ -105,13 +105,11 @@
     "showMoodOptions": "Show Mood Options",
     "respondToNotePlaceholder": "Respond to note...",
     "moodOptions": {
-      "Movie night": "Movie night",
-      "Dinner out": "Dinner out",
-      "Wine glass": "Wine glass",
-      "Late night talks": "Late night talks",
-      "Evening Walk": "Evening Walk",
-      "Ice Cream Outing": "Ice Cream Outing",
-      "Cozy night in": "Cozy night in"
+      "morning_walk": "Morning walk",
+      "movie_night": "Popcorn and movie",
+      "dining_out": "Dining out",
+      "coffee_break": "Coffee break",
+      "out_for_a_drink": "Out for a drink"
     }
   },
 

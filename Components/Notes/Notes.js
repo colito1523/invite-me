@@ -36,12 +36,11 @@ import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 
 const moodOptions = [
-  "Caminhada matinal",
-  "Pipocas e filme", 
-  "Jantar fora",
-  "Coffee break",
-  "out for a drink"// New mood option
-
+  "morning_walk",
+  "movie_night",
+  "dining_out",
+  "coffee_break",
+  "out_for_a_drink"
 ];
 
 export default function Notes() {
@@ -389,8 +388,9 @@ export default function Notes() {
   };
 
   const handleMoodOptionPress = async (mood) => {
+    const translatedMood = t(`notes.moodOptions.${mood}`);
     try {
-      await handleSubmitNote(mood);
+      await handleSubmitNote(translatedMood); // Guarda el texto traducido
       setShowMoodOptions(false);
       setShowMoodToggle(false);
       moodOptionsHeight.setValue(0); // Actualiza sin animación
@@ -399,6 +399,7 @@ export default function Notes() {
       Alert.alert(t("notes.error"), t("notes.shareMoodError"));
     }
   };
+  
   const renderMoodNote = (note, isUser = false) => (
     <TouchableOpacity
       key={`note-${note.friendId}-${note.id}`} // Añadir prefijo 'note-' y friendId
@@ -638,9 +639,7 @@ export default function Notes() {
       style={styles.moodOption}
       onPress={() => handleMoodOptionPress(item)}
     >
-      <Text style={styles.moodOptionText}>
-        {t(`notes.moodOptions.${item}`)}
-      </Text>
+      <Text style={styles.moodOptionText}>{t(`notes.moodOptions.${item}`)}</Text>
     </TouchableOpacity>
   );
 

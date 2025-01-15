@@ -105,14 +105,12 @@
     "hideMoodOptions": "Ocultar opciones de estado de ánimo",
     "showMoodOptions": "Mostrar opciones de estado de ánimo",
     "respondToNotePlaceholder": "Responder a la nota...",
-    "moodOptions": {
-      "Movie night": "Noche de cine",
-      "Dinner out": "Cena fuera",
-      "Wine glass": "Copa de vino",
-      "Late night talks": "Charlas nocturnas",
-      "Evening Walk": "Paseo nocturno",
-      "Ice Cream Outing": "Salida por helado",
-      "Cozy night in": "Noche acogedora en casa"
+   "moodOptions": {
+      "morning_walk": "Caminata matutina",
+      "movie_night": "Palomitas y película",
+      "dining_out": "Cena fuera",
+      "coffee_break": "Descanso para café",
+      "out_for_a_drink": "Salir por una bebida"
     }
   },
     "userProfilePrivate": {
