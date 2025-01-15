@@ -50,10 +50,12 @@ export default function Search() {
   const [isNightMode, setIsNightMode] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false); // Added state
-  const [selectedStories, setSelectedStories] = useState(null); // Added state
+  const [selectedStories, setSelectedStories] = useState(null);
+  const [stories, setStories] = useState([]);
+  const [unseenStories, setUnseenStories] = useState({});
   const blockedUsers = useBlockedUsers();
   const { t } = useTranslation();
-  const storySliderRef = useRef(); // Added ref
+  const storySliderRef = useRef();
 
   const user = auth.currentUser;
   const navigation = useNavigation();
@@ -86,14 +88,21 @@ export default function Search() {
   const theme = isNightMode ? darkTheme : lightTheme;
 
   const onRefresh = useCallback(async () => {
+    if (!user) return;
+    
     setRefreshing(true);
-    await Promise.all([
-      fetchUsers(searchTerm, setResults),
-      fetchRecommendations(user, setRecommendations),
-      storySliderRef.current?.loadExistingStories(),
-    ]);
-    setRefreshing(false);
-  }, [fetchUsers, fetchRecommendations, searchTerm, user]);
+    try {
+      await Promise.all([
+        fetchUsers(searchTerm, setResults),
+        fetchRecommendations(user, setRecommendations),
+        storySliderRef.current?.loadExistingStories(t, setStories, setUnseenStories, false),
+      ]);
+    } catch (error) {
+      console.error('Error refreshing:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [searchTerm, user, t]);
 
   useEffect(() => {
     fetchUsers(searchTerm, setResults);
@@ -597,6 +606,7 @@ export default function Search() {
 
       {searchTerm.length === 0 ? (
         <SectionList
+          showsVerticalScrollIndicator={false}
           sections={sectionsData}
           keyExtractor={(item, index) => item.id + index.toString()}
           renderItem={({ section, item }) => section.renderItem({ item })}
@@ -617,7 +627,7 @@ export default function Search() {
               {t("noRecommendationsOrHistory")}
             </Text>
           }
-          stickySectionHeadersEnabled={false} // Agrega esta línea
+          stickySectionHeadersEnabled={false} 
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

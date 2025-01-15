@@ -277,7 +277,11 @@ const renderStory = ({ item, index }) => {
 
 
   return (
-    <ScrollView>
+    <ScrollView 
+      horizontal={false} 
+      scrollEnabled={false}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.sliderContainer}>
         <FlatList
           data={[{ uid: "addStory" }, ...stories]}
