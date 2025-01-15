@@ -37,20 +37,14 @@ exports.deleteExpiredEvents = functions.runWith({
                 }
 
                 // Depuración
-                console.log(`Procesando evento: ${eventDoc.id}`);
-                console.log(`date: ${eventData.date}, dynamicEventDate: ${dynamicEventDate}`);
-                console.log(`expirationDate: ${eventData.expirationDate}`);
-                console.log(`day: ${eventData.day}`);
-
                 if (
                     (eventData.expirationDate && eventData.expirationDate.toMillis() < now.toMillis()) ||
                     (eventDate && eventDate.getTime() < now.getTime()) ||
                     (dynamicEventDate && dynamicEventDate < now.toMillis())
                 ) {
                     await eventDoc.ref.delete();
-                    console.log(`Evento eliminado (usuarios): ${eventDoc.id}`);
                 } else {
-                    console.log(`Evento NO eliminado: ${eventDoc.id}`);
+                    
                 }
             }
 
@@ -62,14 +56,11 @@ exports.deleteExpiredEvents = functions.runWith({
                 const notificationData = notificationDoc.data();
                 const notificationDate = notificationData.expirationDate;
 
-                console.log(`Procesando notificación: ${notificationDoc.id}`);
-                console.log(`expirationDate: ${notificationDate}`);
-
                 if (notificationDate && notificationDate.toMillis() < now.toMillis()) {
                     await notificationDoc.ref.delete();
-                    console.log(`Notificación eliminada: ${notificationDoc.id}`);
+                   
                 } else {
-                    console.log(`Notificación NO eliminada: ${notificationDoc.id}`);
+                   
                 }
             }
         }
@@ -80,22 +71,17 @@ exports.deleteExpiredEvents = functions.runWith({
             const eventData = eventDoc.data();
             const eventDate = eventData.day ? new Date(eventData.day.split('/').reverse().join('-')) : null;
 
-            console.log(`Procesando evento (EventsPriv): ${eventDoc.id}`);
-            console.log(`expirationDate: ${eventData.expirationDate}`);
-            console.log(`day: ${eventData.day}`);
 
             if (
                 (eventData.expirationDate && eventData.expirationDate.toMillis() < now.toMillis()) ||
                 (eventDate && eventDate.getTime() < now.getTime())
             ) {
                 await eventDoc.ref.delete();
-                console.log(`Evento eliminado (EventsPriv): ${eventDoc.id}`);
             } else {
-                console.log(`Evento NO eliminado (EventsPriv): ${eventDoc.id}`);
+              
             }
         }
 
-        console.log("Eliminación de eventos y notificaciones expirados completada.");
         return null;
     } catch (error) {
         console.error("Error al eliminar eventos y notificaciones expirados:", error);

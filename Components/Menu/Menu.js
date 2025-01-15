@@ -109,7 +109,6 @@ export default function Menu({
       if (user) {
         const userRef = doc(database, "users", user.uid);
         await updateDoc(userRef, { preferredLanguage: language });
-        console.log("Idioma preferido actualizado en Firebase:", language);
       }
     } catch (error) {
       console.error("Error al actualizar el idioma en Firebase:", error);

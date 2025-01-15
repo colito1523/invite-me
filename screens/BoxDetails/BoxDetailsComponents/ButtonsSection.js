@@ -25,12 +25,6 @@ const ButtonsSection = ({
         await handleRemoveFromEvent(); // Llama a la función para "No Voy"
       } else {
         // Aquí se imprime en consola los datos que se están enviando
-        console.log("Datos al presionar 'Voy':", {
-          // Suponiendo que tienes datos relevantes para mostrar
-          // Puedes reemplazar estos campos con los reales
-          eventId: 'yourEventIdHere', // Reemplazar con el id real del evento
-          userId: 'yourUserIdHere',   // Reemplazar con el id real del usuario
-        });
         await handleAddEvent(); // Llama a la función para "Voy"
       }
     } catch (error) {

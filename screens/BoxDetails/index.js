@@ -111,11 +111,6 @@ export default memo(function BoxDetails({ route, navigation }) {
       fetchEventDetails({ box, setBoxData });
     }
     if (isFromNotification) {
-      console.log("Datos recibidos desde la notificación:", {
-        box,
-        selectedDate,
-        isFromNotification,
-      });
     }
   }, [box, isFromNotification]);
 

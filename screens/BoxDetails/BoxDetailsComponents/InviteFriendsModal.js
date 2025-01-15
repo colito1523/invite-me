@@ -26,7 +26,6 @@ const InviteFriendsModal = ({
 
   useEffect(() => {
     if (modalVisible) {
-      console.log("Attendees for the event:", attendeesList);
     }
   }, [modalVisible, attendeesList]);
 

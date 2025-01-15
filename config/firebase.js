@@ -17,7 +17,6 @@ const firebaseConfig = {
   databaseURL: Constants.expoConfig.extra.databaseURL,
 };
 
-console.log("Firebase Config:", firebaseConfig);
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);

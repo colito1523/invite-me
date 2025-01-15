@@ -15,7 +15,7 @@ export const onSignOut = async (navigation, auth) => {
         try {
           unsubscribe();
         } catch (error) {
-          console.log("Error al desuscribirse:", error);
+         
         }
       }
     }
@@ -26,9 +26,7 @@ export const onSignOut = async (navigation, auth) => {
     // Clear session and sign out
     await SecureStore.deleteItemAsync("session_token");
     await signOut(auth);
-    console.log("Sign-out successful and session token cleared.");
   } catch (error) {
-    console.log("Sign-out error:", error);
     Alert.alert("Error", "No se pudo cerrar la sesión correctamente.");
   }
 };
@@ -103,7 +101,6 @@ export const checkTime = (setIsNightMode: (value: boolean) => void) => {
 export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
   if (auth.currentUser) {
     const user = auth.currentUser;
-    console.log("Usuario autenticado:", user.uid); // Log del usuario autenticado
     const notificationsRef = collection(database, "users", user.uid, "notifications");
     const q = query(notificationsRef, where("seen", "==", false));
     const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
@@ -126,7 +123,6 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
     });
 
     return () => {
-      console.log("Limpiando suscripciones a onSnapshot");
       unsubscribeNotifications();
       unsubscribeFriendRequests();
     };

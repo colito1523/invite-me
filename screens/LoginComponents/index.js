@@ -34,7 +34,6 @@ import { styles, lightTheme, darkTheme } from './styles';
 const storeSessionToken = async (token) => {
   try {
     await SecureStore.setItemAsync('session_token', token);
-    console.log('Token almacenado de manera segura');
   } catch (error) {
     console.error('Error al almacenar el token:', error);
   }
@@ -85,7 +84,6 @@ export default function Login({ navigation }) {
       try {
         const token = await getSessionToken(); // Recupera el token del almacenamiento seguro
         if (token) {
-          console.log('Sesión activa. Token:', token);
           navigation.navigate('Home'); // Redirige al usuario si el token es válido
         }
       } catch (error) {

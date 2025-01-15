@@ -480,9 +480,6 @@ export function StoryViewer({
                   onLoad={(event) => {
                     const loadTime =
                       Date.now() - (currentStory.loadStartTime || Date.now());
-                    console.log(
-                      `Historia ${currentStory.id} cargada en ${loadTime}ms`,
-                    );
 
                     const { width: imgWidth, height: imgHeight } =
                       event.nativeEvent.source;

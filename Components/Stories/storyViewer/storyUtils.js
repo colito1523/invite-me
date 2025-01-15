@@ -944,7 +944,7 @@ export const preloadNextStory = ({
   // Ejecutar todas las promesas en paralelo
   Promise.all(preloadPromises)
     .then(() => {
-      console.log(`Precarga completada en ${Date.now() - loadStartTime}ms`);
+
     })
     .catch((error) => {
       console.warn("Error en precarga:", error);

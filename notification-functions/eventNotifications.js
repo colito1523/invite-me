@@ -22,7 +22,7 @@ exports.sendEventNotification = functions.firestore
       const expoPushToken = userDoc.data()?.expoPushToken;
 
       if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) {
-        console.log('Token inválido o no encontrado:', expoPushToken);
+
         return;
       }
 
@@ -63,7 +63,7 @@ exports.sendEventNotification = functions.firestore
         title = texts.generalEventTitle;
         body = texts.inviteText(notificationData.fromName, notificationData.eventTitle);
       } else {
-        console.log('Tipo de notificación desconocido o datos incompletos:', notificationData);
+
         return;
       }
 
