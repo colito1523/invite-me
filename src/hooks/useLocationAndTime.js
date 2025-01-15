@@ -15,8 +15,8 @@ export const useLocationAndTime = () => {
         const location = await Location.getCurrentPositionAsync({});
         const geocode = await Location.reverseGeocodeAsync(location.coords);
         if (geocode.length > 0) {
-          setCountry(geocode[0].country || null);
-          console.log("País detectado:", detectedCountry); // Agregar el console.log aquí
+          const detectedCountry = geocode[0].country || null;
+          console.log("País detectado:", detectedCountry);
           setCountry(detectedCountry);
         }
       }
