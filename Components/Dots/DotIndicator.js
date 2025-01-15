@@ -254,7 +254,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         {filteredImages.length > 6 && (
           <View style={currentStyles.moreContainer}>
             <Text style={currentStyles.moreText}>
-              +72 {/* Change this to always display +72 */}
+            +{filteredImages.length - 6}
             </Text>
           </View>
         )}

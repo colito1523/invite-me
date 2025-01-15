@@ -601,9 +601,11 @@ export default function Notes() {
                 {showResponseInput && (
                   <View style={styles.responseInputContainer}>
                     <TextInput
-                      style={[
+                       style={[
                         styles.responseInput,
-                        { borderColor: isNightMode ? "white" : "black" }, // Borde dinámico según el modo
+                        {
+                          color: isNightMode ? "white" : "#333", // Color específico del texto escrito
+                        },
                       ]}
                       value={responseMessage}
                       onChangeText={setResponseMessage}

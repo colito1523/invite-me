@@ -18,8 +18,7 @@ export const dayStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+   
   },
   sectionTitle: {
     fontSize: 22,

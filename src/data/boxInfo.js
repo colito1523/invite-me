@@ -254,27 +254,7 @@ const boxInfo = [
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
   },
-  {
-    path: require("../../assets/Lisboa/lust in rio.jpg"),
-    title: "Lust in rio",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "Cerrado",
-      Martes: "Cerrado",
-      Miércoles: "8:00 PM - 12:00 AM",
-      Jueves: "8:00 PM - 12:00 AM",
-      Viernes: "8:00 PM - 12:00 AM",
-      Sábado: "8:00 PM - 12:00 AM",
-      Domingo: "12:00 AM - 6:00 AM",
-    },
-    number: "913 795 242",
-    coordinates: {
-      latitude: 38.706027,
-      longitude: -9.1499039,
-    },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-  },
+ 
   {
     path: require("../../assets/Lisboa/Mome.jpg"),
     title: "MOME",
@@ -334,6 +314,27 @@ const boxInfo = [
     coordinates: {
       latitude: 38.7063889,
       longitude: -9.1575,
+    },
+    country: "Portugal", // Agregar esta propiedad
+    city: "Lisboa", // Agregado el campo de ciuda
+  },
+  {
+    path: require("../../assets/Lisboa/lust in rio.jpg"),
+    title: "Lust in rio",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "8:00 PM - 12:00 AM",
+      Jueves: "8:00 PM - 12:00 AM",
+      Viernes: "8:00 PM - 12:00 AM",
+      Sábado: "8:00 PM - 12:00 AM",
+      Domingo: "12:00 AM - 6:00 AM",
+    },
+    number: "913 795 242",
+    coordinates: {
+      latitude: 38.706027,
+      longitude: -9.1499039,
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
