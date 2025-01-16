@@ -491,13 +491,12 @@ export const handleSendMessage = async (params) => {
     });
 
     const currentParams = {
-      recipientUser: selectedUser,
+      recipientUser: {
+        ...selectedUser,
+        photoUrls: selectedUser.photoUrls || [selectedUser.profileImage || "https://via.placeholder.com/150"]
+      },
       currentChatId: existingChatId
     };
-
-    if (selectedUser.profileImage) {
-      currentParams.imageUri = selectedUser.profileImage;
-    }
 
     navigation.navigate("ChatUsers", currentParams);
   } catch (error) {

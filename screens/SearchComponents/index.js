@@ -661,10 +661,7 @@ export default function Search() {
           <StoryViewer
             stories={selectedStories}
             initialIndex={0}
-            onClose={async () => {
-              setIsModalVisible(false);
-              await loadExistingStories();
-            }}
+            onClose={() => setIsModalVisible(false)}
             unseenStories={{}}
             navigation={navigation}
           />
@@ -672,4 +669,4 @@ export default function Search() {
       )}
     </LinearGradient>
   );
-}
+} 

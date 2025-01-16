@@ -21,6 +21,7 @@ const ViewerItem = ({
   setSelectedViewer,
   setIsHideStoryModalVisible,
   hideStories,
+  navigation, // Add navigation prop here
 }) => {
   const hasLiked = currentStory?.likes?.some((like) => like.uid === item.uid);
   const isPinned = pinnedViewers.some((pv) => pv.uid === item.uid);
@@ -109,7 +110,7 @@ const ViewerItem = ({
             hasStories: item.hasStories || false,
           },
           database,
-          navigation,
+          navigation, // Ensure navigation is passed here
           t,
         });
       }}

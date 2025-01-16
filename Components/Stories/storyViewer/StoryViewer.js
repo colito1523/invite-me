@@ -352,24 +352,33 @@ export function StoryViewer({
       )
     : 0;
 
-    const renderViewerItem = ({ item }) => (
-      <ViewerItem
-        item={item}
-        currentStory={stories[currentIndex]?.userStories[storyIndex]}
-        pinnedViewers={pinnedViewers}
-        setPinnedViewers={setPinnedViewers}
-        handleUserPress={handleUserPress}
-        handlePinViewer={handlePinViewer}
-        handleThreeDotsPress={handleThreeDotsPress}
-        setViewersModalVisible={setViewersModalVisible}
-        setIsPaused={setIsPaused}
-        auth={auth}
-        database={database}
-        t={t}
-        setSelectedViewer={setSelectedViewer}
-        setIsHideStoryModalVisible={setIsHideStoryModalVisible}
-      />
-    );
+  const renderViewerItem = ({ item }) => (
+    <ViewerItem
+      item={item}
+      currentStory={stories[currentIndex]?.userStories[storyIndex]}
+      pinnedViewers={pinnedViewers}
+      setPinnedViewers={setPinnedViewers}
+      handleUserPress={async (selectedUser) => {
+        await onClose(localUnseenStories);
+        handleUserPress({
+          selectedUser,
+          database,
+          navigation,
+          t,
+        });
+      }}
+      handlePinViewer={handlePinViewer}
+      handleThreeDotsPress={handleThreeDotsPress}
+      setViewersModalVisible={setViewersModalVisible}
+      setIsPaused={setIsPaused}
+      auth={auth}
+      database={database}
+      t={t}
+      setSelectedViewer={setSelectedViewer}
+      setIsHideStoryModalVisible={setIsHideStoryModalVisible}
+      navigation={navigation} // Add navigation prop here
+    />
+  );
 
   useEffect(() => {
     const backAction = () => {

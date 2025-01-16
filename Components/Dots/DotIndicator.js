@@ -63,6 +63,9 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       return;
     }
 
+   // Cierra el modal antes de navegar
+    setModalVisible(false);
+
     if (uid === auth.currentUser.uid) {
       setModalVisible(false); // Close the modal
       navigation.navigate("Profile");
@@ -346,9 +349,9 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                   <StoryViewer
                     stories={selectedStories}
                     initialIndex={0}
-                    onClose={async () => {
+                    onClose={() => {
                       setIsModalVisible(false);
-                      await checkStories();
+                      setModalVisible(false); // Cierra también el modal principal
                     }}
                     unseenStories={{}}
                     navigation={navigation}
