@@ -47,8 +47,10 @@ export default {
         "WRITE_EXTERNAL_STORAGE",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-      ], // Agrega permisos explícitos
-      versionCode: 1 // Agrega este campo aquí
+      ],
+      softwareKeyboardLayoutMode: "pan",
+      allowBackup: true,
+      jsEngine: "hermes"
     },
     web: {
       favicon: "./assets/Logo_Invite_Me.png",
