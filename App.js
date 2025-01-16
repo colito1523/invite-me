@@ -123,7 +123,7 @@ const LanguageProvider = ({ children }) => {
 
 function ChatStack() {
   const [initialRoute, setInitialRoute] = React.useState(null);
-  
+
   React.useEffect(() => {
     const checkTutorialStatus = async () => {
       if (auth.currentUser) {
@@ -286,7 +286,7 @@ export default function App() {
         try {
           const userRef = doc(database, 'users', auth.currentUser.uid);
           await updateDoc(userRef, { expoPushToken: expoPushToken });
-       
+
         } catch (error) {
           console.error("Error actualizando expoPushToken:", error);
         }
