@@ -99,8 +99,8 @@ const ViewerItem = ({
       onPress={async () => {
         setViewersModalVisible(false);
         setIsPaused(false);
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        handleUserPress({
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        navigation.navigate("UserProfile", {
           selectedUser: {
             id: item.uid,
             username: item.username,
@@ -108,10 +108,11 @@ const ViewerItem = ({
             lastName: item.lastName,
             profileImage: item.profileImage,
             hasStories: item.hasStories || false,
+            photoUrls: [item.profileImage],
           },
           database,
-          navigation, // Ensure navigation is passed here
-          t,
+          navigation,
+          t
         });
       }}
     >
