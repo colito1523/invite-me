@@ -177,11 +177,9 @@ export function StoryViewer({
   useEffect(() => {
     let timer;
     if (!isPaused && !isKeyboardVisible && !isComplaintsVisible) {
-      timer = setInterval(() => {
-        if (progress < 1) {
-          setProgress((prev) => prev + 0.002);
-        } else {
-          handleNextWrapper({
+      timer = setTimeout(() => {
+        if (progress >= 1) {
+          handleNext({
             stories,
             currentIndex,
             setCurrentIndex,
@@ -192,12 +190,14 @@ export function StoryViewer({
             localUnseenStories,
             setLocalUnseenStories,
           });
+        } else {
+          setProgress((prev) => prev + 0.02);
         }
-      }, 10);
+      }, 50);
     }
 
-    return () => clearInterval(timer);
-  }, [progress, isPaused, isKeyboardVisible, isComplaintsVisible]);
+    return () => clearTimeout(timer);
+  }, [progress, isPaused, isKeyboardVisible, isComplaintsVisible, stories, currentIndex, storyIndex]);
 
   useEffect(() => {
     if (isOptionsModalVisible) {
