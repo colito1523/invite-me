@@ -231,10 +231,9 @@ export function StoryViewer({
 
   useEffect(() => {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
-
-    // Si `currentStory` no está disponible, no continúes y muestra un indicador de carga
     if (!currentStory) {
-      return;
+      console.error("currentStory no válido");
+      return; // Asegura que no se continúe si no es válido
     }
 
     if (auth.currentUser) {
