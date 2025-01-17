@@ -50,7 +50,14 @@ export default {
       ],
       softwareKeyboardLayoutMode: "pan",
       allowBackup: true,
-      jsEngine: "hermes"
+      jsEngine: "hermes",
+    },
+    "expo-build-properties": {
+      android: {
+        compileSdkVersion: 33,
+        targetSdkVersion: 33,
+        buildToolsVersion: "33.0.2",
+      },
     },
     web: {
       favicon: "./assets/Logo_Invite_Me.png",
