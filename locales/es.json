@@ -602,12 +602,20 @@
  "profileMenuSections": {
     "deleteAccount": "Eliminar cuenta",
     "deleteAccountQuestions": "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.",
+    "confirmEmail": "Confirmar correo electrónico",
+    "enterEmail": "Por favor, introduce tu correo electrónico:",
+    "confirmPassword": "Confirmar contraseña",
+    "enterPassword": "Por favor, introduce tu contraseña:",
+    "emailRequired": "El correo electrónico es obligatorio.",
+    "passwordRequired": "La contraseña es obligatoria.",
+    "invalidCredentials": "Correo o contraseña incorrectos.",
     "success": "Éxito",
     "accountDeleted": "Tu cuenta ha sido eliminada exitosamente.",
     "error": "Error",
     "noAuthenticatedUser": "No se encontró un usuario autenticado.",
     "recentLoginRequired": "Debes iniciar sesión nuevamente para eliminar tu cuenta.",
-    "deleteAccountError": "No se pudo eliminar tu cuenta. Intenta nuevamente."
+    "deleteAccountError": "No se pudo eliminar tu cuenta. Intenta nuevamente.",
+     "continue": "Continuar"
   },
   "userProfile": {
     "error": "Error",

@@ -2,7 +2,9 @@ import React from "react";
 import { View, TouchableOpacity, StyleSheet, Alert, Platform } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-import { getAuth, deleteUser } from "firebase/auth";
+import { getAuth, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+import { doc, deleteDoc } from "firebase/firestore";
+import { database } from "../../config/firebase";
 import { useTranslation } from "react-i18next";
 
 const MenuSection = ({
@@ -28,32 +30,93 @@ const MenuSection = ({
         {
           text: t("chatUsers.delete"),
           style: "destructive",
-          onPress: async () => {
-            try {
-              const auth = getAuth();
-              const user = auth.currentUser;
-
-              if (user) {
-                await deleteUser(user);
-                Alert.alert(t("profileMenuSections.success"), t("profileMenuSections.accountDeleted"));
-              } else {
-                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.noAuthenticatedUser"));
-              }
-            } catch (error) {
-              if (error.code === "auth/requires-recent-login") {
-                Alert.alert(
-                  t("profileMenuSections.error"),
-                  t("profileMenuSections.recentLoginRequired")
-                );
-              } else {
-                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.deleteAccountError"));
-              }
-            }
+          onPress: () => {
+            Alert.prompt(
+              t("profileMenuSections.confirmEmail"),
+              t("profileMenuSections.enterEmail"),
+              [
+                {
+                  text: t("chatUsers.cancel"),
+                  style: "cancel",
+                },
+                {
+                  text: t("profileMenuSections.continue"),
+                  style: "default",
+                  onPress: (email) => {
+                    if (!email) {
+                      Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.emailRequired"));
+                      return;
+                    }
+  
+                    Alert.prompt(
+                      t("profileMenuSections.confirmPassword"),
+                      t("profileMenuSections.enterPassword"),
+                      [
+                        {
+                          text: t("chatUsers.cancel"),
+                          style: "cancel",
+                        },
+                        {
+                          text: t("chatUsers.delete"),
+                          style: "destructive",
+                          onPress: async (password) => {
+                            if (!password) {
+                              Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
+                              return;
+                            }
+  
+                            try {
+                              const auth = getAuth();
+                              const user = auth.currentUser;
+                              const credential = EmailAuthProvider.credential(email, password);
+  
+                              // Reautenticar usuario
+                              await reauthenticateWithCredential(user, credential);
+  
+                              // Eliminar datos de Firestore
+                              await deleteDoc(doc(database, "users", user.uid));
+  
+                              // Eliminar usuario de la autenticación
+                              await deleteUser(user);
+  
+                              Alert.alert(
+                                t("profileMenuSections.success"),
+                                t("profileMenuSections.accountDeleted"),
+                                [
+                                  {
+                                    text: t("chatUsers.ok"),
+                                    onPress: () => {
+                                      navigation.reset({
+                                        index: 0,
+                                        routes: [{ name: "Login" }], // Redirige al login después de eliminar la cuenta
+                                      });
+                                    },
+                                  },
+                                ]
+                              );
+                            } catch (error) {
+                              if (error.code === "auth/wrong-password" || error.code === "auth/user-mismatch") {
+                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidCredentials"));
+                              } else {
+                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.deleteAccountError"));
+                              }
+                            }
+                          },
+                        },
+                      ],
+                      "secure-text"
+                    );
+                  },
+                },
+              ],
+              "plain-text"
+            );
           },
         },
       ]
     );
   };
+  
 
   return (
     <View style={styles.menuContainer}>

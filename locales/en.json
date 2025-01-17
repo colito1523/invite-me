@@ -599,14 +599,22 @@
   },
 
   "profileMenuSections": {
-    "deleteAccount": "Delete account",
+   "deleteAccount": "Delete account",
     "deleteAccountQuestions": "Are you sure you want to delete your account? This action cannot be undone.",
+    "confirmEmail": "Confirm email",
+    "enterEmail": "Please enter your email:",
+    "confirmPassword": "Confirm password",
+    "enterPassword": "Please enter your password:",
+    "emailRequired": "Email is required.",
+    "passwordRequired": "Password is required.",
+    "invalidCredentials": "Incorrect email or password.",
     "success": "Success",
     "accountDeleted": "Your account has been successfully deleted.",
     "error": "Error",
     "noAuthenticatedUser": "No authenticated user found.",
     "recentLoginRequired": "You need to log in again to delete your account.",
-    "deleteAccountError": "Failed to delete your account. Please try again."
+    "deleteAccountError": "Failed to delete your account. Please try again.",
+     "continue": "Continue"
   },
 
   "userProfile": {
