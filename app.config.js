@@ -51,6 +51,11 @@ export default {
       softwareKeyboardLayoutMode: "pan",
       allowBackup: true,
       jsEngine: "hermes",
+      config: {
+        googleMaps: {
+          apiKey: "AIzaSyAmlwxr5zZXZnv_3YihB_XIQiKVqMzszYg" // Clave API de Google Maps
+        }
+      }
     },
     "expo-build-properties": {
       android: {
