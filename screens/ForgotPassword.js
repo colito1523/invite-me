@@ -49,7 +49,7 @@ i18n
 
 const { width, height } = Dimensions.get('window');
 
-import { LanguageContext } from "../App"; // Ensure correct import of LanguageContext
+import { LanguageContext } from "../src/contexts/LanguageContext"; // Ensure correct import of LanguageContext
 
 export default function ElegantForgotPassword({ navigation }) {
   const [email, setEmail] = useState('');

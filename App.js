@@ -70,57 +70,7 @@ const AuthenticatedUserProvider = ({ children }) => {
   );
 };
 
-export const LanguageContext = createContext(); // Export LanguageContext
-
-const LanguageProvider = ({ children }) => {
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
-
-  useEffect(() => {
-    const loadSavedLanguage = async () => {
-      try {
-        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
-        if (savedLanguage) {
-          i18n.changeLanguage(savedLanguage);
-          setSelectedLanguage(savedLanguage);
-        } else if (auth.currentUser) {
-          const userRef = doc(database, "users", auth.currentUser.uid);
-          const userDoc = await getDoc(userRef);
-          if (userDoc.exists()) {
-            const preferredLanguage = userDoc.data().preferredLanguage;
-            if (preferredLanguage) {
-              i18n.changeLanguage(preferredLanguage);
-              setSelectedLanguage(preferredLanguage);
-              await AsyncStorage.setItem(LANGUAGE_KEY, preferredLanguage);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error loading saved language:', error);
-      }
-    };
-    loadSavedLanguage();
-  }, []);
-
-  const changeLanguage = async (lang) => {
-    await i18n.changeLanguage(lang);
-    setSelectedLanguage(lang);
-    try {
-      await AsyncStorage.setItem(LANGUAGE_KEY, lang);
-      if (auth.currentUser) {
-        const userRef = doc(database, "users", auth.currentUser.uid);
-        await updateDoc(userRef, { preferredLanguage: lang });
-      }
-    } catch (error) {
-      console.error('Error saving language:', error);
-    }
-  };
-
-  return (
-    <LanguageContext.Provider value={{ selectedLanguage, changeLanguage }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
+import { LanguageProvider } from './src/contexts/LanguageContext';
 
 function ChatStack() {
   const [initialRoute, setInitialRoute] = React.useState(null);
@@ -275,15 +225,7 @@ export default function App() {
         }
         setIsI18nInitialized(true);
 
-        const expoPushToken = useNotifications(); // Usa el hook de notificaciones
-        if (auth.currentUser && expoPushToken) {
-          try {
-            const userRef = doc(database, 'users', auth.currentUser.uid);
-            await updateDoc(userRef, { expoPushToken: expoPushToken });
-          } catch (error) {
-            console.error("Error actualizando expoPushToken:", error);
-          }
-        }
+        // Notifications will be handled by the useEffect hook in the component
 
       } catch (e) {
         console.warn(e);

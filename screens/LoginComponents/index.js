@@ -24,7 +24,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import * as SecureStore from 'expo-secure-store';
 import validator from 'validator'; // Importar la biblioteca validator
-import { LanguageContext } from "../../App"; // Ensure correct import of LanguageContext
+import { LanguageContext } from "../../src/contexts/LanguageContext"; // Ensure correct import of LanguageContext
 
 import es from '../../locales/es.json';
 import en from '../../locales/en.json';
