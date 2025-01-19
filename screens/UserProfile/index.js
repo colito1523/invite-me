@@ -583,6 +583,7 @@ export default function UserProfile({ route, navigation }) {
                       t,
                       setHideStories,
                       hideStories,
+                      closeMenu, // Pass closeMenu function
                     })
                   }
                   title={
@@ -599,6 +600,7 @@ export default function UserProfile({ route, navigation }) {
                       t,
                       setHideMyStories,
                       hideMyStories,
+                      closeMenu, // Pass closeMenu function
                     })
                   }
                   title={

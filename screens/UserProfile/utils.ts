@@ -528,6 +528,7 @@ export const handleToggleHiddenStories = async (params) => {
   const t = params.t
   const setHideStories = params.setHideStories
   const hideStories = params.hideStories
+  const closeMenu = params.closeMenu // Add closeMenu parameter
 
   if (!user || !selectedUser) return;
 
@@ -539,7 +540,6 @@ export const handleToggleHiddenStories = async (params) => {
     const currentHiddenStories = userData.hiddenStories || [];
 
     if (currentHiddenStories.includes(selectedUser.id)) {
-      // Si el UID ya está en la lista, lo eliminamos
       await updateDoc(userRef, {
         hiddenStories: arrayRemove(selectedUser.id),
       });
@@ -548,7 +548,6 @@ export const handleToggleHiddenStories = async (params) => {
         t("userProfile.willSeeStories")
       );
     } else {
-      // Si no está en la lista, lo añadimos
       await updateDoc(userRef, {
         hiddenStories: arrayUnion(selectedUser.id),
       });
@@ -558,8 +557,8 @@ export const handleToggleHiddenStories = async (params) => {
       );
     }
 
-    // Actualizamos el estado local para reflejar el cambio
     setHideStories(!hideStories);
+    closeMenu(); // Close the menu after action
   } catch (error) {
     console.error("Error updating hidden stories:", error);
     Alert.alert(
@@ -575,6 +574,7 @@ export const toggleHideMyStories = async (params) => {
   const t = params.t
   const setHideMyStories = params.setHideMyStories
   const hideMyStories = params.hideMyStories
+  const closeMenu = params.closeMenu // Add closeMenu parameter
 
   if (!user || !selectedUser) return;
 
@@ -616,6 +616,7 @@ export const toggleHideMyStories = async (params) => {
 
       // Actualizar el estado local para reflejar el cambio
       setHideMyStories(!hideMyStories);
+      closeMenu(); // Close the menu after action
   } catch (error) {
       console.error("Error updating hide stories:", error);
       Alert.alert(
