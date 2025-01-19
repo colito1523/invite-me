@@ -65,6 +65,7 @@ const NameDisplay = React.memo(({
               onChangeText={setName}
               placeholder={t("profile.namePlaceholder")}
               placeholderTextColor="#bbb"
+              maxLength={15}
             />
             <TextInput
               ref={surnameInputRef}
@@ -73,6 +74,7 @@ const NameDisplay = React.memo(({
               onChangeText={setSurname}
               placeholder={t("profile.surnamePlaceholder")}
               placeholderTextColor="#bbb"
+              maxLength={15}
             />
           </>
         ) : (
