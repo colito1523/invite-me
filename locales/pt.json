@@ -321,7 +321,8 @@
   "eightHours": "8 horas",
   "twentyFourHours": "24 horas",
   "alreadyViewed": "Já visto",
-  "view": "Ver"
+  "view": "Ver",
+  "sentPhoto": "Enviou uma foto"
 },
   "notifications": {
   "deleteNotificationTitle": "Eliminar notificação",

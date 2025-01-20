@@ -1,8 +1,20 @@
+
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, Alert, Platform } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Platform,
+} from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-import { getAuth, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+import {
+  getAuth,
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "firebase/auth";
 import { doc, deleteDoc } from "firebase/firestore";
 import { database } from "../../config/firebase";
 import { useTranslation } from "react-i18next";
@@ -17,6 +29,8 @@ const MenuSection = ({
   setIsBlockedListVisible,
 }) => {
   const { t } = useTranslation();
+
+  const closeMenu = () => setMenuVisible(false);
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -45,10 +59,13 @@ const MenuSection = ({
                   style: "default",
                   onPress: (email) => {
                     if (!email) {
-                      Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.emailRequired"));
+                      Alert.alert(
+                        t("profileMenuSections.error"),
+                        t("profileMenuSections.emailRequired"),
+                      );
                       return;
                     }
-  
+
                     Alert.prompt(
                       t("profileMenuSections.confirmPassword"),
                       t("profileMenuSections.enterPassword"),
@@ -62,24 +79,28 @@ const MenuSection = ({
                           style: "destructive",
                           onPress: async (password) => {
                             if (!password) {
-                              Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
+                              Alert.alert(
+                                t("profileMenuSections.error"),
+                                t("profileMenuSections.passwordRequired"),
+                              );
                               return;
                             }
-  
+
                             try {
                               const auth = getAuth();
                               const user = auth.currentUser;
-                              const credential = EmailAuthProvider.credential(email, password);
-  
-                              // Reautenticar usuario
-                              await reauthenticateWithCredential(user, credential);
-  
-                              // Eliminar datos de Firestore
+                              const credential = EmailAuthProvider.credential(
+                                email,
+                                password,
+                              );
+
+                              await reauthenticateWithCredential(
+                                user,
+                                credential,
+                              );
                               await deleteDoc(doc(database, "users", user.uid));
-  
-                              // Eliminar usuario de la autenticación
                               await deleteUser(user);
-  
+
                               Alert.alert(
                                 t("profileMenuSections.success"),
                                 t("profileMenuSections.accountDeleted"),
@@ -89,60 +110,87 @@ const MenuSection = ({
                                     onPress: () => {
                                       navigation.reset({
                                         index: 0,
-                                        routes: [{ name: "Login" }], // Redirige al login después de eliminar la cuenta
+                                        routes: [{ name: "Login" }],
                                       });
                                     },
                                   },
-                                ]
+                                ],
                               );
                             } catch (error) {
-                              if (error.code === "auth/wrong-password" || error.code === "auth/user-mismatch") {
-                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidCredentials"));
+                              if (
+                                error.code === "auth/wrong-password" ||
+                                error.code === "auth/user-mismatch"
+                              ) {
+                                Alert.alert(
+                                  t("profileMenuSections.error"),
+                                  t("profileMenuSections.invalidCredentials"),
+                                );
                               } else {
-                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.deleteAccountError"));
+                                Alert.alert(
+                                  t("profileMenuSections.error"),
+                                  t("profileMenuSections.deleteAccountError"),
+                                );
                               }
                             }
                           },
                         },
                       ],
-                      "secure-text"
+                      "secure-text",
                     );
                   },
                 },
               ],
-              "plain-text"
+              "plain-text",
             );
           },
         },
-      ]
+      ],
     );
   };
-  
 
   return (
     <View style={styles.menuContainer}>
       <Menu
         visible={menuVisible}
-        onDismiss={() => setMenuVisible(false)}
+        onDismiss={closeMenu}
         anchor={
-          <TouchableOpacity onPress={() => setMenuVisible(true)}>
+          <TouchableOpacity
+            onPress={() => setMenuVisible(true)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Ionicons name="ellipsis-vertical" size={27} color="white" />
           </TouchableOpacity>
         }
         contentStyle={styles.menuContent}
+        statusBarHeight={Platform.OS === "ios" ? 40 : 0}
       >
-        <Menu.Item onPress={handleEditProfile} title={t("profile.editProfile")} />
         <Menu.Item
-          onPress={() => setIsBlockedListVisible(true)}
+          onPress={() => {
+            handleEditProfile();
+            closeMenu();
+          }}
+          title={t("profile.editProfile")}
+        />
+        <Menu.Item
+          onPress={() => {
+            setIsBlockedListVisible(true);
+            closeMenu();
+          }}
           title={t("blockedUsers.modalTitle")}
           disabled={blockedUsers.length === 0}
         />
         <Menu.Item
-          onPress={handleTogglePrivacy}
+          onPress={() => {
+            handleTogglePrivacy();
+            closeMenu();
+          }}
           title={isPrivate ? t("profile.makePublic") : t("profile.makePrivate")}
         />
         <Menu.Item
-          onPress={handleDeleteAccount}
+          onPress={() => {
+            handleDeleteAccount();
+            closeMenu();
+          }}
           title={t("profileMenuSections.deleteAccount")}
           titleStyle={{ color: "red" }}
         />
@@ -159,7 +207,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   menuContent: {
-    marginTop: 60, // Ajusta este valor para mover las opciones del menú hacia abajo
+    marginTop: 60,
     borderRadius: 10,
   },
 });

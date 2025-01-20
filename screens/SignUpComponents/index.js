@@ -35,7 +35,7 @@ import es from '../../locales/es.json';
 import en from '../../locales/en.json';
 import pt from '../../locales/pt.json';
 
-import { LanguageContext } from "../../App"; // Ensure correct import of LanguageContext
+import { LanguageContext } from "../../src/contexts/LanguageContext"; // Ensure correct import of LanguageContext
 
 const LANGUAGE_KEY = '@app_language';
 

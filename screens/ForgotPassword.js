@@ -49,7 +49,7 @@ i18n
 
 const { width, height } = Dimensions.get('window');
 
-import { LanguageContext } from "../App"; // Ensure correct import of LanguageContext
+import { LanguageContext } from "../src/contexts/LanguageContext"; // Ensure correct import of LanguageContext
 
 export default function ElegantForgotPassword({ navigation }) {
   const [email, setEmail] = useState('');
@@ -255,14 +255,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 16,
     color: '#333',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   resetButton: {
     width: '50%',

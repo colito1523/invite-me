@@ -15,6 +15,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Importa esto
 import { UnreadMessagesProvider } from './src/hooks/UnreadMessagesContext';
 import { DateProvider } from "./src/hooks/DateContext";
+import * as SplashScreen from "expo-splash-screen";
 
 
 import Login from "./screens/LoginComponents/index";
@@ -69,57 +70,7 @@ const AuthenticatedUserProvider = ({ children }) => {
   );
 };
 
-export const LanguageContext = createContext(); // Export LanguageContext
-
-const LanguageProvider = ({ children }) => {
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
-
-  useEffect(() => {
-    const loadSavedLanguage = async () => {
-      try {
-        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
-        if (savedLanguage) {
-          i18n.changeLanguage(savedLanguage);
-          setSelectedLanguage(savedLanguage);
-        } else if (auth.currentUser) {
-          const userRef = doc(database, "users", auth.currentUser.uid);
-          const userDoc = await getDoc(userRef);
-          if (userDoc.exists()) {
-            const preferredLanguage = userDoc.data().preferredLanguage;
-            if (preferredLanguage) {
-              i18n.changeLanguage(preferredLanguage);
-              setSelectedLanguage(preferredLanguage);
-              await AsyncStorage.setItem(LANGUAGE_KEY, preferredLanguage);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error loading saved language:', error);
-      }
-    };
-    loadSavedLanguage();
-  }, []);
-
-  const changeLanguage = async (lang) => {
-    await i18n.changeLanguage(lang);
-    setSelectedLanguage(lang);
-    try {
-      await AsyncStorage.setItem(LANGUAGE_KEY, lang);
-      if (auth.currentUser) {
-        const userRef = doc(database, "users", auth.currentUser.uid);
-        await updateDoc(userRef, { preferredLanguage: lang });
-      }
-    } catch (error) {
-      console.error('Error saving language:', error);
-    }
-  };
-
-  return (
-    <LanguageContext.Provider value={{ selectedLanguage, changeLanguage }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
+import { LanguageProvider } from './src/contexts/LanguageContext';
 
 function ChatStack() {
   const [initialRoute, setInitialRoute] = React.useState(null);
@@ -234,15 +185,19 @@ function RootNavigator() {
   );
 }
 
+SplashScreen.preventAutoHideAsync(); 
+
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = React.useState(false);
   const [isI18nInitialized, setIsI18nInitialized] = React.useState(false);
+  const [appIsReady, setAppIsReady] = useState(false);
 
-  const expoPushToken = useNotifications(); // Usa el hook de notificaciones
-
-  React.useEffect(() => {
-    const loadFonts = async () => {
+  useEffect(() => {
+    const prepare = async () => {
       try {
+        // Carga inicial: fuentes, datos, etc.
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simula un retraso
+
         await Font.loadAsync({
           NotoSerifKhitan: require("./assets/fonts/NotoSerifKhitanSmallScript-Regular.ttf"),
           Parisienne: require("./assets/fonts/Parisienne-Regular.ttf"),
@@ -252,13 +207,7 @@ export default function App() {
           "Lato-Black": require("./assets/fonts/Lato-Black.ttf"),
         });
         setFontsLoaded(true);
-      } catch (error) {
-        console.error("Error loading fonts", error);
-      }
-    };
 
-    const initializeI18n = async () => {
-      try {
         const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
         if (savedLanguage) {
           await i18n.changeLanguage(savedLanguage);
@@ -275,30 +224,21 @@ export default function App() {
           }
         }
         setIsI18nInitialized(true);
-      } catch (error) {
-        console.error('Error initializing i18n:', error);
-        setIsI18nInitialized(true);
+
+        // Notifications will be handled by the useEffect hook in the component
+
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+        await SplashScreen.hideAsync(); // Oculta la splash screen
       }
     };
 
-    const updatePushTokenInFirestore = async () => {
-      if (auth.currentUser && expoPushToken) {
-        try {
-          const userRef = doc(database, 'users', auth.currentUser.uid);
-          await updateDoc(userRef, { expoPushToken: expoPushToken });
+    prepare();
+  }, []);
 
-        } catch (error) {
-          console.error("Error actualizando expoPushToken:", error);
-        }
-      }
-    };
-
-    loadFonts();
-    initializeI18n();
-    updatePushTokenInFirestore();
-  }, [expoPushToken]);
-
-  if (!fontsLoaded || !isI18nInitialized) {
+  if (!appIsReady || !fontsLoaded || !isI18nInitialized) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size={50} />
@@ -308,17 +248,17 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-       <SafeAreaProvider>
-    <AuthenticatedUserProvider>
-    <UnreadMessagesProvider> 
-      <PaperProvider>
-        <LanguageProvider>
-        <RootNavigator />
-        </LanguageProvider>
-      </PaperProvider>
-      </UnreadMessagesProvider>
-    </AuthenticatedUserProvider>
-    </SafeAreaProvider>
+      <SafeAreaProvider>
+        <AuthenticatedUserProvider>
+          <UnreadMessagesProvider> 
+            <PaperProvider>
+              <LanguageProvider>
+                <RootNavigator />
+              </LanguageProvider>
+            </PaperProvider>
+          </UnreadMessagesProvider>
+        </AuthenticatedUserProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
