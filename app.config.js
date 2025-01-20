@@ -47,6 +47,7 @@ export default {
         "WRITE_EXTERNAL_STORAGE",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
+        "RECORD_AUDIO",
       ],
       softwareKeyboardLayoutMode: "pan",
       allowBackup: true,
