@@ -24,6 +24,7 @@ const MenuSection = ({
       t("profileMenuSections.deleteAccountQuestions"),
       [
         {
+          
           text: t("chatUsers.cancel"),
           style: "cancel",
         },
