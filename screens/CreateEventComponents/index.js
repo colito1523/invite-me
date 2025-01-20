@@ -20,7 +20,7 @@ import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { LinearGradient } from "expo-linear-gradient";
 import { Keyboard } from "react-native";
-import { fetchFriends, sendInvitationNotifications, pickImage, handleSubmit, onChangeDate, onChangeTime, toggleFriendSelection } from "./utils";
+import { fetchFriends, sendInvitationNotifications, pickImage, handleSubmit, onChangeDate, onChangeTime, toggleFriendSelection, closeDateTimePicker } from "./utils";
 import { styles, lightTheme, darkTheme } from "./styles";
 
 const { width } = Dimensions.get("window");
@@ -263,10 +263,7 @@ useEffect(() => {
           animationType="slide"
           transparent={true}
           visible={showDatePicker || showTimePicker}
-          onRequestClose={() => {
-            setShowDatePicker(false);
-            setShowTimePicker(false);
-          }}
+          onRequestClose={() => closeDateTimePicker(setShowDatePicker, setShowTimePicker)}
         >
           <View style={styles.centeredView}>
             <View style={[styles.modalView, { backgroundColor: theme.background }]}>
@@ -276,10 +273,11 @@ useEffect(() => {
                 display="spinner"
                 onChange={(event, selectedValue) => {
                   if (showDatePicker) {
-                    setTempDate(selectedValue || tempDate);
+                    setDay(selectedValue || tempDate);
                   } else {
-                    setTempTime(selectedValue || tempTime);
+                    setHour(selectedValue || tempTime);
                   }
+                  closeDateTimePicker(setShowDatePicker, setShowTimePicker);
                 }}
                 minimumDate={today}
                 maximumDate={maxDate}
@@ -289,10 +287,7 @@ useEffect(() => {
                 <View style={{ flexDirection: "row", marginTop: 20 }}>
                   <TouchableOpacity
                     style={[styles.modalButton, { backgroundColor: theme.buttonBackground, marginRight: 10 }]}
-                    onPress={() => {
-                      setShowDatePicker(false);
-                      setShowTimePicker(false);
-                    }}
+                    onPress={() => closeDateTimePicker(setShowDatePicker, setShowTimePicker)}
                   >
                     <Text style={[styles.modalButtonText, { color: theme.text }]}>
                       {t("createEvent.cancel")}
@@ -306,8 +301,7 @@ useEffect(() => {
                       } else {
                         setHour(tempTime);
                       }
-                      setShowDatePicker(false);
-                      setShowTimePicker(false);
+                      closeDateTimePicker(setShowDatePicker, setShowTimePicker);
                     }}
                   >
                     <Text style={[styles.modalButtonText, { color: theme.text }]}>

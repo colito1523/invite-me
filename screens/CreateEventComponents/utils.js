@@ -275,3 +275,8 @@ export const toggleFriendSelection = (friendId, setSelectedFriends) => {
       : [...prevSelected, friendId]
   );
 };
+
+export const closeDateTimePicker = (setShowDatePicker, setShowTimePicker) => {
+  setShowDatePicker(false);
+  setShowTimePicker(false);
+};
