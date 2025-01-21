@@ -17,30 +17,46 @@ const SliderContent = ({
   const { t } = useTranslation();
 
   useEffect(() => {
-    // Reinicia el mapa al cambiar las coordenadas del evento
-    if (
-      box?.coordinates &&
-      typeof box.coordinates.latitude === "number" &&
-      typeof box.coordinates.longitude === "number"
-    ) {
+    let isMounted = true;
+
+    const initializeMap = async () => {
+      if (!box?.coordinates) {
+        console.warn("Coordenadas no disponibles para este evento.");
+        return;
+      }
+
+      const { latitude, longitude } = box.coordinates;
+      
+      if (typeof latitude !== "number" || typeof longitude !== "number") {
+        console.warn("Coordenadas inválidas");
+        return;
+      }
+
       const newRegion = {
-        latitude: box.coordinates.latitude,
-        longitude: box.coordinates.longitude,
+        latitude,
+        longitude,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       };
 
-      setMapRegion(newRegion); // Actualiza la región del mapa
-      setMarkerCoordinate({
-        latitude: box.coordinates.latitude,
-        longitude: box.coordinates.longitude,
-      }); // Actualiza la coordenada del marcador
-    } else {
-      console.warn("Coordenadas inválidas o no disponibles para este evento.");
-      setMapRegion(null); // Limpia el mapa si no hay coordenadas
-      setMarkerCoordinate(null); // Limpia el marcador si no hay coordenadas
-    }
-  }, [box]); // Escucha cambios en todo el objeto `box`
+      if (isMounted) {
+        setMapRegion(newRegion);
+        setMarkerCoordinate({ latitude, longitude });
+      }
+    };
+
+    // Pequeño retraso para asegurar que los componentes estén montados
+    const timer = setTimeout(() => {
+      initializeMap();
+    }, 500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+      setMapRegion(null);
+      setMarkerCoordinate(null);
+    };
+  }, [box?.coordinates]); // Escuchar cambios específicos en coordenadas
 
   return (
     <ScrollView
@@ -63,19 +79,32 @@ const SliderContent = ({
           </View>
         ) : mapRegion ? (
           <View style={styles.mapContainer}>
-            <MapView
-              style={styles.map}
-              region={mapRegion}
-              onRegionChangeComplete={(region) => setMapRegion(region)}
-            >
-              {markerCoordinate && (
-                <Marker
-                  coordinate={markerCoordinate}
-                  title={box?.title || "Evento"}
-                  description={box?.description || ""}
-                />
-              )}
-            </MapView>
+            {mapRegion && (
+              <MapView
+                style={styles.map}
+                initialRegion={mapRegion}
+                region={mapRegion}
+                onRegionChangeComplete={(region) => setMapRegion(region)}
+                loadingEnabled={true}
+                loadingIndicatorColor="#999999"
+                loadingBackgroundColor="#ffffff"
+                moveOnMarkerPress={false}
+                showsUserLocation={false}
+                toolbarEnabled={false}
+                zoomEnabled={true}
+                zoomControlEnabled={true}
+                minZoomLevel={10}
+                maxZoomLevel={20}
+              >
+                {markerCoordinate && (
+                  <Marker
+                    coordinate={markerCoordinate}
+                    title={box?.title || "Evento"}
+                    description={box?.description || ""}
+                  />
+                )}
+              </MapView>
+            )}
           </View>
         ) : (
           <View style={styles.descriptionContainer}>

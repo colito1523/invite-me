@@ -1,6 +1,18 @@
 import "dotenv/config";
 
 export default {
+  android: {
+    config: {
+      googleMaps: {
+        apiKey: process.env.GOOGLE_MAPS_API_KEY
+      }
+    }
+  },
+  ios: {
+    config: {
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+    }
+  },
   expo: {
     name: "Invite Me",
     slug: "invite-me",
@@ -76,10 +88,10 @@ export default {
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId: process.env.APP_ID,
       eas: {
-        projectId: "e905a76a-da8d-4b9e-86fe-b9f370734b84", // ID del proyecto de EAS
+        projectId: "2f585478-2f32-4de0-a5fe-edc97d5c9ab0",
       },
     },
-    owner: "colo.magan",
+    owner: "patomagan",
     plugins: [
       "expo-secure-store",
       "expo-font",
