@@ -71,21 +71,29 @@ export default function Menu({
   }, [onCitySelect]);
 
   const handleCategorySelect = useCallback((category) => {
-    if (category === t('categories.createOwnEvent')) {
-      onClose();
-      navigation.navigate('CreateEvent');
-    } else if (category === t('categories.suggestSpace')) {
-      onClose();
-      navigation.navigate('EventRecommendations');
-    } else if (category === t('categories.support')) {
-      onClose();
-      handleSupportPress();
-    } else if (category === t('categories.changeLanguage')) {
-      setShowLanguageSelector(true);
-    } else {
-      onCategorySelect(category);
+    let mappedCategory = category;
+
+    // Mapeo de "categories.events" a "Festivities"
+    if (category === t('categories.events')) {
+        mappedCategory = "Festivities";
     }
-  }, [onClose, navigation, onCategorySelect]);
+
+    if (mappedCategory === t('categories.createOwnEvent')) {
+        onClose();
+        navigation.navigate('CreateEvent');
+    } else if (mappedCategory === t('categories.suggestSpace')) {
+        onClose();
+        navigation.navigate('EventRecommendations');
+    } else if (mappedCategory === t('categories.support')) {
+        onClose();
+        handleSupportPress();
+    } else if (mappedCategory === t('categories.changeLanguage')) {
+        setShowLanguageSelector(true);
+    } else {
+        onCategorySelect(mappedCategory);
+    }
+}, [onClose, navigation, onCategorySelect, t]);
+
 
   const handleSupportPress = useCallback(async () => {
     const email = "info@invitemembers.com";
