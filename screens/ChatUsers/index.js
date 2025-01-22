@@ -682,11 +682,7 @@ export default function Chat({ route }) {
                 </Text>
               </View>
 
-              <TouchableOpacity
-                onPress={() => navigation.navigate("FullNote", { note: item })}
-              >
-                <Text style={styles.messageTextNotas}>{item.text}</Text>
-              </TouchableOpacity>
+              <Text style={styles.messageTextNotas}>{item.text}</Text>
               <View style={styles.messageFooter}>
                 <Text style={styles.timeText}>
                   {currentMessageDate.toLocaleTimeString([], {
