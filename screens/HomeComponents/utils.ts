@@ -242,10 +242,13 @@ export const listenForNotificationChanges = (setNotificationIconState) => {
 export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxData, selectedDate }) => {
   try {
     let blockedUsers = [];
+    let userNearestCity = "";
+    
     if (user) {
       const userDoc = await getDoc(doc(database, "users", user.uid));
       if (userDoc.exists()) {
         blockedUsers = userDoc.data()?.blockedUsers || [];
+        userNearestCity = userDoc.data()?.nearestCity || "";
       }
     }
 
@@ -292,30 +295,39 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
 
     const userEvents = [];
     if (user) {
+      // Fetch events where user is admin
       const privateEventsRef = collection(database, "EventsPriv");
-      const adminEventsQuery = query(privateEventsRef, where("Admin", "==", user.uid));
-      const querySnapshot = await getDocs(adminEventsQuery);
+      const eventsQuery = query(privateEventsRef);
+      const querySnapshot = await getDocs(eventsQuery);
 
       querySnapshot.forEach((doc) => {
         const eventData = doc.data();
-        const filteredAttendees = (eventData.attendees || []).filter(
-          (attendee) => !blockedUsers.includes(attendee.uid)
-        );
-        userEvents.push({
-          id: doc.id,
-          imageUrl: eventData.image,
-          title: eventData.title,
-          category: "EventoParaAmigos",
-          hours: { [eventData.day]: eventData.hour },
-          number: eventData.phoneNumber,
-          coordinates: { latitude: 0, longitude: 0 },
-          country: eventData.country || "Portugal",
-          city: eventData.city || "Lisboa",
-          date: eventData.date,
-          attendees: filteredAttendees,
-          attendeesCount: filteredAttendees.length,
-          isPrivateEvent: true,
-        });
+        // Only include events if user is admin or invited and event is in user's nearest city
+        if ((eventData.Admin === user.uid || 
+            (eventData.invitedFriends && eventData.invitedFriends.includes(user.uid))) && 
+            (!eventData.city || eventData.city === userNearestCity)) {
+          
+          const filteredAttendees = (eventData.attendees || []).filter(
+            (attendee) => !blockedUsers.includes(attendee.uid)
+          );
+          
+          userEvents.push({
+            id: doc.id,
+            imageUrl: eventData.image,
+            title: eventData.title,
+            category: "EventoParaAmigos",
+            hours: { [eventData.day]: eventData.hour },
+            number: eventData.phoneNumber,
+            coordinates: { latitude: 0, longitude: 0 },
+            country: eventData.nearestCountry || "España",
+            city: userNearestCity,
+            date: eventData.date,
+            attendees: filteredAttendees,
+            attendeesCount: filteredAttendees.length,
+            isPrivateEvent: true,
+            Admin: eventData.Admin
+          });
+        }
       });
     }
 
