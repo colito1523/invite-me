@@ -230,7 +230,7 @@ export const styles = StyleSheet.create({
     },
     noteResponseText: {
       fontSize: 14,
-      color: "#ffffff",
+      color: "gray",
       fontWeight: "bold",
       marginBottom: 10,
     },
@@ -289,7 +289,7 @@ export const styles = StyleSheet.create({
     },
     storyResponseText: {
       fontSize: 14,
-      color: "#ffffff",
+      color: "gray",
       fontWeight: "bold",
       marginBottom: 10,
     },

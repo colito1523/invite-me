@@ -24,6 +24,7 @@ const boxInfo = [
     path: require("../../assets/Lisboa/praia no parquee.jpg"),
     title: "Praia ",
     category: "Festivities",
+    availableDates: ["24 Jan"], // Fecha específica en la que aparecerá el evento
     hours: {
       Lunes: "12:30 PM - 12:00 AM",
       Martes: "12:30 PM - 12:00 AM",
