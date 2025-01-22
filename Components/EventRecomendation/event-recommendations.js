@@ -93,7 +93,11 @@ export default function EventRecommendationForm() {
       setImage(null);
 
       // Redirigir al usuario al home
-      navigation.navigate('Home');
+     // Redirigir al usuario al Home con la categoría "All"
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home', params: { selectedCategory: 'All' } }],
+    });
     } catch (error) {
       console.error(t('eventRecommendation.submissionError'), error);
       Alert.alert(t('eventRecommendation.error'), t('eventRecommendation.submissionError'));

@@ -204,7 +204,7 @@
     "hours": "{{count}} hora",
     "hours_plural": "{{count}} horas",
     "description": "Descripción",
-    "descriptionNotAvailable": "Descripción no disponible",
+    "descriptionNotAvailable": "-",
     "day": "Día",
     "notAvailable": "No disponible",
     "location": "Ubicación:",

@@ -179,7 +179,6 @@ export const handleSubmit = async (
         day: "numeric",
         month: "short",
       }).split(' ').reverse().join(' ');
-      
 
       const realFriendIds = await Promise.all(
         selectedFriends.map(async (friendDocId) => {
@@ -231,9 +230,9 @@ export const handleSubmit = async (
       );
 
       Alert.alert(t("createEvent.success"), t("createEvent.eventCreated"));
-      navigation.navigate("Home", {
-        screen: "Home",
-        params: { selectedCategory: "all" },
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Home", params: { selectedCategory: "All" } }],
       });
     } catch (error) {
       console.error("Error creating event: ", error);

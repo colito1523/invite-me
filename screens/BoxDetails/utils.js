@@ -1000,7 +1000,10 @@ export const handleDeleteEvent = async ({
       await deleteDoc(eventRef);
 
       // Redirigir a la pantalla principal y mostrar un mensaje de éxito
-      navigation.navigate("Home", { refresh: true });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Home", params: { selectedCategory: "All" } }],
+      });
       Alert.alert(
         t("indexBoxDetails.succes"),
         t("indexBoxDetails.eventDeleteSuccess"),
