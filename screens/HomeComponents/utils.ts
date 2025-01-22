@@ -302,10 +302,11 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
 
       querySnapshot.forEach((doc) => {
         const eventData = doc.data();
-        // Only include events if user is admin or invited and event is in user's nearest city
-        if ((eventData.Admin === user.uid || 
-            (eventData.invitedFriends && eventData.invitedFriends.includes(user.uid))) && 
-            (!eventData.city || eventData.city === userNearestCity)) {
+        // Only include events if user is admin or in attendees list
+        const isAdmin = eventData.Admin === user.uid;
+        const isAttendee = eventData.attendees && eventData.attendees.some(attendee => attendee.uid === user.uid);
+        
+        if ((isAdmin || isAttendee) && (!eventData.city || eventData.city === userNearestCity)) {
           
           const filteredAttendees = (eventData.attendees || []).filter(
             (attendee) => !blockedUsers.includes(attendee.uid)
@@ -424,38 +425,4 @@ export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t, s
     { title: "Eventos Generales", data: generalEvents },
   ];
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
