@@ -295,25 +295,30 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
 
     const userEvents = [];
     if (user) {
-      // Fetch events where user is admin
+      // Fetch only from EventsPriv collection
       const privateEventsRef = collection(database, "EventsPriv");
       const eventsQuery = query(privateEventsRef);
       const querySnapshot = await getDocs(eventsQuery);
 
+      const processedEventIds = new Set();
+
       querySnapshot.forEach((doc) => {
         const eventData = doc.data();
+        const eventId = doc.id;
+        
         // Only include events if user is admin or in attendees list
         const isAdmin = eventData.Admin === user.uid;
         const isAttendee = eventData.attendees && eventData.attendees.some(attendee => attendee.uid === user.uid);
         
-        if ((isAdmin || isAttendee) && (!eventData.city || eventData.city === userNearestCity)) {
+        if ((isAdmin || isAttendee) && (!eventData.city || eventData.city === userNearestCity) && !processedEventIds.has(eventId)) {
+          processedEventIds.add(eventId);
           
           const filteredAttendees = (eventData.attendees || []).filter(
             (attendee) => !blockedUsers.includes(attendee.uid)
           );
           
           userEvents.push({
-            id: doc.id,
+            id: eventId,
             imageUrl: eventData.image,
             title: eventData.title,
             category: "EventoParaAmigos",
