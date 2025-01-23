@@ -26,6 +26,7 @@ export default {
       backgroundColor: "#ffffff",
     },
     ios: {
+      bundleIdentifier: "com.airesSoft.inviteMe",
       supportsTablet: true,
       infoPlist: {
         NSCameraUsageDescription:
