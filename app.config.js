@@ -68,7 +68,7 @@ export default {
       jsEngine: "hermes",
       config: {
         googleMaps: {
-          apiKey: "AIzaSyAmlwxr5zZXZnv_3YihB_XIQiKVqMzszYg" // Clave API de Google Maps
+          apiKey: process.env.GOOGLE_MAPS_API_KEY // Clave API de Google Maps desde .env
         }
       }
     },
