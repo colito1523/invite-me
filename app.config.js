@@ -26,8 +26,9 @@ export default {
       backgroundColor: "#ffffff",
     },
     ios: {
-      bundleIdentifier: "com.airesSoft.inviteMe",
+      bundleIdentifier: "com.airesSoftStudio.inviteMe",
       supportsTablet: true,
+      googleServicesFile: "./GoogleService-Info.plist",
       infoPlist: {
         NSCameraUsageDescription:
           "Se necesita acceso a la cámara para subir historias",
@@ -44,7 +45,7 @@ export default {
       },
     },
     android: {
-      package: "com.airesSoft.inviteMe",
+      package: "com.airesSoftStudio.inviteMe",
       googleServicesFile: "./google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/Logo_Invite_Me.png",

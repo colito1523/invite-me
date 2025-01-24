@@ -20,28 +20,28 @@ const boxInfo = [
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
   },
-  {
-    path: require("../../assets/Lisboa/praia no parquee.jpg"),
-    title: "Praia ",
-    category: "Festivities",
-    availableDates: ["24 Jan"], // Fecha específica en la que aparecerá el evento
-    hours: {
-      Lunes: "12:30 PM - 12:00 AM",
-      Martes: "12:30 PM - 12:00 AM",
-      Miércoles: "12:30 PM - 12:00 AM",
-      Jueves: "12:30 PM - 02:00 AM",
-      Viernes: "12:30 PM - 03:00 AM",
-      Sábado: "12:30 PM - 12:00 AM",
-      Domingo: "12:30 PM - 12:00 AM",
-    },
-    number: "968 842 888",
-    coordinates: {
-      latitude: 38.7301071,
-      longitude: -9.1532305,
-    },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-  },
+  // {
+  //   path: require("../../assets/Lisboa/praia no parquee.jpg"),
+  //   title: "Praia ",
+  //   category: "Festivities",
+  //   availableDates: ["24 Jan"], // Fecha específica en la que aparecerá el evento
+  //   hours: {
+  //     Lunes: "12:30 PM - 12:00 AM",
+  //     Martes: "12:30 PM - 12:00 AM",
+  //     Miércoles: "12:30 PM - 12:00 AM",
+  //     Jueves: "12:30 PM - 02:00 AM",
+  //     Viernes: "12:30 PM - 03:00 AM",
+  //     Sábado: "12:30 PM - 12:00 AM",
+  //     Domingo: "12:30 PM - 12:00 AM",
+  //   },
+  //   number: "968 842 888",
+  //   coordinates: {
+  //     latitude: 38.7301071,
+  //     longitude: -9.1532305,
+  //   },
+  //   country: "Portugal", // Agregar esta propiedad
+  //   city: "Lisboa", // Agregado el campo de ciuda
+  // },
   {
     path: require("../../assets/Lisboa/palacio Chaiado.jpg"),
     title: "Palacio Chiado",
