@@ -4,14 +4,14 @@ export default {
   android: {
     config: {
       googleMaps: {
-        apiKey: process.env.GOOGLE_MAPS_API_KEY
-      }
-    }
+        apiKey: process.env.GOOGLE_MAPS_API_KEY,
+      },
+    },
   },
   ios: {
     config: {
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
-    }
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+    },
   },
   expo: {
     name: "Invite Me",
@@ -42,6 +42,7 @@ export default {
           "Se necesita acceso a tu ubicación para mostrar eventos cercanos.",
         NSLocationAlwaysUsageDescription:
           "Se necesita acceso constante a tu ubicación para enviar notificaciones basadas en tu ubicación.",
+        ITSAppUsesNonExemptEncryption: false,
       },
     },
     android: {
@@ -68,9 +69,9 @@ export default {
       jsEngine: "hermes",
       config: {
         googleMaps: {
-          apiKey: process.env.GOOGLE_MAPS_API_KEY // Clave API de Google Maps desde .env
-        }
-      }
+          apiKey: process.env.GOOGLE_MAPS_API_KEY || "YOUR_API_KEY_HERE",
+        },
+      },
     },
     "expo-build-properties": {
       android: {
