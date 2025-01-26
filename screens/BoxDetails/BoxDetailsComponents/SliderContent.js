@@ -85,7 +85,7 @@ const SliderContent = ({
                 initialRegion={mapRegion}
                 region={mapRegion}
                 onRegionChangeComplete={(region) => setMapRegion(region)}
-                onError={(error) => console.warn('Error en el mapa:', error)}
+                onError={(error) => console.error('Error al cargar el mapa:', error)}
                 loadingEnabled={true}
                 loadingIndicatorColor="#999999"
                 loadingBackgroundColor="#ffffff"
