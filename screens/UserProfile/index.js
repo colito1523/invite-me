@@ -460,8 +460,8 @@ export default function UserProfile({ route, navigation }) {
                                 </View>
                               </View>
                               <View style={styles.iconsContainer}>
-                                <TouchableOpacity
-                                  style={styles.iconButton}
+                                <Pressable
+                                  style={styles.friendshipButton}
                                   onPress={handleToggleFriendshipStatus}
                                   disabled={isProcessing}
                                 >
@@ -483,7 +483,7 @@ export default function UserProfile({ route, navigation }) {
                                       color="white"
                                     />
                                   )}
-                                </TouchableOpacity>
+                                </Pressable>
 
                                 <TouchableOpacity
                                   style={styles.iconButton}

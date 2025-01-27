@@ -151,10 +151,19 @@ export const styles = StyleSheet.create({
       alignItems: "flex-end",
       marginLeft: 10,
       gap: 20,
+      position: "relative",
     },
     iconButton: {
       borderRadius: 20,
       padding: 10,
+      marginBottom: 10,
+    },
+    friendshipButton: {
+      zIndex: 10, // Asegura que esté por encima de otros elementos
+      width: 46,
+      height: 46,
+      justifyContent: "center",
+      alignItems: "center",
       marginBottom: 10,
     },
     mutualFriendIm: {
