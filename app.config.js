@@ -4,7 +4,7 @@ export default {
   android: {
     config: {
       googleMaps: {
-        apiKey: process.env.GOOGLE_MAPS_API_KEY,
+        apiKey: "AIzaSyD0qVS4hUiuJGxoQLTt49SUNnj9kIP-cn8",
       },
     },
   },
