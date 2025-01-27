@@ -300,3 +300,7 @@ export const compressImage = async (uri, quality = 0.6, width = 1080) => {
       return [];
     }
   };
+
+export const openCustomCamera = async (navigation) => {
+  navigation.navigate("CustomCamera");
+};

@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { loadExistingStories, uploadStory, loadStoriesInBatches, compressImage  } from './storySliderUtils';
+import { loadExistingStories, uploadStory, loadStoriesInBatches, compressImage, openCustomCamera } from './storySliderUtils';
 import {
   doc,
   getDoc,
@@ -36,6 +36,9 @@ export default React.forwardRef(function StorySlider(props, ref) {
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
+
+  // Add default value for props.route
+  const route = props.route || {};
 
   useEffect(() => {
     if (stories.length > 0) {
@@ -146,6 +149,12 @@ export default React.forwardRef(function StorySlider(props, ref) {
     loadExistingStories(t, setStories, setUnseenStories, isUploading);
   }, []);
 
+  useEffect(() => {
+    if (route.params?.photoUri) {
+      setSelectedImage(route.params.photoUri);
+    }
+  }, [route.params?.photoUri]);
+
   const handleOpenViewer = async (index) => {
     const userStories = stories[index].userStories;
     const unseenIndex = userStories.findIndex(
@@ -166,24 +175,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
   const handleCamera = async () => {
     setPendingAction(() => async () => {
       try {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert(t("storySlider.error"), t("storySlider.camera"));
-          return;
-        }
-
-        const result = await ImagePicker.launchCameraAsync({
-          mediaType: "photo",
-          quality: 1,
-          allowsEditing: false,
-        });
-
-        if (!result.canceled && result.assets?.length > 0) {
-          // Comprimir la imagen antes de procesarla
-          const compressedUri = await compressImage(result.assets[0].uri);
-          const processedUri = await processImage(compressedUri);
-          setSelectedImage(processedUri);
-        }
+        openCustomCamera(navigation);
       } catch (error) {
         console.error("Error abriendo la cámara:", error);
         Alert.alert(t("storySlider.error"), t("storySlider.storyUploadError"));
