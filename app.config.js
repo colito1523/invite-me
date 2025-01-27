@@ -10,7 +10,7 @@ export default {
   },
   ios: {
     config: {
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      apiKey: process.env.GOOGLE_MAPS_API_KEY,
     },
   },
   expo: {
@@ -67,11 +67,6 @@ export default {
       softwareKeyboardLayoutMode: "pan",
       allowBackup: true,
       jsEngine: "hermes",
-      config: {
-        googleMaps: {
-          apiKey: process.env.GOOGLE_MAPS_API_KEY || "YOUR_API_KEY_HERE",
-        },
-      },
     },
     "expo-build-properties": {
       android: {
