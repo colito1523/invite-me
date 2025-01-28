@@ -85,5 +85,23 @@
     "@babel/core": "^7.20.0",
     "artillery": "^2.0.21"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-maps",
+          "expo-random",
+          "react-native-modal",
+          "react-native-snap-carousel",
+          "dotenv",
+          "firebase",
+          "firebase-admin",
+          "firebase-functions",
+          "react-native-elements"
+        ],
+        "listUnknownPackages": false
+      }
+    }
+  }
 }
