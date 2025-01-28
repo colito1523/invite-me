@@ -96,7 +96,7 @@ export default {
       ["expo-camera"], // Agrega el plugin de expo-camera aquí
     ],
     updates: {
-      url: "https://u.expo.dev/7e15b633-dd47-4035-86d3-96443bfdab66",
+      url: "https://u.expo.dev/2f585478-2f32-4de0-a5fe-edc97d5c9ab0",
     },
     runtimeVersion: {
       policy: "appVersion",

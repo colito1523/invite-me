@@ -1,6 +1,6 @@
 const boxInfo = [
   {
-    path: require("../../assets/Lisboa/praia no parquee.jpg"),
+    path: require("../../assets/Lisboa/praia_no_parquee.jpg"),
     title: "Praia No Parque",
     category: "Restaurants & Rooftops",
     hours: {
@@ -20,30 +20,8 @@ const boxInfo = [
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
   },
-  // {
-  //   path: require("../../assets/Lisboa/praia no parquee.jpg"),
-  //   title: "Praia ",
-  //   category: "Festivities",
-  //   availableDates: ["24 Jan"], // Fecha específica en la que aparecerá el evento
-  //   hours: {
-  //     Lunes: "12:30 PM - 12:00 AM",
-  //     Martes: "12:30 PM - 12:00 AM",
-  //     Miércoles: "12:30 PM - 12:00 AM",
-  //     Jueves: "12:30 PM - 02:00 AM",
-  //     Viernes: "12:30 PM - 03:00 AM",
-  //     Sábado: "12:30 PM - 12:00 AM",
-  //     Domingo: "12:30 PM - 12:00 AM",
-  //   },
-  //   number: "968 842 888",
-  //   coordinates: {
-  //     latitude: 38.7301071,
-  //     longitude: -9.1532305,
-  //   },
-  //   country: "Portugal", // Agregar esta propiedad
-  //   city: "Lisboa", // Agregado el campo de ciuda
-  // },
   {
-    path: require("../../assets/Lisboa/palacio Chaiado.jpg"),
+    path: require("../../assets/Lisboa/palacio_Chaiado.jpg"),
     title: "Palacio Chiado",
     category: "Restaurants & Rooftops",
     hours: {
@@ -65,7 +43,7 @@ const boxInfo = [
   },
 
   {
-    path: require("../../assets/Lisboa/mama shelter.jpg"),
+    path: require("../../assets/Lisboa/mama_shelter.jpg"),
     title: "Mama Shelter",
     category: "Restaurants & Rooftops",
     hours: {
@@ -107,7 +85,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Praca dąs flores.jpg"),
+    path: require("../../assets/Lisboa/Praca_das_flores.jpg"),
     title: "Praça das Flores",
     category: "Bars & Clubs",
     hours: {
@@ -151,7 +129,7 @@ const boxInfo = [
   },
 
   {
-    path: require("../../assets/Lisboa/Mona Verde.jpg"),
+    path: require("../../assets/Lisboa/Mona_Verde.jpg"),
     title: "Mona Verde",
     category: "Restaurants & Rooftops",
     hours: {
@@ -193,7 +171,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Jncquoi club.jpg"),
+    path: require("../../assets/Lisboa/Jncquoi_club.jpg"),
     title: "Jncquoi Club",
     category: "Bars & Clubs",
     hours: {
@@ -214,7 +192,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Jncquoi Avenida.jpg"),
+    path: require("../../assets/Lisboa/Jncquoi_Avenida.jpg"),
     title: "Jncquoi Avenida",
     category: "Restaurants & Rooftops",
     hours: {
@@ -256,7 +234,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/lux Fragil.jpg"),
+    path: require("../../assets/Lisboa/lux_Fragil.jpg"),
     title: "Lux Frágil",
     category: "Bars & Clubs",
     hours: {
@@ -299,7 +277,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Rive Rouge.jpg"),
+    path: require("../../assets/Lisboa/Rive_Rouge.jpg"),
     title: "Rive Rouge",
     category: "Bars & Clubs",
     hours: {
@@ -341,7 +319,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/lust in rio.jpg"),
+    path: require("../../assets/Lisboa/lust_in_rio.jpg"),
     title: "Lust in rio",
     category: "Bars & Clubs",
     hours: {
@@ -405,7 +383,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Casa Santi.jpg"),
+    path: require("../../assets/Lisboa/Casa_Santi.jpg"),
     title: "Casa Santi",
     category: "Restaurants & Rooftops",
     hours: {
@@ -426,7 +404,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Beca Beca 2.jpg"),
+    path: require("../../assets/Lisboa/Beca_Beca_2.jpg"),
     title: "Beca Beca",
     category: "Restaurants & Rooftops",
     hours: {
@@ -447,7 +425,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Bairro alto.webp"),
+    path: require("../../assets/Lisboa/Bairro_alto.webp"),
     title: "Bairro Alto",
     category: "Bars & Clubs",
     hours: {
@@ -468,7 +446,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/SKY BAR.jpg"),
+    path: require("../../assets/Lisboa/SKY_BAR.jpg"),
     title: "Sky Bar",
     category: "Bars & Clubs",
     hours: {
@@ -490,7 +468,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Mini Bar Avillez.jpg"),
+    path: require("../../assets/Lisboa/Mini_Bar_Avillez.jpg"),
     title: "Mini Bar Avillez",
     category: "Bars & Clubs",
     hours: {
@@ -511,8 +489,8 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Sud Lisboa.jpg"),
-    title: "SUD Lisboa",
+    path: require("../../assets/Lisboa/Sud_Lisboa.jpg"),
+    title: "SUD_Lisboa",
     category: "Restaurants & Rooftops",
     hours: {
       Lunes: "12:00 PM - 1:00 AM",
@@ -532,7 +510,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Java Rooftop.jpg"),
+    path: require("../../assets/Lisboa/Java_Rooftop.jpg"),
     title: "Java Rooftop",
     category: "Restaurants & Rooftops",
     hours: {
@@ -595,7 +573,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/cerbejaria liberdade.jpg"),
+    path: require("../../assets/Lisboa/cerbejaria_liberdade.jpg"),
     title: "Cervejaria Liberdade",
     category: "Restaurants & Rooftops",
     hours: {
@@ -617,7 +595,7 @@ const boxInfo = [
   },
 
   {
-    path: require("../../assets/Lisboa/cinco Lounge.jpg"),
+    path: require("../../assets/Lisboa/cinco_Lounge.jpg"),
     title: "Cinco Lounge",
     category: "Bars & Clubs",
     hours: {
@@ -638,7 +616,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/faz frio.jpg"),
+    path: require("../../assets/Lisboa/faz_frio.jpg"),
     title: "Faz Frio",
     category: "Restaurants & Rooftops",
     hours: {
@@ -659,7 +637,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Lx Factory.jpg"),
+    path: require("../../assets/Lisboa/Lx_Factory.jpg"),
     title: "Lx Factory",
     category: "Restaurants & Rooftops",
     hours: {
@@ -743,7 +721,7 @@ const boxInfo = [
     city: "Lisboa", // Agregado el campo de ciuda
   },
   {
-    path: require("../../assets/Lisboa/Bom o mau e o vilão.jpg"),
+    path: require("../../assets/Lisboa/Bom_o_mau_e_o_vilao.jpg"),
     title: "O bom o mau e o vilão",
     category: "Bars & Clubs",
     hours: {

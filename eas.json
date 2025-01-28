@@ -2,7 +2,8 @@
   "build": {
     "preview": {
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "channel": "preview-channel"
       }
     },
     "production": {
@@ -20,7 +21,8 @@
           "MESSAGING_SENDER_ID": "1003756781656",
           "APP_ID": "1:1003756781656:web:2843820ceb2049b147ca2d",
           "GOOGLE_MAPS_API_KEY": "AIzaSyD0qVS4hUiuJGxoQLTt49SUNnj9kIP-cn8"
-        }
+        },
+        "channel": "production-channel"
       },
       "ios": {
         "simulator": false,
@@ -35,7 +37,8 @@
           "MESSAGING_SENDER_ID": "1003756781656",
           "APP_ID": "1:1003756781656:web:2843820ceb2049b147ca2d",
           "GOOGLE_MAPS_API_KEY": "AIzaSyD0qVS4hUiuJGxoQLTt49SUNnj9kIP-cn8"
-        }
+        },
+        "channel": "production-channel"
       }
     }
   },
