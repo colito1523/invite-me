@@ -19,7 +19,22 @@
           "STORAGE_BUCKET": "invite-me-32a07.appspot.com",
           "MESSAGING_SENDER_ID": "1003756781656",
           "APP_ID": "1:1003756781656:web:2843820ceb2049b147ca2d",
-           "GOOGLE_MAPS_API_KEY": "AIzaSyD0qVS4hUiuJGxoQLTt49SUNnj9kIP-cn8"
+          "GOOGLE_MAPS_API_KEY": "AIzaSyD0qVS4hUiuJGxoQLTt49SUNnj9kIP-cn8"
+        }
+      },
+      "ios": {
+        "simulator": false,
+        "autoIncrement": "buildNumber",
+        "node": "22.13.0",
+        "env": {
+          "EXPO_NO_DOTENV": "1",
+          "API_KEY": "AIzaSyAmlwxr5zZXZnv_3YihB_XIQiKVqMzszYg",
+          "AUTH_DOMAIN": "invite-me-32a07.firebaseapp.com",
+          "PROJECT_ID": "invite-me-32a07",
+          "STORAGE_BUCKET": "invite-me-32a07.appspot.com",
+          "MESSAGING_SENDER_ID": "1003756781656",
+          "APP_ID": "1:1003756781656:web:2843820ceb2049b147ca2d",
+          "GOOGLE_MAPS_API_KEY": "AIzaSyD0qVS4hUiuJGxoQLTt49SUNnj9kIP-cn8"
         }
       }
     }
