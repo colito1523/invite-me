@@ -30,19 +30,13 @@ export default {
       supportsTablet: true,
       googleServicesFile: "./GoogleService-Info.plist",
       infoPlist: {
-        NSCameraUsageDescription:
-          "Se necesita acceso a la cámara para subir historias",
-        NSPhotoLibraryUsageDescription:
-          "Se necesita acceso a la galería para subir historias",
-        NSPhotoLibraryAddUsageDescription:
-          "Se necesita permiso para guardar fotos en tu galería",
-        NSUserNotificationsUsageDescription:
-          "Se necesita acceso para enviarte notificaciones importantes sobre eventos y actualizaciones.",
-        NSLocationWhenInUseUsageDescription:
-          "Se necesita acceso a tu ubicación para mostrar eventos cercanos.",
-        NSLocationAlwaysUsageDescription:
-          "Se necesita acceso constante a tu ubicación para enviar notificaciones basadas en tu ubicación.",
-        ITSAppUsesNonExemptEncryption: false,
+        NSCameraUsageDescription: "Access to the camera is required to upload stories.",
+  NSPhotoLibraryUsageDescription: "Access to the photo library is required to upload stories.",
+  NSPhotoLibraryAddUsageDescription: "Permission is needed to save photos to your gallery.",
+  NSUserNotificationsUsageDescription: "Access is required to send you important notifications about events and updates.",
+  NSLocationWhenInUseUsageDescription: "Access to your location is needed to show nearby events.",
+  NSLocationAlwaysUsageDescription: "Constant access to your location is required to send location-based notifications.",
+  ITSAppUsesNonExemptEncryption: false,
       },
     },
     android: {
