@@ -194,6 +194,14 @@ const SliderContent = ({
   );
 };
 
+
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+// Definir categorías de pantalla
+const isSmallScreen = screenWidth <= 412 && screenHeight <= 850; // Pantallas pequeñas
+const isMediumScreen = screenWidth > 412 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -252,7 +260,7 @@ const styles = StyleSheet.create({
   dayText: {
     color: "white",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: isSmallScreen ? 11 : isMediumScreen ? 12 : 12, // Márgenes dinámicos
     marginBottom: 5,
     textAlign: "right",
     paddingRight: 0,
@@ -261,7 +269,7 @@ const styles = StyleSheet.create({
   timeText: {
     color: "white",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: isSmallScreen ? 11 : isMediumScreen ? 12 : 12, // Márgenes dinámicos
     marginBottom: 5,
     textAlign: "left",
     marginVertical: 2,
@@ -274,13 +282,13 @@ const styles = StyleSheet.create({
   },
   contactTitle: {
     color: "white",
-    fontSize: 18,
+    fontSize: isSmallScreen ? 16 : isMediumScreen ? 18 : 18, // Márgenes dinámicos
     fontWeight: "bold",
     marginBottom: 10,
   },
   contactText: {
     color: "white",
-    fontSize: 16,
+    fontSize: isSmallScreen ? 16 : isMediumScreen ? 18 : 18, // Márgenes dinámicos
   },
   descriptionContainer: {
     padding: 15,

@@ -29,7 +29,7 @@
         "autoIncrement": "buildNumber",
         "node": "22.13.0",
         "cache": {
-          "paths": ["~/.cocoapods", "~/Library/Caches/CocoaPods", "ios/Pods"]
+          "paths": ["ios/Pods"]
         },
         "env": {
           "EXPO_NO_DOTENV": "1",
