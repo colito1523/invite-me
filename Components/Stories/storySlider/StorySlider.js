@@ -173,16 +173,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
   };
 
   const handleCamera = async () => {
-    setPendingAction(() => async () => {
-      try {
-        openCustomCamera(navigation);
-      } catch (error) {
-        console.error("Error abriendo la cámara:", error);
-        Alert.alert(t("storySlider.error"), t("storySlider.storyUploadError"));
-      }
-    });
-
-    setIsModalVisible(false); // Cierra el modal
+    navigation.navigate("CustomCamera");
   };
 
 

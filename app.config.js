@@ -27,7 +27,7 @@ export default {
     },
     ios: {
       bundleIdentifier: "com.airesSoftStudio.inviteMe",
-      supportsTablet: true,
+      supportsTablet: false,
       googleServicesFile: "./GoogleService-Info.plist",
       infoPlist: {
         NSCameraUsageDescription: "Access to the camera is required to upload stories.",

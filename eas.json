@@ -14,6 +14,7 @@
         "node": "22.13.0",
         "env": {
           "EXPO_NO_DOTENV": "1",
+          "EXPO_USE_R8": "1",
           "API_KEY": "AIzaSyAmlwxr5zZXZnv_3YihB_XIQiKVqMzszYg",
           "AUTH_DOMAIN": "invite-me-32a07.firebaseapp.com",
           "PROJECT_ID": "invite-me-32a07",
