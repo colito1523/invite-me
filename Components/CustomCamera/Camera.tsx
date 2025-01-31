@@ -35,11 +35,12 @@ export default function Camera({ header = null }) {
             quality: 1,
             base64: true,
             exif: false,
+            mirror: facing === 'front' // Corrige la imagen volteada en selfies
         };
         const takedPhoto = await cameraRef.current.takePictureAsync(options);
         setPhoto(takedPhoto);
     }
-  }; 
+};
 
   const handleRetakePhoto = () => setPhoto(null);
 
