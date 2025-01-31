@@ -109,7 +109,7 @@ function ChatStack() {
         <Stack.Screen name="AudioPlayer" component={AudioPlayer} />
         <Stack.Screen name="StoryViewer" component={StoryViewer} options={{ headerShown: false }} />
         <Stack.Screen name="StorySlider" component={StorySlider} />
-        <Stack.Screen name="Camera" component={Camera} />
+        <Stack.Screen name="Camera" component={Camera} options={{ headerShown: false }} />
       </Stack.Navigator>
       </DateProvider>
     </BlockProvider>

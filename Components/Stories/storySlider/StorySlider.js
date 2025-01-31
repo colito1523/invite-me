@@ -173,6 +173,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
   };
 
   const handleCamera = async () => {
+    setIsModalVisible(false); // Close the modal
     navigation.navigate("Camera");
   };
 
