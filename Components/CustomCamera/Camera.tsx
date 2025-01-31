@@ -1,4 +1,4 @@
-import PhotoPreviewSection from '../PhotoPreviewSection';
+import PhotoPreviewSection from './PhotoPreviewSection';
 import { AntDesign } from '@expo/vector-icons';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'gray',
+    backgroundColor: 'transparent',
     borderWidth: 4,
     borderColor: 'white',
     justifyContent: 'center',
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'lightgray',
+    backgroundColor: 'white',
   },
   toggleButton: {
     position: 'absolute',
