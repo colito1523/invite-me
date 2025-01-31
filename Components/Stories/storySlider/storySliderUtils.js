@@ -302,5 +302,5 @@ export const compressImage = async (uri, quality = 0.6, width = 1080) => {
   };
 
 export const openCustomCamera = async (navigation) => {
-  navigation.navigate("CustomCamera");
+  navigation.navigate("Camera");
 };

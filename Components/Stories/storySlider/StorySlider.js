@@ -173,7 +173,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
   };
 
   const handleCamera = async () => {
-    navigation.navigate("CustomCamera");
+    navigation.navigate("Camera");
   };
 
 

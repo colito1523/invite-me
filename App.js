@@ -36,7 +36,7 @@ import Tutorial from './screens/Tutorial';
 import EventRecommendations from './Components/EventRecomendation/event-recommendations';
 import StoryViewer from './Components/Stories/storyViewer/StoryViewer';
 import StorySlider from "./Components/Stories/storySlider/StorySlider";
-import CustomCamera from "./Components/CustomCamera/CustomCamera";
+import Camera from "./Components/CustomCamera/Camera";
 
 import { auth, database } from "./config/firebase";
 
@@ -109,7 +109,7 @@ function ChatStack() {
         <Stack.Screen name="AudioPlayer" component={AudioPlayer} />
         <Stack.Screen name="StoryViewer" component={StoryViewer} options={{ headerShown: false }} />
         <Stack.Screen name="StorySlider" component={StorySlider} />
-        <Stack.Screen name="CustomCamera" component={CustomCamera} />
+        <Stack.Screen name="Camera" component={Camera} />
       </Stack.Navigator>
       </DateProvider>
     </BlockProvider>
