@@ -8,11 +8,13 @@ import {
   Dimensions,
 } from "react-native";
 import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get('window');
 
-const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, isPrivateEvent }) => {
+const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, isPrivateEvent, priority }) => {
   const displayDate = isPrivateEvent ? DaySpecial : selectedDate;
+  const { t } = useTranslation();
   const defaultImageUrl = "https://example.com/default-image.jpg";
 
   return (
@@ -25,6 +27,11 @@ const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, is
           style={[StyleSheet.absoluteFillObject, styles.image]}
           cachePolicy="memory-disk"
         />
+        {priority && (
+          <View style={styles.priorityContainer}>
+            <Text style={styles.priorityText}>{t('HomeIndex.Patrocinado')}</Text>
+          </View>
+        )}
         {DaySpecial ? (
           <View style={styles.daySpecialContainer}>
             <Text style={styles.daySpecialText}>{DaySpecial}</Text>
@@ -120,6 +127,20 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
+  },
+  priorityContainer: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  priorityText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

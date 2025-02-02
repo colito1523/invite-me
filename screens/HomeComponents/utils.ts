@@ -254,7 +254,7 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
 
     const data = await Promise.all(
       boxInfo.map(
-        async ({ path, title, category, hours, number, coordinates, country, city }) => {
+        async ({ path, title, category, hours, number, coordinates, country, city, priority }) => {
           let url = path;
 
           if (typeof path === "string") {
@@ -288,6 +288,7 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
             city,
             attendees: filteredAttendees,
             attendeesCount: filteredAttendees.length || 0,
+            priority: priority || false, // Ensure priority is passed correctly
           };
         }
       )
@@ -337,9 +338,16 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
       });
     }
 
-    const allEvents = [...userEvents, ...data].sort(
-      (a, b) => b.attendeesCount - a.attendeesCount
-    );
+    // Ordenar los eventos generales con prioridad primero, luego los privados, y finalmente los generales sin prioridad
+    const allEvents = [...userEvents, ...data].sort((a, b) => {
+      if (a.isPrivateEvent && !b.isPrivateEvent) return -1; // Eventos privados primero
+      if (!a.isPrivateEvent && b.isPrivateEvent) return 1;
+
+      if (a.priority && !b.priority) return -1; // Eventos con prioridad primero
+      if (!a.priority && b.priority) return 1;
+
+      return b.attendeesCount - a.attendeesCount; // Ordenar por cantidad de asistentes
+    });
 
     setBoxData(allEvents);
   } catch (error) {

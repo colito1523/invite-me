@@ -1,6 +1,7 @@
 {
   "HomeIndex": {
-    "requestingLocationPermissions" : "Requesting location permissions..."
+    "requestingLocationPermissions" : "Requesting location permissions...",
+    "Patrocinado": "Sponsored"
   },
   "complaints": {
     "reportUser": "Report User",

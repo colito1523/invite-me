@@ -387,6 +387,7 @@ const Home = React.memo(() => {
           selectedDate={selectedDate}
           date={item.date}
           isPrivateEvent={item.category === "EventoParaAmigos"}
+          priority={item.priority} // Ensure the priority property is passed to the Box component
         />
         {item.attendees && item.attendees.length > 0 && (
           <DotIndicator

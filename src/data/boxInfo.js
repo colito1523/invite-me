@@ -19,6 +19,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/palacio_Chaiado.jpg"),
@@ -40,6 +41,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
 
   {
@@ -62,6 +64,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/corner2.jpg"),
@@ -83,6 +86,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Praca_das_flores.jpg"),
@@ -104,6 +108,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
 
   {
@@ -126,6 +131,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
 
   {
@@ -148,6 +154,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/SEEN.jpg"),
@@ -169,6 +176,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: true, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Jncquoi_club.jpg"),
@@ -190,6 +198,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Jncquoi_Avenida.jpg"),
@@ -211,6 +220,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Brilhante.jpg"),
@@ -232,6 +242,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/lux_Fragil.jpg"),
@@ -253,6 +264,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
  
   {
@@ -275,6 +287,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Rive_Rouge.jpg"),
@@ -296,6 +309,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Plateau.jpg"),
@@ -317,6 +331,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/lust_in_rio.jpg"),
@@ -338,6 +353,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
 
   {
@@ -360,6 +376,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/jamaica.jpg"),
@@ -381,6 +398,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Casa_Santi.jpg"),
@@ -402,6 +420,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Beca_Beca_2.jpg"),
@@ -423,6 +442,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Bairro_alto.webp"),
@@ -444,6 +464,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/SKY_BAR.jpg"),
@@ -466,6 +487,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: true,
   },
   {
     path: require("../../assets/Lisboa/Mini_Bar_Avillez.jpg"),
@@ -487,6 +509,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Sud_Lisboa.jpg"),
@@ -508,6 +531,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Java_Rooftop.jpg"),
@@ -529,6 +553,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/hangar.jpg"),
@@ -550,6 +575,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/okha.jpg"),
@@ -571,6 +597,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/cerbejaria_liberdade.jpg"),
@@ -592,6 +619,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
 
   {
@@ -614,6 +642,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/faz_frio.jpg"),
@@ -635,6 +664,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Lx_Factory.jpg"),
@@ -656,6 +686,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Docas.jpg"),
@@ -677,6 +708,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Go A Lisboa Rooftop.jpg"),
@@ -698,6 +730,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Golden.jpg"),
@@ -719,6 +752,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Bom_o_mau_e_o_vilao.jpg"),
@@ -740,6 +774,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Collect.jpg"),
@@ -761,6 +796,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/malacopa.jpg"),
@@ -782,6 +818,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/hifen.jpg"),
@@ -803,6 +840,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
 
   {
@@ -825,6 +863,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
   {
     path: require("../../assets/Lisboa/Ministerium Club.jpg"),
@@ -846,6 +885,7 @@ const boxInfo = [
     },
     country: "Portugal", // Agregar esta propiedad
     city: "Lisboa", // Agregado el campo de ciuda
+    priority: false, // Add this property
   },
 
   // MADRID
