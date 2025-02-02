@@ -27,10 +27,10 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   const maxDate = dayjs().add(2, "month").format("YYYY-MM-DD");
 
   const handleDayPress = (day) => {
-    const formattedDate = dayjs(day.dateString).format("D MMM");
+    const formattedDate = dayjs(day.dateString).format("D MMM"); // Asegúrate de que el formato sea "D MMM"
     setSelectedDate(formattedDate);
     setModalVisible(false);
-
+  
     if (onDateChange) {
       setLoading(true);
       onDateChange(formattedDate);
