@@ -29,7 +29,6 @@
     "noUserDataError": "No se encontraron los datos del usuario actual.",
     "cannotUnblockError": "No puedes desbloquear a este usuario."
   },
-
   "dotIndicator": {
     "searchPlaceholder": "Buscar...",
     "errorFetchingBlockedUsers": "Error al obtener usuarios bloqueados:",
@@ -785,6 +784,7 @@
       "subtitle": "Bienvenido a Invite Me, donde te esperan grandes experiencias."
     }
   },
+  
 
   "tutorial": {
     "skip": "Saltar",
