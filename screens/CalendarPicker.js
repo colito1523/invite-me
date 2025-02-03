@@ -37,10 +37,10 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   const maxDate = dayjs().add(2, "month").format("YYYY-MM-DD");
 
   const handleDayPress = (day) => {
-    const formattedDate = dayjs(day.dateString).format("D MMM"); // Asegúrate de que el formato sea "D MMM"
-    setSelectedDate(formattedDate);
+    const formattedDate = dayjs(day.dateString).format("YYYY-MM-DD"); // Formato inglés
+    setSelectedDate(formattedDate); // Actualiza el contexto con un formato válido
     setModalVisible(false);
-  
+
     if (onDateChange) {
       setLoading(true);
       onDateChange(formattedDate);
@@ -52,7 +52,9 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   return (
     <View>
       <TouchableOpacity style={currentStyles.dateButton} onPress={() => setModalVisible(true)}>
-        <Text style={currentStyles.dateText}>{selectedDate}</Text>
+        <Text style={currentStyles.dateText}>
+          {dayjs(selectedDate).isValid() ? dayjs(selectedDate).format("D MMM") : dayjs().format("D MMM")}
+        </Text>
       </TouchableOpacity>
 
       <Modal
