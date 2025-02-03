@@ -506,12 +506,14 @@ export default function Component({ route, navigation }) {
                   cachePolicy="memory-disk"
                   style={[
                     styles.backgroundImage,
-                    index === 0 && styles.firstImageOverlay,
                     (index === 1 || index === 2) && styles.blankImageOverlay,
                   ]}
                   contentFit="cover"
                 />
                 <View style={styles.overlay}>
+                  {index === 1 || index === 2 ? (
+                    <Text style={styles.privateAccountText}>{t('privateAccount')}</Text>
+                  ) : null}
                   <NameDisplay
                     firstName={selectedUser.firstName}
                     lastName={selectedUser.lastName}
@@ -628,9 +630,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  firstImageOverlay: {
-    opacity: 0.3,
-  },
   blankImageOverlay: {
     opacity: 0,
   },
@@ -733,5 +732,15 @@ const styles = StyleSheet.create({
   addFriendButton: {
     padding: 10,
     borderRadius: 20,
+  },
+  privateAccountText: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -80 }, { translateY: -50 }],
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

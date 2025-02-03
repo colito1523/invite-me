@@ -443,6 +443,7 @@
 
   "anonymousUser": "Usuario Anónimo",
   "errorSendingFriendRequest": "Error al enviar la solicitud de amistad",
+  "privateAccount":"Cuenta privada", 
   "alreadyFriends": "Ya son amigos",
   "alreadyFriendsMessage": "Ya eres amigo de este usuario.",
   "errorCancelingFriendRequest": "Error al cancelar la solicitud de amistad",

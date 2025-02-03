@@ -427,6 +427,7 @@
 
 "anonymousUser": "Utilizador Anónimo",
 "errorSendingFriendRequest": "Erro ao enviar pedido de amizade",
+"privateAccount":"Conta privada", 
 "alreadyFriends": "Já são amigos",
 "alreadyFriendsMessage": "Já é amigo deste utilizador.",
 "errorCancelingFriendRequest": "Erro ao cancelar o pedido de amizade",

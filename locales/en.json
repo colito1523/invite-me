@@ -431,6 +431,7 @@
 
   "anonymousUser": "Anonymous User",
   "errorSendingFriendRequest": "Error sending friend request",
+  "privateAccount":"Private account", 
   "alreadyFriends": "Already Friends",
   "alreadyFriendsMessage": "You are already friends with this user.",
   "errorCancelingFriendRequest": "Error canceling friend request",
