@@ -55,6 +55,32 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
     fetchBlockedUsers();
   }, []);
+
+  const filterAttendeesList = async (attendees) => {
+    try {
+      const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+      const friendsSnapshot = await getDocs(friendsRef);
+      const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
+  
+      const filteredAttendees = await Promise.all(
+        attendees.map(async (attendee) => {
+          const userDocRef = doc(database, "users", attendee.uid);
+          const userDoc = await getDoc(userDocRef);
+          const userData = userDoc.exists() ? userDoc.data() : null;
+  
+          if (!userData) return null;
+          if (userData.isPrivate && !friendsList.includes(attendee.uid)) return null;
+  
+          return attendee;
+        })
+      );
+  
+      return filteredAttendees.filter(Boolean);
+    } catch (error) {
+      console.error("Error al filtrar asistentes:", error);
+      return attendees; // En caso de error, devolver la lista original sin filtrado
+    }
+  };
   
 
   const navigateToUserProfile = async (uid) => {
@@ -155,29 +181,32 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     }
   };
 
- useEffect(() => {
-     const fetchCompleteUserData = async () => {
-       try {
-         const usersWithFullData = await Promise.all(
-           attendeesList.map(async (attendee) => {
-             const userDoc = await getDoc(doc(database, "users", attendee.uid));
-             const userData = userDoc.exists() ? userDoc.data() : {};
-             return {
-               ...userData,
-               ...attendee,
-               hasStories: attendee.hasStories,
-               userStories: attendee.userStories
-             };
-           })
-         );
-         await checkStories();
-       } catch (error) {
-         console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
-       }
-     };
- 
-     fetchCompleteUserData();
-   }, [attendeesList]);
+
+  useEffect(() => {
+    const fetchCompleteUserData = async () => {
+      try {
+        const usersWithFullData = await Promise.all(
+          attendeesList.map(async (attendee) => {
+            const userDoc = await getDoc(doc(database, "users", attendee.uid));
+            const userData = userDoc.exists() ? userDoc.data() : {};
+            return {
+              ...userData,
+              ...attendee,
+              hasStories: attendee.hasStories,
+              userStories: attendee.userStories
+            };
+          })
+        );
+        await checkStories();
+        const filteredAttendees = await filterAttendeesList(usersWithFullData);
+        setFilteredAttendees(filteredAttendees);
+      } catch (error) {
+        console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
+      }
+    };
+  
+    fetchCompleteUserData();
+  }, [attendeesList]);
 
   useEffect(() => {
     const updateFilteredImages = () => {
@@ -202,21 +231,48 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   }, []);
 
   useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredAttendees(
-        attendeesList.filter(
-          (attendee) => !blockedUsers.includes(attendee.uid) // Excluir usuarios bloqueados
-        )
-      );
-    } else {
-      const filtered = attendeesList.filter(
-        (attendee) =>
-          !blockedUsers.includes(attendee.uid) && // Excluir usuarios bloqueados
-          attendee.username.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredAttendees(filtered);
-    }
+    const fetchFilteredAttendees = async () => {
+      try {
+        const friendsRef = collection(database, `users/${auth.currentUser.uid}/friends`);
+        const friendsSnapshot = await getDocs(friendsRef);
+        const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
+  
+        const filtered = await Promise.all(
+          attendeesList.map(async (attendee) => {
+            if (blockedUsers.includes(attendee.uid)) return null;
+  
+            const userDocRef = doc(database, "users", attendee.uid);
+            const userDoc = await getDoc(userDocRef);
+            const userData = userDoc.exists() ? userDoc.data() : null;
+  
+            if (!userData) return null;
+  
+            // Filtra usuarios privados que no son amigos
+            if (userData.isPrivate && !friendsList.includes(attendee.uid)) return null;
+  
+            return attendee;
+          })
+        );
+  
+        let finalFilteredAttendees = filtered.filter(Boolean);
+        
+        if (searchTerm.trim() !== "") {
+          finalFilteredAttendees = finalFilteredAttendees.filter(
+            (attendee) => attendee.username.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+  
+        setFilteredAttendees(finalFilteredAttendees);
+      } catch (error) {
+        console.error("Error al filtrar asistentes:", error);
+      }
+    };
+  
+    fetchFilteredAttendees();
   }, [searchTerm, attendeesList, blockedUsers]);
+  
+  
+  
 
   const handlePresss = () => {
     setModalVisible(true);
