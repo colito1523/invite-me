@@ -17,9 +17,9 @@ const boxInfo = [
       latitude: 38.7301071,
       longitude: -9.1532305,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/palacio_Chaiado.jpg"),
@@ -39,11 +39,9 @@ const boxInfo = [
       latitude: 38.7096823,
       longitude: -9.143029,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
   },
-
   {
     path: require("../../assets/Lisboa/mama_shelter.jpg"),
     title: "Mama Shelter",
@@ -62,9 +60,9 @@ const boxInfo = [
       latitude: 38.7208955,
       longitude: -9.1523714,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    availableDates: ["12 Feb"], // Fechas donde unicamente se vera
   },
   {
     path: require("../../assets/Lisboa/corner2.jpg"),
@@ -84,9 +82,10 @@ const boxInfo = [
       latitude: 38.7253583,
       longitude: -9.1535022,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    priority: true, // Esto hace que aparezca en la sección de prioridad
+    
   },
   {
     path: require("../../assets/Lisboa/Praca_das_flores.jpg"),
@@ -106,11 +105,10 @@ const boxInfo = [
       latitude: 38.714855,
       longitude: -9.1516277,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
-
   {
     path: require("../../assets/Lisboa/Rumu.jpg"),
     title: "Rumu",
@@ -129,11 +127,10 @@ const boxInfo = [
       latitude: 38.7113519,
       longitude: -9.1424033,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
-
   {
     path: require("../../assets/Lisboa/Mona_Verde.jpg"),
     title: "Mona Verde",
@@ -152,9 +149,9 @@ const boxInfo = [
       latitude: 38.7203755,
       longitude: -9.1491488,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/SEEN.jpg"),
@@ -174,9 +171,9 @@ const boxInfo = [
       latitude: 38.72105140,
       longitude: -9.14728440,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: true, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Jncquoi_club.jpg"),
@@ -196,9 +193,9 @@ const boxInfo = [
       latitude: 38.72028,
       longitude: -9.1449959,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Jncquoi_Avenida.jpg"),
@@ -218,9 +215,9 @@ const boxInfo = [
       latitude: 38.72028,
       longitude: -9.1449959,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Brilhante.jpg"),
@@ -240,9 +237,9 @@ const boxInfo = [
       latitude: 38.7078843,
       longitude: -9.1470788,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/lux_Fragil.jpg"),
@@ -262,11 +259,10 @@ const boxInfo = [
       latitude: 38.7148909,
       longitude: -9.1205341,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
- 
   {
     path: require("../../assets/Lisboa/Mome.jpg"),
     title: "MOME",
@@ -285,9 +281,9 @@ const boxInfo = [
       latitude: 38.7059725,
       longitude: -9.1574549,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Rive_Rouge.jpg"),
@@ -307,9 +303,9 @@ const boxInfo = [
       latitude: 38.7074149,
       longitude: -9.1461322,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Plateau.jpg"),
@@ -329,9 +325,9 @@ const boxInfo = [
       latitude: 38.7063889,
       longitude: -9.1575,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/lust_in_rio.jpg"),
@@ -351,11 +347,10 @@ const boxInfo = [
       latitude: 38.706027,
       longitude: -9.1499039,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
-
   {
     path: require("../../assets/Lisboa/nav.jpg"),
     title: "NAV",
@@ -374,9 +369,9 @@ const boxInfo = [
       latitude: 38.7411311,
       longitude: -9.145745,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/jamaica.jpg"),
@@ -396,9 +391,9 @@ const boxInfo = [
       latitude: 38.7053888,
       longitude: -9.1467954,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Casa_Santi.jpg"),
@@ -418,9 +413,9 @@ const boxInfo = [
       latitude: 38.7071959,
       longitude: -9.1538892,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Beca_Beca_2.jpg"),
@@ -440,9 +435,9 @@ const boxInfo = [
       latitude: 38.7283001,
       longitude: -9.1526828,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Bairro_alto.webp"),
@@ -462,9 +457,9 @@ const boxInfo = [
       latitude: 38.7128331,
       longitude: -9.1450582,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/SKY_BAR.jpg"),
@@ -479,15 +474,14 @@ const boxInfo = [
       Sábado: "12:30 PM - 2:00 AM",
       Domingo: "12:30 PM - 1:00 AM",
     },
-
     number: "21 096 5775",
     coordinates: {
       latitude: 38.7209984,
       longitude: -9.147139,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: true,
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Mini_Bar_Avillez.jpg"),
@@ -507,9 +501,9 @@ const boxInfo = [
       latitude: 38.7122668,
       longitude: -9.1424025,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Sud_Lisboa.jpg"),
@@ -529,9 +523,9 @@ const boxInfo = [
       latitude: 38.6963541,
       longitude: -9.1917573,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Java_Rooftop.jpg"),
@@ -551,9 +545,9 @@ const boxInfo = [
       latitude: 38.7076621,
       longitude: -9.1468819,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/hangar.jpg"),
@@ -573,9 +567,9 @@ const boxInfo = [
       latitude: 38.718489,
       longitude: -9.1322327,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/okha.jpg"),
@@ -595,9 +589,9 @@ const boxInfo = [
       latitude: 38.7030827,
       longitude: -9.162038,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/cerbejaria_liberdade.jpg"),
@@ -617,11 +611,10 @@ const boxInfo = [
       latitude: 38.72102950,
       longitude: -9.14693150,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
-
   {
     path: require("../../assets/Lisboa/cinco_Lounge.jpg"),
     title: "Cinco Lounge",
@@ -640,9 +633,9 @@ const boxInfo = [
       latitude: 38.7141649,
       longitude: -9.1497258,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/faz_frio.jpg"),
@@ -662,9 +655,9 @@ const boxInfo = [
       latitude: 38.7160092,
       longitude: -9.1469233,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Lx_Factory.jpg"),
@@ -684,9 +677,9 @@ const boxInfo = [
       latitude: 38.7034979,
       longitude: -9.178873,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Docas.jpg"),
@@ -706,9 +699,9 @@ const boxInfo = [
       latitude: 38.6994781,
       longitude: -9.1774925,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Go A Lisboa Rooftop.jpg"),
@@ -728,9 +721,9 @@ const boxInfo = [
       latitude: 38.7065681,
       longitude: -9.1723879,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Golden.jpg"),
@@ -750,9 +743,9 @@ const boxInfo = [
       latitude: 38.6997337,
       longitude: -9.1785392,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Bom_o_mau_e_o_vilao.jpg"),
@@ -772,9 +765,9 @@ const boxInfo = [
       latitude: 38.7073563,
       longitude: -9.1435333,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Collect.jpg"),
@@ -794,9 +787,9 @@ const boxInfo = [
       latitude: 38.7074284,
       longitude: -9.1441089,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/malacopa.jpg"),
@@ -816,9 +809,9 @@ const boxInfo = [
       latitude: 38.6982578,
       longitude: -9.4217543,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/hifen.jpg"),
@@ -838,11 +831,10 @@ const boxInfo = [
       latitude: 38.6962004,
       longitude: -9.42026,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
-
   {
     path: require("../../assets/Lisboa/K Urban Beach.jpg"),
     title: "K Urban Beach",
@@ -861,9 +853,9 @@ const boxInfo = [
       latitude: 38.70487280,
       longitude: -9.15498770,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
   {
     path: require("../../assets/Lisboa/Ministerium Club.jpg"),
@@ -883,13 +875,10 @@ const boxInfo = [
       latitude: 38.70716500,
       longitude: -9.13718600,
     },
-    country: "Portugal", // Agregar esta propiedad
-    city: "Lisboa", // Agregado el campo de ciuda
-    priority: false, // Add this property
+    country: "Portugal",
+    city: "Lisboa",
+    
   },
-
-  // MADRID
-
   {
     path: require("../../assets/Madrid/Istar.jpg"),
     title: "Istar",
@@ -908,11 +897,10 @@ const boxInfo = [
       latitude: 40.428745,
       longitude: -3.6875565,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
-    isPrivate: false, // Evento general
+    country: "España",
+    city: "Madrid",
+    
   },
-
   {
     path: require("../../assets/Madrid/Giselle.jpg"),
     title: "Giselle",
@@ -931,9 +919,9 @@ const boxInfo = [
       latitude: 40.4225554,
       longitude: -3.6908309,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
-    isPrivate: false, // Evento general
+    country: "España",
+    city: "Madrid",
+    
   },
   {
     path: require("../../assets/Madrid/Amazonico.jpg"),
@@ -953,8 +941,8 @@ const boxInfo = [
       latitude: 40.423715,
       longitude: -3.6850997,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Jungle Jazz Club.jpg"),
@@ -974,8 +962,8 @@ const boxInfo = [
       latitude: 40.423715,
       longitude: -3.6850997,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Los 33.jpg"),
@@ -995,8 +983,8 @@ const boxInfo = [
       latitude: 40.4238428,
       longitude: -3.6948365,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Castellana 8.jpg"),
@@ -1016,8 +1004,8 @@ const boxInfo = [
       latitude: 40.4274487,
       longitude: -3.6893616,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Panthera.jpg"),
@@ -1037,8 +1025,8 @@ const boxInfo = [
       latitude: 40.4361839,
       longitude: -3.6916115,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Nomada.jpg"),
@@ -1058,8 +1046,8 @@ const boxInfo = [
       latitude: 40.4288166,
       longitude: -3.687976,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/La Flaca.jpg"),
@@ -1079,8 +1067,8 @@ const boxInfo = [
       latitude: 40.4288828,
       longitude: -3.6874267,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/marieta.jpg"),
@@ -1100,10 +1088,9 @@ const boxInfo = [
       latitude: 40.4338889,
       longitude: -3.6877778,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/Chambao Madrid.jpg"),
     title: "Chambao Madrid",
@@ -1122,10 +1109,9 @@ const boxInfo = [
       latitude: 40.4268248,
       longitude: -3.6894579,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/Fanatico.jpg"),
     title: "Fanatico",
@@ -1144,8 +1130,8 @@ const boxInfo = [
       latitude: 40.4354529,
       longitude: -3.6896221,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/slvj2.jpg"),
@@ -1165,10 +1151,9 @@ const boxInfo = [
       latitude: 40.428215,
       longitude: -3.6832182,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/Aarde.jpg"),
     title: "Aarde",
@@ -1187,8 +1172,8 @@ const boxInfo = [
       latitude: 40.4195293,
       longitude: -3.6895932,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Tuetano.jpg"),
@@ -1208,8 +1193,8 @@ const boxInfo = [
       latitude: 40.4365605,
       longitude: -3.6992103,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Casa Suecia.jpg"),
@@ -1229,8 +1214,8 @@ const boxInfo = [
       latitude: 40.4179018,
       longitude: -3.6962677,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Habanera.jpg"),
@@ -1250,8 +1235,8 @@ const boxInfo = [
       latitude: 40.4253604,
       longitude: -3.6917744,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Gaston.jpg"),
@@ -1271,10 +1256,9 @@ const boxInfo = [
       latitude: 40.4220598,
       longitude: -3.6859164,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/Toni 2 piano Bar.jpg"),
     title: "Toni 2 piano Bar",
@@ -1293,8 +1277,8 @@ const boxInfo = [
       latitude: 40.4226339,
       longitude: -3.6947675,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Vandido.jpg"),
@@ -1314,8 +1298,8 @@ const boxInfo = [
       latitude: 40.4251922,
       longitude: -3.6779126,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/victoria.jpg"),
@@ -1335,10 +1319,9 @@ const boxInfo = [
       latitude: 40.4290497,
       longitude: -3.687336,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/Morris Club.jpg"),
     title: "Morris Club",
@@ -1357,8 +1340,8 @@ const boxInfo = [
       latitude: 40.4344244,
       longitude: -3.6899541,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Rubicon.jpg"),
@@ -1378,8 +1361,8 @@ const boxInfo = [
       latitude: 40.4225137,
       longitude: -3.689844,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Gabana.jpg"),
@@ -1399,10 +1382,9 @@ const boxInfo = [
       latitude: 40.4376559,
       longitude: -3.6796724,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/Gunilla.jpg"),
     title: "Gunilla",
@@ -1421,8 +1403,8 @@ const boxInfo = [
       latitude: 40.4226066,
       longitude: -3.6910073,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Lula Club.jpg"),
@@ -1442,8 +1424,8 @@ const boxInfo = [
       latitude: 40.4213789,
       longitude: -3.707142,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/almagro.jpg"),
@@ -1463,8 +1445,8 @@ const boxInfo = [
       latitude: 40.4286449,
       longitude: -3.6944338,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Numa pompilio.jpg"),
@@ -1484,8 +1466,8 @@ const boxInfo = [
       latitude: 40.4233521,
       longitude: -3.6839974,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Zuma.jpg"),
@@ -1505,10 +1487,9 @@ const boxInfo = [
       latitude: 40.4264239,
       longitude: -3.6895475,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/picalagartos.jpg"),
     title: "Picalagartos Sky Bar & Restaurant",
@@ -1527,8 +1508,8 @@ const boxInfo = [
       latitude: 40.4197791,
       longitude: -3.7012213,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Tatel.jpg"),
@@ -1548,10 +1529,9 @@ const boxInfo = [
       latitude: 40.4324618,
       longitude: -3.6878034,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/margarita.jpg"),
     title: "Margarita",
@@ -1570,10 +1550,9 @@ const boxInfo = [
       latitude: 40.4370387,
       longitude: -3.6809016,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/Terraza abc Sky.jpg"),
     title: "Terraza abc Sky",
@@ -1592,8 +1571,8 @@ const boxInfo = [
       latitude: 40.4323576,
       longitude: -3.6870319,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Red Project Sushi.jpg"),
@@ -1613,8 +1592,8 @@ const boxInfo = [
       latitude: 40.421265,
       longitude: -3.6901571,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Kuu Kuu.jpg"),
@@ -1634,8 +1613,8 @@ const boxInfo = [
       latitude: 40.4283953,
       longitude: -3.6840741,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/ten con ten.jpg"),
@@ -1655,8 +1634,8 @@ const boxInfo = [
       latitude: 40.4278455,
       longitude: -3.6885096,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/Perrachica.jpg"),
@@ -1676,8 +1655,8 @@ const boxInfo = [
       latitude: 40.4337343,
       longitude: -3.7027922,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
   {
     path: require("../../assets/Madrid/La fonda lironda.jpg"),
@@ -1697,10 +1676,9 @@ const boxInfo = [
       latitude: 40.4260918,
       longitude: -3.6922632,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
-
   {
     path: require("../../assets/Madrid/Inclan Brutal Bar.jpg"),
     title: "Inclan Brutal Bar",
@@ -1719,8 +1697,8 @@ const boxInfo = [
       latitude: 40.4150623,
       longitude: -3.7019135,
     },
-    country: "España", // Cambiado a España
-    city: "Madrid", // Cambiado a Madrid
+    country: "España",
+    city: "Madrid",
   },
 ];
 

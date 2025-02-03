@@ -254,7 +254,12 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
 
     const data = await Promise.all(
       boxInfo.map(
-        async ({ path, title, category, hours, number, coordinates, country, city, priority }) => {
+        async ({ path, title, category, hours, number, coordinates, country, city, priority, availableDates }) => {
+          // Verificar si el evento tiene fechas disponibles y si la fecha seleccionada está incluida
+          if (availableDates && !availableDates.includes(selectedDate)) {
+            return null; // No incluir este evento si no está disponible en la fecha seleccionada
+          }
+
           let url = path;
 
           if (typeof path === "string") {
@@ -272,7 +277,7 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
               : [];
           }
 
-          // Filter out blocked attendees
+          // Filtrar asistentes bloqueados
           const filteredAttendees = attendees.filter(
             (attendee) => !blockedUsers.includes(attendee.uid)
           );
@@ -288,11 +293,14 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
             city,
             attendees: filteredAttendees,
             attendeesCount: filteredAttendees.length || 0,
-            priority: priority || false, // Ensure priority is passed correctly
+            priority: priority || false,
           };
         }
       )
     );
+
+    // Filtrar los eventos que no son nulos
+    const filteredData = data.filter(event => event !== null);
 
     const userEvents = [];
     if (user) {
@@ -307,7 +315,7 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
         const eventData = doc.data();
         const eventId = doc.id;
         
-        // Only include events if user is admin or in attendees list
+        // Solo incluir eventos si el usuario es admin o está en la lista de asistentes
         const isAdmin = eventData.Admin === user.uid;
         const isAttendee = eventData.attendees && eventData.attendees.some(attendee => attendee.uid === user.uid);
         
@@ -339,7 +347,7 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
     }
 
     // Ordenar los eventos generales con prioridad primero, luego los privados, y finalmente los generales sin prioridad
-    const allEvents = [...userEvents, ...data].sort((a, b) => {
+    const allEvents = [...userEvents, ...filteredData].sort((a, b) => {
       if (a.isPrivateEvent && !b.isPrivateEvent) return -1; // Eventos privados primero
       if (!a.isPrivateEvent && b.isPrivateEvent) return 1;
 
