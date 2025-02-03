@@ -37,13 +37,14 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   const maxDate = dayjs().add(2, "month").format("YYYY-MM-DD");
 
   const handleDayPress = (day) => {
-    const formattedDate = dayjs(day.dateString).format("YYYY-MM-DD"); // Formato inglés
-    setSelectedDate(formattedDate); // Actualiza el contexto con un formato válido
+    const formattedDate = dayjs(day.dateString).format("D MMM"); // Cambia a un formato estándar para evitar errores
+    setSelectedDate(formattedDate); // Actualiza el contexto
+  
     setModalVisible(false);
-
+    
     if (onDateChange) {
       setLoading(true);
-      onDateChange(formattedDate);
+      onDateChange(formattedDate); // Enviar la fecha al componente padre
     }
   };
 
