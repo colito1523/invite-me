@@ -3,8 +3,10 @@
     "preview": {
       "android": {
         "buildType": "apk",
-        "channel": "preview-channel"
-      }
+        "channel": "preview"
+      },
+      "distribution": "internal",
+      "channel": "preview"
     },
     "production": {
       "android": {
