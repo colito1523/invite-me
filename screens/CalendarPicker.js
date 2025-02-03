@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useDate } from "../src/hooks/DateContext"; // Importa el contexto
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Dimensions } from "react-native";
-import { Calendar } from "react-native-calendars";
+import { Calendar, LocaleConfig } from "react-native-calendars"; // Importa LocaleConfig
 import dayjs from "dayjs";
 import { LinearGradient } from "expo-linear-gradient";
+
+// Configura LocaleConfig para usar el idioma español
+LocaleConfig.locales['es'] = {
+  monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+  monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+  dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+  dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+  today: 'Hoy'
+};
+LocaleConfig.defaultLocale = 'es';
 
 const { width } = Dimensions.get("window");
 
@@ -68,6 +78,7 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
               markedDates={{
                 [today]: { selected: true, selectedColor: "#3e3d3d" },
               }}
+              locale={'es'} // Configura el idioma a español
               theme={{
                 backgroundColor: "transparent",
                 calendarBackground: "transparent",
