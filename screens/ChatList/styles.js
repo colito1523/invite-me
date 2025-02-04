@@ -73,13 +73,13 @@ export const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "black",
+    backgroundColor: isNight ? "white" : "black", // Updated color for night mode
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 10,
   },
   unseenCountText: {
-    color: "white",
+    color: isNight ? "black" : "white", // Updated color for night mode
     fontSize: 12,
     fontWeight: "bold",
   },

@@ -38,7 +38,7 @@ exports.sendEventNotification = functions.firestore
             defaultTitle: 'New Notification!',
             privateEventTitle: 'New Private Event Invitation!',
             generalEventTitle: 'New Event Invitation!',
-            inviteText: (from, event) => `${from} has invited you to ${event}`
+            inviteText: (from, event) => `${from} invited you to ${event}`
           },
           'pt': {
             defaultTitle: 'Nova Notificação!',

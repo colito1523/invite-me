@@ -643,7 +643,7 @@ export function StoryViewer({
                   }
                 >
                   <Ionicons name="send" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
+              </TouchableOpacity>
               )}
               <TouchableOpacity
                 style={styles.iconButton}

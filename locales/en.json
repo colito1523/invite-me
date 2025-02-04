@@ -366,7 +366,7 @@
     "noNumber": "No number",
     "coordinatesNotAvailable": "Event coordinates are not available.",
     "wantsToBeFriend": "wants to be your friend.",
-    "invitedToEvent": "has invited you to the event {{eventTitle}}",
+    "invitedToEvent": "invited you to {{eventTitle}}",
     "nowFriends": "and you are now friends.",
     "rejectedFriendRequest": "has rejected your friend request.",
     "likedYourStory": "liked your story.",

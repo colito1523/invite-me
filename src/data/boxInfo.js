@@ -22,6 +22,29 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Lisboa/Tágide.jpg"),
+    title: "Tágide Gastrobar",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "12:30 PM - 12:00 AM",
+      Miércoles: "12:30 PM - 12:00 AM",
+      Jueves: "12:30 PM - 02:00 AM",
+      Viernes: "12:30 PM - 03:00 AM",
+      Sábado: "12:30 PM - 12:00 AM",
+      Domingo: "12:30 PM - 12:00 AM",
+    },
+    number: "968 842 888",
+    coordinates: {
+      latitude: 38.7301071,
+      longitude: -9.1532305,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    priority: true, // Esto hace que aparezca en la sección de priorida
+    
+  },
+  {
     path: require("../../assets/Lisboa/palacio_Chaiado.jpg"),
     title: "Palacio Chiado",
     category: "Restaurants & Rooftops",
@@ -84,7 +107,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    priority: true, // Esto hace que aparezca en la sección de prioridad
     
   },
   {

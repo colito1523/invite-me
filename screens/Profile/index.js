@@ -188,7 +188,7 @@ export default function Profile({ navigation }) {
   }, [photoUrls]);
 
   const validateInput = (input) => {
-    return /^[a-zA-ZáéíóúÁÉÍÓÚñÑçÇ\s]+$/.test(input);
+    return /^[a-zA-ZáéíóúÁÉÍÓÚñÑçÇãõÃÕ\s]+$/.test(input);
   };
 
   const handleEditProfile = () => {

@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
     },
     container: {
       flex: 1,
+      backgroundColor: isNight ? "black" : "#f0f0f0", // Updated color
     },
     loadingContainer: {
       justifyContent: "center",
