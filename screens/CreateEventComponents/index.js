@@ -267,49 +267,67 @@ useEffect(() => {
         >
           <View style={styles.centeredView}>
             <View style={[styles.modalView, { backgroundColor: theme.background }]}>
-              <DateTimePicker
-                value={showDatePicker ? tempDate : tempTime}
-                mode={showDatePicker ? "date" : "time"}
-                display="spinner"
-                onChange={(event, selectedValue) => {
-                  if (showDatePicker) {
-                    setDay(selectedValue || tempDate);
-                  } else {
-                    setHour(selectedValue || tempTime);
-                  }
-                  closeDateTimePicker(setShowDatePicker, setShowTimePicker);
-                }}
-                minimumDate={today}
-                maximumDate={maxDate}
-                textColor={theme.text}
-              />
-              {Platform.OS === "ios" && (
-                <View style={{ flexDirection: "row", marginTop: 20 }}>
-                  <TouchableOpacity
-                    style={[styles.modalButton, { backgroundColor: theme.buttonBackground, marginRight: 10 }]}
-                    onPress={() => closeDateTimePicker(setShowDatePicker, setShowTimePicker)}
-                  >
-                    <Text style={[styles.modalButtonText, { color: theme.text }]}>
-                      {t("createEvent.cancel")}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.modalButton, { backgroundColor: theme.buttonBackground }]}
-                    onPress={() => {
-                      if (showDatePicker) {
-                        setDay(tempDate);
-                      } else {
-                        setHour(tempTime);
-                      }
-                      closeDateTimePicker(setShowDatePicker, setShowTimePicker);
-                    }}
-                  >
-                    <Text style={[styles.modalButtonText, { color: theme.text }]}>
-                      {t("createEvent.accept")}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+            <DateTimePicker
+  value={showDatePicker ? tempDate : tempTime}
+  mode={showDatePicker ? "date" : "time"}
+  display="spinner"
+  onChange={(event, selectedValue) => {
+    if (selectedValue) {
+      if (showDatePicker) {
+        if (Platform.OS === "android") {
+          setDay(selectedValue);
+          setShowDatePicker(false); // Cerrar el picker automáticamente en Android
+        } else {
+          setTempDate(selectedValue); // En iOS, solo guardar temporalmente
+        }
+      } else {
+        if (Platform.OS === "android") {
+          setHour(selectedValue);
+          setShowTimePicker(false); // Cerrar el picker automáticamente en Android
+        } else {
+          setTempTime(selectedValue); // En iOS, solo guardar temporalmente
+        }
+      }
+    } else {
+      // Si el usuario cancela en Android, cerrar el picker
+      if (Platform.OS === "android") {
+        setShowDatePicker(false);
+        setShowTimePicker(false);
+      }
+    }
+  }}
+  minimumDate={today}
+  maximumDate={maxDate}
+  textColor={theme.text}
+/>
+
+
+{Platform.OS === "ios" && (
+  <View style={{ flexDirection: "row", marginTop: 20 }}>
+    <TouchableOpacity
+      style={[styles.modalButton, { backgroundColor: theme.buttonBackground, marginRight: 10 }]}
+      onPress={() => closeDateTimePicker(setShowDatePicker, setShowTimePicker)}
+    >
+      <Text style={[styles.modalButtonText, { color: theme.text }]}>
+        {t("createEvent.cancel")}
+      </Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+      style={[styles.modalButton, { backgroundColor: theme.buttonBackground }]}
+      onPress={() => {
+        setDay(tempDate);
+        setHour(tempTime);
+        closeDateTimePicker(setShowDatePicker, setShowTimePicker);
+      }}
+    >
+      <Text style={[styles.modalButtonText, { color: theme.text }]}>
+        {t("createEvent.accept")}
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
+
+
             </View>
           </View>
         </Modal>
