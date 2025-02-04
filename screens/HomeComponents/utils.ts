@@ -1,10 +1,14 @@
 import { collection, doc, getDoc, onSnapshot, query, where, getDocs  } from "firebase/firestore";
+import { CommonActions } from '@react-navigation/native';
 import { ref, getDownloadURL } from "firebase/storage";
 import { auth, database, } from "../../config/firebase";
 import { signOut } from "firebase/auth";
 import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";
 import * as Location from "expo-location";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 export const onSignOut = async (navigation, auth) => {
   try {
@@ -15,18 +19,27 @@ export const onSignOut = async (navigation, auth) => {
         try {
           unsubscribe();
         } catch (error) {
-         
+          console.log('Error unsubscribing:', error);
         }
       }
     }
-    
+
     // Clear all listeners
     navigation.getState().unsubscribes = [];
-    
-    // Clear session and sign out
+
+    // Clear all AsyncStorage data
+    await AsyncStorage.clear();
+
+    // Clear SecureStore data
     await SecureStore.deleteItemAsync("session_token");
+    await SecureStore.deleteItemAsync("user_preferences");
+    await SecureStore.deleteItemAsync("language_settings");
+
+    // Sign out from Firebase
     await signOut(auth);
+
   } catch (error) {
+    console.error('Error during sign out:', error);
     Alert.alert("Error", "No se pudo cerrar la sesión correctamente.");
   }
 };
@@ -243,7 +256,7 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
   try {
     let blockedUsers = [];
     let userNearestCity = "";
-    
+
     if (user) {
       const userDoc = await getDoc(doc(database, "users", user.uid));
       if (userDoc.exists()) {
@@ -314,18 +327,18 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
       querySnapshot.forEach((doc) => {
         const eventData = doc.data();
         const eventId = doc.id;
-        
+
         // Solo incluir eventos si el usuario es admin o está en la lista de asistentes
         const isAdmin = eventData.Admin === user.uid;
         const isAttendee = eventData.attendees && eventData.attendees.some(attendee => attendee.uid === user.uid);
-        
+
         if ((isAdmin || isAttendee) && (!eventData.city || eventData.city === userNearestCity) && !processedEventIds.has(eventId)) {
           processedEventIds.add(eventId);
-          
+
           const filteredAttendees = (eventData.attendees || []).filter(
             (attendee) => !blockedUsers.includes(attendee.uid)
           );
-          
+
           userEvents.push({
             id: eventId,
             imageUrl: eventData.image,
@@ -446,4 +459,3 @@ export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t, s
     { title: "Eventos Generales", data: generalEvents },
   ];
 };
-
