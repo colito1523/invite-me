@@ -968,7 +968,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 35,
-    width: "90%",
+    width: "100%",
   },
   fullScreenNoteText: {
     fontSize: 18,

@@ -39,6 +39,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   const [filteredImages, setFilteredImages] = useState(profileImages);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -155,29 +156,65 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     }
   };
 
- useEffect(() => {
-     const fetchCompleteUserData = async () => {
-       try {
-         const usersWithFullData = await Promise.all(
-           attendeesList.map(async (attendee) => {
-             const userDoc = await getDoc(doc(database, "users", attendee.uid));
-             const userData = userDoc.exists() ? userDoc.data() : {};
-             return {
-               ...userData,
-               ...attendee,
-               hasStories: attendee.hasStories,
-               userStories: attendee.userStories
-             };
-           })
-         );
-         await checkStories();
-       } catch (error) {
-         console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
-       }
-     };
- 
-     fetchCompleteUserData();
-   }, [attendeesList]);
+  useEffect(() => {
+    const fetchCompleteUserData = async () => {
+      try {
+        setIsLoading(true); // Bloquear la renderización hasta que los datos estén listos
+  
+        // 1️⃣ Obtener la lista de amigos del usuario actual
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendsSnapshot = await getDocs(friendsRef);
+        const friendIds = friendsSnapshot.docs.map(doc => doc.data().friendId); // Lista de IDs de amigos
+  
+        const usersWithFullData = await Promise.all(
+          attendeesList.map(async (attendee, index) => {
+            const userDoc = await getDoc(doc(database, "users", attendee.uid));
+            const userData = userDoc.exists() ? userDoc.data() : {};
+  
+            // 2️⃣ Excluir usuarios privados que no sean amigos
+            const isFriend = friendIds.includes(attendee.uid);
+            if (userData.isPrivate && attendee.uid !== auth.currentUser.uid && !isFriend) {
+              return null;
+            }
+  
+            return {
+              ...attendee,
+              username: userData.username || "Desconocido",
+              profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+              hasStories: attendee.hasStories,
+              userStories: attendee.userStories,
+              index, // Guarda el índice para filtrar imágenes
+            };
+          })
+        );
+  
+        // 3️⃣ Filtrar los usuarios privados antes de actualizar los estados, pero mantener el usuario actual y amigos
+        const filteredUsers = usersWithFullData.filter(user => user !== null);
+  
+        setFilteredAttendees(filteredUsers);
+  
+        // 4️⃣ Filtrar imágenes para excluir los usuarios privados que no sean amigos
+        const filteredImagesList = profileImages.filter((_, index) =>
+          filteredUsers.some(user => user.index === index)
+        );
+  
+        setFilteredImages(filteredImagesList);
+  
+      } catch (error) {
+        console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
+      } finally {
+        setIsLoading(false); // Indicar que los datos están listos
+      }
+    };
+  
+    fetchCompleteUserData();
+  }, [attendeesList, profileImages]);
+  
+  
+  
+  
+  
+  
 
   useEffect(() => {
     const updateFilteredImages = () => {
@@ -236,6 +273,11 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
  
 
   const currentStyles = isNightMode ? nightStyles : dayStyles;
+
+  // Evitar que la UI se renderice antes de que los datos estén listos
+if (isLoading) { 
+  return <View style={{ height: 0 }} />; // Espaciador para evitar desajustes en la UI
+}
 
   return (
     <View style={currentStyles.container}>

@@ -99,7 +99,13 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
         }
       }
 
-      setFilteredAttendees(attendeesWithStories);
+      setFilteredAttendees((prevFiltered) =>
+        prevFiltered.map((user) => {
+          const updatedUser = attendeesWithStories.find((attendee) => attendee.uid === user.uid);
+          return updatedUser || user; // Mantiene solo los que ya estaban filtrados
+        })
+      );
+      
     } catch (error) {
       console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
     }
@@ -108,10 +114,25 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   useEffect(() => {
     const fetchCompleteUserData = async () => {
       try {
+        if (!auth.currentUser) return;
+  
+        // Obtener la lista de amigos del usuario actual
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendsSnapshot = await getDocs(friendsRef);
+        const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
+  
         const usersWithFullData = await Promise.all(
           attendeesList.map(async (attendee) => {
             const userDoc = await getDoc(doc(database, "users", attendee.uid));
             const userData = userDoc.exists() ? userDoc.data() : {};
+  
+            // Si el usuario es privado y no es el usuario actual, verifica si es amigo
+            if (userData?.isPrivate && attendee.uid !== auth.currentUser.uid) {
+              if (!friendsList.includes(attendee.uid)) {
+                return null; // Excluir usuario privado si no es amigo
+              }
+            }
+  
             return {
               ...userData,
               ...attendee,
@@ -120,15 +141,23 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             };
           })
         );
-      
+  
+        // Filtra los valores nulos (usuarios privados excluidos)
+        const filteredUsers = usersWithFullData.filter(user => user !== null);
+  
+        setFilteredAttendees(filteredUsers);
         await checkStories();
       } catch (error) {
         console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
       }
     };
-
+  
     fetchCompleteUserData();
   }, [attendeesList]);
+  
+  
+  
+  
 
   // Cargar usuarios bloqueados
   useEffect(() => {
