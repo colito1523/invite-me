@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from "react";
 import { 
   View, 
@@ -31,11 +32,9 @@ import { styles, lightTheme, darkTheme } from "./styles";
 import { useTranslation } from "react-i18next";
 import StoryViewer from '../../Components/Stories/storyViewer/StoryViewer';
 import { useUnreadMessages } from '../../src/hooks/UnreadMessagesContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   formatTime, 
   truncateMessage, 
-  areChatsDifferent, 
   checkNightMode, 
   handleDeleteChat,
   handleMuteSelectedChats,
@@ -68,23 +67,65 @@ export default function ChatList() {
 
     setRefreshing(true);
     try {
-      const updatedChats = await checkStories(chats, user.uid);
-      if (updatedChats) {
-        setChats(updatedChats);
-        const serializedChats = updatedChats.map(chat => ({
-          ...chat,
-          lastMessageTimestamp: chat.lastMessageTimestamp ? {
-            seconds: chat.lastMessageTimestamp.seconds,
-            nanoseconds: chat.lastMessageTimestamp.nanoseconds
-          } : null
-        }));
-        await AsyncStorage.setItem('chats', JSON.stringify(serializedChats));
-      }
+      const chatsRef = collection(database, "chats");
+      const q = query(chatsRef, where("participants", "array-contains", user.uid));
+      const querySnapshot = await getDocs(q);
+      
+      const userRef = doc(database, "users", user.uid);
+      const userSnapshot = await getDoc(userRef);
+      const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+
+      const chatList = await Promise.all(
+        querySnapshot.docs.map(async (docSnapshot) => {
+          const chatData = docSnapshot.data();
+          if (chatData.isHidden?.[user.uid] || blockedUsers.some((blockedUid) => 
+            chatData.participants.includes(blockedUid))) {
+            return null;
+          }
+
+          const otherUserId = chatData.participants.find((uid) => uid !== user.uid);
+          const otherUserDoc = await getDoc(doc(database, "users", otherUserId));
+          if (!otherUserDoc.exists()) return null;
+
+          const otherUserData = otherUserDoc.data();
+          const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
+          const unseenMessagesQuery = query(
+            messagesRef,
+            where("seen", "==", false),
+            where("senderId", "!=", user.uid)
+          );
+          const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+
+          return {
+            id: docSnapshot.id,
+            user: otherUserData,
+            unseenMessagesCount: unseenMessagesSnapshot.size,
+            lastMessage: chatData.lastMessage || "",
+            lastMessageTimestamp: chatData.lastMessageTimestamp || null,
+          };
+        })
+      );
+
+      const sortedChats = chatList
+        .filter((chat) => chat !== null)
+        .sort((a, b) => {
+          const dateA = a.lastMessageTimestamp
+            ? a.lastMessageTimestamp.toDate().getTime()
+            : 0;
+          const dateB = b.lastMessageTimestamp
+            ? b.lastMessageTimestamp.toDate().getTime()
+            : 0;
+          return dateB - dateA;
+        });
+
+      const updatedChats = await checkStories(sortedChats, user.uid);
+      setChats(updatedChats);
     } catch (error) {
       console.error("Error refreshing:", error);
     }
     setRefreshing(false);
-  }, [chats, user]);
+  }, [user]);
+
   const { t } = useTranslation();
   const user = auth.currentUser;
   const navigation = useNavigation();
@@ -152,98 +193,75 @@ export default function ChatList() {
 
   useFocusEffect(
     useCallback(() => {
-      const fetchChats = async () => {
-        if (!user) return;
+      if (!user) return;
 
-        try {
-          const cachedChats = await AsyncStorage.getItem('chats');
-          if (cachedChats) {
-            const parsedChats = JSON.parse(cachedChats);
-            const deserializedChats = parsedChats.map(chat => ({
-              ...chat,
-              lastMessageTimestamp: chat.lastMessageTimestamp ? 
-                new Timestamp(chat.lastMessageTimestamp.seconds, chat.lastMessageTimestamp.nanoseconds) 
-                : null
-            }));
-            setChats(deserializedChats);
-          }
+      try {
+        const userRef = doc(database, "users", user.uid);
+        const blockedUsersRef = getDoc(userRef);
 
-          const userRef = doc(database, "users", user.uid);
-          const userSnapshot = await getDoc(userRef);
-          const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+        const chatsRef = collection(database, "chats");
+        const q = query(chatsRef, where("participants", "array-contains", user.uid));
 
-          const chatsRef = collection(database, "chats");
-          const q = query(chatsRef, where("participants", "array-contains", user.uid));
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+          const blockedUsers = (await blockedUsersRef).data()?.blockedUsers || [];
+          let hasUnread = false;
 
-          const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-            let hasUnread = false;
-            const chatList = await Promise.all(
-              querySnapshot.docs.map(async (docSnapshot) => {
-                const chatData = docSnapshot.data();
-                if (chatData.isHidden?.[user.uid] || blockedUsers.some((blockedUid) => 
-                  chatData.participants.includes(blockedUid))) {
-                  return null;
-                }
+          const chatList = await Promise.all(
+            querySnapshot.docs.map(async (docSnapshot) => {
+              const chatData = docSnapshot.data();
+              if (chatData.isHidden?.[user.uid] || blockedUsers.some((blockedUid) => 
+                chatData.participants.includes(blockedUid))) {
+                return null;
+              }
 
-                const otherUserId = chatData.participants.find((uid) => uid !== user.uid);
-                const otherUserDoc = await getDoc(doc(database, "users", otherUserId));
-                if (!otherUserDoc.exists()) return null;
+              const otherUserId = chatData.participants.find((uid) => uid !== user.uid);
+              const otherUserDoc = await getDoc(doc(database, "users", otherUserId));
+              if (!otherUserDoc.exists()) return null;
 
-                const otherUserData = otherUserDoc.data();
-                const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
-                const unseenMessagesQuery = query(
-                  messagesRef,
-                  where("seen", "==", false),
-                  where("senderId", "!=", user.uid)
-                );
-                const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+              const otherUserData = otherUserDoc.data();
+              const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
+              const unseenMessagesQuery = query(
+                messagesRef,
+                where("seen", "==", false),
+                where("senderId", "!=", user.uid)
+              );
+              const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
 
-                if (unseenMessagesSnapshot.size > 0) {
-                  hasUnread = true;
-                }
+              if (unseenMessagesSnapshot.size > 0) {
+                hasUnread = true;
+              }
 
-                return {
-                  id: docSnapshot.id,
-                  user: otherUserData,
-                  unseenMessagesCount: unseenMessagesSnapshot.size,
-                  lastMessage: chatData.lastMessage || "",
-                  lastMessageTimestamp: chatData.lastMessageTimestamp || null,
-                };
-              })
-            );
+              return {
+                id: docSnapshot.id,
+                user: otherUserData,
+                unseenMessagesCount: unseenMessagesSnapshot.size,
+                lastMessage: chatData.lastMessage || "",
+                lastMessageTimestamp: chatData.lastMessageTimestamp || null,
+              };
+            })
+          );
 
-            const sortedChats = chatList
-              .filter((chat) => chat !== null)
-              .sort((a, b) => {
-                const dateA = a.lastMessageTimestamp
-                  ? a.lastMessageTimestamp.toDate().getTime()
-                  : 0;
-                const dateB = b.lastMessageTimestamp
-                  ? b.lastMessageTimestamp.toDate().getTime()
-                  : 0;
-                return dateB - dateA;
-              });
+          const sortedChats = chatList
+            .filter((chat) => chat !== null)
+            .sort((a, b) => {
+              const dateA = a.lastMessageTimestamp
+                ? a.lastMessageTimestamp.toDate().getTime()
+                : 0;
+              const dateB = b.lastMessageTimestamp
+                ? b.lastMessageTimestamp.toDate().getTime()
+                : 0;
+              return dateB - dateA;
+            });
 
-            const updatedChats = await checkStories(sortedChats, user.uid);
-            setChats(updatedChats);
-            setHasUnreadMessages(hasUnread);
-            const serializedChats = updatedChats.map(chat => ({
-              ...chat,
-              lastMessageTimestamp: chat.lastMessageTimestamp ? {
-                seconds: chat.lastMessageTimestamp.seconds,
-                nanoseconds: chat.lastMessageTimestamp.nanoseconds
-              } : null
-            }));
-            await AsyncStorage.setItem('chats', JSON.stringify(serializedChats));
-          });
+          const updatedChats = await checkStories(sortedChats, user.uid);
+          setChats(updatedChats);
+          setHasUnreadMessages(hasUnread);
+        });
 
-          return () => unsubscribe();
-        } catch (error) {
-          console.error("Error fetching chats:", error);
-        }
-      };
-
-      fetchChats();
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+      }
     }, [user?.uid])
   );
 
@@ -258,14 +276,6 @@ export default function ChatList() {
     const success = await handleDeleteChat(chat, user.uid, t);
     if (success) {
       setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
-      const serializedChats = chats.map(chat => ({
-        ...chat,
-        lastMessageTimestamp: chat.lastMessageTimestamp ? {
-          seconds: chat.lastMessageTimestamp.seconds,
-          nanoseconds: chat.lastMessageTimestamp.nanoseconds
-        } : null
-      }));
-      await AsyncStorage.setItem('chats', JSON.stringify(chats.filter((c) => c.id !== chat.id)));
     }
   };
 
@@ -353,18 +363,9 @@ export default function ChatList() {
   const handleDeleteSelectedChatsLocal = async () => {
     const success = await handleDeleteSelectedChats(selectedChats, user.uid, t);
     if (success) {
-      const updatedChats = chats.filter((chat) => !selectedChats.includes(chat.id));
-      setChats(updatedChats);
+      setChats((prevChats) => prevChats.filter((chat) => !selectedChats.includes(chat.id)));
       setSelectedChats([]);
       setIsSelectionMode(false);
-      const serializedChats = updatedChats.map(chat => ({
-        ...chat,
-        lastMessageTimestamp: chat.lastMessageTimestamp ? {
-          seconds: chat.lastMessageTimestamp.seconds,
-          nanoseconds: chat.lastMessageTimestamp.nanoseconds
-        } : null
-      }));
-      await AsyncStorage.setItem('chats', JSON.stringify(serializedChats));
     }
   };
 
@@ -404,16 +405,8 @@ export default function ChatList() {
     if (chats.length > 0) {
       const debounceCheckStories = setTimeout(async () => {
         const updatedChats = await checkStories(chats, user.uid);
-        if (updatedChats.some((chat, index) => chat !== chats[index])) {
+        if (JSON.stringify(updatedChats) !== JSON.stringify(chats)) {
           setChats(updatedChats);
-          const serializedChats = updatedChats.map(chat => ({
-            ...chat,
-            lastMessageTimestamp: chat.lastMessageTimestamp ? {
-              seconds: chat.lastMessageTimestamp.seconds,
-              nanoseconds: chat.lastMessageTimestamp.nanoseconds
-            } : null
-          }));
-          await AsyncStorage.setItem('chats', JSON.stringify(serializedChats));
         }
       }, 300);
 
@@ -468,23 +461,23 @@ export default function ChatList() {
           />
         )}
         <TouchableOpacity onPress={() => handleImagePress(item)}>
-        <View
-  style={[
-    styles.userImageContainer, // Nuevo estilo base para todos
-    item.user.hasStories && {
-      ...styles.storyIndicator, // Aplica el borde al contenedor
-      borderColor: isNightMode ? "white" : "black",
-    },
-    { padding: 2 }, // Espacio interno adicional
-  ]}
->
-  <Image
-    source={{
-      uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
-    }}
-    style={styles.userImage} // Mantén solo el estilo de la imagen aquí
-  />
-</View>
+          <View
+            style={[
+              styles.userImageContainer,
+              item.user.hasStories && {
+                ...styles.storyIndicator,
+                borderColor: isNightMode ? "white" : "black",
+              },
+              { padding: 2 },
+            ]}
+          >
+            <Image
+              source={{
+                uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
+              }}
+              style={styles.userImage}
+            />
+          </View>
         </TouchableOpacity>
         <View style={styles.chatInfo}>
           <Text
@@ -581,9 +574,7 @@ export default function ChatList() {
 
   return (
     <Provider>
-      <SafeAreaView
-        style={[styles.container]}
-      >
+      <SafeAreaView style={[styles.container]}>
         <LinearGradient
           colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
           style={styles.container}
