@@ -433,6 +433,7 @@ export default function Component({ route, navigation }) {
             fromImage: profileImage,
             status: "pending",
             timestamp: Timestamp.now(),
+            seen: false
           });
 
           setPendingRequest(true);
