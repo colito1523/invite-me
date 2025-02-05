@@ -289,6 +289,14 @@ export default function Login({ navigation }) {
                   </Text>
                 </View>
               </TouchableOpacity>
+              <TouchableOpacity
+              style={styles.previewIcon}
+              onPress={() => navigation.navigate('PreviewHome')}
+            >
+             <Text>
+                    {t('previewHome')}
+                  </Text>
+            </TouchableOpacity>
             </LinearGradient>
           </ScrollView>
         </KeyboardAvoidingView>

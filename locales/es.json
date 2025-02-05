@@ -785,6 +785,12 @@
       "subtitle": "Bienvenido a Invite Me, donde te esperan grandes experiencias."
     }
   },
+
+  "accessRequiredTitle": "Acceso requerido",
+  "accessRequiredMessage": "Para acceder a todas las funciones, inicia sesión.",
+  "cancel": "Cancelar",
+  "login": "Iniciar sesión",
+  "previewHome": "Vista previa",
   
 
   "tutorial": {

@@ -278,6 +278,7 @@ export default function ChatList() {
       setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
     }
   };
+  
 
   const handleImagePress = async (chat) => {
     const chatUser = chat.user;
@@ -413,6 +414,9 @@ export default function ChatList() {
       return () => clearTimeout(debounceCheckStories);
     }
   }, [chats]);
+
+
+
 
   const renderChatItem = ({ item }) => {
     const isMuted = mutedChats.some(

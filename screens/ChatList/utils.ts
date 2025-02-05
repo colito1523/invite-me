@@ -258,6 +258,7 @@ export const handleChatPressLocal = async ({
   navigation,
   handleChatPress,
   userId,
+  setHasUnreadMessages, // Añade esta línea
 }) => {
   try {
     // Actualizar estado local
@@ -275,6 +276,9 @@ export const handleChatPressLocal = async ({
 
     // Actualizar en backend
     await handleChatPress(chat, userId);
+
+    // Actualizar el estado global de mensajes no leídos
+    setHasUnreadMessages(false); // Añade esta línea
   } catch (error) {
     console.error("Error al procesar el chat:", error);
     Alert.alert("Error", "No se pudo abrir el chat.");

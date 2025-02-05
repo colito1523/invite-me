@@ -18,7 +18,7 @@ LocaleConfig.defaultLocale = 'es';
 const { width } = Dimensions.get("window");
 
 const CalendarPicker = ({ onDateChange, setLoading }) => {
-  const { selectedDate, setSelectedDate } = useDate(); // Usa el contexto
+  const { selectedDate, setSelectedDate } = useDate(); // Ensure useDate provides selectedDate and setSelectedDate
   const [modalVisible, setModalVisible] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
 

@@ -14,6 +14,7 @@ import {
   TouchableOpacity, // Necesario para el TabBar
   Image,
 } from "react-native";
+import { collection, query, where, onSnapshot, getDocs } from "firebase/firestore";
 import { auth, storage, database } from "../../config/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
@@ -62,12 +63,14 @@ const Header = ({ isNightMode, toggleMenu, handleDateChange, setLoading }) => {
 };
 
 const Home = React.memo(() => {
+  const [unreadNotifications, setUnreadNotifications] = useState(false);
   const { locationGranted, country, isNightMode } = useLocationAndTime();
   const navigation = useNavigation();
   const route = useRoute();
   const [errorMessage, setErrorMessage] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [boxData, setBoxData] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [profileImage, setProfileImage] = useState(null);
@@ -77,21 +80,23 @@ const Home = React.memo(() => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [privateEvents, setPrivateEvents] = useState([]);
+  const { hasUnreadMessages, setHasUnreadMessages } = useUnreadMessages();
   const { t } = useTranslation();
-  const [unreadMessages, setUnreadMessages] = useState(false);
-  const [unreadNotifications, setUnreadNotifications] = useState(false);
   const currentStyles = useMemo(
     () => (isNightMode ? nightStyles : dayStyles),
     [isNightMode],
   );
-  const { hasUnreadMessages } = useUnreadMessages();
   const navigateToProfile = useCallback(() => {
     navigation.navigate("Profile");
   }, [navigation]);
 
   useEffect(() => {
-    fetchUnreadNotifications();
-  }, [navigation]);
+    fetchUnreadNotifications({ setUnreadNotifications });
+}, [navigation]);
+
+useEffect(() => {
+  setUnreadMessages(hasUnreadMessages); // Añade esta línea
+}, [hasUnreadMessages]); // Añade esta línea
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -346,6 +351,39 @@ const Home = React.memo(() => {
     fetchPrivateEvents,
   ]);
 
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const chatsRef = collection(database, "chats");
+    const q = query(
+        chatsRef,
+        where("participants", "array-contains", user.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+        let hasUnread = false;
+        for (const docSnapshot of querySnapshot.docs) {
+            const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
+            const unreadQuery = query(messagesRef, where("seen", "==", false), where("senderId", "!=", user.uid));
+            const unreadMessagesSnapshot = await getDocs(unreadQuery);
+
+            if (unreadMessagesSnapshot.size > 0) {
+                hasUnread = true;
+                break;
+            }
+        }
+
+        setUnreadMessages(hasUnread);
+        setHasUnreadMessages(hasUnread); // Actualiza en el contexto global
+    });
+
+    return () => unsubscribe();
+}, [navigation]); // Se actualiza cuando el usuario navega
+
+
+
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
@@ -527,20 +565,11 @@ const Home = React.memo(() => {
           )}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
-          <Ionicons
-            name="mail"
-            size={25}
-            color={isNightMode ? "white" : "black"}
-          />
-          {hasUnreadMessages && (
-            <View
-              style={[
-                styles.unreadIndicator,
-                { backgroundColor: isNightMode ? "white" : "black" },
-              ]}
-            />
-          )}
-        </TouchableOpacity>
+        <Ionicons name="mail" size={25} color={isNightMode ? "white" : "black"} />
+        {unreadMessages && (
+          <View style={[styles.unreadIndicator, { backgroundColor: isNightMode ? "white" : "black" }]} />
+        )}
+      </TouchableOpacity>
       </View>
     </View>
   );

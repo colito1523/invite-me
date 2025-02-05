@@ -771,6 +771,12 @@
 }
   },
 
+  "accessRequiredTitle": "Acesso necessário",
+  "accessRequiredMessage": "Para acessar todas as funções, faça login.",
+  "cancel": "Cancelar",
+  "login": "Iniciar sessão",
+  "previewHome": "Pré-visualizar",
+
   "tutorial": {
     "skip": "Pular",
     "understood": "Entendido",

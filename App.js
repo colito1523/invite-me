@@ -38,6 +38,7 @@ import StoryViewer from './Components/Stories/storyViewer/StoryViewer';
 import StorySlider from "./Components/Stories/storySlider/StorySlider";
 import Camera from "./Components/CustomCamera/Camera";
 import PhotoPreviewSection from "./Components/CustomCamera/PhotoPreviewSection";
+import PreviewHome from "./screens/PreviewHomeComponents/index";
 
 import { auth, database } from "./config/firebase";
 
@@ -173,6 +174,7 @@ function RootNavigator() {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+          <Stack.Screen name="PreviewHome" component={PreviewHome} />
         </Stack.Navigator>
       )}
     </NavigationContainer>

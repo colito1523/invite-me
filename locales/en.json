@@ -798,6 +798,12 @@
       "subtitle": "Welcome to Invite Me, Where great experiences await you."
     }
   },
+
+  "accessRequiredTitle": "Access required",
+  "accessRequiredMessage": "To access all features, please log in.",
+  "cancel": "Cancel",
+  "login": "Log in",
+  "previewHome": "Preview",
   
 
   "tutorial": {
