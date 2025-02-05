@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useDate } from "../src/hooks/DateContext"; // Importa el contexto
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Dimensions } from "react-native";
-import { Calendar, LocaleConfig } from "react-native-calendars"; // Importa LocaleConfig
+import { Calendar } from "react-native-calendars";
 import dayjs from "dayjs";
 import { LinearGradient } from "expo-linear-gradient";
-
-// Configura LocaleConfig para usar el idioma español
-LocaleConfig.locales['es'] = {
-  monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-  monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-  dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-  dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
-  today: 'Hoy'
-};
-LocaleConfig.defaultLocale = 'es';
 
 const { width } = Dimensions.get("window");
 
 const CalendarPicker = ({ onDateChange, setLoading }) => {
-  const { selectedDate, setSelectedDate } = useDate(); // Ensure useDate provides selectedDate and setSelectedDate
+  const { selectedDate, setSelectedDate } = useDate(); // Usa el contexto
   const [modalVisible, setModalVisible] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
 
@@ -37,14 +27,13 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   const maxDate = dayjs().add(2, "month").format("YYYY-MM-DD");
 
   const handleDayPress = (day) => {
-    const formattedDate = dayjs(day.dateString).format("D MMM"); // Cambia a un formato estándar para evitar errores
-    setSelectedDate(formattedDate); // Actualiza el contexto
-  
+    const formattedDate = dayjs(day.dateString).format("D MMM");
+    setSelectedDate(formattedDate);
     setModalVisible(false);
-    
+
     if (onDateChange) {
       setLoading(true);
-      onDateChange(formattedDate); // Enviar la fecha al componente padre
+      onDateChange(formattedDate);
     }
   };
 
@@ -53,9 +42,7 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   return (
     <View>
       <TouchableOpacity style={currentStyles.dateButton} onPress={() => setModalVisible(true)}>
-        <Text style={currentStyles.dateText}>
-          {dayjs(selectedDate).isValid() ? dayjs(selectedDate).format("D MMM") : dayjs().format("D MMM")}
-        </Text>
+        <Text style={currentStyles.dateText}>{selectedDate}</Text>
       </TouchableOpacity>
 
       <Modal
@@ -81,7 +68,6 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
               markedDates={{
                 [today]: { selected: true, selectedColor: "#3e3d3d" },
               }}
-              locale={'es'} // Configura el idioma a español
               theme={{
                 backgroundColor: "transparent",
                 calendarBackground: "transparent",

@@ -143,10 +143,10 @@ const ViewerItem = ({
         }
       >
         <AntDesign
-          name="pushpino"
-          size={18}
-          color={isPinned ? "#007AFF" : "#000"}
-        />
+  name={isPinned ? "pushpin" : "pushpino"}
+  size={18}
+  color={isPinned ? "#000" : "#000"} 
+/>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.dotsButton}

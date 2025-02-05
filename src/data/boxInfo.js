@@ -22,7 +22,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Tágide.jpg"),
+    path: require("../../assets/Lisboa/Tagide.jpg"),
     title: "Tágide Gastrobar",
     category: "Restaurants & Rooftops",
     hours: {
