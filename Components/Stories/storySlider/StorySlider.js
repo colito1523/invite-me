@@ -169,7 +169,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
   };
 
   const handleAddStory = () => {
-    setIsModalVisible(true);
+    navigation.navigate("Camera");
   };
 
   const handleCamera = async () => {

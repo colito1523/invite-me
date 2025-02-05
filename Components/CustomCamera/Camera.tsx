@@ -2,7 +2,8 @@ import PhotoPreviewSection from './PhotoPreviewSection';
 import { AntDesign } from '@expo/vector-icons';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Camera({ header = null }) {
@@ -11,6 +12,38 @@ export default function Camera({ header = null }) {
   const [photo, setPhoto] = useState<any>(null);
   const cameraRef = useRef<CameraView | null>(null);
   const navigation = useNavigation();
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy < -50) {
+          handleOpenGallery();
+        }
+      },
+    })
+  ).current;
+
+  const handleOpenGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Se necesita permiso para acceder a la galería');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets?.[0]) {
+      setPhoto({
+        uri: result.assets[0].uri,
+        base64: result.assets[0].base64,
+      });
+    }
+  };
 
   if (!permission) {
     return <View />;
@@ -47,7 +80,7 @@ export default function Camera({ header = null }) {
   if (photo) return <PhotoPreviewSection photo={photo} handleRetakePhoto={handleRetakePhoto} />
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...panResponder.panHandlers}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <AntDesign name="close" size={30} color="white" />
