@@ -269,7 +269,6 @@ const dayStyles = StyleSheet.create({
   menuItem: {
     fontSize: 15,
     color: "black",
-    fontFamily: "Lato-Black",
     textAlign: "center",
     paddingVertical: 7,
   },
@@ -309,12 +308,6 @@ const dayStyles = StyleSheet.create({
 });
 
 const nightStyles = StyleSheet.create({
-  modalOverlay2: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-  },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -322,7 +315,7 @@ const nightStyles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   modalContent: {
-    backgroundColor: "#222",
+    backgroundColor: "black",
     padding: 20,
     borderRadius: 15,
     width: "90%",
@@ -343,18 +336,17 @@ const nightStyles = StyleSheet.create({
     width: "100%",
     paddingVertical: 15,
     paddingHorizontal: 5,
-    backgroundColor: "#222",
+    backgroundColor: "black",
   },
   menuItemText: {
-    fontSize: 15,
+    fontSize: 17,
     color: "white",
     textAlign: "center",
     paddingVertical: 7,
   },
   menuItem: {
-    fontSize: 15,
+    fontSize: 17,
     color: "white",
-    fontFamily: "Lato-Black",
     textAlign: "center",
     paddingVertical: 7,
   },
@@ -363,7 +355,7 @@ const nightStyles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     marginBottom: 10,
-    backgroundColor: '#333',
+    backgroundColor: "black",
     borderColor: "#444",
     borderWidth: 1,
     borderRadius: 30,
@@ -384,7 +376,7 @@ const nightStyles = StyleSheet.create({
     borderColor: '#444',
     borderRadius: 5,
     marginTop: 5,
-    backgroundColor: '#333',
+    backgroundColor: 'black',
   },
   autocompleteItem: {
     padding: 10,

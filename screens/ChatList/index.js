@@ -343,6 +343,7 @@ export default function ChatList() {
       navigation,
       handleChatPress,
       userId: user.uid,
+      setHasUnreadMessages,
     });
   };
 

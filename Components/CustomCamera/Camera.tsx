@@ -5,6 +5,8 @@ import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
+import * as ImageManipulator from 'expo-image-manipulator';
+
 
 export default function Camera({ header = null }) {
   const [facing, setFacing] = useState<CameraType>('back');
