@@ -370,7 +370,7 @@ export const loadViewers = async ({
             viewer.uid !== stories[currentIndex].uid,
         );
 
-        // Separar viewers pinneados y no pinneados
+        // Separar viewers en tres grupos: pinneados, likes y otros
         const pinnedViewersWithActivity = allViewers.filter((viewer) =>
           pinnedViewers.some((pv) => pv.uid === viewer.uid),
         );
@@ -379,15 +379,26 @@ export const loadViewers = async ({
           (viewer) => !pinnedViewers.some((pv) => pv.uid === viewer.uid),
         );
 
+        // Separar los no pinneados en likes y otros
+        const likeViewers = nonPinnedViewers.filter((viewer) =>
+          currentStory.likes?.some((like) => like.uid === viewer.uid)
+        );
+
+        const otherViewers = nonPinnedViewers.filter((viewer) =>
+          !currentStory.likes?.some((like) => like.uid === viewer.uid)
+        );
+
         // Ordenar cada grupo por timestamp
         const sortByTimestamp = (a, b) => b.timestamp - a.timestamp;
         pinnedViewersWithActivity.sort(sortByTimestamp);
-        nonPinnedViewers.sort(sortByTimestamp);
+        likeViewers.sort(sortByTimestamp);
+        otherViewers.sort(sortByTimestamp);
 
-        // Combinar los grupos: pinneados primero, luego el resto
+        // Combinar los grupos en el orden deseado: pinneados, likes y otros
         const sortedViewers = [
           ...pinnedViewersWithActivity,
-          ...nonPinnedViewers,
+          ...likeViewers,
+          ...otherViewers,
         ];
 
         setViewers(sortedViewers);
