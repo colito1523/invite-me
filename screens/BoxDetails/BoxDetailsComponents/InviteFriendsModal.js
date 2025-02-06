@@ -8,8 +8,11 @@ import {
   TouchableWithoutFeedback,
   StyleSheet,
   Alert,
+  Pressable,
+  Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import * as Haptics from "expo-haptics"; // Para feedback háptico en iOS
 
 const InviteFriendsModal = ({
   modalVisible,
@@ -31,11 +34,20 @@ const InviteFriendsModal = ({
 
   const handleInvite = (friendId) => {
     setInvitedFriends([...invitedFriends, friendId]);
+  
+    // Agregar feedback háptico en iOS y Android
+    if (Platform.OS === "ios") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  
     Alert.alert(
       t("userProfile.success"),
       t("boxDetails.friendInvitedMessage")
     );
   };
+  
 
   const renderFriendItemWithInvite = ({ item }) => {
     const isInvited = invitedFriends.includes(item.friendId);

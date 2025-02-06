@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { View, Text, StyleSheet, ScrollView, Dimensions, Platform } from "react-native";
+import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
@@ -81,6 +81,7 @@ const SliderContent = ({
           <View style={styles.mapContainer}>
             {mapRegion && (
               <MapView
+              provider={Platform.OS === "android" ? "google" : undefined}
                 style={styles.map}
                 initialRegion={mapRegion}
                 region={mapRegion}
@@ -90,8 +91,8 @@ const SliderContent = ({
                 loadingIndicatorColor="#999999"
                 loadingBackgroundColor="#ffffff"
                 moveOnMarkerPress={false}
-                showsUserLocation={false}
-                toolbarEnabled={false}
+                showsUserLocation={true}
+                toolbarEnabled={true}
                 zoomEnabled={true}
                 zoomControlEnabled={true}
                 minZoomLevel={10}

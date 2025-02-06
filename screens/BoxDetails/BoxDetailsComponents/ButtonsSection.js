@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, Pressable, Text, StyleSheet, ActivityIndicator, Alert, Platform  } from "react-native";
 import { auth } from "../../../config/firebase";
+import * as Haptics from "expo-haptics"; // Para feedback háptico en iOS
 
 const ButtonsSection = ({
   isEventSaved,
@@ -20,6 +21,10 @@ const ButtonsSection = ({
   const handleButtonPress = async () => {
     if (isLoading) return; // Evita múltiples clics mientras está en proceso
     setIsLoading(true); // Muestra el indicador de carga
+     // Agregar feedback háptico en iOS
+     if (Platform.OS === "ios") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
     try {
       if (isEventSaved) {
         await handleRemoveFromEvent(); // Llama a la función para "No Voy"
@@ -35,9 +40,17 @@ const ButtonsSection = ({
   };
 
   const handleInvitePress = () => {
+    // Agregar feedback háptico en iOS
+    if (Platform.OS === "ios") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
     if (isEventSaved) {
       setModalVisible(true);
     } else {
+      // Agregar feedback háptico en iOS
+      if (Platform.OS === "ios") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
       Alert.alert(
         t("boxDetails.error"),
         t("boxDetails.attendFirstMessage")
@@ -48,7 +61,7 @@ const ButtonsSection = ({
   return (
     <View style={styles.buttonContainer}>
       {/* Botón Participar/No Participar */}
-      <TouchableOpacity
+      <Pressable
         style={[styles.button, isEventSaved && styles.activeButton]}
         disabled={isProcessing || isLoading} // Desactiva el botón mientras se procesa
         onPress={handleButtonPress}
@@ -60,17 +73,17 @@ const ButtonsSection = ({
             {isEventSaved ? t("boxDetails.notGoingButton") : t("boxDetails.goingButton")}
           </Text>
         )}
-      </TouchableOpacity>
+      </Pressable>
 
       {/* Botón Invitar Amigos */}
       {showInviteButton && (
-        <TouchableOpacity
+        <Pressable
           style={styles.button}
           onPress={handleInvitePress}
           disabled={isProcessing}
         >
           <Text style={styles.buttonText}>{t("boxDetails.inviteButton")}</Text>
-        </TouchableOpacity>
+        </Pressable>
       )}
     </View>
   );

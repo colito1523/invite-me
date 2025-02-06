@@ -41,8 +41,7 @@
           "PROJECT_ID": "invite-me-32a07",
           "STORAGE_BUCKET": "invite-me-32a07.appspot.com",
           "MESSAGING_SENDER_ID": "1003756781656",
-          "APP_ID": "1:1003756781656:web:2843820ceb2049b147ca2d",
-          "GOOGLE_MAPS_API_KEY": "AIzaSyD0qVS4hUiuJGxoQLTt49SUNnj9kIP-cn8"
+          "APP_ID": "1:1003756781656:web:2843820ceb2049b147ca2d"
         },
         "channel": "production-channel"
       }
