@@ -36,23 +36,31 @@ export const fetchUsers = async (searchTerm, setResults) => {
           const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
           const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", doc.id)));
           const isFriend = !friendSnapshot.empty;
-      
-          const storiesRef = collection(database, "users", doc.id, "stories");
-          const storiesSnapshot = await getDocs(storiesRef);
-          const now = new Date();
-      
-          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
-            const storyData = storyDoc.data();
-            return (
-              new Date(storyData.expiresAt.toDate()) > now &&
-              !hideStoriesFrom.includes(doc.id)
-            );
-          });
-      
+
+          // Check if the user is private
+          const isPrivate = data.isPrivate || false;
+
+          // Only check for stories if the user is not private or if the current user is a friend
+          let hasStories = false;
+          if (!isPrivate || isFriend) {
+            const storiesRef = collection(database, "users", doc.id, "stories");
+            const storiesSnapshot = await getDocs(storiesRef);
+            const now = new Date();
+
+            hasStories = storiesSnapshot.docs.some((storyDoc) => {
+              const storyData = storyDoc.data();
+              return (
+                new Date(storyData.expiresAt.toDate()) > now &&
+                !hideStoriesFrom.includes(doc.id)
+              );
+            });
+          }
+
           return {
             id: doc.id,
             ...data,
             isFriend,
+            isPrivate,
             hasStories,
             profileImage:
               data.photoUrls && data.photoUrls.length > 0
@@ -71,7 +79,6 @@ export const fetchUsers = async (searchTerm, setResults) => {
            user.firstName.toLowerCase().includes(normalizedSearchTerm) ||
            user.lastName.toLowerCase().includes(normalizedSearchTerm))
       );
-
 
       setResults(filteredList);
     } catch (error) {

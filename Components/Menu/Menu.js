@@ -261,13 +261,13 @@ const dayStyles = StyleSheet.create({
     backgroundColor: "white",
   },
   menuItemText: {
-    fontSize: 15,
+    fontSize: 17,
     color: "black",
     textAlign: "center",
     paddingVertical: 7,
   },
   menuItem: {
-    fontSize: 15,
+    fontSize: 17,
     color: "black",
     textAlign: "center",
     paddingVertical: 7,

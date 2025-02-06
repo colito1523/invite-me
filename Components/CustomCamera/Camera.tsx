@@ -5,8 +5,7 @@ import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
-import * as ImageManipulator from 'expo-image-manipulator';
-
+import { debounce } from 'lodash';
 
 export default function Camera({ header = null }) {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -15,37 +14,44 @@ export default function Camera({ header = null }) {
   const cameraRef = useRef<CameraView | null>(null);
   const navigation = useNavigation();
 
+  const handleOpenGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Se necesita permiso para acceder a la galería');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets?.[0]) {
+        setPhoto({
+          uri: result.assets[0].uri,
+          base64: result.assets[0].base64,
+        });
+      }
+    } catch (error) {
+      console.error('Error al abrir la galería:', error);
+      alert('Hubo un error al abrir la galería. Inténtalo de nuevo.');
+    }
+  };
+
+  const handleOpenGalleryDebounced = debounce(handleOpenGallery, 300);
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dy < -50) {
-          handleOpenGallery();
+        if (gestureState.dy < -50 && Math.abs(gestureState.dx) < 50) {
+          handleOpenGalleryDebounced();
         }
       },
     })
   ).current;
-
-  const handleOpenGallery = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Se necesita permiso para acceder a la galería');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets?.[0]) {
-      setPhoto({
-        uri: result.assets[0].uri,
-        base64: result.assets[0].base64,
-      });
-    }
-  };
 
   if (!permission) {
     return <View />;
@@ -66,20 +72,20 @@ export default function Camera({ header = null }) {
 
   const handleTakePhoto = async () => {
     if (cameraRef.current) {
-        const options = {
-            quality: 1,
-            base64: true,
-            exif: false,
-            mirror: facing === 'front' // Corrige la imagen volteada en selfies
-        };
-        const takedPhoto = await cameraRef.current.takePictureAsync(options);
-        setPhoto(takedPhoto);
+      const options = {
+        quality: 1,
+        base64: true,
+        exif: false,
+        mirror: facing === 'front', // Corrige la imagen volteada en selfies
+      };
+      const takedPhoto = await cameraRef.current.takePictureAsync(options);
+      setPhoto(takedPhoto);
     }
-};
+  };
 
   const handleRetakePhoto = () => setPhoto(null);
 
-  if (photo) return <PhotoPreviewSection photo={photo} handleRetakePhoto={handleRetakePhoto} />
+  if (photo) return <PhotoPreviewSection photo={photo} handleRetakePhoto={handleRetakePhoto} />;
 
   return (
     <View style={styles.container} {...panResponder.panHandlers}>
@@ -96,7 +102,7 @@ export default function Camera({ header = null }) {
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
-          <AntDesign name='retweet' size={30} color='white' />
+          <AntDesign name="retweet" size={30} color="white" />
         </TouchableOpacity>
       </CameraView>
     </View>
