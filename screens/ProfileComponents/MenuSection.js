@@ -1,25 +1,9 @@
-
-import React from "react";
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  Platform,
-} from "react-native";
-import { Menu } from "react-native-paper";
+import React, { useCallback } from "react";
+import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  getAuth,
-  deleteUser,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-} from "firebase/auth";
-import { doc, deleteDoc } from "firebase/firestore";
-import { database } from "../../config/firebase";
 import { useTranslation } from "react-i18next";
 
-const MenuSection = ({
+const MenuSection = React.memo(({
   menuVisible,
   setMenuVisible,
   handleEditProfile,
@@ -30,15 +14,14 @@ const MenuSection = ({
 }) => {
   const { t } = useTranslation();
 
-  const closeMenu = () => setMenuVisible(false);
+  const closeMenu = useCallback(() => setMenuVisible(false), [setMenuVisible]);
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = useCallback(() => {
     Alert.alert(
       t("profileMenuSections.deleteAccount"),
       t("profileMenuSections.deleteAccountQuestions"),
       [
         {
-          
           text: t("chatUsers.cancel"),
           style: "cancel",
         },
@@ -65,7 +48,7 @@ const MenuSection = ({
                       );
                       return;
                     }
-
+  
                     Alert.prompt(
                       t("profileMenuSections.confirmPassword"),
                       t("profileMenuSections.enterPassword"),
@@ -85,7 +68,7 @@ const MenuSection = ({
                               );
                               return;
                             }
-
+  
                             try {
                               const auth = getAuth();
                               const user = auth.currentUser;
@@ -93,14 +76,11 @@ const MenuSection = ({
                                 email,
                                 password,
                               );
-
-                              await reauthenticateWithCredential(
-                                user,
-                                credential,
-                              );
+  
+                              await reauthenticateWithCredential(user, credential);
                               await deleteDoc(doc(database, "users", user.uid));
                               await deleteUser(user);
-
+  
                               Alert.alert(
                                 t("profileMenuSections.success"),
                                 t("profileMenuSections.accountDeleted"),
@@ -146,58 +126,76 @@ const MenuSection = ({
         },
       ],
     );
-  };
+  }, [t]);
+  
+  
 
   return (
     <View style={styles.menuContainer}>
-      <Menu
-        visible={menuVisible}
-        onDismiss={closeMenu}
-        anchor={
-          <TouchableOpacity
-            onPress={() => setMenuVisible(true)}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="ellipsis-vertical" size={27} color="white" />
-          </TouchableOpacity>
-        }
-        contentStyle={styles.menuContent}
-        statusBarHeight={Platform.OS === "ios" ? 40 : 0}
+      <TouchableOpacity
+        onPress={() => setMenuVisible(true)}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Menu.Item
-          onPress={() => {
-            handleEditProfile();
-            closeMenu();
-          }}
-          title={t("profile.editProfile")}
-        />
-        <Menu.Item
-          onPress={() => {
-            setIsBlockedListVisible(true);
-            closeMenu();
-          }}
-          title={t("blockedUsers.modalTitle")}
-          disabled={blockedUsers.length === 0}
-        />
-        <Menu.Item
-          onPress={() => {
-            handleTogglePrivacy();
-            closeMenu();
-          }}
-          title={isPrivate ? t("profile.makePublic") : t("profile.makePrivate")}
-        />
-        <Menu.Item
-          onPress={() => {
-            handleDeleteAccount();
-            closeMenu();
-          }}
-          title={t("profileMenuSections.deleteAccount")}
-          titleStyle={{ color: "red" }}
-        />
-      </Menu>
+        <Ionicons name="ellipsis-vertical" size={27} color="white" />
+      </TouchableOpacity>
+
+      <Modal
+        visible={menuVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeMenu}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={closeMenu}
+        >
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                handleEditProfile();
+                closeMenu();
+              }}
+            >
+              <Text style={styles.menuItemText}>{t("profile.editProfile")}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setIsBlockedListVisible(true);
+                closeMenu();
+              }}
+              disabled={blockedUsers.length === 0}
+            >
+              <Text style={styles.menuItemText}>{t("blockedUsers.modalTitle")}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                handleTogglePrivacy();
+                closeMenu();
+              }}
+            >
+              <Text style={styles.menuItemText}>
+                {isPrivate ? t("profile.makePublic") : t("profile.makePrivate")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.menuItem, styles.deleteMenuItem]}
+              onPress={() => {
+                handleDeleteAccount();
+                closeMenu();
+              }}
+            >
+              <Text style={styles.deleteMenuItemText}>{t("profileMenuSections.deleteAccount")}</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   menuContainer: {
@@ -206,9 +204,36 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 10,
   },
-  menuContent: {
-    marginTop: 60,
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
     borderRadius: 10,
+    padding: 20,
+    width: '60%',
+    alignItems: 'center', // Centra los elementos dentro del modal
+  },
+  menuItem: {
+    paddingVertical: 15,
+    width: '100%', // Asegura que las opciones ocupen todo el ancho disponible
+    alignItems: 'center', // Centra los textos en el TouchableOpacity
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center', // Asegura que el texto esté alineado al centro
+  },
+  deleteMenuItem: {
+    borderBottomWidth: 0,
+  },
+  deleteMenuItemText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center', // Asegura que el texto de eliminar cuenta también esté centrado
   },
 });
 
