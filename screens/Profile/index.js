@@ -234,6 +234,7 @@ export default function Profile({ navigation }) {
           })
         );
         
+        
 
         const updatedData = {
           firstName: name,
