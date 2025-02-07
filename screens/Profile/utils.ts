@@ -25,42 +25,41 @@ export const fetchUserData = async (params) => {
 };
 
 export const setFetchUserData = async (params) => {
-    const setName = params.setName
-    const setSurname = params.setSurname
-    const setIsPrivate = params.setIsPrivate
-    const setPhotoUrls = params.setPhotoUrls
-    const setUsername = params.setUsername
-    const setFriendCount = params.setFriendCount
-    const setFirstHobby = params.setFirstHobby
-    const setSecondHobby = params.setSecondHobby
-    const setRelationshipStatus = params.setRelationshipStatus
-    const setFirstInterest = params.setFirstInterest
-    const setSecondInterest = params.setSecondInterest
-
+    const { 
+      setName, setSurname, setIsPrivate, setPhotoUrls, setUsername, 
+      setFriendCount, setFirstHobby, setSecondHobby, setFirstInterest, setSecondInterest 
+    } = params;
+  
     const user = auth.currentUser;
-    if (user) {
-        const userDoc = await getDoc(doc(database, "users", user.uid));
-        if (userDoc.exists()) {
-            const data = userDoc.data();
-            setName(data.firstName || "");
-            setSurname(data.lastName || "");
-            setIsPrivate(data.isPrivate || false);
-            if (data.photoUrls && data.photoUrls.length > 0) {
-                setPhotoUrls(data.photoUrls);
-            }
-            if (data.username) setUsername(data.username);
-            const friendsSnapshot = await getDocs(
-                collection(database, "users", user.uid, "friends")
-            );
-            setFriendCount(friendsSnapshot.size);
-            setFirstHobby(data.firstHobby || "");
-            setSecondHobby(data.secondHobby || "");
-            setRelationshipStatus(data.relationshipStatus || "");
-            setFirstInterest(data.firstInterest || "");
-            setSecondInterest(data.secondInterest || "");
-        }
+    if (!user) return;
+  
+    try {
+      const [userDoc, friendsSnapshot] = await Promise.all([
+        getDoc(doc(database, "users", user.uid)),
+        getDocs(collection(database, "users", user.uid, "friends"))
+      ]);
+  
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+  
+        // Agrupar estados en un solo `setState`
+        setName(data.firstName || "");
+        setSurname(data.lastName || "");
+        setIsPrivate(data.isPrivate || false);
+        setPhotoUrls(data.photoUrls || []);
+        setUsername(data.username || "");
+        setFriendCount(friendsSnapshot.size);
+        setFirstHobby(data.firstHobby || "");
+        setSecondHobby(data.secondHobby || "");
+        setFirstInterest(data.firstInterest || "");
+        setSecondInterest(data.secondInterest || "");
+      }
+    } catch (error) {
+      console.error("Error obteniendo datos del usuario:", error);
     }
-};
+  };
+  
+
 
 export const handleTogglePrivacy = async (params) => {
     const isPrivate = params.isPrivate
@@ -179,26 +178,6 @@ export const checkLikeStatus = async (params) => {
         }
     } catch (error) {
         console.error("Error verificando el estado del like:", error);
-    }
-};
-
-export const fetchFriendCount = async (params) => {
-    const setFriendCount = params.setFriendCount
-
-
-    try {
-        const user = auth.currentUser;
-        if (user) {
-            const friendsSnapshot = await getDocs(
-                collection(database, "users", user.uid, "friends")
-            );
-          
-            setFriendCount(friendsSnapshot.size);
-        } else {
-     
-        }
-    } catch (error) {
-        console.error("Error fetching friend count:", error);
     }
 };
 

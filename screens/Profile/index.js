@@ -111,7 +111,6 @@ export default function Profile({ navigation }) {
   const [isFriendListVisible, setIsFriendListVisible] = useState(false);
   const [firstHobby, setFirstHobby] = useState("");
   const [secondHobby, setSecondHobby] = useState("");
-  const [relationshipStatus, setRelationshipStatus] = useState("");
   const [firstInterest, setFirstInterest] = useState("");
   const [secondInterest, setSecondInterest] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
@@ -156,26 +155,34 @@ export default function Profile({ navigation }) {
     }
   }, []);
 
-  
-
   useEffect(() => {
-    checkLikeStatus({setIsHearted});
-    fetchFriendCount({setFriendCount});
-    setFetchUserData({
-        setName, 
-        setSurname, 
-        setIsPrivate, 
-        setPhotoUrls, 
-        setUsername, 
-        setFriendCount, 
-        setFirstHobby, 
-        setSecondHobby, 
-        setRelationshipStatus, 
-        setFirstInterest, 
-        setSecondInterest
-    });
-    fetchHeartCount({setHeartCount});
+    const fetchProfileData = async () => {
+        if (!auth.currentUser) return;
+
+        try {
+            await setFetchUserData({
+                setName,
+                setSurname,
+                setIsPrivate,
+                setPhotoUrls,
+                setUsername,
+                setFriendCount,
+                setFirstHobby,
+                setSecondHobby,
+                setFirstInterest,
+                setSecondInterest
+            });
+
+            checkLikeStatus({ setIsHearted });
+            fetchHeartCount({ setHeartCount });
+        } catch (error) {
+            console.error("Error cargando datos:", error);
+        }
+    };
+
+    fetchProfileData();
 }, [auth.currentUser]);
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -201,53 +208,50 @@ export default function Profile({ navigation }) {
       Alert.alert(t("profile.error"), t("profile.nameValidationError"));
       return;
     }
-
+  
     if (!name.trim() || !surname.trim()) {
       Alert.alert(t("profile.error"), t("profile.allFieldsRequired"));
       return;
     }
-
+  
     const user = auth.currentUser;
     if (user) {
       setIsLoading(true);
-
+  
       try {
-        const updatedPhotoUrls = await Promise.all(
-          photoUrls.map(async (url, index) => {
-            try {
-              if (url.startsWith("file://") || !url.includes("profileImages")) {
-                // Asegúrate de que todas las imágenes estén en la carpeta `profileImages`
-                const imageRef = ref(
-                  storage,
-                  `photos/${user.uid}_${index}.jpg`
-                );
-                const response = await fetch(url);
-                const blob = await response.blob();
-                await uploadBytes(imageRef, blob);
-                return await getDownloadURL(imageRef);
-              }
-              return url; // Mantén las URLs ya correctas
-            } catch (error) {
-              console.error("Error al cargar la imagen:", error);
-              throw error;
-            }
-          })
-        );
-        
-        
-
-        const updatedData = {
-          firstName: name,
-          lastName: surname,
-          photoUrls: updatedPhotoUrls,
-          firstHobby,
-          secondHobby,
-          relationshipStatus,
-          firstInterest,
-          secondInterest,
-        };
-
-        await updateDoc(doc(database, "users", user.uid), updatedData);
+        const userDoc = await getDoc(doc(database, "users", user.uid));
+        const currentData = userDoc.exists() ? userDoc.data() : {};
+  
+        // Crear un objeto solo con los datos que han cambiado
+        let updatedData = {};
+        if (name !== currentData.firstName) updatedData.firstName = name;
+        if (surname !== currentData.lastName) updatedData.lastName = surname;
+        if (firstHobby !== currentData.firstHobby) updatedData.firstHobby = firstHobby;
+        if (secondHobby !== currentData.secondHobby) updatedData.secondHobby = secondHobby;
+        if (firstInterest !== currentData.firstInterest) updatedData.firstInterest = firstInterest;
+        if (secondInterest !== currentData.secondInterest) updatedData.secondInterest = secondInterest;
+  
+        // Subir solo imágenes nuevas
+        const uploadTasks = photoUrls.map(async (url, index) => {
+          if (url.startsWith("file://")) {
+            const imageRef = ref(storage, `photos/${user.uid}_${index}.jpg`);
+            const response = await fetch(url);
+            const blob = await response.blob();
+            await uploadBytes(imageRef, blob);
+            return getDownloadURL(imageRef);
+          }
+          return url;
+        });
+  
+        const updatedPhotoUrls = await Promise.all(uploadTasks);
+        if (JSON.stringify(updatedPhotoUrls) !== JSON.stringify(currentData.photoUrls)) {
+          updatedData.photoUrls = updatedPhotoUrls;
+        }
+  
+        if (Object.keys(updatedData).length > 0) {
+          await updateDoc(doc(database, "users", user.uid), updatedData);
+        }
+  
         setPhotoUrls(updatedPhotoUrls);
         setIsEditing(false);
       } catch (error) {
@@ -258,6 +262,9 @@ export default function Profile({ navigation }) {
       }
     }
   };
+  
+  
+  
 
   const renderSaveButton = () => {
     return (
