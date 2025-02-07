@@ -32,6 +32,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
+  const [friendsList, setFriendsList] = useState([]);
   const [viewedStories, setViewedStories] = useState({});
   const { t } = useTranslation();
 
@@ -42,47 +43,52 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     }));
   };
 
+  useEffect(() => {
+    const fetchFriendsList = async () => {
+      try {
+        if (!auth.currentUser) return;
+  
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendsSnapshot = await getDocs(friendsRef);
+        const friends = friendsSnapshot.docs.map(doc => doc.data().friendId);
+  
+        setFriendsList(friends);
+      } catch (error) {
+        console.error(t("dotIndicatorBoxDetails.errorFetchingFriends"), error);
+      }
+    };
+  
+    fetchFriendsList();
+  }, []);
+
   const checkStories = async () => {
     try {
+      if (filteredAttendees.length === 0) return; // No procesar si no hay usuarios filtrados
+      
       const currentUserRef = doc(database, "users", auth.currentUser.uid);
       const currentUserDoc = await getDoc(currentUserRef);
       const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
-
-      const attendeesWithStories = attendeesList.map((attendee) => ({
+  
+      const attendeesWithStories = filteredAttendees.map((attendee) => ({
         ...attendee,
         hasStories: false,
         userStories: [],
       }));
-
+  
       for (const attendee of attendeesWithStories) {
-        // Exclude current user's stories and hidden stories
         if (attendee.uid === auth.currentUser.uid || hideStoriesFrom.includes(attendee.uid)) {
           continue;
         }
-
+  
         const userDocRef = doc(database, "users", attendee.uid);
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.exists() ? userDoc.data() : null;
-
+  
         if (!userData) continue;
-
-        const isPrivate = userData?.isPrivate || false;
-
-        // Verificar si somos amigos
-        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-        const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
-        const friendSnapshot = await getDocs(friendQuery);
-        const isFriend = !friendSnapshot.empty;
-
-        // Saltar si es privado y no somos amigos
-        if (isPrivate && !isFriend) {
-          continue;
-        }
-
-        // Cargar historias solo si el perfil es público o si somos amigos
+  
         const storiesRef = collection(userDocRef, "stories");
         const storiesSnapshot = await getDocs(storiesRef);
-
+  
         const now = new Date();
         const userStories = storiesSnapshot.docs
           .map((doc) => ({
@@ -92,18 +98,23 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             expiresAt: doc.data().expiresAt?.toDate(),
           }))
           .filter((story) => story.expiresAt > now);
-
+  
         if (userStories.length > 0) {
           attendee.hasStories = true;
           attendee.userStories = userStories;
         }
       }
-
-      setFilteredAttendees(attendeesWithStories);
+  
+      // Solo actualizar si hay historias
+      if (attendeesWithStories.some((attendee) => attendee.hasStories)) {
+        setFilteredAttendees(attendeesWithStories);
+      }
     } catch (error) {
       console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
     }
   };
+  
+  
 
   useEffect(() => {
     const fetchCompleteUserData = async () => {
@@ -153,15 +164,48 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
 
   // Filtrar asistentes
   useEffect(() => {
-    const updateFilteredAttendees = () => {
-      const filtered = attendeesList.filter(
-        (attendee) => !blockedUsers.includes(attendee.uid)
-      );
-      setFilteredAttendees(filtered);
+    const updateFilteredAttendees = async () => {
+      if (!attendeesList || attendeesList.length === 0) return;
+      
+      const filtered = await Promise.all(attendeesList.map(async (attendee) => {
+        // Asegurar que el usuario actual siempre se muestra
+        if (attendee.uid === auth.currentUser.uid) return attendee;
+  
+        // Filtrar bloqueados
+        if (blockedUsers.includes(attendee.uid)) return null;
+  
+        // Obtener datos del usuario
+        const userDocRef = doc(database, "users", attendee.uid);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.exists() ? userDoc.data() : null;
+  
+        if (!userData) return null;
+  
+        const isPrivate = userData.isPrivate || false;
+        const isFriend = friendsList.includes(attendee.uid);
+  
+        // Si es privado y no es amigo, excluir
+        if (isPrivate && !isFriend) return null;
+  
+        return {
+          ...attendee,
+          isPrivate,
+          isFriend
+        };
+      }));
+  
+      // Eliminar valores nulos y actualizar la lista
+      const finalFiltered = filtered.filter(Boolean);
+  
+      setFilteredAttendees(finalFiltered);
     };
-
-    updateFilteredAttendees();
-  }, [attendeesList, blockedUsers]);
+  
+    if (friendsList.length > 0 || blockedUsers.length > 0) {
+      updateFilteredAttendees();
+    }
+  }, [attendeesList, blockedUsers, friendsList]);
+  
+  
 
   // Modo nocturno
   useEffect(() => {
