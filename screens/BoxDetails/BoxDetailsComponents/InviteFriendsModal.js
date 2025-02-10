@@ -28,6 +28,7 @@ const InviteFriendsModal = ({
 
   useEffect(() => {
     if (modalVisible) {
+      // Aquí podrías cargar algo si es necesario
     }
   }, [modalVisible, attendeesList]);
 
@@ -41,10 +42,7 @@ const InviteFriendsModal = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
-    Alert.alert(
-      t("userProfile.success"),
-      t("boxDetails.friendInvitedMessage")
-    );
+    Alert.alert(t("userProfile.success"), t("boxDetails.friendInvitedMessage"));
   };
 
   const renderFriendItemWithInvite = ({ item }) => {
@@ -59,56 +57,33 @@ const InviteFriendsModal = ({
       visible={modalVisible}
       onRequestClose={closeModal}
     >
-      {/* 
-        El primer TouchableWithoutFeedback se usa para cerrar el modal al tocar fuera,
-        pero hay que tener cuidado de no interceptar los gestos de scroll dentro del contenido.
-      */}
-      <TouchableWithoutFeedback onPress={closeModal}>
-        <View style={styles.modalOverlay}>
-          {/* Evitamos que este TouchableWithoutFeedback bloquee los toques dentro */}
-          <TouchableWithoutFeedback>
-            <View
-              style={[
-                styles.friendsModalContent,
-                isNightMode && styles.friendsModalContentNight,
-              ]}
-            >
-              {/* Título */}
-              <Text
-                style={[
-                  styles.modalTitle,
-                  isNightMode && styles.modalTitleNight,
-                ]}
-              >
-                {t("boxDetails.inviteFriendsTitle")}
-              </Text>
+      <View style={{ flex: 1 }}>
 
-              {/* Barra de búsqueda */}
-              <TextInput
-                style={[
-                  styles.searchInput,
-                  isNightMode && styles.searchInputNight,
-                ]}
-                placeholder={t("boxDetails.searchFriendsPlaceholder")}
-                placeholderTextColor={isNightMode ? "#888" : "#888"}
-                value={searchText}
-                onChangeText={handleSearch}
-              />
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.modalOverlay} />
+        </TouchableWithoutFeedback>
 
-              {/* Contenedor con altura fija para mostrar 5 items y permitir scroll */}
-              <View style={styles.flatListContainer}>
-                <FlatList
-                  nestedScrollEnabled={true} // Habilita el scroll anidado
-                  data={filteredFriends}
-                  renderItem={renderFriendItemWithInvite}
-                  keyExtractor={(item) => item.friendId.toString()}
-                  showsVerticalScrollIndicator={true}
-                />
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
+        <View style={styles.modalContainer}>
+          <View style={[styles.friendsModalContent, isNightMode && styles.friendsModalContentNight]}>
+            <Text style={[styles.modalTitle, isNightMode && styles.modalTitleNight]}>
+              {t("boxDetails.inviteFriendsTitle")}
+            </Text>
+            <TextInput
+              style={[styles.searchInput, isNightMode && styles.searchInputNight]}
+              placeholder={t("boxDetails.searchFriendsPlaceholder")}
+              placeholderTextColor="#888"
+              value={searchText}
+              onChangeText={handleSearch}
+            />
+            <FlatList
+              data={filteredFriends}
+              renderItem={renderFriendItemWithInvite}
+              keyExtractor={(item) => item.friendId.toString()}
+              keyboardShouldPersistTaps="handled"
+            />
+          </View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 };
@@ -119,44 +94,48 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
   },
   friendsModalContent: {
     backgroundColor: "white",
     padding: 20,
-    borderRadius: 15,
-    width: "90%",
+    borderRadius: 20,
+    width: "80%",
+    maxHeight: "80%",
   },
   friendsModalContentNight: {
     backgroundColor: "#1a1a1a",
   },
   modalTitle: {
     color: "black",
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 15,
     textAlign: "center",
   },
   modalTitleNight: {
     color: "white",
   },
   searchInput: {
-    height: 40,
-    borderColor: "black",
     borderWidth: 1,
-    borderRadius: 8,
+    borderColor: "#ccc",
+    borderRadius: 25,
+    padding: 10,
     marginBottom: 10,
-    paddingHorizontal: 10,
     color: "#333",
+    fontSize: 16,
   },
   searchInputNight: {
-    borderColor: "black",
+    borderColor: "#444",
     color: "white",
     backgroundColor: "#333",
-  },
-  flatListContainer: {
-    // Con una altura de 250px se mostrarán aproximadamente 5 items
-    height: 250,
   },
 });

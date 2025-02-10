@@ -9,6 +9,7 @@ import {
   Alert,
   Dimensions,
   TextInput,
+  TouchableWithoutFeedback
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -305,105 +306,102 @@ if (isLoading) {
         )}
       </TouchableOpacity>
 
-      <Modal visible={modalVisible} transparent={true} animationType="fade">
-        <TouchableOpacity
-          style={currentStyles.modalOverlay}
-          onPress={() => setModalVisible(false)}
-        >
-          <TouchableOpacity activeOpacity={1}>
-            <LinearGradient
-              colors={
-                isNightMode
-                  ? ["#1A1A1A", "#000000"]
-                  : ["rgba(0, 0, 0, 0.8)", "rgba(0, 0, 0, 0.8)"]
-              }
-              style={currentStyles.modalContent}
-            >
-              <View style={currentStyles.searchContainer}>
-                <Ionicons
-                  name="search"
-                  size={20}
-                  color="gray"
-                  style={currentStyles.searchIcon}
-                />
-                <TextInput
-                  style={[
-                    currentStyles.searchInput,
-                    { color: isNightMode ? "#fff" : "gray" },
-                  ]}
-                  placeholder={t("dotIndicator.searchPlaceholder")}
-                  placeholderTextColor="gray"
-                  value={searchTerm}
-                  onChangeText={setSearchTerm}
-                />
-              </View>
+      import { TouchableWithoutFeedback } from "react-native";
 
-              <FlatList
-  data={filteredAttendees}
-  keyExtractor={(item) => item.uid || item.username}
-  renderItem={({ item }) => (
-    <View style={currentStyles.attendeeItem}>
-      {/* Imagen de perfil con borde separado */}
-      <TouchableOpacity
-        onPress={() => handlePress(item.uid, false)} // Acceso a historias
-        style={[currentStyles.attendeeImageContainer,{ marginRight:20,}]}
+// ...
+
+<Modal visible={modalVisible} transparent={true} animationType="fade">
+  <View style={{ flex: 1 }}>
+    {/* Overlay que cierra el modal al tocar fuera */}
+    <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+      <View style={currentStyles.modalOverlay} />
+    </TouchableWithoutFeedback>
+
+    {/* Contenedor del contenido del modal */}
+    <View style={currentStyles.modalContainer}>
+      <LinearGradient
+        colors={
+          isNightMode
+            ? ["#1A1A1A", "#000000"]
+            : ["rgba(0, 0, 0, 0.8)", "rgba(0, 0, 0, 0.8)"]
+        }
+        style={currentStyles.modalContent}
       >
-        <View
-          style={[
-            currentStyles.unseenStoryCircle, // Borde externo
-            item.hasStories && {
-              borderColor: "white",
-              // Color dinámico del borde
-            },
-          ]}
-        >
-          <Image
-            source={{
-              uri:
-                item.profileImage ||
-                "https://via.placeholder.com/150",
-            }}
-            style={currentStyles.attendeeImage} // Imagen interna
-            cachePolicy="memory-disk"
+        <View style={currentStyles.searchContainer}>
+          <Ionicons
+            name="search"
+            size={20}
+            color="gray"
+            style={currentStyles.searchIcon}
+          />
+          <TextInput
+            style={[
+              currentStyles.searchInput,
+              { color: isNightMode ? "#fff" : "gray" },
+            ]}
+            placeholder={t("dotIndicator.searchPlaceholder")}
+            placeholderTextColor="gray"
+            value={searchTerm}
+            onChangeText={setSearchTerm}
           />
         </View>
-      </TouchableOpacity>
 
-      {/* Texto del usuario: clic redirige al perfil */}
-      <TouchableOpacity
-        onPress={() => navigateToUserProfile(item.uid)} // Redirige al perfil
-      >
-        <Text style={currentStyles.attendeeName}>
-          {item.username}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  )}
-/>
-
-
-              {isModalVisible && (
-                <Modal
-                  visible={isModalVisible}
-                  animationType="slide"
-                  transparent={false}
+        <FlatList
+          data={filteredAttendees}
+          keyExtractor={(item) => item.uid || item.username}
+          renderItem={({ item }) => (
+            <View style={currentStyles.attendeeItem}>
+              <TouchableOpacity
+                onPress={() => handlePress(item.uid, false)}
+                style={[
+                  currentStyles.attendeeImageContainer,
+                  { marginRight: 20 },
+                ]}
+              >
+                <View
+                  style={[
+                    currentStyles.unseenStoryCircle,
+                    item.hasStories && { borderColor: "white" },
+                  ]}
                 >
-                  <StoryViewer
-                    stories={selectedStories}
-                    initialIndex={0}
-                    onClose={() => {
-                      setIsModalVisible(false);
-                      setModalVisible(false); // Cierra también el modal principal
+                  <Image
+                    source={{
+                      uri:
+                        item.profileImage ||
+                        "https://via.placeholder.com/150",
                     }}
-                    unseenStories={{}}
-                    navigation={navigation}
+                    style={currentStyles.attendeeImage}
+                    cachePolicy="memory-disk"
                   />
-                </Modal>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => navigateToUserProfile(item.uid)}>
+                <Text style={currentStyles.attendeeName}>{item.username}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+
+        {isModalVisible && (
+          <Modal visible={isModalVisible} animationType="slide" transparent={false}>
+            <StoryViewer
+              stories={selectedStories}
+              initialIndex={0}
+              onClose={() => {
+                setIsModalVisible(false);
+                setModalVisible(false);
+              }}
+              unseenStories={{}}
+              navigation={navigation}
+            />
+          </Modal>
+        )}
+      </LinearGradient>
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 };
@@ -435,13 +433,20 @@ const baseStyles = {
     fontWeight: "bold",
   },
   modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: width * 0.8,
+    width: width * 0.8, // o el ancho que prefieras
     maxHeight: 400,
     borderRadius: 20,
     padding: 20,

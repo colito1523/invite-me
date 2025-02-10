@@ -733,7 +733,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           bounces={false}
           alwaysBounceVertical={false}
           showsVerticalScrollIndicator={true}
-          scrollEnabled={true}
+          scrollEnabled={!modalVisible} 
           overScrollMode="never"
         >
           {/* Header */}
