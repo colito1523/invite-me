@@ -28,7 +28,6 @@ const InviteFriendsModal = ({
 
   useEffect(() => {
     if (modalVisible) {
-      // Lógica adicional si es necesaria
     }
   }, [modalVisible, attendeesList]);
 
