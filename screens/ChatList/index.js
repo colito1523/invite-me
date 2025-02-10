@@ -7,6 +7,7 @@ import {
   TextInput, 
   TouchableOpacity, 
   SafeAreaView, 
+  ScrollView,
   Alert, 
   Modal,
   RefreshControl
@@ -64,7 +65,7 @@ export default function ChatList() {
 
   const onRefresh = useCallback(async () => {
     if (!user) return;
-
+  
     setRefreshing(true);
     try {
       const chatsRef = collection(database, "chats");
@@ -74,19 +75,21 @@ export default function ChatList() {
       const userRef = doc(database, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
       const blockedUsers = userSnapshot.data()?.blockedUsers || [];
-
+  
       const chatList = await Promise.all(
         querySnapshot.docs.map(async (docSnapshot) => {
           const chatData = docSnapshot.data();
-          if (chatData.isHidden?.[user.uid] || blockedUsers.some((blockedUid) => 
-            chatData.participants.includes(blockedUid))) {
+          if (
+            chatData.isHidden?.[user.uid] ||
+            blockedUsers.some((blockedUid) => chatData.participants.includes(blockedUid))
+          ) {
             return null;
           }
-
+  
           const otherUserId = chatData.participants.find((uid) => uid !== user.uid);
           const otherUserDoc = await getDoc(doc(database, "users", otherUserId));
           if (!otherUserDoc.exists()) return null;
-
+  
           const otherUserData = otherUserDoc.data();
           const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
           const unseenMessagesQuery = query(
@@ -95,7 +98,7 @@ export default function ChatList() {
             where("senderId", "!=", user.uid)
           );
           const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
-
+  
           return {
             id: docSnapshot.id,
             user: otherUserData,
@@ -105,7 +108,7 @@ export default function ChatList() {
           };
         })
       );
-
+  
       const sortedChats = chatList
         .filter((chat) => chat !== null)
         .sort((a, b) => {
@@ -117,7 +120,7 @@ export default function ChatList() {
             : 0;
           return dateB - dateA;
         });
-
+  
       const updatedChats = await checkStories(sortedChats, user.uid);
       setChats(updatedChats);
     } catch (error) {
@@ -125,6 +128,7 @@ export default function ChatList() {
     }
     setRefreshing(false);
   }, [user]);
+  
 
   const { t } = useTranslation();
   const user = auth.currentUser;
@@ -579,88 +583,15 @@ export default function ChatList() {
 
   return (
     <Provider>
-      <SafeAreaView style={[styles.container]}>
+      <SafeAreaView style={styles.container}>
         <LinearGradient
           colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
           style={styles.container}
         >
-          <Notes />
-          <View
-            style={[styles.searchContainer, { borderColor: theme.borderColor }]}
-          >
-            <Ionicons
-              name="search"
-              size={20}
-              color={theme.icon}
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={[styles.searchInput, { color: theme.text }]}
-              placeholder={t("indexChatList.searchPlaceholder")}
-              placeholderTextColor={theme.placeholder}
-              value={searchText}
-              onChangeText={setSearchText}
-            />
-          </View>
-
-          <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: theme.text }]}>
-              {t("indexChatList.tittle")}
-            </Text>
-            <Menu
-              visible={showOptionsMenu}
-              onDismiss={() => setShowOptionsMenu(false)}
-              anchor={
-                <TouchableOpacity onPress={handleOptionsPress}>
-                  <Ionicons
-                    name="ellipsis-horizontal"
-                    size={24}
-                    color={theme.icon}
-                    style={styles.dotsIcon}
-                  />
-                </TouchableOpacity>
-              }
-            >
-              <Menu.Item
-                onPress={() => {
-                  setIsSelectionMode(true);
-                  setShowOptionsMenu(false);
-                }}
-                title={t("indexChatList.deleteChats")}
-              />
-              <Menu.Item
-                onPress={() => {
-                  setIsSelectionMode(true);
-                  setShowMuteOptions(true);
-                  setShowOptionsMenu(false);
-                }}
-                title={t("indexChatList.muteChats")}
-              />
-            </Menu>
-          </View>
-
-          {isSelectionMode && (
-            <TouchableOpacity
-              style={[
-                styles.selectAllButton,
-                { backgroundColor: theme.buttonBackground },
-              ]}
-              onPress={handleSelectAll}
-            >
-              <Text style={[styles.selectAllText, { color: theme.buttonText }]}>
-                {selectAll
-                  ? t("indexChatList.selectAll")
-                  : t("indexChatList.deselectAll")}
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          {showMuteOptions && renderMuteOptions()}
-
           <FlatList
             data={filteredChats}
             keyExtractor={(item) => `chat-${item.id}`}
-            renderItem={renderChatItem}
+            renderItem={({ item }) => renderChatItem({ item })}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -669,8 +600,84 @@ export default function ChatList() {
                 tintColor={isNightMode ? "#fff" : "#000"}
               />
             }
+            ListHeaderComponent={
+              <>
+                <Notes />
+                <View
+                  style={[styles.searchContainer, { borderColor: theme.borderColor }]}
+                >
+                  <Ionicons
+                    name="search"
+                    size={20}
+                    color={theme.icon}
+                    style={styles.searchIcon}
+                  />
+                  <TextInput
+                    style={[styles.searchInput, { color: theme.text }]}
+                    placeholder={t("indexChatList.searchPlaceholder")}
+                    placeholderTextColor={theme.placeholder}
+                    value={searchText}
+                    onChangeText={setSearchText}
+                  />
+                </View>
+  
+                <View style={styles.titleContainer}>
+                  <Text style={[styles.title, { color: theme.text }]}>
+                    {t("indexChatList.tittle")}
+                  </Text>
+                  <Menu
+                    visible={showOptionsMenu}
+                    onDismiss={() => setShowOptionsMenu(false)}
+                    anchor={
+                      <TouchableOpacity onPress={handleOptionsPress}>
+                        <Ionicons
+                          name="ellipsis-horizontal"
+                          size={24}
+                          color={theme.icon}
+                          style={styles.dotsIcon}
+                        />
+                      </TouchableOpacity>
+                    }
+                  >
+                    <Menu.Item
+                      onPress={() => {
+                        setIsSelectionMode(true);
+                        setShowOptionsMenu(false);
+                      }}
+                      title={t("indexChatList.deleteChats")}
+                    />
+                    <Menu.Item
+                      onPress={() => {
+                        setIsSelectionMode(true);
+                        setShowMuteOptions(true);
+                        setShowOptionsMenu(false);
+                      }}
+                      title={t("indexChatList.muteChats")}
+                    />
+                  </Menu>
+                </View>
+  
+                {isSelectionMode && (
+                  <TouchableOpacity
+                    style={[
+                      styles.selectAllButton,
+                      { backgroundColor: theme.buttonBackground },
+                    ]}
+                    onPress={handleSelectAll}
+                  >
+                    <Text style={[styles.selectAllText, { color: theme.buttonText }]}>
+                      {selectAll
+                        ? t("indexChatList.selectAll")
+                        : t("indexChatList.deselectAll")}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+  
+                {showMuteOptions && renderMuteOptions()}
+              </>
+            }
           />
-
+  
           {isSelectionMode && (
             <View
               style={[
@@ -728,7 +735,7 @@ export default function ChatList() {
               </TouchableOpacity>
             </View>
           )}
-
+  
           {isModalVisible && (
             <Modal
               visible={isModalVisible}
