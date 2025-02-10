@@ -8,11 +8,10 @@ import {
   TouchableWithoutFeedback,
   StyleSheet,
   Alert,
-  Pressable,
   Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import * as Haptics from "expo-haptics"; // Para feedback háptico en iOS
+import * as Haptics from "expo-haptics";
 
 const InviteFriendsModal = ({
   modalVisible,
@@ -29,25 +28,25 @@ const InviteFriendsModal = ({
 
   useEffect(() => {
     if (modalVisible) {
+      // Lógica adicional si es necesaria
     }
   }, [modalVisible, attendeesList]);
 
   const handleInvite = (friendId) => {
     setInvitedFriends([...invitedFriends, friendId]);
-  
-    // Agregar feedback háptico en iOS y Android
+
+    // Feedback háptico para iOS y Android
     if (Platform.OS === "ios") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-  
+
     Alert.alert(
       t("userProfile.success"),
       t("boxDetails.friendInvitedMessage")
     );
   };
-  
 
   const renderFriendItemWithInvite = ({ item }) => {
     const isInvited = invitedFriends.includes(item.friendId);
@@ -61,16 +60,21 @@ const InviteFriendsModal = ({
       visible={modalVisible}
       onRequestClose={closeModal}
     >
+      {/* 
+        El primer TouchableWithoutFeedback se usa para cerrar el modal al tocar fuera,
+        pero hay que tener cuidado de no interceptar los gestos de scroll dentro del contenido.
+      */}
       <TouchableWithoutFeedback onPress={closeModal}>
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+          {/* Evitamos que este TouchableWithoutFeedback bloquee los toques dentro */}
+          <TouchableWithoutFeedback>
             <View
               style={[
                 styles.friendsModalContent,
                 isNightMode && styles.friendsModalContentNight,
               ]}
             >
-              {/* Título del modal */}
+              {/* Título */}
               <Text
                 style={[
                   styles.modalTitle,
@@ -92,12 +96,16 @@ const InviteFriendsModal = ({
                 onChangeText={handleSearch}
               />
 
-              {/* Lista de amigos */}
-              <FlatList
-                data={filteredFriends}
-                renderItem={renderFriendItemWithInvite}
-                keyExtractor={(item) => item.friendId.toString()}
-              />
+              {/* Contenedor con altura fija para mostrar 5 items y permitir scroll */}
+              <View style={styles.flatListContainer}>
+                <FlatList
+                  nestedScrollEnabled={true} // Habilita el scroll anidado
+                  data={filteredFriends}
+                  renderItem={renderFriendItemWithInvite}
+                  keyExtractor={(item) => item.friendId.toString()}
+                  showsVerticalScrollIndicator={true}
+                />
+              </View>
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -147,5 +155,9 @@ const styles = StyleSheet.create({
     borderColor: "black",
     color: "white",
     backgroundColor: "#333",
+  },
+  flatListContainer: {
+    // Con una altura de 250px se mostrarán aproximadamente 5 items
+    height: 250,
   },
 });

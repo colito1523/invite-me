@@ -36,8 +36,8 @@ const boxInfo = [
     },
     number: "968 842 888",
     coordinates: {
-      latitude: 38.7301071,
-      longitude: -9.1532305,
+      latitude: 38.70831910,
+      longitude: -9.13998250,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -236,6 +236,28 @@ const boxInfo = [
     coordinates: {
       latitude: 38.72028,
       longitude: -9.1449959,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/douro.jpg"),
+    title: "Douro",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "12:30 PM - 12:00 AM",
+      Martes: "12:30 PM - 12:00 AM",
+      Miércoles: "12:30 PM - 12:00 AM",
+      Jueves: "12:30 PM - 02:00 AM",
+      Viernes: "12:30 PM - 03:00 AM",
+      Sábado: "12:30 PM - 12:00 AM",
+      Domingo: "12:30 PM - 12:00 AM",
+    },
+    number: "968 842 888",
+    coordinates: {
+      latitude: 38.7301071,
+      longitude: -9.1532305,
     },
     country: "Portugal",
     city: "Lisboa",

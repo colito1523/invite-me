@@ -165,16 +165,18 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   // Filtrar asistentes
   useEffect(() => {
     const updateFilteredAttendees = async () => {
-      if (!attendeesList || attendeesList.length === 0) return;
+      if (!attendeesList || attendeesList.length === 0) {
+        setFilteredAttendees([]); // Aseguramos que se limpie la lista si no hay asistentes
+        return;
+      }
       
       const filtered = await Promise.all(attendeesList.map(async (attendee) => {
-        // Asegurar que el usuario actual siempre se muestra
+        // Si deseas que el usuario actual no se muestre cuando dice "no voy",
+        // elimina o ajusta esta condición.
         if (attendee.uid === auth.currentUser.uid) return attendee;
   
-        // Filtrar bloqueados
         if (blockedUsers.includes(attendee.uid)) return null;
   
-        // Obtener datos del usuario
         const userDocRef = doc(database, "users", attendee.uid);
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.exists() ? userDoc.data() : null;
@@ -184,7 +186,6 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
         const isPrivate = userData.isPrivate || false;
         const isFriend = friendsList.includes(attendee.uid);
   
-        // Si es privado y no es amigo, excluir
         if (isPrivate && !isFriend) return null;
   
         return {
@@ -194,16 +195,14 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
         };
       }));
   
-      // Eliminar valores nulos y actualizar la lista
       const finalFiltered = filtered.filter(Boolean);
-  
       setFilteredAttendees(finalFiltered);
     };
   
-    if (friendsList.length > 0 || blockedUsers.length > 0) {
-      updateFilteredAttendees();
-    }
+    // Ejecutamos siempre la actualización, sin depender de friendsList o blockedUsers
+    updateFilteredAttendees();
   }, [attendeesList, blockedUsers, friendsList]);
+  
   
   
 

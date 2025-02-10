@@ -235,7 +235,7 @@ export const handleBoxPress = ({ event, navigation, t }) => {
           phoneNumber: event.phoneNumber || t("profile.noNumber"),
           locationLink: event.locationLink || t("profile.noLocation"),
           coordinates: event.coordinates || { latitude: 0, longitude: 0 },
-          description: event.description || t("profile.noDescription"),
+          description: event.description || "",
       
         };
   
