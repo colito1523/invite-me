@@ -193,7 +193,7 @@ export default function Login({ navigation }) {
                   style={styles.languageSelector}
                   onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
                 >
-                  <Ionicons name="globe-outline" size={24} color="#000" />
+                  <Ionicons name="globe-outline" size={22} color="#000" />
                   <Text style={styles.selectedLanguage}>
                     {languages.find(lang => lang.code === selectedLanguage)?.name}
                   </Text>

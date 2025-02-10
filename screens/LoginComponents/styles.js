@@ -16,9 +16,10 @@ export const styles = StyleSheet.create({
     padding: 20,
   },
   logoContainer: {
-    width: width * 0.5,
-    height: width * 0.5,
+    width: width * 0.4,         // 80% del ancho de la pantalla
+    height: width * 0.4,        // Ajusta la altura para mantener la proporción, o defínela según necesites
     marginBottom: 30,
+    alignSelf: 'center',        // Esto centra el contenedor dentro del padre
   },
   logo: {
     width: '100%',
@@ -104,8 +105,8 @@ export const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   selectedLanguage: {
-    marginHorizontal: 10,
-    fontSize: 16,
+    marginHorizontal: 2,
+    fontSize: 14,
     color: '#333',
   },
   languageOptions: {

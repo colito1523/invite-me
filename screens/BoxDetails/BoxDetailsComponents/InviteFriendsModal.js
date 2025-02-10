@@ -8,10 +8,11 @@ import {
   TouchableWithoutFeedback,
   StyleSheet,
   Alert,
+  Pressable,
   Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import * as Haptics from "expo-haptics";
+import * as Haptics from "expo-haptics"; // Para feedback háptico en iOS
 
 const InviteFriendsModal = ({
   modalVisible,
@@ -28,22 +29,25 @@ const InviteFriendsModal = ({
 
   useEffect(() => {
     if (modalVisible) {
-      // Aquí podrías cargar algo si es necesario
     }
   }, [modalVisible, attendeesList]);
 
   const handleInvite = (friendId) => {
     setInvitedFriends([...invitedFriends, friendId]);
-
-    // Feedback háptico para iOS y Android
+  
+    // Agregar feedback háptico en iOS y Android
     if (Platform.OS === "ios") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-
-    Alert.alert(t("userProfile.success"), t("boxDetails.friendInvitedMessage"));
+  
+    Alert.alert(
+      t("userProfile.success"),
+      t("boxDetails.friendInvitedMessage")
+    );
   };
+  
 
   const renderFriendItemWithInvite = ({ item }) => {
     const isInvited = invitedFriends.includes(item.friendId);
@@ -57,33 +61,47 @@ const InviteFriendsModal = ({
       visible={modalVisible}
       onRequestClose={closeModal}
     >
-      <View style={{ flex: 1 }}>
+      <TouchableWithoutFeedback onPress={closeModal}>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+            <View
+              style={[
+                styles.friendsModalContent,
+                isNightMode && styles.friendsModalContentNight,
+              ]}
+            >
+              {/* Título del modal */}
+              <Text
+                style={[
+                  styles.modalTitle,
+                  isNightMode && styles.modalTitleNight,
+                ]}
+              >
+                {t("boxDetails.inviteFriendsTitle")}
+              </Text>
 
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalOverlay} />
-        </TouchableWithoutFeedback>
+              {/* Barra de búsqueda */}
+              <TextInput
+                style={[
+                  styles.searchInput,
+                  isNightMode && styles.searchInputNight,
+                ]}
+                placeholder={t("boxDetails.searchFriendsPlaceholder")}
+                placeholderTextColor={isNightMode ? "#888" : "#888"}
+                value={searchText}
+                onChangeText={handleSearch}
+              />
 
-        <View style={styles.modalContainer}>
-          <View style={[styles.friendsModalContent, isNightMode && styles.friendsModalContentNight]}>
-            <Text style={[styles.modalTitle, isNightMode && styles.modalTitleNight]}>
-              {t("boxDetails.inviteFriendsTitle")}
-            </Text>
-            <TextInput
-              style={[styles.searchInput, isNightMode && styles.searchInputNight]}
-              placeholder={t("boxDetails.searchFriendsPlaceholder")}
-              placeholderTextColor="#888"
-              value={searchText}
-              onChangeText={handleSearch}
-            />
-            <FlatList
-              data={filteredFriends}
-              renderItem={renderFriendItemWithInvite}
-              keyExtractor={(item) => item.friendId.toString()}
-              keyboardShouldPersistTaps="handled"
-            />
-          </View>
+              {/* Lista de amigos */}
+              <FlatList
+                data={filteredFriends}
+                renderItem={renderFriendItemWithInvite}
+                keyExtractor={(item) => item.friendId.toString()}
+              />
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -94,47 +112,39 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
   },
   friendsModalContent: {
     backgroundColor: "white",
     padding: 20,
-    borderRadius: 20,
-    width: "80%",
-    maxHeight: "80%",
+    borderRadius: 15,
+    width: "90%",
   },
   friendsModalContentNight: {
     backgroundColor: "#1a1a1a",
   },
   modalTitle: {
     color: "black",
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 15,
+    marginBottom: 20,
     textAlign: "center",
   },
   modalTitleNight: {
     color: "white",
   },
   searchInput: {
+    height: 40,
+    borderColor: "black",
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 25,
-    padding: 10,
+    borderRadius: 8,
     marginBottom: 10,
+    paddingHorizontal: 10,
     color: "#333",
-    fontSize: 16,
   },
   searchInputNight: {
-    borderColor: "#444",
+    borderColor: "black",
     color: "white",
     backgroundColor: "#333",
   },

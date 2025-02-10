@@ -306,18 +306,13 @@ if (isLoading) {
         )}
       </TouchableOpacity>
 
-      import { TouchableWithoutFeedback } from "react-native";
-
-// ...
-
 <Modal visible={modalVisible} transparent={true} animationType="fade">
   <View style={{ flex: 1 }}>
-    {/* Overlay que cierra el modal al tocar fuera */}
     <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
       <View style={currentStyles.modalOverlay} />
     </TouchableWithoutFeedback>
 
-    {/* Contenedor del contenido del modal */}
+   
     <View style={currentStyles.modalContainer}>
       <LinearGradient
         colors={
