@@ -14,6 +14,8 @@ import {
   collection,
   getDocs,
   doc,
+  query,
+  where,
   getDoc,
 } from "firebase/firestore";
 import { database, auth } from "../../config/firebase";
@@ -26,19 +28,43 @@ import { handleUserPress } from "./utils";
 
 const { width } = Dimensions.get("window");
 
-const DotIndicator = ({ attendeesList }) => {
+const DotIndicator = ({ profileImages, attendeesList }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [friendsList, setFriendsList] = useState([]);
-  const [filteredAttendees, setFilteredAttendees] = useState([]);
+  // Esta lista contendrá a los asistentes filtrados según bloqueos, privacidad y búsqueda
+  const [filteredAttendees, setFilteredAttendees] = useState(attendeesList);
   const navigation = useNavigation();
   const [isNightMode, setIsNightMode] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
+  // Eliminamos filteredImages para usar directamente filteredAttendees en el render
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
   const { t } = useTranslation();
 
-  // Obtener la lista de amigos
+  // Estado para almacenar la lista de amigos (para determinar si mostramos usuarios privados)
+  const [friendsList, setFriendsList] = useState([]);
+
+  // ---------------------------
+  // Obtención de usuarios bloqueados
+  // ---------------------------
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+        const userRef = doc(database, "users", auth.currentUser.uid);
+        const userSnapshot = await getDoc(userRef);
+        const blockedList = userSnapshot.data()?.blockedUsers || [];
+        setBlockedUsers(blockedList);
+      } catch (error) {
+        console.error(t("dotIndicator.errorFetchingBlockedUsers"), error);
+      }
+    };
+
+    fetchBlockedUsers();
+  }, []);
+
+  // ---------------------------
+  // Obtención de amigos
+  // ---------------------------
   useEffect(() => {
     const fetchFriendsList = async () => {
       try {
@@ -56,53 +82,41 @@ const DotIndicator = ({ attendeesList }) => {
         console.error(t("dotIndicator.errorFetchingFriends"), error);
       }
     };
-
     fetchFriendsList();
   }, []);
 
-  // Obtener la lista de usuarios bloqueados
-  useEffect(() => {
-    const fetchBlockedUsers = async () => {
-      try {
-        const userRef = doc(database, "users", auth.currentUser.uid);
-        const userSnapshot = await getDoc(userRef);
-        const blockedList = userSnapshot.data()?.blockedUsers || [];
-        setBlockedUsers(blockedList);
-      } catch (error) {
-        console.error(t("dotIndicator.errorFetchingBlockedUsers"), error);
-      }
-    };
-
-    fetchBlockedUsers();
-  }, []);
-
+  // ---------------------------
+  // Función para navegar al perfil de un usuario
+  // ---------------------------
   const navigateToUserProfile = async (uid) => {
     if (!uid) {
       console.error("User ID is undefined");
       return;
     }
 
-   // Cierra el modal antes de navegar
+    // Cierra el modal antes de navegar
     setModalVisible(false);
 
     if (uid === auth.currentUser.uid) {
-      setModalVisible(false); // Close the modal
       navigation.navigate("Profile");
       return;
     }
-  
+
     try {
       const userDoc = await getDoc(doc(database, "users", uid));
       const userData = userDoc.exists() ? userDoc.data() : {};
-  
-      setModalVisible(false); // Close the modal
+
       navigation.navigate("UserProfile", {
         selectedUser: {
           id: uid,
-          username: userData.username || t("dotIndicatorBoxDetails.unknownUser"),
-          firstName: userData.firstName || t("dotIndicatorBoxDetails.unknownUser"),
-          lastName: userData.lastName || t("dotIndicatorBoxDetails.unknownUser"),
-          profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+          username:
+            userData.username || t("dotIndicatorBoxDetails.unknownUser"),
+          firstName:
+            userData.firstName || t("dotIndicatorBoxDetails.unknownUser"),
+          lastName:
+            userData.lastName || t("dotIndicatorBoxDetails.unknownUser"),
+          profileImage:
+            userData.photoUrls?.[0] || "https://via.placeholder.com/150",
           isPrivate: userData.isPrivate || false,
         },
       });
@@ -111,80 +125,55 @@ const DotIndicator = ({ attendeesList }) => {
     }
   };
 
-  // Filtrar asistentes
-  useEffect(() => {
-    const updateFilteredAttendees = async () => {
-      if (!attendeesList || attendeesList.length === 0) {
-        setFilteredAttendees([]);
-        return;
-      }
+  // ---------------------------
+  // Función para verificar y asignar historias a cada asistente  
+  // (se ajusta para NO descartar al usuario actual)
+  // ---------------------------
+  const checkStories = async () => {
+    try {
+      const currentUserRef = doc(database, "users", auth.currentUser.uid);
+      const currentUserDoc = await getDoc(currentUserRef);
+      const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
 
-      const filtered = await Promise.all(
+      // Mapeamos todos los asistentes agregando propiedades para historias
+      const attendeesWithStories = await Promise.all(
         attendeesList.map(async (attendee) => {
-          if (attendee.uid === auth.currentUser.uid) return attendee;
-          if (blockedUsers.includes(attendee.uid)) return null;
-
-          const userDocRef = doc(database, "users", attendee.uid);
-          const userDoc = await getDoc(userDocRef);
-          const userData = userDoc.exists() ? userDoc.data() : null;
-          if (!userData) return null;
-
-          const isPrivate = userData.isPrivate || false;
-          const isFriend = friendsList.includes(attendee.uid);
-
-          if (isPrivate && !isFriend) return null;
-
-          return {
-            ...attendee,
-            isPrivate,
-            isFriend,
-          };
-        })
-      );
-
-      const finalFiltered = filtered.filter(Boolean);
-      setFilteredAttendees(finalFiltered);
-    };
-
-    updateFilteredAttendees();
-  }, [attendeesList, blockedUsers, friendsList]);
-
-  // Verificar historias
-  useEffect(() => {
-    const checkStories = async () => {
-      try {
-        const currentUserRef = doc(database, "users", auth.currentUser.uid);
-        const currentUserDoc = await getDoc(currentUserRef);
-        const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
-
-        const attendeesWithStories = filteredAttendees.map((attendee) => ({
-          ...attendee,
-          hasStories: false,
-          userStories: [],
-        }));
-
-        for (const attendee of attendeesWithStories) {
-          if (
-            !attendee ||
-            attendee.uid === auth.currentUser.uid ||
-            hideStoriesFrom.includes(attendee.uid)
-          ) {
-            continue;
+          // Si el usuario está en la lista de ocultar historias, se omite (pero no el usuario actual)
+          if (!attendee || (hideStoriesFrom.includes(attendee.uid) && attendee.uid !== auth.currentUser.uid)) {
+            return attendee;
           }
 
           const userDocRef = doc(database, "users", attendee.uid);
           const userDoc = await getDoc(userDocRef);
           const userData = userDoc.exists() ? userDoc.data() : null;
-          if (!userData) continue;
+          if (!userData) return attendee;
 
-          const isPrivate = userData?.isPrivate || false;
-          const isFriend = friendsList.includes(attendee.uid);
+          const isPrivate = userData.isPrivate || false;
 
-          if (isPrivate && !isFriend) continue;
+          // Para usuarios que no sean el actual, comprobamos si son amigos
+          let isFriend = false;
+          if (attendee.uid === auth.currentUser.uid) {
+            isFriend = true;
+          } else {
+            const friendsRef = collection(
+              database,
+              "users",
+              auth.currentUser.uid,
+              "friends"
+            );
+            const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
+            const friendSnapshot = await getDocs(friendQuery);
+            isFriend = !friendSnapshot.empty;
+          }
 
+          // Si la cuenta es privada y el usuario no es amigo, no se cargan historias
+          if (isPrivate && !isFriend) {
+            return attendee;
+          }
+
+          // Cargar historias (si existen y vigentes)
           const storiesRef = collection(userDocRef, "stories");
           const storiesSnapshot = await getDocs(storiesRef);
-
           const now = new Date();
           const userStories = storiesSnapshot.docs
             .map((doc) => ({
@@ -195,24 +184,64 @@ const DotIndicator = ({ attendeesList }) => {
             }))
             .filter((story) => story.expiresAt > now);
 
-          if (userStories.length > 0) {
-            attendee.hasStories = true;
-            attendee.userStories = userStories;
-          }
-        }
-
-        setFilteredAttendees(attendeesWithStories);
-      } catch (error) {
-        console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
-      }
-    };
-
-    if (filteredAttendees.length > 0) {
-      checkStories();
+          return { ...attendee, hasStories: userStories.length > 0, userStories };
+        })
+      );
+      // Se actualiza la lista; aquí se pueden filtrar o mantener todos
+      setFilteredAttendees(attendeesWithStories);
+    } catch (error) {
+      console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
     }
-  }, [filteredAttendees]);
+  };
 
-  // Modo nocturno
+  // ---------------------------
+  // Filtrado principal de asistentes (para modal y para las bolitas)
+  // Se excluyen usuarios bloqueados y, si la cuenta es privada y no es amigo, se descarta,
+  // salvo si el asistente es el usuario actual (para que nosotros aparezcamos).
+  // ---------------------------
+  useEffect(() => {
+    const updateFilteredAttendees = async () => {
+      if (!attendeesList || attendeesList.length === 0) {
+        setFilteredAttendees([]);
+        return;
+      }
+      const filtered = await Promise.all(
+        attendeesList.map(async (attendee) => {
+          // Siempre incluimos al usuario actual
+          if (attendee.uid === auth.currentUser.uid) return attendee;
+
+          // Excluir usuarios bloqueados
+          if (blockedUsers.includes(attendee.uid)) return null;
+
+          // Si se está buscando, filtrar por username
+          if (
+            searchTerm.trim() !== "" &&
+            !attendee.username.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+            return null;
+
+          // Obtener la data completa del usuario para chequear la privacidad
+          const userDoc = await getDoc(doc(database, "users", attendee.uid));
+          const userData = userDoc.exists() ? userDoc.data() : null;
+          if (!userData) return null;
+          const isPrivate = userData.isPrivate || false;
+          const isFriend = friendsList.includes(attendee.uid);
+
+          // Si la cuenta es privada y el usuario no es amigo, se descarta
+          if (isPrivate && !isFriend) return null;
+
+          return { ...attendee, isPrivate, isFriend };
+        })
+      );
+      const finalFiltered = filtered.filter((item) => item !== null);
+      setFilteredAttendees(finalFiltered);
+    };
+    updateFilteredAttendees();
+  }, [searchTerm, attendeesList, blockedUsers, friendsList]);
+
+  // ---------------------------
+  // Modo nocturno (se chequea la hora para ajustar estilos)
+  // ---------------------------
   useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
@@ -223,6 +252,13 @@ const DotIndicator = ({ attendeesList }) => {
     const interval = setInterval(checkTime, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  // ---------------------------
+  // Handlers para abrir modal y para manejar la pulsación en un asistente
+  // ---------------------------
+  const handlePresss = () => {
+    setModalVisible(true);
+  };
 
   const handlePress = async (uid) => {
     await handleUserPress({
@@ -239,14 +275,14 @@ const DotIndicator = ({ attendeesList }) => {
 
   return (
     <View style={currentStyles.container}>
-      <TouchableOpacity
-        onPress={() => setModalVisible(true)}
-        style={currentStyles.imageContainer}
-      >
+      {/* Renderizamos las “bolitas” usando la lista filtrada */}
+      <TouchableOpacity onPress={handlePresss} style={currentStyles.imageContainer}>
         {filteredAttendees.slice(0, 6).map((attendee, index) => (
           <Image
             key={attendee.uid}
-            source={{ uri: attendee.profileImage }}
+            source={{
+              uri: attendee.profileImage || "https://via.placeholder.com/150",
+            }}
             style={[
               currentStyles.profileImage,
               { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
@@ -295,9 +331,10 @@ const DotIndicator = ({ attendeesList }) => {
                   onChangeText={setSearchTerm}
                 />
               </View>
+
               <FlatList
                 data={filteredAttendees}
-                keyExtractor={(item) => item.uid}
+                keyExtractor={(item) => item.uid || item.username}
                 renderItem={({ item }) => (
                   <View style={currentStyles.attendeeItem}>
                     <TouchableOpacity
@@ -326,9 +363,7 @@ const DotIndicator = ({ attendeesList }) => {
                         />
                       </View>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => navigateToUserProfile(item.uid)}
-                    >
+                    <TouchableOpacity onPress={() => navigateToUserProfile(item.uid)}>
                       <Text style={currentStyles.attendeeName}>
                         {item.username}
                       </Text>
@@ -336,29 +371,25 @@ const DotIndicator = ({ attendeesList }) => {
                   </View>
                 )}
               />
+
+              {isModalVisible && (
+                <Modal visible={isModalVisible} animationType="slide" transparent={false}>
+                  <StoryViewer
+                    stories={selectedStories}
+                    initialIndex={0}
+                    onClose={() => {
+                      setIsModalVisible(false);
+                      setModalVisible(false); // Se cierra también el modal principal
+                    }}
+                    unseenStories={{}}
+                    navigation={navigation}
+                  />
+                </Modal>
+              )}
             </LinearGradient>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
-
-      {isModalVisible && (
-        <Modal
-          visible={isModalVisible}
-          animationType="slide"
-          transparent={false}
-        >
-          <StoryViewer
-            stories={selectedStories}
-            initialIndex={0}
-            onClose={() => {
-              setIsModalVisible(false);
-              setModalVisible(false);
-            }}
-            unseenStories={{}}
-            navigation={navigation}
-          />
-        </Modal>
-      )}
     </View>
   );
 };
@@ -407,11 +438,10 @@ const baseStyles = {
     marginBottom: 15,
   },
   attendeeImage: {
-    width: 46, // Ajusta según tus necesidades
+    width: 46,
     height: 46,
-    borderRadius: 23, // Mantén el radio de la imagen
+    borderRadius: 23,
   },
-
   attendeeName: {
     fontSize: 18,
   },
@@ -435,9 +465,9 @@ const baseStyles = {
   },
   unseenStoryCircle: {
     borderWidth: 2,
-    borderColor: "transparent", // Color predeterminado
-    borderRadius: 28, // Asegúrate de que sea mayor que attendeeImage
-    padding: 3, // Margen interno entre la imagen y el borde
+    borderColor: "transparent",
+    borderRadius: 28,
+    padding: 3,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -469,9 +499,9 @@ const nightStyles = StyleSheet.create({
   },
   moreContainer: {
     ...baseStyles.moreContainer,
-    backgroundColor: "#000", // Change to black
-    borderWidth: 2, // Add border
-    borderColor: "#000", // Border color black
+    backgroundColor: "#000",
+    borderWidth: 2,
+    borderColor: "#000",
   },
   moreText: {
     ...baseStyles.moreText,
