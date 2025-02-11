@@ -49,6 +49,9 @@ export default {
       notification: {
         icon: "./assets/notification-icon.png",
         color: "#FFFFFF",
+        iosDisplayInForeground: true,
+        androidMode: "default",
+        androidCollapsedTitle: "Invite Me",
       },
       permissions: [
         "CAMERA",

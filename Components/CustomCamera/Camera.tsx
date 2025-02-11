@@ -75,10 +75,11 @@ export default function Camera({ header = null }) {
       const options = {
         quality: 1,
         base64: true,
-        exif: false,
+        exif: true, // Cambiar a true para capturar datos EXIF
         mirror: facing === 'front', // Corrige la imagen volteada en selfies
       };
       const takedPhoto = await cameraRef.current.takePictureAsync(options);
+      console.log("Captured Photo EXIF Data:", takedPhoto.exif); // Log para verificar datos EXIF
       setPhoto(takedPhoto);
     }
   };

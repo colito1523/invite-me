@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { CameraCapturedPicture } from 'expo-camera';
 import { useState } from "react";
-import React from 'react';
-import { TouchableOpacity, View, Image, StyleSheet, Text } from 'react-native';
+import React from "react";
+import { TouchableOpacity, View, Image, StyleSheet, Text, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from "react-i18next";
-import { uploadStory } from '../Stories/storySlider/storySliderUtils'; // Importa la función de subida de historias
+import { uploadStory } from '../Stories/storySlider/storySliderUtils'; 
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const PhotoPreviewSection = ({
     photo,
@@ -25,7 +27,7 @@ const PhotoPreviewSection = ({
         setIsUploading(true);
         await uploadStory(
             photo.uri,
-            () => {}, // Puedes agregar traducción si es necesario
+            () => {}, 
             setIsUploading,
             setUploadProgress,
             setStories,
@@ -35,11 +37,31 @@ const PhotoPreviewSection = ({
         navigation.goBack();
     };
 
+    // Determinar la rotación correcta según la relación de aspecto
+    let rotation = 0;
+    if (photo.width > photo.height) {
+        // Foto en modo apaisado
+        rotation = photo.exif?.Orientation === 3 ? 270 : 90;
+    } else {
+        // Foto en modo vertical
+        rotation = 0;
+    }
+
     return (
         <View style={styles.container}>
             <Image
-                style={styles.previewContainer}
-                source={{ uri: 'data:image/jpg;base64,' + photo.base64 }}
+                style={[
+                    styles.previewContainer,
+                    {
+                        width: photo.width > photo.height ? screenHeight : screenWidth,
+                        height: photo.width > photo.height ? screenWidth : screenHeight,
+                        alignSelf: 'center',
+                        position: 'absolute',
+                        transform: [{ rotate: `${rotation}deg` }]
+                    }
+                ]}
+                source={{ uri: photo.uri }}
+                resizeMode="cover"
             />
 
             {/* Botón para cerrar (volver atrás) */}
@@ -48,20 +70,19 @@ const PhotoPreviewSection = ({
             </TouchableOpacity>
 
             <TouchableOpacity 
-    style={styles.uploadButton} 
-    onPress={handleUploadStory} 
-    disabled={isUploading}
->
-    {isUploading ? (
-        <Text style={styles.uploadButtonText}>{Math.round(uploadProgress)}%</Text>
-    ) : (
-        <>
-            <Text style={styles.uploadButtonText}> {t("storySlider.addStory")}</Text>
-            <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
-        </>
-    )}
-</TouchableOpacity>
-
+                style={styles.uploadButton} 
+                onPress={handleUploadStory} 
+                disabled={isUploading}
+            >
+                {isUploading ? (
+                    <Text style={styles.uploadButtonText}>{Math.round(uploadProgress)}%</Text>
+                ) : (
+                    <>
+                        <Text style={styles.uploadButtonText}>{t("storySlider.addStory")}</Text>
+                        <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
+                    </>
+                )}
+            </TouchableOpacity>
         </View>
     );
 };
@@ -69,11 +90,12 @@ const PhotoPreviewSection = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: 'black', 
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     previewContainer: {
-        ...StyleSheet.absoluteFillObject,
-        width: '100%',
-        height: '100%',
+        position: 'absolute',
     },
     closeButton: {
         position: 'absolute',
@@ -99,7 +121,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginRight: 15,
     },
-    
 });
 
 export default PhotoPreviewSection;

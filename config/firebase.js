@@ -20,6 +20,9 @@ const firebaseConfig = {
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
+if (!app.messaging) {
+  console.warn('irebase Cloud Messaging is not available on this device.');
+}
 
 // Inicializar Firebase Auth con AsyncStorage
 const auth = initializeAuth(app, {

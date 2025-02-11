@@ -33,7 +33,9 @@ async function registerForPushNotificationsAsync() {
       return;
     }
 
-    token = (await Notifications.getExpoPushTokenAsync()).data;
+    token = (await Notifications.getExpoPushTokenAsync({
+      projectId: Constants.expoConfig.extra.eas.projectId
+    })).data;
   } else {
     alert("Debes usar un dispositivo físico para recibir notificaciones push");
   }
