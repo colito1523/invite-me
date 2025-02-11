@@ -109,7 +109,8 @@ function AgeSelector({ onAgeChange, initialAge }) {
 
   return (
     <View style={styles.ageSelectorContainer}>
-      <View style={styles.selectedOverlayAge} />
+      {/* Se agrega pointerEvents="none" para que el overlay no bloquee toques */}
+      <View style={styles.selectedOverlayAge} pointerEvents="none" />
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -125,6 +126,7 @@ function AgeSelector({ onAgeChange, initialAge }) {
     </View>
   );
 }
+
 
 function GenderSelector({ onGenderChange, initialGender }) {
   const [selectedGender, setSelectedGender] = useState(initialGender);
@@ -151,20 +153,18 @@ function GenderSelector({ onGenderChange, initialGender }) {
   };
 
   const renderGenderItem = (gender, index) => {
-    // Check if the current gender is selected
     const isSelected = gender === selectedGender;
-
     return (
       <View
-        key={`${gender}-${index}`} // Unique key for each item
+        key={`${gender}-${index}`}
         style={[
-          styles.genderItem, // Base style for gender item
-          isSelected && styles.selectedGenderItem, // Additional style if selected
-          { flex: 1, justifyContent: "center", alignItems: "center" }, // Center the content
+          styles.genderItem,
+          isSelected && styles.selectedGenderItem,
+          { flex: 1, justifyContent: "center", alignItems: "center" },
         ]}
       >
         <Text style={[styles.genderText, isSelected && styles.selectedText]}>
-          {t(`signup.genders.${gender.toLowerCase()}`)} 
+          {t(`signup.genders.${gender.toLowerCase()}`)}
         </Text>
       </View>
     );
@@ -172,7 +172,8 @@ function GenderSelector({ onGenderChange, initialGender }) {
 
   return (
     <View style={styles.genderContainer}>
-      <View style={styles.selectedOverlay} />
+      {/* Se agrega pointerEvents="none" para que el overlay no bloquee toques */}
+      <View style={styles.selectedOverlay} pointerEvents="none" />
       <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
@@ -182,13 +183,12 @@ function GenderSelector({ onGenderChange, initialGender }) {
         contentContainerStyle={styles.genderScrollViewContent}
         nestedScrollEnabled={true}
       >
-        {genders.map((gender, index) =>
-          renderGenderItem(gender, index)
-        )}
+        {genders.map((gender, index) => renderGenderItem(gender, index))}
       </ScrollView>
     </View>
   );
 }
+
 
 export default function SignUp() {
   const { t } = useTranslation();

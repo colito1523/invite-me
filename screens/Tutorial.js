@@ -120,6 +120,7 @@ export default function Tutorial() {
             shouldPlay    // Inicia la reproducción automáticamente
             isLooping     // Reproduce en loop
             useNativeControls={false}
+            isMuted={true} // Mute the video
           />
           <Text style={[styles.overlayText, styles.topOverlayText, item.topTextStyle]}>
             {item.topText}
