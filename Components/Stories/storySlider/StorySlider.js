@@ -239,14 +239,14 @@ const renderStory = ({ item, index }) => {
         }}
       >
         {hasStories ? (
-          <Image
-            source={{
-              uri: `${item.profileImage}?alt=media&w=50&h=50&q=2` || "https://via.placeholder.com/50",
-            }}
-            style={[styles.storyImage]}
-            defaultSource={require("../../../assets/perfil.jpg")}
-            resizeMode="cover"
-          />
+         <Image
+         source={{
+           uri: `${item.profileImage}?alt=media&w=50&h=50&q=1` || "https://via.placeholder.com/50",
+         }}
+         style={styles.storyImage}
+         defaultSource={require("../../../assets/perfil.jpg")}
+         resizeMode="cover"
+       />
         ) : (
           <Image
             source={{ uri: "https://via.placeholder.com/100" }}
