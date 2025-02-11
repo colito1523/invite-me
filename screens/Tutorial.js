@@ -27,11 +27,11 @@ export default function Tutorial() {
   const slides = [
     { 
       id: '1', 
-      type: 'welcome',
-      text: t('tutorial.slides.1.text'),
-      description: t('tutorial.slides.1.description'),
-      image: require('../assets/Logo_Invite_Me.png'),
-      imageStyle: styles.imageStyle1
+      type: 'info',
+      video: require('../assets/tutorial/videos/0.mp4'),
+      videoStyle: styles.imageStyle2,
+      topTextStyle: { fontSize: 14 },      // Estilo específico para el texto superior
+      bottomTextStyle: { fontSize: 14 },   // Estilo específico para el texto inferior
     },
     { 
       id: '2', 
@@ -39,67 +39,67 @@ export default function Tutorial() {
       topText: t('tutorial.slides.2.topText'),
       video: require('../assets/tutorial/videos/1.mp4'),
       videoStyle: styles.imageStyle2,
-      textStyle: styles.textStyle2,
-      bottomText: t('tutorial.slides.2.bottomText')
+      topTextStyle: { fontSize: 14 },      // Estilo específico para el texto superior
+      bottomTextStyle: { fontSize: 14 },   // Estilo específico para el texto inferior
     },
     { 
       id: '3', 
       type: 'info',
-      topText: t('tutorial.slides.2.topText'),
+      topText: t('tutorial.slides.3.topText'),
       video: require('../assets/tutorial/videos/2.mp4'),
       videoStyle: styles.imageStyle2,
-      textStyle: styles.textStyle2,
-      bottomText: t('tutorial.slides.2.bottomText')
+      topTextStyle: { fontSize: 14 },
+      bottomTextStyle: { fontSize: 14 },
     },
     { 
       id: '4', 
       type: 'info',
-      topText: t('tutorial.slides.3.topText'),
+      topText: t('tutorial.slides.4.topText'),
       video: require('../assets/tutorial/videos/3.mp4'),
       videoStyle: styles.imageStyle3,
-      textStyle: styles.textStyle3,
-      bottomText: t('tutorial.slides.3.bottomText')
+      topTextStyle: { fontSize: 14 },
+      bottomTextStyle: { fontSize: 14 },
     },
     { 
       id: '5', 
       type: 'info',
-      topText: t('tutorial.slides.4.topText'),
+      topText: t('tutorial.slides.5.topText'),
       video: require('../assets/tutorial/videos/4.mp4'),
       videoStyle: styles.imageStyle4,
-      textStyle: styles.textStyle4,
-      bottomText: t('tutorial.slides.4.bottomText')
+      topTextStyle: { fontSize: 14 },
+      bottomTextStyle: { fontSize: 14 },
     },
     { 
       id: '6', 
       type: 'info',
-      topText: t('tutorial.slides.4.topText'),
+      topText: t('tutorial.slides.6.topText'),
       video: require('../assets/tutorial/videos/5.mp4'),
       videoStyle: styles.imageStyle4,
-      textStyle: styles.textStyle4,
-      bottomText: t('tutorial.slides.4.bottomText')
+      topTextStyle: { fontSize: 14 },
+      bottomTextStyle: { fontSize: 14 },
     },
     { 
       id: '7', 
       type: 'info',
-      topText: t('tutorial.slides.4.topText'),
+      topText: t('tutorial.slides.7.topText'),
       video: require('../assets/tutorial/videos/6.mp4'),
       videoStyle: styles.imageStyle4,
-      textStyle: styles.textStyle4,
-      bottomText: t('tutorial.slides.4.bottomText')
+      topTextStyle: { fontSize: 14 },
+      bottomTextStyle: { fontSize: 14 },
     },
     { 
       id: '8', 
       type: 'info',
-      topText: t('tutorial.slides.4.topText'),
+      topText: t('tutorial.slides.8.topText'),
       video: require('../assets/tutorial/videos/7.mp4'),
       videoStyle: styles.imageStyle4,
-      textStyle: styles.textStyle4,
-      bottomText: t('tutorial.slides.4.bottomText')
+      topTextStyle: { fontSize: 14 },
+      bottomTextStyle: { fontSize: 14 },
     },
   ];
 
-  const renderItem = ({ item }) => (
-    <View style={[styles.content, { width }]}>
+  const renderItem = ({ item, index }) => (
+    <View style={[styles.content, { width, backgroundColor: index === 0 ? 'white' : 'black' }]}>
       {item.type === 'welcome' ? (
         <>
           <Image
@@ -111,7 +111,7 @@ export default function Tutorial() {
           <Text style={styles.descriptionText}>{item.description}</Text>
         </>
       ) : (
-        // Para slides con video: se crea un contenedor para posicionar los textos encima del video.
+        // Contenedor para slides con video, permitiendo posicionar los textos en la parte superior e inferior.
         <View style={styles.videoContainer}>
           <Video
             source={item.video}
@@ -121,11 +121,11 @@ export default function Tutorial() {
             isLooping     // Reproduce en loop
             useNativeControls={false}
           />
-          <Text style={[styles.overlayText, styles.topOverlayText, item.textStyle]}>
+          <Text style={[styles.overlayText, styles.topOverlayText, item.topTextStyle]}>
             {item.topText}
           </Text>
           {item.bottomText && (
-            <Text style={[styles.overlayText, styles.bottomOverlayText, item.textStyle]}>
+            <Text style={[styles.overlayText, styles.bottomOverlayText, item.bottomTextStyle]}>
               {item.bottomText}
             </Text>
           )}
@@ -179,7 +179,6 @@ export default function Tutorial() {
       <View style={styles.skipContainer}>
         <TouchableOpacity style={styles.skipButton} onPress={handleNavigation}>
           <Text style={styles.skipText}>{t('tutorial.skip')}</Text>
-          <AntDesign name="close" size={24} color="#4d4d4d" />
         </TouchableOpacity>
       </View>
       <FlatList
@@ -206,7 +205,8 @@ export default function Tutorial() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'b',
+    // Fondo por defecto en el contenedor; se verán los fondos de cada slide
+    backgroundColor: 'black',
   },
   skipContainer: {
     position: 'absolute',
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   skipText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#4d4d4d',
+    color: 'white',
     marginRight: 5,
   },
   content: {
@@ -260,16 +260,15 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 10,
     fontWeight: 'bold',
-    // Sombra para mejorar la legibilidad sobre el video
     textShadowColor: '#000',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   topOverlayText: {
-    top: 10, // Ajusta el espacio desde arriba según necesites
+    top: 20, // Posiciona el texto superior
   },
   bottomOverlayText: {
-    bottom: 10, // Ajusta el espacio desde abajo según necesites
+    bottom: 10, // Posiciona el texto inferior
   },
   paginationContainer: {
     flexDirection: 'row',
@@ -289,7 +288,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 50,
     right: 20,
-    backgroundColor: 'black',
+    backgroundColor: 'gray',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -300,7 +299,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imageStyle1: {
-    // Personaliza el estilo de la imagen de bienvenida si lo requieres
+    width: 300,
+    height: 300,
   },
   imageStyle2: {
     top: 40,
@@ -322,17 +322,5 @@ const styles = StyleSheet.create({
     height: 647,
     marginBottom: 20,
     borderRadius: 100,
-  },
-  textStyle2: {
-    top: 60,
-    fontSize: 14,
-  },
-  textStyle3: {
-    top: 40,
-    fontSize: 14,
-  },
-  textStyle4: {
-    top: 50,
-    fontSize: 14,
   },
 });

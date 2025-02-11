@@ -815,30 +815,24 @@
         "description": "Swipe through to discover the app's features and learn how to make the most of your experience."
       },
       "2": {
-        "topText": "Home is your go-to spot for exploring your favourite places and the hottest events in town.",
-        "bottomText": "Select where you'll be so your friends can easily see what you're up to as you dive into the city's coolest happenings!"
+        "topText": "Explore what's happening in your city! See upcoming events, check out who's attending, and join in. Want to bring friends along? Invite them with just a tap!"
       },
       "3": {
-        "topText": "By selecting the events you plan to attend on Home, your profile will showcase where you're headed, letting others join in on the fun and see your exciting plans!",
-        "bottomText": "It's also all about your favorite spots-the places you love and what matches your vibe perfectly. Plus, it captures who you are, celebrating all the unique details that make you, you."
-      },
+        "topText": "A profile that speaks for itself! Pick your best three photos, highlight your hobbies, and share what makes you, you. It's all about keeping it real."},
       "4": {
-        "topText": "If you prefer, you can set your account to private. Others who are not your friend will view it like this.",
-        "bottomText": "This also means that only your friends will be able to see where you're going, both here and in Home."
+        "topText": "Enjoy the scene, your way! Your plans remain private, and only your friends can see where you're going. Everyone else? They only get a glimpse!"
       },
       "5": {
-        "topText": "In the Chat section, share your mood and see how others are feeling! Respond or like their vibes and connect with friends in a fun way."
+        "topText": "Your night, your story! Post highlights from your favorite events, restaurants, and parties. Share moments with friends and relive the best times!"
       },
       "6": {
-        "topText": "In Stories, you can see who's sharing their moments, and if you want to keep your favorites close, just fixate on someone! They'll always appear at the top for easy access."
+        "topText": "Your social calendar, made easy! Get invites from friends, track your plans, and keep up with all the best events in one place."
       },
       "7": {
-        "topText": "In the menu, you can find exactly what you're in the mood for whether it's dining out, grabbing a drink, or hitting up a club. You can also create your own events and explore much more.",
-        "bottomText": "Plus, you can search in other cities to see what's happening elsewhere. Whether you're planning a trip or just curious about what's going on, you can check out events in advance and see who you might meet there."
+        "topText": "Stay connected! Chat with friends, make plans, and share your mood—whether you're up for a big night out or a chill evening."
       },
       "8": {
-        "topText": "With 'Create My Own Event', you have the freedom to host your own gatherings, whether it's a private party or a special celebration.",
-        "bottomText": "You can customize the event details and even make it a private affair by inviting only the people you want to share the experience with. It's your event, your way-designed to bring the right people together."
+        "topText": "Take control of your social scene! Create events, invite your people, and curate the perfect experience. It's all about the right crowd."
       }
     }
   }

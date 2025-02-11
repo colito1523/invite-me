@@ -798,36 +798,30 @@
     "understood": "Entendido",
     "slides": {
       "1": {
-        "text": "¡Estás oficialmente invitado, Bienvenido!",
-        "description": "Desliza para descubrir las características de la aplicación y aprender cómo aprovechar al máximo tu experiencia."
+        "text": "¡Estás invitado oficialmente, bienvenido!",
+        "description": "Desliza para descubrir las funciones de la aplicación y aprende a sacarle el máximo partido a tu experiencia."
       },
       "2": {
-        "topText": "Inicio es tu lugar ideal para explorar tus lugares favoritos y los eventos más populares de la ciudad.",
-        "bottomText": "¡Selecciona dónde estarás para que tus amigos puedan ver fácilmente lo que estás haciendo mientras te sumerges en los acontecimientos más geniales de la ciudad!"
+        "topText": "¡Mira lo mejor que ocurre en tu ciudad, descubre los mejores planes, averigua a dónde van los demás e invita a tus amigos!"
       },
       "3": {
-        "topText": "Al seleccionar los eventos a los que planeas asistir en Inicio, tu perfil mostrará a dónde te diriges, ¡permitiendo que otros se unan a la diversión y vean tus planes emocionantes!",
-        "bottomText": "También se trata de tus lugares favoritos: los lugares que amas y que coinciden perfectamente con tu vibra. Además, captura quién eres, celebrando todos los detalles únicos que te hacen ser tú."
+        "topText": "¡Tu identidad, en tres fotografías! Elige las que muestren tu estilo, habla sobre tus intereses y lo que te define. Aquí, la autenticidad es lo que más importa."
       },
       "4": {
-        "topText": "Si lo prefieres, puedes configurar tu cuenta como privada. Los que no sean tus amigos la verán así.",
-        "bottomText": "Esto también significa que solo tus amigos podrán ver a dónde vas, tanto aquí como en Inicio."
+        "topText": "Al hacer tu perfil privado, solo tus amigos podrán ver dónde estarás."
       },
       "5": {
-        "topText": "En la sección de Chat, ¡comparte tu estado de ánimo y ve cómo se sienten los demás! Responde o da me gusta a sus vibraciones y conéctate con amigos de una manera divertida."
+        "topText": "¡Tu perfil, tu historia! Comparte tus mejores momentos y revive los mejores recuerdos!"
       },
       "6": {
-        "topText": "En Historias, puedes ver quién está compartiendo sus momentos, y si quieres mantener a tus favoritos cerca, ¡solo fíjate en alguien! Siempre aparecerán en la parte superior para un fácil acceso."
+        "topText": "¡Tu calendario social, simplificado! Recibe invitaciones de tus amigos, sigue los planes y mantente al tanto de los mejores eventos."
       },
       "7": {
-        "topText": "En el menú, puedes encontrar exactamente lo que te apetece, ya sea cenar fuera, tomar una copa o ir a un club. También puedes crear tus propios eventos y explorar mucho más.",
-        "bottomText": "Además, puedes buscar en otras ciudades para ver qué está pasando en otros lugares. Ya sea que estés planeando un viaje o simplemente tengas curiosidad sobre lo que está sucediendo, puedes consultar eventos con anticipación y ver a quién podrías conocer allí."
+        "topText": "¡Mantente conectado! Habla con tus amigos, organiza planes y comparte tu estado de ánimo, ya sea para una noche animada o para una noche tranquila."
       },
       "8": {
-        "topText": "Con 'Crear Mi Propio Evento', tienes la libertad de organizar tus propias reuniones, ya sea una fiesta privada o una celebración especial.",
-        "bottomText": "Puedes personalizar los detalles del evento e incluso hacerlo privado invitando solo a las personas con las que quieres compartir la experiencia. Es tu evento, a tu manera, diseñado para reunir a las personas adecuadas."
+        "topText": "¡Toma el control! Crea eventos, invita a las personas que más combinan contigo y crea la experiencia ideal."
       }
     }
   }
-
 }

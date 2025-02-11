@@ -85,7 +85,7 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    availableDates: ["12 Feb"], // Fechas donde unicamente se vera
+    // availableDates: ["12 Feb"], // Fechas donde unicamente se vera
   },
   {
     path: require("../../assets/Lisboa/corner2.jpg"),
@@ -390,28 +390,6 @@ const boxInfo = [
     coordinates: {
       latitude: 38.706027,
       longitude: -9.1499039,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
-    path: require("../../assets/Lisboa/nav.jpg"),
-    title: "NAV",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "Cerrado",
-      Martes: "Cerrado",
-      Miércoles: "Cerrado",
-      Jueves: "Cerrado",
-      Viernes: "8:00 PM - 12:00 AM",
-      Sábado: "10:00 PM - 12:00 AM",
-      Domingo: "12:00 AM - 4:00 AM",
-    },
-    number: "-",
-    coordinates: {
-      latitude: 38.7411311,
-      longitude: -9.145745,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -742,28 +720,6 @@ const boxInfo = [
     coordinates: {
       latitude: 38.6994781,
       longitude: -9.1774925,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
-    path: require("../../assets/Lisboa/Go A Lisboa Rooftop.jpg"),
-    title: "Go A Lisboa Rooftop",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-",
-    },
-    number: "21 594 1117",
-    coordinates: {
-      latitude: 38.7065681,
-      longitude: -9.1723879,
     },
     country: "Portugal",
     city: "Lisboa",

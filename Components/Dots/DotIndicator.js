@@ -6,18 +6,14 @@ import {
   Modal,
   TouchableOpacity,
   FlatList,
-  Alert,
   Dimensions,
   TextInput,
-  TouchableWithoutFeedback
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   collection,
   getDocs,
   doc,
-  query,
-  where,
   getDoc,
 } from "firebase/firestore";
 import { database, auth } from "../../config/firebase";
@@ -30,19 +26,41 @@ import { handleUserPress } from "./utils";
 
 const { width } = Dimensions.get("window");
 
-const DotIndicator = ({ profileImages, attendeesList }) => {
+const DotIndicator = ({ attendeesList }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredAttendees, setFilteredAttendees] = useState(attendeesList);
+  const [friendsList, setFriendsList] = useState([]);
+  const [filteredAttendees, setFilteredAttendees] = useState([]);
   const navigation = useNavigation();
   const [isNightMode, setIsNightMode] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
-  const [filteredImages, setFilteredImages] = useState(profileImages);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
 
+  // Obtener la lista de amigos
+  useEffect(() => {
+    const fetchFriendsList = async () => {
+      try {
+        if (!auth.currentUser) return;
+        const friendsRef = collection(
+          database,
+          "users",
+          auth.currentUser.uid,
+          "friends"
+        );
+        const friendsSnapshot = await getDocs(friendsRef);
+        const friends = friendsSnapshot.docs.map((doc) => doc.data().friendId);
+        setFriendsList(friends);
+      } catch (error) {
+        console.error(t("dotIndicator.errorFetchingFriends"), error);
+      }
+    };
+
+    fetchFriendsList();
+  }, []);
+
+  // Obtener la lista de usuarios bloqueados
   useEffect(() => {
     const fetchBlockedUsers = async () => {
       try {
@@ -57,7 +75,6 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 
     fetchBlockedUsers();
   }, []);
-  
 
   const navigateToUserProfile = async (uid) => {
     if (!uid) {
@@ -94,140 +111,108 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     }
   };
 
-  const checkStories = async () => {
-    try {
-      const currentUserRef = doc(database, "users", auth.currentUser.uid);
-      const currentUserDoc = await getDoc(currentUserRef);
-      const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
-
-      const attendeesWithStories = attendeesList.map((attendee) => ({
-        ...attendee,
-        hasStories: false,
-        userStories: [],
-      }));
-
-      for (const attendee of attendeesWithStories) {
-        // Ensure attendee is defined
-        if (!attendee || attendee.uid === auth.currentUser.uid || hideStoriesFrom.includes(attendee.uid)) {
-          continue;
-        }
-
-        const userDocRef = doc(database, "users", attendee.uid);
-        const userDoc = await getDoc(userDocRef);
-        const userData = userDoc.exists() ? userDoc.data() : null;
-
-        if (!userData) continue;
-
-        const isPrivate = userData?.isPrivate || false;
-
-        // Verificar si somos amigos
-        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-        const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
-        const friendSnapshot = await getDocs(friendQuery);
-        const isFriend = !friendSnapshot.empty;
-
-        // Saltar si es privado y no somos amigos
-        if (isPrivate && !isFriend) {
-          continue;
-        }
-
-        // Cargar historias solo si el perfil es público o si somos amigos
-        const storiesRef = collection(userDocRef, "stories");
-        const storiesSnapshot = await getDocs(storiesRef);
-
-        const now = new Date();
-        const userStories = storiesSnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate(),
-            expiresAt: doc.data().expiresAt?.toDate(),
-          }))
-          .filter((story) => story.expiresAt > now);
-
-        if (userStories.length > 0) {
-          attendee.hasStories = true;
-          attendee.userStories = userStories;
-        }
+  // Filtrar asistentes
+  useEffect(() => {
+    const updateFilteredAttendees = async () => {
+      if (!attendeesList || attendeesList.length === 0) {
+        setFilteredAttendees([]);
+        return;
       }
 
-      setFilteredAttendees(attendeesWithStories);
-    } catch (error) {
-      console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
-    }
-  };
+      const filtered = await Promise.all(
+        attendeesList.map(async (attendee) => {
+          if (attendee.uid === auth.currentUser.uid) return attendee;
+          if (blockedUsers.includes(attendee.uid)) return null;
 
-  useEffect(() => {
-    const fetchCompleteUserData = async () => {
-      try {
-        setIsLoading(true); // Bloquear la renderización hasta que los datos estén listos
-  
-        // 1️⃣ Obtener la lista de amigos del usuario actual
-        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-        const friendsSnapshot = await getDocs(friendsRef);
-        const friendIds = friendsSnapshot.docs.map(doc => doc.data().friendId); // Lista de IDs de amigos
-  
-        const usersWithFullData = await Promise.all(
-          attendeesList.map(async (attendee, index) => {
-            const userDoc = await getDoc(doc(database, "users", attendee.uid));
-            const userData = userDoc.exists() ? userDoc.data() : {};
-  
-            // 2️⃣ Excluir usuarios privados que no sean amigos
-            const isFriend = friendIds.includes(attendee.uid);
-            if (userData.isPrivate && attendee.uid !== auth.currentUser.uid && !isFriend) {
-              return null;
-            }
-  
-            return {
-              ...attendee,
-              username: userData.username || "Desconocido",
-              profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-              hasStories: attendee.hasStories,
-              userStories: attendee.userStories,
-              index, // Guarda el índice para filtrar imágenes
-            };
-          })
-        );
-  
-        // 3️⃣ Filtrar los usuarios privados antes de actualizar los estados, pero mantener el usuario actual y amigos
-        const filteredUsers = usersWithFullData.filter(user => user !== null);
-  
-        setFilteredAttendees(filteredUsers);
-  
-        // 4️⃣ Filtrar imágenes para excluir los usuarios privados que no sean amigos
-        const filteredImagesList = profileImages.filter((_, index) =>
-          filteredUsers.some(user => user.index === index)
-        );
-  
-        setFilteredImages(filteredImagesList);
-  
-      } catch (error) {
-        console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
-      } finally {
-        setIsLoading(false); // Indicar que los datos están listos
-      }
-    };
-  
-    fetchCompleteUserData();
-  }, [attendeesList, profileImages]);
-  
-  
-  
-  
-  
-  
+          const userDocRef = doc(database, "users", attendee.uid);
+          const userDoc = await getDoc(userDocRef);
+          const userData = userDoc.exists() ? userDoc.data() : null;
+          if (!userData) return null;
 
-  useEffect(() => {
-    const updateFilteredImages = () => {
-      const filtered = profileImages.filter(
-        (_, index) => !blockedUsers.includes(attendeesList[index]?.uid) // Filtra imágenes asociadas a usuarios bloqueados
+          const isPrivate = userData.isPrivate || false;
+          const isFriend = friendsList.includes(attendee.uid);
+
+          if (isPrivate && !isFriend) return null;
+
+          return {
+            ...attendee,
+            isPrivate,
+            isFriend,
+          };
+        })
       );
-      setFilteredImages(filtered);
+
+      const finalFiltered = filtered.filter(Boolean);
+      setFilteredAttendees(finalFiltered);
     };
 
-    updateFilteredImages();
-  }, [profileImages, blockedUsers, attendeesList]);
+    updateFilteredAttendees();
+  }, [attendeesList, blockedUsers, friendsList]);
 
+  // Verificar historias
+  useEffect(() => {
+    const checkStories = async () => {
+      try {
+        const currentUserRef = doc(database, "users", auth.currentUser.uid);
+        const currentUserDoc = await getDoc(currentUserRef);
+        const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
+
+        const attendeesWithStories = filteredAttendees.map((attendee) => ({
+          ...attendee,
+          hasStories: false,
+          userStories: [],
+        }));
+
+        for (const attendee of attendeesWithStories) {
+          if (
+            !attendee ||
+            attendee.uid === auth.currentUser.uid ||
+            hideStoriesFrom.includes(attendee.uid)
+          ) {
+            continue;
+          }
+
+          const userDocRef = doc(database, "users", attendee.uid);
+          const userDoc = await getDoc(userDocRef);
+          const userData = userDoc.exists() ? userDoc.data() : null;
+          if (!userData) continue;
+
+          const isPrivate = userData?.isPrivate || false;
+          const isFriend = friendsList.includes(attendee.uid);
+
+          if (isPrivate && !isFriend) continue;
+
+          const storiesRef = collection(userDocRef, "stories");
+          const storiesSnapshot = await getDocs(storiesRef);
+
+          const now = new Date();
+          const userStories = storiesSnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+              createdAt: doc.data().createdAt?.toDate(),
+              expiresAt: doc.data().expiresAt?.toDate(),
+            }))
+            .filter((story) => story.expiresAt > now);
+
+          if (userStories.length > 0) {
+            attendee.hasStories = true;
+            attendee.userStories = userStories;
+          }
+        }
+
+        setFilteredAttendees(attendeesWithStories);
+      } catch (error) {
+        console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
+      }
+    };
+
+    if (filteredAttendees.length > 0) {
+      checkStories();
+    }
+  }, [filteredAttendees]);
+
+  // Modo nocturno
   useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
@@ -239,164 +224,141 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredAttendees(
-        attendeesList.filter(
-          (attendee) => !blockedUsers.includes(attendee.uid) // Excluir usuarios bloqueados
-        )
-      );
-    } else {
-      const filtered = attendeesList.filter(
-        (attendee) =>
-          !blockedUsers.includes(attendee.uid) && // Excluir usuarios bloqueados
-          attendee.username.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredAttendees(filtered);
-    }
-  }, [searchTerm, attendeesList, blockedUsers]);
-
-  const handlePresss = () => {
-    setModalVisible(true);
+  const handlePress = async (uid) => {
+    await handleUserPress({
+      uid,
+      navigation,
+      blockedUsers,
+      t,
+      setSelectedStories,
+      setIsModalVisible,
+    });
   };
 
-   const handlePress = async (uid) => {
-      await handleUserPress({
-        uid,
-        navigation,
-        blockedUsers,
-        t,
-        setSelectedStories,
-        setIsModalVisible,
-      });
-    };
-
- 
-
   const currentStyles = isNightMode ? nightStyles : dayStyles;
-
-  // Evitar que la UI se renderice antes de que los datos estén listos
-if (isLoading) { 
-  return <View style={{ height: 0 }} />; // Espaciador para evitar desajustes en la UI
-}
 
   return (
     <View style={currentStyles.container}>
       <TouchableOpacity
-        onPress={handlePresss}
+        onPress={() => setModalVisible(true)}
         style={currentStyles.imageContainer}
       >
-        {filteredImages.slice(0, 6).map((imageUrl, index) => (
+        {filteredAttendees.slice(0, 6).map((attendee, index) => (
           <Image
-            key={index}
-            source={{ uri: imageUrl }}
+            key={attendee.uid}
+            source={{ uri: attendee.profileImage }}
             style={[
               currentStyles.profileImage,
               { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
             ]}
-            cachePolicy="memory-disk" // Opcional: mejora la carga de imágenes
+            cachePolicy="memory-disk"
           />
         ))}
-        {filteredImages.length > 6 && (
+        {filteredAttendees.length > 6 && (
           <View style={currentStyles.moreContainer}>
             <Text style={currentStyles.moreText}>
-            +{filteredImages.length - 6}
+              +{filteredAttendees.length - 6}
             </Text>
           </View>
         )}
       </TouchableOpacity>
 
-<Modal visible={modalVisible} transparent={true} animationType="fade">
-  <View style={{ flex: 1 }}>
-    <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-      <View style={currentStyles.modalOverlay} />
-    </TouchableWithoutFeedback>
-
-   
-    <View style={currentStyles.modalContainer}>
-      <LinearGradient
-        colors={
-          isNightMode
-            ? ["#1A1A1A", "#000000"]
-            : ["rgba(0, 0, 0, 0.8)", "rgba(0, 0, 0, 0.8)"]
-        }
-        style={currentStyles.modalContent}
-      >
-        <View style={currentStyles.searchContainer}>
-          <Ionicons
-            name="search"
-            size={20}
-            color="gray"
-            style={currentStyles.searchIcon}
-          />
-          <TextInput
-            style={[
-              currentStyles.searchInput,
-              { color: isNightMode ? "#fff" : "gray" },
-            ]}
-            placeholder={t("dotIndicator.searchPlaceholder")}
-            placeholderTextColor="gray"
-            value={searchTerm}
-            onChangeText={setSearchTerm}
-          />
-        </View>
-
-        <FlatList
-          data={filteredAttendees}
-          keyExtractor={(item) => item.uid || item.username}
-          renderItem={({ item }) => (
-            <View style={currentStyles.attendeeItem}>
-              <TouchableOpacity
-                onPress={() => handlePress(item.uid, false)}
-                style={[
-                  currentStyles.attendeeImageContainer,
-                  { marginRight: 20 },
-                ]}
-              >
-                <View
+      <Modal visible={modalVisible} transparent={true} animationType="fade">
+        <TouchableOpacity
+          style={currentStyles.modalOverlay}
+          onPress={() => setModalVisible(false)}
+        >
+          <TouchableOpacity activeOpacity={1}>
+            <LinearGradient
+              colors={
+                isNightMode
+                  ? ["#1A1A1A", "#000000"]
+                  : ["rgba(0, 0, 0, 0.8)", "rgba(0, 0, 0, 0.8)"]
+              }
+              style={currentStyles.modalContent}
+            >
+              <View style={currentStyles.searchContainer}>
+                <Ionicons
+                  name="search"
+                  size={20}
+                  color="gray"
+                  style={currentStyles.searchIcon}
+                />
+                <TextInput
                   style={[
-                    currentStyles.unseenStoryCircle,
-                    item.hasStories && { borderColor: "white" },
+                    currentStyles.searchInput,
+                    { color: isNightMode ? "#fff" : "gray" },
                   ]}
-                >
-                  <Image
-                    source={{
-                      uri:
-                        item.profileImage ||
-                        "https://via.placeholder.com/150",
-                    }}
-                    style={currentStyles.attendeeImage}
-                    cachePolicy="memory-disk"
-                  />
-                </View>
-              </TouchableOpacity>
+                  placeholder={t("dotIndicator.searchPlaceholder")}
+                  placeholderTextColor="gray"
+                  value={searchTerm}
+                  onChangeText={setSearchTerm}
+                />
+              </View>
+              <FlatList
+                data={filteredAttendees}
+                keyExtractor={(item) => item.uid}
+                renderItem={({ item }) => (
+                  <View style={currentStyles.attendeeItem}>
+                    <TouchableOpacity
+                      onPress={() => handlePress(item.uid)}
+                      style={[
+                        currentStyles.attendeeImageContainer,
+                        { marginRight: 20 },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          currentStyles.unseenStoryCircle,
+                          item.hasStories && {
+                            borderColor: "white",
+                          },
+                        ]}
+                      >
+                        <Image
+                          source={{
+                            uri:
+                              item.profileImage ||
+                              "https://via.placeholder.com/150",
+                          }}
+                          style={currentStyles.attendeeImage}
+                          cachePolicy="memory-disk"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => navigateToUserProfile(item.uid)}
+                    >
+                      <Text style={currentStyles.attendeeName}>
+                        {item.username}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+            </LinearGradient>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
-              <TouchableOpacity onPress={() => navigateToUserProfile(item.uid)}>
-                <Text style={currentStyles.attendeeName}>{item.username}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        />
-
-        {isModalVisible && (
-          <Modal visible={isModalVisible} animationType="slide" transparent={false}>
-            <StoryViewer
-              stories={selectedStories}
-              initialIndex={0}
-              onClose={() => {
-                setIsModalVisible(false);
-                setModalVisible(false);
-              }}
-              unseenStories={{}}
-              navigation={navigation}
-            />
-          </Modal>
-        )}
-      </LinearGradient>
-    </View>
-  </View>
-</Modal>
-
+      {isModalVisible && (
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={false}
+        >
+          <StoryViewer
+            stories={selectedStories}
+            initialIndex={0}
+            onClose={() => {
+              setIsModalVisible(false);
+              setModalVisible(false);
+            }}
+            unseenStories={{}}
+            navigation={navigation}
+          />
+        </Modal>
+      )}
     </View>
   );
 };
@@ -428,20 +390,13 @@ const baseStyles = {
     fontWeight: "bold",
   },
   modalOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: width * 0.8, // o el ancho que prefieras
+    width: width * 0.8,
     maxHeight: 400,
     borderRadius: 20,
     padding: 20,
@@ -456,7 +411,7 @@ const baseStyles = {
     height: 46,
     borderRadius: 23, // Mantén el radio de la imagen
   },
-  
+
   attendeeName: {
     fontSize: 18,
   },

@@ -782,18 +782,28 @@
     "understood": "Entendido",
     "slides": {
       "1": {
-        "text": "Bem-vindo(a)! Estás oficialmente invited!",
-        "description": "Desliza para descobrir como utilizar a aplicação e aproveitar ao máximo a tua experiência."
+        "text": "You're officially invited, Welcome!",
+        "description": "Swipe through to discover the app's features and learn how to make the most of your experience."
       },
       "2": {
-        "topText": "A Home serve para explorares os melhores lugares da cidade, aderir a eventos e ver quem vai também! Ao selecionares onde vais estar, o teu perfil vai mostrar os teus planos, para que os outros possam vê-los e se juntarem a ti!."
+        "topText": "Vê o melhor que se passa na tua cidade, descobre os  melhores planos, sabe onde vão os outros e convida os teus amigos!"
       },
       "3": {
-        "topText": "Se preferires, podes tornar o teu perfil privado. Assim, só os teus amigos podem ver onde vais estar."
-      },
+        "topText": "A tua identidade, em três fotografias! Escolhe as que mostram o teu estilo, fala sobre os teus interesses e o que te define. Aqui, a autenticidade é o que mais importa."},
       "4": {
-        "topText": "No menu, podes criar o teu evento privado, personalizar os detalhes e convidar quem quiseres. O objetivo é reunir as pessoas certas!",
-        "bottomText": "Também podes explorar outras cidades, descobrir os espaços que a Invite Me sugere e ver quem vai a cada um. Assim, se tiveres a planear uma viagem, saberás onde ir e quem podes vir a encontrar."
+        "topText": "Ao tornares o teu perfil privado, só os teus amigos conseguem ver onde vais estar."
+      },
+      "5": {
+        "topText": "A teu perfil, a tua história! Partilha os teus melhores momentos e revive as melhores memórias!"
+      },
+      "6": {
+        "topText": "O teu calendário social, simplificado! Recebe convites dos teus amigos, acompanha os planos e mantém-te a par dos melhores eventos."
+      },
+      "7": {
+        "topText": "Mantém-te conectado! Conversa com os amigos, organiza planos e partilha o teu estado de espírito—seja para uma noite animada ou uma noite tranquila."
+      },
+      "8": {
+        "topText": "Assume o controlo! Cria eventos, convida as pessoas que mais combinam contigo e cria a experiência ideal."
       }
     }
   }
