@@ -14,7 +14,7 @@ import {
   Image,
   BackHandler,
 } from "react-native";
-import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { auth, database, storage } from "../../../config/firebase";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import styles from "./StoryViewStyles";
@@ -47,6 +47,8 @@ import {
   handleCloseViewersModal,
   fetchBlockedUsers,
   fetchPinnedViewers,
+  useStoryProgress,
+  calculateHoursAgo 
 } from "./storyUtils"; // Fix import path
 
 const { width, height } = Dimensions.get("window"); // Add this line
@@ -107,7 +109,6 @@ export function StoryViewer({
     );
     return unseenIndex !== -1 ? unseenIndex : 0;
   });
-  const [progress, setProgress] = useState(0);
   const [localStories, setLocalStories] = useState(() => [...stories]);
   const [localUnseenStories, setLocalUnseenStories] = useState(unseenStories);
   const [message, setMessage] = useState("");
@@ -126,6 +127,7 @@ export function StoryViewer({
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [isHideStoryModalVisible, setIsHideStoryModalVisible] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [selectedViewer, setSelectedViewer] = useState(null); // Para almacenar el espectador seleccionado
   const [imageDimensions, setImageDimensions] = useState({
     width: "100%",
@@ -174,30 +176,25 @@ export function StoryViewer({
     });
   };
 
-  useEffect(() => {
-    let timer;
-    if (!isPaused && !isKeyboardVisible && !isComplaintsVisible) {
-      timer = setTimeout(() => {
-        if (progress >= 1) {
-          handleNext({
-            stories,
-            currentIndex,
-            setCurrentIndex,
-            storyIndex,
-            setStoryIndex,
-            setProgress,
-            onClose,
-            localUnseenStories,
-            setLocalUnseenStories,
-          });
-        } else {
-          setProgress((prev) => prev + 0.02);
-        }
-      }, 50);
-    }
-
-    return () => clearTimeout(timer);
-  }, [progress, isPaused, isKeyboardVisible, isComplaintsVisible, stories, currentIndex, storyIndex]);
+  useStoryProgress({
+    isPaused,
+    isKeyboardVisible,
+    isComplaintsVisible,
+    progress,
+    setProgress,
+    onComplete: () =>
+      handleNext({
+        stories,
+        currentIndex,
+        setCurrentIndex,
+        storyIndex,
+        setStoryIndex,
+        setProgress,
+        onClose,
+        localUnseenStories,
+        setLocalUnseenStories,
+      }),
+  });
 
   useEffect(() => {
     if (isOptionsModalVisible) {
@@ -342,14 +339,7 @@ export function StoryViewer({
     currentIndex === stories.length - 1 &&
     storyIndex === stories[currentIndex]?.userStories.length - 1;
 
-  const hoursAgo = currentStory?.createdAt
-    ? Math.floor(
-        (Date.now() -
-          (currentStory.createdAt.toDate?.() ||
-            new Date(currentStory.createdAt))) /
-          (1000 * 60 * 60),
-      )
-    : 0;
+    const hoursAgo = calculateHoursAgo(currentStory?.createdAt);
 
   const renderViewerItem = ({ item }) => (
     <ViewerItem

@@ -6,6 +6,7 @@ import { TouchableOpacity, View, Image, StyleSheet, Text, Dimensions } from 'rea
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from "react-i18next";
 import { uploadStory } from '../Stories/storySlider/storySliderUtils'; 
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -25,14 +26,26 @@ const PhotoPreviewSection = ({
 
     const handleUploadStory = async () => {
         setIsUploading(true);
-        await uploadStory(
-            photo.uri,
-            () => {}, 
-            setIsUploading,
-            setUploadProgress,
-            setStories,
-            setUnseenStories
-        );
+        try {
+            // Comprime la imagen reduciendo la calidad (por ejemplo, a 50%)
+            const manipulatedResult = await ImageManipulator.manipulateAsync(
+                photo.uri,
+                [],
+                { compress: 0.01, format: ImageManipulator.SaveFormat.JPEG }
+            );
+            
+            // Sube la imagen comprimida
+            await uploadStory(
+                manipulatedResult.uri,
+                () => {}, 
+                setIsUploading,
+                setUploadProgress,
+                setStories,
+                setUnseenStories
+            );
+        } catch (error) {
+            console.error('Error al comprimir la imagen:', error);
+        }
         setIsUploading(false);
         navigation.goBack();
     };

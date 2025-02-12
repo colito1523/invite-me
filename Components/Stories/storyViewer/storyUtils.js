@@ -12,6 +12,7 @@ import {
   where,
   setDoc,
 } from "firebase/firestore";
+import { useEffect } from "react";
 import { ref, deleteObject } from "firebase/storage";
 import { auth, database, storage } from "../../../config/firebase";
 
@@ -986,3 +987,62 @@ export const fetchBlockedUsers = async ({
     console.error("Error fetching blocked users:", error);
   }
 };
+
+export const useStoryProgress = ({
+  isPaused,
+  isKeyboardVisible,
+  isComplaintsVisible,
+  progress,
+  setProgress,
+  onComplete, // función a llamar cuando progress llega a 1
+  interval = 16,       // 16 ms por actualización (~60 FPS)
+  increment = 1 / 250, // 250 actualizaciones para 4 segundos (~0.004 por actualización)
+}) => {
+  useEffect(() => {
+    let timer;
+    if (!isPaused && !isKeyboardVisible && !isComplaintsVisible) {
+      timer = setTimeout(() => {
+        if (progress >= 1) {
+          onComplete();
+        } else {
+          setProgress((prev) => prev + increment);
+        }
+      }, interval);
+    }
+
+    return () => clearTimeout(timer);
+  }, [
+    progress,
+    isPaused,
+    isKeyboardVisible,
+    isComplaintsVisible,
+    setProgress,
+    onComplete,
+    interval,
+    increment,
+  ]);
+};
+
+
+export function calculateHoursAgo(createdAt) {
+  if (!createdAt) return 0;
+  
+  // Si el timestamp de Firestore tiene el método toMillis, úsalo
+  let timeInMs;
+  if (typeof createdAt.toMillis === "function") {
+    timeInMs = createdAt.toMillis();
+  } else if (typeof createdAt.toDate === "function") {
+    timeInMs = createdAt.toDate().getTime();
+  } else {
+    timeInMs = new Date(createdAt).getTime();
+  }
+  
+  if (isNaN(timeInMs)) return 0;
+  
+  const diffInMs = Date.now() - timeInMs;
+  return Math.floor(diffInMs / (1000 * 60 * 60));
+}
+
+
+
+
