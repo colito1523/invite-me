@@ -11,7 +11,8 @@ export const styles = StyleSheet.create({
       paddingBottom: 10,
       borderBottomWidth: 1,
       borderBottomColor: "white",
-      marginVertical: 40,
+      marginBottom: 40,
+      marginTop:60,
     },
     backButton: {
       marginRight: 15,

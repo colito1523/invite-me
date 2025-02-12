@@ -224,17 +224,18 @@ const commonInputStyles = {
 };
 
 const dayStyles = StyleSheet.create({
-  modalOverlay2: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-  },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  modalOverlay2: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // Puedes ajustar el backgroundColor según prefieras
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   modalContent: {
     backgroundColor: "white",
@@ -308,6 +309,12 @@ const dayStyles = StyleSheet.create({
 });
 
 const nightStyles = StyleSheet.create({
+  modalOverlay2: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",

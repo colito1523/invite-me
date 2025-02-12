@@ -296,8 +296,6 @@ useEffect(() => {
       }
     }
   }}
-  minimumDate={today}
-  maximumDate={maxDate}
   textColor={theme.text}
 />
 
