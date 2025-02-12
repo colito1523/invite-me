@@ -230,9 +230,11 @@ export const handleSubmit = async (
       );
 
       Alert.alert(t("createEvent.success"), t("createEvent.eventCreated"));
+      const selectedCategory =
+  userData.preferredLanguage === "en" ? "All" : "Todos";
       navigation.reset({
         index: 0,
-        routes: [{ name: "Home", params: { selectedCategory: "All" } }],
+        routes: [{ name: "Home", params: { selectedCategory } }],
       });
     } catch (error) {
       console.error("Error creating event: ", error);

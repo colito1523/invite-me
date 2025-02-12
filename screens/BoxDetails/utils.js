@@ -998,11 +998,24 @@ export const handleDeleteEvent = async ({
 
       // Eliminar el evento de la colección principal (EventsPriv)
       await deleteDoc(eventRef);
+      // Obtener la información del usuario para determinar su idioma preferido
+      const user = auth.currentUser;
+      let selectedCategory = "Todos"; // Valor por defecto
+
+      if (user) {
+        const userDocRef = doc(database, "users", user.uid);
+        const userDocSnapshot = await getDoc(userDocRef);
+        const userData = userDocSnapshot.data();
+
+        if (userData && userData.preferredLanguage === "en") {
+          selectedCategory = "All";
+        }
+      }
 
       // Redirigir a la pantalla principal y mostrar un mensaje de éxito
       navigation.reset({
         index: 0,
-        routes: [{ name: "Home", params: { selectedCategory: "All" } }],
+        routes: [{ name: "Home", params: { selectedCategory } }],
       });
       Alert.alert(
         t("indexBoxDetails.succes"),

@@ -110,8 +110,11 @@ export default function Menu({
   }, []);
 
   const handleLanguageChange = async (language) => {
+    // Cambia el idioma en i18n
     i18n.changeLanguage(language);
+    // Cierra solo el selector de idiomas
     setShowLanguageSelector(false);
+  
     try {
       const user = auth.currentUser; // Obtén el usuario autenticado
       if (user) {
@@ -121,7 +124,15 @@ export default function Menu({
     } catch (error) {
       console.error("Error al actualizar el idioma en Firebase:", error);
     }
+  
+    // Dependiendo del idioma, definir la categoría a mostrar en Home
+    const selectedCategory = language === "en" ? "All" : "Todos";
+    
+    // Navega a Home con el parámetro adecuado sin cerrar el menú
+    navigation.navigate('Home', { selectedCategory });
   };
+  
+  
   
 
   const LanguageSelector = () => (

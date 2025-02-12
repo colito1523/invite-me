@@ -48,7 +48,7 @@ export default function CreateEvent() {
   const [tempTime, setTempTime] = useState(new Date());
 
   const today = new Date();
-  const maxDate = new Date(today.getTime() + 2 * 30 * 24 * 60 * 60 * 1000); // Max 2 months from today
+  const maxDate = new Date(today.getTime() + 6 * 30 * 24 * 60 * 60 * 1000); // Max 2 months from today
 
   useEffect(() => {
     const checkTime = () => {
@@ -272,32 +272,38 @@ useEffect(() => {
   mode={showDatePicker ? "date" : "time"}
   display="spinner"
   onChange={(event, selectedValue) => {
+    const today = new Date();
+    console.log("Día real:", today.toLocaleDateString());
+    console.log("Día seleccionado:", selectedValue ? selectedValue.toLocaleDateString() : "Ninguno");
+
     if (selectedValue) {
       if (showDatePicker) {
         if (Platform.OS === "android") {
           setDay(selectedValue);
-          setShowDatePicker(false); // Cerrar el picker automáticamente en Android
+          setShowDatePicker(false);
         } else {
-          setTempDate(selectedValue); // En iOS, solo guardar temporalmente
+          setTempDate(selectedValue);
         }
       } else {
         if (Platform.OS === "android") {
           setHour(selectedValue);
-          setShowTimePicker(false); // Cerrar el picker automáticamente en Android
+          setShowTimePicker(false);
         } else {
-          setTempTime(selectedValue); // En iOS, solo guardar temporalmente
+          setTempTime(selectedValue);
         }
       }
     } else {
-      // Si el usuario cancela en Android, cerrar el picker
       if (Platform.OS === "android") {
         setShowDatePicker(false);
         setShowTimePicker(false);
       }
     }
   }}
+  minimumDate={showTimePicker && day.toDateString() === new Date().toDateString() ? new Date() : undefined}
+  maximumDate={maxDate}
   textColor={theme.text}
 />
+
 
 
 {Platform.OS === "ios" && (
