@@ -20,7 +20,10 @@ import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import styles from "./StoryViewStyles";
 import { useTranslation } from "react-i18next";
 import Complaints from "../../Complaints/Complaints";
+import StoryHeader from "./StoryHeader";
 import ViewerItem from "./ViewerItem";
+import StoryActions from "./StoryActions";
+import StoryProgressBar from "./StoryProgressBar";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import {
   createStoryPanResponder,
@@ -48,7 +51,7 @@ import {
   fetchBlockedUsers,
   fetchPinnedViewers,
   useStoryProgress,
-  calculateHoursAgo 
+  calculateHoursAgo,
 } from "./storyUtils"; // Fix import path
 
 const { width, height } = Dimensions.get("window"); // Add this line
@@ -105,7 +108,7 @@ export function StoryViewer({
     const userStories = deserializedStories[initialIndex]?.userStories || [];
     const unseenIndex = userStories.findIndex(
       (story) =>
-        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid),
+        !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
     );
     return unseenIndex !== -1 ? unseenIndex : 0;
   });
@@ -210,14 +213,14 @@ export function StoryViewer({
       () => {
         setIsKeyboardVisible(true);
         setIsPaused(true);
-      },
+      }
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
         setIsKeyboardVisible(false);
         setIsPaused(false);
-      },
+      }
     );
 
     return () => {
@@ -248,12 +251,12 @@ export function StoryViewer({
           "users",
           currentStory.uid,
           "stories",
-          currentStory.id,
+          currentStory.id
         );
         const storySnap = await getDoc(storyRef);
         const storyData = storySnap.data();
         const userHasLiked = storyData?.likes?.some(
-          (like) => like.uid === auth.currentUser.uid,
+          (like) => like.uid === auth.currentUser.uid
         );
         setLikedStories((prevLikedStories) => ({
           ...prevLikedStories,
@@ -293,7 +296,7 @@ export function StoryViewer({
   const filteredViewers = viewers.filter((viewer) =>
     `${viewer.firstName} ${viewer.lastName}`
       .toLowerCase()
-      .includes(searchQuery.toLowerCase()),
+      .includes(searchQuery.toLowerCase())
   );
 
   const panResponder = createStoryPanResponder({
@@ -339,7 +342,7 @@ export function StoryViewer({
     currentIndex === stories.length - 1 &&
     storyIndex === stories[currentIndex]?.userStories.length - 1;
 
-    const hoursAgo = calculateHoursAgo(currentStory?.createdAt);
+  const hoursAgo = calculateHoursAgo(currentStory?.createdAt);
 
   const renderViewerItem = ({ item }) => (
     <ViewerItem
@@ -377,7 +380,7 @@ export function StoryViewer({
 
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction,
+      backAction
     );
 
     return () => backHandler.remove();
@@ -439,25 +442,11 @@ export function StoryViewer({
             <View style={styles.storyContainer}>
               <View>
                 {isUIVisible && (
-                  <View style={styles.progressContainer}>
-                    {stories[currentIndex]?.userStories.map((_, index) => (
-                      <View key={index} style={styles.progressBar}>
-                        <View
-                          style={[
-                            styles.progress,
-                            {
-                              width:
-                                index === storyIndex
-                                  ? `${progress * 100}%`
-                                  : index < storyIndex
-                                    ? "100%"
-                                    : "0%",
-                            },
-                          ]}
-                        />
-                      </View>
-                    ))}
-                  </View>
+                  <StoryProgressBar
+                    userStories={stories[currentIndex]?.userStories || []}
+                    currentStoryIndex={storyIndex}
+                    progress={progress}
+                  />
                 )}
                 <Image
                   key={currentStory.id}
@@ -468,7 +457,7 @@ export function StoryViewer({
                   fadeDuration={0}
                   priority="high"
                   loadingIndicatorSource={require("../../../assets/notification-icon.png")}
-                  resizeMode="cover" // Siempre usar "cover"
+                  resizeMode="cover"
                   cachePolicy="memory-disk"
                   progressiveRenderingEnabled={true}
                   memoryCachePolicy="aggressive"
@@ -499,72 +488,38 @@ export function StoryViewer({
                   onError={(error) => {
                     console.error(
                       `Error cargando historia ${currentStory.id}:`,
-                      error,
+                      error
                     );
                   }}
                 />
               </View>
-
               {isUIVisible && (
-                <View style={styles.userInfo}>
-                  <TouchableOpacity
-                    style={styles.userDetails}
-                    onPress={async () => {
-                      const currentStory = stories[currentIndex];
-                      if (currentStory) {
-                        await onClose(localUnseenStories);
-                        if (currentStory.uid === auth.currentUser.uid) {
-                          setTimeout(() => {
-                            navigation.navigate("Profile");
-                          }, 100);
-                        } else {
-                          setTimeout(() => {
-                            navigation.navigate("UserProfile", {
-                              selectedUser: {
-                                id: currentStory.uid,
-                                username: currentStory.username,
-                                firstName: currentStory.username,
-                                lastName: currentStory.lastName || "",
-                                profileImage: currentStory.profileImage,
-                              },
-                            });
-                          }, 100);
-                        }
-                      }
-                    }}
-                  >
-                    <Image
-                      key={`avatar-${stories[currentIndex]?.uid}`}
-                      source={{
-                        uri: `${stories[currentIndex]?.profileImage}?alt=media&w=10&h=10&q=5`,
-                      }}
-                      style={styles.avatar}
-                      cachePolicy="memory-only"
-                      resizeMode="cover"
-                      progressiveRenderingEnabled={false}
-                      defaultSource={require("../../../assets/perfil.jpg")}
-                    />
-                    <Text style={styles.username}>
-                      {`${stories[currentIndex]?.username} ${
-                        stories[currentIndex]?.lastName || ""
-                      }`}
-                    </Text>
-                  </TouchableOpacity>
-                  <View style={styles.rightInfo}>
-                    <Text style={styles.timeAgo}>
-                      {t("storyViewer.hoursAgo", { hours: hoursAgo })}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => setIsOptionsModalVisible(true)}
-                    >
-                      <Ionicons
-                        name="ellipsis-horizontal"
-                        size={24}
-                        color="white"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                <StoryHeader
+                  currentStory={stories[currentIndex]}
+                  user={auth.currentUser}
+                  t={t}
+                  hoursAgo={calculateHoursAgo(currentStory?.createdAt)}
+                  onProfilePress={async () => {
+                    // Lógica de navegación (similar a la que tienes)
+                    await onClose(localUnseenStories);
+                    if (stories[currentIndex]?.uid === auth.currentUser.uid) {
+                      setTimeout(() => navigation.navigate("Profile"), 100);
+                    } else {
+                      setTimeout(() => {
+                        navigation.navigate("UserProfile", {
+                          selectedUser: {
+                            id: stories[currentIndex].uid,
+                            username: stories[currentIndex].username,
+                            firstName: stories[currentIndex].username,
+                            lastName: stories[currentIndex].lastName || "",
+                            profileImage: stories[currentIndex].profileImage,
+                          },
+                        });
+                      }, 100);
+                    }
+                  }}
+                  onOptionsPress={() => setIsOptionsModalVisible(true)}
+                />
               )}
             </View>
           </TouchableWithoutFeedback>
@@ -600,66 +555,43 @@ export function StoryViewer({
             ></TouchableOpacity>
           )}
 
-          {!isCurrentUserStory && isUIVisible && (
-            <View style={styles.messageContainer}>
-              <TextInput
-                style={styles.messageInput}
-                placeholder={t("storyViewer.typePlaceholder")}
-                placeholderTextColor="#FFFFFF"
-                value={message}
-                onChangeText={(text) => {
-                  setMessage(text);
-                }}
-                onFocus={() => setIsPaused(true)}
-                onBlur={() => setIsPaused(false)}
-              />
-              {message.trim().length > 0 && (
-                <TouchableOpacity
-                  style={styles.iconButton}
-                  onPress={() =>
-                    handleSendMessage({
-                      auth,
-                      database,
-                      t,
-                      stories,
-                      currentIndex,
-                      storyIndex,
-                      message,
-                      setMessage,
-                      Keyboard,
-                      setIsPaused,
-                      setShowSendConfirmation,
-                    })
-                  }
-                >
-                  <Ionicons name="send" size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={() =>
-                  handleLikeStory({
-                    auth,
-                    stories,
-                    currentIndex,
-                    storyIndex,
-                    likedStories,
-                    setLikedStories,
-                    database,
-                    t,
-                  })
-                }
-              >
-                <Ionicons
-                  name={
-                    likedStories[currentStory?.id] ? "heart" : "heart-outline"
-                  }
-                  size={24}
-                  color={likedStories[currentStory?.id] ? "red" : "#FFFFFF"}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
+{!isCurrentUserStory && isUIVisible && (
+  <StoryActions
+    message={message}
+    setMessage={setMessage}
+    onSendMessage={() =>
+      handleSendMessage({
+        auth,
+        database,
+        t,
+        stories,
+        currentIndex,
+        storyIndex,
+        message,
+        setMessage,
+        Keyboard,
+        setIsPaused,
+        setShowSendConfirmation,
+      })
+    }
+    onLikePress={() =>
+      handleLikeStory({
+        auth,
+        stories,
+        currentIndex,
+        storyIndex,
+        likedStories,
+        setLikedStories,
+        database,
+        t,
+      })
+    }
+    isLiked={likedStories[currentStory?.id]}
+    setIsPaused={setIsPaused}
+    t={t}
+  />
+)}
+
 
           <Modal
             animationType="slide"
