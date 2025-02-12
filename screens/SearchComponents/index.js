@@ -7,7 +7,6 @@ import {
   Text,
   TouchableOpacity,
   Alert,
-  SafeAreaView,
   RefreshControl,
   Modal,
 } from "react-native";

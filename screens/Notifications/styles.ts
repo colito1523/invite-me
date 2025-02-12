@@ -3,10 +3,6 @@ import { StyleSheet } from "react-native";
 const isNight = new Date().getHours() >= 19 || new Date().getHours() < 6;
 
 export const styles = StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: isNight ? "black" : "#f0f0f0", // Updated color
-    },
     container: {
       flex: 1,
       backgroundColor: isNight ? "black" : "#f0f0f0", // Updated color

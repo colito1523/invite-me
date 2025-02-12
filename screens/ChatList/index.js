@@ -583,7 +583,6 @@ export default function ChatList() {
 
   return (
     <Provider>
-      <SafeAreaView style={styles.container}>
         <LinearGradient
           colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
           style={styles.container}
@@ -758,7 +757,6 @@ export default function ChatList() {
             </Modal>
           )}
         </LinearGradient>
-      </SafeAreaView>
     </Provider>
   );
 }

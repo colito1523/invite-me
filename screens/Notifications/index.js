@@ -682,7 +682,6 @@ export default function NotificationsComponent() {
     );
   }
   return (
-    <SafeAreaView style={styles.safeArea}>
       <LinearGradient
         colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
         style={styles.container}
@@ -702,6 +701,5 @@ export default function NotificationsComponent() {
           }
         />
       </LinearGradient>
-    </SafeAreaView>
   );
 }
