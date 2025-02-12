@@ -1,5 +1,7 @@
 import { doc, updateDoc, getDoc,  } from "firebase/firestore";
 import { database } from "../../config/firebase";
+import { Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
 export const muteChat = async (
   userId: string,
@@ -41,6 +43,52 @@ export const muteChat = async (
     }
   } catch (error) {
     console.error("Error al silenciar el chat:", error);
+  }
+};
+
+export const handleMediaPress = async (
+  database,
+  chatId,
+  user,
+  mediaUrl,
+  mediaType,
+  messageId,
+  isViewOnce,
+  setSelectedImage,
+  setIsModalVisible,
+  t
+) => {
+  try {
+    const messageRef = doc(database, "chats", chatId, "messages", messageId);
+    const messageSnapshot = await getDoc(messageRef);
+
+    if (!messageSnapshot.exists()) {
+      Alert.alert(t("chatUsers.error"), t("chatUsers.messageNotFound"));
+      return;
+    }
+
+    const messageData = messageSnapshot.data();
+
+    // Solo actualizar si es una imagen de "ver una vez"
+    if (isViewOnce) {
+      if (messageData.viewedBy?.includes(user.uid)) {
+        Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista.");
+        return;
+      }
+
+      // Marcar el mensaje como visto por el usuario actual
+      await updateDoc(messageRef, {
+        viewedBy: [...(messageData.viewedBy || []), user.uid],
+        seen: true,
+      });
+    }
+
+    // Mostrar la imagen (o video) en el modal
+    setSelectedImage(mediaUrl);
+    setIsModalVisible(true);
+  } catch (error) {
+    console.error("Error al abrir la imagen:", error);
+    Alert.alert(t("chatUsers.error"), t("chatUsers.openImageError"));
   }
 };
 
@@ -111,5 +159,27 @@ export const handleDeleteMessage = async (database, chatId, user, messageId, rec
   } catch (error) {
     console.error("Error al eliminar el mensaje:", error);
     throw new Error("No se pudo eliminar el mensaje");
+  }
+};
+
+export const pickMedia = async (handleSend, t) => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== "granted") {
+    Alert.alert(
+      t("chatUsers.permissionDenied"),
+      t("chatUsers.galleryPermission")
+    );
+    return;
+  }
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.All,
+    allowsEditing: true,
+    quality: 1,
+  });
+
+  if (!result.canceled) {
+    const mediaType = result.assets[0].type === "video" ? "video" : "image";
+    handleSend(mediaType, result.assets[0].uri);
   }
 };

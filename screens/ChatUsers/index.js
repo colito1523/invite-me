@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Dimensions
 } from "react-native";
 import { auth, database, storage } from "../../config/firebase";
 import {
@@ -30,18 +31,17 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 
+import MessageItem from "./MessageItem";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Video } from "expo-av";
-import { Audio } from "expo-av";
-import AudioPlayer from "../AudioPlayer";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { ImageBackground } from "react-native";
 import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
-import { muteChat, handleDeleteMessage } from "./utils";
+import { muteChat, handleDeleteMessage, handleMediaPress, pickMedia } from "./utils";
 
 import Complaints from "../../Components/Complaints/Complaints";
 import { useTranslation } from "react-i18next";
@@ -55,8 +55,6 @@ export default function Chat({ route }) {
   const [recipient, setRecipient] = useState(recipientUser);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [recording, setRecording] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
   const user = auth.currentUser;
   const navigation = useNavigation();
@@ -70,11 +68,13 @@ export default function Chat({ route }) {
   const [duration, setDuration] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(false);
   const videoRef = useRef(null);
+  const [modalImageLoading, setModalImageLoading] = useState(true);
   const [mutedChats, setMutedChats] = useState([]);
   const [isMuteModalVisible, setIsMuteModalVisible] = useState(false);
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
   const { t } = useTranslation();
+  const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -425,28 +425,6 @@ export default function Chat({ route }) {
     }
   };
 
-  const pickMedia = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        t("chatUsers.permissionDenied"),
-        t("chatUsers.galleryPermission"),
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const mediaType = result.assets[0].type === "video" ? "video" : "image";
-      handleSend(mediaType, result.assets[0].uri); // Verifica que `handleSend` esté en `ChatUsersParaEditar.js`
-    }
-  };
-
   const handleUserPress = async () => {
     try {
       if (!chatId) {
@@ -485,52 +463,11 @@ export default function Chat({ route }) {
     }
   };
 
-  const handleMediaPress = async (
-    mediaUrl,
-    mediaType,
-    messageId,
-    isViewOnce,
-  ) => {
-    try {
-      const messageRef = doc(database, "chats", chatId, "messages", messageId);
-      const messageSnapshot = await getDoc(messageRef);
-
-      if (!messageSnapshot.exists()) {
-        Alert.alert(t("chatUsers.error"), t("chatUsers.messageNotFound"));
-        return;
-      }
-
-      const messageData = messageSnapshot.data();
-
-      // Solo actualizar si es una imagen de "ver una vez"
-      if (isViewOnce) {
-        if (messageData.viewedBy?.includes(user.uid)) {
-          Alert.alert("Imagen no disponible", "Esta imagen ya ha sido vista.");
-          return;
-        }
-
-        // Marcar el mensaje como visto por el usuario actual
-        await updateDoc(messageRef, {
-          viewedBy: [...(messageData.viewedBy || []), user.uid],
-          seen: true,
-        });
-
-        setSelectedImage(mediaUrl);
-        setIsModalVisible(true);
-      } else {
-        setSelectedImage(mediaUrl);
-        setIsModalVisible(true);
-      }
-    } catch (error) {
-      console.error("Error al abrir la imagen:", error);
-      Alert.alert(t("chatUsers.error"), t("chatUsers.openImageError"));
-    }
-  };
-
   const closeModal = () => {
-    setIsModalVisible(false);
-    setSelectedImage(null);
-  };
+  setIsModalVisible(false);
+  setSelectedImage(null);
+  setModalImageLoading(true); // Reinicia el indicador para la próxima imagen
+};
 
   const handleLongPressMessage = (message) => {
     // Allow deletion of messages sent by the current user or received from the other user
@@ -563,267 +500,6 @@ export default function Chat({ route }) {
     ).catch((error) => Alert.alert("Error", error.message));
   };
 
-  const renderDate = (date) => {
-    return (
-      <View style={styles.dateContainer}>
-        <Text style={styles.dateText}>
-          {date.toLocaleDateString([], {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </Text>
-      </View>
-    );
-  };
-
-  const renderMessage = ({ item, index }) => {
-    const previousMessage = messages[index - 1];
-    const currentMessageDate = item.createdAt
-      ? new Date(item.createdAt.seconds * 1000)
-      : new Date();
-    const previousMessageDate =
-      previousMessage && previousMessage.createdAt
-        ? new Date(previousMessage.createdAt.seconds * 1000)
-        : null;
-
-    const isSameDay =
-      previousMessageDate &&
-      currentMessageDate.toDateString() === previousMessageDate.toDateString();
-
-    const isOwnMessage = item.senderId === user.uid;
-
-    const isDeleted = item.deletedFor?.[user.uid];
-    if (isDeleted) {
-      return null;
-    }
-
-    if (item.isStoryResponse) {
-      return (
-        <>
-          {!isSameDay && renderDate(currentMessageDate)}
-
-          {/* Renderizar respuesta de historia */}
-          <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-            <View
-              style={[
-                styles.message,
-                item.senderId === user.uid
-                  ? styles.sent // A la derecha si el remitente eres tú
-                  : styles.received, // A la izquierda si el remitente es el destinatario
-                styles.storyResponseContainer,
-              ]}
-            >
-              <Text style={styles.storyResponseText}>
-                {item.senderId === user.uid
-                  ? t("chatUsers.youAnswered")
-                  : t("chatUsers.Answered")}
-              </Text>
-              <Image
-                source={{ uri: item.storyUrl }}
-                style={styles.storyResponseImage}
-              />
-              <Text style={styles.messageText}>{item.text}</Text>
-              {item.senderId === user.uid && item.seen && (
-                <View style={styles.messageFooter}>
-                  <Text style={styles.timeText}>
-                    {currentMessageDate.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </Text>
-                  {item.senderId === user.uid && item.seen && (
-                    <Ionicons
-                      name="checkmark-done-sharp"
-                      size={16}
-                      color="black"
-                      style={styles.seenIcon}
-                    />
-                  )}
-                </View>
-              )}
-            </View>
-          </TouchableOpacity>
-        </>
-      );
-    }
-    // Renderizar respuesta de nota
-    if (item.isNoteResponse) {
-      return (
-        <>
-          {!isSameDay && renderDate(currentMessageDate)}
-
-          <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-            <View
-              style={[
-                styles.message,
-                isOwnMessage ? styles.sent : styles.received,
-                styles.noteResponseContainer,
-              ]}
-            >
-              <Text style={styles.noteResponseText}>
-                {isOwnMessage
-                  ? t("chatUsers.youAnsweredNote")
-                  : t("chatUsers.AnsweredNote")}
-              </Text>
-
-              <Image
-                source={require("../../assets/flecha-curva.png")}
-                style={[
-                  styles.arrowImage,
-                  isOwnMessage
-                    ? styles.arrowImageSent
-                    : styles.arrowImageReceived,
-                ]}
-              />
-              <View>
-                <Text style={styles.originalNoteText}>
-                  {item.noteText || "Nota no disponible"}
-                </Text>
-              </View>
-
-              <Text style={styles.messageTextNotas}>{item.text}</Text>
-              <View style={styles.messageFooter}>
-                <Text style={styles.timeText}>
-                  {currentMessageDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-                {isOwnMessage && item.seen && (
-                  <Ionicons
-                    name="checkmark-done-sharp"
-                    size={16}
-                    color="black"
-                    style={styles.seenIcon}
-                  />
-                )}
-              </View>
-            </View>
-          </TouchableOpacity>
-        </>
-      );
-    }
-
-    if (item.isUploading) {
-      return (
-        <View style={[styles.message, styles.sent, styles.uploadingMessage]}>
-          <ActivityIndicator size="large" color="black" />
-        </View>
-      );
-    }
-
-    return (
-      <>
-        {!isSameDay && renderDate(currentMessageDate)}
-
-        <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-          <View
-            style={[
-              styles.message,
-              item.senderId === user.uid ? styles.sent : styles.received,
-            ]}
-          >
-            {item.text && <Text style={styles.messageText}>{item.text}</Text>}
-
-            {item.mediaType === "image" &&
-              (item.isViewOnce ? (
-                <TouchableOpacity
-                  onPress={() =>
-                    handleMediaPress(
-                      item.mediaUrl,
-                      "image",
-                      item.id,
-                      item.isViewOnce,
-                    )
-                  }
-                  style={[
-                    styles.viewOnceImagePlaceholder,
-                    item.viewedBy?.includes(user.uid)
-                      ? styles.imageViewed
-                      : styles.imageNotViewed,
-                  ]}
-                  disabled={item.viewedBy?.includes(user.uid)} // Desactivar si ya fue vista
-                >
-                  <Text style={styles.imageStatusText}>
-                    {item.viewedBy?.includes(user.uid)
-                      ? t("chatUsers.alreadyViewed")
-                      : t("chatUsers.view")}
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={() =>
-                    handleMediaPress(item.mediaUrl, "image", item.id, false)
-                  }
-                  style={styles.normalImageContainer}
-                  onLongPress={() => handleLongPressMessage(item)} // Add long press handler for images
-                >
-                  <Image
-                    source={{ uri: item.mediaUrl }}
-                    style={styles.messageImage}
-                  />
-                </TouchableOpacity>
-              ))}
-
-            {item.mediaType === "video" && (
-              <>
-                <TouchableOpacity
-                  onPress={() => {
-                    setSelectedImage({
-                      uri: item.mediaUrl,
-                      mediaType: item.mediaType,
-                    });
-                    setIsModalVisible(true);
-                  }}
-                  style={styles.videoThumbnailContainer}
-                >
-                  <Video
-                    source={{ uri: item.mediaUrl }}
-                    style={styles.messageVideo}
-                    posterSource={{ uri: item.mediaUrl }}
-                    usePoster={true}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.playIconOverlay}>
-                    <Ionicons name="play-circle" size={40} color="white" />
-                  </View>
-                </TouchableOpacity>
-                {item.senderId === user.uid &&
-                  item.viewedBy?.includes(recipient.uid) && (
-                    <Ionicons
-                      name="checkmark-done-sharp"
-                      size={16}
-                      color="black"
-                      style={styles.seenIcon}
-                    />
-                  )}
-              </>
-            )}
-
-            {item.mediaType === "audio" && <AudioPlayer uri={item.mediaUrl} />}
-
-            <View style={styles.messageFooter}>
-              <Text style={styles.timeText}>
-                {currentMessageDate.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-              {item.senderId === user.uid && item.seen && (
-                <Ionicons
-                  name="checkmark-done-sharp"
-                  size={16}
-                  color="black"
-                  style={styles.seenIcon}
-                />
-              )}
-            </View>
-          </View>
-        </TouchableOpacity>
-      </>
-    );
-  };
 
   return (
     <ImageBackground source={require('../../assets/fondo chat.jpg')} style={styles.container}>
@@ -899,23 +575,38 @@ export default function Chat({ route }) {
         </View>
 
         <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={renderMessage}
-          maxToRenderPerBatch={50}
-          windowSize={21}
-          removeClippedSubviews={false}
-          onContentSizeChange={() =>
-            flatListRef.current?.scrollToEnd({ animated: false })
-          }
-          onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
-          initialNumToRender={messages.length}
-          maintainVisibleContentPosition={{
-            minIndexForVisible: 0,
-            autoscrollToTopThreshold: 10,
-          }}
-        />
+  ref={flatListRef}
+  data={messages}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item, index }) => (
+    <MessageItem
+      item={item}
+      index={index}
+      messages={messages}
+      user={user}
+      database={database}
+      chatId={chatId}
+      setSelectedImage={setSelectedImage}
+      setIsModalVisible={setIsModalVisible}
+      handleLongPressMessage={handleLongPressMessage}
+      handleMediaPress={handleMediaPress}
+      recipient={recipient}
+      t={t}
+    />
+  )}
+  maxToRenderPerBatch={50}
+  windowSize={21}
+  removeClippedSubviews={false}
+  onContentSizeChange={() =>
+    flatListRef.current?.scrollToEnd({ animated: false })
+  }
+  onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+  initialNumToRender={messages.length}
+  maintainVisibleContentPosition={{
+    minIndexForVisible: 0,
+    autoscrollToTopThreshold: 10,
+  }}
+/>
 
         <View style={styles.containerIg}>
           <TouchableOpacity
@@ -940,7 +631,7 @@ export default function Chat({ route }) {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              onPress={pickMedia}
+            onPress={() => pickMedia(handleSend, t)}
               style={styles.iconButtonGaleria}
             >
               <Ionicons name="image-outline" size={30} color="#000" />
@@ -1010,98 +701,73 @@ export default function Chat({ route }) {
         </Modal>
 
         <Modal
-          visible={isModalVisible}
-          transparent={true}
-          onRequestClose={closeModal}
-        >
-          <View style={styles.modalBackground}>
-            <TouchableOpacity
-              style={styles.closeModalButton}
-              onPress={closeModal}
-            >
-              <Ionicons name="close" size={28} color="white" />
-            </TouchableOpacity>
-            <View style={styles.mediaContainer}>
-              {selectedImage &&
-                (typeof selectedImage === "object" &&
-                selectedImage.mediaType === "video" ? (
-                  <View style={styles.videoContainer}>
-                    <Video
-                      source={{ uri: selectedImage.uri }}
-                      style={styles.fullscreenMedia}
-                      resizeMode="contain"
-                      shouldPlay={true}
-                      isLooping={false}
-                      useNativeControls={false}
-                      onPlaybackStatusUpdate={(status) => {
-                        if (status.didJustFinish) {
-                          videoRef.current.setPositionAsync(0);
-                          setIsPlaying(false);
-                          setControlsVisible(true);
-                          videoRef.current.pauseAsync();
-                        }
-                        if (status.isLoaded) {
-                          setDuration(status.durationMillis);
-                          setCurrentTime(status.positionMillis);
-                          setIsPlaying(status.isPlaying);
-                        }
-                      }}
-                      ref={videoRef}
-                    />
-                    <TouchableWithoutFeedback
-                      onPress={() => setControlsVisible((prev) => !prev)}
-                    >
-                      <View style={styles.fullScreenTouchable}>
-                        {controlsVisible && (
-                          <TouchableOpacity
-                            style={styles.playButton}
-                            onPress={() => {
-                              if (videoRef.current) {
-                                if (isPlaying) {
-                                  videoRef.current.pauseAsync();
-                                } else {
-                                  videoRef.current.playAsync();
-                                }
-                                setIsPlaying(!isPlaying);
-                              }
-                            }}
-                          >
-                            <Ionicons
-                              name={isPlaying ? "pause" : "play"}
-                              size={50}
-                              color="white"
-                            />
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    </TouchableWithoutFeedback>
-                    <View style={styles.videoControlsContainer}>
-                      <View style={styles.progressBar}>
-                        <View
-                          style={[
-                            styles.progress,
-                            { width: `${(currentTime / duration) * 100}%` },
-                          ]}
-                        />
-                      </View>
-                    </View>
-                  </View>
-                ) : (
-                  <TouchableWithoutFeedback onPress={closeModal}>
-                    <Image
-                      source={{
-                        uri:
-                          typeof selectedImage === "object"
-                            ? selectedImage.uri
-                            : selectedImage,
-                      }}
-                      style={styles.fullscreenMedia}
-                    />
-                  </TouchableWithoutFeedback>
-                ))}
-            </View>
+  visible={isModalVisible}
+  transparent={true}
+  onRequestClose={closeModal}
+>
+  <View style={styles.modalBackground}>
+    <TouchableOpacity
+      style={styles.closeModalButton}
+      onPress={closeModal}
+    >
+      <Ionicons name="close" size={28} color="white" />
+    </TouchableOpacity>
+    <View style={styles.mediaContainer}>
+      {selectedImage &&
+        (typeof selectedImage === "object" &&
+        selectedImage.mediaType === "video" ? (
+          // Aquí va la lógica para video
+          <View style={styles.videoContainer}>
+            {/* ... código del video ... */}
           </View>
-        </Modal>
+        ) : (
+          <TouchableWithoutFeedback onPress={closeModal}>
+          <View
+            style={{
+              width: windowWidth,
+              height: windowHeight,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {modalImageLoading && (
+              <ActivityIndicator
+                size="large"
+                color="#fff"
+                style={{ position: "absolute", zIndex: 1 }}
+              />
+            )}
+            <Image
+              source={{
+                uri:
+                  typeof selectedImage === "object"
+                    ? selectedImage.uri
+                    : selectedImage,
+              }}
+              style={{
+                width: windowWidth,
+                height: windowHeight,
+                resizeMode: "contain",
+                opacity: modalImageLoading ? 0 : 1,
+              }}
+              onLoad={() => {
+                console.log("Imagen cargada correctamente");
+                setModalImageLoading(false);
+              }}
+              onError={(error) => {
+                console.error("Error al cargar la imagen", error);
+                setModalImageLoading(false);
+              }}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+        
+        
+        ))}
+    </View>
+  </View>
+</Modal>
+
         <Complaints
           isVisible={isComplaintVisible}
           onClose={() => setIsComplaintVisible(false)}

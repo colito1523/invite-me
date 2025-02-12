@@ -128,8 +128,6 @@ const MenuSection = React.memo(({
     );
   }, [t]);
   
-  
-
   return (
     <View style={styles.menuContainer}>
       <TouchableOpacity
@@ -160,16 +158,20 @@ const MenuSection = React.memo(({
             >
               <Text style={styles.menuItemText}>{t("profile.editProfile")}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                setIsBlockedListVisible(true);
-                closeMenu();
-              }}
-              disabled={blockedUsers.length === 0}
-            >
-              <Text style={styles.menuItemText}>{t("blockedUsers.modalTitle")}</Text>
-            </TouchableOpacity>
+
+            {/* Renderizamos la opción de perfiles bloqueados sólo si hay algún usuario bloqueado */}
+            {blockedUsers.length > 0 && (
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  setIsBlockedListVisible(true);
+                  closeMenu();
+                }}
+              >
+                <Text style={styles.menuItemText}>{t("blockedUsers.modalTitle")}</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {

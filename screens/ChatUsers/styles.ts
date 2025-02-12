@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
       paddingBottom: 10,
       borderBottomWidth: 1,
       borderBottomColor: "white",
-      marginBottom: 40,
+      marginBottom: 0,
       marginTop:60,
     },
     backButton: {
