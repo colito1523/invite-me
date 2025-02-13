@@ -36,6 +36,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Video } from "expo-av";
+import ChatHeader from "./ChatHeader";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { ImageBackground } from "react-native";
 import { Menu } from "react-native-paper";
@@ -425,43 +426,6 @@ export default function Chat({ route }) {
     }
   };
 
-  const handleUserPress = async () => {
-    try {
-      if (!chatId) {
-        Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
-        return;
-      }
-
-      const chatRef = doc(database, "chats", chatId);
-      const chatSnapshot = await getDoc(chatRef);
-
-      if (!chatSnapshot.exists()) {
-        console.error("El documento del chat no existe.");
-        Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
-        return;
-      }
-
-      const chatData = chatSnapshot.data();
-
-      // Obtener el ID del destinatario desde los participantes
-      const otherParticipantId = chatData.participants.find(
-        (participantId) => participantId !== user.uid,
-      );
-
-      if (!otherParticipantId) {
-        console.error("No se encontró un ID válido para el destinatario.");
-        Alert.alert(t("chatUsers.error"), t("chatUsers.recipientNotFound"));
-        return;
-      }
-
-      navigation.navigate("UserProfile", {
-        selectedUser: { id: otherParticipantId, ...recipientUser },
-      });
-    } catch (error) {
-      console.error("Error navegando al perfil del usuario:", error);
-      Alert.alert(t("chatUsers.error"), t("chatUsers.navigateToProfileError"));
-    }
-  };
 
   const closeModal = () => {
   setIsModalVisible(false);
@@ -508,71 +472,13 @@ export default function Chat({ route }) {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <Feather name="arrow-left" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleUserPress} style={styles.userInfo}>
-            <Image
-              source={{ uri: recipient?.photoUrls?.[0] || 'https://via.placeholder.com/150' }}
-              style={styles.profileImage}
-            />
-            <Text style={styles.username}>
-              {recipient.firstName + " " + recipient.lastName}
-            </Text>
-          </TouchableOpacity>
-
-          <Menu
-            visible={menuVisible}
-            onDismiss={() => setMenuVisible(false)}
-            anchor={
-              <TouchableOpacity onPress={() => setMenuVisible(true)}>
-                <Feather name="more-vertical" size={24} color="white" />
-              </TouchableOpacity>
-            }
-            contentStyle={styles.menuContainer}
-          >
-            <Menu.Item
-              onPress={() => {
-                setMenuVisible(false);
-                Alert.alert(
-                  t("chatUsers.deleteChat"),
-                  t("chatUsers.deleteChatConfirmation"),
-                  [
-                    {
-                      text: t("chatUsers.cancel"),
-                      style: "cancel",
-                    },
-                    {
-                      text: t("chatUsers.delete"),
-                      onPress: handleDeleteChat,
-                    },
-                  ],
-                );
-              }}
-              title={t("chatUsers.deleteChat")}
-              titleStyle={styles.menuItemText}
-              style={styles.menuItemContainer}
-            />
-            <Menu.Item
-              onPress={() => {
-                setMenuVisible(false);
-                setIsMuteModalVisible(true);
-              }}
-              title={t("chatUsers.mute")}
-              titleStyle={styles.menuItemText}
-            />
-            <Menu.Item
-              onPress={handleReport}
-              title={t("chatUsers.report")}
-              titleStyle={styles.menuItemText}
-              style={styles.menuItemContainer}
-            />
-          </Menu>
-        </View>
+       <ChatHeader
+  recipient={recipient}
+  chatId={chatId}
+  handleDeleteChat={handleDeleteChat}
+  handleReport={handleReport}
+  handleMuteChat={handleMuteChat}
+/>
 
         <FlatList
   ref={flatListRef}

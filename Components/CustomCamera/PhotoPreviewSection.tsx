@@ -30,9 +30,10 @@ const PhotoPreviewSection = ({
             // Comprime la imagen reduciendo la calidad (por ejemplo, a 50%)
             const manipulatedResult = await ImageManipulator.manipulateAsync(
                 photo.uri,
-                [],
-                { compress: 0.01, format: ImageManipulator.SaveFormat.JPEG }
+                [{ resize: { width: 1080 } }], // Reduce el ancho a 1080px, altura se ajusta automáticamente
+                { compress: 0.50, format: ImageManipulator.SaveFormat.JPEG } // Compresión similar a Instagram
             );
+            
             
             // Sube la imagen comprimida
             await uploadStory(

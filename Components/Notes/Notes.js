@@ -605,7 +605,8 @@ export default function Notes() {
                        style={[
                         styles.responseInput,
                         {
-                          color: isNightMode ? "white" : "#333", // Color específico del texto escrito
+                          color: isNightMode ? "white" : "#333",
+                          borderColor: isNightMode ? "white" : "black"  // Color específico del texto escrito
                         },
                       ]}
                       value={responseMessage}
