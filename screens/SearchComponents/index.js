@@ -411,7 +411,7 @@ export default function Search() {
             },
             {
               title: t("suggestionsForYou"),
-              data: recommendations,
+              data: recommendations.slice(0, 4),
               renderItem: renderRecommendationItem,
             },
           ]}

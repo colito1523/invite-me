@@ -1,4 +1,4 @@
-// SearchHistory.js
+
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Alert, Modal } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,6 +17,8 @@ import { saveSearchHistory } from "./utils";
 import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
 import { styles } from "./styles";
 
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutos
+
 const SearchHistory = ({
   user,
   blockedUsers,
@@ -28,72 +30,94 @@ const SearchHistory = ({
   const [searchHistory, setSearchHistory] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadSearchHistory = async () => {
-      if (user) {
-        try {
-          const savedHistory = await AsyncStorage.getItem(
-            `searchHistory_${user.uid}`
-          );
-          if (savedHistory !== null) {
-            const parsedHistory = JSON.parse(savedHistory);
+      if (!user) return;
 
-            const updatedHistory = await Promise.all(
-              parsedHistory.map(async (item) => {
-                const userDocRef = doc(database, "users", item.id);
-                const userDoc = await getDoc(userDocRef);
-                if (!userDoc.exists()) {
-                  return null;
-                }
-                const userData = userDoc.data();
-                const isPrivate = userData?.isPrivate || false;
-
-                const friendsRef = collection(
-                  database,
-                  "users",
-                  user.uid,
-                  "friends"
-                );
-                const friendsSnapshot = await getDocs(
-                  query(friendsRef, where("friendId", "==", item.id))
-                );
-                const isFriend = !friendsSnapshot.empty;
-
-                const storiesRef = collection(database, "users", item.id, "stories");
-                const storiesSnapshot = await getDocs(storiesRef);
-                const now = new Date();
-
-                const hasStories = storiesSnapshot.docs.some((storyDoc) => {
-                  const storyData = storyDoc.data();
-                  return (
-                    new Date(storyData.expiresAt.toDate()) > now &&
-                    (!isPrivate || isFriend)
-                  );
-                });
-
-                return {
-                  ...item,
-                  hasStories,
-                  isPrivate,
-                  isFriend,
-                };
-              })
-            );
-
-            const filteredHistory = updatedHistory.filter(
-              (item) => item && !blockedUsers.includes(item.id)
-            );
-
-            setSearchHistory(filteredHistory);
+      try {
+        // Intentar cargar desde caché primero
+        const cachedData = await AsyncStorage.getItem(`searchHistoryCache_${user.uid}`);
+        if (cachedData) {
+          const { data, timestamp } = JSON.parse(cachedData);
+          if (Date.now() - timestamp < CACHE_EXPIRY && isMounted) {
+            setSearchHistory(data);
+            setIsLoading(false);
           }
-        } catch (error) {
-          console.error(t("errorLoadingSearchHistory"), error);
+        }
+
+        // Cargar datos actualizados
+        const savedHistory = await AsyncStorage.getItem(`searchHistory_${user.uid}`);
+        if (!savedHistory) {
+          setIsLoading(false);
+          return;
+        }
+
+        const parsedHistory = JSON.parse(savedHistory);
+        const updatedHistoryPromises = parsedHistory.map(async (item) => {
+          const userDocRef = doc(database, "users", item.id);
+          const [userDoc, friendsSnapshot, storiesSnapshot] = await Promise.all([
+            getDoc(userDocRef),
+            getDocs(query(
+              collection(database, "users", user.uid, "friends"),
+              where("friendId", "==", item.id)
+            )),
+            getDocs(collection(database, "users", item.id, "stories"))
+          ]);
+
+          if (!userDoc.exists()) return null;
+
+          const userData = userDoc.data();
+          const isPrivate = userData?.isPrivate || false;
+          const isFriend = !friendsSnapshot.empty;
+          const now = new Date();
+
+          const hasStories = storiesSnapshot.docs.some((storyDoc) => {
+            const storyData = storyDoc.data();
+            return new Date(storyData.expiresAt.toDate()) > now && (!isPrivate || isFriend);
+          });
+
+          return {
+            ...item,
+            hasStories,
+            isPrivate,
+            isFriend,
+          };
+        });
+
+        const updatedHistory = await Promise.all(updatedHistoryPromises);
+        const filteredHistory = updatedHistory.filter(
+          (item) => item && !blockedUsers.includes(item.id)
+        );
+
+        if (isMounted) {
+          setSearchHistory(filteredHistory);
+          // Actualizar caché
+          await AsyncStorage.setItem(
+            `searchHistoryCache_${user.uid}`,
+            JSON.stringify({
+              data: filteredHistory,
+              timestamp: Date.now(),
+            })
+          );
+        }
+      } catch (error) {
+        console.error(t("errorLoadingSearchHistory"), error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
     };
 
     loadSearchHistory();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, blockedUsers, t]);
 
   const handleUserPress = (selectedUser) => {
@@ -102,7 +126,6 @@ const SearchHistory = ({
       return;
     }
 
-    // Actualiza el historial: si el usuario no existe se agrega
     const updatedHistory = [...searchHistory];
     const existingUser = updatedHistory.find(
       (item) => item.id === selectedUser.id
@@ -123,47 +146,39 @@ const SearchHistory = ({
     });
   };
 
-  const removeFromHistory = (userId) => {
+  const removeFromHistory = async (userId) => {
     const updatedHistory = searchHistory.filter((user) => user.id !== userId);
     setSearchHistory(updatedHistory);
-    saveSearchHistory(user, updatedHistory, blockedUsers);
+    await saveSearchHistory(user, updatedHistory, blockedUsers);
+    
+    // Actualizar caché
+    await AsyncStorage.setItem(
+      `searchHistoryCache_${user.uid}`,
+      JSON.stringify({
+        data: updatedHistory,
+        timestamp: Date.now(),
+      })
+    );
   };
 
   const renderHistoryItem = (item, index) => (
     <View key={`history-${item.id}-${index}`} style={styles.historyItem}>
       <TouchableOpacity
-        onPress={() =>
-          navigation.navigate("UserProfile", { selectedUser: item })
-        }
+        onPress={() => navigation.navigate("UserProfile", { selectedUser: item })}
         style={styles.historyTextContainer}
       >
         <TouchableOpacity
           onPress={async () => {
-            if (item.isPrivate) {
-              const friendsRef = collection(
-                database,
-                "users",
-                user.uid,
-                "friends"
-              );
-              const friendsSnapshot = await getDocs(
-                query(friendsRef, where("friendId", "==", item.id))
-              );
-              if (friendsSnapshot.empty) {
-                navigation.navigate("UserProfile", { selectedUser: item });
-                return;
-              }
+            if (item.isPrivate && !item.isFriend) {
+              navigation.navigate("UserProfile", { selectedUser: item });
+              return;
             }
+
             if (!item.hasStories) {
               navigation.navigate("UserProfile", { selectedUser: item });
             } else {
               try {
-                const storiesRef = collection(
-                  database,
-                  "users",
-                  item.id,
-                  "stories"
-                );
+                const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
 
@@ -174,13 +189,9 @@ const SearchHistory = ({
                     createdAt: doc.data().createdAt,
                     expiresAt: doc.data().expiresAt,
                     storyUrl: doc.data().storyUrl,
-                    profileImage:
-                      doc.data().profileImage || item.profileImage,
+                    profileImage: doc.data().profileImage || item.profileImage,
                     uid: item.id,
-                    username:
-                      doc.data().username ||
-                      item.username ||
-                      t("unknownUser"),
+                    username: doc.data().username || item.username || t("unknownUser"),
                     viewers: doc.data().viewers || [],
                     likes: doc.data().likes || [],
                   }))
@@ -190,11 +201,7 @@ const SearchHistory = ({
                   setSelectedStories([
                     {
                       uid: item.id,
-                      username:
-                        `${item.firstName || ""} ${item.lastName || ""}`
-                          .trim() ||
-                        item.username ||
-                        t("unknownUser"),
+                      username: `${item.firstName || ""} ${item.lastName || ""}`.trim() || item.username || t("unknownUser"),
                       profileImage: item.profileImage,
                       userStories: userStories,
                     },
