@@ -98,16 +98,16 @@ export const handleUserPress = async (params) => {
   const { uid, navigation, t } = params;
 
   try {
-    const userDoc = await getDoc(
-      doc(database, "users", auth.currentUser.uid)
-    );
-    const blockedUsers = userDoc.data()?.blockedUsers || [];
+    // Obtener el documento del usuario actual para revisar usuarios bloqueados
+    const currentUserDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
+    const blockedUsers = currentUserDoc.data()?.blockedUsers || [];
 
     if (blockedUsers.includes(uid)) {
       Alert.alert("Error", "No puedes interactuar con este usuario.");
       return;
     }
 
+    // Obtener los datos del usuario seleccionado
     const selectedUserDoc = await getDoc(doc(database, "users", uid));
     if (selectedUserDoc.exists()) {
       const selectedUserData = selectedUserDoc.data();
@@ -116,7 +116,25 @@ export const handleUserPress = async (params) => {
         selectedUserData.photoUrls && selectedUserData.photoUrls.length > 0
           ? selectedUserData.photoUrls[0]
           : "https://via.placeholder.com/150";
-      navigation.navigate("UserProfile", { selectedUser: selectedUserData });
+
+      // Determinar si el usuario es privado y si es amigo del usuario actual
+      const isPrivate = selectedUserData.isPrivate || false;
+      let isFriend = false;
+      if (uid === auth.currentUser.uid) {
+        isFriend = true;
+      } else {
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendQuery = query(friendsRef, where("friendId", "==", uid));
+        const friendSnapshot = await getDocs(friendQuery);
+        isFriend = !friendSnapshot.empty;
+      }
+
+      // Navegar a la pantalla correspondiente según la privacidad y amistad
+      if (isPrivate && !isFriend) {
+        navigation.navigate("PrivateUserProfile", { selectedUser: selectedUserData });
+      } else {
+        navigation.navigate("UserProfile", { selectedUser: selectedUserData });
+      }
     } else {
       Alert.alert(
         t("notifications.error"),

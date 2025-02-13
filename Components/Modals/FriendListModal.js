@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, Modal, StyleSheet, Alert } from 'react-native';
 import { collection, query, where, getDocs, doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { database } from "../../config/firebase";
+import { database, auth } from "../../config/firebase";
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
@@ -70,28 +70,46 @@ export default function FriendListModal({ isVisible, onClose, userId, updateFrie
       !blockedUsers.includes(friend.id) // Excluir amigos bloqueados
   );
 
-  // Manejar la selección de un amigo
-  const handleUserPress = async (uid) => {
-    // Verificar si el usuario está bloqueado antes de proceder
-    if (blockedUsers.includes(uid)) {
-      Alert.alert("Error", t("friendListModal.userBlocked"));
-      return;
-    }
+// Manejar la selección de un amigo
+const handleUserPress = async (uid) => {
+  // Verificar si el usuario está bloqueado antes de proceder
+  if (blockedUsers.includes(uid)) {
+    Alert.alert("Error", t("friendListModal.userBlocked"));
+    return;
+  }
 
-    try {
-      const userDoc = await getDoc(doc(database, "users", uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        userData.id = uid;
-        navigation.navigate("UserProfile", { selectedUser: userData });
+  try {
+    const userDoc = await getDoc(doc(database, "users", uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      userData.id = uid;
+      const isPrivate = userData.isPrivate || false;
+
+      // Verificar si el usuario es amigo del usuario actual
+      let isFriend = false;
+      if (uid === auth.currentUser.uid) {
+        isFriend = true;
       } else {
-        console.error(t("friendListModal.userNotFound"));
+        const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+        const friendQuery = query(friendsRef, where("friendId", "==", uid));
+        const friendSnapshot = await getDocs(friendQuery);
+        isFriend = !friendSnapshot.empty;
       }
-    } catch (error) {
-      console.error(t("friendListModal.errorFetchingUser"), error);
+
+      if (isPrivate && !isFriend) {
+        navigation.navigate("PrivateUserProfile", { selectedUser: userData });
+      } else {
+        navigation.navigate("UserProfile", { selectedUser: userData });
+      }
+    } else {
+      console.error(t("friendListModal.userNotFound"));
     }
-    onClose();
-  };
+  } catch (error) {
+    console.error(t("friendListModal.errorFetchingUser"), error);
+  }
+  onClose();
+};
+
 
   // Bloquear un usuario y actualizar la lista de amigos
   const handleBlockUser = async (uid) => {

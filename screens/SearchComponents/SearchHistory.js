@@ -120,32 +120,6 @@ const SearchHistory = ({
     };
   }, [user, blockedUsers, t]);
 
-  const handleUserPress = (selectedUser) => {
-    if (blockedUsers.includes(selectedUser.id)) {
-      Alert.alert(t("error"), t("cannotInteractWithUser"));
-      return;
-    }
-
-    const updatedHistory = [...searchHistory];
-    const existingUser = updatedHistory.find(
-      (item) => item.id === selectedUser.id
-    );
-    if (!existingUser) {
-      updatedHistory.unshift(selectedUser);
-      if (updatedHistory.length > 10) updatedHistory.pop();
-      setSearchHistory(updatedHistory);
-      saveSearchHistory(user, updatedHistory, blockedUsers);
-    }
-
-    navigation.navigate("UserProfile", {
-      selectedUser: {
-        ...selectedUser,
-        isPrivate: selectedUser.isPrivate || false,
-        isFriend: selectedUser.isFriend || false,
-      },
-    });
-  };
-
   const removeFromHistory = async (userId) => {
     const updatedHistory = searchHistory.filter((user) => user.id !== userId);
     setSearchHistory(updatedHistory);
@@ -164,7 +138,13 @@ const SearchHistory = ({
   const renderHistoryItem = (item, index) => (
     <View key={`history-${item.id}-${index}`} style={styles.historyItem}>
       <TouchableOpacity
-        onPress={() => navigation.navigate("UserProfile", { selectedUser: item })}
+        onPress={() => {
+            if (item.isPrivate && !item.isFriend) {
+              navigation.navigate("PrivateUserProfile", { selectedUser: item });
+            } else {
+              navigation.navigate("UserProfile", { selectedUser: item });
+            }
+          }}
         style={styles.historyTextContainer}
       >
         <TouchableOpacity

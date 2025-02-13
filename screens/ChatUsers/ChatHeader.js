@@ -5,7 +5,7 @@ import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image"; // Usando expo-image para mejor optimización
 import { styles } from "./styles";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
 import { useTranslation } from "react-i18next";
 
@@ -32,41 +32,66 @@ const ChatHeader = ({ recipient, chatId, handleDeleteChat, handleReport, handleM
 
     const handleUserPress = async () => {
         try {
-            if (!chatId) {
-                Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
-                return;
-            }
-
-            const chatRef = doc(database, "chats", chatId);
-            const chatSnapshot = await getDoc(chatRef);
-
-            if (!chatSnapshot.exists()) {
-                console.error("El documento del chat no existe.");
-                Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
-                return;
-            }
-
-            const chatData = chatSnapshot.data();
-
-            // Obtener el ID del destinatario desde los participantes
-            const otherParticipantId = chatData.participants.find(
-                (participantId) => participantId !== user.uid
-            );
-
-            if (!otherParticipantId) {
-                console.error("No se encontró un ID válido para el destinatario.");
-                Alert.alert(t("chatUsers.error"), t("chatUsers.recipientNotFound"));
-                return;
-            }
-
-            navigation.navigate("UserProfile", {
-                selectedUser: { id: otherParticipantId, ...recipient },
-            });
+          if (!chatId) {
+            Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
+            return;
+          }
+      
+          const chatRef = doc(database, "chats", chatId);
+          const chatSnapshot = await getDoc(chatRef);
+      
+          if (!chatSnapshot.exists()) {
+            console.error("El documento del chat no existe.");
+            Alert.alert(t("chatUsers.error"), t("chatUsers.chatNotFound"));
+            return;
+          }
+      
+          const chatData = chatSnapshot.data();
+      
+          // Obtener el ID del destinatario desde los participantes
+          const otherParticipantId = chatData.participants.find(
+            (participantId) => participantId !== user.uid
+          );
+      
+          if (!otherParticipantId) {
+            console.error("No se encontró un ID válido para el destinatario.");
+            Alert.alert(t("chatUsers.error"), t("chatUsers.recipientNotFound"));
+            return;
+          }
+      
+          // Obtener la data del destinatario
+          const userDoc = await getDoc(doc(database, "users", otherParticipantId));
+          if (!userDoc.exists()) {
+            console.error("El usuario no existe.");
+            Alert.alert(t("chatUsers.error"), t("chatUsers.recipientNotFound"));
+            return;
+          }
+          const userData = userDoc.data();
+          userData.id = otherParticipantId;
+          const isPrivate = userData.isPrivate || false;
+      
+          // Verificar si el usuario es amigo del usuario actual
+          let isFriend = false;
+          if (otherParticipantId === auth.currentUser.uid) {
+            isFriend = true;
+          } else {
+            const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
+            const friendQuery = query(friendsRef, where("friendId", "==", otherParticipantId));
+            const friendSnapshot = await getDocs(friendQuery);
+            isFriend = !friendSnapshot.empty;
+          }
+      
+          // Navegar a la pantalla correspondiente según la privacidad y la amistad
+          if (isPrivate && !isFriend) {
+            navigation.navigate("PrivateUserProfile", { selectedUser: userData });
+          } else {
+            navigation.navigate("UserProfile", { selectedUser: userData });
+          }
         } catch (error) {
-            console.error("Error navegando al perfil del usuario:", error);
-            Alert.alert(t("chatUsers.error"), t("chatUsers.navigateToProfileError"));
+          console.error("Error navegando al perfil del usuario:", error);
+          Alert.alert(t("chatUsers.error"), t("chatUsers.navigateToProfileError"));
         }
-    };
+      };
 
     return (
         <View style={styles.header}>

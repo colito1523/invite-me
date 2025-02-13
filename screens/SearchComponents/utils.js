@@ -8,12 +8,11 @@ import { useTranslation } from 'react-i18next';
 
 export const fetchUsers = async (searchTerm, setResults) => {
   const auth = getAuth();
+  if (!auth.currentUser) return;
+
   if (searchTerm.trim().length > 0) {
     try {
       const user = auth.currentUser;
-      if (!user) return;
-
-      // Load blocked users
       const userRef = doc(database, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
       const blockedUsers = userSnapshot.data()?.blockedUsers || [];

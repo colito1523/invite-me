@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { TouchableOpacity, Text, Image, Alert } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import styles from "./StoryViewStyles";
-import { doc, getDoc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayRemove, arrayUnion, collection, query, where, getDocs } from "firebase/firestore";
 import i18next from 'i18next';
 
 const ViewerItem = ({
@@ -10,17 +10,12 @@ const ViewerItem = ({
   currentStory,
   pinnedViewers,
   setPinnedViewers,
-  handleUserPress,
   handlePinViewer,
-  handleThreeDotsPress,
   setViewersModalVisible,
   setIsPaused,
   auth,
   database,
   t = i18next.t,
-  setSelectedViewer,
-  setIsHideStoryModalVisible,
-  hideStories,
   navigation, // Add navigation prop here
 }) => {
   const hasLiked = currentStory?.likes?.some((like) => like.uid === item.uid);
@@ -38,33 +33,6 @@ const ViewerItem = ({
 
     checkHideStatus();
   }, [item.uid, auth.currentUser.uid, database]);
-
-  const handleToggleHiddenStories = async () => {
-    const userRef = doc(database, "users", auth.currentUser.uid);
-
-    try {
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-      const currentHiddenStories = userData.hiddenStories || [];
-
-      if (currentHiddenStories.includes(item.uid)) {
-        await updateDoc(userRef, {
-          hiddenStories: arrayRemove(item.uid),
-        });
-        Alert.alert(t("userProfile.success"), t("userProfile.willSeeStories"));
-      } else {
-        await updateDoc(userRef, {
-          hiddenStories: arrayUnion(item.uid),
-        });
-        Alert.alert(t("userProfile.success"), t("userProfile.willNotSeeStories"));
-      }
-
-      setIsHidden(!isHidden);
-    } catch (error) {
-      console.error("Error updating hidden stories:", error);
-      Alert.alert(t("userProfile.error"), t("userProfile.hiddenStoriesUpdateError"));
-    }
-  };
 
   const handleToggleHideMyStories = async () => {
     const selectedUserRef = doc(database, "users", item.uid);
@@ -95,27 +63,45 @@ const ViewerItem = ({
 
   return (
     <TouchableOpacity
-      style={styles.viewerItem}
-      onPress={async () => {
-        setViewersModalVisible(false);
-        setIsPaused(false);
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        navigation.navigate("UserProfile", {
-          selectedUser: {
-            id: item.uid,
-            username: item.username,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            profileImage: item.profileImage,
-            hasStories: item.hasStories || false,
-            photoUrls: [item.profileImage],
-          },
-          database,
-          navigation,
-          t
-        });
-      }}
-    >
+    style={styles.viewerItem}
+    onPress={async () => {
+      setViewersModalVisible(false);
+      setIsPaused(false);
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      try {
+        const userDoc = await getDoc(doc(database, "users", item.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          userData.id = item.uid;
+          const isPrivate = userData.isPrivate || false;
+          let isFriend = false;
+          if (item.uid === auth.currentUser.uid) {
+            isFriend = true;
+          } else {
+            const friendsRef = collection(
+              database,
+              "users",
+              auth.currentUser.uid,
+              "friends"
+            );
+            const friendQuery = query(friendsRef, where("friendId", "==", item.uid));
+            const friendSnapshot = await getDocs(friendQuery);
+            isFriend = !friendSnapshot.empty;
+          }
+
+          if (isPrivate && !isFriend) {
+            navigation.navigate("PrivateUserProfile", { selectedUser: userData });
+          } else {
+            navigation.navigate("UserProfile", { selectedUser: userData });
+          }
+        } else {
+          console.error("User not found");
+        }
+      } catch (error) {
+        console.error("Error fetching user data", error);
+      }
+    }}
+  >
       <Image
         progressiveRenderingEnabled={true}
         source={{ uri: `${item.profileImage}?alt=media&w=30&h=30&q=1` }}

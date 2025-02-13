@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
@@ -64,20 +64,19 @@ export default function Search() {
     const interval = setInterval(checkTime, 60000);
     return () => clearInterval(interval);
   }, []);
+  
 
-  useFocusEffect(
-    React.useCallback(() => {
-      navigation.setOptions({
-        headerStyle: {
-          backgroundColor: isNightMode ? "black" : "#fff",
-        },
-        headerTintColor: isNightMode ? "#fff" : "#000",
-        headerTitleStyle: {
-          color: isNightMode ? "#fff" : "#000",
-        },
-      });
-    }, [isNightMode])
-  );
+  useEffect(() => {
+    navigation.setOptions({
+      headerStyle: {
+        backgroundColor: isNightMode ? "black" : "#fff",
+      },
+      headerTintColor: isNightMode ? "#fff" : "#000",
+      headerTitleStyle: {
+        color: isNightMode ? "#fff" : "#000",
+      },
+    });
+  }, [isNightMode]);
 
   const theme = isNightMode ? darkTheme : lightTheme;
 
@@ -145,8 +144,8 @@ export default function Search() {
       <RecommendedUserItem
         item={item}
         index={index}
-        onUserPress={handleUserPress} // asegúrate de que esta función esté definida
-        theme={theme} // el tema que estés utilizando (por ejemplo, darkTheme o lightTheme)
+        onUserPress={handleUserPress} 
+        theme={theme} 
       />
     );
   };
@@ -170,7 +169,7 @@ export default function Search() {
                 }
                 const userData = userDoc.data();
                 const isPrivate = userData?.isPrivate || false;
-
+    
                 const friendsRef = collection(
                   database,
                   "users",
@@ -181,7 +180,7 @@ export default function Search() {
                   query(friendsRef, where("friendId", "==", item.id))
                 );
                 const isFriend = !friendsSnapshot.empty;
-
+    
                 const storiesRef = collection(
                   database,
                   "users",
@@ -190,7 +189,7 @@ export default function Search() {
                 );
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
-
+    
                 const hasStories = storiesSnapshot.docs.some((storyDoc) => {
                   const storyData = storyDoc.data();
                   return (
@@ -198,7 +197,7 @@ export default function Search() {
                     (!isPrivate || isFriend)
                   );
                 });
-
+    
                 return {
                   ...item,
                   hasStories,
@@ -207,11 +206,11 @@ export default function Search() {
                 };
               })
             );
-
+    
             const filteredHistory = updatedHistory.filter(
               (item) => item && !blockedUsers.includes(item.id)
             );
-
+    
             setSearchHistory(filteredHistory);
           }
         } catch (error) {
@@ -219,16 +218,17 @@ export default function Search() {
         }
       }
     };
-
+    
     loadSearchHistory();
+    
   }, [user, blockedUsers]);
-
+  
   const handleUserPress = (selectedUser) => {
     if (blockedUsers.includes(selectedUser.id)) {
       Alert.alert(t("error"), t("cannotInteractWithUser"));
       return;
     }
-
+  
     const updatedHistory = [...searchHistory];
     const existingUser = updatedHistory.find(
       (item) => item.id === selectedUser.id
@@ -239,15 +239,22 @@ export default function Search() {
       setSearchHistory(updatedHistory);
       saveSearchHistory(auth.currentUser, updatedHistory, blockedUsers);
     }
-
-    navigation.navigate("UserProfile", {
-      selectedUser: {
-        ...selectedUser,
-        isPrivate: selectedUser.isPrivate || false,
-        isFriend: selectedUser.isFriend || false,
-      },
-    });
+  
+    // Aseguramos que isPrivate e isFriend sean booleanos
+    const isPrivate = selectedUser.isPrivate || false;
+    const isFriend = selectedUser.isFriend || false;
+  
+    if (isPrivate && !isFriend) {
+      navigation.navigate("PrivateUserProfile", {
+        selectedUser: { ...selectedUser, isPrivate, isFriend },
+      });
+    } else {
+      navigation.navigate("UserProfile", {
+        selectedUser: { ...selectedUser, isPrivate, isFriend },
+      });
+    }
   };
+  
 
   const renderUserItem = ({ item, index }) => {
     return (
@@ -358,7 +365,6 @@ export default function Search() {
     );
   };
 
-  // Componente header que incluye el StorySlider y el buscador
   const listHeader = (
     <>
       <StorySlider
@@ -396,7 +402,6 @@ export default function Search() {
           sections={[
             {
               title: t("recent"),
-              // Usamos un dato dummy para que se invoque renderItem una sola vez
               data: [null],
               renderItem: () => (
                 <SearchHistory
