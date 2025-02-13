@@ -36,6 +36,8 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
+import RecommendedUserItem from "./RecommendedUserItem";
+import SearchHistory from "./SearchHistory";
 import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer"; // Added import
 import { styles, lightTheme, darkTheme } from "./styles";
 
@@ -48,7 +50,7 @@ export default function Search() {
   const [requestStatus, setRequestStatus] = useState(null);
   const [isNightMode, setIsNightMode] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false); // Added state
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState(null);
   const [stories, setStories] = useState([]);
   const [unseenStories, setUnseenStories] = useState({});
@@ -141,99 +143,15 @@ export default function Search() {
   }, []);
 
   const renderRecommendationItem = ({ item, index }) => {
-    const [status, setStatus] = useState(null);
-    const [isProcessing, setIsProcessing] = useState(false);
-
-    useEffect(() => {
-      const fetchFriendRequestStatus = async () => {
-        try {
-          const requestRef = collection(
-            database,
-            "users",
-            item.id,
-            "friendRequests",
-          );
-          const existingRequestQuery = query(
-            requestRef,
-            where("fromId", "==", auth.currentUser.uid),
-          );
-          const existingRequestSnapshot = await getDocs(existingRequestQuery);
-
-          if (!existingRequestSnapshot.empty) {
-            const existingRequest = existingRequestSnapshot.docs[0].data();
-            setStatus(existingRequest.status);
-          } else {
-            setStatus(null);
-          }
-        } catch (error) {
-          console.error(t("errorCheckingFriendRequestStatus"), error);
-        }
-      };
-
-      fetchFriendRequestStatus();
-    }, [item]);
-
-    const toggleFriendRequest = async () => {
-      setIsProcessing(true);
-
-      try {
-        if (status === "pending") {
-          await cancelFriendRequest(item, setStatus, t); // Pasa 't' aquí
-        } else {
-          await sendFriendRequest(item, setStatus);
-        }
-      } catch (error) {
-        console.error(t("errorHandlingFriendRequest"), error);
-      } finally {
-        setIsProcessing(false);
-      }
-    };
-
     return (
-      <TouchableOpacity
-        key={`recommendation-${item.id}-${index}`}
-        style={styles.recommendationItem}
-        onPress={() => handleUserPress(item)}
-      >
-        <Image
-          source={{
-            uri: item.profileImage || "https://via.placeholder.com/150",
-          }}
-          style={[styles.userImage, { marginRight: 13 }]} // Estilo en línea
-          cachePolicy="memory-disk"
-        />
-        <View style={styles.textContainer}>
-          <Text style={[styles.resultText, { color: theme.text }]}>
-            {item.username}
-          </Text>
-          {item.firstName && item.lastName && (
-            <Text style={[styles.fullName, { color: theme.textSecondary }]}>
-              {`${item.firstName} ${item.lastName}`}
-            </Text>
-          )}
-        </View>
-        <TouchableOpacity
-          style={[
-            styles.addFriendButton,
-            { backgroundColor: theme.buttonBackground },
-          ]}
-          onPress={toggleFriendRequest}
-          disabled={isProcessing || status === "accepted"}
-        >
-          {isProcessing ? (
-            <ActivityIndicator size="small" color="black" />
-          ) : status === "pending" ? (
-            <Ionicons name="time" size={20} color="black" />
-          ) : status === "accepted" ? (
-            <Ionicons name="checkmark" size={20} color="black" />
-          ) : (
-            <Ionicons name="person-add" size={24} color="black" />
-          )}
-        </TouchableOpacity>
-      </TouchableOpacity>
+      <RecommendedUserItem
+        item={item}
+        index={index}
+        onUserPress={handleUserPress} // asegúrate de que esta función esté definida
+        theme={theme} // el tema que estés utilizando (por ejemplo, darkTheme o lightTheme)
+      />
     );
   };
-
   useEffect(() => {
     const loadSearchHistory = async () => {
       if (user) {
@@ -246,17 +164,14 @@ export default function Search() {
 
             const updatedHistory = await Promise.all(
               parsedHistory.map(async (item) => {
-                // Verificar el estado actual del perfil
                 const userDocRef = doc(database, "users", item.id);
                 const userDoc = await getDoc(userDocRef);
                 if (!userDoc.exists()) {
-                  return null; // Eliminar usuarios que ya no existen
+                  return null;
                 }
-
                 const userData = userDoc.data();
                 const isPrivate = userData?.isPrivate || false;
 
-                // Verificar si es amigo
                 const friendsRef = collection(
                   database,
                   "users",
@@ -268,7 +183,6 @@ export default function Search() {
                 );
                 const isFriend = !friendsSnapshot.empty;
 
-                // Validar historias solo si es amigo o no es privado
                 const storiesRef = collection(
                   database,
                   "users",
@@ -295,7 +209,6 @@ export default function Search() {
               }),
             );
 
-            // Filtrar usuarios bloqueados o eliminados
             const filteredHistory = updatedHistory.filter(
               (item) => item && !blockedUsers.includes(item.id),
             );
@@ -317,7 +230,6 @@ export default function Search() {
       return;
     }
 
-    // Agregar al historial si no existe ya
     const updatedHistory = [...searchHistory];
     const existingUser = updatedHistory.find(
       (item) => item.id === selectedUser.id,
@@ -428,7 +340,7 @@ export default function Search() {
             style={[
               styles.unseenStoryCircle,
               item.hasStories && {
-                borderColor: isNightMode ? "white" : "black", // Color dinámico
+                borderColor: isNightMode ? "white" : "black",
               },
             ]}
           >
@@ -436,7 +348,7 @@ export default function Search() {
               source={{
                 uri: item.profileImage || "https://via.placeholder.com/150",
               }}
-              style={styles.userImage} // Solo dimensiones, sin borde adicional
+              style={styles.userImage}
             />
           </View>
         </TouchableOpacity>
@@ -527,7 +439,7 @@ export default function Search() {
             style={[
               styles.unseenStoryCircle,
               item.hasStories && {
-                borderColor: isNightMode ? "white" : "black", // Color dinámico del borde
+                borderColor: isNightMode ? "white" : "black",
               },
             ]}
           >
@@ -535,7 +447,7 @@ export default function Search() {
               source={{
                 uri: item.profileImage || "https://via.placeholder.com/150",
               }}
-              style={styles.userImage} // Imagen interna sin borde adicional
+              style={styles.userImage}
             />
           </View>
         </TouchableOpacity>
@@ -570,23 +482,14 @@ export default function Search() {
     },
   ];
 
-  const loadExistingStories = async () => {
-    //This function is added to reload stories after closing the StoryViewer
-    await loadSearchHistory();
-  };
-
-  return (
-    <LinearGradient
-      colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
-      style={styles.container}
-    >
-      <View style={styles.header}>
-        <StorySlider
-          ref={storySliderRef}
-          eventTitle={t("exampleEvent")}
-          selectedDate={new Date()}
-        />
-      </View>
+  // Componente header que incluye el StorySlider y el buscador
+  const listHeader = (
+    <>
+      <StorySlider
+        ref={storySliderRef}
+        eventTitle={t("exampleEvent")}
+        selectedDate={new Date()}
+      />
       <View style={[styles.contentContainer, styles.searchContainer]}>
         <Ionicons
           name="search"
@@ -602,42 +505,71 @@ export default function Search() {
           onChangeText={setSearchTerm}
         />
       </View>
+    </>
+  );
 
+  return (
+    <LinearGradient
+      colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
+      style={styles.container}
+    >
       {searchTerm.length === 0 ? (
-        <SectionList
-          showsVerticalScrollIndicator={false}
-          sections={sectionsData}
-          keyExtractor={(item, index) => item.id + index.toString()}
-          renderItem={({ section, item }) => section.renderItem({ item })}
-          renderSectionHeader={({ section }) =>
-            section.data.length > 0 ? (
-              <Text style={[styles.sectionTitle, { color: theme.text }]}>
-                {section.title}
-              </Text>
-            ) : null
-          }
-          renderSectionFooter={({ section }) =>
-            section.title === t("recent") ? (
-              <View style={styles.sectionSeparator} />
-            ) : null
-          }
-          ListEmptyComponent={
-            <Text style={{ color: theme.text }}>
-              {t("noRecommendationsOrHistory")}
-            </Text>
-          }
-          stickySectionHeadersEnabled={false} 
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[theme.icon]}
-              tintColor={theme.icon}
-            />
-          }
-        />
-      ) : (
+  <SectionList
+    ListHeaderComponent={listHeader}
+    showsVerticalScrollIndicator={false}
+    sections={[
+      {
+        title: t("recent"),
+        // Usamos un dato dummy para que se invoque renderItem una sola vez
+        data: [0],
+        renderItem: () => (
+          <SearchHistory
+            user={user}
+            blockedUsers={blockedUsers}
+            t={t}
+            navigation={navigation}
+            theme={theme}
+            isNightMode={isNightMode}
+          />
+        ),
+      },
+      {
+        title: t("suggestionsForYou"),
+        data: recommendations,
+        renderItem: renderRecommendationItem,
+      },
+    ]}
+    keyExtractor={(item, index) => index.toString()}
+    renderSectionHeader={({ section }) =>
+      section.data.length > 0 ? (
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          {section.title}
+        </Text>
+      ) : null
+    }
+    renderSectionFooter={({ section }) =>
+      section.title === t("recent") ? (
+        <View style={styles.sectionSeparator} />
+      ) : null
+    }
+    ListEmptyComponent={
+      <Text style={{ color: theme.text }}>
+        {t("noRecommendationsOrHistory")}
+      </Text>
+    }
+    stickySectionHeadersEnabled={false}
+    refreshControl={
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        colors={[theme.icon]}
+        tintColor={theme.icon}
+      />
+    }
+  />
+) : (
         <FlatList
+          ListHeaderComponent={listHeader}
           data={results}
           keyExtractor={(item) => item.id}
           renderItem={renderUserItem}
@@ -668,4 +600,4 @@ export default function Search() {
       )}
     </LinearGradient>
   );
-} 
+}

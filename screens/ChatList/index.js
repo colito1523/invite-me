@@ -62,6 +62,7 @@ export default function ChatList() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { setHasUnreadMessages } = useUnreadMessages();
+  const [notesRefresh, setNotesRefresh] = useState(0);
 
   const onRefresh = useCallback(async () => {
     if (!user) return;
@@ -127,6 +128,7 @@ export default function ChatList() {
       console.error("Error refreshing:", error);
     }
     setRefreshing(false);
+    setNotesRefresh(prev => prev + 1);
   }, [user]);
   
 
@@ -601,7 +603,7 @@ export default function ChatList() {
             }
             ListHeaderComponent={
               <>
-                <Notes />
+                <Notes refresh={notesRefresh} />
                 <View
                   style={[styles.searchContainer, { borderColor: theme.borderColor }]}
                 >

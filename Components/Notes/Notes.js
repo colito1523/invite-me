@@ -43,7 +43,7 @@ const moodOptions = [
   "out_for_a_drink"
 ];
 
-export default function Notes() {
+export default function Notes({ refresh }) {
   const { t } = useTranslation();
   const [userData, setUserData] = useState(null);
   const [friendsNotes, setFriendsNotes] = useState([]);
@@ -399,6 +399,11 @@ export default function Notes() {
       Alert.alert(t("notes.error"), t("notes.shareMoodError"));
     }
   };
+
+  useEffect(() => {
+    // Vuelve a cargar las notas de amigos al cambiar la prop refresh
+    fetchFriendsNotes();
+  }, [refresh]);
   
   const renderMoodNote = (note, isUser = false) => (
     <TouchableOpacity

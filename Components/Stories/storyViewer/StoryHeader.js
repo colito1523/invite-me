@@ -1,7 +1,8 @@
 // StoryHeader.js
-import React from "react";
-import { View, TouchableOpacity, Text, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image"; // Usando expo-image para mejor optimización
 import styles from "./StoryViewStyles";
 
 const StoryHeader = ({
@@ -12,19 +13,32 @@ const StoryHeader = ({
   onProfilePress,
   onOptionsPress,
 }) => {
+  // Intentar cargar primero la imagen de baja calidad
+  const [imageUri, setImageUri] = useState(
+    currentStory.lowQualityProfileImage || `${currentStory.profileImage}?alt=media&w=10&h=10&q=5`
+  );
+
+  // Luego cambiar a la imagen en alta calidad si existe
+  useEffect(() => {
+    if (currentStory.profileImage) {
+      setTimeout(() => {
+        setImageUri(currentStory.profileImage);
+      }, 500); // Retraso para mejorar la UX
+    }
+  }, [currentStory.profileImage]);
+
   return (
     <View style={styles.userInfo}>
-      <TouchableOpacity
-        style={styles.userDetails}
-        onPress={onProfilePress}
-      >
+      <TouchableOpacity style={styles.userDetails} onPress={onProfilePress}>
         <Image
           source={{
-            uri: `${currentStory.profileImage}?alt=media&w=10&h=10&q=5`,
+            uri: imageUri,
+            cache: "force-cache",
           }}
           style={styles.avatar}
-          resizeMode="cover"
-          defaultSource={require("../../../assets/perfil.jpg")}
+          contentFit="cover"
+          placeholder={{ blurhash: "LEHV6nWB2yk8pyo0adR*.7kCMdnj" }} // Placeholder borroso
+          defaultSource={require("../../../assets/perfil.jpg")} // Imagen por defecto si no hay ninguna disponible
         />
         <Text style={styles.username}>
           {`${currentStory.username} ${currentStory.lastName || ""}`}
