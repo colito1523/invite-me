@@ -159,12 +159,13 @@ export const styles = StyleSheet.create({
       marginBottom: 10,
     },
     friendshipButton: {
-      zIndex: 10, // Asegura que esté por encima de otros elementos
+      zIndex: 10,
       width: 46,
       height: 46,
       justifyContent: "center",
       alignItems: "center",
-      marginBottom: 10,
+      // marginBottom: 10, // Eliminar
+      marginLeft: 10,     // Añadir para que haya espacio horizontal
     },
     mutualFriendIm: {
       width: 40,
@@ -199,5 +200,9 @@ export const styles = StyleSheet.create({
       fontSize: 16,
       marginTop: 5,
       textAlign: "center",
+    },
+    nameRow: {
+      flexDirection: "row",
+      alignItems: "center",
     },
   });

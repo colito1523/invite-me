@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Dimensions,
   Pressable,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
@@ -48,13 +47,44 @@ const NameDisplay = ({
   onFriendListPress,
   showMutualFriends,
   renderMutualFriends,
+  showFriendshipButton, // Added prop
+  handleToggleFriendshipStatus, // Added prop
+  isProcessing, // Added prop
+  friendshipStatus, // Added prop
+  pendingRequest, // Added prop
 }) => {
   const { t } = useTranslation();
   return (
     <View style={styles.nameContainer}>
-      <Text style={styles.name}>
-        {firstName} {lastName}
-      </Text>
+      <View style={styles.nameRow}>
+  <Text style={styles.name}>
+    {firstName} {lastName}
+  </Text>
+  {showFriendshipButton && (
+    <Pressable
+      style={styles.friendshipButton}
+      onPress={handleToggleFriendshipStatus}
+      disabled={isProcessing}
+    >
+      {isProcessing ? (
+        <ActivityIndicator size="small" color="#fff" />
+      ) : (
+        <AntDesign
+          name={
+            friendshipStatus
+              ? "deleteuser"
+              : pendingRequest
+              ? "clockcircle"
+              : "adduser"
+          }
+          size={27}
+          color="white"
+        />
+      )}
+    </Pressable>
+  )}
+</View>
+
       {showFriendCount && (
         <TouchableOpacity
           onPress={onFriendListPress}
@@ -428,8 +458,13 @@ export default function UserProfile({ route, navigation }) {
                       friendCount={friendCount}
                       showFriendCount={index === 0}
                       onFriendListPress={() => setIsFriendListVisible(true)}
-                      showMutualFriends={index === 1} // Added prop
-                      renderMutualFriends={renderMutualFriends} // Added prop
+                      showMutualFriends={index === 1}
+                      renderMutualFriends={renderMutualFriends}
+                      showFriendshipButton={index === 0 || index === 1} // Added prop
+                      handleToggleFriendshipStatus={handleToggleFriendshipStatus} // Added prop
+                      isProcessing={isProcessing} // Added prop
+                      friendshipStatus={friendshipStatus} // Added prop
+                      pendingRequest={pendingRequest} // Added prop
                     />
                     <View style={styles.infoContainer}>
                       {index === 0 && (
