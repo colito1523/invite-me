@@ -498,7 +498,7 @@ useEffect(() => {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.container}
-        initialNumToRender={5}
+        initialNumToRender={2}
         removeClippedSubviews={true}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
