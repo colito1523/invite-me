@@ -440,28 +440,6 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Beca_Beca_2.jpg"),
-    title: "Beca Beca",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "11:00 AM - 9:00 PM",
-      Martes: "11:00 AM - 9:00 PM",
-      Miércoles: "11:00 AM - 9:00 PM",
-      Jueves: "11:00 AM - 9:00 PM",
-      Viernes: "11:00 AM - 9:00 PM",
-      Sábado: "11:00 AM - 9:00 PM",
-      Domingo: "11:00 AM - 9:00 PM",
-    },
-    number: "914 103 112",
-    coordinates: {
-      latitude: 38.7283001,
-      longitude: -9.1526828,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
     path: require("../../assets/Lisboa/Bairro_alto.webp"),
     title: "Bairro Alto",
     category: "Bars & Clubs",
