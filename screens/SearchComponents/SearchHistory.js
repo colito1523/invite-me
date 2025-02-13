@@ -150,7 +150,7 @@ const SearchHistory = ({
         <TouchableOpacity
           onPress={async () => {
             if (item.isPrivate && !item.isFriend) {
-              navigation.navigate("UserProfile", { selectedUser: item });
+              navigation.navigate("PrivateUserProfile", { selectedUser: item });
               return;
             }
 

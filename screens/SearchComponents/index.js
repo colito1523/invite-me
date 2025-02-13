@@ -19,7 +19,11 @@ import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import StorySlider from "../../Components/Stories/storySlider/StorySlider";
 import { useTranslation } from "react-i18next";
 import { getAuth } from "firebase/auth";
-import { fetchUsers, fetchRecommendations, saveSearchHistory } from "./utils";
+import {
+  fetchUsers,
+  fetchRecommendations,
+  handleUserPress as handleUserPressUtil,
+} from "./utils";
 import { database } from "../../config/firebase";
 import {
   collection,
@@ -104,11 +108,11 @@ export default function Search() {
 
   useEffect(() => {
     fetchUsers(searchTerm, setResults);
-  }, [fetchUsers, searchTerm]);
+  }, [searchTerm]);
 
   useEffect(() => {
     fetchRecommendations(user, setRecommendations);
-  }, [fetchRecommendations, user]);
+  }, [user]);
 
   useEffect(() => {
     const checkFriendRequestStatus = async () => {
@@ -144,8 +148,17 @@ export default function Search() {
       <RecommendedUserItem
         item={item}
         index={index}
-        onUserPress={handleUserPress} 
-        theme={theme} 
+        onUserPress={(selectedUser) =>
+          handleUserPressUtil(selectedUser, {
+            blockedUsers,
+            searchHistory,
+            setSearchHistory,
+            navigation,
+            currentUser: auth.currentUser,
+            t,
+          })
+        }
+        theme={theme}
       />
     );
   };
@@ -223,39 +236,6 @@ export default function Search() {
     
   }, [user, blockedUsers]);
   
-  const handleUserPress = (selectedUser) => {
-    if (blockedUsers.includes(selectedUser.id)) {
-      Alert.alert(t("error"), t("cannotInteractWithUser"));
-      return;
-    }
-  
-    const updatedHistory = [...searchHistory];
-    const existingUser = updatedHistory.find(
-      (item) => item.id === selectedUser.id
-    );
-    if (!existingUser) {
-      updatedHistory.unshift(selectedUser);
-      if (updatedHistory.length > 10) updatedHistory.pop();
-      setSearchHistory(updatedHistory);
-      saveSearchHistory(auth.currentUser, updatedHistory, blockedUsers);
-    }
-  
-    // Aseguramos que isPrivate e isFriend sean booleanos
-    const isPrivate = selectedUser.isPrivate || false;
-    const isFriend = selectedUser.isFriend || false;
-  
-    if (isPrivate && !isFriend) {
-      navigation.navigate("PrivateUserProfile", {
-        selectedUser: { ...selectedUser, isPrivate, isFriend },
-      });
-    } else {
-      navigation.navigate("UserProfile", {
-        selectedUser: { ...selectedUser, isPrivate, isFriend },
-      });
-    }
-  };
-  
-
   const renderUserItem = ({ item, index }) => {
     return (
       <View key={`user-${item.id}-${index}`} style={styles.resultItem}>
@@ -277,7 +257,14 @@ export default function Search() {
               }
             }
             if (!item.hasStories) {
-              handleUserPress(item);
+              handleUserPressUtil(item, {
+                blockedUsers,
+                searchHistory,
+                setSearchHistory,
+                navigation,
+                currentUser: auth.currentUser,
+                t,
+              });
             } else {
               try {
                 const storiesRef = collection(
@@ -310,9 +297,7 @@ export default function Search() {
                     {
                       uid: item.id,
                       username:
-                        `${item.firstName || ""} ${
-                          item.lastName || ""
-                        }`.trim() ||
+                        `${item.firstName || ""} ${item.lastName || ""}`.trim() ||
                         item.username ||
                         t("unknownUser"),
                       profileImage: item.profileImage,
@@ -321,12 +306,26 @@ export default function Search() {
                   ]);
                   setIsModalVisible(true);
                 } else {
-                  handleUserPress(item);
+                  handleUserPressUtil(item, {
+                    blockedUsers,
+                    searchHistory,
+                    setSearchHistory,
+                    navigation,
+                    currentUser: auth.currentUser,
+                    t,
+                  });
                 }
               } catch (error) {
                 console.error(t("errorLoadingStories"), error);
                 Alert.alert(t("error"), t("errorLoadingStories"));
-                handleUserPress(item);
+                handleUserPressUtil(item, {
+                  blockedUsers,
+                  searchHistory,
+                  setSearchHistory,
+                  navigation,
+                  currentUser: auth.currentUser,
+                  t,
+                });
               }
             }
           }}
@@ -349,7 +348,16 @@ export default function Search() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => handleUserPress(item)}
+          onPress={() =>
+            handleUserPressUtil(item, {
+              blockedUsers,
+              searchHistory,
+              setSearchHistory,
+              navigation,
+              currentUser: auth.currentUser,
+              t,
+            })
+          }
           style={styles.textContainer}
         >
           <Text style={[styles.resultText, { color: theme.text }]}>

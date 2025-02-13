@@ -283,25 +283,36 @@ export const deleteFriendRequest = async (user, setStatus) => {
   }
 };
 
-export const saveSearchHistory = async (currentUser, history, blockedUsers) => {
-  if (!currentUser) return;
+export const handleUserPress = (
+  selectedUser,
+  { blockedUsers, searchHistory, setSearchHistory, navigation, currentUser, t }
+) => {
+  if (blockedUsers.includes(selectedUser.id)) {
+    Alert.alert(t("error"), t("cannotInteractWithUser"));
+    return;
+  }
 
-  try {
-    const safeHistory = JSON.stringify(
-      history
-        .filter((item) => !blockedUsers.includes(item.id)) 
-        .map((item) => ({
-          id: item.id,
-          username: item.username,
-          firstName: item.firstName || "",
-          lastName: item.lastName || "",
-          profileImage: item.profileImage || "https://via.placeholder.com/150",
-          isPrivate: item.isPrivate || false, 
-        }))
-    );
+  // Actualiza el historial de búsqueda si el usuario no existe ya
+  const updatedHistory = [...searchHistory];
+  const existingUser = updatedHistory.find((item) => item.id === selectedUser.id);
+  if (!existingUser) {
+    updatedHistory.unshift(selectedUser);
+    if (updatedHistory.length > 10) updatedHistory.pop();
+    setSearchHistory(updatedHistory);
+    saveSearchHistory(currentUser, updatedHistory, blockedUsers);
+  }
 
-    await AsyncStorage.setItem(`searchHistory_${currentUser.uid}`, safeHistory);
-  } catch (error) {
-    console.error("Error al guardar el historial de búsqueda:", error);
+  // Nos aseguramos de que isPrivate e isFriend sean booleanos
+  const isPrivate = selectedUser.isPrivate || false;
+  const isFriend = selectedUser.isFriend || false;
+
+  if (isPrivate && !isFriend) {
+    navigation.navigate("PrivateUserProfile", {
+      selectedUser: { ...selectedUser, isPrivate, isFriend },
+    });
+  } else {
+    navigation.navigate("UserProfile", {
+      selectedUser: { ...selectedUser, isPrivate, isFriend },
+    });
   }
 };
