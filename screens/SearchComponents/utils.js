@@ -3,7 +3,27 @@ import { database, auth } from "../../config/firebase";
 import { getAuth } from "firebase/auth"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
-import { useTranslation } from 'react-i18next';
+
+export const saveSearchHistory = async (user, history, blockedUsers) => {
+  try {
+    // Actualiza el almacenamiento persistente del historial
+    await AsyncStorage.setItem(
+      `searchHistory_${user.uid}`,
+      JSON.stringify(history)
+    );
+
+    // Actualiza la caché con el historial actualizado
+    await AsyncStorage.setItem(
+      `searchHistoryCache_${user.uid}`,
+      JSON.stringify({
+        data: history,
+        timestamp: Date.now()
+      })
+    );
+  } catch (error) {
+    console.error("Error saving search history:", error);
+  }
+};
 
 
 export const fetchUsers = async (searchTerm, setResults) => {

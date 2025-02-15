@@ -13,7 +13,6 @@ import {
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import StorySlider from "../../Components/Stories/storySlider/StorySlider";
@@ -30,8 +29,6 @@ import {
   query,
   where,
   getDocs,
-  doc,
-  getDoc,
 } from "firebase/firestore";
 import RecommendedUserItem from "./RecommendedUserItem";
 import SearchHistory from "./SearchHistory";
@@ -162,79 +159,6 @@ export default function Search() {
       />
     );
   };
-
-  useEffect(() => {
-    const loadSearchHistory = async () => {
-      if (user) {
-        try {
-          const savedHistory = await AsyncStorage.getItem(
-            `searchHistory_${user.uid}`
-          );
-          if (savedHistory !== null) {
-            const parsedHistory = JSON.parse(savedHistory);
-
-            const updatedHistory = await Promise.all(
-              parsedHistory.map(async (item) => {
-                const userDocRef = doc(database, "users", item.id);
-                const userDoc = await getDoc(userDocRef);
-                if (!userDoc.exists()) {
-                  return null;
-                }
-                const userData = userDoc.data();
-                const isPrivate = userData?.isPrivate || false;
-    
-                const friendsRef = collection(
-                  database,
-                  "users",
-                  user.uid,
-                  "friends"
-                );
-                const friendsSnapshot = await getDocs(
-                  query(friendsRef, where("friendId", "==", item.id))
-                );
-                const isFriend = !friendsSnapshot.empty;
-    
-                const storiesRef = collection(
-                  database,
-                  "users",
-                  item.id,
-                  "stories"
-                );
-                const storiesSnapshot = await getDocs(storiesRef);
-                const now = new Date();
-    
-                const hasStories = storiesSnapshot.docs.some((storyDoc) => {
-                  const storyData = storyDoc.data();
-                  return (
-                    new Date(storyData.expiresAt.toDate()) > now &&
-                    (!isPrivate || isFriend)
-                  );
-                });
-    
-                return {
-                  ...item,
-                  hasStories,
-                  isPrivate,
-                  isFriend,
-                };
-              })
-            );
-    
-            const filteredHistory = updatedHistory.filter(
-              (item) => item && !blockedUsers.includes(item.id)
-            );
-    
-            setSearchHistory(filteredHistory);
-          }
-        } catch (error) {
-          console.error(t("errorLoadingSearchHistory"), error);
-        }
-      }
-    };
-    
-    loadSearchHistory();
-    
-  }, [user, blockedUsers]);
   
   const renderUserItem = ({ item, index }) => {
     return (
@@ -384,7 +308,6 @@ export default function Search() {
         <Ionicons
           name="search"
           size={20}
-          color="#333333"
           style={styles.searchIcon}
         />
         <TextInput

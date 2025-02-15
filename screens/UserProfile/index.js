@@ -427,6 +427,7 @@ export default function UserProfile({ route, navigation }) {
           <ScrollView
             horizontal
             pagingEnabled
+            bounces={false}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollViewHorizontal}
             onScroll={(event) => {

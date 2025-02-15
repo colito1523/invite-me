@@ -492,6 +492,7 @@ export default function Component({ route, navigation }) {
           <ScrollView
             horizontal
             pagingEnabled
+            bounces={false} 
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
           >
