@@ -31,13 +31,11 @@ const SearchHistory = ({
     setSearchHistory(updatedHistory);
     await saveSearchHistory(user, updatedHistory, blockedUsers);
 
-    // Si es privado y no es amigo, navega al perfil privado
     if (item.isPrivate && !item.isFriend) {
       navigation.navigate("PrivateUserProfile", { selectedUser: item });
       return;
     }
 
-    // Si no tiene historias, navega directamente al perfil
     if (!item.hasStories) {
       navigation.navigate("UserProfile", { selectedUser: item });
     } else {
@@ -90,10 +88,7 @@ const SearchHistory = ({
 
   const renderHistoryItem = (item, index) => (
     <View key={`history-${item.id}-${index}`} style={styles.historyItem}>
-      <TouchableOpacity
-        onPress={() => handleHistoryPress(item)}
-        style={styles.historyTextContainer}
-      >
+      <TouchableOpacity onPress={() => handleHistoryPress(item)} style={styles.historyTextContainer}>
         <TouchableOpacity onPress={() => handleHistoryPress(item)}>
           <View
             style={[
@@ -102,9 +97,7 @@ const SearchHistory = ({
             ]}
           >
             <Image
-              source={{
-                uri: item.profileImage || "https://via.placeholder.com/150",
-              }}
+              source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
               style={styles.userImage}
             />
           </View>
@@ -117,9 +110,12 @@ const SearchHistory = ({
     </View>
   );
 
+  // Filtrar el historial para excluir usuarios bloqueados
+  const filteredHistory = searchHistory.filter((item) => !blockedUsers.includes(item.id));
+
   return (
     <View>
-      {searchHistory.slice(0, 5).map((item, index) => renderHistoryItem(item, index))}
+      {filteredHistory.slice(0, 5).map((item, index) => renderHistoryItem(item, index))}
       {isModalVisible && (
         <Modal visible={isModalVisible} animationType="slide" transparent={false}>
           <StoryViewer

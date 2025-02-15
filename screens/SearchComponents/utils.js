@@ -110,56 +110,48 @@ export const fetchUsers = async (searchTerm, setResults) => {
 
 
 export const fetchRecommendations = async (user, setRecommendations) => {
-  const auth = getAuth(); 
+  const auth = getAuth();
   if (!user) return;
 
   try {
-    // Try to get cached recommendations first
-    const cachedData = await AsyncStorage.getItem(`recommendations_${user.uid}`);
-    if (cachedData) {
-      const { recommendations, timestamp } = JSON.parse(cachedData);
-      const now = new Date().getTime();
-      // Use cache if less than 5 minutes old
-      if (now - timestamp < 60 * 60 * 1000) {
-        setRecommendations(recommendations);
-        return;
-      }
-    }
-
-    // If no valid cache, proceed with normal fetch
+    // Obtener la lista actual de usuarios bloqueados del usuario actual
     const userRef = doc(database, "users", user.uid);
     const userSnapshot = await getDoc(userRef);
     const blockedUsers = userSnapshot.data()?.blockedUsers || [];
 
+    // Intentar obtener recomendaciones desde la caché
+    const cachedData = await AsyncStorage.getItem(`recommendations_${user.uid}`);
+    if (cachedData) {
+      const { recommendations, timestamp } = JSON.parse(cachedData);
+      const now = new Date().getTime();
+      if (now - timestamp < 60 * 60 * 1000) {
+        // Filtrar los usuarios bloqueados de la caché
+        const filteredCache = recommendations.filter(rec => !blockedUsers.includes(rec.id));
+        setRecommendations(filteredCache);
+        return;
+      }
+    }
+
+    // Si no hay caché válida, proceder con el fetch normal
     const friendsRef = collection(database, "users", user.uid, "friends");
     const friendsSnapshot = await getDocs(friendsRef);
-    const friendsList = friendsSnapshot.docs.map(
-      (doc) => doc.data().friendId
-    );
+    const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
 
     let potentialFriends = [];
     for (const friendId of friendsList) {
-      const friendFriendsRef = collection(
-        database,
-        "users",
-        friendId,
-        "friends"
-      );
+      const friendFriendsRef = collection(database, "users", friendId, "friends");
       const friendFriendsSnapshot = await getDocs(friendFriendsRef);
-      potentialFriends.push(
-        ...friendFriendsSnapshot.docs.map((doc) => doc.data().friendId)
-      );
+      potentialFriends.push(...friendFriendsSnapshot.docs.map(doc => doc.data().friendId));
     }
 
     potentialFriends = potentialFriends.filter(
       (id) =>
         id !== user.uid &&
         !friendsList.includes(id) &&
-        !blockedUsers.includes(id) 
+        !blockedUsers.includes(id)
     );
 
     const uniquePotentialFriends = [...new Set(potentialFriends)];
-
     const recommendedUsers = [];
     for (const friendId of uniquePotentialFriends) {
       const userDoc = await getDoc(doc(database, "users", friendId));
@@ -178,7 +170,7 @@ export const fetchRecommendations = async (user, setRecommendations) => {
 
     setRecommendations(recommendedUsers);
 
-    // Save to cache
+    // Guardar en caché
     await AsyncStorage.setItem(`recommendations_${user.uid}`, JSON.stringify({
       recommendations: recommendedUsers,
       timestamp: new Date().getTime()
