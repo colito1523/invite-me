@@ -30,10 +30,13 @@ import {
   query,
   where,
   getDocs,
+  doc,
+  getDoc
 } from "firebase/firestore";
 import RecommendedUserItem from "./RecommendedUserItem";
 import SearchHistory from "./SearchHistory";
 import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { styles, lightTheme, darkTheme } from "./styles";
 
 export default function Search() {
@@ -81,6 +84,22 @@ export default function Search() {
 
   const theme = isNightMode ? darkTheme : lightTheme;
 
+  // Carga el historial de búsquedas desde AsyncStorage y lo establece en el estado
+  useEffect(() => {
+    const loadSearchHistory = async () => {
+      if (!user) return;
+      try {
+        const savedHistory = await AsyncStorage.getItem(`searchHistory_${user.uid}`);
+        if (savedHistory) {
+          setSearchHistory(JSON.parse(savedHistory));
+        }
+      } catch (error) {
+        console.error("Error loading search history:", error);
+      }
+    };
+    loadSearchHistory();
+  }, [user]);
+
   const onRefresh = useCallback(async () => {
     if (!user) return;
 
@@ -88,7 +107,6 @@ export default function Search() {
     try {
       await Promise.all([
         fetchUsers(searchTerm, setResults),
-        // Posponemos la carga de recomendaciones hasta que terminen las interacciones
         InteractionManager.runAfterInteractions(() => {
           fetchRecommendations(user, setRecommendations);
         }),
@@ -106,7 +124,6 @@ export default function Search() {
     }
   }, [searchTerm, user, t]);
 
-  // Posponemos la búsqueda de usuarios para no bloquear la animación de entrada
   useEffect(() => {
     const task = InteractionManager.runAfterInteractions(() => {
       fetchUsers(searchTerm, setResults);
@@ -114,7 +131,6 @@ export default function Search() {
     return () => task.cancel();
   }, [searchTerm]);
 
-  // Posponemos la carga de recomendaciones
   useEffect(() => {
     const task = InteractionManager.runAfterInteractions(() => {
       fetchRecommendations(user, setRecommendations);
@@ -151,7 +167,6 @@ export default function Search() {
     checkFriendRequestStatus();
   }, []);
 
-  // useCallback para evitar recrear la función en cada render
   const renderRecommendationItem = useCallback(({ item, index }) => {
     return (
       <RecommendedUserItem
@@ -172,7 +187,6 @@ export default function Search() {
     );
   }, [blockedUsers, searchHistory, navigation, auth.currentUser, t, theme]);
 
-  // Memoriza el slice de recomendaciones
   const recommendationData = useMemo(() => recommendations.slice(0, 4), [recommendations]);
 
   const renderUserItem = ({ item, index }) => {
@@ -354,6 +368,8 @@ export default function Search() {
                   navigation={navigation}
                   theme={theme}
                   isNightMode={isNightMode}
+                  searchHistory={searchHistory}
+                  setSearchHistory={setSearchHistory}
                 />
               ),
             },
