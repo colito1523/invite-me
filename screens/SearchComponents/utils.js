@@ -312,17 +312,19 @@ export const handleUserPress = (
     return;
   }
 
-  // Actualiza el historial de búsqueda si el usuario no existe ya
-  const updatedHistory = [...searchHistory];
-  const existingUser = updatedHistory.find((item) => item.id === selectedUser.id);
-  if (!existingUser) {
-    updatedHistory.unshift(selectedUser);
-    if (updatedHistory.length > 10) updatedHistory.pop();
-    setSearchHistory(updatedHistory);
-    saveSearchHistory(currentUser, updatedHistory, blockedUsers);
+  // Remover el usuario si ya existe en el historial
+  const updatedHistory = searchHistory.filter((item) => item.id !== selectedUser.id);
+  // Agregar el usuario al principio
+  updatedHistory.unshift(selectedUser);
+  // Limitar el historial a 5 usuarios
+  while (updatedHistory.length > 5) {
+    updatedHistory.pop();
   }
 
-  // Nos aseguramos de que isPrivate e isFriend sean booleanos
+  setSearchHistory(updatedHistory);
+  saveSearchHistory(currentUser, updatedHistory, blockedUsers);
+
+  // Asegurarse de que isPrivate e isFriend sean booleanos
   const isPrivate = selectedUser.isPrivate || false;
   const isFriend = selectedUser.isFriend || false;
 
@@ -336,3 +338,4 @@ export const handleUserPress = (
     });
   }
 };
+
