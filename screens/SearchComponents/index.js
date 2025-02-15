@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
+  InteractionManager,
   View,
   TextInput,
   SectionList,
@@ -32,7 +33,7 @@ import {
 } from "firebase/firestore";
 import RecommendedUserItem from "./RecommendedUserItem";
 import SearchHistory from "./SearchHistory";
-import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer"; // Added import
+import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
 import { styles, lightTheme, darkTheme } from "./styles";
 
 export default function Search() {
@@ -65,7 +66,6 @@ export default function Search() {
     const interval = setInterval(checkTime, 60000);
     return () => clearInterval(interval);
   }, []);
-  
 
   useEffect(() => {
     navigation.setOptions({
@@ -88,7 +88,10 @@ export default function Search() {
     try {
       await Promise.all([
         fetchUsers(searchTerm, setResults),
-        fetchRecommendations(user, setRecommendations),
+        // Posponemos la carga de recomendaciones hasta que terminen las interacciones
+        InteractionManager.runAfterInteractions(() => {
+          fetchRecommendations(user, setRecommendations);
+        }),
         storySliderRef.current?.loadExistingStories(
           t,
           setStories,
@@ -103,12 +106,20 @@ export default function Search() {
     }
   }, [searchTerm, user, t]);
 
+  // Posponemos la búsqueda de usuarios para no bloquear la animación de entrada
   useEffect(() => {
-    fetchUsers(searchTerm, setResults);
+    const task = InteractionManager.runAfterInteractions(() => {
+      fetchUsers(searchTerm, setResults);
+    });
+    return () => task.cancel();
   }, [searchTerm]);
 
+  // Posponemos la carga de recomendaciones
   useEffect(() => {
-    fetchRecommendations(user, setRecommendations);
+    const task = InteractionManager.runAfterInteractions(() => {
+      fetchRecommendations(user, setRecommendations);
+    });
+    return () => task.cancel();
   }, [user]);
 
   useEffect(() => {
@@ -140,7 +151,8 @@ export default function Search() {
     checkFriendRequestStatus();
   }, []);
 
-  const renderRecommendationItem = ({ item, index }) => {
+  // useCallback para evitar recrear la función en cada render
+  const renderRecommendationItem = useCallback(({ item, index }) => {
     return (
       <RecommendedUserItem
         item={item}
@@ -158,8 +170,11 @@ export default function Search() {
         theme={theme}
       />
     );
-  };
-  
+  }, [blockedUsers, searchHistory, navigation, auth.currentUser, t, theme]);
+
+  // Memoriza el slice de recomendaciones
+  const recommendationData = useMemo(() => recommendations.slice(0, 4), [recommendations]);
+
   const renderUserItem = ({ item, index }) => {
     return (
       <View key={`user-${item.id}-${index}`} style={styles.resultItem}>
@@ -305,11 +320,7 @@ export default function Search() {
         selectedDate={new Date()}
       />
       <View style={styles.searchContainer}>
-        <Ionicons
-          name="search"
-          size={20}
-          style={styles.searchIcon}
-        />
+        <Ionicons name="search" size={20} style={styles.searchIcon} />
         <TextInput
           style={[styles.searchInput, { color: isNightMode ? "#fff" : "#000" }]}
           placeholder={t("search")}
@@ -329,6 +340,7 @@ export default function Search() {
       {searchTerm.length === 0 ? (
         <SectionList
           ListHeaderComponent={listHeader}
+          initialNumToRender={4}
           showsVerticalScrollIndicator={false}
           sections={[
             {
@@ -347,7 +359,7 @@ export default function Search() {
             },
             {
               title: t("suggestionsForYou"),
-              data: recommendations.slice(0, 4),
+              data: recommendationData,
               renderItem: renderRecommendationItem,
             },
           ]}
@@ -382,6 +394,7 @@ export default function Search() {
       ) : (
         <FlatList
           ListHeaderComponent={listHeader}
+          initialNumToRender={10}
           data={results}
           keyExtractor={(item) => item.id}
           renderItem={renderUserItem}
@@ -396,11 +409,7 @@ export default function Search() {
         />
       )}
       {isModalVisible && (
-        <Modal
-          visible={isModalVisible}
-          animationType="slide"
-          transparent={false}
-        >
+        <Modal visible={isModalVisible} animationType="slide" transparent={false}>
           <StoryViewer
             stories={selectedStories}
             initialIndex={0}

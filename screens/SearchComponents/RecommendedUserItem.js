@@ -101,4 +101,4 @@ const RecommendedUserItem = ({ item, index, onUserPress, theme }) => {
   );
 };
 
-export default RecommendedUserItem;
+export default React.memo(RecommendedUserItem);
