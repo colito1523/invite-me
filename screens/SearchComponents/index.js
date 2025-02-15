@@ -4,7 +4,6 @@ import {
   View,
   TextInput,
   SectionList,
-  FlatList,
   Text,
   TouchableOpacity,
   Alert,
@@ -30,8 +29,6 @@ import {
   query,
   where,
   getDocs,
-  doc,
-  getDoc
 } from "firebase/firestore";
 import RecommendedUserItem from "./RecommendedUserItem";
 import SearchHistory from "./SearchHistory";
@@ -59,12 +56,12 @@ export default function Search() {
   const user = auth.currentUser;
   const navigation = useNavigation();
 
+  // Configuración de modo nocturno
   useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
       setIsNightMode(currentHour >= 19 || currentHour < 6);
     };
-
     checkTime();
     const interval = setInterval(checkTime, 60000);
     return () => clearInterval(interval);
@@ -84,7 +81,7 @@ export default function Search() {
 
   const theme = isNightMode ? darkTheme : lightTheme;
 
-  // Carga el historial de búsquedas desde AsyncStorage y lo establece en el estado
+  // Cargar historial de búsquedas
   useEffect(() => {
     const loadSearchHistory = async () => {
       if (!user) return;
@@ -102,7 +99,6 @@ export default function Search() {
 
   const onRefresh = useCallback(async () => {
     if (!user) return;
-
     setRefreshing(true);
     try {
       await Promise.all([
@@ -110,12 +106,7 @@ export default function Search() {
         InteractionManager.runAfterInteractions(() => {
           fetchRecommendations(user, setRecommendations);
         }),
-        storySliderRef.current?.loadExistingStories(
-          t,
-          setStories,
-          setUnseenStories,
-          false
-        ),
+        storySliderRef.current?.loadExistingStories(t, setStories, setUnseenStories, false),
       ]);
     } catch (error) {
       console.error("Error refreshing:", error);
@@ -125,10 +116,10 @@ export default function Search() {
   }, [searchTerm, user, t]);
 
   useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() => {
+    const delaySearch = setTimeout(() => {
       fetchUsers(searchTerm, setResults);
-    });
-    return () => task.cancel();
+    }, 300);
+    return () => clearTimeout(delaySearch);
   }, [searchTerm]);
 
   useEffect(() => {
@@ -141,18 +132,9 @@ export default function Search() {
   useEffect(() => {
     const checkFriendRequestStatus = async () => {
       try {
-        const requestRef = collection(
-          database,
-          "users",
-          user.uid,
-          "friendRequests"
-        );
-        const existingRequestQuery = query(
-          requestRef,
-          where("fromId", "==", auth.currentUser.uid)
-        );
+        const requestRef = collection(database, "users", user.uid, "friendRequests");
+        const existingRequestQuery = query(requestRef, where("fromId", "==", auth.currentUser.uid));
         const existingRequestSnapshot = await getDocs(existingRequestQuery);
-
         if (!existingRequestSnapshot.empty) {
           const existingRequest = existingRequestSnapshot.docs[0].data();
           setRequestStatus(existingRequest.status);
@@ -163,11 +145,10 @@ export default function Search() {
         console.error(t("errorCheckingFriendRequestStatus"), error);
       }
     };
-
     checkFriendRequestStatus();
   }, []);
 
-  const renderRecommendationItem = useCallback(({ item, index }) => {
+  const renderRecommendationItem = ({ item, index }) => {
     return (
       <RecommendedUserItem
         item={item}
@@ -185,9 +166,7 @@ export default function Search() {
         theme={theme}
       />
     );
-  }, [blockedUsers, searchHistory, navigation, auth.currentUser, t, theme]);
-
-  const recommendationData = useMemo(() => recommendations.slice(0, 4), [recommendations]);
+  };
 
   const renderUserItem = ({ item, index }) => {
     return (
@@ -195,15 +174,8 @@ export default function Search() {
         <TouchableOpacity
           onPress={async () => {
             if (item.isPrivate) {
-              const friendsRef = collection(
-                database,
-                "users",
-                user.uid,
-                "friends"
-              );
-              const friendsSnapshot = await getDocs(
-                query(friendsRef, where("friendId", "==", item.id))
-              );
+              const friendsRef = collection(database, "users", user.uid, "friends");
+              const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
               if (friendsSnapshot.empty) {
                 navigation.navigate("UserProfile", { selectedUser: item });
                 return;
@@ -220,15 +192,9 @@ export default function Search() {
               });
             } else {
               try {
-                const storiesRef = collection(
-                  database,
-                  "users",
-                  item.id,
-                  "stories"
-                );
+                const storiesRef = collection(database, "users", item.id, "stories");
                 const storiesSnapshot = await getDocs(storiesRef);
                 const now = new Date();
-
                 const userStories = storiesSnapshot.docs
                   .map((doc) => ({
                     id: doc.id,
@@ -238,13 +204,11 @@ export default function Search() {
                     storyUrl: doc.data().storyUrl,
                     profileImage: doc.data().profileImage || item.profileImage,
                     uid: item.id,
-                    username:
-                      doc.data().username || item.username || t("unknownUser"),
+                    username: doc.data().username || item.username || t("unknownUser"),
                     viewers: doc.data().viewers || [],
                     likes: doc.data().likes || [],
                   }))
                   .filter((story) => new Date(story.expiresAt.toDate()) > now);
-
                 if (userStories.length > 0) {
                   setSelectedStories([
                     {
@@ -286,20 +250,15 @@ export default function Search() {
           <View
             style={[
               styles.unseenStoryCircle,
-              item.hasStories && {
-                borderColor: isNightMode ? "white" : "black",
-              },
+              item.hasStories && { borderColor: isNightMode ? "white" : "black" },
             ]}
           >
             <Image
-              source={{
-                uri: item.profileImage || "https://via.placeholder.com/150",
-              }}
+              source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
               style={styles.userImage}
             />
           </View>
         </TouchableOpacity>
-
         <TouchableOpacity
           onPress={() =>
             handleUserPressUtil(item, {
@@ -313,9 +272,7 @@ export default function Search() {
           }
           style={styles.textContainer}
         >
-          <Text style={[styles.resultText, { color: theme.text }]}>
-            {item.username}
-          </Text>
+          <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
           {item.firstName && item.lastName && (
             <Text style={[styles.fullName, { color: theme.textSecondary }]}>
               {`${item.firstName} ${item.lastName}`}
@@ -326,6 +283,7 @@ export default function Search() {
     );
   };
 
+  // Encabezado fijo que contiene el StorySlider y la barra de búsqueda (esta última se coloca debajo del StorySlider)
   const listHeader = (
     <>
       <StorySlider
@@ -341,89 +299,93 @@ export default function Search() {
           placeholderTextColor="#333333"
           value={searchTerm}
           onChangeText={setSearchTerm}
+          autoCorrect={false}
+          returnKeyType="search"
         />
       </View>
     </>
   );
+
+  // Definir las secciones según si hay término de búsqueda o no
+  const sections = searchTerm.length === 0
+    ? [
+        {
+          title: t("recent"),
+          data: [null], // se usa un valor placeholder para renderizar el SearchHistory
+          sectionKey: "recent",
+        },
+        {
+          title: t("suggestionsForYou"),
+          data: recommendations.slice(0, 4),
+          sectionKey: "suggestions",
+        },
+      ]
+    : [
+        {
+          title: "",
+          data: results,
+          sectionKey: "results",
+        },
+      ];
+
+  const renderSectionItem = ({ item, index, section }) => {
+    if (searchTerm.length === 0) {
+      if (section.sectionKey === "recent") {
+        return (
+          <SearchHistory
+            user={user}
+            blockedUsers={blockedUsers}
+            t={t}
+            navigation={navigation}
+            theme={theme}
+            isNightMode={isNightMode}
+            searchHistory={searchHistory}
+            setSearchHistory={setSearchHistory}
+          />
+        );
+      }
+      if (section.sectionKey === "suggestions") {
+        return renderRecommendationItem({ item, index });
+      }
+    } else {
+      return renderUserItem({ item, index });
+    }
+  };
 
   return (
     <LinearGradient
       colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
       style={styles.container}
     >
-      {searchTerm.length === 0 ? (
-        <SectionList
-          ListHeaderComponent={listHeader}
-          initialNumToRender={4}
-          showsVerticalScrollIndicator={false}
-          sections={[
-            {
-              title: t("recent"),
-              data: [null],
-              renderItem: () => (
-                <SearchHistory
-                  user={user}
-                  blockedUsers={blockedUsers}
-                  t={t}
-                  navigation={navigation}
-                  theme={theme}
-                  isNightMode={isNightMode}
-                  searchHistory={searchHistory}
-                  setSearchHistory={setSearchHistory}
-                />
-              ),
-            },
-            {
-              title: t("suggestionsForYou"),
-              data: recommendationData,
-              renderItem: renderRecommendationItem,
-            },
-          ]}
-          keyExtractor={(item, index) => index.toString()}
-          renderSectionHeader={({ section }) =>
-            section.data.length > 0 ? (
-              <Text style={[styles.sectionTitle, { color: theme.text }]}>
-                {section.title}
-              </Text>
-            ) : null
-          }
-          renderSectionFooter={({ section }) =>
-            section.title === t("recent") ? (
-              <View style={styles.sectionSeparator} />
-            ) : null
-          }
-          ListEmptyComponent={
-            <Text style={{ color: theme.text }}>
-              {t("noRecommendationsOrHistory")}
+      <SectionList
+        ListHeaderComponent={listHeader}
+        initialNumToRender={4}
+        sections={sections}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={renderSectionItem}
+        renderSectionHeader={({ section }) =>
+          section.title ? (
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {section.title}
             </Text>
-          }
-          stickySectionHeadersEnabled={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[theme.icon]}
-              tintColor={theme.icon}
-            />
-          }
-        />
-      ) : (
-        <FlatList
-          ListHeaderComponent={listHeader}
-          initialNumToRender={10}
-          data={results}
-          keyExtractor={(item) => item.id}
-          renderItem={renderUserItem}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[theme.icon]}
-              tintColor={theme.icon}
-            />
-          }
-        />
-      )}
+          ) : null
+        }
+        ListEmptyComponent={
+          <Text style={{ color: theme.text }}>
+            {t("noRecommendationsOrHistory")}
+          </Text>
+        }
+        stickySectionHeadersEnabled={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.icon]}
+            tintColor={theme.icon}
+          />
+        }
+        keyboardShouldPersistTaps="handled"
+      />
       {isModalVisible && (
         <Modal visible={isModalVisible} animationType="slide" transparent={false}>
           <StoryViewer
