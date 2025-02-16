@@ -553,58 +553,6 @@ export const handleThreeDotsPress = async ({
   }
 };
 
-export const toggleHideMyStories = async ({
-  viewer,
-  user,
-  database,
-  setSelectedViewer,
-  t,
-}) => {
-  if (!user || !viewer) return;
-
-  const viewerRef = doc(database, "users", viewer.uid);
-
-  try {
-    const viewerDoc = await getDoc(viewerRef);
-    const viewerData = viewerDoc.data();
-    const hideStoriesFrom = viewerData.hideStoriesFrom || [];
-
-    let updatedHideStoriesFrom;
-    if (hideStoriesFrom.includes(user.uid)) {
-      updatedHideStoriesFrom = hideStoriesFrom.filter(
-        (uid) => uid !== user.uid,
-      );
-      await updateDoc(viewerRef, {
-        hideStoriesFrom: updatedHideStoriesFrom,
-      });
-      Alert.alert(
-        t("storyViewer.success"),
-        t("storyViewer.viewerCanSeeStories"),
-      );
-    } else {
-      updatedHideStoriesFrom = [...hideStoriesFrom, user.uid];
-      await updateDoc(viewerRef, {
-        hideStoriesFrom: updatedHideStoriesFrom,
-      });
-      Alert.alert(
-        t("storyViewer.success"),
-        t("storyViewer.viewerCannotSeeStories"),
-      );
-    }
-
-    setSelectedViewer((prev) => ({
-      ...prev,
-      hideStoriesFrom: updatedHideStoriesFrom,
-    }));
-  } catch (error) {
-    console.error("Error updating hideStoriesFrom:", error);
-    Alert.alert(
-      t("storyViewer.error"),
-      t("storyViewer.storySettingsUpdateError"),
-    );
-  }
-};
-
 export const toggleHideStories = async ({
   user,
   currentStory,
@@ -887,81 +835,36 @@ export const preloadNextStory = ({
   stories,
   loadedImages,
   setLoadedImages,
-  preloadBuffer = 3,
 }) => {
-  const currentStory = stories[currentIndex]?.userStories[storyIndex];
-  if (!currentStory) return;
+  let nextCurrentIndex = currentIndex;
+  let nextStoryIndex = storyIndex + 1;
+  if (nextStoryIndex >= stories[currentIndex].userStories.length) {
+    nextCurrentIndex = currentIndex + 1;
+    nextStoryIndex = 0;
+  }
+  if (nextCurrentIndex >= stories.length) return;
 
-  // Usar Promise.all para cargar múltiples imágenes en paralelo
-  const preloadPromises = [];
-  const urlsToPreload = new Set();
-  const loadStartTime = Date.now();
-  const loadTimeout = 1500; // Reducir timeout a 1.5 segundos
+  const nextStory = stories[nextCurrentIndex].userStories[nextStoryIndex];
+  if (!nextStory) return;
 
-  // Precargar la historia actual con alta prioridad
-  const currentUrl = currentStory.storyUrl;
-  if (currentUrl && !loadedImages[currentUrl]) {
-    const currentLoadPromise = Image.prefetch(currentUrl).then(() => {
-      setLoadedImages((prev) => ({
-        ...prev,
-        [currentUrl]: { loaded: true, loadTime: Date.now() - loadStartTime },
-      }));
-    });
-    preloadPromises.push(currentLoadPromise);
+  if (loadedImages[nextStory.id]) {
+    console.log("Next image already preloaded:", nextStory.storyUrl);
+    return;
   }
 
-  // Precargar las siguientes historias del mismo usuario
-  for (let i = 1; i <= preloadBuffer; i++) {
-    if (storyIndex + i < stories[currentIndex]?.userStories.length) {
-      urlsToPreload.add(
-        stories[currentIndex].userStories[storyIndex + i].storyUrl,
-      );
-    }
-  }
-
-  // Precargar historias de los siguientes 2 usuarios
-  for (let i = 1; i <= 2; i++) {
-    if (currentIndex + i < stories.length) {
-      const nextUserStories = stories[currentIndex + i].userStories;
-      for (let j = 0; j < Math.min(3, nextUserStories.length); j++) {
-        urlsToPreload.add(nextUserStories[j].storyUrl);
-      }
-    }
-  }
-
-  // Precargar todas las URLs en paralelo con timeout
-  Array.from(urlsToPreload).forEach((url) => {
-    if (url && !loadedImages[url]) {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), loadTimeout),
-      );
-
-      const loadPromise = Promise.race([Image.prefetch(url), timeoutPromise])
-        .then(() => {
-          setLoadedImages((prev) => ({
-            ...prev,
-            [url]: { loaded: true, loadTime: Date.now() - loadStartTime },
-          }));
-        })
-        .catch((error) => {
-          if (error.message !== "Timeout") {
-            console.warn("Error precargando:", url, error);
-          }
-        });
-
-      preloadPromises.push(loadPromise);
-    }
-  });
-
-  // Ejecutar todas las promesas en paralelo
-  Promise.all(preloadPromises)
+  const startTime = Date.now();
+  Image.prefetch(nextStory.storyUrl)
     .then(() => {
-
+      const duration = Date.now() - startTime;
+      console.log("Next image loaded:", nextStory.storyUrl, "in", duration, "ms");
+      setLoadedImages(prev => ({ ...prev, [nextStory.id]: true }));
     })
-    .catch((error) => {
-      console.warn("Error en precarga:", error);
+    .catch(err => {
+      console.error("Error preloading image:", err);
     });
 };
+
+
 
 export const handleCloseViewersModal = ({
   setViewersModalVisible,

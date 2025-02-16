@@ -24,6 +24,7 @@ import StoryHeader from "./StoryHeader";
 import ViewerItem from "./ViewerItem";
 import StoryActions from "./StoryActions";
 import StoryProgressBar from "./StoryProgressBar";
+import OptionsModal from "./OptionsModal";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import {
   createStoryPanResponder,
@@ -36,7 +37,6 @@ import {
   handlePinViewer,
   handleUserPress,
   handleThreeDotsPress,
-  toggleHideMyStories,
   toggleHideStories,
   addViewerToStory,
   handleSearch,
@@ -166,6 +166,17 @@ export function StoryViewer({
   }, [auth.currentUser.uid, database]);
 
   const handleNextWrapper = () => {
+    let nextCurrentIndex = currentIndex;
+    let nextStoryIndex = storyIndex + 1;
+    if (nextStoryIndex >= stories[currentIndex].userStories.length) {
+      nextCurrentIndex = currentIndex + 1;
+      nextStoryIndex = 0;
+    }
+    const nextStory = stories[nextCurrentIndex]?.userStories[nextStoryIndex];
+    if (nextStory && !loadedImages[nextStory.id]) {
+      console.log("La imagen de la siguiente historia aún no se cargó.");
+      return;
+    }
     handleNext({
       stories,
       currentIndex,
@@ -555,43 +566,42 @@ export function StoryViewer({
             ></TouchableOpacity>
           )}
 
-{!isCurrentUserStory && isUIVisible && (
-  <StoryActions
-    message={message}
-    setMessage={setMessage}
-    onSendMessage={() =>
-      handleSendMessage({
-        auth,
-        database,
-        t,
-        stories,
-        currentIndex,
-        storyIndex,
-        message,
-        setMessage,
-        Keyboard,
-        setIsPaused,
-        setShowSendConfirmation,
-      })
-    }
-    onLikePress={() =>
-      handleLikeStory({
-        auth,
-        stories,
-        currentIndex,
-        storyIndex,
-        likedStories,
-        setLikedStories,
-        database,
-        t,
-      })
-    }
-    isLiked={likedStories[currentStory?.id]}
-    setIsPaused={setIsPaused}
-    t={t}
-  />
-)}
-
+          {!isCurrentUserStory && isUIVisible && (
+            <StoryActions
+              message={message}
+              setMessage={setMessage}
+              onSendMessage={() =>
+                handleSendMessage({
+                  auth,
+                  database,
+                  t,
+                  stories,
+                  currentIndex,
+                  storyIndex,
+                  message,
+                  setMessage,
+                  Keyboard,
+                  setIsPaused,
+                  setShowSendConfirmation,
+                })
+              }
+              onLikePress={() =>
+                handleLikeStory({
+                  auth,
+                  stories,
+                  currentIndex,
+                  storyIndex,
+                  likedStories,
+                  setLikedStories,
+                  database,
+                  t,
+                })
+              }
+              isLiked={likedStories[currentStory?.id]}
+              setIsPaused={setIsPaused}
+              t={t}
+            />
+          )}
 
           <Modal
             animationType="slide"
@@ -679,80 +689,27 @@ export function StoryViewer({
           </Modal>
         </View>
 
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isOptionsModalVisible}
-          onRequestClose={() => setIsOptionsModalVisible(false)}
-        >
-          <TouchableWithoutFeedback
-            onPress={() => setIsOptionsModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <TouchableWithoutFeedback>
-                <View style={styles.optionsModalContainer}>
-                  {isCurrentUserStory ? (
-                    // Opción solo para el dueño
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => {
-                        setIsOptionsModalVisible(false);
-                        deleteStory({
-                          auth,
-                          stories: localStories, // Usar localStories
-                          currentIndex,
-                          storyIndex,
-                          setStories: setLocalStories, // Usar setLocalStories
-                          onClose,
-                          database,
-                          storage,
-                          t,
-                        });
-                      }}
-                    >
-                      <Text style={styles.deleteButtonText}>
-                        {t("storyViewer.Delete")}
-                      </Text>
-                    </TouchableOpacity>
-                  ) : (
-                    // Opciones para otros usuarios
-                    <>
-                      <TouchableOpacity
-                        style={styles.optionButton}
-                        onPress={() => {
-                          toggleHideStories({
-                            user: auth.currentUser,
-                            currentStory,
-                            database,
-                            onClose,
-                            localUnseenStories,
-                            t,
-                          });
-                          setIsOptionsModalVisible(false);
-                        }}
-                      >
-                        <Text style={styles.optionButtonText}>
-                          {t("storyViewer.DontSeeMore")}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.optionButton}
-                        onPress={() => {
-                          setIsOptionsModalVisible(false);
-                          setIsComplaintsVisible(true); // Abre el modal de denuncias
-                        }}
-                      >
-                        <Text style={styles.optionButtonText}>
-                          {t("storyViewer.Report")}
-                        </Text>
-                      </TouchableOpacity>
-                    </>
-                  )}
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
+        <OptionsModal
+          isVisible={isOptionsModalVisible}
+          onClose={() => setIsOptionsModalVisible(false)}
+          isCurrentUserStory={
+            stories[currentIndex]?.uid === auth.currentUser?.uid
+          }
+          auth={auth}
+          localStories={localStories}
+          currentIndex={currentIndex}
+          storyIndex={storyIndex}
+          setLocalStories={setLocalStories}
+          database={database}
+          storage={storage}
+          currentStory={stories[currentIndex]?.userStories[storyIndex]}
+          toggleHideStories={toggleHideStories}
+          localUnseenStories={localUnseenStories}
+          t={t}
+          setIsComplaintsVisible={setIsComplaintsVisible}
+          deleteStory={deleteStory}
+          styles={styles}
+        />
 
         <Complaints
           isVisible={isComplaintsVisible}

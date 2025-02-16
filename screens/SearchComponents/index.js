@@ -56,6 +56,16 @@ export default function Search() {
   const user = auth.currentUser;
   const navigation = useNavigation();
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      InteractionManager.runAfterInteractions(() => {
+        fetchRecommendations(user, setRecommendations);
+      });
+    });
+  
+    return unsubscribe;
+  }, [navigation, user]);
+
   // Configuración de modo nocturno
   useEffect(() => {
     const checkTime = () => {
@@ -101,19 +111,18 @@ export default function Search() {
     if (!user) return;
     setRefreshing(true);
     try {
-      await Promise.all([
-        fetchUsers(searchTerm, setResults),
-        InteractionManager.runAfterInteractions(() => {
-          fetchRecommendations(user, setRecommendations);
-        }),
-        storySliderRef.current?.loadExistingStories(t, setStories, setUnseenStories, false),
-      ]);
+       await Promise.all([
+          fetchUsers(searchTerm, setResults),
+          fetchRecommendations(user, setRecommendations),  // Asegura que se recargan las recomendaciones
+          storySliderRef.current?.loadExistingStories(t, setStories, setUnseenStories, false),
+       ]);
     } catch (error) {
-      console.error("Error refreshing:", error);
+       console.error("Error refreshing:", error);
     } finally {
-      setRefreshing(false);
+       setRefreshing(false);
     }
-  }, [searchTerm, user, t]);
+ }, [searchTerm, user, t]);
+ 
 
   useEffect(() => {
     const delaySearch = setTimeout(() => {
@@ -307,26 +316,30 @@ export default function Search() {
   );
 
   // Definir las secciones según si hay término de búsqueda o no
-  const sections = searchTerm.length === 0
-    ? [
-        {
-          title: t("recent"),
-          data: [null], // se usa un valor placeholder para renderizar el SearchHistory
-          sectionKey: "recent",
-        },
-        {
-          title: t("suggestionsForYou"),
-          data: recommendations.slice(0, 4),
-          sectionKey: "suggestions",
-        },
-      ]
-    : [
-        {
-          title: "",
-          data: results,
-          sectionKey: "results",
-        },
-      ];
+// Definir las secciones según si hay término de búsqueda o no
+const sections = searchTerm.length === 0
+  ? [
+      ...(searchHistory.length > 0
+        ? [{
+            title: t("recent"),
+            data: [null], // se usa un valor placeholder para renderizar el SearchHistory
+            sectionKey: "recent",
+          }]
+        : []), // Si no hay historial, no se agrega esta sección
+      {
+        title: t("suggestionsForYou"),
+        data: recommendations.slice(0, 4),
+        sectionKey: "suggestions",
+      },
+    ]
+  : [
+      {
+        title: "",
+        data: results,
+        sectionKey: "results",
+      },
+    ];
+
 
   const renderSectionItem = ({ item, index, section }) => {
     if (searchTerm.length === 0) {
@@ -380,8 +393,8 @@ export default function Search() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[theme.icon]}
-            tintColor={theme.icon}
+            colors={isNightMode ? ["white"] : ["black"]} // Blanco de noche, negro de día
+            tintColor={isNightMode ? "white" : "black"} // También cambia el indicador de carga
           />
         }
         keyboardShouldPersistTaps="handled"

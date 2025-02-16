@@ -114,71 +114,63 @@ export const fetchRecommendations = async (user, setRecommendations) => {
   if (!user) return;
 
   try {
-    // Obtener la lista actual de usuarios bloqueados del usuario actual
-    const userRef = doc(database, "users", user.uid);
-    const userSnapshot = await getDoc(userRef);
-    const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+     const userRef = doc(database, "users", user.uid);
+     const userSnapshot = await getDoc(userRef);
+     const blockedUsers = userSnapshot.data()?.blockedUsers || [];
 
-    // Intentar obtener recomendaciones desde la caché
-    const cachedData = await AsyncStorage.getItem(`recommendations_${user.uid}`);
-    if (cachedData) {
-      const { recommendations, timestamp } = JSON.parse(cachedData);
-      const now = new Date().getTime();
-      if (now - timestamp < 60 * 60 * 1000) {
-        // Filtrar los usuarios bloqueados de la caché
-        const filteredCache = recommendations.filter(rec => !blockedUsers.includes(rec.id));
-        setRecommendations(filteredCache);
-        return;
-      }
-    }
+     const cachedData = await AsyncStorage.getItem(`recommendations_${user.uid}`);
+     if (cachedData) {
+        const { recommendations, timestamp } = JSON.parse(cachedData);
+        const now = new Date().getTime();
+        if (now - timestamp < 60 * 60 * 1000) {
+           setRecommendations(recommendations.filter(rec => !blockedUsers.includes(rec.id)));
+        } else {
+           console.log("Caché expirada, recargando recomendaciones...");
+        }
+     }
 
-    // Si no hay caché válida, proceder con el fetch normal
-    const friendsRef = collection(database, "users", user.uid, "friends");
-    const friendsSnapshot = await getDocs(friendsRef);
-    const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
+     // Siempre buscar nuevas recomendaciones sin depender de la caché
+     const friendsRef = collection(database, "users", user.uid, "friends");
+     const friendsSnapshot = await getDocs(friendsRef);
+     const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
 
-    let potentialFriends = [];
-    for (const friendId of friendsList) {
-      const friendFriendsRef = collection(database, "users", friendId, "friends");
-      const friendFriendsSnapshot = await getDocs(friendFriendsRef);
-      potentialFriends.push(...friendFriendsSnapshot.docs.map(doc => doc.data().friendId));
-    }
+     let potentialFriends = [];
+     for (const friendId of friendsList) {
+        const friendFriendsRef = collection(database, "users", friendId, "friends");
+        const friendFriendsSnapshot = await getDocs(friendFriendsRef);
+        potentialFriends.push(...friendFriendsSnapshot.docs.map(doc => doc.data().friendId));
+     }
 
-    potentialFriends = potentialFriends.filter(
-      (id) =>
-        id !== user.uid &&
-        !friendsList.includes(id) &&
-        !blockedUsers.includes(id)
-    );
+     potentialFriends = potentialFriends.filter(id => id !== user.uid && !friendsList.includes(id) && !blockedUsers.includes(id));
+     const uniquePotentialFriends = [...new Set(potentialFriends)];
 
-    const uniquePotentialFriends = [...new Set(potentialFriends)];
-    const recommendedUsers = [];
-    for (const friendId of uniquePotentialFriends) {
-      const userDoc = await getDoc(doc(database, "users", friendId));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        recommendedUsers.push({
-          id: friendId,
-          ...userData,
-          profileImage:
-            userData.photoUrls && userData.photoUrls.length > 0
-              ? userData.photoUrls[0]
-              : "https://via.placeholder.com/150",
-        });
-      }
-    }
+     const recommendedUsers = [];
+     for (const friendId of uniquePotentialFriends) {
+        const userDoc = await getDoc(doc(database, "users", friendId));
+        if (userDoc.exists()) {
+           const userData = userDoc.data();
+           recommendedUsers.push({
+              id: friendId,
+              ...userData,
+              profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+           });
+        }
+     }
 
-    setRecommendations(recommendedUsers);
+     setRecommendations(recommendedUsers);
 
-    // Guardar en caché
-    await AsyncStorage.setItem(`recommendations_${user.uid}`, JSON.stringify({
-      recommendations: recommendedUsers,
-      timestamp: new Date().getTime()
-    }));
+     // Guardar en caché solo si hay datos nuevos
+     if (recommendedUsers.length > 0) {
+        await AsyncStorage.setItem(`recommendations_${user.uid}`, JSON.stringify({
+           recommendations: recommendedUsers,
+           timestamp: new Date().getTime()
+        }));
+     }
   } catch (error) {
-    console.error("Error fetching friend recommendations:", error);
+     console.error("Error fetching friend recommendations:", error);
   }
 };
+
 
 export const sendFriendRequest = async (user, setStatus) => {
   const auth = getAuth(); 
