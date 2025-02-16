@@ -7,8 +7,6 @@ import {
   Keyboard,
   SafeAreaView,
   Dimensions,
-  Image,
-  BackHandler,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -23,8 +21,11 @@ import StoryActions from "./StoryActions";
 import StoryProgressBar from "./StoryProgressBar";
 import OptionsModal from "./OptionsModal";
 import ViewersModal from "./ViewersModal";
+import StoryImage from "./StoryImage";
 import useKeyboardListeners from "./useKeyboardListeners";
 import StoryNavigationButtons from "./StoryNavigationButtons";
+import useBackHandler from "./useBackHandler";
+import useUserRelations from "./useUserRelations";
 import {
   createStoryPanResponder,
   handleNextUser,
@@ -38,7 +39,6 @@ import {
   handleThreeDotsPress,
   toggleHideStories,
   addViewerToStory,
-  handleSearch,
   handleOpenViewersModal,
   handleLongPressIn,
   handleLongPressOut,
@@ -47,13 +47,9 @@ import {
   handleNext,
   preloadNextStory,
   handleCloseViewersModal,
-  fetchBlockedUsers,
-  fetchPinnedViewers,
   useStoryProgress,
   calculateHoursAgo,
 } from "./storyUtils"; // Fix import path
-
-const { width, height } = Dimensions.get("window"); // Add this line
 
 export function StoryViewer({
   stories,
@@ -120,22 +116,18 @@ export function StoryViewer({
   const [likedStories, setLikedStories] = useState({}); // Estado para likes por historia
   const [viewers, setViewers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [pinnedViewers, setPinnedViewers] = useState([]);
   const [loadedImages, setLoadedImages] = useState({});
   const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
   const [isComplaintsVisible, setIsComplaintsVisible] = useState(false);
   const [showSendConfirmation, setShowSendConfirmation] = useState(false);
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
-  const [blockedUsers, setBlockedUsers] = useState([]);
   const [isHideStoryModalVisible, setIsHideStoryModalVisible] = useState(false);
   const [progress, setProgress] = useState(0);
   const [selectedViewer, setSelectedViewer] = useState(null); // Para almacenar el espectador seleccionado
-  const [imageDimensions, setImageDimensions] = useState({
-    width: "100%",
-    height: "100%",
-  });
   const [isLongPressActive, setIsLongPressActive] = useState(false);
   const [isUIVisible, setIsUIVisible] = useState(true);
+  const { blockedUsers, pinnedViewers, setBlockedUsers, setPinnedViewers } =
+    useUserRelations({ auth, database });
   const isKeyboardVisible = useKeyboardListeners();
   useEffect(() => {
     if (isKeyboardVisible) {
@@ -162,14 +154,6 @@ export function StoryViewer({
       setIsPaused(false);
     }
   }, [isComplaintsVisible, isOptionsModalVisible, isKeyboardVisible]);
-
-  useEffect(() => {
-    fetchBlockedUsers({ auth, database, setBlockedUsers });
-  }, []);
-
-  useEffect(() => {
-    fetchPinnedViewers({ auth, database, setPinnedViewers });
-  }, [auth.currentUser.uid, database]);
 
   const handleNextWrapper = () => {
     let nextCurrentIndex = currentIndex;
@@ -367,19 +351,8 @@ export function StoryViewer({
     />
   );
 
-  useEffect(() => {
-    const backAction = () => {
-      onClose(localUnseenStories);
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, [onClose, localUnseenStories]);
+ 
+useBackHandler(() => onClose(localUnseenStories));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -443,12 +416,10 @@ export function StoryViewer({
                     progress={progress}
                   />
                 )}
-                <Image
-                  key={currentStory.id}
-                  source={{
-                    uri: `${currentStory.storyUrl}?alt=media&w=1&h=1&q=1`,
-                  }}
-                  style={[styles.image, imageDimensions]}
+                <StoryImage
+                  key={currentStory.id} // por si necesitas forzar re-render
+                  currentStory={currentStory} // pasamos la historia actual
+                  style={styles.image} // aplica tus estilos base
                   fadeDuration={0}
                   priority="high"
                   loadingIndicatorSource={require("../../../assets/notification-icon.png")}
@@ -456,36 +427,6 @@ export function StoryViewer({
                   cachePolicy="memory-disk"
                   progressiveRenderingEnabled={true}
                   memoryCachePolicy="aggressive"
-                  onLoadStart={() => {
-                    currentStory.loadStartTime = Date.now();
-                  }}
-                  onLoad={(event) => {
-                    const loadTime =
-                      Date.now() - (currentStory.loadStartTime || Date.now());
-
-                    const { width: imgWidth, height: imgHeight } =
-                      event.nativeEvent.source;
-                    const screenAspectRatio = width / height;
-                    const imageAspectRatio = imgWidth / imgHeight;
-
-                    if (imageAspectRatio > screenAspectRatio) {
-                      setImageDimensions({
-                        width: "100%",
-                        height: "100%",
-                      });
-                    } else {
-                      setImageDimensions({
-                        width: "100%",
-                        height: "100%",
-                      });
-                    }
-                  }}
-                  onError={(error) => {
-                    console.error(
-                      `Error cargando historia ${currentStory.id}:`,
-                      error
-                    );
-                  }}
                 />
               </View>
               {isUIVisible && (
