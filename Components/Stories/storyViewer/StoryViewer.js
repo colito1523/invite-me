@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  TouchableOpacity,
   Text,
-  TextInput,
-  Modal,
-  FlatList,
   TouchableWithoutFeedback,
   Alert,
   Keyboard,
@@ -13,8 +9,9 @@ import {
   Dimensions,
   Image,
   BackHandler,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { auth, database, storage } from "../../../config/firebase";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import styles from "./StoryViewStyles";
@@ -25,7 +22,9 @@ import ViewerItem from "./ViewerItem";
 import StoryActions from "./StoryActions";
 import StoryProgressBar from "./StoryProgressBar";
 import OptionsModal from "./OptionsModal";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import ViewersModal from "./ViewersModal";
+import useKeyboardListeners from "./useKeyboardListeners";
+import StoryNavigationButtons from "./StoryNavigationButtons";
 import {
   createStoryPanResponder,
   handleNextUser,
@@ -122,7 +121,6 @@ export function StoryViewer({
   const [viewers, setViewers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [pinnedViewers, setPinnedViewers] = useState([]);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [loadedImages, setLoadedImages] = useState({});
   const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
   const [isComplaintsVisible, setIsComplaintsVisible] = useState(false);
@@ -138,6 +136,14 @@ export function StoryViewer({
   });
   const [isLongPressActive, setIsLongPressActive] = useState(false);
   const [isUIVisible, setIsUIVisible] = useState(true);
+  const isKeyboardVisible = useKeyboardListeners();
+  useEffect(() => {
+    if (isKeyboardVisible) {
+      setIsPaused(true);
+    } else {
+      setIsPaused(false);
+    }
+  }, [isKeyboardVisible]);
 
   const user = auth.currentUser;
 
@@ -217,28 +223,6 @@ export function StoryViewer({
       setIsPaused(false);
     }
   }, [isOptionsModalVisible]);
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        setIsKeyboardVisible(true);
-        setIsPaused(true);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        setIsKeyboardVisible(false);
-        setIsPaused(false);
-      }
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
 
   useEffect(() => {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
@@ -543,28 +527,21 @@ export function StoryViewer({
             </View>
           )}
 
-          {!isFirstStory && (
-            <TouchableOpacity
-              style={[styles.navButton, styles.leftButton]}
-              onPress={() =>
-                handlePrevious({
-                  storyIndex,
-                  setStoryIndex,
-                  currentIndex,
-                  setCurrentIndex,
-                  stories: localStories,
-                  setProgress,
-                })
-              }
-            ></TouchableOpacity>
-          )}
-
-          {!isLastStory && (
-            <TouchableOpacity
-              style={[styles.navButton, styles.rightButton]}
-              onPress={handleNextWrapper}
-            ></TouchableOpacity>
-          )}
+          <StoryNavigationButtons
+            isFirstStory={isFirstStory}
+            isLastStory={isLastStory}
+            onPrevious={() =>
+              handlePrevious({
+                storyIndex,
+                setStoryIndex,
+                currentIndex,
+                setCurrentIndex,
+                stories: localStories,
+                setProgress,
+              })
+            }
+            onNext={handleNextWrapper}
+          />
 
           {!isCurrentUserStory && isUIVisible && (
             <StoryActions
@@ -603,90 +580,35 @@ export function StoryViewer({
             />
           )}
 
-          <Modal
-            animationType="slide"
-            transparent={true}
+          <ViewersModal
             visible={viewersModalVisible}
-            onRequestClose={() =>
+            onClose={() =>
               handleCloseViewersModal({
                 setViewersModalVisible,
                 setIsPaused,
               })
             }
-          >
-            <TouchableWithoutFeedback
-              onPress={() =>
-                handleCloseViewersModal({
-                  setViewersModalVisible,
-                  setIsPaused,
-                })
-              }
-            >
-              <View style={styles.modalOverlay}>
-                <TouchableWithoutFeedback>
-                  <View style={styles.viewersModalContainer}>
-                    <View style={styles.viewersModalContent}>
-                      <View style={styles.viewersModalHeader}>
-                        <View style={styles.searchContainer}>
-                          <Ionicons
-                            name="search"
-                            size={20}
-                            color="black"
-                            style={styles.searchIcon}
-                          />
-                          <TextInput
-                            style={styles.searchInput}
-                            placeholder={t("storyViewer.searchPlaceholder")}
-                            placeholderTextColor="black"
-                            value={searchQuery}
-                            onChangeText={(query) =>
-                              handleSearch({ query, setSearchQuery })
-                            }
-                          />
-                          <View style={styles.searchInputDivider} />
-                          <Text style={styles.searchInputCount}>
-                            {filteredViewers.length}
-                          </Text>
-                        </View>
-                        <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() => {
-                            setViewersModalVisible(false);
-                            setIsPaused(false);
-                            deleteStory({
-                              auth,
-                              stories: localStories,
-                              currentIndex,
-                              storyIndex,
-                              setStories: setLocalStories,
-                              onClose,
-                              database,
-                              storage,
-                              t,
-                            });
-                          }}
-                        >
-                          <Ionicons
-                            name="trash-outline"
-                            size={20}
-                            color="black"
-                          />
-                        </TouchableOpacity>
-                      </View>
-                      <Text style={styles.viewersTitle}>
-                        {t("storyViewer.viewers")}
-                      </Text>
-                      <FlatList
-                        data={filteredViewers}
-                        renderItem={renderViewerItem}
-                        keyExtractor={(item) => item.uid}
-                      />
-                    </View>
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
+            filteredViewers={filteredViewers}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onDeleteStory={() => {
+              setViewersModalVisible(false);
+              setIsPaused(false);
+              deleteStory({
+                auth,
+                stories: localStories,
+                currentIndex,
+                storyIndex,
+                setStories: setLocalStories,
+                onClose,
+                database,
+                storage,
+                t,
+              });
+            }}
+            renderViewerItem={renderViewerItem}
+            t={t}
+          />
         </View>
 
         <OptionsModal
