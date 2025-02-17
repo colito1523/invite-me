@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
-  InteractionManager,
   View,
   TextInput,
   SectionList,
@@ -79,7 +78,6 @@ export default function Search() {
       // Limpiar todo
       setSearchTerm("");
       setResults([]);
-      setRecommendations([]);  // <-- Asegúrate de vaciar
 
     });
   
@@ -186,6 +184,7 @@ export default function Search() {
           })
         }
         theme={theme}
+        isNightMode={isNightMode}
       />
     );
   };

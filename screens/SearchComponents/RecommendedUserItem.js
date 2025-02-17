@@ -9,7 +9,7 @@ import { sendFriendRequest, cancelFriendRequest } from "./utils";
 import { useTranslation } from "react-i18next";
 import { styles } from "./styles";
 
-const RecommendedUserItem = ({ item, index, onUserPress, theme }) => {
+const RecommendedUserItem = ({ item, index, onUserPress, theme, isNightMode }) => {
   const auth = getAuth();
   const { t } = useTranslation();
   const [status, setStatus] = useState(null);
@@ -71,9 +71,11 @@ const RecommendedUserItem = ({ item, index, onUserPress, theme }) => {
     uri: item.lowQualityProfileImage || item.profileImage,
     cache: "force-cache",
   }}
-  style={styles.userImage}
+  style={[
+    styles.userImage,
+  { backgroundColor: isNightMode ? "black" : "#fff" } // Fondo dinámico
+  ]}
   contentFit="cover"
-  defaultSource={require("../../assets/perfil.jpg")}
 />
       <View style={styles.textContainer}>
         <Text style={[styles.resultText, { color: theme.text }]}>
