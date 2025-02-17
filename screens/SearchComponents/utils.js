@@ -341,20 +341,10 @@ export const handleUserPress = (
     return;
   }
 
-  // Actualiza el historial sin esperar la operación asíncrona
-  const updatedHistory = searchHistory.filter(item => item.id !== selectedUser.id);
-  updatedHistory.unshift(selectedUser);
-  while (updatedHistory.length > 5) {
-    updatedHistory.pop();
-  }
-  setSearchHistory(updatedHistory);
-  // Llamada sin await para no bloquear la navegación
-  saveSearchHistory(currentUser, updatedHistory, blockedUsers);
-
-  // Asegurarse de que isPrivate e isFriend sean booleanos
   const isPrivate = selectedUser.isPrivate || false;
   const isFriend = selectedUser.isFriend || false;
 
+  // 1. Navegar primero
   if (isPrivate && !isFriend) {
     navigation.navigate("PrivateUserProfile", {
       selectedUser: { ...selectedUser, isPrivate, isFriend },
@@ -364,6 +354,21 @@ export const handleUserPress = (
       selectedUser: { ...selectedUser, isPrivate, isFriend },
     });
   }
+
+  // 2. Luego, tras un pequeño delay, actualizar el historial.
+  //    De esta forma se evita el “parpadeo” o actualización inmediata del listado.
+  setTimeout(() => {
+    const updatedHistory = searchHistory.filter(
+      (item) => item.id !== selectedUser.id
+    );
+    updatedHistory.unshift(selectedUser);
+    while (updatedHistory.length > 5) {
+      updatedHistory.pop();
+    }
+    setSearchHistory(updatedHistory);
+    // Guardado en segundo plano, sin bloquear la navegación
+    saveSearchHistory(currentUser, updatedHistory, blockedUsers);
+  }, 600); // 50 ms o el tiempo que prefieras
 };
 
 

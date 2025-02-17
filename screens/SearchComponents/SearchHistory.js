@@ -22,64 +22,24 @@ const SearchHistory = ({
   const [selectedStories, setSelectedStories] = useState(null);
 
   const handleHistoryPress = async (item) => {
-    // Actualiza el orden: remueve el usuario si ya existe y lo agrega al inicio
-    const updatedHistory = searchHistory.filter((u) => u.id !== item.id);
-    updatedHistory.unshift(item);
-    while (updatedHistory.length > 5) {
-      updatedHistory.pop();
-    }
-    setSearchHistory(updatedHistory);
-    // Ejecutar la actualización en segundo plano sin await
-    saveSearchHistory(user, updatedHistory, blockedUsers);
-  
     if (item.isPrivate && !item.isFriend) {
       navigation.navigate("PrivateUserProfile", { selectedUser: item });
-      return;
+    } else {
+      navigation.navigate("UserProfile", { selectedUser: item });
     }
   
-    if (!item.hasStories) {
-      navigation.navigate("UserProfile", { selectedUser: item });
-    } else {
-      try {
-        const storiesRef = collection(database, "users", item.id, "stories");
-        const storiesSnapshot = await getDocs(storiesRef);
-        const now = new Date();
-        const userStories = storiesSnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt,
-            expiresAt: doc.data().expiresAt,
-            storyUrl: doc.data().storyUrl,
-            profileImage: doc.data().profileImage || item.profileImage,
-            uid: item.id,
-            username: doc.data().username || item.username || t("unknownUser"),
-            viewers: doc.data().viewers || [],
-            likes: doc.data().likes || [],
-          }))
-          .filter((story) => new Date(story.expiresAt.toDate()) > now);
-        if (userStories.length > 0) {
-          setSelectedStories([
-            {
-              uid: item.id,
-              username:
-                `${item.firstName || ""} ${item.lastName || ""}`.trim() ||
-                item.username ||
-                t("unknownUser"),
-              profileImage: item.profileImage,
-              userStories: userStories,
-            },
-          ]);
-          setIsModalVisible(true);
-        } else {
-          navigation.navigate("UserProfile", { selectedUser: item });
-        }
-      } catch (error) {
-        console.error(t("errorLoadingStories"), error);
-        Alert.alert(t("error"), t("errorLoadingStories"));
+    // Retrasamos la actualización del historial para evitar refresco antes de la navegación
+    setTimeout(() => {
+      const updatedHistory = searchHistory.filter((u) => u.id !== item.id);
+      updatedHistory.unshift(item);
+      while (updatedHistory.length > 5) {
+        updatedHistory.pop();
       }
-    }
+      setSearchHistory(updatedHistory);
+      saveSearchHistory(user, updatedHistory, blockedUsers);
+    }, 500); // Ajusta este tiempo según el rendimiento de la navegación
   };
+  
   
 
   const removeFromHistory = async (userId) => {

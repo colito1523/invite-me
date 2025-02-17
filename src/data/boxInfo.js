@@ -660,6 +660,28 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Lisboa/Bar Alimentar.jpg"),
+    title: "Bar Alimentar",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-",
+    },
+    number: "927 932 885",
+    coordinates: {
+      latitude: 38.71423350,
+      longitude: -9.15305580,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
     path: require("../../assets/Lisboa/Lx_Factory.jpg"),
     title: "Lx Factory",
     category: "Restaurants & Rooftops",
@@ -786,6 +808,50 @@ const boxInfo = [
     coordinates: {
       latitude: 38.6982578,
       longitude: -9.4217543,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/marvila.jpg"),
+    title: "8 marvila",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "12:00 PM - 12:00 AM",
+      Viernes: "12:00 PM - 2:00 AM",
+      Sábado: "12:00 PM - 2:00 AM",
+      Domingo: "12:00 PM - 10:00 PM",
+    },
+    number: "-",
+    coordinates: {
+      latitude: 38.74228450,
+      longitude: -9.10209180,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/Meceiria.jpg"),
+    title: "Mercearia Pacheca",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "8:00 AM - 10:00 PM",
+      Miércoles: "8:00 AM - 10:00 PM",
+      Jueves: "8:00 AM - 10:00 PM",
+      Viernes: "8:00 AM - 10:00 PM",
+      Sábado: "8:00 AM - 10:00 PM",
+      Domingo: "Cerrado",
+    },
+    number: "915 394 817",
+    coordinates: {
+      latitude: 38.72447670,
+      longitude: -9.15598330,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -1023,6 +1089,27 @@ const boxInfo = [
     coordinates: {
       latitude: 40.4288166,
       longitude: -3.687976,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/Arrogante.jpg"),
+    title: "Arrogante",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "8:00 PM - 1:00 AM",
+      Martes: "8:00 PM - 1:00 AM",
+      Miércoles: "8:00 PM - 1:00 AM",
+      Jueves: "8:00 PM - 1:00 AM",
+      Viernes: "2:00 PM - 2:00 AM",
+      Sábado: "1:30 PM - 2:00 AM",
+      Domingo: "1:30 PM - 1:00 AM",
+    },
+    number: "+34 917 37 69 70",
+    coordinates: {
+      latitude: 40.43326880,
+      longitude: -3.68328290,
     },
     country: "España",
     city: "Madrid",
