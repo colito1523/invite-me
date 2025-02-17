@@ -58,6 +58,20 @@ export default function Search() {
   const navigation = useNavigation();
 
   useEffect(() => {
+    // Si el usuario no ha escrito nada, cargamos las recomendaciones con un leve retraso
+    if (!searchTerm) {
+      const timer = setTimeout(() => {
+        fetchRecommendations(user, setRecommendations);
+      }, 500); // medio segundo de retraso (ajusta a tu gusto)
+  
+      return () => clearTimeout(timer);
+    } else {
+      // Si el usuario empieza a teclear, vaciamos las recomendaciones para no bloquear
+      setRecommendations([]);
+    }
+  }, [searchTerm, user]);
+
+  useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       // Forzar re-render
       setFocusKey(prev => prev + 1);
@@ -66,9 +80,7 @@ export default function Search() {
       setSearchTerm("");
       setResults([]);
       setRecommendations([]);  // <-- Asegúrate de vaciar
-  
-      // Llamar inmediatamente a fetchRecommendations
-      fetchRecommendations(user, setRecommendations);
+
     });
   
     return unsubscribe;
@@ -119,17 +131,16 @@ export default function Search() {
     if (!user) return;
     setRefreshing(true);
     try {
-       await Promise.all([
-          fetchUsers(searchTerm, setResults),
-          fetchRecommendations(user, setRecommendations),  // Asegura que se recargan las recomendaciones
-          storySliderRef.current?.loadExistingStories(t, setStories, setUnseenStories, false),
-       ]);
+      await Promise.all([
+        fetchUsers(searchTerm, setResults),
+        storySliderRef.current?.loadExistingStories(t, setStories, setUnseenStories, false),
+      ]);
     } catch (error) {
-       console.error("Error refreshing:", error);
+      console.error("Error refreshing:", error);
     } finally {
-       setRefreshing(false);
+      setRefreshing(false);
     }
- }, [searchTerm, user, t]);
+  }, [searchTerm, user, t]);
  
 
   useEffect(() => {

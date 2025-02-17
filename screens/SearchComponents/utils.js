@@ -1,5 +1,5 @@
-import { collection, getDocs, query, where, addDoc, getDoc, deleteDoc, doc, or } from "firebase/firestore";
-import { database, auth } from "../../config/firebase";
+import { collection, getDocs, query, where, addDoc, getDoc, deleteDoc, doc, documentId } from "firebase/firestore";
+import { database} from "../../config/firebase";
 import { getAuth } from "firebase/auth"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
@@ -114,60 +114,101 @@ export const fetchRecommendations = async (user, setRecommendations) => {
   if (!user) return;
 
   try {
-     const userRef = doc(database, "users", user.uid);
-     const userSnapshot = await getDoc(userRef);
-     const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+    // 1) Leer datos del usuario, para conocer a bloqueados
+    const userRef = doc(database, "users", user.uid);
+    const userSnapshot = await getDoc(userRef);
+    const blockedUsers = userSnapshot.data()?.blockedUsers || [];
 
-     const cachedData = await AsyncStorage.getItem(`recommendations_${user.uid}`);
-     if (cachedData) {
-        const { recommendations, timestamp } = JSON.parse(cachedData);
-        const now = new Date().getTime();
-        if (now - timestamp < 60 * 60 * 1000) {
-           setRecommendations(recommendations.filter(rec => !blockedUsers.includes(rec.id)));
-        } else {
-           console.log("Caché expirada, recargando recomendaciones...");
+    // 2) Leer caché
+    const cachedData = await AsyncStorage.getItem(`recommendations_${user.uid}`);
+    if (cachedData) {
+      const { recommendations: cachedRecs, timestamp } = JSON.parse(cachedData);
+      const now = Date.now();
+      // Ejemplo: 1 hora de vigencia
+      if (now - timestamp < 60 * 60 * 1000) {
+        // Filtrar bloqueados de la lista cacheada
+        const filtered = cachedRecs.filter(
+          (rec) => !blockedUsers.includes(rec.id)
+        );
+        setRecommendations(filtered);
+      } else {
+        console.log("Caché expirada, recargando recomendaciones...");
+      }
+    }
+
+    // 3) Obtener la lista de amigos del usuario
+    const friendsRef = collection(database, "users", user.uid, "friends");
+    const friendsSnapshot = await getDocs(friendsRef);
+    const friendsList = friendsSnapshot.docs.map((doc) => doc.data().friendId);
+
+    // 4) Ir armando la lista de "amigos de mis amigos"
+    //    (en el ejemplo, mantenemos el bucle, pero luego haremos UNA sola consulta por chunk)
+    let potentialFriends = [];
+    for (const friendId of friendsList) {
+      const friendFriendsRef = collection(database, "users", friendId, "friends");
+      const friendFriendsSnapshot = await getDocs(friendFriendsRef);
+      potentialFriends.push(
+        ...friendFriendsSnapshot.docs.map((doc) => doc.data().friendId)
+      );
+    }
+
+    // 5) Filtrar:
+    //    - No incluyas al usuario actual
+    //    - No incluyas amigos directos (ya lo son)
+    //    - No incluyas usuarios bloqueados
+    potentialFriends = potentialFriends.filter(
+      (id) =>
+        id !== user.uid &&
+        !friendsList.includes(id) &&
+        !blockedUsers.includes(id)
+    );
+
+    // Quitar duplicados
+    const uniquePotentialFriends = [...new Set(potentialFriends)];
+
+    // 6) Hacer consultas por lotes (chunks) para no sobrepasar
+    //    el límite de Firestore (10 ó 30 IDs en un "in").
+    const chunkSize = 10;
+    let recommendedUsers = [];
+
+    for (let i = 0; i < uniquePotentialFriends.length; i += chunkSize) {
+      const chunk = uniquePotentialFriends.slice(i, i + chunkSize);
+
+      // Consulta por lotes:
+      const qUsers = query(
+        collection(database, "users"),
+        where(documentId(), "in", chunk)
+      );
+
+      const chunkSnapshot = await getDocs(qUsers);
+      chunkSnapshot.forEach((docSnap) => {
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          recommendedUsers.push({
+            id: docSnap.id,
+            ...userData,
+            profileImage:
+              userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+          });
         }
-     }
+      });
+    }
 
-     // Siempre buscar nuevas recomendaciones sin depender de la caché
-     const friendsRef = collection(database, "users", user.uid, "friends");
-     const friendsSnapshot = await getDocs(friendsRef);
-     const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
+    // 7) Asignar a estado final
+    setRecommendations(recommendedUsers);
 
-     let potentialFriends = [];
-     for (const friendId of friendsList) {
-        const friendFriendsRef = collection(database, "users", friendId, "friends");
-        const friendFriendsSnapshot = await getDocs(friendFriendsRef);
-        potentialFriends.push(...friendFriendsSnapshot.docs.map(doc => doc.data().friendId));
-     }
-
-     potentialFriends = potentialFriends.filter(id => id !== user.uid && !friendsList.includes(id) && !blockedUsers.includes(id));
-     const uniquePotentialFriends = [...new Set(potentialFriends)];
-
-     const recommendedUsers = [];
-     for (const friendId of uniquePotentialFriends) {
-        const userDoc = await getDoc(doc(database, "users", friendId));
-        if (userDoc.exists()) {
-           const userData = userDoc.data();
-           recommendedUsers.push({
-              id: friendId,
-              ...userData,
-              profileImage: userData.photoUrls?.[0] || "https://via.placeholder.com/150",
-           });
-        }
-     }
-
-     setRecommendations(recommendedUsers);
-
-     // Guardar en caché solo si hay datos nuevos
-     if (recommendedUsers.length > 0) {
-        await AsyncStorage.setItem(`recommendations_${user.uid}`, JSON.stringify({
-           recommendations: recommendedUsers,
-           timestamp: new Date().getTime()
-        }));
-     }
+    // 8) Guardar en caché (solo si hay resultados)
+    if (recommendedUsers.length > 0) {
+      await AsyncStorage.setItem(
+        `recommendations_${user.uid}`,
+        JSON.stringify({
+          recommendations: recommendedUsers,
+          timestamp: Date.now(), // para luego comparar con la caducidad
+        })
+      );
+    }
   } catch (error) {
-     console.error("Error fetching friend recommendations:", error);
+    console.error("Error fetching friend recommendations:", error);
   }
 };
 
