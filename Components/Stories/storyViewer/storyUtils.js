@@ -829,40 +829,48 @@ export const handleNext = ({
   }
 };
 
-export const preloadNextStory = ({
+export const preloadNextStories = ({
   currentIndex,
   storyIndex,
   stories,
   loadedImages,
   setLoadedImages,
+  preloadBuffer = 7, // Cantidad de historias a pre-cargar
 }) => {
   let nextCurrentIndex = currentIndex;
   let nextStoryIndex = storyIndex + 1;
-  if (nextStoryIndex >= stories[currentIndex].userStories.length) {
-    nextCurrentIndex = currentIndex + 1;
-    nextStoryIndex = 0;
+
+  for (let i = 0; i < preloadBuffer; i++) {
+    if (nextStoryIndex >= stories[nextCurrentIndex].userStories.length) {
+      nextCurrentIndex++;
+      nextStoryIndex = 0;
+    }
+
+    if (nextCurrentIndex >= stories.length) return;
+
+    const nextStory = stories[nextCurrentIndex].userStories[nextStoryIndex];
+    if (!nextStory) return;
+
+    if (loadedImages[nextStory.id]) {
+      console.log("Story ya pre-cargada:", nextStory.storyUrl);
+      continue;
+    }
+
+    const startTime = Date.now();
+    Image.prefetch(nextStory.storyUrl)
+      .then(() => {
+        const duration = Date.now() - startTime;
+        console.log("Story pre-cargada:", nextStory.storyUrl, "en", duration, "ms");
+        setLoadedImages(prev => ({ ...prev, [nextStory.id]: true }));
+      })
+      .catch(err => {
+        console.error("Error pre-cargando historia:", err);
+      });
+
+    nextStoryIndex++;
   }
-  if (nextCurrentIndex >= stories.length) return;
-
-  const nextStory = stories[nextCurrentIndex].userStories[nextStoryIndex];
-  if (!nextStory) return;
-
-  if (loadedImages[nextStory.id]) {
-    console.log("Next image already preloaded:", nextStory.storyUrl);
-    return;
-  }
-
-  const startTime = Date.now();
-  Image.prefetch(nextStory.storyUrl)
-    .then(() => {
-      const duration = Date.now() - startTime;
-      console.log("Next image loaded:", nextStory.storyUrl, "in", duration, "ms");
-      setLoadedImages(prev => ({ ...prev, [nextStory.id]: true }));
-    })
-    .catch(err => {
-      console.error("Error preloading image:", err);
-    });
 };
+
 
 
 

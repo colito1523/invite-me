@@ -46,7 +46,7 @@ import {
   handlePrevious,
   handleTap,
   handleNext,
-  preloadNextStory,
+  preloadNextStories,
   handleCloseViewersModal,
   useStoryProgress,
   calculateHoursAgo,
@@ -269,13 +269,13 @@ export function StoryViewer({
     const preloadBuffer = 5; // Aumentar el buffer de prefetch
 
     // Pre-cargar la siguiente historia si existe
-    preloadNextStory({
+    preloadNextStories({
       currentIndex,
       storyIndex,
       stories,
       loadedImages,
       setLoadedImages,
-      preloadBuffer,
+      preloadBuffer: 7, // Puedes ajustar este número según lo que necesites
     });
   }, [currentIndex, storyIndex]);
 
