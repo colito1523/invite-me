@@ -165,7 +165,6 @@ export function StoryViewer({
     const nextStory = stories[nextCurrentIndex]?.userStories[nextStoryIndex];
     if (nextStory && !loadedImages[nextStory.id]) {
       console.log("La imagen de la siguiente historia aún no se cargó.");
-      return;
     }
     handleNext({
       stories,

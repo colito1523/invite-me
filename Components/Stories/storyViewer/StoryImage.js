@@ -12,8 +12,9 @@ export default function StoryImage({ currentStory, ...rest }) {
 
   return (
     <Image
-      source={{ uri: `${currentStory.storyUrl}?alt=media&w=1&h=1&q=1` }}
+    source={{ uri: currentStory.storyUrl }}
       style={[imageDimensions, rest.style]}
+      fadeDuration={0}
       onLoadStart={() => {
         currentStory.loadStartTime = Date.now();
       }}
