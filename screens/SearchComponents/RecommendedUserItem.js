@@ -65,13 +65,16 @@ const RecommendedUserItem = ({ item, index, onUserPress, theme }) => {
       style={styles.recommendationItem}
       onPress={() => onUserPress(item)}
     >
-      <Image
-        source={{
-          uri: item.profileImage || "https://via.placeholder.com/150",
-        }}
-        style={[styles.userImage, { marginRight: 13 }]}
-        cachePolicy="memory-disk"
-      />
+    <Image
+  key={item.profileImage} // Forzar re-render cuando cambia la imagen
+  source={{
+    uri: item.lowQualityProfileImage || item.profileImage,
+    cache: "force-cache",
+  }}
+  style={styles.userImage}
+  contentFit="cover"
+  defaultSource={require("../../assets/perfil.jpg")}
+/>
       <View style={styles.textContainer}>
         <Text style={[styles.resultText, { color: theme.text }]}>
           {item.username}

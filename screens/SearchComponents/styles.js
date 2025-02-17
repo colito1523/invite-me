@@ -74,6 +74,7 @@ export const styles = StyleSheet.create({
     width: 55, // Tamaño de la imagen
     height: 55,
     borderRadius: 27.5, // Hace que la imagen sea circular
+    marginRight: 20,
   },
   resultItem: {
     flexDirection: "row",

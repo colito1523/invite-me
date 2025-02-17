@@ -142,7 +142,6 @@ export const fetchRecommendations = async (user, setRecommendations) => {
     const friendsList = friendsSnapshot.docs.map((doc) => doc.data().friendId);
 
     // 4) Ir armando la lista de "amigos de mis amigos"
-    //    (en el ejemplo, mantenemos el bucle, pero luego haremos UNA sola consulta por chunk)
     let potentialFriends = [];
     for (const friendId of friendsList) {
       const friendFriendsRef = collection(database, "users", friendId, "friends");
@@ -153,9 +152,6 @@ export const fetchRecommendations = async (user, setRecommendations) => {
     }
 
     // 5) Filtrar:
-    //    - No incluyas al usuario actual
-    //    - No incluyas amigos directos (ya lo son)
-    //    - No incluyas usuarios bloqueados
     potentialFriends = potentialFriends.filter(
       (id) =>
         id !== user.uid &&
@@ -166,8 +162,7 @@ export const fetchRecommendations = async (user, setRecommendations) => {
     // Quitar duplicados
     const uniquePotentialFriends = [...new Set(potentialFriends)];
 
-    // 6) Hacer consultas por lotes (chunks) para no sobrepasar
-    //    el límite de Firestore (10 ó 30 IDs en un "in").
+    // 6) Hacer consultas por lotes (chunks) para no sobrepasar el límite de Firestore
     const chunkSize = 10;
     let recommendedUsers = [];
 
@@ -184,11 +179,19 @@ export const fetchRecommendations = async (user, setRecommendations) => {
       chunkSnapshot.forEach((docSnap) => {
         if (docSnap.exists()) {
           const userData = docSnap.data();
+
+          // Imagen optimizada usando expo-image
+          const profileImage =
+            userData.photoUrls?.[0] || "https://via.placeholder.com/150";
+          const lowQualityProfileImage = profileImage
+            ? `${profileImage}?alt=media&w=30&h=30&q=1`
+            : null;
+
           recommendedUsers.push({
             id: docSnap.id,
             ...userData,
-            profileImage:
-              userData.photoUrls?.[0] || "https://via.placeholder.com/150",
+            profileImage,
+            lowQualityProfileImage,
           });
         }
       });
@@ -203,7 +206,7 @@ export const fetchRecommendations = async (user, setRecommendations) => {
         `recommendations_${user.uid}`,
         JSON.stringify({
           recommendations: recommendedUsers,
-          timestamp: Date.now(), // para luego comparar con la caducidad
+          timestamp: Date.now(),
         })
       );
     }
