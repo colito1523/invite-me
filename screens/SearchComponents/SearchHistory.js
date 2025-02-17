@@ -29,13 +29,14 @@ const SearchHistory = ({
       updatedHistory.pop();
     }
     setSearchHistory(updatedHistory);
-    await saveSearchHistory(user, updatedHistory, blockedUsers);
-
+    // Ejecutar la actualización en segundo plano sin await
+    saveSearchHistory(user, updatedHistory, blockedUsers);
+  
     if (item.isPrivate && !item.isFriend) {
       navigation.navigate("PrivateUserProfile", { selectedUser: item });
       return;
     }
-
+  
     if (!item.hasStories) {
       navigation.navigate("UserProfile", { selectedUser: item });
     } else {
@@ -79,6 +80,7 @@ const SearchHistory = ({
       }
     }
   };
+  
 
   const removeFromHistory = async (userId) => {
     const updatedHistory = searchHistory.filter((userItem) => userItem.id !== userId);

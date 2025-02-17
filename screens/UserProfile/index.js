@@ -128,8 +128,6 @@ export default function UserProfile({ route, navigation }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [heartCount, setHeartCount] = useState(0);
-  const [isHearted, setIsHearted] = useState(false);
   const [isMutualFriendsModalVisible, setIsMutualFriendsModalVisible] =
     useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);

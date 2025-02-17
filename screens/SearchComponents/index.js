@@ -73,11 +73,11 @@ export default function Search() {
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       // Forzar re-render
-      setFocusKey(prev => prev + 1);
+      // setFocusKey(prev => prev + 1);
   
       // Limpiar todo
-      setSearchTerm("");
-      setResults([]);
+      // setSearchTerm("");
+      // setResults([]);
 
     });
   
@@ -109,21 +109,32 @@ export default function Search() {
 
   const theme = isNightMode ? darkTheme : lightTheme;
 
-  // Cargar historial de búsquedas
-  useEffect(() => {
-    const loadSearchHistory = async () => {
-      if (!user) return;
-      try {
-        const savedHistory = await AsyncStorage.getItem(`searchHistory_${user.uid}`);
-        if (savedHistory) {
-          setSearchHistory(JSON.parse(savedHistory));
-        }
-      } catch (error) {
-        console.error("Error loading search history:", error);
+ // Dentro de index.js, reemplaza el useEffect que carga el historial de búsqueda por este:
+
+useEffect(() => {
+  const loadSearchHistory = async () => {
+    if (!user) return;
+    try {
+      const savedHistory = await AsyncStorage.getItem(`searchHistory_${user.uid}`);
+      if (savedHistory) {
+        setSearchHistory(JSON.parse(savedHistory));
       }
-    };
+    } catch (error) {
+      console.error("Error loading search history:", error);
+    }
+  };
+
+  // Cargar historial al montar el componente
+  loadSearchHistory();
+
+  // Cargar historial cada vez que la pantalla recupera el foco
+  const unsubscribe = navigation.addListener("focus", () => {
     loadSearchHistory();
-  }, [user]);
+  });
+
+  return unsubscribe;
+}, [navigation, user]);
+
 
   const onRefresh = useCallback(async () => {
     if (!user) return;
@@ -383,7 +394,6 @@ const sections = searchTerm.length === 0
       style={styles.container}
     >
       <SectionList
-       key={focusKey}
         ListHeaderComponent={listHeader}
         initialNumToRender={4}
         sections={sections}

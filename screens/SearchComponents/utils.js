@@ -331,6 +331,7 @@ export const deleteFriendRequest = async (user, setStatus) => {
   }
 };
 
+// En utils.js, modifica la función handleUserPress para que guarde el historial en segundo plano sin await:
 export const handleUserPress = (
   selectedUser,
   { blockedUsers, searchHistory, setSearchHistory, navigation, currentUser, t }
@@ -340,16 +341,14 @@ export const handleUserPress = (
     return;
   }
 
-  // Remover el usuario si ya existe en el historial
-  const updatedHistory = searchHistory.filter((item) => item.id !== selectedUser.id);
-  // Agregar el usuario al principio
+  // Actualiza el historial sin esperar la operación asíncrona
+  const updatedHistory = searchHistory.filter(item => item.id !== selectedUser.id);
   updatedHistory.unshift(selectedUser);
-  // Limitar el historial a 5 usuarios
   while (updatedHistory.length > 5) {
     updatedHistory.pop();
   }
-
   setSearchHistory(updatedHistory);
+  // Llamada sin await para no bloquear la navegación
   saveSearchHistory(currentUser, updatedHistory, blockedUsers);
 
   // Asegurarse de que isPrivate e isFriend sean booleanos
@@ -366,4 +365,5 @@ export const handleUserPress = (
     });
   }
 };
+
 
