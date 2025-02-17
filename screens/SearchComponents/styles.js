@@ -74,6 +74,11 @@ export const styles = StyleSheet.create({
     width: 55, // Tamaño de la imagen
     height: 55,
     borderRadius: 27.5, // Hace que la imagen sea circular
+  },
+  userImageRecommender: {
+    width: 55, // Tamaño de la imagen
+    height: 55,
+    borderRadius: 27.5, // Hace que la imagen sea circular
     marginRight: 20,
   },
   resultItem: {
@@ -106,6 +111,7 @@ export const styles = StyleSheet.create({
     padding: 3, // Espacio entre la imagen y el borde
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 20,
   },
 });
 

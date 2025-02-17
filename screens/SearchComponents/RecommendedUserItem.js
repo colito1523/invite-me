@@ -72,7 +72,7 @@ const RecommendedUserItem = ({ item, index, onUserPress, theme, isNightMode }) =
     cache: "force-cache",
   }}
   style={[
-    styles.userImage,
+    styles.userImageRecommender,
   { backgroundColor: isNightMode ? "black" : "#fff" } // Fondo dinámico
   ]}
   contentFit="cover"

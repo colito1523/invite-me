@@ -500,22 +500,24 @@ export default function Component({ route, navigation }) {
               <View key={index} style={styles.imageContainer}>
                 <Image
                   source={{
-                    uri:
-                      index === 0
-                        ? photoUrls[0]
-                        : "https://via.placeholder.com/400",
+                    uri: photoUrls[index] || photoUrls[0],
                   }}
                   cachePolicy="memory-disk"
                   style={[
                     styles.backgroundImage,
-                    (index === 1 || index === 2) && styles.blankImageOverlay,
+                    index > 0 && {
+                      opacity: 0.5,
+                      backgroundColor: '#808080',
+                    },
                   ]}
                   contentFit="cover"
                 />
-                <View style={styles.overlay}>
-                  {index === 1 || index === 2 ? (
-                    <Text style={styles.privateAccountText}>{t('privateAccount')}</Text>
-                  ) : null}
+                <View style={[
+                  styles.overlay,
+                  index > 0 && {
+                    backgroundColor: 'rgba(128, 128, 128, 0.5)',
+                  }
+                ]}>
                   <NameDisplay
                     firstName={selectedUser.firstName}
                     lastName={selectedUser.lastName}
@@ -606,7 +608,6 @@ export default function Component({ route, navigation }) {
   friends={mutualFriends}
 />
     </Provider>
-    
   );
 }
 
@@ -735,14 +736,20 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  privateAccountText: {
+  privateTextContainer: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -80 }, { translateY: -50 }],
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  privateAccountText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
 });

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Alert, Modal } from "react-native";
+import { View, Text, TouchableOpacity, Modal } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
-import { collection, getDocs } from "firebase/firestore";
-import { database } from "../../config/firebase";
 import { saveSearchHistory } from "./utils";
 import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
 import { styles } from "./styles";

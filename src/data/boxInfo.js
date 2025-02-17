@@ -243,7 +243,7 @@ const boxInfo = [
   },
   {
     path: require("../../assets/Lisboa/douro.jpg"),
-    title: "Douro",
+    title: "Duro",
     category: "Restaurants & Rooftops",
     hours: {
       Lunes: "12:30 PM - 12:00 AM",
@@ -662,7 +662,7 @@ const boxInfo = [
   {
     path: require("../../assets/Lisboa/Bar Alimentar.jpg"),
     title: "Bar Alimentar",
-    category: "Bars & Clubs",
+    category: "Restaurants & Rooftops",
     hours: {
       Lunes: "-",
       Martes: "-",
@@ -838,7 +838,7 @@ const boxInfo = [
   {
     path: require("../../assets/Lisboa/Meceiria.jpg"),
     title: "Mercearia Pacheca",
-    category: "Bars & Clubs",
+    category: "Restaurants & Rooftops",
     hours: {
       Lunes: "Cerrado",
       Martes: "8:00 AM - 10:00 PM",
