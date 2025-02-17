@@ -5,6 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { saveSearchHistory } from "./utils";
 import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
 import { styles } from "./styles";
+import { collection, getDocs } from "firebase/firestore";
+import { database } from "../../config/firebase"; // Asegúrate de que la ruta sea la correcta
 
 const SearchHistory = ({
   user,
@@ -22,11 +24,56 @@ const SearchHistory = ({
   const handleHistoryPress = async (item) => {
     if (item.isPrivate && !item.isFriend) {
       navigation.navigate("PrivateUserProfile", { selectedUser: item });
-    } else {
+      return;
+    }
+  
+    if (!item.hasStories) {
+      navigation.navigate("UserProfile", { selectedUser: item });
+      return;
+    }
+  
+    try {
+      const storiesRef = collection(database, "users", item.id, "stories");
+      const storiesSnapshot = await getDocs(storiesRef);
+      const now = new Date();
+  
+      const userStories = storiesSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt,
+          expiresAt: doc.data().expiresAt,
+          storyUrl: doc.data().storyUrl,
+          profileImage: doc.data().profileImage || item.profileImage,
+          uid: item.id,
+          username: doc.data().username || item.username || t("unknownUser"),
+          viewers: doc.data().viewers || [],
+          likes: doc.data().likes || [],
+        }))
+        .filter((story) => new Date(story.expiresAt.toDate()) > now);
+  
+      if (userStories.length > 0) {
+        setSelectedStories([
+          {
+            uid: item.id,
+            username:
+              `${item.firstName || ""} ${item.lastName || ""}`.trim() ||
+              item.username ||
+              t("unknownUser"),
+            profileImage: item.profileImage,
+            userStories: userStories,
+          },
+        ]);
+        setIsModalVisible(true);
+      } else {
+        navigation.navigate("UserProfile", { selectedUser: item });
+      }
+    } catch (error) {
+      console.error(t("errorLoadingStories"), error);
+      Alert.alert(t("error"), t("errorLoadingStories"));
       navigation.navigate("UserProfile", { selectedUser: item });
     }
   
-    // Retrasamos la actualización del historial para evitar refresco antes de la navegación
     setTimeout(() => {
       const updatedHistory = searchHistory.filter((u) => u.id !== item.id);
       updatedHistory.unshift(item);
@@ -35,9 +82,8 @@ const SearchHistory = ({
       }
       setSearchHistory(updatedHistory);
       saveSearchHistory(user, updatedHistory, blockedUsers);
-    }, 500); // Ajusta este tiempo según el rendimiento de la navegación
+    }, 500);
   };
-  
   
 
   const removeFromHistory = async (userId) => {
