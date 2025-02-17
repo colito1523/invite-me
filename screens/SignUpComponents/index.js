@@ -535,18 +535,32 @@ export default function SignUp() {
     }
   };
 
+  const compressImage = async (uri) => {
+    try {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1080 } }], // Redimensiona la imagen a un ancho máximo de 1080px
+        { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG } // Comprime al 60% de calidad
+      );
+      return manipulatedImage.uri;
+    } catch (error) {
+      console.error("Error al comprimir la imagen:", error);
+      return uri; // En caso de error, devuelve la imagen original
+    }
+  };
+  
+
   const pickImage = async (photoNumber) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true, // Habilita la edición para permitir redimensionamiento
-      quality: 1, // Máxima calidad
+      allowsEditing: true, // Permite recortar antes de seleccionar
+      quality: 1, // Máxima calidad antes de la compresión
     });
-
+  
     if (!result.canceled) {
-      handleAnswer(`photo${photoNumber}`, result.assets[0].uri);
-      handleNext();
-    } else {
-
+      const compressedUri = await compressImage(result.assets[0].uri); // Comprime la imagen
+      handleAnswer(`photo${photoNumber}`, compressedUri); // Guarda la imagen comprimida en el estado
+      handleNext(); // Pasa a la siguiente pregunta
     }
   };
 

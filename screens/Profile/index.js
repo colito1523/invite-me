@@ -33,7 +33,7 @@ import MenuSection from "../ProfileComponents/MenuSection";
 import EventsSection from "../ProfileComponents/EventsSection";
 import { FlatList } from "react-native-gesture-handler";
 import { styles } from "./styles";
-import { fetchUserData, setFetchUserData, handleTogglePrivacy, handleHeartPress, checkLikeStatus, fetchFriendCount, fetchHeartCount, pickImage, handleBoxPress } from "./utils"; 
+import { fetchUserData, setFetchUserData, handleTogglePrivacy, handleHeartPress, checkLikeStatus, fetchFriendCount, fetchHeartCount, pickImage, handleBoxPress,compressImage } from "./utils"; 
 
 const NameDisplay = React.memo(({
   name,
@@ -222,7 +222,6 @@ export default function Profile({ navigation }) {
         const userDoc = await getDoc(doc(database, "users", user.uid));
         const currentData = userDoc.exists() ? userDoc.data() : {};
   
-        // Crear un objeto solo con los datos que han cambiado
         let updatedData = {};
         if (name !== currentData.firstName) updatedData.firstName = name;
         if (surname !== currentData.lastName) updatedData.lastName = surname;
@@ -231,11 +230,12 @@ export default function Profile({ navigation }) {
         if (firstInterest !== currentData.firstInterest) updatedData.firstInterest = firstInterest;
         if (secondInterest !== currentData.secondInterest) updatedData.secondInterest = secondInterest;
   
-        // Subir solo imágenes nuevas
+        // Subir imágenes comprimidas
         const uploadTasks = photoUrls.map(async (url, index) => {
           if (url.startsWith("file://")) {
+            const compressedUri = await compressImage(url, false); // Comprimir imagen normal
             const imageRef = ref(storage, `photos/${user.uid}_${index}.jpg`);
-            const response = await fetch(url);
+            const response = await fetch(compressedUri);
             const blob = await response.blob();
             await uploadBytes(imageRef, blob);
             return getDownloadURL(imageRef);
@@ -246,6 +246,17 @@ export default function Profile({ navigation }) {
         const updatedPhotoUrls = await Promise.all(uploadTasks);
         if (JSON.stringify(updatedPhotoUrls) !== JSON.stringify(currentData.photoUrls)) {
           updatedData.photoUrls = updatedPhotoUrls;
+        }
+  
+        // Generar y subir imagen en **ultra baja calidad** solo para la primera foto
+        if (photoUrls[0].startsWith("file://")) {
+          const lowQualityUri = await compressImage(photoUrls[0], true); // Comprimir aún más
+          const lowQualityRef = ref(storage, `photos/${user.uid}_low.jpg`);
+          const lowQualityResponse = await fetch(lowQualityUri);
+          const lowQualityBlob = await lowQualityResponse.blob();
+          await uploadBytes(lowQualityRef, lowQualityBlob);
+          const lowQualityUrl = await getDownloadURL(lowQualityRef);
+          updatedData.lowQualityProfileImage = lowQualityUrl; // Guardar en la base de datos
         }
   
         if (Object.keys(updatedData).length > 0) {
@@ -262,8 +273,6 @@ export default function Profile({ navigation }) {
       }
     }
   };
-  
-  
   
 
   const renderSaveButton = () => {

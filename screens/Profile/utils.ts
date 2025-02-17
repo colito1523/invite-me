@@ -1,7 +1,21 @@
 import { collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where, writeBatch } from "firebase/firestore";
 import { auth, database } from "../../config/firebase";
 import { Alert } from "react-native";
+import * as ImageManipulator from "expo-image-manipulator";
 
+export const compressImage = async (uri, isLowQuality = false) => {
+    try {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: isLowQuality ? 50 : 1080 } }], // 50px para ultra baja calidad, 1080px para normal
+        { compress: isLowQuality ? 0.2 : 0.6, format: ImageManipulator.SaveFormat.JPEG } // 20% de calidad para ultra baja
+      );
+      return manipulatedImage.uri;
+    } catch (error) {
+      console.error("Error al comprimir la imagen:", error);
+      return uri;
+    }
+  };
 
 export const fetchUserData = async (params) => {
     const setBlockedUsers = params.setBlockedUsers
@@ -196,29 +210,34 @@ export const fetchHeartCount = async (params) => {
     }
 };
 
-export const pickImage = async (index, ImagePicker, photoUrls, setPhotoUrls) => {
+export const pickImage = async (index, ImagePicker, photoUrls, setPhotoUrls, setLowQualityProfileImage) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-        Alert.alert(
-            "Permiso denegado",
-            "Se necesita acceso a la galería para subir fotos."
-        );
-        return;
+      Alert.alert("Permiso denegado", "Se necesita acceso a la galería para subir fotos.");
+      return;
     }
-
+  
     const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
     });
-
+  
     if (!result.canceled) {
-        const newPhotoUrls = [...photoUrls];
-        newPhotoUrls[index] = result.assets[0].uri;
-        setPhotoUrls(newPhotoUrls);
-     
+      const compressedUri = await compressImage(result.assets[0].uri, false); // Compresión normal
+      const newPhotoUrls = [...photoUrls];
+      newPhotoUrls[index] = compressedUri;
+      setPhotoUrls(newPhotoUrls);
+  
+      // Si es la primera imagen, también crear versión en ultra baja calidad
+      if (index === 0) {
+        const lowQualityUri = await compressImage(result.assets[0].uri, true);
+        setLowQualityProfileImage(lowQualityUri);
+      }
     }
-};
+  };
+  
+
 
 export const handleBoxPress = ({ event, navigation, t }) => {
     const isPrivateEvent = event.category === "EventoParaAmigos";
