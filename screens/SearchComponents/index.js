@@ -47,6 +47,7 @@ export default function Search() {
   const [refreshing, setRefreshing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState(null);
+  const [focusKey, setFocusKey] = useState(0);
   const [stories, setStories] = useState([]);
   const [unseenStories, setUnseenStories] = useState({});
   const blockedUsers = useBlockedUsers();
@@ -57,10 +58,17 @@ export default function Search() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      InteractionManager.runAfterInteractions(() => {
-        fetchRecommendations(user, setRecommendations);
-      });
+    const unsubscribe = navigation.addListener("focus", () => {
+      // Forzar re-render
+      setFocusKey(prev => prev + 1);
+  
+      // Limpiar todo
+      setSearchTerm("");
+      setResults([]);
+      setRecommendations([]);  // <-- Asegúrate de vaciar
+  
+      // Llamar inmediatamente a fetchRecommendations
+      fetchRecommendations(user, setRecommendations);
     });
   
     return unsubscribe;
@@ -131,12 +139,6 @@ export default function Search() {
     return () => clearTimeout(delaySearch);
   }, [searchTerm]);
 
-  useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() => {
-      fetchRecommendations(user, setRecommendations);
-    });
-    return () => task.cancel();
-  }, [user]);
 
   useEffect(() => {
     const checkFriendRequestStatus = async () => {
@@ -371,6 +373,7 @@ const sections = searchTerm.length === 0
       style={styles.container}
     >
       <SectionList
+       key={focusKey}
         ListHeaderComponent={listHeader}
         initialNumToRender={4}
         sections={sections}
