@@ -310,7 +310,6 @@ export const fetchUserData = async (params) => {
   const setPhotoUrls = params.setPhotoUrls
   const setFirstHobby = params.setFirstHobby
   const setSecondHobby = params.setSecondHobby
-  const setRelationshipStatus = params.setRelationshipStatus
   const setFirstInterest = params.setFirstInterest
   const setSecondInterest = params.setSecondInterest
 
@@ -335,7 +334,6 @@ export const fetchUserData = async (params) => {
       setPhotoUrls(userData.photoUrls || ["https://via.placeholder.com/400"]);
       setFirstHobby(userData.firstHobby || "");
       setSecondHobby(userData.secondHobby || "");
-      setRelationshipStatus(userData.relationshipStatus || "");
       setFirstInterest(userData.firstInterest || "");
       setSecondInterest(userData.secondInterest || "");
     }

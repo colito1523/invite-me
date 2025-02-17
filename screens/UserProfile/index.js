@@ -116,7 +116,6 @@ export default function UserProfile({ route, navigation }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [firstHobby, setFirstHobby] = useState("");
   const [secondHobby, setSecondHobby] = useState("");
-  const [relationshipStatus, setRelationshipStatus] = useState("");
   const [firstInterest, setFirstInterest] = useState("");
   const [secondInterest, setSecondInterest] = useState("");
   const [mutualFriends, setMutualFriends] = useState([]);
@@ -132,12 +131,73 @@ export default function UserProfile({ route, navigation }) {
     useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
 
-  useEffect(() => {
-    fetchBlockedUsers({
-      user,
-      setBlockedUsers,
-    });
-  }, [user]);
+ // Efecto unificado para cargar datos de Firebase relacionados con user & selectedUser
+ useEffect(() => {
+  if (!user || !selectedUser) return;
+
+  const loadData = async () => {
+    try {
+      // 1. Llamadas que NO dependen entre sí se pueden disparar en paralelo
+      const [
+        // Bloqueo o lista de bloqueados
+        blockedUsersRes,
+        // Ocultar stories
+        hiddenStatusRes,
+        hideMyStoriesRes,
+        // "Like" status
+        likeStatusRes,
+      ] = await Promise.all([
+        fetchBlockedUsers({ user, setBlockedUsers }), // cambia internamente setBlockedUsers
+        checkHiddenStatus({ user, selectedUser, setHideStories, setHideMyStories }),
+        checkHideMyStoriesStatus({ user, selectedUser, setHideMyStories }),
+        checkLikeStatus({ user, selectedUser, setIsLiked }),
+      ]);
+
+      // 2. Llamadas que dependen de blockedUsers se pueden hacer tras tenerlo (ej: fetchEvents)
+      //    pero si no dependieran entre sí, también podrías incluirlas en el Promise.all anterior.
+      await fetchUserData({
+        selectedUser,
+        setIsPrivate,
+        user,
+        navigation,
+        setPhotoUrls,
+        setFirstHobby,
+        setSecondHobby,
+        setFirstInterest,
+        setSecondInterest,
+      });
+
+      await fetchFriendCount({ selectedUser, setFriendCount });
+
+      await fetchEvents({
+        selectedUser,
+        blockedUsers, // ya se estableció vía setBlockedUsers arriba
+        setEvents,
+        parseEventDate,
+      });
+
+      await checkFriendship({
+        user,
+        selectedUser,
+        setFriendshipStatus,
+        setPendingRequest,
+      });
+
+      await fetchMutualFriends({ user, selectedUser, setMutualFriends });
+
+      // 3. LikeCount
+      const userDoc = await getDoc(doc(database, "users", selectedUser.id));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setLikeCount(userData.likeCount || 0);
+      }
+    } catch (error) {
+      console.error("Error cargando datos de perfil:", error);
+    }
+  };
+
+  loadData();
+}, [user, selectedUser]); 
 
   const user = auth.currentUser;
 
@@ -224,17 +284,6 @@ export default function UserProfile({ route, navigation }) {
     }
   };
 
-  useEffect(() => {
-    checkHiddenStatus({ user, selectedUser, setHideStories, setHideMyStories });
-  }, [user, selectedUser]);
-
-  useEffect(() => {
-    checkHideMyStoriesStatus({ user, selectedUser, setHideMyStories });
-  }, [user, selectedUser]);
-
-  useEffect(() => {
-    checkLikeStatus({ user, selectedUser, setIsLiked });
-  }, [user, selectedUser]);
 
   useEffect(() => {
     const checkTime = () => {
@@ -271,7 +320,6 @@ export default function UserProfile({ route, navigation }) {
       setPhotoUrls,
       setFirstHobby,
       setSecondHobby,
-      setRelationshipStatus,
       setFirstInterest,
       setSecondInterest,
     });
