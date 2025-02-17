@@ -9,6 +9,7 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  Image
 } from "react-native";
 import { auth, database, storage } from "../../../config/firebase";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
@@ -126,6 +127,8 @@ export function StoryViewer({
   const [selectedViewer, setSelectedViewer] = useState(null); // Para almacenar el espectador seleccionado
   const [isLongPressActive, setIsLongPressActive] = useState(false);
   const [isUIVisible, setIsUIVisible] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+const [nextStoryUrl, setNextStoryUrl] = useState(null);
   const { blockedUsers, pinnedViewers, setBlockedUsers, setPinnedViewers } =
     useUserRelations({ auth, database });
   const isKeyboardVisible = useKeyboardListeners();
@@ -155,29 +158,48 @@ export function StoryViewer({
     }
   }, [isComplaintsVisible, isOptionsModalVisible, isKeyboardVisible]);
 
-  const handleNextWrapper = () => {
-    let nextCurrentIndex = currentIndex;
-    let nextStoryIndex = storyIndex + 1;
-    if (nextStoryIndex >= stories[currentIndex].userStories.length) {
-      nextCurrentIndex = currentIndex + 1;
-      nextStoryIndex = 0;
-    }
-    const nextStory = stories[nextCurrentIndex]?.userStories[nextStoryIndex];
-    if (nextStory && !loadedImages[nextStory.id]) {
-      console.log("La imagen de la siguiente historia aún no se cargó.");
-    }
-    handleNext({
-      stories,
-      currentIndex,
-      setCurrentIndex,
-      storyIndex,
-      setStoryIndex,
-      setProgress,
-      onClose,
-      localUnseenStories,
-      setLocalUnseenStories,
-    });
-  };
+// Esta es la función que se llama cuando tocas la pantalla para ir a la siguiente:
+const handleNextWrapper = () => {
+  // Calculamos cuál es la siguiente story (igual a como lo haces ahora)
+  let nextCurrentIndex = currentIndex;
+  let nextStoryIndex = storyIndex + 1;
+  if (nextStoryIndex >= stories[currentIndex].userStories.length) {
+    nextCurrentIndex = currentIndex + 1;
+    nextStoryIndex = 0;
+  }
+  const nextStory = stories[nextCurrentIndex]?.userStories[nextStoryIndex];
+  if (!nextStory) {
+    // No hay siguiente historia, cierra
+    onClose?.(localUnseenStories);
+    return;
+  }
+
+  // 1) Guardamos la URL de la siguiente historia y activamos la transición
+  setNextStoryUrl(nextStory.storyUrl);
+  setIsTransitioning(true);
+};
+
+// Esta función se llama en onLoad de la imagen overlay
+// para hacer el cambio "real" de historia
+const handleNextReal = () => {
+  // 2) Ya tenemos la historia precargada, ahora sí navegamos
+  handleNext({
+    stories,
+    currentIndex,
+    setCurrentIndex,
+    storyIndex,
+    setStoryIndex,
+    setProgress,
+    onClose,
+    localUnseenStories,
+    setLocalUnseenStories,
+  });
+
+  // 3) Apagamos la transición
+  setIsTransitioning(false);
+  setNextStoryUrl(null);
+};
+
 
   useStoryProgress({
     isPaused,
@@ -427,8 +449,20 @@ useBackHandler(() => onClose(localUnseenStories));
                   progressiveRenderingEnabled={true}
                   memoryCachePolicy="aggressive"
                 />
-              </View>
-              {isUIVisible && (
+              {isTransitioning && nextStoryUrl && (
+      <Image
+        source={{ uri: nextStoryUrl }}
+        style={[styles.imageOverlay, { opacity: 0 }]} 
+        onLoad={() => {
+          // Cuando la imagen nueva está totalmente cargada, 
+          // avanzamos de verdad a la siguiente historia:
+          handleNextReal();
+        }}
+      />
+    )}
+  </View>
+
+  {isUIVisible && (
                 <StoryHeader
                   currentStory={stories[currentIndex]}
                   user={auth.currentUser}

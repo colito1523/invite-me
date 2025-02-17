@@ -24,6 +24,16 @@ const styles = StyleSheet.create({
   rotatedImage: {
     transform: [{ rotate: "90deg" }],
   },
+
+  imageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: 9999, // encima de la historia actual
+    backgroundColor: 'red',
+  },
   
   progressBar: {
     marginTop: 10,
