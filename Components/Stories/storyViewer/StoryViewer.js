@@ -26,6 +26,7 @@ import StoryImage from "./StoryImage";
 import useKeyboardListeners from "./useKeyboardListeners";
 import StoryNavigationButtons from "./StoryNavigationButtons";
 import useBackHandler from "./useBackHandler";
+import { Animated } from "react-native";
 import useUserRelations from "./useUserRelations";
 import {
   createStoryPanResponder,
@@ -129,6 +130,7 @@ export function StoryViewer({
   const [isUIVisible, setIsUIVisible] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [nextStoryUrl, setNextStoryUrl] = useState(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
   const { blockedUsers, pinnedViewers, setBlockedUsers, setPinnedViewers } =
     useUserRelations({ auth, database });
   const isKeyboardVisible = useKeyboardListeners();
@@ -435,18 +437,17 @@ export function StoryViewer({
                     progress={progress}
                   />
                 )}
-                <StoryImage
-                  key={currentStory.id} // por si necesitas forzar re-render
-                  currentStory={currentStory} // pasamos la historia actual
-                  style={styles.image} // aplica tus estilos base
-                  fadeDuration={0}
-                  priority="high"
-                  loadingIndicatorSource={require("../../../assets/notification-icon.png")}
-                  resizeMode="cover"
-                  cachePolicy="memory-disk"
-                  progressiveRenderingEnabled={true}
-                  memoryCachePolicy="aggressive"
-                />
+            <StoryImage
+  currentStory={currentStory} // pasamos la historia actual
+  style={styles.image} // aplica tus estilos base
+  fadeDuration={0}
+  priority="high"
+  loadingIndicatorSource={require("../../../assets/notification-icon.png")}
+  resizeMode="cover"
+  cachePolicy="memory-disk"
+essiveRenderingEnabled={true}
+  memoryCachePolicy="aggressive"
+/>
                 {isTransitioning && nextStoryUrl && (
                   <Image
                     source={{ uri: nextStoryUrl }}

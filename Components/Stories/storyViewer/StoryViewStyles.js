@@ -31,8 +31,8 @@ const styles = StyleSheet.create({
     left: 0,
     width: '100%',
     height: '100%',
-    zIndex: 9999, // encima de la historia actual
-    backgroundColor: 'red',
+    zIndex: 9999,
+    backgroundColor: 'transparent', // En lugar de 'red'
   },
   
   progressBar: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    backgroundColor: "black",
+    backgroundColor: "transparent",
   },
   rotatedImage: {
     transform: [{ rotate: "90deg" }],
