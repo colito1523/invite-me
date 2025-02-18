@@ -217,19 +217,22 @@ const renderStory = ({ item, index }) => {
 
   return (
     <View
-      style={[
-        styles.storyImageWrapper,
-        hasStories ? {
-          borderWidth: 2,
-          borderStyle: hasUnseenStories ? 'solid' : 'dotted',
-          borderColor: isNightMode ? 'white' : 'black',
-          borderRadius: styles.storyCircle.borderRadius + 2,
-          opacity: hasUnseenStories ? 1 : 0.7,
-        } : {
-          borderWidth: 0
-        }
-      ]}
-    >
+    style={[
+      styles.storyImageWrapper,
+      hasStories
+        ? {
+            borderWidth: 2,
+            borderStyle: isCurrentUserStory ? 'solid' : hasUnseenStories ? 'solid' : 'dotted',
+            borderColor: isCurrentUserStory ? 'black' : isNightMode ? 'white' : 'black',
+            borderRadius: styles.storyCircle.borderRadius + 2,
+            opacity: isCurrentUserStory ? 1 : hasUnseenStories ? 1 : 0.7,
+          }
+        : {
+            borderWidth: 0
+          }
+    ]}
+  >
+  
       <TouchableOpacity
         style={styles.storyCircle}
         onPress={() => {
