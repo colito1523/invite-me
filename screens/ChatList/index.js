@@ -6,8 +6,6 @@ import {
   FlatList, 
   TextInput, 
   TouchableOpacity, 
-  SafeAreaView, 
-  ScrollView,
   Alert, 
   Modal,
   RefreshControl
@@ -533,7 +531,7 @@ export default function ChatList() {
                 { color: isNightMode ? "white" : "black" },
               ]}
             >
-              {formatTime(item.lastMessageTimestamp)}
+               {formatTime(item.lastMessageTimestamp, t)}
             </Text>
           )}
         </View>

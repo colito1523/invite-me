@@ -12,7 +12,10 @@ import {
 } from "firebase/firestore";
 import { database } from "../../config/firebase";
 
-export const formatTime = (timestamp: Timestamp): string => {
+export const formatTime = (
+  timestamp: Timestamp,
+  t: (key: string, options?: any) => string
+): string => {
   if (!(timestamp instanceof Timestamp) || isNaN(timestamp.seconds) || isNaN(timestamp.nanoseconds)) {
     console.error("Invalid timestamp:", timestamp);
     return "";
@@ -31,13 +34,13 @@ export const formatTime = (timestamp: Timestamp): string => {
       hour12: false,
     });
   } else if (days === 1) {
-    return "Ayer";
+    return t("formatTime.yesterday"); // Por ejemplo: "Ayer"
   } else if (days < 7) {
-    return `${days} días`;
+    return t("formatTime.days", { count: days }); // Ejemplo: "2 días"
   } else if (weeks === 1) {
-    return "1 sem";
+    return t("formatTime.oneWeek"); // Ejemplo: "1 sem"
   } else {
-    return `${weeks} sem`;
+    return t("formatTime.weeks", { count: weeks }); // Ejemplo: "2 sem"
   }
 };
 

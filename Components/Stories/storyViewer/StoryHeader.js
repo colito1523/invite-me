@@ -23,7 +23,7 @@ const StoryHeader = ({
     if (currentStory.profileImage) {
       setTimeout(() => {
         setImageUri(currentStory.profileImage);
-      }, 500); // Retraso para mejorar la UX
+      }, 0); // Retraso para mejorar la UX
     }
   }, [currentStory.profileImage]);
 

@@ -329,6 +329,12 @@
     "sentPhoto": "Sent a photo"
 
   },
+  "formatTime": {
+    "yesterday": "Yesterday",
+    "days": "Days",
+    "oneWeek": "1 Week",
+    "weeks": "Weeks"
+  },
 
   "notifications": {
     "deleteNotificationTitle": "Delete Notification",

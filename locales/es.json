@@ -332,6 +332,12 @@
     "view":"Ver",
     "sentPhoto": "Te ha enviado una foto"
   },
+  "formatTime": {
+    "yesterday": "Ayer",
+    "days": "Días",
+    "oneWeek": "1 Sem",
+    "weeks": "Sem"
+  },
 
   "notifications": {
     "deleteNotificationTitle": "Eliminar notificación",
