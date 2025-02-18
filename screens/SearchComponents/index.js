@@ -35,7 +35,7 @@ import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { styles, lightTheme, darkTheme } from "./styles";
 
-export default function Search() {
+export default function Search({ route }) {
   const auth = getAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
@@ -72,17 +72,16 @@ export default function Search() {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      // Forzar re-render
-      // setFocusKey(prev => prev + 1);
-  
-      // Limpiar todo
-      // setSearchTerm("");
-      // setResults([]);
-
+      if (route.params?.forceStoryUpdate) {
+        // Actualizamos silenciosamente el StorySlider
+        storySliderRef.current?.loadExistingStories();
+        // Limpiamos el parámetro para evitar actualizaciones innecesarias
+        navigation.setParams({ forceStoryUpdate: undefined });
+      }
     });
   
     return unsubscribe;
-  }, [navigation, user]);
+  }, [navigation, route.params?.forceStoryUpdate]);
 
   // Configuración de modo nocturno
   useEffect(() => {
