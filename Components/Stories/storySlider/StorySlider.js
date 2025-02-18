@@ -267,28 +267,32 @@ const renderStory = ({ item, index }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.sliderContainer}>
-        <FlatList
-          data={[{ uid: "addStory" }, ...stories]}
-          renderItem={({ item, index }) =>
-            item.uid === "addStory" ? (
-              <TouchableOpacity
-                onPress={handleAddStory}
-                style={[styles.addStoryCircle, styles.centeredAddStoryCircle]}
-              >
-                <Ionicons
-                  name="add-circle-outline"
-                  size={40}
-                  color={isNightMode ? "#bbb7b7" : "black"}
-                />
-              </TouchableOpacity>
-            ) : (
-              renderStory({ item, index: index - 1 })
-            )
-          }
-          keyExtractor={(item) => item.uid}
-          horizontal
-          showsHorizontalScrollIndicator={false}
+       <FlatList
+  data={[{ uid: "addStory" }, ...stories]}
+  initialNumToRender={4}         // Renderiza las primeras 4 bolas al instante
+  maxToRenderPerBatch={4}          // Limita el renderizado por lote
+  windowSize={5}                   // Ajusta el tamaño de la ventana de renderizado
+  renderItem={({ item, index }) =>
+    item.uid === "addStory" ? (
+      <TouchableOpacity
+        onPress={handleAddStory}
+        style={[styles.addStoryCircle, styles.centeredAddStoryCircle]}
+      >
+        <Ionicons
+          name="add-circle-outline"
+          size={40}
+          color={isNightMode ? "#bbb7b7" : "black"}
         />
+      </TouchableOpacity>
+    ) : (
+      renderStory({ item, index: index - 1 })
+    )
+  }
+  keyExtractor={(item) => item.uid}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+/>
+
         <Modal
           visible={!!selectedImage}
           transparent={true}
