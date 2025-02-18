@@ -187,13 +187,13 @@ export const deleteStory = async ({
   t,
 }) => {
   try {
-    const user = auth.currentUser;
-    if (!user) {
-      console.error("No user logged in");
+    if (!auth || !auth.currentUser) {
+      console.error("No auth or user available");
       Alert.alert(t("storyViewer.error"), t("storyViewer.dontAuthentication"));
       return;
     }
 
+    const user = auth.currentUser;
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
     if (!currentStory) {
       console.error("Story not found");
@@ -953,7 +953,3 @@ export function calculateHoursAgo(createdAt) {
   const diffInMs = Date.now() - timeInMs;
   return Math.floor(diffInMs / (1000 * 60 * 60));
 }
-
-
-
-

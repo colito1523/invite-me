@@ -10,6 +10,10 @@ export default function StoryImage({ currentStory, ...rest }) {
     height: "100%",
   });
 
+  if (!currentStory?.storyUrl) {
+    return null;
+  }
+
   return (
     <Image
     source={{ uri: currentStory.storyUrl }}

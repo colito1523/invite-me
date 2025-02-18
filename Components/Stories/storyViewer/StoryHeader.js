@@ -13,19 +13,23 @@ const StoryHeader = ({
   onProfilePress,
   onOptionsPress,
 }) => {
-  // Intentar cargar primero la imagen de baja calidad
+  if (!currentStory) {
+    return null;
+  }
+
   const [imageUri, setImageUri] = useState(
-    currentStory.lowQualityProfileImage || `${currentStory.profileImage}?alt=media&w=10&h=10&q=5`
+    currentStory?.lowQualityProfileImage || 
+    (currentStory?.profileImage ? `${currentStory.profileImage}?alt=media&w=10&h=10&q=5` : null)
   );
 
   // Luego cambiar a la imagen en alta calidad si existe
   useEffect(() => {
-    if (currentStory.profileImage) {
+    if (currentStory?.profileImage) {
       setTimeout(() => {
         setImageUri(currentStory.profileImage);
       }, 0); // Retraso para mejorar la UX
     }
-  }, [currentStory.profileImage]);
+  }, [currentStory?.profileImage]);
 
   return (
     <View style={styles.userInfo}>

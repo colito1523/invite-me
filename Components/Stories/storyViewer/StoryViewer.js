@@ -77,7 +77,6 @@ export function StoryViewer({
       console.error("Prop 'stories' no es un array válido:", stories);
       onClose?.();
     } else if (validStories.length === 0) {
-      console.error("No hay historias válidas disponibles.");
       onClose?.();
     } else if (!isValidInitialIndex) {
       console.error("Índice inicial inválido:", initialIndex);
@@ -97,8 +96,15 @@ export function StoryViewer({
             ? story.expiresAt.toDate()
             : new Date(story.expiresAt),
         })),
-      }))
+      })).filter(group => group.userStories.length > 0)
     : [];
+
+  // Close viewer if no stories remain
+  useEffect(() => {
+    if (deserializedStories.length === 0) {
+      onClose?.(localUnseenStories);
+    }
+  }, [deserializedStories.length]);
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [storyIndex, setStoryIndex] = useState(() => {
@@ -147,8 +153,22 @@ export function StoryViewer({
   const currentStory = stories[currentIndex]?.userStories[storyIndex];
 
   useEffect(() => {
-    if (!stories[currentIndex]?.userStories[storyIndex]) {
+    // Validar que existan historias y sean válidas
+    if (!stories || !Array.isArray(stories) || stories.length === 0) {
       onClose?.(localUnseenStories);
+      return;
+    }
+
+    // Validar que el índice actual sea válido
+    if (currentIndex >= stories.length) {
+      onClose?.(localUnseenStories);
+      return;
+    }
+
+    // Validar que la historia actual exista
+    if (!stories[currentIndex]?.userStories?.[storyIndex]) {
+      onClose?.(localUnseenStories);
+      return;
     }
   }, [currentIndex, storyIndex, stories, onClose, localUnseenStories]);
 
@@ -290,7 +310,7 @@ export function StoryViewer({
         database,
       });
     } else {
-      console.error("auth o auth.currentUser no está disponible.");
+      
     }
   }, [currentStory, auth, database]);
 
