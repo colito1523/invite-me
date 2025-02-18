@@ -142,14 +142,16 @@ useEffect(() => {
     try {
       await Promise.all([
         fetchUsers(searchTerm, setResults),
-        storySliderRef.current?.loadExistingStories(t, setStories, setUnseenStories, false),
+        storySliderRef.current?.loadExistingStories(),
+        // Forzar recarga de historias en StorySlider
+        storySliderRef.current?.forceUpdate && storySliderRef.current?.forceUpdate()
       ]);
     } catch (error) {
       console.error("Error refreshing:", error);
     } finally {
       setRefreshing(false);
     }
-  }, [searchTerm, user, t]);
+  }, [searchTerm, user]);
  
 
   useEffect(() => {

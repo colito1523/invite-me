@@ -27,7 +27,11 @@ import styles from "./StorySliderStyles";
 
 export default React.forwardRef(function StorySlider(props, ref) {
   React.useImperativeHandle(ref, () => ({
-    loadExistingStories,
+    loadExistingStories: () => loadExistingStories(t, setStories, setUnseenStories, isUploading),
+    forceUpdate: () => {
+      loadStoriesInBatches(stories);
+      loadExistingStories(t, setStories, setUnseenStories, isUploading);
+    }
   }));
   const { t } = useTranslation();
   const navigation = useNavigation();
