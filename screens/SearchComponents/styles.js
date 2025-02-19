@@ -6,7 +6,6 @@ export const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 20,
    
   },
   header: {
@@ -25,7 +24,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: 15,
     paddingHorizontal: 10,
-    width: "100%",
+    width: "90%",
     alignSelf: "center",
     marginBottom: 15,
     height: 43,
@@ -39,6 +38,7 @@ export const styles = StyleSheet.create({
     height: 40,
   },
   sectionTitle: {
+    paddingHorizontal: 20,
     fontSize: 17,
     fontWeight: "700",
     marginVertical: 15, // Puedes aumentar este valor
@@ -50,6 +50,7 @@ export const styles = StyleSheet.create({
     height: 40,
   },
   historyItem: {
+    paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -58,6 +59,7 @@ export const styles = StyleSheet.create({
     marginVertical: 5,
   },
   recommendationItem: {
+    paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
