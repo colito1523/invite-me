@@ -1,24 +1,15 @@
-import React from "react";
-import { useEffect } from "react";
-import { View, TouchableOpacity, Text, StyleSheet} from "react-native";
-import { Dimensions } from 'react-native';
+import React, { useEffect } from "react";
+import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from "react-native";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
-// Categorías de pantalla
-const isSmallScreen = screenWidth <= 411 && screenHeight <= 850; // Pantallas pequeñas
-const isMediumScreen = screenWidth > 411 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
+const { width, height } = Dimensions.get("window");
 
 const EventsSection = ({ events, handleBoxPress, t }) => {
- 
-const handlePress = (event) => {
- 
-  handleBoxPress(event);
-};
+  const handlePress = (event) => {
+    handleBoxPress(event);
+  };
 
+  useEffect(() => {}, [events]);
 
-useEffect(() => {
-}, [events]);
   return (
     <View style={styles.buttonContainer}>
       {events.map((event) => (
@@ -46,19 +37,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     flexWrap: "wrap",
-    marginBottom: isSmallScreen ? 10 : isMediumScreen ? 50 : 80, // Diferentes márgenes según la categoría
-    gap: 10,
+    marginBottom: height * 0.05, // 5% de la altura de la pantalla
+    gap: width * 0.03, // 3% del ancho de la pantalla como separación entre botones
   },
   button: {
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingVertical: isSmallScreen ? 10 : isMediumScreen ? 10 : 15, // Diferentes márgenes según la categoría
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    margin: 5,
+    paddingVertical: height * 0.01, // 2% de la altura
+    paddingHorizontal: width * 0.05, // 5% del ancho
+    borderRadius: Math.min(width, height) * 0.05, // 5% de la dimensión menor para un radio responsivo
+    margin: width * 0.01, // margen de 1% del ancho
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: Math.min(width, height) * 0.04, // tamaño de fuente relativo a la pantalla
     fontWeight: "bold",
   },
 });

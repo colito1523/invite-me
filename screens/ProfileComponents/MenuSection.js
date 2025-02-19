@@ -1,7 +1,9 @@
 import React, { useCallback } from "react";
-import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+
+const { width, height } = Dimensions.get("window");
 
 const MenuSection = React.memo(({
   menuVisible,
@@ -134,7 +136,7 @@ const MenuSection = React.memo(({
         onPress={() => setMenuVisible(true)}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Ionicons name="ellipsis-vertical" size={27} color="white" />
+        <Ionicons name="ellipsis-vertical" size={Math.min(width, height) * 0.06} color="white" />
       </TouchableOpacity>
 
       <Modal
@@ -159,7 +161,6 @@ const MenuSection = React.memo(({
               <Text style={styles.menuItemText}>{t("profile.editProfile")}</Text>
             </TouchableOpacity>
 
-            {/* Renderizamos la opción de perfiles bloqueados sólo si hay algún usuario bloqueado */}
             {blockedUsers.length > 0 && (
               <TouchableOpacity
                 style={styles.menuItem}
@@ -202,40 +203,40 @@ const MenuSection = React.memo(({
 const styles = StyleSheet.create({
   menuContainer: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 80 : 40,
-    right: 20,
+    top: Platform.OS === "ios" ? height * 0.1 : height * 0.05, // top responsivo: 10% para iOS, 5% para Android
+    right: width * 0.05, // 5% del ancho desde la derecha
     zIndex: 10,
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    width: '60%',
-    alignItems: 'center', // Centra los elementos dentro del modal
+    backgroundColor: "white",
+    borderRadius: Math.min(width, height) * 0.03, // radio de borde del 3% de la dimensión menor
+    padding: width * 0.05, // padding del 5% del ancho
+    width: "60%",
+    alignItems: "center",
   },
   menuItem: {
-    paddingVertical: 15,
-    width: '100%', // Asegura que las opciones ocupen todo el ancho disponible
-    alignItems: 'center', // Centra los textos en el TouchableOpacity
+    paddingVertical: height * 0.02, // padding vertical del 2% de la altura
+    width: "100%",
+    alignItems: "center",
   },
   menuItemText: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center', // Asegura que el texto esté alineado al centro
+    fontSize: Math.min(width, height) * 0.04, // tamaño de fuente relativo
+    color: "#333",
+    textAlign: "center",
   },
   deleteMenuItem: {
     borderBottomWidth: 0,
   },
   deleteMenuItemText: {
-    fontSize: 16,
-    color: 'red',
-    textAlign: 'center', // Asegura que el texto de eliminar cuenta también esté centrado
+    fontSize: Math.min(width, height) * 0.04,
+    color: "red",
+    textAlign: "center",
   },
 });
 
