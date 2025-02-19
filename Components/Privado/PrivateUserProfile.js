@@ -33,9 +33,8 @@ import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import MutualFriendsModal from "../Mutual-Friends-Modal/MutualFriendsModal";
 
+
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const isSmallScreen = screenWidth <= 411 && screenHeight <= 850; // Pantallas pequeñas
-const isMediumScreen = screenWidth > 411 && screenWidth <= 430 && screenHeight <= 932; // Pantallas medianas
 
 const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus, isProcessing, friendCount, mutualFriends, handleMutualFriendsPress }) => {
   const { t } = useTranslation();
@@ -620,8 +619,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 70 : 50,
-    left: 20,
+    // Aproximadamente 70px en iOS y 50px en Android, convertidos a porcentaje
+    top: Platform.OS === "ios" ? screenHeight * 0.0875 : screenHeight * 0.0625,
+    left: screenWidth * 0.05,
     zIndex: 10,
   },
   imageContainer: {
@@ -640,38 +640,39 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
     justifyContent: "flex-end",
-    paddingBottom: 40,
+    paddingBottom: screenHeight * 0.05, // Equivale a unos 40px en una pantalla de 800px de alto
   },
   infoContainer: {
-    padding: 20,
+    padding: screenWidth * 0.05,
   },
+  // Posicionamos el contenedor del nombre usando porcentajes
   nameContainer: {
     position: "absolute",
-    top: isSmallScreen ? 510 : isMediumScreen ? 600 : 750, // Márgenes dinámicos
-    left: 20,
-    right: 20,
+    top: "68%",
+    left: screenWidth * 0.05,
+    right: screenWidth * 0.05,
     zIndex: 10,
   },
   nameAndButtonContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
+  // El tamaño de fuente se calcula como un porcentaje del ancho de pantalla
   name: {
-    fontSize: isSmallScreen ? 21 : isMediumScreen ? 25 : 30, // Márgenes dinámicos
+    fontSize: screenWidth * 0.06,
     fontWeight: "bold",
     color: "white",
-    marginRight: 10, // Add some space between the name and the button
+    marginRight: screenWidth * 0.025,
   },
   spacer: {
-    height: 150,
+    height: screenHeight * 0.1875, // Aproximadamente 150px en una pantalla de 800px de alto
   },
+  // Contenedor para el texto de cantidad de amigos
   friendCountContainer: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 40,
+    marginBottom: screenHeight * 0.05,
   },
   number: {
-    fontSize: isSmallScreen ? 19 : isMediumScreen ? 26 : 30, // Márgenes dinámicos,
+    fontSize: screenWidth * 0.06,
     fontWeight: "bold",
   },
   rectanglesContainer: {
@@ -680,61 +681,63 @@ const styles = StyleSheet.create({
   topRectanglesRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: screenHeight * 0.0125,
   },
+  // Convertimos dimensiones fijas a proporcionales
   rectangle: {
-    width: 160,
-    height: 40,
-    borderRadius: 20,
+    width: screenWidth * 0.4,
+    height: screenHeight * 0.05,
+    borderRadius: screenWidth * 0.05,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    marginHorizontal: 5,
+    marginHorizontal: screenWidth * 0.012,
   },
   bottomRectangle: {
-    width: 160,
-    height: 40,
-    borderRadius: 20,
+    width: screenWidth * 0.4,
+    height: screenHeight * 0.05,
+    borderRadius: screenWidth * 0.05,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
+  // Posición del menú relativa a la pantalla
   menuContainer: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 70 : 50,
-    right: 20,
+    top: Platform.OS === "ios" ? screenHeight * 0.0875 : screenHeight * 0.0625,
+    right: screenWidth * 0.05,
     zIndex: 10,
   },
   mutualFriendsContainer: {
-    marginTop: 20,
+    marginTop: screenHeight * 0.025,
   },
   mutualFriendImagesContainer: {
     flexDirection: "row",
-    height: 40,
+    height: screenHeight * 0.05,
   },
   mutualFriendImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: screenWidth * 0.1,
+    height: screenWidth * 0.1,
+    borderRadius: screenWidth * 0.05,
     position: "absolute",
   },
   mutualFriendMoreText: {
-    fontSize: 14,
+    fontSize: screenWidth * 0.035,
     fontWeight: "bold",
   },
   noMutualFriendsText: {
-    fontSize: 14,
+    fontSize: screenWidth * 0.035,
     fontWeight: "bold",
   },
   horizontalRectanglesContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: screenHeight * 0.025,
   },
   addFriendContainer: {
     alignItems: "flex-end",
-    marginTop: 20,
+    marginTop: screenHeight * 0.025,
   },
   addFriendButton: {
-    padding: 10,
-    borderRadius: 20,
+    padding: screenWidth * 0.025,
+    borderRadius: screenWidth * 0.05,
   },
   privateTextContainer: {
     position: 'absolute',
@@ -747,9 +750,13 @@ const styles = StyleSheet.create({
   },
   privateAccountText: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: screenWidth * 0.06,
     fontWeight: 'bold',
     textAlign: 'center',
     textTransform: 'uppercase',
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
