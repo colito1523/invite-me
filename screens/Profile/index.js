@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Dimensions,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -33,68 +33,88 @@ import MenuSection from "../ProfileComponents/MenuSection";
 import EventsSection from "../ProfileComponents/EventsSection";
 import { FlatList } from "react-native-gesture-handler";
 import { styles } from "./styles";
-import { fetchUserData, setFetchUserData, handleTogglePrivacy, handleHeartPress, checkLikeStatus, fetchFriendCount, fetchHeartCount, pickImage, handleBoxPress,compressImage } from "./utils"; 
+import {
+  fetchUserData,
+  setFetchUserData,
+  handleTogglePrivacy,
+  handleHeartPress,
+  checkLikeStatus,
+  fetchFriendCount,
+  fetchHeartCount,
+  pickImage,
+  handleBoxPress,
+  compressImage,
+} from "./utils";
 
-const NameDisplay = React.memo(({
-  name,
-  surname,
-  friendCount,
-  isEditing,
-  setName,
-  setSurname,
-  nameInputRef,
-  surnameInputRef,
-  handleFriendCountClick,
-  displayFriendCount,
-}) => {
-  const { t } = useTranslation();
+const NameDisplay = React.memo(
+  ({
+    name,
+    surname,
+    friendCount,
+    isEditing,
+    setName,
+    setSurname,
+    nameInputRef,
+    surnameInputRef,
+    handleFriendCountClick,
+    displayFriendCount,
+  }) => {
+    const { t } = useTranslation();
 
-  return (
-    <View style={[styles.nameContainer, isEditing && styles.nameContainerEditing]}>
-      {/* Condicional para modo edición o visualización */}
-      <View style={[
-          styles.nameAndSurnameContainer,
-          isEditing && styles.nameAndSurnameContainerEditing,
-        ]}>
-        {isEditing ? (
-          <>
-            <TextInput
-              ref={nameInputRef}
-              style={[styles.editableText, styles.editableTextEditing]}
-              value={name}
-              onChangeText={setName}
-              placeholder={t("profile.namePlaceholder")}
-              placeholderTextColor="#bbb"
-              maxLength={15}
-            />
-            <TextInput
-              ref={surnameInputRef}
-              style={[styles.editableText, styles.editableTextEditing]}
-              value={surname}
-              onChangeText={setSurname}
-              placeholder={t("profile.surnamePlaceholder")}
-              placeholderTextColor="#bbb"
-              maxLength={15}
-            />
-          </>
-        ) : (
-          <Text style={styles.text}>
-            {name} {surname}
-          </Text>
+    return (
+      <View
+        style={[styles.nameContainer, isEditing && styles.nameContainerEditing]}
+      >
+        {/* Condicional para modo edición o visualización */}
+        <View
+          style={[
+            styles.nameAndSurnameContainer,
+            isEditing && styles.nameAndSurnameContainerEditing,
+          ]}
+        >
+          {isEditing ? (
+            <>
+              <TextInput
+                ref={nameInputRef}
+                style={[styles.editableText, styles.editableTextEditing]}
+                value={name}
+                onChangeText={setName}
+                placeholder={t("profile.namePlaceholder")}
+                placeholderTextColor="#bbb"
+                maxLength={15}
+              />
+              <TextInput
+                ref={surnameInputRef}
+                style={[styles.editableText, styles.editableTextEditing]}
+                value={surname}
+                onChangeText={setSurname}
+                placeholder={t("profile.surnamePlaceholder")}
+                placeholderTextColor="#bbb"
+                maxLength={15}
+              />
+            </>
+          ) : (
+            <Text style={styles.text}>
+              {name} {surname}
+            </Text>
+          )}
+        </View>
+
+        {/* Condicional para mostrar cantidad de amigos */}
+        {!isEditing && displayFriendCount && (
+          <TouchableOpacity
+            onPress={handleFriendCountClick}
+            style={styles.friendCountContainer}
+          >
+            <Text style={styles.friendsText}>
+              {friendCount > 0 ? friendCount : t("profile.loading")}
+            </Text>
+          </TouchableOpacity>
         )}
       </View>
-
-      {/* Condicional para mostrar cantidad de amigos */}
-      {!isEditing && displayFriendCount && (
-        <TouchableOpacity onPress={handleFriendCountClick} style={styles.friendCountContainer}>
-          <Text style={styles.friendsText}>
-            {friendCount > 0 ? friendCount : t("profile.loading")}
-          </Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-});
+    );
+  }
+);
 
 export default function Profile({ navigation }) {
   const [name, setName] = useState("");
@@ -120,7 +140,7 @@ export default function Profile({ navigation }) {
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [isBlockedListVisible, setIsBlockedListVisible] = useState(false);
   const [userData, setUserData] = useState(null);
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   const [screenCategory, setScreenCategory] = useState("");
 
   const nameInputRef = useRef(null);
@@ -135,15 +155,15 @@ export default function Profile({ navigation }) {
   };
 
   useEffect(() => {
-    fetchUserData({setBlockedUsers, setUserData});
+    fetchUserData({ setBlockedUsers, setUserData });
   }, []);
 
   useEffect(() => {
-    const { width, height } = Dimensions.get('window');
+    const { width, height } = Dimensions.get("window");
     console.log(`Tamaño de la pantalla - Ancho: ${width}, Alto: ${height}`);
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const { width, height } = Dimensions.get("window");
 
     if (width === 411 && height === 835) {
@@ -155,34 +175,37 @@ export default function Profile({ navigation }) {
     }
   }, []);
 
+  const handleFriendCountClick = useCallback(() => {
+    setIsFriendListVisible(true);
+  }, []);
+
   useEffect(() => {
     const fetchProfileData = async () => {
-        if (!auth.currentUser) return;
+      if (!auth.currentUser) return;
 
-        try {
-            await setFetchUserData({
-                setName,
-                setSurname,
-                setIsPrivate,
-                setPhotoUrls,
-                setUsername,
-                setFriendCount,
-                setFirstHobby,
-                setSecondHobby,
-                setFirstInterest,
-                setSecondInterest
-            });
+      try {
+        await setFetchUserData({
+          setName,
+          setSurname,
+          setIsPrivate,
+          setPhotoUrls,
+          setUsername,
+          setFriendCount,
+          setFirstHobby,
+          setSecondHobby,
+          setFirstInterest,
+          setSecondInterest,
+        });
 
-            checkLikeStatus({ setIsHearted });
-            fetchHeartCount({ setHeartCount });
-        } catch (error) {
-            console.error("Error cargando datos:", error);
-        }
+        checkLikeStatus({ setIsHearted });
+        fetchHeartCount({ setHeartCount });
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+      }
     };
 
     fetchProfileData();
-}, [auth.currentUser]);
-
+  }, [auth.currentUser]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -208,28 +231,32 @@ export default function Profile({ navigation }) {
       Alert.alert(t("profile.error"), t("profile.nameValidationError"));
       return;
     }
-  
+
     if (!name.trim() || !surname.trim()) {
       Alert.alert(t("profile.error"), t("profile.allFieldsRequired"));
       return;
     }
-  
+
     const user = auth.currentUser;
     if (user) {
       setIsLoading(true);
-  
+
       try {
         const userDoc = await getDoc(doc(database, "users", user.uid));
         const currentData = userDoc.exists() ? userDoc.data() : {};
-  
+
         let updatedData = {};
         if (name !== currentData.firstName) updatedData.firstName = name;
         if (surname !== currentData.lastName) updatedData.lastName = surname;
-        if (firstHobby !== currentData.firstHobby) updatedData.firstHobby = firstHobby;
-        if (secondHobby !== currentData.secondHobby) updatedData.secondHobby = secondHobby;
-        if (firstInterest !== currentData.firstInterest) updatedData.firstInterest = firstInterest;
-        if (secondInterest !== currentData.secondInterest) updatedData.secondInterest = secondInterest;
-  
+        if (firstHobby !== currentData.firstHobby)
+          updatedData.firstHobby = firstHobby;
+        if (secondHobby !== currentData.secondHobby)
+          updatedData.secondHobby = secondHobby;
+        if (firstInterest !== currentData.firstInterest)
+          updatedData.firstInterest = firstInterest;
+        if (secondInterest !== currentData.secondInterest)
+          updatedData.secondInterest = secondInterest;
+
         // Subir imágenes comprimidas
         const uploadTasks = photoUrls.map(async (url, index) => {
           if (url.startsWith("file://")) {
@@ -242,12 +269,15 @@ export default function Profile({ navigation }) {
           }
           return url;
         });
-  
+
         const updatedPhotoUrls = await Promise.all(uploadTasks);
-        if (JSON.stringify(updatedPhotoUrls) !== JSON.stringify(currentData.photoUrls)) {
+        if (
+          JSON.stringify(updatedPhotoUrls) !==
+          JSON.stringify(currentData.photoUrls)
+        ) {
           updatedData.photoUrls = updatedPhotoUrls;
         }
-  
+
         // Generar y subir imagen en **ultra baja calidad** solo para la primera foto
         if (photoUrls[0].startsWith("file://")) {
           const lowQualityUri = await compressImage(photoUrls[0], true); // Comprimir aún más
@@ -258,11 +288,11 @@ export default function Profile({ navigation }) {
           const lowQualityUrl = await getDownloadURL(lowQualityRef);
           updatedData.lowQualityProfileImage = lowQualityUrl; // Guardar en la base de datos
         }
-  
+
         if (Object.keys(updatedData).length > 0) {
           await updateDoc(doc(database, "users", user.uid), updatedData);
         }
-  
+
         setPhotoUrls(updatedPhotoUrls);
         setIsEditing(false);
       } catch (error) {
@@ -273,25 +303,22 @@ export default function Profile({ navigation }) {
       }
     }
   };
-  
 
   const renderSaveButton = () => {
     return (
-        <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSaveChanges}
-            disabled={isLoading}
-        >
-            {isLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
-            ) : (
-                <Text style={styles.saveButtonText}>
-                    {t("profile.saveChanges")}
-                </Text>
-            )}
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.saveButton}
+        onPress={handleSaveChanges}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.saveButtonText}>{t("profile.saveChanges")}</Text>
+        )}
+      </TouchableOpacity>
     );
-};
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -341,31 +368,33 @@ export default function Profile({ navigation }) {
 
   const renderPhotoEditor = () => {
     return (
-        <View style={styles.photoEditorContainer}>
-            {photoUrls.map((url, index) => (
-                <View key={index} style={styles.photoContainer}>
-                    {url ? (
-                        <Image
-                            source={{ uri: url }}
-                            style={styles.photoThumbnail}
-                            cachePolicy="memory-disk"
-                        />
-                    ) : (
-                        <View style={styles.emptyPhoto} />
-                    )}
-                    <TouchableOpacity
-                        onPress={() => pickImage(index, ImagePicker, photoUrls, setPhotoUrls)}
-                        style={styles.photoButton}
-                    >
-                        <Text style={styles.photoButtonText}>
-                            {url ? t("profile.change") : t("profile.add")}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            ))}
-        </View>
+      <View style={styles.photoEditorContainer}>
+        {photoUrls.map((url, index) => (
+          <View key={index} style={styles.photoContainer}>
+            {url ? (
+              <Image
+                source={{ uri: url }}
+                style={styles.photoThumbnail}
+                cachePolicy="memory-disk"
+              />
+            ) : (
+              <View style={styles.emptyPhoto} />
+            )}
+            <TouchableOpacity
+              onPress={() =>
+                pickImage(index, ImagePicker, photoUrls, setPhotoUrls)
+              }
+              style={styles.photoButton}
+            >
+              <Text style={styles.photoButtonText}>
+                {url ? t("profile.change") : t("profile.add")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
     );
-};
+  };
 
   const handleFriendSelect = async (friend) => {
     const user = auth.currentUser;
@@ -389,204 +418,217 @@ export default function Profile({ navigation }) {
 
   const renderEditableOval = (value, setValue, placeholder) => {
     if (isEditing) {
-        return (
-            <TextInput
-                style={[styles.oval, styles.ovalInput]}
-                value={value}
-                onChangeText={setValue}
-                placeholder={placeholder}
-                maxLength={12}
-            />
-        );
+      return (
+        <TextInput
+          style={[styles.oval, styles.ovalInput]}
+          value={value}
+          onChangeText={setValue}
+          placeholder={placeholder}
+          maxLength={12}
+        />
+      );
     }
     return (
-        <View style={styles.oval}>
-            <Text style={styles.ovalText}>{value}</Text>
-        </View>
+      <View style={styles.oval}>
+        <Text style={styles.ovalText}>{value}</Text>
+      </View>
     );
-};
+  };
 
   return (
     <Provider>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         keyboardVerticalOffset={0}
       >
-        <ScrollView 
-          contentContainerStyle={[
-            styles.scrollViewContent,
-            {flexGrow: 1}
-          ]}
+        <ScrollView
+          contentContainerStyle={[styles.scrollViewContent, { flexGrow: 1 }]}
           keyboardShouldPersistTaps="handled"
           scrollEnabled={false} // Disable vertical scrolling
         >
-        <View style={styles.container}>
-          {isElementsVisible && (
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Ionicons
-                name="arrow-back"
-                size={27}
-                color="white"
-                style={styles.iconShadow}
+          <View style={styles.container}>
+            {isElementsVisible && (
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons
+                  name="arrow-back"
+                  size={27}
+                  color="white"
+                  style={styles.iconShadow}
+                />
+              </TouchableOpacity>
+            )}
+
+            {isElementsVisible && (
+              <MenuSection
+                menuVisible={menuVisible}
+                setMenuVisible={setMenuVisible}
+                handleEditProfile={handleEditProfile}
+                handleTogglePrivacy={() =>
+                  handleTogglePrivacy({ isPrivate, setIsPrivate, t })
+                }
+                isPrivate={isPrivate}
+                t={t}
+                blockedUsers={blockedUsers}
+                setIsBlockedListVisible={setIsBlockedListVisible}
               />
-            </TouchableOpacity>
-          )}
+            )}
 
-          {isElementsVisible && (
-            <MenuSection
-              menuVisible={menuVisible}
-              setMenuVisible={setMenuVisible}
-              handleEditProfile={handleEditProfile}
-              handleTogglePrivacy={() => handleTogglePrivacy({isPrivate, setIsPrivate, t})}
-              isPrivate={isPrivate}
-              t={t}
-              blockedUsers={blockedUsers}
-              setIsBlockedListVisible={setIsBlockedListVisible}
-            />
-          )}
+            {/* FlatList en lugar de ScrollView */}
+            <View style={{ flex: 1 }}>
+              <FlatList
+                data={photoUrls.filter((url) => url)} // Filtra URLs válidas
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                scrollEventThrottle={16}
+                directionalLockEnabled={true}
+                scrollEnabled={true} // Ensure horizontal scrolling is enabled
+                bounces={false}
+                onScroll={(event) => {
+                  const contentOffset = event.nativeEvent.contentOffset;
+                  const viewSize = event.nativeEvent.layoutMeasurement;
+                  setCurrentImageIndex(
+                    Math.floor(contentOffset.x / viewSize.width)
+                  );
+                }}
+                keyExtractor={(item, index) => `photo-${index}`}
+                renderItem={({ item, index }) => (
+                  <Pressable
+                    style={styles.imageContainer}
+                    onLongPress={handleLongPress}
+                    onPressOut={handlePressOut}
+                  >
+                   <Image
+  source={{ uri: item }}
+  style={styles.backgroundImage}
+  contentFit="cover"
+  cachePolicy="disk"
+  priority="high"
+/>
 
-          {/* FlatList en lugar de ScrollView */}
-          <View style={{ flex: 1 }}>
-            <FlatList
-              data={photoUrls.filter((url) => url)} // Filtra URLs válidas
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              scrollEventThrottle={16}
-              directionalLockEnabled={true}
-              scrollEnabled={true} // Ensure horizontal scrolling is enabled
-              bounces={false}
-              onScroll={(event) => {
-                const contentOffset = event.nativeEvent.contentOffset;
-                const viewSize = event.nativeEvent.layoutMeasurement;
-                setCurrentImageIndex(Math.floor(contentOffset.x / viewSize.width));
-              }}
-              keyExtractor={(item, index) => `photo-${index}`}
-              renderItem={({ item, index }) => (
-                <Pressable
-                  style={styles.imageContainer}
-                  onLongPress={handleLongPress}
-                  onPressOut={handlePressOut}
-                >
-                  <Image
-                    source={{ uri: item }}
-                    style={styles.backgroundImage}
-                    contentFit="cover"
-                    cachePolicy="memory-disk"
-                    placeholder={{ uri: "placeholder-image-url" }} // Placeholder
-                  />
-                  {isElementsVisible && (
-                    <View style={styles.overlay}>
-                      <NameDisplay
-                        name={name}
-                        surname={surname}
-                        friendCount={friendCount}
-                        isEditing={isEditing}
-                        setName={setName}
-                        setSurname={setSurname}
-                        nameInputRef={nameInputRef}
-                        surnameInputRef={surnameInputRef}
-                        handleFriendCountClick={() => setIsFriendListVisible(true)}
-                        displayFriendCount={index === 0}
-                      />
-                      {index === 0 && !isEditing && (
-                        <EventsSection
-                          events={events.slice(0, 4)}
-                          handleBoxPress={(event) => handleBoxPress({ event, navigation, t })} // Pass event correctly
-                          t={t}
+                    {isElementsVisible && (
+                      <View style={styles.overlay}>
+                        <NameDisplay
+                          name={name}
+                          surname={surname}
+                          friendCount={friendCount}
+                          isEditing={isEditing}
+                          setName={setName}
+                          setSurname={setSurname}
+                          nameInputRef={nameInputRef}
+                          surnameInputRef={surnameInputRef}
+                          handleFriendCountClick={handleFriendCountClick}
+                          displayFriendCount={index === 0} // donde index corresponde al indice en el render, si es aplicable
                         />
-                      )}
-                      {index === 0 && isEditing && (
-                        <>
-                          {renderPhotoEditor()}
-                          {renderSaveButton()}
-                        </>
-                      )}
-                      {index === 1 && (
-                        <EventsSection
-                          events={events.slice(4, 6)}
-                          handleBoxPress={(event) => handleBoxPress({ event, navigation, t })} // Pass event correctly
-                          t={t}
-                        />
-                      )}
-                      {index === 2 && (
-                        <>
-                          <View style={styles.contentWrapper}>
-                            <View style={styles.ovalAndIconsContainer}>
-                              <View style={styles.ovalWrapper}>
-                                <View style={styles.ovalContainer}>
-                                  {renderEditableOval(
-                                    firstHobby,
-                                    setFirstHobby,
-                                    t("profile.hobby1")
-                                  )}
-                                  {renderEditableOval(
-                                    secondHobby,
-                                    setSecondHobby,
-                                    t("profile.hobby2")
-                                  )}
+                        {index === 0 && !isEditing && (
+                          <EventsSection
+                            events={events.slice(0, 4)}
+                            handleBoxPress={(event) =>
+                              handleBoxPress({ event, navigation, t })
+                            } // Pass event correctly
+                            t={t}
+                          />
+                        )}
+                        {index === 0 && isEditing && (
+                          <>
+                            {renderPhotoEditor()}
+                            {renderSaveButton()}
+                          </>
+                        )}
+                        {index === 1 && (
+                          <EventsSection
+                            events={events.slice(4, 6)}
+                            handleBoxPress={(event) =>
+                              handleBoxPress({ event, navigation, t })
+                            } // Pass event correctly
+                            t={t}
+                          />
+                        )}
+                        {index === 2 && (
+                          <>
+                            <View style={styles.contentWrapper}>
+                              <View style={styles.ovalAndIconsContainer}>
+                                <View style={styles.ovalWrapper}>
+                                  <View style={styles.ovalContainer}>
+                                    {renderEditableOval(
+                                      firstHobby,
+                                      setFirstHobby,
+                                      t("profile.hobby1")
+                                    )}
+                                    {renderEditableOval(
+                                      secondHobby,
+                                      setSecondHobby,
+                                      t("profile.hobby2")
+                                    )}
+                                  </View>
+
+                                  <View style={styles.ovalContainer}>
+                                    {renderEditableOval(
+                                      firstInterest,
+                                      setFirstInterest,
+                                      t("profile.interest1")
+                                    )}
+                                    {renderEditableOval(
+                                      secondInterest,
+                                      setSecondInterest,
+                                      t("profile.interest2")
+                                    )}
+                                  </View>
                                 </View>
 
-                                <View style={styles.ovalContainer}>
-                                  {renderEditableOval(
-                                    firstInterest,
-                                    setFirstInterest,
-                                    t("profile.interest1")
-                                  )}
-                                  {renderEditableOval(
-                                    secondInterest,
-                                    setSecondInterest,
-                                    t("profile.interest2")
-                                  )}
+                                <View style={styles.iconsContainer}>
+                                  <TouchableOpacity style={styles.iconButton}>
+                                    <AntDesign
+                                      name="adduser"
+                                      size={27}
+                                      color="white"
+                                    />
+                                  </TouchableOpacity>
+                                  <TouchableOpacity
+                                    style={styles.iconButton}
+                                    onPress={() =>
+                                      handleHeartPress({
+                                        isHearted,
+                                        heartCount,
+                                        setIsHearted,
+                                        setHeartCount,
+                                      })
+                                    }
+                                  >
+                                    <AntDesign
+                                      name={isHearted ? "heart" : "hearto"}
+                                      size={27}
+                                      color="white"
+                                    />
+                                    <Text style={styles.heartCountText}>
+                                      {heartCount}
+                                    </Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity style={styles.iconButton}>
+                                    <AntDesign
+                                      name="message1"
+                                      size={27}
+                                      color="white"
+                                    />
+                                  </TouchableOpacity>
                                 </View>
-                              </View>
-
-                              <View style={styles.iconsContainer}>
-                                <TouchableOpacity style={styles.iconButton}>
-                                  <AntDesign
-                                    name="adduser"
-                                    size={27}
-                                    color="white"
-                                  />
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                  style={styles.iconButton}
-                                  onPress={() => handleHeartPress({isHearted, heartCount, setIsHearted, setHeartCount})}
-                                >
-                                  <AntDesign
-                                    name={isHearted ? "heart" : "hearto"}
-                                    size={27}
-                                    color="white"
-                                  />
-                                  <Text style={styles.heartCountText}>
-                                    {heartCount}
-                                  </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.iconButton}>
-                                  <AntDesign
-                                    name="message1"
-                                    size={27}
-                                    color="white"
-                                  />
-                                </TouchableOpacity>
                               </View>
                             </View>
-                          </View>
-                          {isEditing && renderSaveButton()}
-                        </>
-                      )}
-                    </View>
-                  )}
-                </Pressable>
-              )}
-            />
+                            {isEditing && renderSaveButton()}
+                          </>
+                        )}
+                      </View>
+                    )}
+                  </Pressable>
+                )}
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
       </KeyboardAvoidingView>
 
       <FriendListModal
@@ -602,7 +644,6 @@ export default function Profile({ navigation }) {
         onClose={() => setIsBlockedListVisible(false)}
         blockedUsers={blockedUsers}
       />
-
     </Provider>
   );
 }

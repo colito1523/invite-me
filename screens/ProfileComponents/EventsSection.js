@@ -1,14 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useCallback } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-const EventsSection = ({ events, handleBoxPress, t }) => {
-  const handlePress = (event) => {
+const EventsSection = React.memo(({ events, handleBoxPress, t }) => {
+  const handlePress = useCallback((event) => {
     handleBoxPress(event);
-  };
-
-  useEffect(() => {}, [events]);
+  }, [handleBoxPress]);
 
   return (
     <View style={styles.buttonContainer}>
@@ -30,26 +28,26 @@ const EventsSection = ({ events, handleBoxPress, t }) => {
       ))}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center",
     flexWrap: "wrap",
-    marginBottom: height * 0.05, // 5% de la altura de la pantalla
-    gap: width * 0.03, // 3% del ancho de la pantalla como separación entre botones
+    marginBottom: height * 0.05,
+    gap: width * 0.03,
   },
   button: {
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingVertical: height * 0.01, // 2% de la altura
-    paddingHorizontal: width * 0.05, // 5% del ancho
-    borderRadius: Math.min(width, height) * 0.05, // 5% de la dimensión menor para un radio responsivo
-    margin: width * 0.01, // margen de 1% del ancho
+    paddingVertical: height * 0.01,
+    paddingHorizontal: width * 0.05,
+    borderRadius: Math.min(width, height) * 0.05,
+    margin: width * 0.01,
   },
   buttonText: {
     color: "#fff",
-    fontSize: Math.min(width, height) * 0.04, // tamaño de fuente relativo a la pantalla
+    fontSize: Math.min(width, height) * 0.04,
     fontWeight: "bold",
   },
 });

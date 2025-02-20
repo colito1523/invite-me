@@ -15,7 +15,7 @@ import {
   collection,
   query,
   where,
-  onSnapshot,
+  getDocs,
   doc,
   getDoc,
   limit,
@@ -53,68 +53,110 @@ export default function NotificationsComponent() {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingEventId, setLoadingEventId] = useState(null);
   const user = auth.currentUser;
+  const [lastVisible, setLastVisible] = useState(null);
+const [loadingMore, setLoadingMore] = useState(false);
 
-  const fetchNotifications = useCallback(async () => {
-    if (!user) return;
-  
+
+ // Carga inicial de notificaciones (y solicitudes de amistad)
+ const fetchNotifications = useCallback(async () => {
+  if (!user) return;
+
+  try {
     const userRef = doc(database, "users", user.uid);
     const userDoc = await getDoc(userRef);
     const hiddenNotifications = userDoc.data()?.hiddenNotifications || [];
     const blockedUsers = userDoc.data()?.blockedUsers || [];
-  
+
     const notificationsRef = collection(database, "users", user.uid, "notifications");
     const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
-  
-    const notificationsQuery = query(notificationsRef);
-    const friendRequestsQuery = query(friendRequestsRef, where("status", "==", "pending"));
-  
-    let notifList = [];
-    let requestList = [];
-  
-    const unsubscribeNotifications = onSnapshot(notificationsQuery, (notifSnapshot) => {
-      notifList = notifSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          type: doc.data().type || "notification",
-        }))
-        .filter(
-          (notif) =>
-            !hiddenNotifications.includes(notif.id) &&
-            !blockedUsers.includes(notif.fromId)
-        );
-      // Actualizamos combinando las notificaciones y solicitudes de amistad
-      setNotifications(
-        [...notifList, ...requestList].sort((a, b) => b.timestamp - a.timestamp)
+
+    const notificationsQuery = query(
+      notificationsRef,
+      orderBy("timestamp", "desc"),
+      limit(8)
+    );
+    const friendRequestsQuery = query(
+      friendRequestsRef,
+      where("status", "==", "pending"),
+      limit(8)
+    );
+
+    const [notificationsSnapshot, friendRequestsSnapshot] = await Promise.all([
+      getDocs(notificationsQuery),
+      getDocs(friendRequestsQuery)
+    ]);
+
+    const notificationsData = notificationsSnapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        type: doc.data().type || "notification",
+      }))
+      .filter(notif => 
+        !hiddenNotifications.includes(notif.id) &&
+        !blockedUsers.includes(notif.fromId)
       );
-      setIsLoading(false);
-    });
-  
-    const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (friendSnapshot) => {
-      requestList = friendSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          type: "friendRequest",
-        }))
-        .filter(
-          (notif) =>
-            !hiddenNotifications.includes(notif.id) &&
-            !blockedUsers.includes(notif.fromId)
-        );
-      // Actualizamos combinando las notificaciones y solicitudes de amistad
-      setNotifications(
-        [...notifList, ...requestList].sort((a, b) => b.timestamp - a.timestamp)
+
+    const friendRequestsData = friendRequestsSnapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        type: "friendRequest",
+      }))
+      .filter(notif => 
+        !hiddenNotifications.includes(notif.id) &&
+        !blockedUsers.includes(notif.fromId)
       );
-      setIsLoading(false);
-    });
-  
-    return () => {
-      unsubscribeNotifications();
-      unsubscribeFriendRequests();
-    };
-  }, [user]);
-  
+
+    let combined = [...notificationsData, ...friendRequestsData];
+    combined.sort((a, b) => b.timestamp - a.timestamp);
+
+    if (!notificationsSnapshot.empty) {
+      setLastVisible(notificationsSnapshot.docs[notificationsSnapshot.docs.length - 1]);
+    }
+
+    setNotifications(combined);
+    setIsLoading(false);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    setIsLoading(false);
+  }
+}, [user]);
+
+
+const loadMoreNotifications = async () => {
+  if (!lastVisible || loadingMore || !user) return;
+  setLoadingMore(true);
+
+  try {
+    const notificationsRef = collection(database, "users", user.uid, "notifications");
+    const nextQuery = query(
+      notificationsRef,
+      orderBy("timestamp", "desc"),
+      startAfter(lastVisible),
+      limit(10)
+    );
+    const snapshot = await getDocs(nextQuery);
+    if (!snapshot.empty) {
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+      const moreNotifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        type: doc.data().type || "notification",
+      }));
+      setNotifications(prev => [...prev, ...moreNotifications]);
+    } else {
+      // Si no hay datos, indicamos que no hay más datos
+      setLastVisible(null);
+    }
+  } catch (error) {
+    console.error("Error loading more notifications:", error);
+  } finally {
+    setLoadingMore(false);
+  }
+};
+
+
 
   useEffect(() => {
     const checkTime = () => {
@@ -647,37 +689,26 @@ export default function NotificationsComponent() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size={50} color="black" />
-      </View>
-    );
-  }
   return (
-      <LinearGradient
-        colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
-        style={styles.container}
-      >
-       <FlatList
-  data={notifications}
-  keyExtractor={(item) => item.id}
-  renderItem={renderNotificationItem}
-  contentContainerStyle={styles.listContent}
-  initialNumToRender={6}  // ⚡ Renderiza solo los primeros 10 elementos
-  maxToRenderPerBatch={5}  // ⚡ Carga los elementos de a 5 cuando se desplaza
-  removeClippedSubviews={true}  // ⚡ Elimina elementos fuera de la pantalla
-  getItemLayout={(data, index) => ({ length: 80, offset: 80 * index, index })} // ⚡ Mejora el desplazamiento
-  refreshControl={
-    <RefreshControl
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-      colors={["black"]}
-      tintColor="black"
+    <LinearGradient
+    colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
+    style={styles.container}
+  >
+    <FlatList
+      data={notifications}
+      keyExtractor={(item) => item.id}
+      renderItem={renderNotificationItem}
+      contentContainerStyle={styles.listContent}
+      initialNumToRender={6}
+      maxToRenderPerBatch={5}
+      removeClippedSubviews={true}
+      onEndReached={loadMoreNotifications}
+      onEndReachedThreshold={0.1}
+      ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color="black" /> : null}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["black"]} tintColor="black" />
+      }
     />
-  }
-/>
-
-      </LinearGradient>
-  );
+  </LinearGradient>
+);
 }
