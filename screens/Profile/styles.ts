@@ -7,6 +7,7 @@ export const styles = StyleSheet.create({
     flexGrow: 1,
   },
   container: {
+    backgroundColor: "red",
     flex: 1,
   },
   backButton: {
@@ -16,7 +17,7 @@ export const styles = StyleSheet.create({
     zIndex: 10,
   },
   backgroundImage: {
-    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "transparent",
     width: "100%",
     height: "100%",
   },

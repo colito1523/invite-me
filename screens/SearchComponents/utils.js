@@ -111,9 +111,16 @@ export const fetchUsers = async (searchTerm, setResults) => {
 
 export const fetchRecommendations = async (user, setRecommendations) => {
   const auth = getAuth();
-  if (!user) return;
+  
+  // Validar usuario antes de proceder
+  if (!user || !user.uid) {
+    console.error("fetchRecommendations: Usuario no autenticado o sin UID.");
+    return;
+  }
 
   try {
+    console.log("fetchRecommendations iniciado para UID:", user.uid);
+
     // 1) Leer datos del usuario, para conocer a bloqueados
     const userRef = doc(database, "users", user.uid);
     const userSnapshot = await getDoc(userRef);
@@ -124,13 +131,11 @@ export const fetchRecommendations = async (user, setRecommendations) => {
     if (cachedData) {
       const { recommendations: cachedRecs, timestamp } = JSON.parse(cachedData);
       const now = Date.now();
-      // Ejemplo: 1 hora de vigencia
       if (now - timestamp < 60 * 60 * 1000) {
-        // Filtrar bloqueados de la lista cacheada
-        const filtered = cachedRecs.filter(
-          (rec) => !blockedUsers.includes(rec.id)
-        );
+        const filtered = cachedRecs.filter(rec => !blockedUsers.includes(rec.id));
+        console.log("Usando caché de recomendaciones");
         setRecommendations(filtered);
+        return;
       } else {
         console.log("Caché expirada, recargando recomendaciones...");
       }
@@ -139,53 +144,58 @@ export const fetchRecommendations = async (user, setRecommendations) => {
     // 3) Obtener la lista de amigos del usuario
     const friendsRef = collection(database, "users", user.uid, "friends");
     const friendsSnapshot = await getDocs(friendsRef);
-    const friendsList = friendsSnapshot.docs.map((doc) => doc.data().friendId);
+    const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
 
-    // 4) Ir armando la lista de "amigos de mis amigos"
+    if (!friendsList.length) {
+      console.warn("fetchRecommendations: El usuario no tiene amigos registrados.");
+      setRecommendations([]);
+      return;
+    }
+
+    // 4) Obtener amigos de amigos
     let potentialFriends = [];
     for (const friendId of friendsList) {
       const friendFriendsRef = collection(database, "users", friendId, "friends");
       const friendFriendsSnapshot = await getDocs(friendFriendsRef);
-      potentialFriends.push(
-        ...friendFriendsSnapshot.docs.map((doc) => doc.data().friendId)
-      );
+      potentialFriends.push(...friendFriendsSnapshot.docs.map(doc => doc.data().friendId));
     }
 
-    // 5) Filtrar:
+    // 5) Filtrar amigos ya existentes y bloqueados
     potentialFriends = potentialFriends.filter(
-      (id) =>
-        id !== user.uid &&
-        !friendsList.includes(id) &&
-        !blockedUsers.includes(id)
+      id => id !== user.uid && !friendsList.includes(id) && !blockedUsers.includes(id)
     );
 
     // Quitar duplicados
     const uniquePotentialFriends = [...new Set(potentialFriends)];
+    console.log("Amigos de amigos encontrados:", uniquePotentialFriends);
 
-    // 6) Hacer consultas por lotes (chunks) para no sobrepasar el límite de Firestore
+    if (!uniquePotentialFriends.length) {
+      console.warn("fetchRecommendations: No hay amigos recomendados.");
+      setRecommendations([]);
+      return;
+    }
+
+    // 6) Hacer consultas por lotes para evitar límites de Firestore
     const chunkSize = 10;
     let recommendedUsers = [];
 
     for (let i = 0; i < uniquePotentialFriends.length; i += chunkSize) {
       const chunk = uniquePotentialFriends.slice(i, i + chunkSize);
 
-      // Consulta por lotes:
-      const qUsers = query(
-        collection(database, "users"),
-        where(documentId(), "in", chunk)
-      );
+      // Evitar consultas con valores vacíos o inválidos
+      if (!chunk.length || chunk.some(id => !id)) {
+        console.warn("fetchRecommendations: Se encontró un chunk con valores inválidos, omitiendo...");
+        continue;
+      }
 
+      const qUsers = query(collection(database, "users"), where(documentId(), "in", chunk));
       const chunkSnapshot = await getDocs(qUsers);
-      chunkSnapshot.forEach((docSnap) => {
+
+      chunkSnapshot.forEach(docSnap => {
         if (docSnap.exists()) {
           const userData = docSnap.data();
-
-          // Imagen optimizada usando expo-image
-          const profileImage =
-            userData.photoUrls?.[0] || "https://via.placeholder.com/150";
-          const lowQualityProfileImage = profileImage
-            ? `${profileImage}?alt=media&w=30&h=30&q=1`
-            : null;
+          const profileImage = userData.photoUrls?.[0] || "https://via.placeholder.com/150";
+          const lowQualityProfileImage = profileImage ? `${profileImage}?alt=media&w=30&h=30&q=1` : null;
 
           recommendedUsers.push({
             id: docSnap.id,
@@ -197,10 +207,11 @@ export const fetchRecommendations = async (user, setRecommendations) => {
       });
     }
 
-    // 7) Asignar a estado final
+    // 7) Asignar recomendaciones al estado
+    console.log("Recomendaciones finales:", recommendedUsers);
     setRecommendations(recommendedUsers);
 
-    // 8) Guardar en caché (solo si hay resultados)
+    // 8) Guardar en caché para futuras consultas
     if (recommendedUsers.length > 0) {
       await AsyncStorage.setItem(
         `recommendations_${user.uid}`,
