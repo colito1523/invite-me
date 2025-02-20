@@ -6,11 +6,11 @@ import {
   Alert,
   Text,
   ActivityIndicator,
-  SafeAreaView,
   RefreshControl,
 } from "react-native";
 import { Image } from "expo-image";
 import { database, auth } from "../../config/firebase";
+import { InteractionManager } from "react-native";
 import {
   collection,
   query,
@@ -18,6 +18,9 @@ import {
   onSnapshot,
   doc,
   getDoc,
+  limit,
+  orderBy,
+  startAfter
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { format, isToday, isYesterday } from "date-fns";
@@ -52,100 +55,66 @@ export default function NotificationsComponent() {
   const user = auth.currentUser;
 
   const fetchNotifications = useCallback(async () => {
-    if (user) {
-      const userRef = doc(database, "users", user.uid);
-      const userDoc = await getDoc(userRef);
-      const hiddenNotifications = userDoc.data()?.hiddenNotifications || [];
-      const blockedUsers = userDoc.data()?.blockedUsers || [];
-
-      const notificationsRef = collection(
-        database,
-        "users",
-        user.uid,
-        "notifications"
+    if (!user) return;
+  
+    const userRef = doc(database, "users", user.uid);
+    const userDoc = await getDoc(userRef);
+    const hiddenNotifications = userDoc.data()?.hiddenNotifications || [];
+    const blockedUsers = userDoc.data()?.blockedUsers || [];
+  
+    const notificationsRef = collection(database, "users", user.uid, "notifications");
+    const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
+  
+    const notificationsQuery = query(notificationsRef);
+    const friendRequestsQuery = query(friendRequestsRef, where("status", "==", "pending"));
+  
+    let notifList = [];
+    let requestList = [];
+  
+    const unsubscribeNotifications = onSnapshot(notificationsQuery, (notifSnapshot) => {
+      notifList = notifSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          type: doc.data().type || "notification",
+        }))
+        .filter(
+          (notif) =>
+            !hiddenNotifications.includes(notif.id) &&
+            !blockedUsers.includes(notif.fromId)
+        );
+      // Actualizamos combinando las notificaciones y solicitudes de amistad
+      setNotifications(
+        [...notifList, ...requestList].sort((a, b) => b.timestamp - a.timestamp)
       );
-
-      const friendRequestsRef = collection(
-        database,
-        "users",
-        user.uid,
-        "friendRequests"
-      );
-
-      const notificationsQuery = query(notificationsRef);
-
-      const friendRequestsQuery = query(
-        friendRequestsRef,
-        where("status", "==", "pending")
-      );
-
-      const unsubscribeNotifications = onSnapshot(
-        notificationsQuery,
-        (querySnapshot) => {
-          const notifList = querySnapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-              type: doc.data().type || "notification",
-            }))
-            .filter(
-              (notif) =>
-                !hiddenNotifications.includes(notif.id) &&
-                !blockedUsers.includes(notif.fromId)
-            );
-
-          setNotifications((prevNotifications) => {
-            const mergedNotifications = [...prevNotifications];
-            notifList.forEach((newNotif) => {
-              const index = mergedNotifications.findIndex(
-                (n) => n.id === newNotif.id
-              );
-              if (index !== -1) {
-                mergedNotifications[index] = {
-                  ...mergedNotifications[index],
-                  ...newNotif,
-                };
-              } else {
-                mergedNotifications.push(newNotif);
-              }
-            });
-            return mergedNotifications.sort(
-              (a, b) => b.timestamp - a.timestamp
-            );
-          });
-        }
-      );
-
-      const unsubscribeFriendRequests = onSnapshot(
-        friendRequestsQuery,
-        (querySnapshot) => {
-          const requestList = querySnapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-              type: "friendRequest",
-            }))
-            .filter(
-              (notif) =>
-                !hiddenNotifications.includes(notif.id) &&
-                !blockedUsers.includes(notif.fromId)
-            );
-
-          updateNotifications({
-            newNotifications: requestList,
-            setNotifications,
-          });
-        }
-      );
-
       setIsLoading(false);
-
-      return () => {
-        unsubscribeNotifications();
-        unsubscribeFriendRequests();
-      };
-    }
+    });
+  
+    const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (friendSnapshot) => {
+      requestList = friendSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          type: "friendRequest",
+        }))
+        .filter(
+          (notif) =>
+            !hiddenNotifications.includes(notif.id) &&
+            !blockedUsers.includes(notif.fromId)
+        );
+      // Actualizamos combinando las notificaciones y solicitudes de amistad
+      setNotifications(
+        [...notifList, ...requestList].sort((a, b) => b.timestamp - a.timestamp)
+      );
+      setIsLoading(false);
+    });
+  
+    return () => {
+      unsubscribeNotifications();
+      unsubscribeFriendRequests();
+    };
   }, [user]);
+  
 
   useEffect(() => {
     const checkTime = () => {
@@ -201,14 +170,22 @@ export default function NotificationsComponent() {
 
   useFocusEffect(
     useCallback(() => {
-      markNotificationsAsSeen({
-        user,
-        database,
-        notifications,
-        setNotifications,
+      const task = InteractionManager.runAfterInteractions(() => {
+        if (notifications.some((notif) => !notif.seen)) {
+          markNotificationsAsSeen({
+            user,
+            database,
+            notifications,
+            setNotifications,
+          });
+        }
       });
+  
+      return () => task.cancel();
     }, [user, notifications])
   );
+  
+  
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -436,60 +413,42 @@ export default function NotificationsComponent() {
       }
     }
 
-    const handleNotificationPress = () => {
-      if (isEventInvitation) {
-        if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: item.eventImage,
-              date: item.eventDate,
-              day: item.day,
-              description: item.description, // Asegúrate de pasar esto
-              hour: item.hour, // Agrega la hora
-              address: item.address, // Pasar dirección
-              location: item.eventLocation || t("notifications.noLocation"),
-              coordinates: item.coordinates || { latitude: 0, longitude: 0 },
-              hours: item.hours || {},
-              number: item.phoneNumber || t("notifications.noNumber"),
-              isPrivate: item.isPrivate || false,
-            },
-            selectedDate: item.eventDate,
-            isFromNotification: true, // Indicamos que es desde la notificación
-          });
-        } else {
-          if (
-            !item.coordinates ||
-            !item.coordinates.latitude ||
-            !item.coordinates.longitude
-          ) {
-            Alert.alert(
-              t("notifications.error"),
-              t("notifications.coordinatesNotAvailable")
-            );
-
-            return;
-          }
-
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: item.eventImage,
-              date: item.eventDate,
-              location: item.eventLocation || t("notifications.noLocation"),
-              coordinates: item.coordinates || { latitude: 0, longitude: 0 },
-              hours: item.hours || {},
-              number: item.phoneNumber || t("notifications.noNumber"),
-              isPrivate: item.isPrivate || false,
-            },
-            selectedDate: item.eventDate,
-          });
-        }
-      } else if (isFriendRequestResponse) {
-        handleUserPress({
-          uid: item.fromId,
-          navigation,
-          t,
+    const handleNotificationPress = (item) => {
+      if (!item) return; // ✅ Evita errores si item es undefined
+    
+      // 1️⃣ Primero navegamos inmediatamente
+      if (item.type === "generalEventInvitation") {
+        navigation.navigate("BoxDetails", {
+          box: {
+            title: item.eventTitle,
+            imageUrl: item.eventImage,
+            date: item.eventDate,
+            isPrivate: false,
+            hours: item.hours,
+            number: item.number,
+            coordinates: item.coordinates,
+          },
+          selectedDate: item.eventDate,
+          isFromNotification: true,
+        });
+      } else if (item.type === "invitation") {
+        navigation.navigate("BoxDetails", {
+          box: {
+            title: item.eventTitle,
+            imageUrl: item.eventImage,
+            date: item.eventDate,
+            isPrivate: true,
+            description: item.description,
+            day: item.day,
+            hour: item.hour,
+            address: item.address,
+            phoneNumber: item.phoneNumber,
+            eventId: item.eventId,
+            category: "EventoParaAmigos",
+            Admin: item.Admin,
+          },
+          selectedDate: item.eventDate,
+          isFromNotification: true,
         });
       } else {
         handleUserPress({
@@ -498,7 +457,21 @@ export default function NotificationsComponent() {
           t,
         });
       }
+    
+      // 2️⃣ Luego ejecutamos validaciones en segundo plano
+      setTimeout(() => {
+        if (item.type === "invitation" || item.type === "generalEventInvitation") {
+          if (!item.coordinates || !item.coordinates.latitude || !item.coordinates.longitude) {
+            Alert.alert(
+              t("notifications.error"),
+              t("notifications.coordinatesNotAvailable")
+            );
+          }
+        }
+      }, 500);
     };
+    
+    
 
     if (item.type === "generalEventInvitation") {
       return renderGeneralEventNotification({ item });
@@ -518,7 +491,7 @@ export default function NotificationsComponent() {
               t,
             })
           }
-          onPress={handleNotificationPress}
+          onPress={() => handleNotificationPress(item)}
         >
           <View
             style={[
@@ -686,20 +659,25 @@ export default function NotificationsComponent() {
         colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
         style={styles.container}
       >
-        <FlatList
-          data={notifications}
-          keyExtractor={(item) => item.id}
-          renderItem={renderNotificationItem}
-          contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["black"]}
-              tintColor="black"
-            />
-          }
-        />
+       <FlatList
+  data={notifications}
+  keyExtractor={(item) => item.id}
+  renderItem={renderNotificationItem}
+  contentContainerStyle={styles.listContent}
+  initialNumToRender={6}  // ⚡ Renderiza solo los primeros 10 elementos
+  maxToRenderPerBatch={5}  // ⚡ Carga los elementos de a 5 cuando se desplaza
+  removeClippedSubviews={true}  // ⚡ Elimina elementos fuera de la pantalla
+  getItemLayout={(data, index) => ({ length: 80, offset: 80 * index, index })} // ⚡ Mejora el desplazamiento
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      colors={["black"]}
+      tintColor="black"
+    />
+  }
+/>
+
       </LinearGradient>
   );
 }
