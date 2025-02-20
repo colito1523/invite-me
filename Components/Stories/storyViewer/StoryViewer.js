@@ -321,7 +321,15 @@ export function StoryViewer({
   );
 
   const panResponder = createStoryPanResponder({
-    handleCloseViewer: () => onClose(unseenStories),
+    handleCloseViewer: () => {
+      if (viewersModalVisible) {
+        // Cierra solo el modal de espectadores
+        handleCloseViewersModal({ setViewersModalVisible, setIsPaused });
+      } else {
+        // Cierra el visor de historias
+        onClose(unseenStories);
+      }
+    },
     handleOpenViewersModal: () =>
       handleOpenViewersModal({
         setIsPaused,
@@ -354,6 +362,7 @@ export function StoryViewer({
       }),
     isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
   });
+  
 
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;

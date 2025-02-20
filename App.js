@@ -12,6 +12,16 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import useNotifications from "./src/hooks/useNotifications"; // Importa el hook personalizado
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as ExpoNotifications from 'expo-notifications';
+
+// Configuración de notificaciones
+ExpoNotifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Importa esto
 import { UnreadMessagesProvider } from './src/hooks/UnreadMessagesContext';
 import { DateProvider } from "./src/hooks/DateContext";

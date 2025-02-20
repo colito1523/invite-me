@@ -41,9 +41,28 @@ async function registerForPushNotificationsAsync() {
   }
 
   if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
+    // Canal para mensajes de chat
+    await Notifications.setNotificationChannelAsync("chat-messages", {
+      name: "Chat Messages",
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+      sound: 'default',
+    });
+
+    // Canal para eventos
+    await Notifications.setNotificationChannelAsync("events", {
+      name: "Events",
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#32CD32",
+      sound: 'default',
+    });
+
+    // Canal para notificaciones generales
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "General Notifications",
+      importance: Notifications.AndroidImportance.DEFAULT,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: "#FF231F7C",
     });
@@ -52,7 +71,7 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
-const useNotifications = () => {
+const useNotifications = (navigation) => { // Added navigation prop
   const [expoPushToken, setExpoPushToken] = useState("");
 
   useEffect(() => {
@@ -73,25 +92,35 @@ const useNotifications = () => {
       }
     });
 
-// Listener para manejar notificaciones recibidas mientras la app está abierta
-const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
-  // Extrae el título y el cuerpo del contenido de la notificación
-  const { title, body } = notification.request.content;
- 
-});
+    // Listener para manejar notificaciones recibidas mientras la app está abierta
+    const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
+      const { title, body, data } = notification.request.content;
+      // Puedes manejar la notificación según el tipo de datos recibidos
+      if (data?.type === 'chat') {
+        // Manejar notificación de chat
+      } else if (data?.type === 'event') {
+        // Manejar notificación de evento
+      }
+    });
 
-// Listener para manejar acciones cuando se interactúa con la notificación (tocar la notificación)
-const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
-  const { title, body } = response.notification.request.content;
+    // Listener para manejar acciones cuando se interactúa con la notificación
+    const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
+      const { data } = response.notification.request.content;
 
-});
+      // Navegación basada en el tipo de notificación
+      if (data?.type === 'chat' && data.chatId) {
+        navigation.navigate('ChatUsers', { chatId: data.chatId });
+      } else if (data?.type === 'event' && data.eventId) {
+        navigation.navigate('BoxDetails', { eventId: data.eventId });
+      }
+    });
 
     // Limpiar los listeners cuando el componente se desmonte
     return () => {
       Notifications.removeNotificationSubscription(notificationListener);
       Notifications.removeNotificationSubscription(responseListener);
     };
-  }, []);
+  }, [navigation]); // Added navigation to dependency array
 
   return expoPushToken;
 };

@@ -227,7 +227,7 @@ const renderStory = ({ item, index }) => {
         ? {
             borderWidth: 2,
             borderStyle: isCurrentUserStory ? 'solid' : hasUnseenStories ? 'solid' : 'dotted',
-            borderColor: isCurrentUserStory ? 'black' : isNightMode ? 'white' : 'black',
+            borderColor: isCurrentUserStory ? (isNightMode ? 'white' : 'black') : (isNightMode ? 'white' : 'black'),
             borderRadius: styles.storyCircle.borderRadius + 2,
             opacity: isCurrentUserStory ? 1 : hasUnseenStories ? 1 : 0.7,
           }
