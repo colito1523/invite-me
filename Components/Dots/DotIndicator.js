@@ -134,43 +134,38 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       const currentUserRef = doc(database, "users", auth.currentUser.uid);
       const currentUserDoc = await getDoc(currentUserRef);
       const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
-
-      // Mapeamos todos los asistentes agregando propiedades para historias
+  
+      // Mapeamos todos los asistentes agregando propiedades para historias y filtramos los privados que no son amigos
       const attendeesWithStories = await Promise.all(
         attendeesList.map(async (attendee) => {
-          // Si el usuario está en la lista de ocultar historias, se omite (pero no el usuario actual)
+          // Si el usuario está en la lista de ocultar historias (y no es el usuario actual), descartarlo
           if (!attendee || (hideStoriesFrom.includes(attendee.uid) && attendee.uid !== auth.currentUser.uid)) {
-            return attendee;
+            return null;
           }
-
+  
           const userDocRef = doc(database, "users", attendee.uid);
           const userDoc = await getDoc(userDocRef);
           const userData = userDoc.exists() ? userDoc.data() : null;
-          if (!userData) return attendee;
-
+          if (!userData) return null;
+  
           const isPrivate = userData.isPrivate || false;
-
-          // Para usuarios que no sean el actual, comprobamos si son amigos
+  
+          // Comprobar si es amigo
           let isFriend = false;
           if (attendee.uid === auth.currentUser.uid) {
             isFriend = true;
           } else {
-            const friendsRef = collection(
-              database,
-              "users",
-              auth.currentUser.uid,
-              "friends"
-            );
+            const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
             const friendQuery = query(friendsRef, where("friendId", "==", attendee.uid));
             const friendSnapshot = await getDocs(friendQuery);
             isFriend = !friendSnapshot.empty;
           }
-
-          // Si la cuenta es privada y el usuario no es amigo, no se cargan historias
+  
+          // Si la cuenta es privada y no es amigo, descartarlo de la lista
           if (isPrivate && !isFriend) {
-            return attendee;
+            return null;
           }
-
+  
           // Cargar historias (si existen y vigentes)
           const storiesRef = collection(userDocRef, "stories");
           const storiesSnapshot = await getDocs(storiesRef);
@@ -183,16 +178,18 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
               expiresAt: doc.data().expiresAt?.toDate(),
             }))
             .filter((story) => story.expiresAt > now);
-
+  
           return { ...attendee, hasStories: userStories.length > 0, userStories };
         })
       );
-      // Se actualiza la lista; aquí se pueden filtrar o mantener todos
-      setFilteredAttendees(attendeesWithStories);
+      // Filtrar los valores nulos
+      const filteredWithStories = attendeesWithStories.filter((item) => item !== null);
+      setFilteredAttendees(filteredWithStories);
     } catch (error) {
       console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
     }
   };
+  
 
   // ---------------------------
   // Filtrado principal de asistentes (para modal y para las bolitas)
