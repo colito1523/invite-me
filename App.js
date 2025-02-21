@@ -198,6 +198,8 @@ export default function App() {
   const [isI18nInitialized, setIsI18nInitialized] = React.useState(false);
   const [appIsReady, setAppIsReady] = useState(false);
 
+  useNotifications();
+
   useEffect(() => {
     const prepare = async () => {
       try {

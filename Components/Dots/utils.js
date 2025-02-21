@@ -174,14 +174,14 @@ export const handleUserPressDotIndicator = async ({
       const storiesSnapshot = await getDocs(storiesRef);
       const now = new Date();
       const activeStories = storiesSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt,
-          expiresAt: doc.data().expiresAt,
-        }))
-        .filter((story) => new Date(story.expiresAt.toDate()) > now);
-
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(0), // Agrega verificación
+        expiresAt: doc.data().expiresAt?.toDate() || new Date(0),
+      }))
+      .filter((story) => story.expiresAt > now);
+    
       if (activeStories.length > 0) {
         setSelectedStories([
           {
@@ -237,13 +237,14 @@ export const handleUserPressDotIndicator = async ({
     const storiesSnapshot = await getDocs(storiesRef);
     const now = new Date();
     const activeStories = storiesSnapshot.docs
-      .map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data.createdAt,
-        expiresAt: doc.data.expiresAt,
-      }))
-      .filter((story) => new Date(story.expiresAt.toDate()) > now);
+    .map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(0), // Agrega verificación
+      expiresAt: doc.data().expiresAt?.toDate() || new Date(0),
+    }))
+    .filter((story) => story.expiresAt > now);
+  
 
     if (activeStories.length === 0) {
       // 🚨 Cerrar el modal solo si no hay historias activas
