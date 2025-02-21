@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { CameraCapturedPicture } from 'expo-camera';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import React from "react";
 import { TouchableOpacity, View, Image, StyleSheet, Text, Dimensions } from 'react-native';
@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from "react-i18next";
 import { uploadStory } from '../Stories/storySlider/storySliderUtils'; 
 import * as ImageManipulator from 'expo-image-manipulator';
-
+import * as MediaLibrary from 'expo-media-library';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -25,6 +25,15 @@ const PhotoPreviewSection = ({
     const [uploadProgress, setUploadProgress] = useState(0);
     const [stories, setStories] = useState([]);
     const [unseenStories, setUnseenStories] = useState({});
+    const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState(null);
+    const [downloadStatus, setDownloadStatus] = useState<'default' | 'loading' | 'success'>('default');
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            setHasMediaLibraryPermission(status === 'granted');
+        })();
+    }, []);
 
     const handleUploadStory = async () => {
         setIsUploading(true);
@@ -44,10 +53,8 @@ const PhotoPreviewSection = ({
                 setUnseenStories
             );
 
-            // Esperamos un momento breve antes de navegar de vuelta
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            // Navegamos de vuelta y forzamos una actualización silenciosa del StorySlider
             navigation.navigate('Search', { 
                 forceStoryUpdate: true,
                 timestamp: Date.now()
@@ -58,13 +65,33 @@ const PhotoPreviewSection = ({
         setIsUploading(false);
     };
 
-    // Determinar la rotación correcta según la relación de aspecto
+    const handleDownloadPhoto = async () => {
+        if (!hasMediaLibraryPermission) return;
+        setDownloadStatus('loading');
+
+        try {
+            const asset = await MediaLibrary.createAssetAsync(photo.uri);
+            const albumName = "Historias Guardadas";
+            let album = await MediaLibrary.getAlbumAsync(albumName);
+            
+            if (!album) {
+                album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
+            } else {
+                await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+            }
+            
+            setDownloadStatus('success');
+            setTimeout(() => setDownloadStatus('default'), 2000);
+        } catch (error) {
+            console.error('Error al descargar la imagen:', error);
+            setDownloadStatus('default');
+        }
+    };
+
     let rotation = 0;
     if (photo.width > photo.height) {
-        // Foto en modo apaisado
         rotation = photo.exif?.Orientation === 3 ? 270 : 90;
     } else {
-        // Foto en modo vertical
         rotation = 0;
     }
 
@@ -85,25 +112,34 @@ const PhotoPreviewSection = ({
                 resizeMode="cover"
             />
 
-            {/* Botón para cerrar (volver atrás) */}
             <TouchableOpacity style={styles.closeButton} onPress={handleRetakePhoto}>
                 <Ionicons name="close" size={30} color="white" />
             </TouchableOpacity>
 
+            <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadPhoto}>
+                {downloadStatus === 'loading' ? (
+                    <ActivityIndicator size="small" color="white" />
+                ) : downloadStatus === 'success' ? (
+                    <Ionicons name="checkmark" size={30} color="white" />
+                ) : (
+                    <Ionicons name="download" size={30} color="white" />
+                )}
+            </TouchableOpacity>
+
             <TouchableOpacity 
-    style={styles.uploadButton} 
-    onPress={handleUploadStory} 
-    disabled={isUploading}
->
-    {isUploading ? (
-        <ActivityIndicator size="small" color="black" />
-    ) : (
-        <>
-            <Text style={styles.uploadButtonText}>{t("storySlider.addStory")}</Text>
-            <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
-        </>
-    )}
-</TouchableOpacity>
+                style={styles.uploadButton} 
+                onPress={handleUploadStory} 
+                disabled={isUploading}
+            >
+                {isUploading ? (
+                    <ActivityIndicator size="small" color="black" />
+                ) : (
+                    <>
+                        <Text style={styles.uploadButtonText}>{t("storySlider.addStory")}</Text>
+                        <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
+                    </>
+                )}
+            </TouchableOpacity>
         </View>
     );
 };
@@ -122,6 +158,12 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 50,
         left: 20,
+        zIndex: 1,
+    },
+    downloadButton: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
         zIndex: 1,
     },
     uploadButton: {
