@@ -16,7 +16,7 @@ export default {
   expo: {
     name: "Invite Me",
     slug: "invite-me",
-    version: "1.0.4",
+    version: "1.0.5",
     orientation: "portrait",
     icon: "./assets/Logo_Invite_Me.png",
     userInterfaceStyle: "light",
