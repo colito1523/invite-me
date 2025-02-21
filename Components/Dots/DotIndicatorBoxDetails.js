@@ -34,6 +34,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
   const [friendsList, setFriendsList] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [viewedStories, setViewedStories] = useState({});
   const { t } = useTranslation();
 
@@ -62,57 +63,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     fetchFriendsList();
   }, []);
 
-  const checkStories = async () => {
-    try {
-      if (filteredAttendees.length === 0) return; // No procesar si no hay usuarios filtrados
-      
-      const currentUserRef = doc(database, "users", auth.currentUser.uid);
-      const currentUserDoc = await getDoc(currentUserRef);
-      const hideStoriesFrom = currentUserDoc.data()?.hideStoriesFrom || [];
-  
-      const attendeesWithStories = filteredAttendees.map((attendee) => ({
-        ...attendee,
-        hasStories: false,
-        userStories: [],
-      }));
-  
-      for (const attendee of attendeesWithStories) {
-        if (hideStoriesFrom.includes(attendee.uid)) {
-          continue;
-        }
-        const userDocRef = doc(database, "users", attendee.uid);
-        const userDoc = await getDoc(userDocRef);
-        const userData = userDoc.exists() ? userDoc.data() : null;
-  
-        if (!userData) continue;
-  
-        const storiesRef = collection(userDocRef, "stories");
-        const storiesSnapshot = await getDocs(storiesRef);
-  
-        const now = new Date();
-        const userStories = storiesSnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate(),
-            expiresAt: doc.data().expiresAt?.toDate(),
-          }))
-          .filter((story) => story.expiresAt > now);
-  
-        if (userStories.length > 0) {
-          attendee.hasStories = true;
-          attendee.userStories = userStories;
-        }
-      }
-  
-      // Solo actualizar si hay historias
-      if (attendeesWithStories.some((attendee) => attendee.hasStories)) {
-        setFilteredAttendees(attendeesWithStories);
-      }
-    } catch (error) {
-      console.error(t("dotIndicatorBoxDetails.errorCheckingStories"), error);
-    }
-  };
+
   
   
 
@@ -138,20 +89,18 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   }, []);
 
 
-  
   useEffect(() => {
     const updateFilteredAttendeesWithStories = async () => {
       if (!attendeesList || attendeesList.length === 0) {
         setFilteredAttendees([]);
+        setIsLoaded(true);
         return;
       }
       const updated = await Promise.all(
         attendeesList.map(async (attendee) => {
-          // Si es el usuario actual, aplicar la condición amIGoing:
+          // Para el usuario actual:
           if (attendee.uid === auth.currentUser.uid) {
-            // Si el usuario ha marcado "no voy", se descarta (retornamos null)
             if (!amIGoing) return null;
-            // Si está marcado como "voy", se consultan las historias
             const userDoc = await getDoc(doc(database, "users", attendee.uid));
             let hasStories = false;
             let userStories = [];
@@ -171,14 +120,13 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             }
             return { ...attendee, hasStories, userStories };
           }
-          // Para los demás asistentes:
+          // Para otros asistentes:
           if (blockedUsers.includes(attendee.uid)) return null;
           const userDoc = await getDoc(doc(database, "users", attendee.uid));
           if (!userDoc.exists()) return null;
           const userData = userDoc.data();
           const isPrivate = userData.isPrivate || false;
           const isFriend = friendsList.includes(attendee.uid);
-          // Descartar si es privado y no es amigo
           if (isPrivate && !isFriend) return null;
           const storiesRef = collection(doc(database, "users", attendee.uid), "stories");
           const storiesSnapshot = await getDocs(storiesRef);
@@ -197,6 +145,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
       );
       const finalFiltered = updated.filter(Boolean);
       setFilteredAttendees(finalFiltered);
+      setIsLoaded(true);
     };
   
     updateFilteredAttendeesWithStories();
@@ -256,22 +205,22 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
 
   return (
     <View style={currentStyles.container}>
-      {filteredAttendees.length > 0 ? (
-        <Animated.FlatList
-          data={filteredAttendees}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.uid}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.flatListContent}
-          snapToInterval={ITEM_SIZE + SPACING}
-          decelerationRate="fast"
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: true }
-          )}
-        />
-      ) : null}
+    {isLoaded && filteredAttendees.length > 0 ? (
+      <Animated.FlatList
+        data={filteredAttendees}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.uid}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.flatListContent}
+        snapToInterval={ITEM_SIZE + SPACING}
+        decelerationRate="fast"
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: true }
+        )}
+      />
+    ) : null}
 
       {/* Modal para StoryViewer */}
       {isModalVisible && (
@@ -286,7 +235,6 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             onClose={async (updatedUnseenStories) => {
               handleCloseStoryViewer(updatedUnseenStories);
               setIsModalVisible(false);
-              await checkStories(); // Recargar historias inmediatamente
             }}
             unseenStories={{}}
             navigation={navigation} 
