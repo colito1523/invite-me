@@ -1,6 +1,6 @@
 import PhotoPreviewSection from './PhotoPreviewSection';
-import { AntDesign } from '@expo/vector-icons';
-import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { CameraType, CameraView, FlashMode, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +9,7 @@ import { debounce } from 'lodash';
 
 export default function Camera({ header = null }) {
   const [facing, setFacing] = useState<CameraType>('back');
+  const [flashMode, setFlashMode] = useState<FlashMode>('off');
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<any>(null);
   const cameraRef = useRef<CameraView | null>(null);
@@ -70,16 +71,21 @@ export default function Camera({ header = null }) {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
+  function toggleFlash() {
+    setFlashMode(current => (current === 'off' ? 'on' : 'off'));
+  }
+
   const handleTakePhoto = async () => {
     if (cameraRef.current) {
       const options = {
         quality: 1,
         base64: true,
-        exif: true, // Cambiar a true para capturar datos EXIF
-        mirror: facing === 'front', // Corrige la imagen volteada en selfies
+        exif: true,
+        mirror: facing === 'front',
+        flashMode: flashMode,
       };
       const takedPhoto = await cameraRef.current.takePictureAsync(options);
-      console.log("Captured Photo EXIF Data:", takedPhoto.exif); // Log para verificar datos EXIF
+      console.log("Captured Photo EXIF Data:", takedPhoto.exif);
       setPhoto(takedPhoto);
     }
   };
@@ -96,7 +102,7 @@ export default function Camera({ header = null }) {
         </TouchableOpacity>
       </View>
       {header}
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef} flash={flashMode}>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
             <View style={styles.innerCircle} />
@@ -105,6 +111,14 @@ export default function Camera({ header = null }) {
         <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
           <AntDesign name="retweet" size={30} color="white" />
         </TouchableOpacity>
+        <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
+  <Ionicons
+    name={flashMode === 'off' ? 'flash-off' : 'flash'}
+    size={30}
+    color="white"
+  />
+</TouchableOpacity>
+
       </CameraView>
     </View>
   );
@@ -145,6 +159,11 @@ const styles = StyleSheet.create({
   toggleButton: {
     position: 'absolute',
     bottom: 20,
+    right: 20,
+  },
+  flashButton: {
+    position: 'absolute',
+    top: 50,
     right: 20,
   },
   text: {
