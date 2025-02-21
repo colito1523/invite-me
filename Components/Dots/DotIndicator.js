@@ -24,7 +24,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import StoryViewer from "../Stories/storyViewer/StoryViewer";
 import { useTranslation } from "react-i18next";
-import { handleUserPress } from "./utils";
+import { handleUserPressDotIndicator } from "./utils";
 
 const { width } = Dimensions.get("window");
 
@@ -263,7 +263,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   
 
   const handlePress = async (uid) => {
-    await handleUserPress({
+    await handleUserPressDotIndicator({
       uid,
       navigation,
       blockedUsers,
