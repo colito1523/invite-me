@@ -2,12 +2,14 @@ import { Dimensions, StyleSheet, Platform } from "react-native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
+const isDayTime = new Date().getHours() >= 6 && new Date().getHours() < 18;
+
 export const styles = StyleSheet.create({
   scrollViewContent: {
     flexGrow: 1,
   },
   container: {
-    backgroundColor: "red",
+    backgroundColor: isDayTime ? "white" : "black",
     flex: 1,
   },
   backButton: {

@@ -502,13 +502,15 @@ export default function Profile({ navigation }) {
                     onLongPress={handleLongPress}
                     onPressOut={handlePressOut}
                   >
-                   <Image
-  source={{ uri: item }}
-  style={styles.backgroundImage}
-  contentFit="cover"
-  cachePolicy="disk"
-  priority="high"
-/>
+                    <Image
+                      source={{ uri: item }}
+                      style={styles.backgroundImage}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
+                      priority="high"
+                      placeholderContentFit="cover"
+                      transition={0}
+                    />
 
                     {isElementsVisible && (
                       <View style={styles.overlay}>

@@ -2,6 +2,7 @@ import { collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, wh
 import { auth, database } from "../../config/firebase";
 import { Alert } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const compressImage = async (uri, isLowQuality = false) => {
     try {
@@ -43,19 +44,19 @@ export const setFetchUserData = async (params) => {
       setName, setSurname, setIsPrivate, setPhotoUrls, setUsername, 
       setFriendCount, setFirstHobby, setSecondHobby, setFirstInterest, setSecondInterest 
     } = params;
-  
+
     const user = auth.currentUser;
     if (!user) return;
-  
+
     try {
       const [userDoc, friendsSnapshot] = await Promise.all([
         getDoc(doc(database, "users", user.uid)),
         getDocs(collection(database, "users", user.uid, "friends"))
       ]);
-  
+
       if (userDoc.exists()) {
         const data = userDoc.data();
-  
+
         // Agrupar estados en un solo `setState`
         setName(data.firstName || "");
         setSurname(data.lastName || "");
@@ -72,7 +73,7 @@ export const setFetchUserData = async (params) => {
       console.error("Error obteniendo datos del usuario:", error);
     }
   };
-  
+
 
 
 export const handleTogglePrivacy = async (params) => {
@@ -216,19 +217,19 @@ export const pickImage = async (index, ImagePicker, photoUrls, setPhotoUrls, set
       Alert.alert("Permiso denegado", "Se necesita acceso a la galería para subir fotos.");
       return;
     }
-  
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
       quality: 1,
     });
-  
+
     if (!result.canceled) {
       const compressedUri = await compressImage(result.assets[0].uri, false); // Compresión normal
       const newPhotoUrls = [...photoUrls];
       newPhotoUrls[index] = compressedUri;
       setPhotoUrls(newPhotoUrls);
-  
+
       // Si es la primera imagen, también crear versión en ultra baja calidad
       if (index === 0) {
         const lowQualityUri = await compressImage(result.assets[0].uri, true);
@@ -236,12 +237,12 @@ export const pickImage = async (index, ImagePicker, photoUrls, setPhotoUrls, set
       }
     }
   };
-  
+
 
 
 export const handleBoxPress = ({ event, navigation, t }) => {
     const isPrivateEvent = event.category === "EventoParaAmigos";
-  
+
     // Definir el objeto `box` dependiendo del tipo de evento
     const box = isPrivateEvent
       ? event
@@ -255,9 +256,9 @@ export const handleBoxPress = ({ event, navigation, t }) => {
           locationLink: event.locationLink || t("profile.noLocation"),
           coordinates: event.coordinates || { latitude: 0, longitude: 0 },
           description: event.description || "",
-      
+
         };
-  
+
     // Navegar al componente `BoxDetails`
     navigation.navigate("BoxDetails", {
       box: box,
@@ -265,3 +266,37 @@ export const handleBoxPress = ({ event, navigation, t }) => {
       selectedDate: event.date || t("profile.noDate"),
     });
   };
+
+export const fetchProfileImage = async ({setProfileImage}) => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        // Primero intentar cargar desde el caché
+        const cachedImage = await AsyncStorage.getItem(`profileImage_${user.uid}`);
+        if (cachedImage) {
+          setProfileImage(cachedImage);
+          return; // Si hay imagen en caché, no continuar
+        }
+
+        // Luego obtener la imagen de baja calidad
+        const userDoc = await getDoc(doc(database, "users", user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          if (data.lowQualityProfileImage) {
+            setProfileImage(data.lowQualityProfileImage);
+            return; // Si hay imagen de baja calidad, no continuar
+          }
+
+          // Finalmente cargar la imagen de alta calidad
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            const highQualityImage = data.photoUrls[0];
+            setProfileImage(highQualityImage);
+            // Actualizar el caché
+            await AsyncStorage.setItem(`profileImage_${user.uid}`, highQualityImage);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading profile image:", error);
+      }
+    }
+};
