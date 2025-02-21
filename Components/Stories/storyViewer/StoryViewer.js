@@ -363,6 +363,23 @@ export function StoryViewer({
     isCurrentUserStory: stories[currentIndex]?.uid === auth.currentUser?.uid,
   });
   
+  const onDeleteStory = () => {
+    setViewersModalVisible(false);
+    setIsPaused(false);
+  
+    deleteStory({
+      auth,
+      stories: localStories,
+      currentIndex,
+      storyIndex,
+      setStories: setLocalStories,
+      onClose, // ⬅ Cierra el visor de historias después de borrar
+      database,
+      storage,
+      t,
+    });
+  };
+  
 
   const isCurrentUserStory =
     stories[currentIndex]?.uid === auth.currentUser?.uid;
@@ -614,26 +631,25 @@ essiveRenderingEnabled={true}
         </View>
 
         <OptionsModal
-          isVisible={isOptionsModalVisible}
-          onClose={() => setIsOptionsModalVisible(false)}
-          isCurrentUserStory={
-            stories[currentIndex]?.uid === auth.currentUser?.uid
-          }
-          auth={auth}
-          localStories={localStories}
-          currentIndex={currentIndex}
-          storyIndex={storyIndex}
-          setLocalStories={setLocalStories}
-          database={database}
-          storage={storage}
-          currentStory={stories[currentIndex]?.userStories[storyIndex]}
-          toggleHideStories={toggleHideStories}
-          localUnseenStories={localUnseenStories}
-          t={t}
-          setIsComplaintsVisible={setIsComplaintsVisible}
-          deleteStory={deleteStory}
-          styles={styles}
-        />
+  isVisible={isOptionsModalVisible}
+  onClose={() => setIsOptionsModalVisible(false)}
+  isCurrentUserStory={stories[currentIndex]?.uid === auth.currentUser?.uid}
+  auth={auth}
+  localStories={localStories}
+  currentIndex={currentIndex}
+  storyIndex={storyIndex}
+  setLocalStories={setLocalStories}
+  database={database}
+  storage={storage}
+  currentStory={stories[currentIndex]?.userStories[storyIndex]}
+  toggleHideStories={toggleHideStories}
+  localUnseenStories={localUnseenStories}
+  t={t}
+  setIsComplaintsVisible={setIsComplaintsVisible}
+  onDeleteStory={onDeleteStory} // ✅ Ahora pasamos la función correctamente
+  styles={styles}
+/>
+
 
         <Complaints
           isVisible={isComplaintsVisible}

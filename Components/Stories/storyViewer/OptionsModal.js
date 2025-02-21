@@ -13,20 +13,17 @@ const OptionsModal = ({
   onClose,
   isCurrentUserStory,
   auth,
-  localStories,
-  currentIndex,
-  storyIndex,
-  setLocalStories,
   database,
-  storage,
   currentStory,
   toggleHideStories,
   localUnseenStories,
   t,
   setIsComplaintsVisible,
-  deleteStory,
+  onDeleteStory, // ✅ Ahora sí lo pasamos correctamente
   styles,
 }) => {
+
+
   return (
     <Modal
       animationType="slide"
@@ -41,26 +38,18 @@ const OptionsModal = ({
               {isCurrentUserStory ? (
                 // Opción solo para el dueño de la historia
                 <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => {
-                    onClose();
-                    deleteStory({
-                      auth,
-                      stories: localStories,
-                      currentIndex,
-                      storyIndex,
-                      setStories: setLocalStories,
-                      onClose,
-                      database,
-                      storage,
-                      t,
-                    });
-                  }}
-                >
-                  <Text style={styles.deleteButtonText}>
-                    {t("storyViewer.Delete")}
-                  </Text>
-                </TouchableOpacity>
+                style={styles.deleteButton}
+                onPress={() => {
+                  onClose(); // Cierra el modal de opciones
+                  onDeleteStory(); // ⬅ Se asegura de eliminar la historia y cerrar el visor
+                }}
+              >
+                <Text style={styles.deleteButtonText}>
+                  {t("storyViewer.Delete")}
+                </Text>
+              </TouchableOpacity>
+              
+              
               ) : (
                 // Opciones para otros usuarios
                 <>
