@@ -260,6 +260,11 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     setModalVisible(true);
   };
 
+  useEffect(() => {
+    checkStories();
+  }, [attendeesList]);
+  
+
   const handlePress = async (uid) => {
     await handleUserPress({
       uid,
@@ -268,36 +273,42 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       t,
       setSelectedStories,
       setIsModalVisible,
+      setModalVisible, // Pasar este setter
     });
   };
-
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 
   return (
     <View style={currentStyles.container}>
       {/* Renderizamos las “bolitas” usando la lista filtrada */}
       <TouchableOpacity onPress={handlePresss} style={currentStyles.imageContainer}>
-        {filteredAttendees.slice(0, 6).map((attendee, index) => (
-          <Image
-            key={attendee.uid}
-            source={{
-              uri: attendee.profileImage || "https://via.placeholder.com/150",
-            }}
-            style={[
-              currentStyles.profileImage,
-              { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
-            ]}
-            cachePolicy="memory-disk"
-          />
-        ))}
-        {filteredAttendees.length > 6 && (
-          <View style={currentStyles.moreContainer}>
-            <Text style={currentStyles.moreText}>
-              +{filteredAttendees.length - 6}
-            </Text>
-          </View>
-        )}
-      </TouchableOpacity>
+  {filteredAttendees.slice(0, 6).map((attendee, index) => (
+    <View
+      key={attendee.uid}
+      style={[
+        currentStyles.unseenStoryCircle,
+        attendee.hasStories && { borderColor: "white" },
+        { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
+      ]}
+    >
+      <Image
+        source={{
+          uri: attendee.profileImage || "https://via.placeholder.com/150",
+        }}
+        style={currentStyles.profileImage}
+        cachePolicy="memory-disk"
+      />
+    </View>
+  ))}
+  {filteredAttendees.length > 6 && (
+    <View style={currentStyles.moreContainer}>
+      <Text style={currentStyles.moreText}>
+        +{filteredAttendees.length - 6}
+      </Text>
+    </View>
+  )}
+</TouchableOpacity>
+
 
       <Modal visible={modalVisible} transparent={true} animationType="fade">
         <TouchableOpacity
@@ -471,6 +482,15 @@ const baseStyles = {
     alignItems: "center",
     justifyContent: "center",
   },
+  unseenStoryCircle: {
+    borderWidth: 2,
+    borderColor: "transparent",
+    borderRadius: 28,
+    padding: 3,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  
 };
 
 const dayStyles = StyleSheet.create({

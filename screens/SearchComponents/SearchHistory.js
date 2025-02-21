@@ -94,26 +94,25 @@ const SearchHistory = ({
 
   const renderHistoryItem = (item, index) => (
     <View key={`history-${item.id}-${index}`} style={styles.historyItem}>
-      <TouchableOpacity onPress={() => handleHistoryPress(item)} style={styles.historyTextContainer}>
-        <TouchableOpacity onPress={() => handleHistoryPress(item)}>
-          <View
-            style={[
-              styles.unseenStoryCircle,
-              item.hasStories && { borderColor: isNightMode ? "white" : "black" },
-            ]}
-          >
-            <Image
-              source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
-              style={styles.userImage}
-            />
-          </View>
-        </TouchableOpacity>
-        <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => removeFromHistory(item.id)}>
-        <Ionicons name="close" size={20} color={theme.text} />
-      </TouchableOpacity>
-    </View>
+    {/* TouchableOpacity exclusivo para la imagen */}
+    <TouchableOpacity onPress={() => handleHistoryPress(item)}>
+      <View style={[styles.unseenStoryCircle, item.hasStories && { borderColor: isNightMode ? "white" : "black" }]}>
+        <Image
+          source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
+          style={styles.userImage}
+        />
+      </View>
+    </TouchableOpacity>
+  
+    {/* TouchableOpacity exclusivo para el nombre que navega al perfil */}
+    <TouchableOpacity onPress={() => navigation.navigate("UserProfile", { selectedUser: item })} style={styles.historyTextContainer}>
+      <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
+    </TouchableOpacity>
+  
+    <TouchableOpacity onPress={() => removeFromHistory(item.id)}>
+      <Ionicons name="close" size={20} color={theme.text} />
+    </TouchableOpacity>
+  </View>
   );
 
   // Filtrar el historial para excluir usuarios bloqueados
