@@ -24,6 +24,7 @@ import { handleUserPress } from "./utils";
 const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [filteredAttendees, setFilteredAttendees] = useState([]);
+  const [amIGoing, setAmIGoing] = useState(true);
   const [isNightMode, setIsNightMode] = useState(false);
   const { width } = Dimensions.get('window');
   const ITEM_SIZE = 80;
@@ -115,31 +116,6 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   
   
 
-  useEffect(() => {
-    const fetchCompleteUserData = async () => {
-      try {
-        const usersWithFullData = await Promise.all(
-          attendeesList.map(async (attendee) => {
-            const userDoc = await getDoc(doc(database, "users", attendee.uid));
-            const userData = userDoc.exists() ? userDoc.data() : {};
-            return {
-              ...userData,
-              ...attendee,
-              hasStories: attendee.hasStories,
-              userStories: attendee.userStories
-            };
-          })
-        );
-      
-        await checkStories();
-      } catch (error) {
-        console.error(t("dotIndicatorBoxDetails.errorFetchingUserDetails"), error);
-      }
-    };
-
-    fetchCompleteUserData();
-  }, [attendeesList]);
-
   // Cargar usuarios bloqueados
   useEffect(() => {
     const fetchBlockedUsers = async () => {
@@ -171,8 +147,11 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
       }
       const updated = await Promise.all(
         attendeesList.map(async (attendee) => {
-          // Siempre incluir el usuario actual
+          // Si es el usuario actual, aplicar la condición amIGoing:
           if (attendee.uid === auth.currentUser.uid) {
+            // Si el usuario ha marcado "no voy", se descarta (retornamos null)
+            if (!amIGoing) return null;
+            // Si está marcado como "voy", se consultan las historias
             const userDoc = await getDoc(doc(database, "users", attendee.uid));
             let hasStories = false;
             let userStories = [];
@@ -192,9 +171,8 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             }
             return { ...attendee, hasStories, userStories };
           }
-          // Descartar bloqueados
+          // Para los demás asistentes:
           if (blockedUsers.includes(attendee.uid)) return null;
-          // Obtener datos completos para chequear privacidad
           const userDoc = await getDoc(doc(database, "users", attendee.uid));
           if (!userDoc.exists()) return null;
           const userData = userDoc.data();
@@ -202,7 +180,6 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
           const isFriend = friendsList.includes(attendee.uid);
           // Descartar si es privado y no es amigo
           if (isPrivate && !isFriend) return null;
-          // Consultar las historias del asistente
           const storiesRef = collection(doc(database, "users", attendee.uid), "stories");
           const storiesSnapshot = await getDocs(storiesRef);
           const now = new Date();
@@ -223,7 +200,8 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     };
   
     updateFilteredAttendeesWithStories();
-  }, [attendeesList, blockedUsers, friendsList]);
+  }, [attendeesList, blockedUsers, friendsList, amIGoing]);
+  
   
   
   
