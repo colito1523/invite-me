@@ -18,11 +18,13 @@ export const styles = StyleSheet.create({
   imageContainer: {
     width: screenWidth,
     height: "100%",
+    backgroundColor: "black",
   },
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
+    backgroundColor: "black",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

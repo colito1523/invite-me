@@ -50,15 +50,20 @@ const ViewerItem = ({
     <TouchableOpacity
       style={styles.viewerItem}
       onPress={async () => {
+        // 1) Cierra el modal y “reanuda” la historia
         setViewersModalVisible(false);
         setIsPaused(false);
-        await new Promise((resolve) => setTimeout(resolve, 300));
+      
+        // 2) (Opcional) Un pequeño retardo para dar tiempo a cerrar animaciones
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      
         try {
           const userDoc = await getDoc(doc(database, "users", item.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
             userData.id = item.uid;
             const isPrivate = userData.isPrivate || false;
+      
             let isFriend = false;
             if (item.uid === auth.currentUser.uid) {
               isFriend = true;
@@ -73,11 +78,12 @@ const ViewerItem = ({
               const friendSnapshot = await getDocs(friendQuery);
               isFriend = !friendSnapshot.empty;
             }
-
+      
+            // 3) En vez de navigate, usar replace para que se cierre por completo
             if (isPrivate && !isFriend) {
-              navigation.navigate("PrivateUserProfile", { selectedUser: userData });
+              navigation.replace("PrivateUserProfile", { selectedUser: userData });
             } else {
-              navigation.navigate("UserProfile", { selectedUser: userData });
+              navigation.replace("UserProfile", { selectedUser: userData });
             }
           } else {
             console.error("User not found");
@@ -86,6 +92,7 @@ const ViewerItem = ({
           console.error("Error fetching user data", error);
         }
       }}
+      
     >
       <Image
         key={item?.profileImage} // Forzar re-render cuando cambia la imagen

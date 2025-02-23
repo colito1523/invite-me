@@ -66,7 +66,6 @@ exports.sendChatNotification = functions.firestore
           senderName: `${senderData.firstName} ${senderData.lastName}`,
           senderPhoto: senderData.photoUrls?.[0]
         },
-        icon: senderData.photoUrls?.[0],
         channelId: 'chat-messages'
       };
 

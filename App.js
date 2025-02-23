@@ -111,13 +111,13 @@ function ChatStack() {
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Search" component={Search} options={{ headerTitle: "" }} />
         <Stack.Screen name="Notifications" component={Notifications} />
-        <Stack.Screen name="UserProfile" component={UserProfile} options={{ headerShown: false, animationEnabled: false, presentation: 'transparentModal' }} />
+        <Stack.Screen name="UserProfile" component={UserProfile} options={{ headerShown: false, }} />
         <Stack.Screen name="CreateEvent" component={CreateEvent} options={{ headerShown: false }} />
         <Stack.Screen name="EventRecommendations" component={EventRecommendations} options={{ headerShown: false }}  />
         <Stack.Screen name="BoxDetails" component={BoxDetails} options={{ headerShown: false }} />
         <Stack.Screen name="ChatUsers" component={ChatUsers} options={{ headerShown: false }} />
         <Stack.Screen name="ChatList" component={ChatList} options={{ headerTitle: "" }} />
-        <Stack.Screen name="PrivateUserProfile" component={PrivateUserProfile} options={{ headerShown: false, animationEnabled: false, presentation: 'transparentModal'}}/>
+        <Stack.Screen name="PrivateUserProfile" component={PrivateUserProfile} options={{ headerShown: false}}/>
         <Stack.Screen name="AudioPlayer" component={AudioPlayer} />
         <Stack.Screen name="StoryViewer" component={StoryViewer} options={{ headerShown: false }} />
         <Stack.Screen name="StorySlider" component={StorySlider} />
