@@ -98,24 +98,9 @@ export const handleUserPress = async (params) => {
   const { uid, navigation, t } = params;
 
   try {
-    // Verificar que el usuario actual existe antes de intentar obtener datos
-    if (!auth.currentUser) {
-      Alert.alert("Error", "No hay usuario autenticado.");
-      return;
-    }
-
+    // Obtener el documento del usuario actual para revisar usuarios bloqueados
     const currentUserDoc = await getDoc(doc(database, "users", auth.currentUser.uid));
-
-    // Verificar si el documento del usuario actual existe
-    if (!currentUserDoc.exists()) {
-      Alert.alert("Error", "No se encontraron datos del usuario actual.");
-      return;
-    }
-
-    // Asegurar que blockedUsers sea un array
-    const blockedUsers = Array.isArray(currentUserDoc.data()?.blockedUsers)
-      ? currentUserDoc.data().blockedUsers
-      : [];
+    const blockedUsers = currentUserDoc.data()?.blockedUsers || [];
 
     if (blockedUsers.includes(uid)) {
       Alert.alert("Error", "No puedes interactuar con este usuario.");
@@ -164,7 +149,6 @@ export const handleUserPress = async (params) => {
     );
   }
 };
-
 
 export const handleAcceptRequest = async (params) => {
   const { request, setLoadingEventId, setNotifications, t } = params;

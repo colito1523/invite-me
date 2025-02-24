@@ -10,17 +10,17 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { database, auth } from "../../config/firebase";
-import { InteractionManager } from "react-native";
 import {
   collection,
   query,
   where,
-  getDocs,
+  onSnapshot,
   doc,
   getDoc,
-  limit,
   orderBy,
-  startAfter
+  limit,
+  startAfter,
+  getDocs
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { format, isToday, isYesterday } from "date-fns";
@@ -52,126 +52,161 @@ export default function NotificationsComponent() {
   const [isNightMode, setIsNightMode] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingEventId, setLoadingEventId] = useState(null);
+  const [notificationList, setNotificationList] = useState([]);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [lastNotificationDoc, setLastNotificationDoc] = useState(null);
+  const [fetchingMore, setFetchingMore] = useState(false);
   const user = auth.currentUser;
-  const [lastVisible, setLastVisible] = useState(null);
-const [loadingMore, setLoadingMore] = useState(false);
 
 
- // Carga inicial de notificaciones (y solicitudes de amistad)
- const fetchNotifications = useCallback(async () => {
-  if (!user) return;
+  const loadInitialNotifications = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      const userDocSnap = await getDoc(doc(database, "users", user.uid));
+      const hidden = userDocSnap.data()?.hiddenNotifications || [];
+      const blocked = userDocSnap.data()?.blockedUsers || [];
+      const notificationsRef = collection(database, "users", user.uid, "notifications");
+      const q = query(notificationsRef, orderBy("timestamp", "desc"), limit(8));
+      const snapshot = await getDocs(q);
+      const notifs = snapshot.docs
+        .map(docSnap => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+          type: docSnap.data().type || "notification"
+        }))
+        .filter(n => !hidden.includes(n.id) && !blocked.includes(n.fromId));
+      setNotificationList(notifs);
+      if (snapshot.docs.length > 0) {
+        setLastNotificationDoc(snapshot.docs[snapshot.docs.length - 1]);
+      } else {
+        setLastNotificationDoc(null);
+      }
+    } catch (error) {
+      console.log("Error loading initial notifications:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
 
-  try {
-    const userRef = doc(database, "users", user.uid);
-    const userDoc = await getDoc(userRef);
-    const hiddenNotifications = userDoc.data()?.hiddenNotifications || [];
-    const blockedUsers = userDoc.data()?.blockedUsers || [];
-
-    const notificationsRef = collection(database, "users", user.uid, "notifications");
+  const subscribeFriendRequests = useCallback(() => {
+    if (!user) return () => {};
     const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
+    const friendRequestsQuery = query(friendRequestsRef, where("status", "==", "pending"));
+    const unsubscribe = onSnapshot(friendRequestsQuery, async (snapshot) => {
+      try {
+        const userDoc = await getDoc(doc(database, "users", user.uid));
+        const hidden = userDoc.data()?.hiddenNotifications || [];
+        const blocked = userDoc.data()?.blockedUsers || [];
+        const reqs = snapshot.docs
+          .map(docSnap => ({ id: docSnap.id, ...docSnap.data(), type: "friendRequest" }))
+          .filter(item => !hidden.includes(item.id) && !blocked.includes(item.fromId));
+        setFriendRequests(reqs);
+      } catch (err) {
+        console.log("Error in friendRequests subscription:", err);
+      }
+    });
+    return unsubscribe;
+  }, [user]);
 
-    const notificationsQuery = query(
-      notificationsRef,
-      orderBy("timestamp", "desc"),
-      limit(8)
-    );
-    const friendRequestsQuery = query(
-      friendRequestsRef,
-      where("status", "==", "pending"),
-      limit(8)
-    );
-
-    const [notificationsSnapshot, friendRequestsSnapshot] = await Promise.all([
-      getDocs(notificationsQuery),
-      getDocs(friendRequestsQuery)
-    ]);
-
-    const notificationsData = notificationsSnapshot.docs
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        type: doc.data().type || "notification",
-      }))
-      .filter(notif => 
-        !hiddenNotifications.includes(notif.id) &&
-        !blockedUsers.includes(notif.fromId)
+  const combinedNotifications = [...notificationList, ...friendRequests].sort((a, b) => {
+    const at = a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp;
+    const bt = b.timestamp?.toDate ? b.timestamp.toDate() : b.timestamp;
+    return bt - at;
+  });
+  
+  const loadMoreNotifications = useCallback(async () => {
+    if (!lastNotificationDoc || fetchingMore || !user) return;
+    setFetchingMore(true);
+    try {
+      const userDocSnap = await getDoc(doc(database, "users", user.uid));
+      const hidden = userDocSnap.data()?.hiddenNotifications || [];
+      const blocked = userDocSnap.data()?.blockedUsers || [];
+      const notificationsRef = collection(database, "users", user.uid, "notifications");
+      const q = query(
+        notificationsRef,
+        orderBy("timestamp", "desc"),
+        startAfter(lastNotificationDoc),
+        limit(5)
       );
+      const snapshot = await getDocs(q);
+      const moreNotifs = snapshot.docs
+        .map(docSnap => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+          type: docSnap.data().type || "notification"
+        }))
+        .filter(n => !hidden.includes(n.id) && !blocked.includes(n.fromId));
+      setNotificationList(prev => {
+        const merged = [...prev, ...moreNotifs];
+        const unique = {};
+        merged.forEach(item => { unique[item.id] = item; });
+        return Object.values(unique).sort((a, b) => b.timestamp - a.timestamp);
+      });
+      if (snapshot.docs.length > 0) {
+        setLastNotificationDoc(snapshot.docs[snapshot.docs.length - 1]);
+      } else {
+        setLastNotificationDoc(null);
+      }
+    } catch (error) {
+      console.log("Error loading more notifications:", error);
+    } finally {
+      setFetchingMore(false);
+    }
+  }, [user, lastNotificationDoc, fetchingMore]);
+  
 
-    const friendRequestsData = friendRequestsSnapshot.docs
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        type: "friendRequest",
-      }))
-      .filter(notif => 
-        !hiddenNotifications.includes(notif.id) &&
-        !blockedUsers.includes(notif.fromId)
+  const refreshNewNotifications = useCallback(async () => {
+    if (!user) return;
+    try {
+      const userDocSnap = await getDoc(doc(database, "users", user.uid));
+      const hidden = userDocSnap.data()?.hiddenNotifications || [];
+      const blocked = userDocSnap.data()?.blockedUsers || [];
+      const notificationsRef = collection(database, "users", user.uid, "notifications");
+      // Tomamos el timestamp de la notificación más reciente, o new Date(0) si no hay ninguna
+      const latestTimestamp = notificationList.length > 0 
+        ? (notificationList[0].timestamp?.toDate ? notificationList[0].timestamp.toDate() : notificationList[0].timestamp)
+        : new Date(0);
+      // Consulta para obtener las notificaciones nuevas (en orden ascendente para traer las más antiguas primero)
+      const q = query(
+        notificationsRef, 
+        where("timestamp", ">", latestTimestamp),
+        orderBy("timestamp", "asc")
       );
-
-    let combined = [...notificationsData, ...friendRequestsData];
-    combined.sort((a, b) => b.timestamp - a.timestamp);
-
-    if (!notificationsSnapshot.empty) {
-      setLastVisible(notificationsSnapshot.docs[notificationsSnapshot.docs.length - 1]);
+      const snapshot = await getDocs(q);
+      const newNotifs = snapshot.docs
+        .map(docSnap => ({
+            id: docSnap.id,
+            ...docSnap.data(),
+            type: docSnap.data().type || "notification"
+        }))
+        .filter(n => !hidden.includes(n.id) && !blocked.includes(n.fromId));
+      if (newNotifs.length > 0) {
+        // Ordenamos de forma descendente (más reciente primero)
+        newNotifs.sort((a, b) => b.timestamp - a.timestamp);
+        setNotificationList(prev => [...newNotifs, ...prev]);
+      }
+    } catch (error) {
+      console.log("Error refreshing new notifications:", error);
     }
-
-    setNotifications(combined);
-    setIsLoading(false);
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
-    setIsLoading(false);
-  }
-}, [user]);
-
-
-const loadMoreNotifications = async () => {
-  if (!lastVisible || loadingMore || !user) return;
-  setLoadingMore(true);
-
-  try {
-    const notificationsRef = collection(database, "users", user.uid, "notifications");
-    const nextQuery = query(
-      notificationsRef,
-      orderBy("timestamp", "desc"),
-      startAfter(lastVisible),
-      limit(10)
-    );
-    const snapshot = await getDocs(nextQuery);
-    if (!snapshot.empty) {
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-      const moreNotifications = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        type: doc.data().type || "notification",
-      }));
-      setNotifications(prev => [...prev, ...moreNotifications]);
-    } else {
-      // Si no hay datos, indicamos que no hay más datos
-      setLastVisible(null);
-    }
-  } catch (error) {
-    console.error("Error loading more notifications:", error);
-  } finally {
-    setLoadingMore(false);
-  }
-};
-
-
-
+  }, [user, notificationList]);
+  
   useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
       setIsNightMode(currentHour >= 19 || currentHour < 6);
     };
-
-    checkTime();
-    const interval = setInterval(checkTime, 60000);
-
-    fetchNotifications();
-
-    return () => clearInterval(interval);
+  
+    // Lo ejecutas al montar
+    checkTime(); 
+  
+    // Llamas a las notificaciones
+    loadInitialNotifications();
+  
+    // Sin interval, así que el return puede ser vacío o no hacer nada.
+    return () => {};
   }, []);
-
+  
   useFocusEffect(
     React.useCallback(() => {
       navigation.setOptions({
@@ -212,28 +247,27 @@ const loadMoreNotifications = async () => {
 
   useFocusEffect(
     useCallback(() => {
-      const task = InteractionManager.runAfterInteractions(() => {
-        if (notifications.some((notif) => !notif.seen)) {
-          markNotificationsAsSeen({
-            user,
-            database,
-            notifications,
-            setNotifications,
-          });
-        }
-      });
-  
-      return () => task.cancel();
+      markNotificationsAsSeen({ user, database, notifications, setNotifications });
     }, [user, notifications])
   );
-  
-  
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchNotifications();
+    await refreshNewNotifications();
     setRefreshing(false);
-  }, [fetchNotifications]);
+  }, [refreshNewNotifications]);
+  
+
+  useEffect(() => {
+    if (!user) return;
+    const currentHour = new Date().getHours();
+    setIsNightMode(currentHour >= 19 || currentHour < 6);
+    const unsubscribeFR = subscribeFriendRequests();
+    loadInitialNotifications();
+    return () => {
+      if (unsubscribeFR) unsubscribeFR();
+    };
+  }, [user]);
 
   const renderPrivateEventNotification = ({ item }) => {
     const eventDate = item.date; // Use the date field instead of timestamp
@@ -455,42 +489,60 @@ const loadMoreNotifications = async () => {
       }
     }
 
-    const handleNotificationPress = (item) => {
-      if (!item) return; // ✅ Evita errores si item es undefined
-    
-      // 1️⃣ Primero navegamos inmediatamente
-      if (item.type === "generalEventInvitation") {
-        navigation.navigate("BoxDetails", {
-          box: {
-            title: item.eventTitle,
-            imageUrl: item.eventImage,
-            date: item.eventDate,
-            isPrivate: false,
-            hours: item.hours,
-            number: item.number,
-            coordinates: item.coordinates,
-          },
-          selectedDate: item.eventDate,
-          isFromNotification: true,
-        });
-      } else if (item.type === "invitation") {
-        navigation.navigate("BoxDetails", {
-          box: {
-            title: item.eventTitle,
-            imageUrl: item.eventImage,
-            date: item.eventDate,
-            isPrivate: true,
-            description: item.description,
-            day: item.day,
-            hour: item.hour,
-            address: item.address,
-            phoneNumber: item.phoneNumber,
-            eventId: item.eventId,
-            category: "EventoParaAmigos",
-            Admin: item.Admin,
-          },
-          selectedDate: item.eventDate,
-          isFromNotification: true,
+    const handleNotificationPress = () => {
+      if (isEventInvitation) {
+        if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
+          navigation.navigate("BoxDetails", {
+            box: {
+              title: item.eventTitle,
+              imageUrl: item.eventImage,
+              date: item.eventDate,
+              day: item.day,
+              description: item.description, // Asegúrate de pasar esto
+              hour: item.hour, // Agrega la hora
+              address: item.address, // Pasar dirección
+              location: item.eventLocation || t("notifications.noLocation"),
+              coordinates: item.coordinates || { latitude: 0, longitude: 0 },
+              hours: item.hours || {},
+              number: item.phoneNumber || t("notifications.noNumber"),
+              isPrivate: item.isPrivate || false,
+            },
+            selectedDate: item.eventDate,
+            isFromNotification: true, // Indicamos que es desde la notificación
+          });
+        } else {
+          if (
+            !item.coordinates ||
+            !item.coordinates.latitude ||
+            !item.coordinates.longitude
+          ) {
+            Alert.alert(
+              t("notifications.error"),
+              t("notifications.coordinatesNotAvailable")
+            );
+
+            return;
+          }
+
+          navigation.navigate("BoxDetails", {
+            box: {
+              title: item.eventTitle,
+              imageUrl: item.eventImage,
+              date: item.eventDate,
+              location: item.eventLocation || t("notifications.noLocation"),
+              coordinates: item.coordinates || { latitude: 0, longitude: 0 },
+              hours: item.hours || {},
+              number: item.phoneNumber || t("notifications.noNumber"),
+              isPrivate: item.isPrivate || false,
+            },
+            selectedDate: item.eventDate,
+          });
+        }
+      } else if (isFriendRequestResponse) {
+        handleUserPress({
+          uid: item.fromId,
+          navigation,
+          t,
         });
       } else {
         handleUserPress({
@@ -499,21 +551,7 @@ const loadMoreNotifications = async () => {
           t,
         });
       }
-    
-      // 2️⃣ Luego ejecutamos validaciones en segundo plano
-      setTimeout(() => {
-        if (item.type === "invitation" || item.type === "generalEventInvitation") {
-          if (!item.coordinates || !item.coordinates.latitude || !item.coordinates.longitude) {
-            Alert.alert(
-              t("notifications.error"),
-              t("notifications.coordinatesNotAvailable")
-            );
-          }
-        }
-      }, 500);
     };
-    
-    
 
     if (item.type === "generalEventInvitation") {
       return renderGeneralEventNotification({ item });
@@ -533,7 +571,7 @@ const loadMoreNotifications = async () => {
               t,
             })
           }
-          onPress={() => handleNotificationPress(item)}
+          onPress={handleNotificationPress}
         >
           <View
             style={[
@@ -690,25 +728,28 @@ const loadMoreNotifications = async () => {
   };
 
   return (
-    <LinearGradient
-    colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
-    style={styles.container}
-  >
-    <FlatList
-      data={notifications}
-      keyExtractor={(item) => item.id}
-      renderItem={renderNotificationItem}
-      contentContainerStyle={styles.listContent}
-      initialNumToRender={6}
-      maxToRenderPerBatch={5}
-      removeClippedSubviews={true}
-      onEndReached={loadMoreNotifications}
-      onEndReachedThreshold={0.1}
-      ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color="black" /> : null}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["black"]} tintColor="black" />
-      }
+      <LinearGradient
+        colors={isNightMode ? ["black", "black"] : ["#fff", "#f0f0f0"]}
+        style={styles.container}
+      >
+       <FlatList
+  data={combinedNotifications}
+  keyExtractor={(item) => item.id}
+  renderItem={renderNotificationItem}
+  contentContainerStyle={styles.listContent}
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      colors={["black"]}
+      tintColor="black"
     />
-  </LinearGradient>
-);
+  }
+  onEndReachedThreshold={0.2}
+  onEndReached={loadMoreNotifications}
+  ListFooterComponent={fetchingMore ? <ActivityIndicator style={{ marginVertical: 16 }} size="small" /> : null}
+/>
+
+      </LinearGradient>
+  );
 }

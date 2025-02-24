@@ -5,14 +5,13 @@ import {
   Text,
   TextInput,
   FlatList,
-  TouchableWithoutFeedback,
   StyleSheet,
   Alert,
   Pressable,
   Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import * as Haptics from "expo-haptics"; // Para feedback háptico en iOS
+import * as Haptics from "expo-haptics";
 
 const InviteFriendsModal = ({
   modalVisible,
@@ -29,25 +28,24 @@ const InviteFriendsModal = ({
 
   useEffect(() => {
     if (modalVisible) {
+      // Puedes realizar alguna acción al abrir el modal
     }
   }, [modalVisible, attendeesList]);
 
   const handleInvite = (friendId) => {
     setInvitedFriends([...invitedFriends, friendId]);
-  
-    // Agregar feedback háptico en iOS y Android
+
     if (Platform.OS === "ios") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-  
+
     Alert.alert(
       t("userProfile.success"),
       t("boxDetails.friendInvitedMessage")
     );
   };
-  
 
   const renderFriendItemWithInvite = ({ item }) => {
     const isInvited = invitedFriends.includes(item.friendId);
@@ -61,47 +59,46 @@ const InviteFriendsModal = ({
       visible={modalVisible}
       onRequestClose={closeModal}
     >
-      <TouchableWithoutFeedback onPress={closeModal}>
-        <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-            <View
-              style={[
-                styles.friendsModalContent,
-                isNightMode && styles.friendsModalContentNight,
-              ]}
-            >
-              {/* Título del modal */}
-              <Text
-                style={[
-                  styles.modalTitle,
-                  isNightMode && styles.modalTitleNight,
-                ]}
-              >
-                {t("boxDetails.inviteFriendsTitle")}
-              </Text>
+      <View style={styles.modalOverlay}>
+        {/* Overlay que cierra el modal al tocar fuera */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={closeModal} />
 
-              {/* Barra de búsqueda */}
-              <TextInput
-                style={[
-                  styles.searchInput,
-                  isNightMode && styles.searchInputNight,
-                ]}
-                placeholder={t("boxDetails.searchFriendsPlaceholder")}
-                placeholderTextColor={isNightMode ? "#888" : "#888"}
-                value={searchText}
-                onChangeText={handleSearch}
-              />
+        {/* Contenido del modal */}
+        <View
+          style={[
+            styles.friendsModalContent,
+            isNightMode && styles.friendsModalContentNight,
+          ]}
+        >
+          <Text
+            style={[
+              styles.modalTitle,
+              isNightMode && styles.modalTitleNight,
+            ]}
+          >
+            {t("boxDetails.inviteFriendsTitle")}
+          </Text>
 
-              {/* Lista de amigos */}
-              <FlatList
-                data={filteredFriends}
-                renderItem={renderFriendItemWithInvite}
-                keyExtractor={(item) => item.friendId.toString()}
-              />
-            </View>
-          </TouchableWithoutFeedback>
+          <TextInput
+            style={[
+              styles.searchInput,
+              isNightMode && styles.searchInputNight,
+            ]}
+            placeholder={t("boxDetails.searchFriendsPlaceholder")}
+            placeholderTextColor="#888"
+            value={searchText}
+            onChangeText={handleSearch}
+          />
+
+          <FlatList
+            data={filteredFriends}
+            renderItem={renderFriendItemWithInvite}
+            keyExtractor={(item) => item.friendId.toString()}
+            style={{ maxHeight: 300 }} // Limita la altura de la lista
+            showsVerticalScrollIndicator={false}
+          />
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 };
