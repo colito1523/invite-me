@@ -1,4 +1,3 @@
-import { Timestamp } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from "react-native";
 import {
@@ -10,6 +9,7 @@ import {
   doc,
   updateDoc,
   writeBatch,
+  Timestamp,
 } from "firebase/firestore";
 import { database } from "../../config/firebase";
 
@@ -241,12 +241,29 @@ export const saveChatsToCache = async (chats) => {
 export const getChatsFromCache = async () => {
   try {
     const jsonValue = await AsyncStorage.getItem('@cached_chats');
-    return jsonValue != null ? JSON.parse(jsonValue) : null;
+    const chats = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (chats) {
+      chats.forEach(chat => {
+        if (
+          chat.lastMessageTimestamp &&
+          typeof chat.lastMessageTimestamp === 'object' &&
+          !chat.lastMessageTimestamp.toDate
+        ) {
+          chat.lastMessageTimestamp = new Timestamp(
+            chat.lastMessageTimestamp.seconds,
+            chat.lastMessageTimestamp.nanoseconds
+          );
+        }
+        // Si tienes otros campos de timestamp, realiza la conversión de forma similar.
+      });
+    }
+    return chats;
   } catch (error) {
     console.error("Error getting chats from cache:", error);
     return null;
   }
 };
+
 
 export const handleDeleteSelectedChats = async (selectedChats: string[], userId: string, t: any) => {
   try {
