@@ -346,6 +346,7 @@ export default function ChatList() {
 
           const updatedChats = await checkStories(sortedChats, user.uid);
           setChats(updatedChats);
+          await saveChatsToCache(updatedChats);
           setHasUnreadMessages(hasUnread);
         });
 
@@ -366,7 +367,12 @@ export default function ChatList() {
   const handleDeleteChatLocal = async (chat) => {
     const success = await handleDeleteChat(chat, user.uid, t);
     if (success) {
-      setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
+      setChats((prevChats) => {
+        const updatedChats = prevChats.filter((c) => c.id !== chat.id);
+        // Actualiza la caché con la lista de chats actualizada
+        saveChatsToCache(updatedChats);
+        return updatedChats;
+      });
     }
   };
   
@@ -456,7 +462,11 @@ export default function ChatList() {
   const handleDeleteSelectedChatsLocal = async () => {
     const success = await handleDeleteSelectedChats(selectedChats, user.uid, t);
     if (success) {
-      setChats((prevChats) => prevChats.filter((chat) => !selectedChats.includes(chat.id)));
+      setChats((prevChats) => {
+        const updatedChats = prevChats.filter((chat) => !selectedChats.includes(chat.id));
+        saveChatsToCache(updatedChats);
+        return updatedChats;
+      });
       setSelectedChats([]);
       setIsSelectionMode(false);
     }

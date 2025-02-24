@@ -30,10 +30,17 @@ import {
   addDoc,
   writeBatch,
 } from "firebase/firestore";
+import {
+  saveUserNoteToCache,
+  getUserNoteFromCache,
+  saveFriendsNotesToCache,
+  getFriendsNotesFromCache
+} from "./utils";
 import { AntDesign, Feather, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { auth, database } from "../../config/firebase";
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
+
 
 const moodOptions = [
   "morning_walk",
@@ -69,6 +76,21 @@ export default function Notes({ refresh }) {
   const theme = isNightMode ? darkTheme : lightTheme;
 
   useEffect(() => {
+    const loadCachedNotes = async () => {
+      const cachedUserNote = await getUserNoteFromCache();
+      if (cachedUserNote) {
+        setUserNote(cachedUserNote);
+      }
+      const cachedFriendsNotes = await getFriendsNotesFromCache();
+      if (cachedFriendsNotes && cachedFriendsNotes.length > 0) {
+        setFriendsNotes(cachedFriendsNotes);
+      }
+    };
+    loadCachedNotes();
+  }, []);
+
+
+  useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
       setIsNightMode(currentHour >= 19 || currentHour < 6);
@@ -101,46 +123,43 @@ export default function Notes({ refresh }) {
           const now = new Date();
           const noteDate = noteData.createdAt.toDate();
           const hoursSinceCreation = (now - noteDate) / (1000 * 60 * 60);
-
+  
           if (hoursSinceCreation < 24) {
-            setUserNote({ id: docSnapshot.id, ...noteData });
+            const newUserNote = { id: docSnapshot.id, ...noteData };
+            setUserNote(newUserNote);
+            saveUserNoteToCache(newUserNote);
           } else {
             handleDeleteNote();
           }
         } else {
           setUserNote(null);
+          saveUserNoteToCache(null);
         }
       });
-
+  
       return () => unsubscribe();
     }
   }, [user]);
 
   const fetchFriendsNotes = async () => {
     if (!user) return;
-
+  
     const friendsRef = collection(database, "users", user.uid, "friends");
     const friendsSnapshot = await getDocs(friendsRef);
     const friendsData = friendsSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-
+  
     const friendsNotesPromises = friendsData.map(async (friend) => {
-      const noteRef = doc(
-        database,
-        "users",
-        friend.friendId,
-        "note",
-        "current"
-      );
+      const noteRef = doc(database, "users", friend.friendId, "note", "current");
       const noteSnapshot = await getDoc(noteRef);
       if (noteSnapshot.exists()) {
         const noteData = noteSnapshot.data();
         const now = new Date();
         const noteDate = noteData.createdAt.toDate();
         const hoursSinceCreation = (now - noteDate) / (1000 * 60 * 60);
-
+  
         if (hoursSinceCreation < 24) {
           const likesRef = collection(
             database,
@@ -152,12 +171,10 @@ export default function Notes({ refresh }) {
           );
           const likesSnapshot = await getDocs(likesRef);
           const isLiked = likesSnapshot.docs.some((doc) => doc.id === user.uid);
-
-          const friendDoc = await getDoc(
-            doc(database, "users", friend.friendId)
-          );
+  
+          const friendDoc = await getDoc(doc(database, "users", friend.friendId));
           const friendData = friendDoc.data();
-
+  
           return {
             id: noteSnapshot.id,
             ...noteData,
@@ -171,12 +188,14 @@ export default function Notes({ refresh }) {
       }
       return null;
     });
-
-    const friendsNotes = (await Promise.all(friendsNotesPromises)).filter(
+  
+    const friendsNotesFetched = (await Promise.all(friendsNotesPromises)).filter(
       (note) => note !== null
     );
-    setFriendsNotes(friendsNotes);
+    setFriendsNotes(friendsNotesFetched);
+    saveFriendsNotesToCache(friendsNotesFetched);
   };
+  
 
   const handleNoteChange = (text) => {
     if (text.length <= 30) {
