@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase/firestore";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from "react-native";
 import {
   collection,
@@ -223,6 +224,27 @@ export const checkStories = async (chats: any[], userId: string) => {
   } catch (error) {
     console.error("Error checking stories:", error);
     return chats;
+  }
+};
+
+// Guardar la lista de chats en la caché
+export const saveChatsToCache = async (chats) => {
+  try {
+    const jsonValue = JSON.stringify(chats);
+    await AsyncStorage.setItem('@cached_chats', jsonValue);
+  } catch (error) {
+    console.error("Error saving chats to cache:", error);
+  }
+};
+
+// Recuperar la lista de chats desde la caché
+export const getChatsFromCache = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@cached_chats');
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (error) {
+    console.error("Error getting chats from cache:", error);
+    return null;
   }
 };
 

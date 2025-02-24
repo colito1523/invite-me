@@ -41,11 +41,14 @@ import {
   handleChatPress,
   checkStories,
   handleDeleteSelectedChats,
-  handleChatPressLocal 
+  handleChatPressLocal,
+  saveChatsToCache,
+  getChatsFromCache 
 } from './utils';
 
 export default function ChatList() {
   const [chats, setChats] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [filteredChats, setFilteredChats] = useState([]);
   const [isNightMode, setIsNightMode] = useState(false);
@@ -61,6 +64,89 @@ export default function ChatList() {
   const [refreshing, setRefreshing] = useState(false);
   const { setHasUnreadMessages } = useUnreadMessages();
   const [notesRefresh, setNotesRefresh] = useState(0);
+
+
+  const loadChats = useCallback(async () => {
+    setIsLoading(true);
+
+    // Intenta cargar los chats desde la caché
+    const cachedChats = await getChatsFromCache();
+    if (cachedChats) {
+      setChats(cachedChats);
+    }
+
+    // Luego, carga los chats desde Firebase
+    try {
+      const chatsRef = collection(database, "chats");
+      const q = query(chatsRef, where("participants", "array-contains", user.uid));
+      const querySnapshot = await getDocs(q);
+
+      const userRef = doc(database, "users", user.uid);
+      const userSnapshot = await getDoc(userRef);
+      const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+
+      const chatList = await Promise.all(
+        querySnapshot.docs.map(async (docSnapshot) => {
+          const chatData = docSnapshot.data();
+          if (
+            chatData.isHidden?.[user.uid] ||
+            blockedUsers.some((blockedUid) => chatData.participants.includes(blockedUid))
+          ) {
+            return null;
+          }
+
+          const otherUserId = chatData.participants.find((uid) => uid !== user.uid);
+          const otherUserDoc = await getDoc(doc(database, "users", otherUserId));
+          if (!otherUserDoc.exists()) return null;
+
+          const otherUserData = otherUserDoc.data();
+          const messagesRef = collection(database, "chats", docSnapshot.id, "messages");
+          const unseenMessagesQuery = query(
+            messagesRef,
+            where("seen", "==", false),
+            where("senderId", "!=", user.uid)
+          );
+          const unseenMessagesSnapshot = await getDocs(unseenMessagesQuery);
+
+          return {
+            id: docSnapshot.id,
+            user: otherUserData,
+            unseenMessagesCount: unseenMessagesSnapshot.size,
+            lastMessage: chatData.lastMessage || "",
+            lastMessageTimestamp: chatData.lastMessageTimestamp || null,
+          };
+        })
+      );
+
+      const sortedChats = chatList
+        .filter((chat) => chat !== null)
+        .sort((a, b) => {
+          const dateA = a.lastMessageTimestamp
+            ? a.lastMessageTimestamp.toDate().getTime()
+            : 0;
+          const dateB = b.lastMessageTimestamp
+            ? b.lastMessageTimestamp.toDate().getTime()
+            : 0;
+          return dateB - dateA;
+        });
+
+      const updatedChats = await checkStories(sortedChats, user.uid);
+      setChats(updatedChats);
+
+      // Guarda los chats en la caché
+      await saveChatsToCache(updatedChats);
+    } catch (error) {
+      console.error("Error loading chats:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  // Cargar los chats cuando el componente se monta
+  useEffect(() => {
+    loadChats();
+  }, [loadChats]);
+
 
   const onRefresh = useCallback(async () => {
     if (!user) return;
@@ -151,6 +237,7 @@ export default function ChatList() {
     const interval = setInterval(checkTime, 60000);
     return () => clearInterval(interval);
   }, []);
+  
 
   useEffect(() => {
     const fetchMutedChats = async () => {
