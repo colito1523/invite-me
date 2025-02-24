@@ -192,8 +192,11 @@ export default function Notes({ refresh }) {
     const friendsNotesFetched = (await Promise.all(friendsNotesPromises)).filter(
       (note) => note !== null
     );
-    setFriendsNotes(friendsNotesFetched);
+  
+    // Actualizar la caché local con los datos más recientes de Firebase
     saveFriendsNotesToCache(friendsNotesFetched);
+  
+    setFriendsNotes(friendsNotesFetched);
   };
   
 
@@ -286,7 +289,7 @@ export default function Notes({ refresh }) {
         user.uid
       );
       const likeDoc = await getDoc(likeRef);
-
+  
       if (likeDoc.exists()) {
         await deleteDoc(likeRef);
         note.isLiked = false;
@@ -295,7 +298,7 @@ export default function Notes({ refresh }) {
         await setDoc(likeRef, { timestamp: new Date() });
         note.isLiked = true;
         note.likeCount++;
-
+  
         const notificationsRef = collection(
           database,
           "users",
@@ -307,14 +310,20 @@ export default function Notes({ refresh }) {
           fromId: user.uid,
           fromName: userData.username,
           fromImage: userData.photoUrls[0],
-          messageKey: "notes.likedYourNote", // Envía la clave de traducción
+          messageKey: "notes.likedYourNote",
           timestamp: new Date(),
           noteText: note.text,
           seen: false,
         });
       }
-
-      setFriendsNotes([...friendsNotes]);
+  
+      // Actualizar la caché local con los datos más recientes
+      const updatedFriendsNotes = friendsNotes.map((n) =>
+        n.friendId === note.friendId ? { ...n, isLiked: note.isLiked, likeCount: note.likeCount } : n
+      );
+      
+      setFriendsNotes(updatedFriendsNotes);
+      saveFriendsNotesToCache(updatedFriendsNotes);
     } catch (error) {
       console.error("Error toggling like:", error);
       Alert.alert(t("notes.error"), t("notes.likeToggleError"));

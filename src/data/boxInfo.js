@@ -198,6 +198,28 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Lisboa/Meceiria.jpg"),
+    title: "Mercearia Pachecas",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "8:00 AM - 10:00 PM",
+      Miércoles: "8:00 AM - 10:00 PM",
+      Jueves: "8:00 AM - 10:00 PM",
+      Viernes: "8:00 AM - 10:00 PM",
+      Sábado: "8:00 AM - 10:00 PM",
+      Domingo: "Cerrado",
+    },
+    number: "915 394 817",
+    coordinates: {
+      latitude: 38.72447670,
+      longitude: -9.15598330,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
     path: require("../../assets/Lisboa/Jncquoi_club.jpg"),
     title: "Jncquoi Club",
     category: "Bars & Clubs",
@@ -280,6 +302,28 @@ const boxInfo = [
     coordinates: {
       latitude: 38.7078843,
       longitude: -9.1470788,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/marvila.jpg"),
+    title: "8 marvila",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "12:00 PM - 12:00 AM",
+      Viernes: "12:00 PM - 2:00 AM",
+      Sábado: "12:00 PM - 2:00 AM",
+      Domingo: "12:00 PM - 10:00 PM",
+    },
+    number: "-",
+    coordinates: {
+      latitude: 38.74228450,
+      longitude: -9.10209180,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -390,6 +434,50 @@ const boxInfo = [
     coordinates: {
       latitude: 38.706027,
       longitude: -9.1499039,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/Collect.jpg"),
+    title: "Collect",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "05:00 PM - 02:00 AM",
+      Martes: "05:00 PM - 02:00 AM",
+      Miércoles: "05:00 PM - 02:00 AM",
+      Jueves: "05:00 PM - 02:00 AM",
+      Viernes: "12:00 PM - 03:00 AM",
+      Sábado: "12:00 PM - 03:00 AM",
+      Domingo: "12:00 PM - 02:00 AM",
+},
+    number: "913 808 371",
+    coordinates: {
+      latitude: 38.70742840,
+      longitude: -9.14410890,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/Incognito.jpg"),
+    title: "Incognito",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "11:00 PM - 04:00 AM",
+      Viernes: "11:00 PM - 04:00 AM",
+      Sábado: "11:00 PM - 04:00 AM",
+      Domingo: "Cerrado",
+},
+    number: "-",
+    coordinates: {
+      latitude: 38.71084890,
+      longitude: -9.1509367,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -769,28 +857,7 @@ const boxInfo = [
     city: "Lisboa",
     
   },
-  {
-    path: require("../../assets/Lisboa/Collect.jpg"),
-    title: "Collect",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "5:00 PM - 2:00 AM",
-      Martes: "5:00 PM - 2:00 AM",
-      Miércoles: "5:00 PM - 2:00 AM",
-      Jueves: "5:00 PM - 2:00 AM",
-      Viernes: "12:00 PM - 3:00 AM",
-      Sábado: "12:00 PM - 3:00 AM",
-      Domingo: "12:00 PM - 2:00 AM",
-    },
-    number: "913 808 371",
-    coordinates: {
-      latitude: 38.7074284,
-      longitude: -9.1441089,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
+
   {
     path: require("../../assets/Lisboa/malacopa.jpg"),
     title: "Malacopa",
@@ -808,50 +875,6 @@ const boxInfo = [
     coordinates: {
       latitude: 38.6982578,
       longitude: -9.4217543,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
-    path: require("../../assets/Lisboa/marvila.jpg"),
-    title: "8 marvila",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "Cerrado",
-      Martes: "Cerrado",
-      Miércoles: "Cerrado",
-      Jueves: "12:00 PM - 12:00 AM",
-      Viernes: "12:00 PM - 2:00 AM",
-      Sábado: "12:00 PM - 2:00 AM",
-      Domingo: "12:00 PM - 10:00 PM",
-    },
-    number: "-",
-    coordinates: {
-      latitude: 38.74228450,
-      longitude: -9.10209180,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
-    path: require("../../assets/Lisboa/Meceiria.jpg"),
-    title: "Mercearia Pacheca",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "Cerrado",
-      Martes: "8:00 AM - 10:00 PM",
-      Miércoles: "8:00 AM - 10:00 PM",
-      Jueves: "8:00 AM - 10:00 PM",
-      Viernes: "8:00 AM - 10:00 PM",
-      Sábado: "8:00 AM - 10:00 PM",
-      Domingo: "Cerrado",
-    },
-    number: "915 394 817",
-    coordinates: {
-      latitude: 38.72447670,
-      longitude: -9.15598330,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -880,7 +903,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/K Urban Beach.jpg"),
+    path: require("../../assets/Lisboa/K Urban Beachh.jpg"),
     title: "K Urban Beach",
     category: "Bars & Clubs",
     hours: {
@@ -902,7 +925,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Ministerium Club.jpg"),
+    path: require("../../assets/Lisboa/MInisterium.jpg"),
     title: "Ministerium Club",
     category: "Bars & Clubs",
     hours: {
