@@ -520,23 +520,33 @@ export default function NotificationsComponent() {
     const isLikeNotification = item.type === "like";
     const isNoteLikeNotification = item.type === "noteLike";
 
-    const timestamp = item.timestamp?.toDate
-      ? item.timestamp.toDate()
-      : new Date(item.timestamp);
-
+    let timestamp;
     let formattedTime = item.formattedTime || "";
 
-    if (!formattedTime && timestamp) {
-      if (isToday(timestamp)) {
-        formattedTime = format(timestamp, "HH:mm");
-      } else if (isYesterday(timestamp)) {
-        formattedTime = `${t("notifications.yesterday")} ${format(
-          timestamp,
-          "HH:mm"
-        )}`;
-      } else {
-        formattedTime = format(timestamp, "dd/MM/yyyy HH:mm");
+    try {
+      if (item.timestamp?.toDate) {
+        timestamp = item.timestamp.toDate();
+      } else if (item.timestamp && typeof item.timestamp === 'object' && item.timestamp.seconds) {
+        timestamp = new Date(item.timestamp.seconds * 1000);
+      } else if (item.timestamp) {
+        timestamp = new Date(item.timestamp);
       }
+
+      if (!formattedTime && timestamp && timestamp instanceof Date && !isNaN(timestamp)) {
+        if (isToday(timestamp)) {
+          formattedTime = format(timestamp, "HH:mm");
+        } else if (isYesterday(timestamp)) {
+          formattedTime = `${t("notifications.yesterday")} ${format(
+            timestamp,
+            "HH:mm"
+          )}`;
+        } else {
+          formattedTime = format(timestamp, "dd/MM/yyyy HH:mm");
+        }
+      }
+    } catch (error) {
+      console.warn("Error formatting timestamp:", error);
+      formattedTime = "";
     }
 
     const handleNotificationPress = () => {
@@ -616,8 +626,9 @@ export default function NotificationsComponent() {
         <TouchableOpacity
           onLongPress={() =>
             handleDeleteNotification({
-              notificationId: item.id, // Asegúrate de pasar el ID de la notificación
+              notificationId: item.id,
               setNotifications,
+              setNotificationList,
               t,
             })
           }

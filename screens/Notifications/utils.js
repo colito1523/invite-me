@@ -33,7 +33,7 @@ export const markNotificationsAsSeen = async (params) => {
 };
 
 export const handleDeleteNotification = (params) => {
-  const { notificationId, setNotifications, t } = params;
+  const { notificationId, setNotifications, setNotificationList, t } = params;
 
   Alert.alert(
     t("notifications.deleteNotificationTitle"),
@@ -50,9 +50,25 @@ export const handleDeleteNotification = (params) => {
           try {
             const userRef = doc(database, "users", auth.currentUser.uid, "notifications", notificationId);
             await deleteDoc(userRef);
+            
+            // Actualizar ambos estados
             setNotifications((prevNotifications) =>
               prevNotifications.filter((notif) => notif.id !== notificationId)
             );
+            
+            setNotificationList((prevList) =>
+              prevList.filter((notif) => notif.id !== notificationId)
+            );
+
+            // Actualizar el caché
+            const cachedNotifications = await loadNotificationsFromCache();
+            if (cachedNotifications) {
+              const updatedCache = cachedNotifications.filter(
+                (notif) => notif.id !== notificationId
+              );
+              await saveNotificationsToCache(updatedCache);
+            }
+
             Alert.alert(
               t("notifications.notificationDeletedTitle"),
               t("notifications.notificationDeletedMessage")
