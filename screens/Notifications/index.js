@@ -43,6 +43,33 @@ import {
   handleRejectGeneralEvent,
 } from "./utils";
 import { styles } from "./styles";
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Added import for AsyncStorage
+
+
+const NOTIFICATION_CACHE_KEY = '@notifications:key';
+
+const loadNotificationsFromCache = async () => {
+  try {
+    const cachedData = await AsyncStorage.getItem(NOTIFICATION_CACHE_KEY);
+    if (cachedData !== null) {
+      return JSON.parse(cachedData);
+    }
+    return null;
+  } catch (error) {
+    console.error("Error loading notifications from cache:", error);
+    return null;
+  }
+};
+
+
+const saveNotificationsToCache = async (notifications) => {
+  try {
+    await AsyncStorage.setItem(NOTIFICATION_CACHE_KEY, JSON.stringify(notifications));
+  } catch (error) {
+    console.error("Error saving notifications to cache:", error);
+  }
+};
+
 
 export default function NotificationsComponent() {
   const { t } = useTranslation();
@@ -63,20 +90,41 @@ export default function NotificationsComponent() {
     if (!user) return;
     setIsLoading(true);
     try {
+      // Cargar desde caché primero
+      const cachedNotifications = await loadNotificationsFromCache();
+      if (cachedNotifications) {
+        setNotificationList(cachedNotifications);
+        setIsLoading(false);
+      }
+
       const userDocSnap = await getDoc(doc(database, "users", user.uid));
       const hidden = userDocSnap.data()?.hiddenNotifications || [];
       const blocked = userDocSnap.data()?.blockedUsers || [];
       const notificationsRef = collection(database, "users", user.uid, "notifications");
-      const q = query(notificationsRef, orderBy("timestamp", "desc"), limit(8));
+      
+      // Consulta sin filtro de tipo para obtener todas las notificaciones
+      const q = query(
+        notificationsRef,
+        orderBy("timestamp", "desc"),
+        limit(20)
+      );
+      
       const snapshot = await getDocs(q);
       const notifs = snapshot.docs
-        .map(docSnap => ({
-          id: docSnap.id,
-          ...docSnap.data(),
-          type: docSnap.data().type || "notification"
-        }))
+        .map(docSnap => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            ...data,
+            type: data.type || "notification",
+            timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : data.timestamp
+          };
+        })
         .filter(n => !hidden.includes(n.id) && !blocked.includes(n.fromId));
+
       setNotificationList(notifs);
+      await saveNotificationsToCache(notifs);
+
       if (snapshot.docs.length > 0) {
         setLastNotificationDoc(snapshot.docs[snapshot.docs.length - 1]);
       } else {
@@ -114,7 +162,7 @@ export default function NotificationsComponent() {
     const bt = b.timestamp?.toDate ? b.timestamp.toDate() : b.timestamp;
     return bt - at;
   });
-  
+
   const loadMoreNotifications = useCallback(async () => {
     if (!lastNotificationDoc || fetchingMore || !user) return;
     setFetchingMore(true);
@@ -154,7 +202,7 @@ export default function NotificationsComponent() {
       setFetchingMore(false);
     }
   }, [user, lastNotificationDoc, fetchingMore]);
-  
+
 
   const refreshNewNotifications = useCallback(async () => {
     if (!user) return;
@@ -184,29 +232,31 @@ export default function NotificationsComponent() {
       if (newNotifs.length > 0) {
         // Ordenamos de forma descendente (más reciente primero)
         newNotifs.sort((a, b) => b.timestamp - a.timestamp);
-        setNotificationList(prev => [...newNotifs, ...prev]);
+        const updatedNotifications = [...newNotifs, ...notificationList];
+        setNotificationList(updatedNotifications);
+        await saveNotificationsToCache(updatedNotifications);
       }
     } catch (error) {
       console.log("Error refreshing new notifications:", error);
     }
   }, [user, notificationList]);
-  
+
   useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
       setIsNightMode(currentHour >= 19 || currentHour < 6);
     };
-  
+
     // Lo ejecutas al montar
     checkTime(); 
-  
+
     // Llamas a las notificaciones
     loadInitialNotifications();
-  
+
     // Sin interval, así que el return puede ser vacío o no hacer nada.
     return () => {};
   }, []);
-  
+
   useFocusEffect(
     React.useCallback(() => {
       navigation.setOptions({
@@ -256,7 +306,7 @@ export default function NotificationsComponent() {
     await refreshNewNotifications();
     setRefreshing(false);
   }, [refreshNewNotifications]);
-  
+
 
   useEffect(() => {
     if (!user) return;
@@ -457,7 +507,7 @@ export default function NotificationsComponent() {
     if (item.type === "friend_request") {
       return null;
     }
-    
+
     const isFriendRequest =
       item.type === "friendRequest" &&
       item.status !== "accepted" &&

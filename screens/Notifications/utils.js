@@ -1,4 +1,5 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from "react-native";
 import { auth, database } from "../../config/firebase";
 
@@ -784,5 +785,39 @@ export const handleLikeNote = async (note) => {
   } catch (error) {
     console.error("Error toggling like:", error);
     Alert.alert(t("notes.error"), t("notes.likeToggleError"));
+  }
+};
+// Cache functions
+export const saveNotificationsToCache = async (notifications) => {
+  try {
+    const serializedNotifications = notifications.map(notification => ({
+      ...notification,
+      timestamp: notification.timestamp instanceof Date 
+        ? notification.timestamp.toISOString()
+        : notification.timestamp?.toDate?.()?.toISOString() 
+        || notification.timestamp,
+      type: notification.type || 'notification'
+    }));
+    await AsyncStorage.setItem('cachedNotifications', JSON.stringify(serializedNotifications));
+  } catch (error) {
+    console.error('Error saving notifications to cache:', error);
+  }
+};
+
+export const loadNotificationsFromCache = async () => {
+  try {
+    const cachedData = await AsyncStorage.getItem('cachedNotifications');
+    if (cachedData) {
+      const notifications = JSON.parse(cachedData);
+      return notifications.map(notification => ({
+        ...notification,
+        timestamp: notification.timestamp ? new Date(notification.timestamp) : null,
+        type: notification.type || 'notification'
+      }));
+    }
+    return null;
+  } catch (error) {
+    console.error('Error loading notifications from cache:', error);
+    return null;
   }
 };
