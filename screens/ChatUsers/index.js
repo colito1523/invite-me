@@ -55,6 +55,7 @@ export default function Chat({ route }) {
   const [messages, setMessages] = useState([]);
   const [recipient, setRecipient] = useState(recipientUser);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [inputHeight, setInputHeight] = useState(40); 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
   const user = auth.currentUser;
@@ -262,6 +263,12 @@ export default function Chat({ route }) {
     }
 
     return chatId; // Retorna el ID del chat actual si ya está definido
+  };
+
+  const handleContentSizeChange = (event) => {
+    const { height } = event.nativeEvent.contentSize;
+    const maxHeight = 40 * 5; // 5 líneas de texto (40 es la altura aproximada de una línea)
+    setInputHeight(Math.min(height, maxHeight));
   };
 
   const handleSend = async (
@@ -514,32 +521,34 @@ export default function Chat({ route }) {
   }}
 />
 
-        <View style={styles.containerIg}>
-          <TouchableOpacity
-            onPress={handleCameraLaunch}
-            style={styles.iconButtonCamera}
-          >
+<View style={[styles.containerIg, { minHeight: 50, height: "auto" }]}>
+          <TouchableOpacity onPress={handleCameraLaunch} style={styles.iconButtonCamera}>
             <Ionicons name="camera-outline" size={20} color="white" />
           </TouchableOpacity>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                height: Math.min(Math.max(40, inputHeight), 40 * 3), // Limit to 5 lines
+                maxHeight: 40 * 3, // Maximum height for 5 lines
+              },
+            ]}
             value={message}
             onChangeText={setMessage}
             placeholder={t("chatUsers.writeMessage")}
             placeholderTextColor="#999"
+            multiline={true}
+            onContentSizeChange={(event) => {
+              const { height } = event.nativeEvent.contentSize
+              setInputHeight(height)
+            }}
           />
           {message.trim() ? (
-            <TouchableOpacity
-              onPress={() => handleSend("text")}
-              style={styles.sendButton}
-            >
+            <TouchableOpacity onPress={() => handleSend("text")} style={styles.sendButton}>
               <FontAwesome name="send" size={20} color="white" />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity
-            onPress={() => pickMedia(handleSend, t)}
-              style={styles.iconButtonGaleria}
-            >
+            <TouchableOpacity onPress={() => pickMedia(handleSend, t)} style={styles.iconButtonGaleria}>
               <Ionicons name="image-outline" size={30} color="#000" />
             </TouchableOpacity>
           )}

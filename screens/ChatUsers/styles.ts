@@ -136,15 +136,18 @@ export const styles = StyleSheet.create({
       backgroundColor: "#fff",
       borderRadius: 25,
       paddingHorizontal: 10,
-      paddingVertical: 10,
-      marginHorizontal: 10,
+      paddingVertical: 10, // Asegúrate de que haya suficiente padding vertical
       marginBottom: 20,
+      minHeight: 50, // Altura mínima del contenedor
+      maxHeight: 200, // Altura máxima del contenedor
     },
     input: {
       flex: 1,
       fontSize: 16,
-      marginLeft: 10,
       color: "#000",
+      paddingHorizontal: 15,
+      paddingVertical: 10, // Asegúrate de que haya suficiente padding vertical
+      maxHeight: 100, // Altura máxima del TextInput (ajusta según sea necesario)
     },
     sendButton: {
       backgroundColor: "#3e3d3d",
