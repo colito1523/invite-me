@@ -62,10 +62,49 @@ export const styles = StyleSheet.create({
     marginBottom: screenHeight * 0.025,
   },
   mutualFriendsContainer: {
-    alignItems: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: screenHeight * 0.02,
     marginBottom: screenHeight * 0.025,
+    flexWrap: "wrap",
+    maxWidth: screenWidth * 0.9, // Evita que se extienda demasiado en pantallas grandes
   },
+  mutualFriendImagesContainer: {
+    flexDirection: "row",
+    position: "relative",
+    height: screenWidth * 0.1,
+    maxWidth: screenWidth * 0.6, // Ajuste responsivo para que no invada el texto
+  },
+  mutualFriendImage: {
+    width: screenWidth * 0.09, // Ajuste responsivo
+    height: screenWidth * 0.09,
+    borderRadius: screenWidth * 0.045,
+    position: "absolute",
+  },
+  mutualFriendMoreText: {
+    color: "white",
+    fontSize: screenWidth * 0.035,
+    marginLeft: screenWidth * 0.03,
+    flexShrink: 1, // Evita que el texto crezca demasiado y se solape con imágenes
+  },
+  mutualFriendCountBubble: {
+    backgroundColor: "transparent", // Fondo transparente
+    justifyContent: "center",
+    alignItems: "center",
+    width: screenWidth * 0.09, // Ajuste responsivo
+    height: screenWidth * 0.09,
+    borderRadius: screenWidth * 0.045,
+    position: "absolute",
+    borderWidth: 2, // Agrega un borde de 2px
+    borderColor: "#fff", // Color blanco para el borde
+  },
+  
+  mutualFriendCountText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  
   number: {
     fontSize: screenWidth * 0.06,
     color: "#fff",
@@ -168,26 +207,7 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "white",
   },
-  mutualFriendImagesContainer: {
-    flexDirection: "row",
-    position: "relative",
-    height: screenWidth * 0.1,
-  },
-  mutualFriendImage: {
-    width: screenWidth * 0.1,
-    height: screenWidth * 0.1,
-    borderRadius: screenWidth * 0.05,
-    position: "absolute",
-  },
-  mutualFriendMoreText: {
-    color: "white",
-    fontSize: screenWidth * 0.035,
-    marginLeft: screenWidth * 0.025,
-  },
-  noMutualFriendsText: {
-    color: "white",
-    fontSize: screenWidth * 0.035,
-  },
+ 
   heartCountText: {
     color: "white",
     fontSize: screenWidth * 0.04,

@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   Pressable,
+  Dimensions
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { Menu, Provider } from "react-native-paper";
@@ -126,6 +127,7 @@ export default function UserProfile({ route, navigation }) {
   const [hideMyStories, setHideMyStories] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
+  const { width: screenWidth } = Dimensions.get("window");
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [isMutualFriendsModalVisible, setIsMutualFriendsModalVisible] =
     useState(false);
@@ -344,23 +346,13 @@ export default function UserProfile({ route, navigation }) {
         </View>
       );
     }
-
-    const containerWidth = Math.min(mutualFriends.length * 32, 130);
-
+  
     return (
       <TouchableOpacity
         onPress={handleMutualFriendsPress}
-        style={[
-          styles.mutualFriendsContainer,
-          { flexDirection: "row", alignItems: "center" },
-        ]}
+        style={styles.mutualFriendsContainer}
       >
-        <View
-          style={[
-            styles.mutualFriendImagesContainer,
-            { width: containerWidth },
-          ]}
-        >
+        <View style={styles.mutualFriendImagesContainer}>
           {Array.isArray(mutualFriends) &&
             mutualFriends.slice(0, 4).map((friend, index) => (
               <Image
@@ -369,22 +361,33 @@ export default function UserProfile({ route, navigation }) {
                   uri:
                     friend?.photoUrls?.[0] || "https://via.placeholder.com/150",
                 }}
-                style={[styles.mutualFriendImage, { left: index * 30 }]}
+                style={[
+                  styles.mutualFriendImage,
+                  { left: index * (screenWidth * 0.05) },
+                ]}
                 cachePolicy="memory-disk"
               />
             ))}
+  
+          {mutualFriends.length > 4 && (
+            <View
+              style={[
+                styles.mutualFriendImage,
+                styles.mutualFriendCountBubble,
+                { left: 4 * (screenWidth * 0.05) },
+              ]}
+            >
+              <Text style={styles.mutualFriendCountText}>
+                +{mutualFriends.length - 4}
+              </Text>
+            </View>
+          )}
         </View>
-        <Text style={[styles.mutualFriendMoreText, { marginLeft: 10 }]}>
-          {mutualFriends.length > 4
-            ? t("userProfile.andMoreMutualFriends", {
-                count: mutualFriends.length - 4,
-              })
-            : t("userProfile.mutualFriends")}
-        </Text>
       </TouchableOpacity>
     );
   };
 
+  
   const renderOval = (value) => (
     <View style={styles.oval}>
       <Text style={styles.ovalText}>{value}</Text>
