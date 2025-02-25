@@ -224,7 +224,8 @@ const onRefresh = useCallback(async () => {
               const friendsRef = collection(database, "users", user.uid, "friends");
               const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
               if (friendsSnapshot.empty) {
-                navigation.navigate("UserProfile", { selectedUser: item });
+                // Si es privado y no es amigo, se navega a PrivateUserProfile
+                navigation.navigate("PrivateUserProfile", { selectedUser: item });
                 return;
               }
             }
@@ -329,6 +330,7 @@ const onRefresh = useCallback(async () => {
       </View>
     );
   };
+  
 
   // Encabezado fijo que contiene el StorySlider y la barra de búsqueda (esta última se coloca debajo del StorySlider)
   const listHeader = (

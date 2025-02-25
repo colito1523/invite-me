@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Modal } from "react-native";
+import { View, Text, TouchableOpacity, Modal, Alert } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { saveSearchHistory } from "./utils";
@@ -21,22 +21,20 @@ const SearchHistory = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState(null);
 
+  // Al hacer click en la imagen: si el usuario tiene historias, se muestran; si es privado o no tiene historias, se navega al perfil correspondiente.
   const handleHistoryPress = async (item) => {
-    if (item.isPrivate && !item.isFriend) {
+    if (item.isPrivate) {
       navigation.navigate("PrivateUserProfile", { selectedUser: item });
       return;
     }
-  
     if (!item.hasStories) {
       navigation.navigate("UserProfile", { selectedUser: item });
       return;
     }
-  
     try {
       const storiesRef = collection(database, "users", item.id, "stories");
       const storiesSnapshot = await getDocs(storiesRef);
       const now = new Date();
-  
       const userStories = storiesSnapshot.docs
         .map((doc) => ({
           id: doc.id,
@@ -51,7 +49,7 @@ const SearchHistory = ({
           likes: doc.data().likes || [],
         }))
         .filter((story) => new Date(story.expiresAt.toDate()) > now);
-  
+
       if (userStories.length > 0) {
         setSelectedStories([
           {
@@ -73,7 +71,7 @@ const SearchHistory = ({
       Alert.alert(t("error"), t("errorLoadingStories"));
       navigation.navigate("UserProfile", { selectedUser: item });
     }
-  
+
     setTimeout(() => {
       const updatedHistory = searchHistory.filter((u) => u.id !== item.id);
       updatedHistory.unshift(item);
@@ -84,7 +82,24 @@ const SearchHistory = ({
       saveSearchHistory(user, updatedHistory, blockedUsers);
     }, 500);
   };
-  
+
+  // Al hacer click en el nombre o en cualquier otra parte del contenedor: se navega directamente al perfil (privado o público según corresponda), ignorando las historias.
+  const handleNamePress = (item) => {
+    if (item.isPrivate) {
+      navigation.navigate("PrivateUserProfile", { selectedUser: item });
+    } else {
+      navigation.navigate("UserProfile", { selectedUser: item });
+    }
+    setTimeout(() => {
+      const updatedHistory = searchHistory.filter((u) => u.id !== item.id);
+      updatedHistory.unshift(item);
+      while (updatedHistory.length > 5) {
+        updatedHistory.pop();
+      }
+      setSearchHistory(updatedHistory);
+      saveSearchHistory(user, updatedHistory, blockedUsers);
+    }, 500);
+  };
 
   const removeFromHistory = async (userId) => {
     const updatedHistory = searchHistory.filter((userItem) => userItem.id !== userId);
@@ -94,28 +109,27 @@ const SearchHistory = ({
 
   const renderHistoryItem = (item, index) => (
     <View key={`history-${item.id}-${index}`} style={styles.historyItem}>
-    {/* TouchableOpacity exclusivo para la imagen */}
-    <TouchableOpacity onPress={() => handleHistoryPress(item)}>
-      <View style={[styles.unseenStoryCircle, item.hasStories && { borderColor: isNightMode ? "white" : "black" }]}>
-        <Image
-          source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
-          style={styles.userImage}
-        />
-      </View>
-    </TouchableOpacity>
-  
-    {/* TouchableOpacity exclusivo para el nombre que navega al perfil */}
-    <TouchableOpacity onPress={() => navigation.navigate("UserProfile", { selectedUser: item })} style={styles.historyTextContainer}>
-      <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
-    </TouchableOpacity>
-  
-    <TouchableOpacity onPress={() => removeFromHistory(item.id)}>
-      <Ionicons name="close" size={20} color={theme.text} />
-    </TouchableOpacity>
-  </View>
+      {/* Click en la imagen para ver historias (o navegar al perfil si no hay historias) */}
+      <TouchableOpacity onPress={() => handleHistoryPress(item)}>
+        <View style={[styles.unseenStoryCircle, item.hasStories && { borderColor: isNightMode ? "white" : "black" }]}>
+          <Image
+            source={{ uri: item.profileImage || "https://via.placeholder.com/150" }}
+            style={styles.userImage}
+          />
+        </View>
+      </TouchableOpacity>
+
+      {/* Click en el contenedor (nombre) para ir al perfil directamente */}
+      <TouchableOpacity onPress={() => handleNamePress(item)} style={styles.historyTextContainer}>
+        <Text style={[styles.resultText, { color: theme.text }]}>{item.username}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => removeFromHistory(item.id)}>
+        <Ionicons name="close" size={20} color={theme.text} />
+      </TouchableOpacity>
+    </View>
   );
 
-  // Filtrar el historial para excluir usuarios bloqueados
   const filteredHistory = searchHistory.filter((item) => !blockedUsers.includes(item.id));
 
   return (

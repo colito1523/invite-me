@@ -159,10 +159,10 @@ export const handleLikeStory = async ({
       await addDoc(notificationRef, {
         type: "storyLike",
         fromId: currentUser.uid,
-        fromName: `${userData.firstName} ${userData.lastName}`.trim(),
+        fromName: `${userData.username} `.trim(),
         fromImage: userData.photoUrls?.[0] || "default-image-url",
         storyId: currentStory.id,
-        message: `${userData.firstName} ${userData.lastName} te dio like en tu historia.`,
+        message: `${userData.username} te dio like en tu historia.`,
         timestamp: new Date(),
         seen: false, // Marcamos la notificación como no vista
       });
