@@ -55,7 +55,6 @@ export default function Chat({ route }) {
   const [messages, setMessages] = useState([]);
   const [recipient, setRecipient] = useState(recipientUser);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [inputHeight, setInputHeight] = useState(40); 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
   const user = auth.currentUser;
@@ -68,6 +67,8 @@ export default function Chat({ route }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [textValue, setTextValue] = useState('');
+  const [inputHeight, setInputHeight] = useState(40); 
   const [controlsVisible, setControlsVisible] = useState(false);
   const videoRef = useRef(null);
   const [modalImageLoading, setModalImageLoading] = useState(true);
@@ -266,9 +267,9 @@ export default function Chat({ route }) {
   };
 
   const handleContentSizeChange = (event) => {
+    // El height que retorna es el alto que va necesitando el texto
     const { height } = event.nativeEvent.contentSize;
-    const maxHeight = 40 * 5; // 5 líneas de texto (40 es la altura aproximada de una línea)
-    setInputHeight(Math.min(height, maxHeight));
+    setInputHeight(height);
   };
 
   const handleSend = async (
@@ -526,18 +527,15 @@ export default function Chat({ route }) {
             <Ionicons name="camera-outline" size={20} color="white" />
           </TouchableOpacity>
           <TextInput
-            style={[
-              styles.input,
-              {
-                height: Math.min(Math.max(40, inputHeight), 40 * 3), // Limit to 5 lines
-                maxHeight: 40 * 3, // Maximum height for 5 lines
-              },
-            ]}
+           style={[
+    styles.input,
+    { height: Math.max(40, inputHeight) },
+  ]}
             value={message}
             onChangeText={setMessage}
             placeholder={t("chatUsers.writeMessage")}
             placeholderTextColor="#999"
-            multiline={true}
+            multiline
             onContentSizeChange={(event) => {
               const { height } = event.nativeEvent.contentSize
               setInputHeight(height)
