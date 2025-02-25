@@ -69,6 +69,10 @@ export const styles = StyleSheet.create({
     flexWrap: "wrap",
     maxWidth: screenWidth * 0.9, // Evita que se extienda demasiado en pantallas grandes
   },
+  noMutualFriendsText: {
+    color: "white",
+    fontWeight: "bold",
+  },
   mutualFriendImagesContainer: {
     flexDirection: "row",
     position: "relative",

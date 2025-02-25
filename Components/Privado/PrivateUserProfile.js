@@ -36,8 +36,21 @@ import MutualFriendsModal from "../Mutual-Friends-Modal/MutualFriendsModal";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, friendshipStatus, pendingRequest, toggleUserStatus, isProcessing, friendCount, mutualFriends, handleMutualFriendsPress }) => {
+const NameDisplay = ({
+  firstName,
+  lastName,
+  isNightMode,
+  showAddFriendButton,
+  friendshipStatus,
+  pendingRequest,
+  toggleUserStatus,
+  isProcessing,
+  friendCount,
+  mutualFriends,
+  handleMutualFriendsPress,
+}) => {
   const { t } = useTranslation();
+
   return (
     <View style={styles.nameContainer}>
       <View style={styles.nameAndButtonContainer}>
@@ -68,24 +81,36 @@ const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, fr
           </TouchableOpacity>
         )}
       </View>
+
       {friendCount !== undefined && (
         <View style={styles.friendCountContainer}>
-          <Text style={[styles.number, { color: isNightMode ? "#fff" : "#fff" }]}>
+          <Text
+            style={[
+              styles.number,
+              { color: isNightMode ? "#fff" : "#fff" },
+            ]}
+          >
             {friendCount}
           </Text>
         </View>
       )}
+
       {mutualFriends !== undefined && (
         <View style={styles.mutualFriendsContainer}>
           {mutualFriends.length === 0 ? (
-            <Text style={[styles.noMutualFriendsText, { color: isNightMode ? "#fff" : "#fff" }]}>
-              {t('noMutualFriends')}
+            <Text
+              style={[
+                styles.noMutualFriendsText,
+                { color: isNightMode ? "#fff" : "#fff" },
+              ]}
+            >
+              {t("noMutualFriends")}
             </Text>
           ) : (
-           <TouchableOpacity
-  onPress={handleMutualFriendsPress}
-  style={{ flexDirection: "row", alignItems: "center" }}
->
+            <TouchableOpacity
+              onPress={handleMutualFriendsPress}
+              style={{ flexDirection: "row", alignItems: "center" }}
+            >
               <View style={{ flexDirection: "row", height: 40 }}>
                 {mutualFriends.slice(0, 4).map((friend, index) => (
                   <Image
@@ -95,12 +120,21 @@ const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, fr
                     cachePolicy="memory-disk"
                   />
                 ))}
+
+                {mutualFriends.length > 4 && (
+                  <View
+                    style={[
+                      styles.mutualFriendImage,
+                      styles.mutualFriendCountBubble,
+                      { left: 4 * 30 },
+                    ]}
+                  >
+                    <Text style={styles.mutualFriendCountText}>
+                      +{mutualFriends.length - 4}
+                    </Text>
+                  </View>
+                )}
               </View>
-              <Text style={[styles.mutualFriendMoreText, { marginLeft: 70, color: isNightMode ? "#fff" : "#fff" }]}>
-                {mutualFriends.length > 4
-                  ? t('andMoreMutualFriends', { count: mutualFriends.length - 4 })
-                  : t('mutualFriends')}
-              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -108,6 +142,7 @@ const NameDisplay = ({ firstName, lastName, isNightMode, showAddFriendButton, fr
     </View>
   );
 };
+
 
 export default function Component({ route, navigation }) {
   const { t } = useTranslation();
@@ -738,6 +773,22 @@ const styles = StyleSheet.create({
   addFriendButton: {
     padding: screenWidth * 0.025,
     borderRadius: screenWidth * 0.05,
+  },
+  mutualFriendCountBubble: {
+    backgroundColor: "transparent", // Fondo transparente
+    justifyContent: "center",
+    alignItems: "center",
+    width: screenWidth * 0.09, // Ajuste responsivo
+    height: screenWidth * 0.09,
+    borderRadius: screenWidth * 0.045,
+    position: "absolute",
+    borderWidth: 2, // Agrega un borde de 2px
+    borderColor: "#fff", // Color blanco para el borde
+  },
+  mutualFriendCountText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
   },
   privateTextContainer: {
     position: 'absolute',
