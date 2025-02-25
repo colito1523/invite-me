@@ -57,18 +57,33 @@ export default function Search({ route }) {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // Si el usuario no ha escrito nada, cargamos las recomendaciones con un leve retraso
-    if (!searchTerm) {
-      const timer = setTimeout(() => {
-        fetchRecommendations(user, setRecommendations);
-      }, 500); // medio segundo de retraso (ajusta a tu gusto)
+    const loadCachedRecommendations = async () => {
+      if (!user) return;
   
-      return () => clearTimeout(timer);
+      try {
+        const cachedData = await AsyncStorage.getItem(`recommendations_${user.uid}`);
+        if (cachedData) {
+          const { recommendations } = JSON.parse(cachedData);
+          setRecommendations(recommendations.map(user => ({
+            ...user,
+            profileImage: user.profileImage || "https://via.placeholder.com/150",
+          })));
+          return; // No llamamos a Firebase si ya hay caché
+        }
+      } catch (error) {
+        console.error("Error loading cached recommendations:", error);
+      }
+  
+      fetchRecommendations(user, setRecommendations);
+    };
+  
+    if (!searchTerm) {
+      loadCachedRecommendations();
     } else {
-      // Si el usuario empieza a teclear, vaciamos las recomendaciones para no bloquear
       setRecommendations([]);
     }
   }, [searchTerm, user]);
+  
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -135,28 +150,27 @@ useEffect(() => {
 }, [navigation, user]);
 
 
-  const onRefresh = useCallback(async () => {
-    if (!user) return;
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        fetchUsers(searchTerm, setResults),
-        storySliderRef.current?.loadExistingStories(),
-        // Forzar recarga de historias en StorySlider
-        storySliderRef.current?.forceUpdate && storySliderRef.current?.forceUpdate()
-      ]);
-    } catch (error) {
-      console.error("Error refreshing:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  }, [searchTerm, user]);
+const onRefresh = useCallback(async () => {
+  if (!user) return;
+  setRefreshing(true);
+  try {
+    await Promise.all([
+      fetchUsers(searchTerm, setResults),
+      fetchRecommendations(user, setRecommendations, true), // Forzar actualización
+      storySliderRef.current?.loadExistingStories(),
+    ]);
+  } catch (error) {
+    console.error("Error refreshing:", error);
+  } finally {
+    setRefreshing(false);
+  }
+}, [searchTerm, user]);
  
 
   useEffect(() => {
     const delaySearch = setTimeout(() => {
       fetchUsers(searchTerm, setResults);
-    }, 300);
+    }, 1);
     return () => clearTimeout(delaySearch);
   }, [searchTerm]);
 

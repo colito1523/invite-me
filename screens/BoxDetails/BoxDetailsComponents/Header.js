@@ -30,23 +30,18 @@ const Header = ({
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Entypo
-          name="chevron-left"
-          size={24}
-          color={isNightMode ? "#000" : "#000"}
-          style={styles.iconShadow}
-        />
+        <View style={styles.backButtonCircle}>
+          <Entypo name="chevron-left" size={24} color={"black"} />
+        </View>
       </TouchableOpacity>
 
       {/* Menú del Administrador */}
       {boxData?.Admin === auth.currentUser?.uid && boxData.category === "EventoParaAmigos" && (
-        <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
-          <Entypo
-            name="dots-three-vertical"
-            size={24}
-            color={isNightMode ? "#000" : "#000"}
-          />
+        <View style={styles.backButtonCircle}>
+        <TouchableOpacity onPress={toggleMenu} >
+          <Entypo name="dots-three-vertical" size={24} color={"black"} />
         </TouchableOpacity>
+          </View>
       )}
 
       {/* Modal del Menú */}
@@ -103,14 +98,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 40,
+    paddingTop: 30,
     width: "100%",
     position: "absolute",
     top: 62,
     zIndex: 10,
   },
-  backButton: { paddingLeft: 20 },
-  menuButton: { paddingRight: 20 },
+  backButton: {
+    paddingLeft: 20,
+  },
+  backButtonCircle: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    backgroundColor: "white", // Gris
+    justifyContent: "center",
+    alignItems: "center",
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -129,13 +133,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
   },
-  editEventText: { color: "black", fontWeight: "bold" },
-  deleteEventButton: { backgroundColor: "black", padding: 10, borderRadius: 5 },
-  deleteEventText: { color: "white", fontWeight: "bold" },
-  iconShadow: {
-    textShadowColor: "white",
-    textShadowOffset: { width: 3, height: 0 },
-    textShadowRadius: 0,
+  editEventText: {
+    color: "black",
+    fontWeight: "bold",
+  },
+  deleteEventButton: {
+    backgroundColor: "black",
+    padding: 10,
+    borderRadius: 5,
+  },
+  deleteEventText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });
 

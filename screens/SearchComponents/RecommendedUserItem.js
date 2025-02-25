@@ -65,18 +65,16 @@ const RecommendedUserItem = ({ item, index, onUserPress, theme, isNightMode }) =
       style={styles.recommendationItem}
       onPress={() => onUserPress(item)}
     >
-    <Image
-  key={item.profileImage} // Forzar re-render cuando cambia la imagen
+ <Image
   source={{
-    uri: item.lowQualityProfileImage || item.profileImage,
-    cache: "force-cache",
+    uri: item.profileImage,
+    cache: "force-cache", // Usa la caché de Expo para evitar recargas innecesarias
   }}
-  style={[
-    styles.userImageRecommender,
-  { backgroundColor: isNightMode ? "black" : "#fff" } // Fondo dinámico
-  ]}
+  style={styles.userImageRecommender}
   contentFit="cover"
 />
+
+
       <View style={styles.textContainer}>
         <Text style={[styles.resultText, { color: theme.text }]}>
           {item.username}
