@@ -692,7 +692,7 @@ export default memo(function BoxDetails({ route, navigation }) {
           disabled={isDisabled}
         >
           <Ionicons
-            name={isDisabled ? "close-sharp" : "paper-plane"}
+            name={isDisabled ? "checkmark-sharp" : "paper-plane"}
             size={20}
             color={isNightMode ? "white" : "black"}
           />

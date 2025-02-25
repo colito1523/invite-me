@@ -463,7 +463,7 @@ const boxInfo = [
   },
   {
     path: require("../../assets/Lisboa/Incognito.jpg"),
-    title: "Incognito",
+    title: "Incógnito",
     category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
