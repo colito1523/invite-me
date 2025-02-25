@@ -623,7 +623,25 @@
     "noAuthenticatedUser": "No authenticated user found.",
     "recentLoginRequired": "You need to log in again to delete your account.",
     "deleteAccountError": "Failed to delete your account. Please try again.",
-     "continue": "Continue"
+     "continue": "Continue",
+     "changePassword": "Change Password",
+  "currentPasswordTitle": "Current Password",
+  "currentPasswordMessage": "Enter your current password",
+  "newPasswordTitle": "New Password",
+  "newPasswordMessage": "Enter your new password",
+  "confirmPasswordTitle": "Confirm New Password",
+  "confirmPasswordMessage": "Confirm your new password",
+  "newPasswordRequired": "The new password is required",
+  "confirmPasswordRequired": "You must confirm your new password",
+  "passwordMismatch": "Passwords do not match",
+  "invalidCurrentPassword": "The current password is incorrect. Please try again.",
+  "passwordChanged": "The password has been successfully changed",
+  "passwordChangeFailed": "Could not change the password. Please try again later.",
+  "passwordVerificationFailed": "Could not verify the password. Please try again later.",
+  "userNotFound": "No authenticated user was found.",
+  "accept": "Accept",
+  "invalidPassword": "The new password must have at least 8 characters, one uppercase letter, one number, and one special character."
+     
   },
 
   "userProfile": {

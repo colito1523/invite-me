@@ -502,6 +502,7 @@
   "signOut": "Terminar Sesión",
 
   "_comment_createEvent.js": "createEvent.js",
+  
 
   "createEvent": {
     "title": "Crea Tu Propio Evento",
@@ -623,7 +624,24 @@
     "noAuthenticatedUser": "No se encontró un usuario autenticado.",
     "recentLoginRequired": "Debes iniciar sesión nuevamente para eliminar tu cuenta.",
     "deleteAccountError": "No se pudo eliminar tu cuenta. Intenta nuevamente.",
-     "continue": "Continuar"
+     "continue": "Continuar",
+     "changePassword": "Cambiar Contraseña",
+     "currentPasswordTitle": "Contraseña actual",
+     "currentPasswordMessage": "Ingresa tu contraseña actual",
+     "newPasswordTitle": "Nueva contraseña",
+     "newPasswordMessage": "Ingresa tu nueva contraseña",
+     "confirmPasswordTitle": "Confirmar nueva contraseña",
+     "confirmPasswordMessage": "Confirma tu nueva contraseña",
+     "newPasswordRequired": "La nueva contraseña es obligatoria",
+     "confirmPasswordRequired": "Debes confirmar tu nueva contraseña",
+     "passwordMismatch": "Las contraseñas no coinciden",
+     "invalidCurrentPassword": "La contraseña actual es incorrecta. Intenta nuevamente.",
+     "passwordChanged": "La contraseña ha sido cambiada exitosamente",
+     "passwordChangeFailed": "No se pudoS cambiar la contraseña. Inténtalo más tarde.",
+     "passwordVerificationFailed": "No se pudo verificar la contraseña. Inténtalo más tarde.",
+     "userNotFound": "No se encontró un usuario autenticado.",
+     "accept": "Aceptar",
+     "invalidPassword": "La nueva contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial."
   },
   "userProfile": {
     "error": "Error",
@@ -791,6 +809,8 @@
       "subtitle": "Bienvenido a Invite Me, donde te esperan grandes experiencias."
     }
   },
+  
+  
 
   "accessRequiredTitle": "Acceso requerido",
   "accessRequiredMessage": "Para acceder a todas las funciones, inicia sesión.",

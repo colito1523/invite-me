@@ -34,6 +34,7 @@ const Header = ({
           name="chevron-left"
           size={24}
           color={isNightMode ? "#000" : "#000"}
+          style={styles.iconShadow}
         />
       </TouchableOpacity>
 
@@ -131,6 +132,11 @@ const styles = StyleSheet.create({
   editEventText: { color: "black", fontWeight: "bold" },
   deleteEventButton: { backgroundColor: "black", padding: 10, borderRadius: 5 },
   deleteEventText: { color: "white", fontWeight: "bold" },
+  iconShadow: {
+    textShadowColor: "white",
+    textShadowOffset: { width: 3, height: 0 },
+    textShadowRadius: 0,
+  },
 });
 
 export default Header;

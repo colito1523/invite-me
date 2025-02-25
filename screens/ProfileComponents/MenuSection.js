@@ -1,6 +1,8 @@
 import React, { useCallback } from "react";
 import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { auth } from "../../config/firebase";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
@@ -129,7 +131,112 @@ const MenuSection = React.memo(({
       ],
     );
   }, [t]);
+
+  const handleChangePasswordAlert = () => {
+    Alert.prompt(
+      t("profileMenuSections.currentPasswordTitle"),
+      t("profileMenuSections.currentPasswordMessage"),
+      [
+        {
+          text: t("chatUsers.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("profileMenuSections.continue"),
+          onPress: async (currentPassword) => {
+            if (!currentPassword) {
+              Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
+              return;
+            }
   
+            const user = auth.currentUser;
+  
+            if (!user || !user.email) {
+              Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
+              return;
+            }
+  
+            try {
+              const trimmedPassword = currentPassword.trim();
+              const credential = EmailAuthProvider.credential(user.email, trimmedPassword);
+              await reauthenticateWithCredential(user, credential);
+  
+              Alert.prompt(
+                t("profileMenuSections.newPasswordTitle"),
+                t("profileMenuSections.newPasswordMessage"),
+                [
+                  {
+                    text: t("chatUsers.cancel"),
+                    style: "cancel",
+                  },
+                  {
+                    text: t("profileMenuSections.continue"),
+                    onPress: (newPassword) => {
+                      if (!newPassword) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
+                        return;
+                      }
+  
+                      // Validación de la nueva contraseña
+                      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+                      if (!passwordRegex.test(newPassword)) {
+                        Alert.alert(
+                          t("profileMenuSections.error"),
+                          t("profileMenuSections.invalidPassword") // Mensaje de error traducido
+                        );
+                        return;
+                      }
+  
+                      Alert.prompt(
+                        t("profileMenuSections.confirmPasswordTitle"),
+                        t("profileMenuSections.confirmPasswordMessage"),
+                        [
+                          {
+                            text: t("chatUsers.cancel"),
+                            style: "cancel",
+                          },
+                          {
+                            text: t("profileMenuSections.accept"),
+                            onPress: async (confirmPassword) => {
+                              if (!confirmPassword) {
+                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.confirmPasswordRequired"));
+                                return;
+                              }
+                              if (newPassword !== confirmPassword) {
+                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordMismatch"));
+                                return;
+                              }
+                              try {
+                                await updatePassword(user, newPassword);
+                                Alert.alert(t("profileMenuSections.success"), t("profileMenuSections.passwordChanged"));
+                              } catch (error) {
+                                console.error("Error al cambiar la contraseña:", error);
+                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordChangeFailed"));
+                              }
+                            },
+                          },
+                        ],
+                        "secure-text"
+                      );
+                    },
+                  },
+                ],
+                "secure-text"
+              );
+            } catch (error) {
+              if (error.code === "auth/wrong-password") {
+                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidCurrentPassword"));
+              } else {
+                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordVerificationFailed"));
+              }
+            }
+          },
+        },
+      ],
+      "secure-text"
+    );
+  };
+
   return (
     <View style={styles.menuContainer}>
       <TouchableOpacity
@@ -193,6 +300,17 @@ const MenuSection = React.memo(({
             >
               <Text style={styles.deleteMenuItemText}>{t("profileMenuSections.deleteAccount")}</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+  style={styles.menuItem}
+  onPress={() => {
+    handleChangePasswordAlert();
+    closeMenu();
+  }}
+>
+  <Text style={styles.menuItemText}>{t("profileMenuSections.changePassword")}</Text>
+</TouchableOpacity>
+
+
           </View>
         </TouchableOpacity>
       </Modal>

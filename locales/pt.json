@@ -607,7 +607,24 @@
     "noAuthenticatedUser": "Nenhum utilizador autenticado encontrado.",
     "recentLoginRequired": "Precisa iniciar sessão novamente para eliminar a sua conta.",
     "deleteAccountError": "Falha ao eliminar a sua conta. Por favor, tente novamente.",
-    "continue": "Continuar"
+    "continue": "Continuar",
+  "changePassword": "Alterar Palavra-passe",
+  "currentPasswordTitle": "Palavra-passe atual",
+  "currentPasswordMessage": "Insere a tua palavra-passe atual",
+  "newPasswordTitle": "Nova palavra-passe",
+  "newPasswordMessage": "Insere a tua nova palavra-passe",
+  "confirmPasswordTitle": "Confirmar nova palavra-passe",
+  "confirmPasswordMessage": "Confirma a tua nova palavra-passe",
+  "newPasswordRequired": "A nova palavra-passe é obrigatória",
+  "confirmPasswordRequired": "Deves confirmar a tua nova palavra-passe",
+  "passwordMismatch": "As palavras-passe não coincidem",
+  "invalidCurrentPassword": "A palavra-passe atual está incorreta. Tenta novamente.",
+  "passwordChanged": "A palavra-passe foi alterada com sucesso",
+  "passwordChangeFailed": "Não foi possível alterar a palavra-passe. Tenta mais tarde.",
+  "passwordVerificationFailed": "Não foi possível verificar a palavra-passe. Tenta mais tarde.",
+  "userNotFound": "Não foi encontrado um utilizador autenticado.",
+  "accept": "Aceitar",
+  "invalidPassword": "A nova palavra-passe deve ter pelo menos 8 caracteres, uma letra maiúscula, um número e um carácter especial."
 },
   
   "userProfile": {
