@@ -54,7 +54,10 @@ exports.sendLikeNotification = functions.firestore
           sound: 'default',
           title: texts.title,
           body: texts.noteLikeBody(notificationData.fromName),
-          data: notificationData,
+          data: {
+            ...notificationData,
+            screen: 'Notifications' // Agregamos la propiedad
+          },
         };
       } else if (notificationData.type === 'like') {
         message = {
@@ -62,7 +65,10 @@ exports.sendLikeNotification = functions.firestore
           sound: 'default',
           title: texts.title,
           body: texts.profileLikeBody(notificationData.fromName),
-          data: notificationData,
+          data: {
+            ...notificationData,
+            screen: 'Notifications' // Agregamos la propiedad
+          },
         };
       }
 

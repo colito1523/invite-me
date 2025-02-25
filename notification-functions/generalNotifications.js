@@ -49,8 +49,12 @@ exports.sendGeneralNotification = functions.firestore
         sound: 'default',
         title: texts.title,
         body: notificationData.message || texts.defaultMessage,
-        data: notificationData,
+        data: { 
+          ...notificationData,
+          screen: 'Notifications' // Agregamos esta propiedad para indicar la pantalla destino
+        },
       };
+      
 
       await expo.sendPushNotificationsAsync([message]);
     } catch (error) {

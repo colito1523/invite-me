@@ -81,10 +81,12 @@ exports.sendEventNotification = functions.firestore
           hours: notificationData.hours || {},
           number: notificationData.number || '',
           imageUrl: notificationData.imageUrl || '',
-          _displayInNotificationScreen: true
+          _displayInNotificationScreen: true,
+          screen: 'Notifications' // Agregamos esta línea
         },
         priority: 'high'
       };
+      
 
       const chunks = expo.chunkPushNotifications([message]);
       for (let chunk of chunks) {

@@ -52,9 +52,10 @@ exports.sendFriendRequestNotification = functions.firestore
           fromId: requestData.fromId,
           fromName: requestData.fromName,
           fromImage: requestData.fromImage,
+          screen: 'Notifications' // Agregamos esta línea
         },
       };
-
+      
       await expo.sendPushNotificationsAsync([message]);
 
       // Create notification record
