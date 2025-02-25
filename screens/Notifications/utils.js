@@ -89,6 +89,7 @@ export const handleDeleteNotification = (params) => {
 
 
 
+
 export const updateNotifications = (params) => {
   const { newNotifications, setNotifications } = params;
 
@@ -168,7 +169,8 @@ export const handleUserPress = async (params) => {
 };
 
 export const handleAcceptRequest = async (params) => {
-  const { request, setLoadingEventId, setNotifications, t } = params;
+  const { request, setLoadingEventId, setNotifications, setNotificationList, t } = params;
+  
 
   setLoadingEventId(request.id);
   try {
@@ -196,6 +198,8 @@ export const handleAcceptRequest = async (params) => {
       friendName: userData.firstName,
       friendImage: profileImage,
     });
+
+    
 
     const requestRef = doc(database, "users", user.uid, "friendRequests", request.id);
     await updateDoc(requestRef, { status: "accepted" });
@@ -244,6 +248,22 @@ export const handleAcceptRequest = async (params) => {
         timestamp: new Date(),
       });
       return updatedNotifications.sort((a, b) => b.timestamp - a.timestamp);
+    });
+
+     // <-- Agrega la actualización de notificationList aquí:
+     setNotificationList((prevList) => {
+      const updatedList = prevList.filter((notif) => notif.id !== request.id);
+      updatedList.push({
+        id: request.id,
+        type: "friendRequestResponse",
+        response: "accepted",
+        fromId: request.fromId,
+        fromName: request.fromName,
+        fromImage: request.fromImage,
+        message: t("notifications.youAreNowFriends", { name: request.fromName }),
+        timestamp: new Date(),
+      });
+      return updatedList.sort((a, b) => b.timestamp - a.timestamp);
     });
 
 
@@ -582,7 +602,7 @@ function convertDateToShortFormat(date) {
 };
 
 export const handleRejectPrivateEvent = async (params) => {
-  const { item, setNotifications, t } = params;
+  const { item, setNotifications, setNotificationList, t } = params; // Agregar setNotificationList
 
   try {
     // Eliminar la notificación
@@ -600,11 +620,17 @@ export const handleRejectPrivateEvent = async (params) => {
       prevNotifications.filter((notif) => notif.id !== item.id)
     );
 
+    // También eliminar de notificationList
+    setNotificationList((prevList) =>
+      prevList.filter((notif) => notif.id !== item.id)
+    );
+
   } catch (error) {
     console.error("Error al rechazar la invitación al evento privado:", error);
     Alert.alert(t("notifications.error"), t("notifications.rejectInvitationError"));
   }
 };
+
 
 export const handleAcceptGeneralEvent = async (params) => {
   const { item, setLoadingEventId, setNotifications, t} = params;
@@ -693,10 +719,10 @@ export const handleAcceptGeneralEvent = async (params) => {
 };
 
 export const handleRejectGeneralEvent = async (params) => {
-  const { item, setNotifications } = params;
+  const { item, setNotifications, setNotificationList, t } = params; // Asegúrate de recibir setNotificationList
 
   try {
-    // Eliminar la notificación
+    // Eliminar la notificación de Firestore
     const notificationRef = doc(database, "users", auth.currentUser.uid, "notifications", item.id);
     await deleteDoc(notificationRef);
 
@@ -722,16 +748,22 @@ export const handleRejectGeneralEvent = async (params) => {
       });
     }
 
-    // Remover la notificación del estado local
+    // Remover la notificación del estado local "notifications"
     setNotifications((prevNotifications) =>
       prevNotifications.filter((notif) => notif.id !== item.id)
     );
-
+    
+    // <-- Agrega aquí la actualización de notificationList:
+    setNotificationList((prevList) =>
+      prevList.filter((notif) => notif.id !== item.id)
+    );
+    
   } catch (error) {
     console.error("Error al rechazar la invitación al evento general:", error);
     Alert.alert("Error", "No se pudo rechazar la invitación.");
   }
 };
+
 
 export const handleCancelFriendRequestNotification = async (params) => {
   const { notificationId, targetUserId, setNotifications } = params;

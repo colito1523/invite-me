@@ -402,6 +402,7 @@ export default function NotificationsComponent() {
                   handleRejectPrivateEvent({
                     item,
                     setNotifications,
+                    setNotificationList,
                     t, // Pass the t function here
                   })
                 }
@@ -488,6 +489,8 @@ export default function NotificationsComponent() {
                   handleRejectGeneralEvent({
                     item,
                     setNotifications,
+                    setNotificationList,
+                    t
                   })
                 }
               >
@@ -714,6 +717,7 @@ export default function NotificationsComponent() {
                               request: item,
                               setLoadingEventId,
                               setNotifications,
+                              setNotificationList,
                               t,
                             })
                           : handleAcceptEventInvitation({
