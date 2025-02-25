@@ -210,7 +210,7 @@ export const handleAcceptRequest = async (params) => {
       type: "friendRequestResponse",
       response: "accepted",
       fromId: user.uid,
-      fromName: userData.firstName,
+      fromName: userData.username,
       fromImage: profileImage,
       message: t("notifications.friendRequestAccepted", {
         name: userData.firstName,
