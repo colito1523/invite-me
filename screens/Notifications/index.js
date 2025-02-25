@@ -383,6 +383,7 @@ export default function NotificationsComponent() {
                     item,
                     setNotifications,
                     setLoadingEventId,
+                    setNotificationList,
                     t,
                   })
                 }
@@ -470,6 +471,7 @@ export default function NotificationsComponent() {
                     item,
                     setNotifications,
                     setLoadingEventId,
+                    setNotificationList,
                     t,
                   })
                 }

@@ -480,7 +480,7 @@ export const handleRejectEventInvitation = async (params) => {
 };
 
 export const handleAcceptPrivateEvent = async (params) => {
-  const { setNotifications, setLoadingEventId, item, t } = params;
+  const { setNotifications, setLoadingEventId, setNotificationList, item, t } = params;
 
   try {
     setLoadingEventId(item.id);
@@ -565,6 +565,15 @@ function convertDateToShortFormat(date) {
   return new Date(date).toLocaleDateString('en-GB', options);
 }
 
+ // **ACTUALIZAR ESTADOS LOCALES INMEDIATAMENTE**
+ setNotifications((prevNotifications) =>
+  prevNotifications.filter((notif) => notif.id !== item.id)
+);
+
+setNotificationList((prevList) =>
+  prevList.filter((notif) => notif.id !== item.id)
+);
+
     // Update the notification with the confirmation message
     const notifRef = doc(database, "users", user.uid, "notifications", item.id);
     await setDoc(notifRef, {
@@ -633,7 +642,7 @@ export const handleRejectPrivateEvent = async (params) => {
 
 
 export const handleAcceptGeneralEvent = async (params) => {
-  const { item, setLoadingEventId, setNotifications, t} = params;
+  const { item, setLoadingEventId, setNotifications, setNotificationList, t} = params;
 
   try {
     setLoadingEventId(item.id);
@@ -693,6 +702,15 @@ export const handleAcceptGeneralEvent = async (params) => {
         timestamp: new Date(),
         type: "eventConfirmation",
       });
+
+       // **ACTUALIZAR ESTADOS LOCALES INMEDIATAMENTE**
+       setNotifications((prevNotifications) =>
+        prevNotifications.filter((notif) => notif.id !== item.id)
+      );
+
+      setNotificationList((prevList) =>
+        prevList.filter((notif) => notif.id !== item.id)
+      );
 
       // Actualizar el estado local
       setNotifications((prevNotifications) =>
