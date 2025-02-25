@@ -142,6 +142,7 @@ export const styles = StyleSheet.create({
   maxHeight: 200, // Altura máxima del contenedor
 },
 input: {
+
   fontSize: 16,
   color: "#000",
   paddingHorizontal: 15,
