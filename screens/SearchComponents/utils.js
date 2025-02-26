@@ -307,7 +307,6 @@ export const deleteFriendRequest = async (user, setStatus) => {
   }
 };
 
-// En utils.js, modifica la función handleUserPress para que guarde el historial en segundo plano sin await:
 export const handleUserPress = (
   selectedUser,
   { blockedUsers, searchHistory, setSearchHistory, navigation, currentUser, t }
@@ -320,7 +319,7 @@ export const handleUserPress = (
   const isPrivate = selectedUser.isPrivate || false;
   const isFriend = selectedUser.isFriend || false;
 
-  // 1. Navegar primero
+  // Navegar según si es privado y si somos amigos
   if (isPrivate && !isFriend) {
     navigation.navigate("PrivateUserProfile", {
       selectedUser: { ...selectedUser, isPrivate, isFriend },
@@ -330,9 +329,9 @@ export const handleUserPress = (
       selectedUser: { ...selectedUser, isPrivate, isFriend },
     });
   }
+if (selectedUser.hasStories) return;
 
-  // 2. Luego, tras un pequeño delay, actualizar el historial.
-  //    De esta forma se evita el “parpadeo” o actualización inmediata del listado.
+  // Actualiza el historial tras un pequeño delay para evitar parpadeos
   setTimeout(() => {
     const updatedHistory = searchHistory.filter(
       (item) => item.id !== selectedUser.id
@@ -342,9 +341,10 @@ export const handleUserPress = (
       updatedHistory.pop();
     }
     setSearchHistory(updatedHistory);
-    // Guardado en segundo plano, sin bloquear la navegación
+    // Guardado en segundo plano
     saveSearchHistory(currentUser, updatedHistory, blockedUsers);
-  }, 600); // 50 ms o el tiempo que prefieras
+  }, 600); // Puedes ajustar el delay si es necesario
 };
+
 
 
