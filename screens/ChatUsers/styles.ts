@@ -145,6 +145,10 @@ export const styles = StyleSheet.create({
       fontSize: 16,
       marginLeft: 10,
       color: "#000",
+      maxHeight: 100,
+      minHeight: 40,
+      paddingTop: 10,
+      paddingBottom: 10,
     },
     sendButton: {
       backgroundColor: "#3e3d3d",

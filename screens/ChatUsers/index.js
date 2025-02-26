@@ -527,6 +527,9 @@ export default function Chat({ route }) {
             onChangeText={setMessage}
             placeholder={t("chatUsers.writeMessage")}
             placeholderTextColor="#999"
+            multiline
+            numberOfLines={1}
+            textAlignVertical="center"
           />
           {message.trim() ? (
             <TouchableOpacity
