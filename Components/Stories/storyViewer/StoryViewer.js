@@ -182,23 +182,17 @@ export function StoryViewer({
 
   // Esta es la función que se llama cuando tocas la pantalla para ir a la siguiente:
   const handleNextWrapper = () => {
-    // Calculamos cuál es la siguiente story (igual a como lo haces ahora)
-    let nextCurrentIndex = currentIndex;
-    let nextStoryIndex = storyIndex + 1;
-    if (nextStoryIndex >= stories[currentIndex].userStories.length) {
-      nextCurrentIndex = currentIndex + 1;
-      nextStoryIndex = 0;
-    }
-    const nextStory = stories[nextCurrentIndex]?.userStories[nextStoryIndex];
-    if (!nextStory) {
-      // No hay siguiente historia, cierra
-      onClose?.(localUnseenStories);
-      return;
-    }
-
-    // 1) Guardamos la URL de la siguiente historia y activamos la transición
-    setNextStoryUrl(nextStory.storyUrl);
-    setIsTransitioning(true);
+    handleNext({
+      stories,
+      currentIndex,
+      setCurrentIndex,
+      storyIndex,
+      setStoryIndex,
+      setProgress,
+      onClose,
+      localUnseenStories,
+      setLocalUnseenStories,
+    });
   };
 
   // Esta función se llama en onLoad de la imagen overlay

@@ -14,7 +14,6 @@ import {
 } from "firebase/firestore";
 import { useEffect } from "react";
 import { ref, deleteObject } from "firebase/storage";
-import { auth, database, storage } from "../../../config/firebase";
 
 export const createStoryPanResponder = ({
   handleCloseViewer,
