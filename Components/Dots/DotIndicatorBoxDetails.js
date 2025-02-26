@@ -181,21 +181,26 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   // Renderizar asistentes
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handlePress(item.uid)} style={styles.itemContainer}>
-      <View
-        style={[
-          styles.imageContainer,
-          item.hasStories &&
-            (!item.isPrivate || (item.isPrivate && item.isFriend)) && {
-              ...styles.unseenStoryCircle,
-              borderColor: "white", // Forzamos siempre blanco
-            },
-        ]}
-      >
-        <Image
-          cachePolicy="memory-disk"
-          source={{ uri: item.profileImage }}
-          style={styles.profileImage}
-        />
+      <View style={styles.imageWrapper}>
+        {item.hasStories ? (
+          <View style={styles.outerBorder}>
+            <View style={styles.innerBorder}>
+              <Image
+                cachePolicy="memory-disk"
+                source={{ uri: item.profileImage }}
+                style={styles.profileImage}
+              />
+            </View>
+          </View>
+        ) : (
+          <View style={styles.noBorderContainer}>
+            <Image
+              cachePolicy="memory-disk"
+              source={{ uri: item.profileImage }}
+              style={styles.profileImage}
+            />
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -276,6 +281,47 @@ const styles = StyleSheet.create({
   itemContainer: {
     width: 80,
     marginHorizontal: 5,
+  },
+  itemContainer: {
+    width: 80,
+    marginHorizontal: 5,
+    alignItems: "center", 
+    justifyContent: "center",
+  },
+  imageWrapper: {
+    width: 75,
+    height: 75,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  outerBorder: {
+    width: 75,
+    height: 75,
+    borderRadius: 40,
+    borderWidth: 2, // Borde negro externo
+    borderColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  innerBorder: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 2, // Borde blanco interno
+    borderColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noBorderContainer: {
+    width: 75, // Mantiene el mismo tamaño que `outerBorder`
+    height: 75,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  profileImage: {
+    width: 65,
+    height: 65,
+    borderRadius: 35,
   },
   imageContainer: {
     width: 75,

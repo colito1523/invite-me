@@ -198,43 +198,44 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   // ---------------------------
   useEffect(() => {
     const updateFilteredAttendees = async () => {
-      if (!attendeesList || attendeesList.length === 0) {
+      if (!attendeesList || attendeesList.length === 0 || blockedUsers.length === 0 || friendsList.length === 0) {
         setFilteredAttendees([]);
         return;
       }
+  
       const filtered = await Promise.all(
         attendeesList.map(async (attendee) => {
+          if (!attendee || !attendee.uid) return null;
+          
           // Siempre incluimos al usuario actual
           if (attendee.uid === auth.currentUser.uid) return attendee;
-
+  
           // Excluir usuarios bloqueados
           if (blockedUsers.includes(attendee.uid)) return null;
-
-          // Si se está buscando, filtrar por username
-          if (
-            searchTerm.trim() !== "" &&
-            !attendee.username.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-            return null;
-
-          // Obtener la data completa del usuario para chequear la privacidad
+  
+          // Obtener la data completa del usuario
           const userDoc = await getDoc(doc(database, "users", attendee.uid));
           const userData = userDoc.exists() ? userDoc.data() : null;
           if (!userData) return null;
+  
           const isPrivate = userData.isPrivate || false;
           const isFriend = friendsList.includes(attendee.uid);
-
-          // Si la cuenta es privada y el usuario no es amigo, se descarta
+  
+          // Si la cuenta es privada y no es amigo, se descarta
           if (isPrivate && !isFriend) return null;
-
+  
           return { ...attendee, isPrivate, isFriend };
         })
       );
+  
+      // Filtrar los valores nulos
       const finalFiltered = filtered.filter((item) => item !== null);
       setFilteredAttendees(finalFiltered);
     };
+  
     updateFilteredAttendees();
-  }, [searchTerm, attendeesList, blockedUsers, friendsList]);
+  }, [attendeesList, blockedUsers, friendsList]);
+  
 
   // ---------------------------
   // Modo nocturno (se chequea la hora para ajustar estilos)
