@@ -11,7 +11,7 @@ export const saveSearchHistory = async (user, history, blockedUsers) => {
       username: userItem.username,
       profileImage: userItem.profileImage,
       isPrivate: userItem.isPrivate || false,
-      hasStories: userItem.hasStories || false,
+      hasStories: false,
     }));
 
     await AsyncStorage.setItem(
