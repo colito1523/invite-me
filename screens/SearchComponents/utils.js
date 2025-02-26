@@ -330,13 +330,18 @@ export const handleUserPress = (
     });
   }
 
-  // Actualiza el historial tras un pequeño delay para evitar parpadeos
+  // Actualiza el historial inmediatamente
+  const updatedHistory = [
+    selectedUser,
+    ...searchHistory.filter((item) => item.id !== selectedUser.id)
+  ].slice(0, 5);
+
+  // Actualiza estado y caché de forma síncrona
+  setSearchHistory(updatedHistory);
+  saveSearchHistory(currentUser, updatedHistory, blockedUsers);
+
+  // Forzar actualización después de la navegación
   setTimeout(() => {
-    const updatedHistory = searchHistory.filter(
-      (item) => item.id !== selectedUser.id
-    );
-    setSearchHistory(updatedHistory);
-    // Guardado en segundo plano
-    saveSearchHistory(currentUser, updatedHistory, blockedUsers);
-  }, 600); // Puedes ajustar el delay si es necesario
+    setSearchHistory([...updatedHistory]);
+  }, 100);
 };
