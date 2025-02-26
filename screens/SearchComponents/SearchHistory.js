@@ -108,19 +108,40 @@ const SearchHistory = ({
     const checkStoriesAvailability = async () => {
       if (!user) return;
       try {
-        // Para cada item del historial, consultamos si tiene historias activas
+        // Para cada usuario en el historial, consultamos si tiene historias activas
         const updatedFlags = await Promise.all(
           searchHistory.map(async (item) => {
-            const storiesRef = collection(database, "users", item.id, "stories");
-            const storiesSnapshot = await getDocs(storiesRef);
-            const now = new Date();
-            const activeStories = storiesSnapshot.docs
-              .map(doc => ({
-                ...doc.data(),
-                expiresAt: doc.data().expiresAt.toDate(),
-              }))
-              .filter(story => story.expiresAt > now);
-            return { id: item.id, hasStories: activeStories.length > 0 };
+            const userRef = doc(database, "users", item.id);
+            const userSnapshot = await getDoc(userRef);
+            if (!userSnapshot.exists()) return { id: item.id, hasStories: false };
+  
+            const userData = userSnapshot.data();
+            const isPrivate = userData.isPrivate || false;
+  
+            // Si el perfil es privado, verificamos si somos amigos
+            let isFriend = false;
+            if (isPrivate) {
+              const friendsRef = collection(database, "users", user.uid, "friends");
+              const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
+              isFriend = !friendSnapshot.empty;
+            }
+  
+            // Solo verificamos historias si el perfil es público o si somos amigos
+            if (!isPrivate || isFriend) {
+              const storiesRef = collection(database, "users", item.id, "stories");
+              const storiesSnapshot = await getDocs(storiesRef);
+              const now = new Date();
+              const activeStories = storiesSnapshot.docs
+                .map(doc => ({
+                  ...doc.data(),
+                  expiresAt: doc.data().expiresAt.toDate(),
+                }))
+                .filter(story => story.expiresAt > now);
+  
+              return { id: item.id, hasStories: activeStories.length > 0 };
+            }
+  
+            return { id: item.id, hasStories: false }; // Si es privado y no somos amigos
           })
         );
   
@@ -136,9 +157,11 @@ const SearchHistory = ({
       }
     };
   
-    const interval = setInterval(checkStoriesAvailability, 100);
+    const interval = setInterval(checkStoriesAvailability);
     return () => clearInterval(interval);
   }, [searchHistory, user]);
+  
+  
   
   
   
