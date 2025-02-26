@@ -105,72 +105,41 @@ const SearchHistory = ({
   
 
   useEffect(() => {
-    const updateSearchHistory = async () => {
+    const checkStoriesAvailability = async () => {
       if (!user) return;
-
       try {
-        const updatedHistory = await Promise.all(
+        // Para cada item del historial, consultamos si tiene historias activas
+        const updatedFlags = await Promise.all(
           searchHistory.map(async (item) => {
-            const userRef = doc(database, "users", item.id);
-            const userSnapshot = await getDoc(userRef);
-
-            if (userSnapshot.exists()) {
-              const userData = userSnapshot.data();
-              const isPrivate = userData.isPrivate || false;
-
-              // Verificar si es amigo
-              const friendsRef = collection(database, "users", user.uid, "friends");
-              const friendQuery = query(friendsRef, where("friendId", "==", item.id));
-              const friendSnapshot = await getDocs(friendQuery);
-              const isFriend = !friendSnapshot.empty;
-
-              // Si es privado y no es amigo, no verificamos historias
-              if (isPrivate && !isFriend) {
-                return { ...item, isPrivate, hasStories: false, isFriend };
-              }
-
-              // Verificar historias disponibles
-              const storiesRef = collection(database, "users", item.id, "stories");
-              const storiesSnapshot = await getDocs(storiesRef);
-              const now = new Date();
-              const activeStories = storiesSnapshot.docs
-                .map(doc => ({
-                  ...doc.data(),
-                  expiresAt: doc.data().expiresAt.toDate(),
-                }))
-                .filter(story => story.expiresAt > now);
-
-              return { 
-                ...item, 
-                isPrivate,
-                isFriend,
-                hasStories: activeStories.length > 0 
-              };
-            }
-            return null;
+            const storiesRef = collection(database, "users", item.id, "stories");
+            const storiesSnapshot = await getDocs(storiesRef);
+            const now = new Date();
+            const activeStories = storiesSnapshot.docs
+              .map(doc => ({
+                ...doc.data(),
+                expiresAt: doc.data().expiresAt.toDate(),
+              }))
+              .filter(story => story.expiresAt > now);
+            return { id: item.id, hasStories: activeStories.length > 0 };
           })
         );
-
-        const filteredHistory = updatedHistory.filter(Boolean);
-        setSearchHistory(filteredHistory);
-        saveSearchHistory(user, filteredHistory, blockedUsers);
+  
+        // Actualizamos solo la propiedad "hasStories" en el estado del historial
+        setSearchHistory(prev =>
+          prev.map(item => {
+            const flag = updatedFlags.find(u => u.id === item.id);
+            return { ...item, hasStories: flag ? flag.hasStories : false };
+          })
+        );
       } catch (error) {
-        console.error("Error updating search history:", error);
+        console.error("Error checking stories availability:", error);
       }
     };
-
-    // Actualizar al montar y cuando la pantalla obtiene el foco
-    updateSearchHistory();
-    const unsubscribe = navigation.addListener("focus", updateSearchHistory);
-
-    // Configurar intervalo para actualización periódica
-    const interval = setInterval(updateSearchHistory, 30000); // Actualizar cada 30 segundos
-
-    return () => {
-      unsubscribe();
-      clearInterval(interval);
-    };
-  }, [navigation, user]);
+  
+    const interval = setInterval(checkStoriesAvailability, 100);
+    return () => clearInterval(interval);
+  }, [searchHistory, user]);
+  
   
   
 
