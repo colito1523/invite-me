@@ -170,7 +170,7 @@ const SearchHistory = ({
       unsubscribe();
       clearInterval(interval);
     };
-  }, [navigation, user, searchHistory]);
+  }, [navigation, user]);
   
   
 
