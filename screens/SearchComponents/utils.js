@@ -335,10 +335,6 @@ export const handleUserPress = (
     const updatedHistory = searchHistory.filter(
       (item) => item.id !== selectedUser.id
     );
-    updatedHistory.unshift(selectedUser);
-    while (updatedHistory.length > 5) {
-      updatedHistory.pop();
-    }
     setSearchHistory(updatedHistory);
     // Guardado en segundo plano
     saveSearchHistory(currentUser, updatedHistory, blockedUsers);
