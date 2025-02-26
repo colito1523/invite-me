@@ -80,11 +80,15 @@ const SearchHistory = ({
           setSelectedStories([
             {
               uid: item.id,
-              username: updatedUser.username,
+              username:
+                `${updatedUser.firstName || ""} ${updatedUser.lastName || ""}`.trim() ||
+                updatedUser.username ||
+                t("unknownUser"), // Ahora mostrará el nombre completo si está disponible
               profileImage: updatedUser.profileImage,
               userStories: userStories,
             },
           ]);
+          
           setIsModalVisible(true);
         } else {
           navigation.navigate("UserProfile", { selectedUser: updatedUser });
