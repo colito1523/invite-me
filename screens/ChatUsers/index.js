@@ -67,8 +67,6 @@ export default function Chat({ route }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [textValue, setTextValue] = useState('');
-  const [inputHeight, setInputHeight] = useState(40); 
   const [controlsVisible, setControlsVisible] = useState(false);
   const videoRef = useRef(null);
   const [modalImageLoading, setModalImageLoading] = useState(true);
@@ -264,12 +262,6 @@ export default function Chat({ route }) {
     }
 
     return chatId; // Retorna el ID del chat actual si ya está definido
-  };
-
-  const handleContentSizeChange = (event) => {
-    // El height que retorna es el alto que va necesitando el texto
-    const { height } = event.nativeEvent.contentSize;
-    setInputHeight(height);
   };
 
   const handleSend = async (
@@ -522,31 +514,32 @@ export default function Chat({ route }) {
   }}
 />
 
-<View style={[styles.containerIg, { minHeight: 50, height: "auto" }]}>
-          <TouchableOpacity onPress={handleCameraLaunch} style={styles.iconButtonCamera}>
+        <View style={styles.containerIg}>
+          <TouchableOpacity
+            onPress={handleCameraLaunch}
+            style={styles.iconButtonCamera}
+          >
             <Ionicons name="camera-outline" size={20} color="white" />
           </TouchableOpacity>
           <TextInput
-           style={[
-    styles.input,
-    { height: Math.max(40, inputHeight) },
-  ]}
+            style={styles.input}
             value={message}
             onChangeText={setMessage}
             placeholder={t("chatUsers.writeMessage")}
             placeholderTextColor="#999"
-            multiline
-            onContentSizeChange={(event) => {
-              const { height } = event.nativeEvent.contentSize
-              setInputHeight(height)
-            }}
           />
           {message.trim() ? (
-            <TouchableOpacity onPress={() => handleSend("text")} style={styles.sendButton}>
+            <TouchableOpacity
+              onPress={() => handleSend("text")}
+              style={styles.sendButton}
+            >
               <FontAwesome name="send" size={20} color="white" />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={() => pickMedia(handleSend, t)} style={styles.iconButtonGaleria}>
+            <TouchableOpacity
+            onPress={() => pickMedia(handleSend, t)}
+              style={styles.iconButtonGaleria}
+            >
               <Ionicons name="image-outline" size={30} color="#000" />
             </TouchableOpacity>
           )}
