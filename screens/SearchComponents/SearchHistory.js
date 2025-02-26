@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Modal, Alert } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { saveSearchHistory } from "./utils";
 import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
 import { styles } from "./styles";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
 import { database } from "../../config/firebase"; // Asegúrate de que la ruta sea la correcta
 
 const SearchHistory = ({
@@ -21,85 +21,148 @@ const SearchHistory = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState(null);
 
+   // Coloca la función updateHistory aquí:
+   const updateHistory = (updatedUser) => {
+    setTimeout(() => {
+      const updatedHistory = searchHistory.filter((u) => u.id !== updatedUser.id);
+      updatedHistory.unshift(updatedUser);
+      while (updatedHistory.length > 5) {
+        updatedHistory.pop();
+      }
+      setSearchHistory(updatedHistory);
+      saveSearchHistory(user, updatedHistory, blockedUsers);
+    }, 500);
+  };
+
   // Al hacer click en la imagen: si el usuario tiene historias, se muestran; si es privado o no tiene historias, se navega al perfil correspondiente.
   const handleHistoryPress = async (item) => {
-    if (item.isPrivate) {
-      navigation.navigate("PrivateUserProfile", { selectedUser: item });
-      return;
-    }
-    if (!item.hasStories) {
-      navigation.navigate("UserProfile", { selectedUser: item });
-      return;
-    }
+    let updatedUser = item;
     try {
-      const storiesRef = collection(database, "users", item.id, "stories");
-      const storiesSnapshot = await getDocs(storiesRef);
-      const now = new Date();
-      const userStories = storiesSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt,
-          expiresAt: doc.data().expiresAt,
-          storyUrl: doc.data().storyUrl,
-          profileImage: doc.data().profileImage || item.profileImage,
-          uid: item.id,
-          username: doc.data().username || item.username || t("unknownUser"),
-          viewers: doc.data().viewers || [],
-          likes: doc.data().likes || [],
-        }))
-        .filter((story) => new Date(story.expiresAt.toDate()) > now);
-
-      if (userStories.length > 0) {
-        setSelectedStories([
-          {
+      // Obtener información actualizada del usuario
+      const userRef = doc(database, "users", item.id);
+      const userSnapshot = await getDoc(userRef);
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        updatedUser = { ...item, ...userData };
+  
+        // Verifica si el usuario actual es amigo de este usuario
+        const friendsRef = collection(database, "users", user.uid, "friends");
+        const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", updatedUser.id)));
+        const isFriend = !friendSnapshot.empty;
+  
+        // Si el perfil es privado y no eres amigo, navega a PrivateUserProfile
+        if (updatedUser.isPrivate && !isFriend) {
+          navigation.navigate("PrivateUserProfile", { selectedUser: updatedUser });
+          updateHistory(updatedUser);
+          return;
+        }
+  
+        // Si tiene historias, carga y muéstralas
+        const storiesRef = collection(database, "users", item.id, "stories");
+        const storiesSnapshot = await getDocs(storiesRef);
+        const now = new Date();
+        const userStories = storiesSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt,
+            expiresAt: doc.data().expiresAt,
+            storyUrl: doc.data().storyUrl,
+            profileImage: doc.data().profileImage || updatedUser.profileImage,
             uid: item.id,
-            username:
-              `${item.firstName || ""} ${item.lastName || ""}`.trim() ||
-              item.username ||
-              t("unknownUser"),
-            profileImage: item.profileImage,
-            userStories: userStories,
-          },
-        ]);
-        setIsModalVisible(true);
+            username: doc.data().username || updatedUser.username || t("unknownUser"),
+            viewers: doc.data().viewers || [],
+            likes: doc.data().likes || [],
+          }))
+          .filter((story) => new Date(story.expiresAt.toDate()) > now);
+  
+        if (userStories.length > 0) {
+          setSelectedStories([
+            {
+              uid: item.id,
+              username: updatedUser.username,
+              profileImage: updatedUser.profileImage,
+              userStories: userStories,
+            },
+          ]);
+          setIsModalVisible(true);
+        } else {
+          navigation.navigate("UserProfile", { selectedUser: updatedUser });
+        }
       } else {
-        navigation.navigate("UserProfile", { selectedUser: item });
+        Alert.alert("Error", "Este usuario ya no existe.");
+        return;
       }
     } catch (error) {
       console.error(t("errorLoadingStories"), error);
       Alert.alert(t("error"), t("errorLoadingStories"));
-      navigation.navigate("UserProfile", { selectedUser: item });
+      return;
     }
-
-    setTimeout(() => {
-      const updatedHistory = searchHistory.filter((u) => u.id !== item.id);
-      updatedHistory.unshift(item);
-      while (updatedHistory.length > 5) {
-        updatedHistory.pop();
-      }
-      setSearchHistory(updatedHistory);
-      saveSearchHistory(user, updatedHistory, blockedUsers);
-    }, 500);
+    // Actualiza el historial con la información fresca
+    updateHistory(updatedUser);
   };
+  
+  
+
+  useEffect(() => {
+    const updateSearchHistory = async () => {
+      if (!user) return;
+  
+      try {
+        const updatedHistory = await Promise.all(
+          searchHistory.map(async (item) => {
+            const userRef = doc(database, "users", item.id);
+            const userSnapshot = await getDoc(userRef);
+  
+            if (userSnapshot.exists()) {
+              return { ...item, isPrivate: userSnapshot.data().isPrivate };
+            }
+            return null; // Si el usuario ya no existe, lo eliminamos del historial
+          })
+        );
+  
+        const filteredHistory = updatedHistory.filter(Boolean); // Elimina los nulos
+        setSearchHistory(filteredHistory);
+        saveSearchHistory(user, filteredHistory, blockedUsers);
+      } catch (error) {
+        console.error("Error updating search history:", error);
+      }
+    };
+  
+    const unsubscribe = navigation.addListener("focus", updateSearchHistory);
+  
+    return unsubscribe;
+  }, [navigation, user, searchHistory]);
+  
+  
 
   // Al hacer click en el nombre o en cualquier otra parte del contenedor: se navega directamente al perfil (privado o público según corresponda), ignorando las historias.
-  const handleNamePress = (item) => {
-    if (item.isPrivate) {
-      navigation.navigate("PrivateUserProfile", { selectedUser: item });
-    } else {
-      navigation.navigate("UserProfile", { selectedUser: item });
-    }
-    setTimeout(() => {
-      const updatedHistory = searchHistory.filter((u) => u.id !== item.id);
-      updatedHistory.unshift(item);
-      while (updatedHistory.length > 5) {
-        updatedHistory.pop();
+  const handleNamePress = async (item) => {
+    let updatedUser = item;
+    try {
+      const userRef = doc(database, "users", item.id);
+      const userSnapshot = await getDoc(userRef);
+      if (userSnapshot.exists()) {
+        updatedUser = { ...item, ...userSnapshot.data() };
+  
+        // Verifica si el usuario actual es amigo de este usuario
+        const friendsRef = collection(database, "users", user.uid, "friends");
+        const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", updatedUser.id)));
+        const isFriend = !friendSnapshot.empty;
+  
+        if (updatedUser.isPrivate && !isFriend) {
+          navigation.navigate("PrivateUserProfile", { selectedUser: updatedUser });
+        } else {
+          navigation.navigate("UserProfile", { selectedUser: updatedUser });
+        }
       }
-      setSearchHistory(updatedHistory);
-      saveSearchHistory(user, updatedHistory, blockedUsers);
-    }, 500);
+    } catch (error) {
+      console.error("Error fetching updated user data:", error);
+    }
+    updateHistory(updatedUser);
   };
+  
+  
 
   const removeFromHistory = async (userId) => {
     const updatedHistory = searchHistory.filter((userItem) => userItem.id !== userId);

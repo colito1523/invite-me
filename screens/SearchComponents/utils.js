@@ -6,24 +6,23 @@ import { Alert } from "react-native";
 
 export const saveSearchHistory = async (user, history, blockedUsers) => {
   try {
-    // Actualiza el almacenamiento persistente del historial
+    const filteredHistory = history.map((userItem) => ({
+      id: userItem.id,
+      username: userItem.username,
+      profileImage: userItem.profileImage,
+      isPrivate: userItem.isPrivate || false,
+      hasStories: userItem.hasStories || false,
+    }));
+
     await AsyncStorage.setItem(
       `searchHistory_${user.uid}`,
-      JSON.stringify(history)
-    );
-
-    // Actualiza la caché con el historial actualizado
-    await AsyncStorage.setItem(
-      `searchHistoryCache_${user.uid}`,
-      JSON.stringify({
-        data: history,
-        timestamp: Date.now()
-      })
+      JSON.stringify(filteredHistory)
     );
   } catch (error) {
     console.error("Error saving search history:", error);
   }
 };
+
 
 
 export const fetchUsers = async (searchTerm, setResults) => {
