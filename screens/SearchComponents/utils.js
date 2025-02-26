@@ -329,7 +329,6 @@ export const handleUserPress = (
       selectedUser: { ...selectedUser, isPrivate, isFriend },
     });
   }
-if (selectedUser.hasStories) return;
 
   // Actualiza el historial tras un pequeño delay para evitar parpadeos
   setTimeout(() => {
@@ -345,6 +344,3 @@ if (selectedUser.hasStories) return;
     saveSearchHistory(currentUser, updatedHistory, blockedUsers);
   }, 600); // Puedes ajustar el delay si es necesario
 };
-
-
-

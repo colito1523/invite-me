@@ -22,17 +22,16 @@ const SearchHistory = ({
   const [selectedStories, setSelectedStories] = useState(null);
 
   const updateHistory = (updatedUser) => {
-    if (updatedUser.hasStories) return;
-      setTimeout(() => {
-        const updatedHistory = searchHistory.filter((u) => u.id !== updatedUser.id);
-        updatedHistory.unshift(updatedUser);
-        while (updatedHistory.length > 5) {
-          updatedHistory.pop();
-        }
-        setSearchHistory(updatedHistory);
-        saveSearchHistory(user, updatedHistory, blockedUsers);
-      }, 500);
-    };
+    setTimeout(() => {
+      const updatedHistory = searchHistory.filter((u) => u.id !== updatedUser.id);
+      updatedHistory.unshift(updatedUser);
+      while (updatedHistory.length > 5) {
+        updatedHistory.pop();
+      }
+      setSearchHistory(updatedHistory);
+      saveSearchHistory(user, updatedHistory, blockedUsers);
+    }, 500);
+  };
     
 
   // Al hacer click en la imagen: si el usuario tiene historias, se muestran; si es privado o no tiene historias, se navega al perfil correspondiente.
