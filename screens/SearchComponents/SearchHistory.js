@@ -107,31 +107,69 @@ const SearchHistory = ({
   useEffect(() => {
     const updateSearchHistory = async () => {
       if (!user) return;
-  
+
       try {
         const updatedHistory = await Promise.all(
           searchHistory.map(async (item) => {
             const userRef = doc(database, "users", item.id);
             const userSnapshot = await getDoc(userRef);
-  
+
             if (userSnapshot.exists()) {
-              return { ...item, isPrivate: userSnapshot.data().isPrivate };
+              const userData = userSnapshot.data();
+              const isPrivate = userData.isPrivate || false;
+
+              // Verificar si es amigo
+              const friendsRef = collection(database, "users", user.uid, "friends");
+              const friendQuery = query(friendsRef, where("friendId", "==", item.id));
+              const friendSnapshot = await getDocs(friendQuery);
+              const isFriend = !friendSnapshot.empty;
+
+              // Si es privado y no es amigo, no verificamos historias
+              if (isPrivate && !isFriend) {
+                return { ...item, isPrivate, hasStories: false, isFriend };
+              }
+
+              // Verificar historias disponibles
+              const storiesRef = collection(database, "users", item.id, "stories");
+              const storiesSnapshot = await getDocs(storiesRef);
+              const now = new Date();
+              const activeStories = storiesSnapshot.docs
+                .map(doc => ({
+                  ...doc.data(),
+                  expiresAt: doc.data().expiresAt.toDate(),
+                }))
+                .filter(story => story.expiresAt > now);
+
+              return { 
+                ...item, 
+                isPrivate,
+                isFriend,
+                hasStories: activeStories.length > 0 
+              };
             }
-            return null; // Si el usuario ya no existe, lo eliminamos del historial
+            return null;
           })
         );
-  
-        const filteredHistory = updatedHistory.filter(Boolean); // Elimina los nulos
+
+        const filteredHistory = updatedHistory.filter(Boolean);
         setSearchHistory(filteredHistory);
         saveSearchHistory(user, filteredHistory, blockedUsers);
       } catch (error) {
         console.error("Error updating search history:", error);
       }
     };
-  
+
+    // Actualizar al montar y cuando la pantalla obtiene el foco
+    updateSearchHistory();
     const unsubscribe = navigation.addListener("focus", updateSearchHistory);
-  
-    return unsubscribe;
+
+    // Configurar intervalo para actualización periódica
+    const interval = setInterval(updateSearchHistory, 30000); // Actualizar cada 30 segundos
+
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+    };
   }, [navigation, user, searchHistory]);
   
   
