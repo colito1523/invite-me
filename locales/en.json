@@ -641,9 +641,10 @@
   "userNotFound": "No authenticated user was found.",
   "accept": "Accept",
   "invalidPassword": "The new password must have at least 8 characters, one uppercase letter, one number, and one special character."
-     
   },
-
+  "notificationss": {
+  "tokenError": "You need to accept the permissions to receive notifications."
+},
   "userProfile": {
     "error": "Error",
     "cannotReportUser": "Cannot report this user at this time.",

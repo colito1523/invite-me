@@ -643,6 +643,9 @@
      "accept": "Aceptar",
      "invalidPassword": "La nueva contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial."
   },
+  "notificationss": {
+    "tokenError": "Tienes que aceptar los permisos para recibir notificaciones"
+  },
   "userProfile": {
     "error": "Error",
     "cannotReportUser": "No se puede denunciar a este usuario en este momento.",

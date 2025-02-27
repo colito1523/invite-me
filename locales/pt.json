@@ -59,6 +59,9 @@
   "errorOpeningCamera": "Ocorreu um problema ao abrir a câmara. Por favor, tente novamente.",
   "errorOpeningGallery": "Ocorreu um problema ao abrir a galeria. Por favor, tente novamente."
 },
+"notificationss": {
+  "tokenError": "Tem de aceitar as permissões para receber notificações."
+},
 "eventRecommendation": {
   "suggestSpace": "Sugerir um Espaço",
   "selectImage": "Selecionar Imagem",

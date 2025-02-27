@@ -5,6 +5,9 @@ import { auth, database } from "../../config/firebase"; // Asegúrate de tener c
 import { doc, setDoc, getDoc } from "firebase/firestore"; // Para guardar en Firestore
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import { useTranslation } from "react-i18next";
+
+const { t } = useTranslation();
 
 // Configuración de notificaciones push
 Notifications.setNotificationHandler({
@@ -29,7 +32,7 @@ async function registerForPushNotificationsAsync() {
     }
 
     if (finalStatus !== "granted") {
-      alert("No se pudo obtener el token para notificaciones push!");
+      alert(t("notificationss.tokenError"));
       return;
     }
 

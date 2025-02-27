@@ -54,6 +54,7 @@ exports.sendFriendRequestNotification = functions.firestore
           fromImage: requestData.fromImage,
           screen: 'Notifications' // Agregamos esta línea
         },
+        image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2FLogo_Invite_Me.png?alt=media&token=4cc951ac-2ff1-4a0e-a1a1-58bc88a9b612'
       };
       
       await expo.sendPushNotificationsAsync([message]);
