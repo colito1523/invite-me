@@ -474,6 +474,7 @@ export default function Profile({ navigation }) {
                 t={t}
                 blockedUsers={blockedUsers}
                 setIsBlockedListVisible={setIsBlockedListVisible}
+                navigation={navigation}
               />
             )}
 

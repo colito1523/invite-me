@@ -7,7 +7,6 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 
-const { t } = useTranslation();
 
 // Configuración de notificaciones push
 Notifications.setNotificationHandler({
@@ -75,6 +74,7 @@ async function registerForPushNotificationsAsync() {
 }
 
 const useNotifications = (navigation) => { // Added navigation prop
+  const { t } = useTranslation();
   const [expoPushToken, setExpoPushToken] = useState("");
 
   useEffect(() => {

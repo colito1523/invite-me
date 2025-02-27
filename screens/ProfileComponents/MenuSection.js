@@ -2,7 +2,8 @@ import React, { useCallback } from "react";
 import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../config/firebase";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, getAuth, deleteUser } from "firebase/auth";
+import { getFirestore, deleteDoc, doc } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
@@ -15,12 +16,15 @@ const MenuSection = React.memo(({
   isPrivate,
   blockedUsers,
   setIsBlockedListVisible,
+  navigation,
 }) => {
   const { t } = useTranslation();
 
   const closeMenu = useCallback(() => setMenuVisible(false), [setMenuVisible]);
 
   const handleDeleteAccount = useCallback(() => {
+    console.log("Iniciando eliminación de cuenta...");
+  
     Alert.alert(
       t("profileMenuSections.deleteAccount"),
       t("profileMenuSections.deleteAccountQuestions"),
@@ -33,6 +37,8 @@ const MenuSection = React.memo(({
           text: t("chatUsers.delete"),
           style: "destructive",
           onPress: () => {
+            console.log("Usuario confirmó eliminación.");
+  
             Alert.prompt(
               t("profileMenuSections.confirmEmail"),
               t("profileMenuSections.enterEmail"),
@@ -52,6 +58,8 @@ const MenuSection = React.memo(({
                       );
                       return;
                     }
+  
+                    console.log("Email ingresado:", email);
   
                     Alert.prompt(
                       t("profileMenuSections.confirmPassword"),
@@ -73,25 +81,43 @@ const MenuSection = React.memo(({
                               return;
                             }
   
+                            console.log("Contraseña ingresada:", password);
+  
                             try {
                               const auth = getAuth();
+                              const database = getFirestore();
                               const user = auth.currentUser;
-                              const credential = EmailAuthProvider.credential(
-                                email,
-                                password,
-                              );
+  
+                              if (!user) {
+                                console.log("Error: No hay usuario autenticado.");
+                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
+                                return;
+                              }
+  
+                              console.log("Usuario autenticado:", user.uid);
+  
+                              const credential = EmailAuthProvider.credential(email, password);
+                              console.log("Reautenticando usuario...");
   
                               await reauthenticateWithCredential(user, credential);
+                              console.log("Reautenticación exitosa.");
+  
+                              console.log("Eliminando usuario de Firestore...");
                               await deleteDoc(doc(database, "users", user.uid));
+                              console.log("Documento eliminado de Firestore.");
+  
+                              console.log("Eliminando usuario de Firebase Authentication...");
                               await deleteUser(user);
+                              console.log("Usuario eliminado de Firebase Authentication.");
   
                               Alert.alert(
                                 t("profileMenuSections.success"),
                                 t("profileMenuSections.accountDeleted"),
                                 [
                                   {
-                                    text: t("chatUsers.ok"),
+                                    text: t("chatUsers.success"),
                                     onPress: () => {
+                                      console.log("Redirigiendo a Login...");
                                       navigation.reset({
                                         index: 0,
                                         routes: [{ name: "Login" }],
@@ -101,20 +127,11 @@ const MenuSection = React.memo(({
                                 ],
                               );
                             } catch (error) {
-                              if (
-                                error.code === "auth/wrong-password" ||
-                                error.code === "auth/user-mismatch"
-                              ) {
-                                Alert.alert(
-                                  t("profileMenuSections.error"),
-                                  t("profileMenuSections.invalidCredentials"),
-                                );
-                              } else {
-                                Alert.alert(
-                                  t("profileMenuSections.error"),
-                                  t("profileMenuSections.deleteAccountError"),
-                                );
-                              }
+                              console.log("Error al eliminar la cuenta:", error);
+                              Alert.alert(
+                                t("profileMenuSections.error"),
+                                t("profileMenuSections.deleteAccountError"),
+                              );
                             }
                           },
                         },
@@ -131,6 +148,7 @@ const MenuSection = React.memo(({
       ],
     );
   }, [t]);
+  
 
   const handleChangePasswordAlert = () => {
     Alert.prompt(

@@ -8,9 +8,10 @@ const db = admin.firestore();
 exports.deleteExpiredEvents = functions.runWith({
     timeoutSeconds: 540,
     memory: "2GB",
-}).pubsub.schedule("every 3 hours").onRun(async (context) => {
+}).pubsub.schedule("0 * * * *").onRun(async (context) => {
     try {
-        const now = admin.firestore.Timestamp.now().toDate();
+        // Cambiado: ahora se mantiene como Timestamp
+        const now = admin.firestore.Timestamp.now();
 
         // Procesar eventos en la colección "users"
         const usersSnapshot = await db.collection("users").get();
@@ -36,15 +37,13 @@ exports.deleteExpiredEvents = functions.runWith({
                     }
                 }
 
-                // Depuración
+                // Depuración y eliminación
                 if (
                     (eventData.expirationDate && eventData.expirationDate.toMillis() < now.toMillis()) ||
-                    (eventDate && eventDate.getTime() < now.getTime()) ||
+                    (eventDate && eventDate.getTime() < now.toMillis()) ||
                     (dynamicEventDate && dynamicEventDate < now.toMillis())
                 ) {
                     await eventDoc.ref.delete();
-                } else {
-                    
                 }
             }
 
@@ -58,9 +57,6 @@ exports.deleteExpiredEvents = functions.runWith({
 
                 if (notificationDate && notificationDate.toMillis() < now.toMillis()) {
                     await notificationDoc.ref.delete();
-                   
-                } else {
-                   
                 }
             }
         }
@@ -71,14 +67,11 @@ exports.deleteExpiredEvents = functions.runWith({
             const eventData = eventDoc.data();
             const eventDate = eventData.day ? new Date(eventData.day.split('/').reverse().join('-')) : null;
 
-
             if (
                 (eventData.expirationDate && eventData.expirationDate.toMillis() < now.toMillis()) ||
-                (eventDate && eventDate.getTime() < now.getTime())
+                (eventDate && eventDate.getTime() < now.toMillis())
             ) {
                 await eventDoc.ref.delete();
-            } else {
-              
             }
         }
 
