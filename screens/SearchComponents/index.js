@@ -219,16 +219,14 @@ const onRefresh = useCallback(async () => {
     return (
       <View key={`user-${item.id}-${index}`} style={styles.resultItem}>
         <TouchableOpacity
-          onPress={async () => {
-            if (item.isPrivate) {
-              const friendsRef = collection(database, "users", user.uid, "friends");
-              const friendsSnapshot = await getDocs(query(friendsRef, where("friendId", "==", item.id)));
-              if (friendsSnapshot.empty) {
-                // Si es privado y no es amigo, se navega a PrivateUserProfile
-                navigation.navigate("PrivateUserProfile", { selectedUser: item });
-                return;
-              }
+          onPress={() => {
+            // 1) Si el usuario es privado y NO es amigo, navegar a PrivateUserProfile
+            if (item.isPrivate && !item.isFriend) {
+              navigation.navigate("PrivateUserProfile", { selectedUser: item });
+              return;
             }
+  
+            // 2) Si no tiene historias, navegar directamente al perfil
             if (!item.hasStories) {
               handleUserPressUtil(item, {
                 blockedUsers,
@@ -238,60 +236,33 @@ const onRefresh = useCallback(async () => {
                 currentUser: auth.currentUser,
                 t,
               });
+              return;
+            }
+  
+            // 3) Si tiene historias almacenadas en `userStories`, abrir directamente el visor de historias
+            if (item.userStories && item.userStories.length > 0) {
+              setSelectedStories([
+                {
+                  uid: item.id,
+                  username:
+                    `${item.firstName || ""} ${item.lastName || ""}`.trim() ||
+                    item.username ||
+                    t("unknownUser"),
+                  profileImage: item.profileImage,
+                  userStories: item.userStories,
+                },
+              ]);
+              setIsModalVisible(true);
             } else {
-              try {
-                const storiesRef = collection(database, "users", item.id, "stories");
-                const storiesSnapshot = await getDocs(storiesRef);
-                const now = new Date();
-                const userStories = storiesSnapshot.docs
-                  .map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    createdAt: doc.data().createdAt,
-                    expiresAt: doc.data().expiresAt,
-                    storyUrl: doc.data().storyUrl,
-                    profileImage: doc.data().profileImage || item.profileImage,
-                    uid: item.id,
-                    username: doc.data().username || item.username || t("unknownUser"),
-                    viewers: doc.data().viewers || [],
-                    likes: doc.data().likes || [],
-                  }))
-                  .filter((story) => new Date(story.expiresAt.toDate()) > now);
-                if (userStories.length > 0) {
-                  setSelectedStories([
-                    {
-                      uid: item.id,
-                      username:
-                        `${item.firstName || ""} ${item.lastName || ""}`.trim() ||
-                        item.username ||
-                        t("unknownUser"),
-                      profileImage: item.profileImage,
-                      userStories: userStories,
-                    },
-                  ]);
-                  setIsModalVisible(true);
-                } else {
-                  handleUserPressUtil(item, {
-                    blockedUsers,
-                    searchHistory,
-                    setSearchHistory,
-                    navigation,
-                    currentUser: auth.currentUser,
-                    t,
-                  });
-                }
-              } catch (error) {
-                console.error(t("errorLoadingStories"), error);
-                Alert.alert(t("error"), t("errorLoadingStories"));
-                handleUserPressUtil(item, {
-                  blockedUsers,
-                  searchHistory,
-                  setSearchHistory,
-                  navigation,
-                  currentUser: auth.currentUser,
-                  t,
-                });
-              }
+              // Si por alguna razón `hasStories` es true pero `userStories` está vacío, ir al perfil
+              handleUserPressUtil(item, {
+                blockedUsers,
+                searchHistory,
+                setSearchHistory,
+                navigation,
+                currentUser: auth.currentUser,
+                t,
+              });
             }
           }}
         >
@@ -330,6 +301,7 @@ const onRefresh = useCallback(async () => {
       </View>
     );
   };
+  
   
 
   // Encabezado fijo que contiene el StorySlider y la barra de búsqueda (esta última se coloca debajo del StorySlider)

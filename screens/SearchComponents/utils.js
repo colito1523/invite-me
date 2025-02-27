@@ -24,7 +24,6 @@ export const saveSearchHistory = async (user, history, blockedUsers) => {
 };
 
 
-
 export const fetchUsers = async (searchTerm, setResults) => {
   const auth = getAuth();
   if (!auth.currentUser) return;
@@ -39,47 +38,56 @@ export const fetchUsers = async (searchTerm, setResults) => {
 
       const normalizedSearchTerm = searchTerm.toLowerCase();
 
-      // Create query to search users by username, firstName, and lastName
+      // Crear consulta para traer todos los usuarios
       const usersRef = collection(database, "users");
       const q = query(usersRef);
-
       const querySnapshot = await getDocs(q);
 
-      // Process each user and check if they have stories
+      // Procesar cada usuario y verificar si tiene historias activas
       const userList = await Promise.all(
         querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
+          const userId = doc.id;
           
-          // Check if the current user is a friend
+          // Verificar si el usuario actual es amigo del usuario encontrado
           const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-          const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", doc.id)));
+          const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", userId)));
           const isFriend = !friendSnapshot.empty;
 
-          // Check if the user is private
+          // Verificar si el usuario es privado
           const isPrivate = data.isPrivate || false;
 
-          // Only check for stories if the user is not private or if the current user is a friend
           let hasStories = false;
+          let userStories = []; // Aquí almacenaremos las historias activas
+
+          // Solo verificar historias si el usuario no es privado o si el usuario actual es su amigo
           if (!isPrivate || isFriend) {
-            const storiesRef = collection(database, "users", doc.id, "stories");
+            const storiesRef = collection(database, "users", userId, "stories");
             const storiesSnapshot = await getDocs(storiesRef);
             const now = new Date();
 
-            hasStories = storiesSnapshot.docs.some((storyDoc) => {
-              const storyData = storyDoc.data();
-              return (
-                new Date(storyData.expiresAt.toDate()) > now &&
-                !hideStoriesFrom.includes(doc.id)
-              );
-            });
+            // Filtrar historias activas (no expiradas)
+            userStories = storiesSnapshot.docs
+              .map((storyDoc) => {
+                const storyData = storyDoc.data();
+                return {
+                  id: storyDoc.id,
+                  ...storyData,
+                  expiresAt: storyData.expiresAt.toDate(), // Convertir timestamp a Date
+                };
+              })
+              .filter((story) => story.expiresAt > now && !hideStoriesFrom.includes(userId));
+
+            hasStories = userStories.length > 0;
           }
 
           return {
-            id: doc.id,
+            id: userId,
             ...data,
             isFriend,
             isPrivate,
             hasStories,
+            userStories, // Ahora incluimos las historias activas
             profileImage:
               data.photoUrls && data.photoUrls.length > 0
                 ? data.photoUrls[0]
@@ -88,7 +96,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
         })
       );
 
-      // Filter blocked users, current user, and apply search term
+      // Filtrar usuarios bloqueados, el usuario actual y aplicar el término de búsqueda
       const filteredList = userList.filter(
         (user) =>
           user.id !== auth.currentUser.uid &&
@@ -106,6 +114,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
     setResults([]);
   }
 };
+
 
 
 export const fetchRecommendations = async (user, setRecommendations, forceRefresh = false) => {
