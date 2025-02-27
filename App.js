@@ -13,7 +13,6 @@ import { initReactI18next } from 'react-i18next';
 import useNotifications from "./src/hooks/useNotifications"; // Importa el hook personalizado
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as ExpoNotifications from 'expo-notifications';
-import PushNotificationHandler from './notification-functions/PushNotificationHandler'; 
 
 // Configuración de notificaciones
 ExpoNotifications.setNotificationHandler({
@@ -176,10 +175,7 @@ function RootNavigator() {
   return (
     <NavigationContainer>
       {user ? (
-       <>
-       <ChatStack />
-       <PushNotificationHandler />
-     </>
+        <ChatStack />
       ) : (
         <Stack.Navigator 
           screenOptions={{ headerShown: false }}

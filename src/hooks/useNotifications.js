@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { auth, database } from "../../config/firebase"; // Asegúrate de tener configurado Firebase
-import { doc, setDoc } from "firebase/firestore"; // Para guardar en Firestore
+import { doc, setDoc, getDoc } from "firebase/firestore"; // Para guardar en Firestore
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
