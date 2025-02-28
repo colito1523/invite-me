@@ -29,6 +29,7 @@ import CalendarPicker from "../CalendarPicker";
 import { useTranslation } from "react-i18next";
 import { dayStyles, nightStyles, styles } from "./styles";
 import { useUnreadMessages } from "../../src/hooks/UnreadMessagesContext";
+import { registerPushToken } from "../../src/hooks/useNotifications";
 import {
   fetchUnreadNotifications,
   fetchData,
@@ -209,6 +210,7 @@ useEffect(() => {
 
     const user = auth.currentUser;
     if (user) {
+      await registerPushToken();
       try {
         // Cargar datos del usuario
         await fetchData({

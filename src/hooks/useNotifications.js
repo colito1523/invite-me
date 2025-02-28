@@ -68,6 +68,22 @@ async function registerForPushNotificationsAsync() {
 
   return token;
 }
+export const registerPushToken = async () => {
+  if (!auth.currentUser) return;
+  const userRef = doc(database, "users", auth.currentUser.uid);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists() || !userDoc.data().expoPushToken) {
+    const token = await registerForPushNotificationsAsync();
+    if (token) {
+      await setDoc(userRef, { expoPushToken: token }, { merge: true });
+      console.log("Expo Push Token guardado en Firestore.");
+      return token;
+    }
+  } else {
+    return userDoc.data().expoPushToken;
+  }
+};
 
 const useNotifications = (navigation) => { 
   const { t } = useTranslation();
