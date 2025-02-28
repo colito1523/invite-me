@@ -30,7 +30,6 @@ async function registerForPushNotificationsAsync() {
     }
 
     if (finalStatus !== "granted") {
-      alert("Error: No se pudo obtener permiso para notificaciones push");
       return;
     }
 
