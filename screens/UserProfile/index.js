@@ -132,32 +132,17 @@ export default function UserProfile({ route, navigation }) {
   const [isMutualFriendsModalVisible, setIsMutualFriendsModalVisible] =
     useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
- // Efecto unificado para cargar datos de Firebase relacionados con user & selectedUser
+ // Cargar datos esenciales primero y el resto en paralelo
  useEffect(() => {
   if (!user || !selectedUser) return;
-
-  const loadData = async () => {
+  
+  // Función para cargar datos críticos inmediatamente
+  const loadInitialData = async () => {
     try {
-      // 1. Llamadas que NO dependen entre sí se pueden disparar en paralelo
-      const [
-        // Bloqueo o lista de bloqueados
-        blockedUsersRes,
-        // Ocultar stories
-        hiddenStatusRes,
-        hideMyStoriesRes,
-        // "Like" status
-        likeStatusRes,
-      ] = await Promise.all([
-        fetchBlockedUsers({ user, setBlockedUsers }), // cambia internamente setBlockedUsers
-        checkHiddenStatus({ user, selectedUser, setHideStories, setHideMyStories }),
-        checkHideMyStoriesStatus({ user, selectedUser, setHideMyStories }),
-        checkLikeStatus({ user, selectedUser, setIsLiked }),
-      ]);
-
-      // 2. Llamadas que dependen de blockedUsers se pueden hacer tras tenerlo (ej: fetchEvents)
-      //    pero si no dependieran entre sí, también podrías incluirlas en el Promise.all anterior.
-      await fetchUserData({
+      // Cargar datos prioritarios para renderizado inicial
+      fetchUserData({
         selectedUser,
         setIsPrivate,
         user,
@@ -168,37 +153,55 @@ export default function UserProfile({ route, navigation }) {
         setFirstInterest,
         setSecondInterest,
       });
-
-      await fetchFriendCount({ selectedUser, setFriendCount });
-
-      await fetchEvents({
-        selectedUser,
-        blockedUsers, // ya se estableció vía setBlockedUsers arriba
-        setEvents,
-        parseEventDate,
-      });
-
-      await checkFriendship({
-        user,
-        selectedUser,
-        setFriendshipStatus,
-        setPendingRequest,
-      });
-
-      await fetchMutualFriends({ user, selectedUser, setMutualFriends });
-
-      // 3. LikeCount
+      
+      // Cargar datos básicos del usuario para mostrar inmediatamente
       const userDoc = await getDoc(doc(database, "users", selectedUser.id));
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setLikeCount(userData.likeCount || 0);
       }
     } catch (error) {
-      console.error("Error cargando datos de perfil:", error);
+      console.error("Error cargando datos iniciales:", error);
+    }
+  };
+  
+  // Función para cargar el resto de los datos en segundo plano
+  const loadBackgroundData = async () => {
+    try {
+      // Cargar todos los datos no críticos en paralelo
+      Promise.all([
+        // Bloqueos y preferencias
+        fetchBlockedUsers({ user, setBlockedUsers }).then(blockedList => {
+          // Una vez cargados los bloqueos, cargar eventos
+          fetchEvents({
+            selectedUser,
+            blockedUsers: blockedList,
+            setEvents,
+            parseEventDate,
+          });
+        }),
+        checkHiddenStatus({ user, selectedUser, setHideStories, setHideMyStories }),
+        checkHideMyStoriesStatus({ user, selectedUser, setHideMyStories }),
+        checkLikeStatus({ user, selectedUser, setIsLiked }),
+        fetchFriendCount({ selectedUser, setFriendCount }),
+        checkFriendship({
+          user,
+          selectedUser,
+          setFriendshipStatus,
+          setPendingRequest,
+        }),
+        fetchMutualFriends({ user, selectedUser, setMutualFriends })
+      ]);
+    } catch (error) {
+      console.error("Error cargando datos secundarios:", error);
     }
   };
 
-  loadData();
+  // Ejecutar carga inicial inmediatamente
+  loadInitialData();
+  
+  // Cargar datos secundarios después
+  loadBackgroundData();
 }, [user, selectedUser]); 
 
   const user = auth.currentUser;
@@ -313,28 +316,8 @@ export default function UserProfile({ route, navigation }) {
     return new Date(currentYear, monthIndex, parseInt(day));
   };
 
-  useEffect(() => {
-    fetchUserData({
-      selectedUser,
-      setIsPrivate,
-      user,
-      navigation,
-      setPhotoUrls,
-      setFirstHobby,
-      setSecondHobby,
-      setFirstInterest,
-      setSecondInterest,
-    });
-    fetchFriendCount({ selectedUser, setFriendCount });
-    fetchEvents({ selectedUser, blockedUsers, setEvents, parseEventDate });
-    checkFriendship({
-      user,
-      selectedUser,
-      setFriendshipStatus,
-      setPendingRequest,
-    });
-    fetchMutualFriends({ user, selectedUser, setMutualFriends });
-  }, [selectedUser, user, friendshipStatus, navigation]);
+  // useEffect eliminado: estas operaciones ya se realizan en el useEffect unificado anterior
+  // Mantener una dependencia en friendshipStatus puede causar ciclos de re-renders innecesarios
 
   const renderMutualFriends = () => {
     if (mutualFriends.length === 0) {
@@ -458,12 +441,13 @@ export default function UserProfile({ route, navigation }) {
       <ScrollView 
           contentContainerStyle={[
             styles.scrollViewContent,
+            { backgroundColor: isNightMode ? "black" : "white" },
             {flexGrow: 1}
           ]}
           keyboardShouldPersistTaps="handled"
           scrollEnabled={false}
           >
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: isNightMode ? "black" : "white" }]}>
           {isElementsVisible && (
             <TouchableOpacity
               style={styles.backButton}
@@ -490,7 +474,7 @@ export default function UserProfile({ route, navigation }) {
             {photoUrls.map((url, index) => (
               <Pressable
                 key={index}
-                style={styles.imageContainer}
+                style={[styles.imageContainer, { backgroundColor: isNightMode ? "black" : "white" }]}
                 onLongPress={handleLongPress}
                 onPressOut={handlePressOut}
               >

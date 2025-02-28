@@ -48,7 +48,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
         querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
           const userId = doc.id;
-          
+
           // Verificar si el usuario actual es amigo del usuario encontrado
           const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
           const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", userId)));
@@ -58,7 +58,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
           const isPrivate = data.isPrivate || false;
 
           let hasStories = false;
-          let userStories = []; // Aquí almacenaremos las historias activas
+          let userStories = [];
 
           // Solo verificar historias si el usuario no es privado o si el usuario actual es su amigo
           if (!isPrivate || isFriend) {
@@ -73,7 +73,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
                 return {
                   id: storyDoc.id,
                   ...storyData,
-                  expiresAt: storyData.expiresAt.toDate(), // Convertir timestamp a Date
+                  expiresAt: storyData.expiresAt.toDate(),
                 };
               })
               .filter((story) => story.expiresAt > now && !hideStoriesFrom.includes(userId));
@@ -87,7 +87,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
             isFriend,
             isPrivate,
             hasStories,
-            userStories, // Ahora incluimos las historias activas
+            userStories,
             profileImage:
               data.photoUrls && data.photoUrls.length > 0
                 ? data.photoUrls[0]
@@ -97,14 +97,16 @@ export const fetchUsers = async (searchTerm, setResults) => {
       );
 
       // Filtrar usuarios bloqueados, el usuario actual y aplicar el término de búsqueda
-      const filteredList = userList.filter(
-        (user) =>
-          user.id !== auth.currentUser.uid &&
-          !blockedUsers.includes(user.id) &&
-          (user.username.toLowerCase().includes(normalizedSearchTerm) ||
-           user.firstName.toLowerCase().includes(normalizedSearchTerm) ||
-           user.lastName.toLowerCase().includes(normalizedSearchTerm))
-      );
+      const filteredList = userList
+        .filter(
+          (user) =>
+            user.id !== auth.currentUser.uid &&
+            !blockedUsers.includes(user.id) &&
+            (user.username.toLowerCase().includes(normalizedSearchTerm) ||
+              user.firstName.toLowerCase().includes(normalizedSearchTerm) ||
+              user.lastName.toLowerCase().includes(normalizedSearchTerm))
+        )
+        .slice(0, 8); // Limitar a 10 resultados
 
       setResults(filteredList);
     } catch (error) {
@@ -114,6 +116,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
     setResults([]);
   }
 };
+
 
 
 

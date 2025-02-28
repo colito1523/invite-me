@@ -8,12 +8,18 @@ export const fetchBlockedUsers = async (params) => {
   const setBlockedUsers = params.setBlockedUsers
 
     try {
+      // Usar una referencia específica para mejorar rendimiento
       const userRef = doc(database, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
       const blockedList = userSnapshot.data()?.blockedUsers || [];
       setBlockedUsers(blockedList);
+      // Devolver el valor para que esté disponible en Promise.all
+      return blockedList;
     } catch (error) {
       console.error("Error fetching blocked users:", error);
+      // Devolver array vacío en caso de error
+      setBlockedUsers([]);
+      return [];
     }
   };
 
