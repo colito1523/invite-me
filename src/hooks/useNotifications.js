@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { auth, database } from "../../config/firebase"; // Asegúrate de tener configurado Firebase
-import { doc, setDoc, getDoc } from "firebase/firestore"; // Para guardar en Firestore
+import { auth, database } from "../../config/firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { useTranslation } from "react-i18next";
-
+import { onAuthStateChanged } from "firebase/auth";
 
 // Configuración de notificaciones push
 Notifications.setNotificationHandler({
@@ -17,7 +17,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// Función para registrar el dispositivo y obtener el token de Expo
 async function registerForPushNotificationsAsync() {
   let token;
 
@@ -31,7 +30,7 @@ async function registerForPushNotificationsAsync() {
     }
 
     if (finalStatus !== "granted") {
-      alert(t("notificationss.tokenError"));
+      alert("Error: No se pudo obtener permiso para notificaciones push");
       return;
     }
 
@@ -43,7 +42,6 @@ async function registerForPushNotificationsAsync() {
   }
 
   if (Platform.OS === "android") {
-    // Canal para mensajes de chat
     await Notifications.setNotificationChannelAsync("chat-messages", {
       name: "Chat Messages",
       importance: Notifications.AndroidImportance.HIGH,
@@ -52,7 +50,6 @@ async function registerForPushNotificationsAsync() {
       sound: 'default',
     });
 
-    // Canal para eventos
     await Notifications.setNotificationChannelAsync("events", {
       name: "Events",
       importance: Notifications.AndroidImportance.HIGH,
@@ -61,7 +58,6 @@ async function registerForPushNotificationsAsync() {
       sound: 'default',
     });
 
-    // Canal para notificaciones generales
     await Notifications.setNotificationChannelAsync("default", {
       name: "General Notifications",
       importance: Notifications.AndroidImportance.DEFAULT,
@@ -73,32 +69,35 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
-const useNotifications = (navigation) => { // Added navigation prop
+const useNotifications = (navigation) => { 
   const { t } = useTranslation();
   const [expoPushToken, setExpoPushToken] = useState("");
 
   useEffect(() => {
-    // Registrar el token de notificaciones push
-    registerForPushNotificationsAsync().then((token) => {
-      if (token) {
-        setExpoPushToken(token);
+    // Nos suscribimos a los cambios en la autenticación
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = doc(database, "users", user.uid);
+        const userDoc = await getDoc(userRef);
 
-        // Guardar el token en Firestore solo si el usuario está autenticado
-        if (auth.currentUser) {
-          const userRef = doc(database, "users", auth.currentUser.uid);
-
-          // Almacenar el token de forma segura y evitar reemplazar datos no relacionados
-          setDoc(userRef, { expoPushToken: token }, { merge: true })
-            .then(() => console.log("Expo Push Token guardado en Firestore."))
-            .catch((error) => console.error("Error al guardar el token:", error));
+        // Si no existe token en Firestore, se registra y guarda
+        if (!userDoc.exists() || !userDoc.data().expoPushToken) {
+          const token = await registerForPushNotificationsAsync();
+          if (token) {
+            setExpoPushToken(token);
+            await setDoc(userRef, { expoPushToken: token }, { merge: true });
+            console.log("Expo Push Token guardado en Firestore.");
+          }
+        } else {
+          // Si ya existe, se utiliza el token existente
+          setExpoPushToken(userDoc.data().expoPushToken);
         }
       }
     });
 
-    // Listener para manejar notificaciones recibidas mientras la app está abierta
+    // Listener para notificaciones recibidas mientras la app está abierta
     const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
-      const { title, body, data } = notification.request.content;
-      // Puedes manejar la notificación según el tipo de datos recibidos
+      const { data } = notification.request.content;
       if (data?.type === 'chat') {
         // Manejar notificación de chat
       } else if (data?.type === 'event') {
@@ -106,11 +105,9 @@ const useNotifications = (navigation) => { // Added navigation prop
       }
     });
 
-    // Listener para manejar acciones cuando se interactúa con la notificación
+    // Listener para acciones al interactuar con la notificación
     const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
       const { data } = response.notification.request.content;
-
-      // Navegación basada en el tipo de notificación
       if (data?.type === 'chat' && data.chatId) {
         navigation.navigate('ChatUsers', { chatId: data.chatId });
       } else if (data?.type === 'event' && data.eventId) {
@@ -118,12 +115,12 @@ const useNotifications = (navigation) => { // Added navigation prop
       }
     });
 
-    // Limpiar los listeners cuando el componente se desmonte
     return () => {
+      unsubscribeAuth();
       Notifications.removeNotificationSubscription(notificationListener);
       Notifications.removeNotificationSubscription(responseListener);
     };
-  }, [navigation]); // Added navigation to dependency array
+  }, [navigation]);
 
   return expoPushToken;
 };
