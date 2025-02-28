@@ -10,8 +10,8 @@ exports.deleteExpiredEvents = functions.runWith({
     memory: "2GB",
 }).pubsub.schedule("0 * * * *").onRun(async (context) => {
     try {
-        // Cambiado: ahora se mantiene como Timestamp
-        const now = admin.firestore.Timestamp.now();
+        // Convertimos el timestamp actual a milisegundos
+        const now = admin.firestore.Timestamp.now().toDate().getTime();
 
         // Procesar eventos en la colección "users"
         const usersSnapshot = await db.collection("users").get();
@@ -23,7 +23,6 @@ exports.deleteExpiredEvents = functions.runWith({
                 const eventData = eventDoc.data();
                 const eventDate = eventData.day ? new Date(eventData.day.split('/').reverse().join('-')) : null;
 
-                // Manejo dinámico del año para el campo 'date'
                 let dynamicEventDate = null;
                 if (eventData.date) {
                     const currentYear = new Date().getFullYear();
@@ -37,11 +36,11 @@ exports.deleteExpiredEvents = functions.runWith({
                     }
                 }
 
-                // Depuración y eliminación
+                // 🔴 Aquí estaba el error: Se debe usar .toDate().getTime() en expirationDate
                 if (
-                    (eventData.expirationDate && eventData.expirationDate.toMillis() < now.toMillis()) ||
-                    (eventDate && eventDate.getTime() < now.toMillis()) ||
-                    (dynamicEventDate && dynamicEventDate < now.toMillis())
+                    (eventData.expirationDate && eventData.expirationDate.toDate().getTime() < now) || 
+                    (eventDate && eventDate.getTime() < now) ||
+                    (dynamicEventDate && dynamicEventDate < now)
                 ) {
                     await eventDoc.ref.delete();
                 }
@@ -55,7 +54,8 @@ exports.deleteExpiredEvents = functions.runWith({
                 const notificationData = notificationDoc.data();
                 const notificationDate = notificationData.expirationDate;
 
-                if (notificationDate && notificationDate.toMillis() < now.toMillis()) {
+                // 🔴 También corregimos el uso de expirationDate en notificaciones
+                if (notificationDate && notificationDate.toDate().getTime() < now) {
                     await notificationDoc.ref.delete();
                 }
             }
@@ -68,8 +68,8 @@ exports.deleteExpiredEvents = functions.runWith({
             const eventDate = eventData.day ? new Date(eventData.day.split('/').reverse().join('-')) : null;
 
             if (
-                (eventData.expirationDate && eventData.expirationDate.toMillis() < now.toMillis()) ||
-                (eventDate && eventDate.getTime() < now.toMillis())
+                (eventData.expirationDate && eventData.expirationDate.toDate().getTime() < now) ||
+                (eventDate && eventDate.getTime() < now)
             ) {
                 await eventDoc.ref.delete();
             }
