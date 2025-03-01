@@ -19,7 +19,7 @@ export default function Camera({ header = null }) {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        alert('Se necesita permiso para acceder a la galería');
+        alert('Permission is required to access the gallery');
         return;
       }
 
@@ -37,7 +37,7 @@ export default function Camera({ header = null }) {
       }
     } catch (error) {
       console.error('Error al abrir la galería:', error);
-      alert('Hubo un error al abrir la galería. Inténtalo de nuevo.');
+      alert('There was an error opening the gallery. Please try again.');
     }
   };
 

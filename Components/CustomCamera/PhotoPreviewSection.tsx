@@ -55,7 +55,7 @@ const PhotoPreviewSection = ({
 
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            navigation.navigate('Search', { 
+            navigation.navigate('Home', { 
                 forceStoryUpdate: true,
                 timestamp: Date.now()
             });

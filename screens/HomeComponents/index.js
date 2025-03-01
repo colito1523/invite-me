@@ -23,6 +23,7 @@ import DotIndicator from "../../Components/Dots/DotIndicator";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import dayjs from "dayjs";
 import { useLocationAndTime } from "../../src/hooks/useLocationAndTime";
+import StorySlider from "../../Components/Stories/storySlider/StorySlider";
 import boxInfo from "../../src/data/boxInfo";
 import Menu from "../../Components/Menu/Menu";
 import CalendarPicker from "../CalendarPicker";
@@ -83,6 +84,7 @@ const Home = React.memo(() => {
   const [privateEvents, setPrivateEvents] = useState([]);
   const { hasUnreadMessages, setHasUnreadMessages } = useUnreadMessages();
   const { t } = useTranslation();
+   const storySliderRef = useRef();
   const currentStyles = useMemo(
     () => (isNightMode ? nightStyles : dayStyles),
     [isNightMode],
@@ -204,6 +206,14 @@ useEffect(() => {
     },
     [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef],
   );
+
+  const renderStorySlider = useCallback(() => (
+    <StorySlider
+      ref={storySliderRef}
+      eventTitle={t("exampleEvent")}
+      selectedDate={selectedDate}
+    />
+  ), [t, selectedDate]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true); // Mostrar el indicador de recarga
@@ -495,17 +505,20 @@ useEffect(() => {
   return (
     <View style={currentStyles.container}>
       {memoizedMenu}
+  
+      {/* StorySlider solo se renderiza una vez */}
+  
       <FlatList
-        data={filteredBoxData.flatMap((group) => group.data)}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        contentContainerStyle={styles.container}
-        removeClippedSubviews={true}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      />
-
+  data={filteredBoxData.flatMap((group) => group.data)}
+  renderItem={renderItem}
+  keyExtractor={keyExtractor}
+  contentContainerStyle={{ paddingBottom: 20 }} // Espacio extra para mejor desplazamiento
+  removeClippedSubviews={true}
+  refreshControl={
+    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+  }
+  ListHeaderComponent={renderStorySlider}
+/>
       {loading && (
         <View
           style={[
@@ -523,7 +536,7 @@ useEffect(() => {
           />
         </View>
       )}
-
+  
       <View style={currentStyles.tabBar}>
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Ionicons
@@ -566,14 +579,15 @@ useEffect(() => {
           )}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
-        <Ionicons name="mail" size={25} color={isNightMode ? "white" : "black"} />
-        {unreadMessages && (
-          <View style={[styles.unreadIndicator, { backgroundColor: isNightMode ? "white" : "black" }]} />
-        )}
-      </TouchableOpacity>
+          <Ionicons name="mail" size={25} color={isNightMode ? "white" : "black"} />
+          {unreadMessages && (
+            <View style={[styles.unreadIndicator, { backgroundColor: isNightMode ? "white" : "black" }]} />
+          )}
+        </TouchableOpacity>
       </View>
     </View>
   );
+  
 });
 
 export default Home;

@@ -14,7 +14,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
-import StorySlider from "../../Components/Stories/storySlider/StorySlider";
 import { useTranslation } from "react-i18next";
 import { getAuth } from "firebase/auth";
 import {
@@ -51,7 +50,6 @@ export default function Search({ route }) {
   const [unseenStories, setUnseenStories] = useState({});
   const blockedUsers = useBlockedUsers();
   const { t } = useTranslation();
-  const storySliderRef = useRef();
 
   const user = auth.currentUser;
   const navigation = useNavigation();
@@ -84,19 +82,6 @@ export default function Search({ route }) {
     }
   }, [searchTerm, user]);
   
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      if (route.params?.forceStoryUpdate) {
-        // Actualizamos silenciosamente el StorySlider
-        storySliderRef.current?.loadExistingStories();
-        // Limpiamos el parámetro para evitar actualizaciones innecesarias
-        navigation.setParams({ forceStoryUpdate: undefined });
-      }
-    });
-  
-    return unsubscribe;
-  }, [navigation, route.params?.forceStoryUpdate]);
 
   // Configuración de modo nocturno
   useEffect(() => {
@@ -157,7 +142,6 @@ const onRefresh = useCallback(async () => {
     await Promise.all([
       fetchUsers(searchTerm, setResults),
       fetchRecommendations(user, setRecommendations, true), // Forzar actualización
-      storySliderRef.current?.loadExistingStories(),
     ]);
   } catch (error) {
     console.error("Error refreshing:", error);
@@ -303,15 +287,8 @@ const onRefresh = useCallback(async () => {
   };
   
   
-
-  // Encabezado fijo que contiene el StorySlider y la barra de búsqueda (esta última se coloca debajo del StorySlider)
   const listHeader = (
     <>
-      <StorySlider
-        ref={storySliderRef}
-        eventTitle={t("exampleEvent")}
-        selectedDate={new Date()}
-      />
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} style={styles.searchIcon} />
         <TextInput

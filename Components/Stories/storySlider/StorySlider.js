@@ -125,8 +125,8 @@ export default React.forwardRef(function StorySlider(props, ref) {
   }, []);
 
   useEffect(() => {
-    loadExistingStories();
-  }, []);
+      loadExistingStories(t, setStories, setUnseenStories, isUploading);
+    }, []);
 
   const updateUnseenStories = (updatedUnseenStories) => {
     setUnseenStories((prev) => ({
@@ -226,7 +226,7 @@ const renderStory = ({ item, index }) => {
       hasStories
         ? {
             borderWidth: 2,
-            borderStyle: isCurrentUserStory ? 'solid' : hasUnseenStories ? 'solid' : 'dotted',
+            borderStyle: isCurrentUserStory ? 'solid' : hasUnseenStories ? 'solid' : 'solid',
             borderColor: isCurrentUserStory ? (isNightMode ? 'white' : 'black') : (isNightMode ? 'white' : 'black'),
             borderRadius: styles.storyCircle.borderRadius + 2,
             opacity: isCurrentUserStory ? 1 : hasUnseenStories ? 1 : 0.7,

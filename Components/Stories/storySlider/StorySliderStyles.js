@@ -5,22 +5,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 0,
     alignItems: "center",
-    marginVertical: 10,
-    marginBottom: 30,
+    marginTop: 10,
   },
   addStoryCircle: {
     marginRight: 10,
   },
   centeredAddStoryCircle: {
     justifyContent: "center",
+    alignItems: "center",  // Asegura alineación vertical
+    width: 70,  // Igual a storyCircle
+    height: 70, // Igual a storyCircle
   },
   storyImageWrapper: {
     marginHorizontal: 3,
+    marginBottom: 20,
     padding: 1,
   },
   storyCircle: {
-    width: 80,
-    height: 80,
+    width: 70,
+    height: 70,
     borderRadius: 40,
     overflow: "hidden",
    

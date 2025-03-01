@@ -5,8 +5,8 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
+    paddingTop:50,
     flex: 1,
-   
   },
   header: {
     flexDirection: "row",
