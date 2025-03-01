@@ -150,8 +150,20 @@ export default React.forwardRef(function StorySlider(props, ref) {
 
 
   useEffect(() => {
-    loadExistingStories(t, setStories, setUnseenStories, isUploading);
-  }, []);
+      let isMounted = true;
+      const safeSetStories = (stories) => {
+        if (isMounted) setStories(stories);
+      };
+      const safeSetUnseenStories = (unseen) => {
+        if (isMounted) setUnseenStories(unseen);
+      };
+    
+      loadExistingStories(t, safeSetStories, safeSetUnseenStories, isUploading);
+    
+      return () => {
+        isMounted = false;
+      };
+    }, []);
 
   useEffect(() => {
     if (route.params?.photoUri) {

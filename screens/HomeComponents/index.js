@@ -216,13 +216,11 @@ useEffect(() => {
   ), [t, selectedDate]);
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true); // Mostrar el indicador de recarga
-
+    setRefreshing(true);
     const user = auth.currentUser;
     if (user) {
       await registerPushToken();
       try {
-        // Cargar datos del usuario
         await fetchData({
           setLoading,
           fetchBoxData,
@@ -235,17 +233,14 @@ useEffect(() => {
           selectedDate: selectedDateRef.current,
           setPrivateEvents,
         });
-
-        // Actualizar la imagen de perfil
         await fetchProfileImage({ setProfileImage });
-
-        // (Opcional) Si necesitas más tareas programáticas, inclúyelas aquí
+        // Refrescar el StorySlider
+        storySliderRef.current?.loadExistingStories();
       } catch (error) {
         console.error("Error al recargar datos:", error);
       }
     }
-
-    setRefreshing(false); // Ocultar el indicador de recarga
+    setRefreshing(false);
   }, [
     auth.currentUser,
     database,
@@ -254,6 +249,7 @@ useEffect(() => {
     setBoxData,
     selectedDateRef,
   ]);
+  
 
   const toggleMenu = useCallback(() => {
     setMenuVisible((prev) => !prev);
