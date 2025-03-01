@@ -214,6 +214,17 @@ useEffect(() => {
       selectedDate={selectedDate}
     />
   ), [t, selectedDate]);
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (route.params?.forceStoryUpdate) {
+        storySliderRef.current?.loadExistingStories();
+        // Limpiar el parámetro para que no se vuelva a llamar en el siguiente focus
+        navigation.setParams({ forceStoryUpdate: undefined });
+      }
+    });
+    return unsubscribe;
+  }, [navigation, route.params?.forceStoryUpdate]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
