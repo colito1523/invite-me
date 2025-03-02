@@ -439,7 +439,14 @@ export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t, s
 
   // Filtrado adicional según categoría, ignorando la opción "Todos"
   if (selectedCategory && selectedCategory !== t("categories.all")) {
-    filteredData = filteredData.filter((box) => box.category === selectedCategory);
+    if (selectedCategory === "Festivities") {
+      // Si se selecciona "Festivities", se muestran también los eventos para amigos
+      filteredData = filteredData.filter((box) =>
+        box.category === "Festivities" || box.category === "EventoParaAmigos"
+      );
+    } else {
+      filteredData = filteredData.filter((box) => box.category === selectedCategory);
+    }
   }
 
   // Separación de eventos en categorías de amigos y generales

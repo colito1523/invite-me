@@ -90,7 +90,7 @@ const boxInfo = [
   {
     path: require("../../assets/Lisboa/corner2.jpg"),
     title: "Corner",
-    category: "Bars & Clubs",
+    category: "Festivities",
     hours: {
       Lunes: "12:00 PM - 12:00 AM",
       Martes: "12:00 PM - 12:00 AM",
