@@ -3,6 +3,7 @@ import { CameraCapturedPicture } from 'expo-camera';
 import { useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import React from "react";
+import i18n from 'i18next';
 import { TouchableOpacity, View, Image, StyleSheet, Text, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from "react-i18next";
@@ -54,16 +55,27 @@ const PhotoPreviewSection = ({
             );
 
             await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const selectedCategory = i18n.language === "en" ? "All" : "Todos";
 
-            navigation.navigate('Home', { 
-                forceStoryUpdate: true,
-                timestamp: Date.now()
-            });
-        } catch (error) {
-            console.error('Error al comprimir la imagen:', error);
-        }
-        setIsUploading(false);
-    };
+            navigation.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: 'Home',
+                    params: { 
+                      selectedCategory,
+                      forceStoryUpdate: true,
+                      timestamp: Date.now()
+                    }
+                  }
+                ],
+              });
+            } catch (error) {
+              console.error('Error al comprimir la imagen:', error);
+            }
+            setIsUploading(false);
+          };
 
     const handleDownloadPhoto = async () => {
         if (!hasMediaLibraryPermission) return;
