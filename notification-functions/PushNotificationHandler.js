@@ -10,8 +10,21 @@ export default function PushNotificationHandler() {
     const subscription = Notifications.addNotificationResponseReceivedListener(response => {
       const data = response.notification.request.content.data;
       
-      // Navigate to Notifications screen for all notification types
-      navigation.navigate('Notifications');
+      // Comprobar si es una notificación de chat para navegar a ChatUsers
+      if (data.chatId) {
+        navigation.navigate('ChatUsers', { 
+          currentChatId: data.chatId,
+          recipientUser: {
+            id: data.senderName ? data.senderId : null,
+            firstName: data.senderName ? data.senderName.split(' ')[0] : '',
+            lastName: data.senderName ? data.senderName.split(' ')[1] || '' : '',
+            photoUrls: data.senderPhoto ? [data.senderPhoto] : null
+          }
+        });
+      } else {
+        // Para otros tipos de notificaciones, navegar a la pantalla Notifications
+        navigation.navigate('Notifications');
+      }
     });
     
     return () => subscription.remove();
