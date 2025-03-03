@@ -161,7 +161,6 @@ export const handleLikeStory = async ({
         fromName: `${userData.username} `.trim(),
         fromImage: userData.photoUrls?.[0] || "default-image-url",
         storyId: currentStory.id,
-        message: `${userData.username} te dio like en tu historia.`,
         timestamp: new Date(),
         seen: false, // Marcamos la notificación como no vista
       });

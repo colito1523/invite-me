@@ -15,11 +15,12 @@ exports.sendLikeNotification = functions.firestore
     const { userId } = context.params;
     const notificationData = snapshot.data();
 
-    if (notificationData.type !== 'like' && notificationData.type !== 'noteLike') return; //Added condition for noteLike
+    if (!['like', 'noteLike', 'storyLike'].includes(notificationData.type)) return; // Agregamos storyLike
 
     try {
       const userDoc = await db.collection('users').doc(userId).get();
       const expoPushToken = userDoc.data()?.expoPushToken;
+      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
 
       if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
 
@@ -27,24 +28,26 @@ exports.sendLikeNotification = functions.firestore
         const texts = {
           'es': {
             title: 'Nuevo Like',
-            noteLikeBody: (name) => `A ${name} le gustó tu estado de ánimo`,
-            profileLikeBody: (name) => `A ${name} le gustó tu perfil`
+            noteLikeBody: (name) => `A ${name} le gustó tu estado de ánimo.`,
+            profileLikeBody: (name) => `A ${name} le gustó tu perfil.`,
+            storyLikeBody: (name) => `A ${name} le gustó tu historia.`
           },
           'en': {
             title: 'New Like',
-            noteLikeBody: (name) => `${name} liked your mood`,
-            profileLikeBody: (name) => `${name} liked your profile`
+            noteLikeBody: (name) => `${name} liked your mood.`,
+            profileLikeBody: (name) => `${name} liked your profile.`,
+            storyLikeBody: (name) => `${name} liked your story.`
           },
           'pt': {
             title: 'Novo Like',
-            noteLikeBody: (name) => `${name} curtiu seu humor`,
-            profileLikeBody: (name) => `${name} curtiu seu perfil`
+            noteLikeBody: (name) => `${name} curtiu seu humor.`,
+            profileLikeBody: (name) => `${name} curtiu seu perfil.`,
+            storyLikeBody: (name) => `${name} curtiu sua história.`
           }
         };
         return texts[lang] || texts['en'];
       };
 
-      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
       const texts = getNotificationText(preferredLanguage);
 
       let message;
@@ -54,10 +57,7 @@ exports.sendLikeNotification = functions.firestore
           sound: 'default',
           title: texts.title,
           body: texts.noteLikeBody(notificationData.fromName),
-          data: {
-            ...notificationData,
-            screen: 'Notifications' // Agregamos la propiedad
-          },
+          data: { ...notificationData, screen: 'Notifications' },
           image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2FLogo_Invite_Me.png?alt=media&token=4cc951ac-2ff1-4a0e-a1a1-58bc88a9b612'
         };
       } else if (notificationData.type === 'like') {
@@ -66,14 +66,19 @@ exports.sendLikeNotification = functions.firestore
           sound: 'default',
           title: texts.title,
           body: texts.profileLikeBody(notificationData.fromName),
-          data: {
-            ...notificationData,
-            screen: 'Notifications' // Agregamos la propiedad
-          },
+          data: { ...notificationData, screen: 'Notifications' },
+          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2FLogo_Invite_Me.png?alt=media&token=4cc951ac-2ff1-4a0e-a1a1-58bc88a9b612'
+        };
+      } else if (notificationData.type === 'storyLike') {
+        message = {
+          to: expoPushToken,
+          sound: 'default',
+          title: texts.title,
+          body: texts.storyLikeBody(notificationData.fromName),
+          data: { ...notificationData, screen: 'Notifications' },
           image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2FLogo_Invite_Me.png?alt=media&token=4cc951ac-2ff1-4a0e-a1a1-58bc88a9b612'
         };
       }
-
 
       await expo.sendPushNotificationsAsync([message]);
     } catch (error) {
