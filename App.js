@@ -26,6 +26,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"; // Import
 import { UnreadMessagesProvider } from './src/hooks/UnreadMessagesContext';
 import { DateProvider } from "./src/hooks/DateContext";
 import * as SplashScreen from "expo-splash-screen";
+import PushNotificationHandler from './notification-functions/PushNotificationHandler';
 
 
 import Login from "./screens/LoginComponents/index";
@@ -175,7 +176,10 @@ function RootNavigator() {
   return (
     <NavigationContainer>
       {user ? (
-        <ChatStack />
+        <>
+          <PushNotificationHandler />
+          <ChatStack />
+        </>
       ) : (
         <Stack.Navigator 
           screenOptions={{ headerShown: false }}
