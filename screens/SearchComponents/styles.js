@@ -5,18 +5,10 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingTop:50,
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-  alignItems: "center",
-  alignSelf: "center",
-  padding: 0, // Elimina todo el padding
-  margin: 0, // Elimina cualquier margen
-  width: "110%", // Asegúrate de ocupar todo el ancho disponible
-  },
   searchContainer: {
+    marginTop: 50,
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
