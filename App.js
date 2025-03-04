@@ -198,7 +198,6 @@ function RootNavigator() {
 SplashScreen.preventAutoHideAsync(); 
 
 export default function App() {
-  const [fontsLoaded, setFontsLoaded] = React.useState(false);
   const [isI18nInitialized, setIsI18nInitialized] = React.useState(false);
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -209,16 +208,6 @@ export default function App() {
       try {
         // Carga inicial: fuentes, datos, etc.
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simula un retraso
-
-        await Font.loadAsync({
-          NotoSerifKhitan: require("./assets/fonts/NotoSerifKhitanSmallScript-Regular.ttf"),
-          Parisienne: require("./assets/fonts/Parisienne-Regular.ttf"),
-          AlexBrush: require("./assets/fonts/AlexBrush-Regular.ttf"),
-          PlaywriteAUSA: require("./assets/fonts/PlaywriteAUSA-VariableFont_wght.ttf"),
-          "Roboto-Light": require("./assets/fonts/Roboto-Light.ttf"),
-          "Lato-Black": require("./assets/fonts/Lato-Black.ttf"),
-        });
-        setFontsLoaded(true);
 
         const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
         if (savedLanguage) {
@@ -250,7 +239,7 @@ export default function App() {
     prepare();
   }, []);
 
-  if (!appIsReady || !fontsLoaded || !isI18nInitialized) {
+  if (!appIsReady || !isI18nInitialized) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size={50} />
