@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 50,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#efe8e4',
     borderRadius: 25,
     paddingHorizontal: 20,
     marginBottom: 15,
@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
   loginButton: {
     width: '50%',
     height: 50,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#efe8e4',
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
@@ -99,7 +99,7 @@ export const styles = StyleSheet.create({
   languageSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#efe8e4',
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 5,
@@ -143,7 +143,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#efe8e4',
     borderRadius: 25,
     padding: 10,
     shadowColor: '#000',
@@ -160,19 +160,19 @@ export const styles = StyleSheet.create({
 export const lightTheme = {
   background: '#fff',
   text: '#333',
-  inputBackground: '#f5f5f5',
+  inputBackground: '#efe8e4',
   placeholder: '#999',
   icon: 'black',
-  buttonBackground: '#f5f5f5',
+  buttonBackground: '#efe8e4',
   link: 'black',
 };
 
 export const darkTheme = {
   background: '#000',
   text: '#fff',
-  inputBackground: '#1a1a1a',
+  inputBackground: '#efe8e4',
   placeholder: '#666',
   icon: 'black',
-  buttonBackground: '#f5f5f5',
+  buttonBackground: '#efe8e4',
   link: 'black',
 };

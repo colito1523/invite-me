@@ -16,25 +16,15 @@ export default StyleSheet.create({
     alignSelf: "center",
     position: "relative",
   },
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
   scrollContainer: {
+    backgroundColor: "white",
     flexGrow: 1,
     padding: 20,
     paddingTop: 60, // Add this line to increase the top padding
   },
-  title: {
-    fontSize: 25,
-    marginTop: 50,
-    textAlign: "center",
-    color: "#4d4d4d",
-    fontWeight: "500",
-  },
   logo: {
     width: 200,
-    height: 100,
+    height: 50,
     alignSelf: "center",
     marginTop: 50,
     marginBottom: 5,
@@ -51,8 +41,7 @@ export default StyleSheet.create({
     fontSize: 15,
     marginVertical: 65,
     textAlign: "center",
-    color: "#333333", // Change to a lighter shade of black
-    fontWeight: "bold",
+    color: 'black', // Texto en blanco
   },
   ageQuestion: {
     fontSize: 14,
@@ -97,7 +86,7 @@ export default StyleSheet.create({
     borderRadius: 30,
     fontSize: 15,
     marginBottom: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "#efe8e4",
     paddingLeft: 25,
   },
   input: {
@@ -105,7 +94,7 @@ export default StyleSheet.create({
     marginBottom: 40,
     borderRadius: 30,
     fontSize: 15,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "#efe8e4",
     paddingLeft: 25,
   },
   inputShort: {
@@ -113,7 +102,7 @@ export default StyleSheet.create({
     marginBottom: 40,
     borderRadius: 30,
     fontSize: 15,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "#efe8e4",
     width: "65%",
     paddingLeft: 25,
     alignSelf: "center",
@@ -122,7 +111,7 @@ export default StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 30,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "#efe8e4",
     marginBottom: 20,
     width: "65%",
     alignSelf: "center",
@@ -191,7 +180,7 @@ export default StyleSheet.create({
     padding: 10,
     borderRadius: 30,
     fontSize: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "#efe8e4",
   },
   ageGenderContainer: {
     alignItems: "center",
@@ -296,9 +285,9 @@ export default StyleSheet.create({
     left: 0,
     right: 0,
     height: GENDER_ITEM_HEIGHT,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "rgba(239, 232, 228, 0.5)",
     borderRadius: 20,
-    zIndex: 1,
+    zIndex: 0,
   },
   selectedOverlayAge: {
     position: "absolute",
@@ -306,9 +295,9 @@ export default StyleSheet.create({
     bottom: 0,
     left: ITEM_WIDTH,
     width: ITEM_WIDTH,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "rgba(239, 232, 228, 0.5)",
     borderRadius: 8,
-    zIndex: 1,
+    zIndex: 0,
   },
   nameText: {
     fontSize: 25,
@@ -390,7 +379,7 @@ export default StyleSheet.create({
   languageSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'white',
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -429,8 +418,5 @@ export default StyleSheet.create({
   selectedLanguageText: {
     fontWeight: 'bold',
     color: '#000',
-  },
-  aboutContainer: {
-    paddingTop: 40, // Add this style to increase the top padding for the about question
   },
 });

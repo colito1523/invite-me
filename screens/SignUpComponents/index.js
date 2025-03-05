@@ -5,20 +5,18 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   Alert,
   Dimensions,
   Animated,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback
 } from "react-native";
 import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database, storage } from "../../config/firebase";
-import { doc, setDoc, getDocs, query, where, collection, getDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDocs, query, where, collection, } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
@@ -28,7 +26,6 @@ import TermsAndConditionsModal from "../../Components/Terms-And-Conditions/terms
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 
 import es from '../../locales/es.json';
@@ -634,11 +631,7 @@ export default function SignUp() {
         behavior={Platform.OS === "ios" ? "padding" : "height" }
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Image
-            source={require("../../assets/Logo_Invite_Me.png")}
-            style={styles.logo}
-            contentFit="contain"
-          />
+          <View style={styles.logo}></View>
           <View style={styles.languageContainer}>
             <TouchableOpacity
               style={styles.languageSelector}
@@ -780,44 +773,84 @@ export default function SignUp() {
             </Animated.View>
           )}
 
-          {currentQuestion.id === "about" && (
-            <View style={styles.aboutContainer}> 
-              <View style={styles.rowInputs}>
-                <TextInput
-                  style={[styles.halfInput, { color: "black" }]}
-                  placeholder={t('signup.placeholders.hobby1')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("hobby1", text)}
-                  value={answers.hobby1}
-                />
-                <TextInput
-                  style={[styles.halfInput, { color: "black" }]}
-                  placeholder={t('signup.placeholders.hobby2')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("hobby2", text)}
-                  value={answers.hobby2}
-                />
-              </View>
+{currentQuestion.id === "about" && (
+  <View>
 
-              
-              <View style={styles.rowInputs}>
-                <TextInput
-                  style={[styles.halfInput, { color: "black" }]}
-                  placeholder={t('signup.placeholders.interest1')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("interest1", text)}
-                  value={answers.interest1}
-                />
-                <TextInput
-                  style={[styles.halfInput, { color: "black" }]}
-                  placeholder={t('signup.placeholders.interest2')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("interest2", text)}
-                  value={answers.interest2}
-                />
-              </View>
-            </View>
-          )}
+    {/* Fila 1 */}
+    <View style={styles.rowInputs}>
+      <TextInput
+        style={[styles.halfInput, { color: "black" }]}
+        placeholder={t('signup.placeholders.hobby1')}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("hobby1", text)}
+        value={answers.hobby1}
+      />
+      <TextInput
+        style={[styles.halfInput, { color: "black" }]}
+        placeholder={t('signup.placeholders.hobby2')}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("hobby2", text)}
+        value={answers.hobby2}
+      />
+    </View>
+
+    {/* Fila 2 */}
+    <View style={styles.rowInputs}>
+      <TextInput
+        style={[styles.halfInput, { color: "black" }]}
+        placeholder={t('signup.placeholders.hobby3')}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("hobby3", text)}
+        value={answers.hobby3}
+      />
+      <TextInput
+        style={[styles.halfInput, { color: "black" }]}
+        placeholder={t('signup.placeholders.hobby4')}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("hobby4", text)}
+        value={answers.hobby4}
+      />
+    </View>
+
+    {/* Fila 3 */}
+    <View style={styles.rowInputs}>
+      <TextInput
+        style={[styles.halfInput, { color: "black" }]}
+        placeholder={t('signup.placeholders.interest1')}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("interest1", text)}
+        value={answers.interest1}
+      />
+      <TextInput
+        style={[styles.halfInput, { color: "black" }]}
+        placeholder={t('signup.placeholders.interest2')}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("interest2", text)}
+        value={answers.interest2}
+      />
+    </View>
+
+    {/* Fila 4 */}
+    <View style={styles.rowInputs}>
+      <TextInput
+        style={[styles.halfInput, { color: "black" }]}
+        placeholder={t('signup.placeholders.interest3')}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("interest3", text)}
+        value={answers.interest3}
+      />
+      <TextInput
+        style={[styles.halfInput, { color: "black" }]}
+        placeholder={t('signup.placeholders.interest4')}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("interest4", text)}
+        value={answers.interest4}
+      />
+    </View>
+
+  </View>
+)}
+
 
           {currentQuestion.id === "photos" && (
             <View style={styles.photoContainer}>
