@@ -63,20 +63,18 @@ const GENDER_CONTAINER_WIDTH = width * 0.6;
 
 const ages = Array.from({ length: 85 }, (_, i) => i + 16);
 const genders = ["Male", "Female", "Other", "Prefer not to say"];
-const hobbyOptions = [
-  "First one leaving",
-  "Last one staying",
-  "Foodie",
-  "Gym",
-  
-];
 
 const interestOptions = [
   "Music",
   "Art",
   "Technology",
   "Nature",
-
+  "Sports",
+  "Travel",
+  "Photography",
+  "Books",
+  "Movies",
+  "Food",
 ];
 
 
@@ -326,54 +324,39 @@ export default function SignUp() {
     }
   };
 
-  
-const handleHobbySelection = (option) => {
-  const currentHobbies = [];
-  if (answers.hobby1) currentHobbies.push(answers.hobby1);
-  if (answers.hobby2) currentHobbies.push(answers.hobby2);
+  const handleInterestSelection = (option) => {
+    const currentInterests = [];
+    if (answers.interest1) currentInterests.push(answers.interest1);
+    if (answers.interest2) currentInterests.push(answers.interest2);
+    if (answers.interest3) currentInterests.push(answers.interest3);
+    if (answers.interest4) currentInterests.push(answers.interest4);
 
-  if (currentHobbies.includes(option)) {
-    // Deseleccionar la opción
-    if (answers.hobby1 === option) {
-      handleAnswer("hobby1", "");
-    } else if (answers.hobby2 === option) {
-      handleAnswer("hobby2", "");
-    }
-  } else {
-    // Si hay menos de 2 seleccionadas, agregar la opción
-    if (!answers.hobby1) {
-      handleAnswer("hobby1", option);
-    } else if (!answers.hobby2) {
-      handleAnswer("hobby2", option);
+    if (currentInterests.includes(option)) {
+      // Deseleccionar la opción
+      if (answers.interest1 === option) {
+        handleAnswer("interest1", "");
+      } else if (answers.interest2 === option) {
+        handleAnswer("interest2", "");
+      } else if (answers.interest3 === option) {
+        handleAnswer("interest3", "");
+      } else if (answers.interest4 === option) {
+        handleAnswer("interest4", "");
+      }
     } else {
-      Alert.alert("Solo se permiten 2 hobbies");
+      // Si hay menos de 4 seleccionadas, agregar la opción
+      if (!answers.interest1) {
+        handleAnswer("interest1", option);
+      } else if (!answers.interest2) {
+        handleAnswer("interest2", option);
+      } else if (!answers.interest3) {
+        handleAnswer("interest3", option);
+      } else if (!answers.interest4) {
+        handleAnswer("interest4", option);
+      } else {
+        Alert.alert(t('signup.errors.maxInterests'));
+      }
     }
-  }
-};
-
-const handleInterestSelection = (option) => {
-  const currentInterests = [];
-  if (answers.interest1) currentInterests.push(answers.interest1);
-  if (answers.interest2) currentInterests.push(answers.interest2);
-
-  if (currentInterests.includes(option)) {
-    // Deseleccionar la opción
-    if (answers.interest1 === option) {
-      handleAnswer("interest1", "");
-    } else if (answers.interest2 === option) {
-      handleAnswer("interest2", "");
-    }
-  } else {
-    // Si hay menos de 2 seleccionadas, agregar la opción
-    if (!answers.interest1) {
-      handleAnswer("interest1", option);
-    } else if (!answers.interest2) {
-      handleAnswer("interest2", option);
-    } else {
-      Alert.alert("Solo se permiten 2 intereses");
-    }
-  }
-};
+  };
 
 
   const validateName = (name) => {
@@ -485,16 +468,18 @@ const handleInterestSelection = (option) => {
 
     if (currentQuestion.id === "about") {
       if (
-        !validateSingleWord(answers.hobby1) ||
-        !validateSingleWord(answers.hobby2)
+        !answers.interest1 || !answers.interest2 || 
+        !answers.interest3 || !answers.interest4
       ) {
-        Alert.alert(t('signup.errors.invalidHobbies'));
+        Alert.alert(t('signup.errors.selectFourInterests'));
         setIsLoading(false);
         return;
       }
       if (
         !validateSingleWord(answers.interest1) ||
-        !validateSingleWord(answers.interest2)
+        !validateSingleWord(answers.interest2) ||
+        !validateSingleWord(answers.interest3) ||
+        !validateSingleWord(answers.interest4)
       ) {
         Alert.alert(t('signup.errors.invalidInterests'));
         setIsLoading(false);
@@ -576,6 +561,8 @@ const handleInterestSelection = (option) => {
         lastName: answers.lastName,
         firstInterest: answers.interest1,
         secondInterest: answers.interest2,
+        thirdInterest: answers.interest3,
+        fourthInterest: answers.interest4,
         photoUrls: photoUrls,
         username: usernameToLower,
         preferredLanguage: i18n.language,
@@ -649,20 +636,20 @@ const handleInterestSelection = (option) => {
         <View style={styles.rectanglesContainer}>
           <View style={styles.topRectanglesContainer}>
             <View style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{answers.hobby1}</Text>
+              <Text style={styles.rectangleText}>{answers.interest1}</Text>
             </View>
             <View style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{answers.hobby2}</Text>
+              <Text style={styles.rectangleText}>{answers.interest2}</Text>
             </View>
           </View>
           <View style={styles.bottomRectangleContainer}>
           </View>
           <View style={styles.bottomRectanglesContainer}>
             <View style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{answers.interest1}</Text>
+              <Text style={styles.rectangleText}>{answers.interest3}</Text>
             </View>
             <View style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{answers.interest2}</Text>
+              <Text style={styles.rectangleText}>{answers.interest4}</Text>
             </View>
           </View>
         </View>
@@ -849,35 +836,16 @@ const handleInterestSelection = (option) => {
 
           {currentQuestion.id === "about" && (
   <View>
-    {/* Hobbies */}
-    {chunkArray(hobbyOptions, 2).map((row, rowIndex) => (
-      <View style={styles.rowInputs} key={`hobby-row-${rowIndex}`}>
-        {row.map((option) => {
-          const isSelected = option === answers.hobby1 || option === answers.hobby2;
-          return (
-            <TouchableOpacity
-              key={option}
-              style={[
-                styles.halfInput,
-                { justifyContent: "center", alignItems: "center" },
-                isSelected ? { backgroundColor: "#e0dcd7" } : null,
-              ]}
-              onPress={() => handleHobbySelection(option)}
-            >
-              <Text style={{ color: "#000", textAlign: "center" }}>
-                {option}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    ))}
-
     {/* Interests */}
+    <Text style={styles.questionInterests}>{t('signup.questions.interests')}</Text>
     {chunkArray(interestOptions, 2).map((row, rowIndex) => (
       <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
         {row.map((option) => {
-          const isSelected = option === answers.interest1 || option === answers.interest2;
+          const isSelected = 
+            option === answers.interest1 || 
+            option === answers.interest2 || 
+            option === answers.interest3 || 
+            option === answers.interest4;
           return (
             <TouchableOpacity
               key={option}
@@ -942,7 +910,7 @@ const handleInterestSelection = (option) => {
                     style={styles.photo}
                     cachePolicy="memory-disk"
                   />
-                ) : (
+                                ) : (
                   <MaterialIcons
                     name="add-photo-alternate"
                     size={70}
