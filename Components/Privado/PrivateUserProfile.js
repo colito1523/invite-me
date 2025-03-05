@@ -127,9 +127,14 @@ const NameDisplay = ({
                       styles.mutualFriendImage,
                       styles.mutualFriendCountBubble,
                       { left: 4 * 30 },
+                      { backgroundColor: isNightMode ? "black" : "white",
+                        borderColor: isNightMode ? "black" : "white" // Cambio aquí
+                       },
                     ]}
                   >
-                    <Text style={styles.mutualFriendCountText}>
+                    <Text style={[styles.mutualFriendCountText, {
+              color: isNightMode ? "white" : "black", 
+              }]}>
                       +{mutualFriends.length - 4}
                     </Text>
                   </View>
@@ -775,7 +780,6 @@ const styles = StyleSheet.create({
     borderRadius: screenWidth * 0.05,
   },
   mutualFriendCountBubble: {
-    backgroundColor: "transparent", // Fondo transparente
     justifyContent: "center",
     alignItems: "center",
     width: screenWidth * 0.09, // Ajuste responsivo
@@ -783,7 +787,6 @@ const styles = StyleSheet.create({
     borderRadius: screenWidth * 0.045,
     position: "absolute",
     borderWidth: 2, // Agrega un borde de 2px
-    borderColor: "#fff", // Color blanco para el borde
   },
   mutualFriendCountText: {
     color: "#fff",

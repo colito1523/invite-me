@@ -354,16 +354,22 @@ export default function UserProfile({ route, navigation }) {
   
           {mutualFriends.length > 4 && (
             <View
-              style={[
-                styles.mutualFriendImage,
-                styles.mutualFriendCountBubble,
-                { left: 4 * (screenWidth * 0.05) },
-              ]}
-            >
-              <Text style={styles.mutualFriendCountText}>
-                +{mutualFriends.length - 4}
-              </Text>
-            </View>
+            style={[
+              styles.mutualFriendImage,
+              styles.mutualFriendCountBubble,
+              { 
+                left: 4 * (screenWidth * 0.05),
+                backgroundColor: isNightMode ? "black" : "white",
+                borderColor: isNightMode ? "black" : "white" // Cambio aquí
+              },
+            ]}
+          >
+            <Text style={[styles.mutualFriendCountText,{
+              color: isNightMode ? "white" : "black", 
+              },]}>
+              +{mutualFriends.length - 4}
+            </Text>
+          </View>
           )}
         </View>
       </TouchableOpacity>
