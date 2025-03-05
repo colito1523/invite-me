@@ -68,12 +68,7 @@ const hobbyOptions = [
   "Last one staying",
   "Foodie",
   "Gym",
-  "MIA person",
-  "Always on time",
-  "Reading",
-  "Traveling",
-  "Cycling",
-  "Running",
+  
 ];
 
 const interestOptions = [
@@ -81,10 +76,7 @@ const interestOptions = [
   "Art",
   "Technology",
   "Nature",
-  "History",
-  "Science",
-  "Movies",
-  "Sports",
+
 ];
 
 
@@ -233,10 +225,10 @@ export default function SignUp() {
     age: "18",
     gender: "Other",
     about: "",
-    hobby1: "",
-    hobby2: "",
     interest1: "",
     interest2: "",
+    interest3: "",
+    interest4: "",
     photo1: null,
     photo2: null,
     photo3: null,
@@ -311,10 +303,10 @@ export default function SignUp() {
 
       setAnswers((prev) => ({ ...prev, [id]: validValue }));
     } else if (
-      id === "hobby1" ||
-      id === "hobby2" ||
       id === "interest1" ||
-      id === "interest2"
+      id === "interest2" ||
+      id === "interest3" ||
+      id === "interest4"
     ) {
       // Letras, espacios y emojis
       const validValue = value
@@ -333,6 +325,55 @@ export default function SignUp() {
       setAnswers((prev) => ({ ...prev, [id]: value }));
     }
   };
+
+  
+const handleHobbySelection = (option) => {
+  const currentHobbies = [];
+  if (answers.hobby1) currentHobbies.push(answers.hobby1);
+  if (answers.hobby2) currentHobbies.push(answers.hobby2);
+
+  if (currentHobbies.includes(option)) {
+    // Deseleccionar la opción
+    if (answers.hobby1 === option) {
+      handleAnswer("hobby1", "");
+    } else if (answers.hobby2 === option) {
+      handleAnswer("hobby2", "");
+    }
+  } else {
+    // Si hay menos de 2 seleccionadas, agregar la opción
+    if (!answers.hobby1) {
+      handleAnswer("hobby1", option);
+    } else if (!answers.hobby2) {
+      handleAnswer("hobby2", option);
+    } else {
+      Alert.alert("Solo se permiten 2 hobbies");
+    }
+  }
+};
+
+const handleInterestSelection = (option) => {
+  const currentInterests = [];
+  if (answers.interest1) currentInterests.push(answers.interest1);
+  if (answers.interest2) currentInterests.push(answers.interest2);
+
+  if (currentInterests.includes(option)) {
+    // Deseleccionar la opción
+    if (answers.interest1 === option) {
+      handleAnswer("interest1", "");
+    } else if (answers.interest2 === option) {
+      handleAnswer("interest2", "");
+    }
+  } else {
+    // Si hay menos de 2 seleccionadas, agregar la opción
+    if (!answers.interest1) {
+      handleAnswer("interest1", option);
+    } else if (!answers.interest2) {
+      handleAnswer("interest2", option);
+    } else {
+      Alert.alert("Solo se permiten 2 intereses");
+    }
+  }
+};
 
 
   const validateName = (name) => {
@@ -533,8 +574,6 @@ export default function SignUp() {
         firstName: answers.firstName,
         gender: answers.gender,
         lastName: answers.lastName,
-        firstHobby: answers.hobby1,
-        secondHobby: answers.hobby2,
         firstInterest: answers.interest1,
         secondInterest: answers.interest2,
         photoUrls: photoUrls,
@@ -808,65 +847,58 @@ export default function SignUp() {
           
 
 
-{currentQuestion.id === "about" && (
+          {currentQuestion.id === "about" && (
   <View>
-    {/* EJEMPLO: Hobbies */}
+    {/* Hobbies */}
     {chunkArray(hobbyOptions, 2).map((row, rowIndex) => (
       <View style={styles.rowInputs} key={`hobby-row-${rowIndex}`}>
-        {row.map((option) => (
-          <TouchableOpacity
-            key={option}
-            style={[
-              styles.halfInput,
-              { justifyContent: "center", alignItems: "center" },
-              // Aquí aplicas un estilo de "seleccionado" si coincide con tu estado:
-              answers.hobby1 === option || answers.hobby2 === option ||
-              answers.hobby3 === option || answers.hobby4 === option
-                ? { backgroundColor: "#e0dcd7" } // Ejemplo de estilo "seleccionado"
-                : null,
-            ]}
-            onPress={() => {
-              // Lógica para asignar el valor a hobby1, hobby2, etc.
-              // Ajusta según tu necesidad de cuántos hobbies quieres guardar.
-              handleAnswer("hobby1", option);
-            }}
-          >
-            <Text style={{ color: "#000", textAlign: "center" }}>
-              {option}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {row.map((option) => {
+          const isSelected = option === answers.hobby1 || option === answers.hobby2;
+          return (
+            <TouchableOpacity
+              key={option}
+              style={[
+                styles.halfInput,
+                { justifyContent: "center", alignItems: "center" },
+                isSelected ? { backgroundColor: "#e0dcd7" } : null,
+              ]}
+              onPress={() => handleHobbySelection(option)}
+            >
+              <Text style={{ color: "#000", textAlign: "center" }}>
+                {option}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     ))}
 
-    {/* EJEMPLO: Interests */}
+    {/* Interests */}
     {chunkArray(interestOptions, 2).map((row, rowIndex) => (
       <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
-        {row.map((option) => (
-          <TouchableOpacity
-            key={option}
-            style={[
-              styles.halfInput,
-              { justifyContent: "center", alignItems: "center" },
-              // Marca como seleccionado si coincide con tu estado
-              answers.interest1 === option || answers.interest2 === option
-                ? { backgroundColor: "#e0dcd7" } // Ejemplo de estilo "seleccionado"
-                : null,
-            ]}
-            onPress={() => {
-              // Lógica para asignar el valor a interest1, interest2, etc.
-              handleAnswer("interest1", option);
-            }}
-          >
-            <Text style={{ color: "#000", textAlign: "center" }}>
-              {option}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {row.map((option) => {
+          const isSelected = option === answers.interest1 || option === answers.interest2;
+          return (
+            <TouchableOpacity
+              key={option}
+              style={[
+                styles.halfInput,
+                { justifyContent: "center", alignItems: "center" },
+                isSelected ? { backgroundColor: "#e0dcd7" } : null,
+              ]}
+              onPress={() => handleInterestSelection(option)}
+            >
+              <Text style={{ color: "#000", textAlign: "center" }}>
+                {option}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     ))}
   </View>
 )}
+
 
 
 
