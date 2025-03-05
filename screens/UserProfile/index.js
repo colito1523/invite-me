@@ -115,10 +115,10 @@ export default function UserProfile({ route, navigation }) {
   const [photoUrls, setPhotoUrls] = useState([]);
   const [isFriendListVisible, setIsFriendListVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [firstHobby, setFirstHobby] = useState("");
-  const [secondHobby, setSecondHobby] = useState("");
   const [firstInterest, setFirstInterest] = useState("");
   const [secondInterest, setSecondInterest] = useState("");
+  const [thirdInterest, setThirdInterest] = useState("");
+  const [fourthInterest, setFourthInterest] = useState("");
   const [mutualFriends, setMutualFriends] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0); // Added likeCount state
@@ -148,10 +148,10 @@ export default function UserProfile({ route, navigation }) {
         user,
         navigation,
         setPhotoUrls,
-        setFirstHobby,
-        setSecondHobby,
         setFirstInterest,
         setSecondInterest,
+        setThirdInterest,
+        setFourthInterest,
       });
       
       // Cargar datos básicos del usuario para mostrar inmediatamente
@@ -525,13 +525,13 @@ export default function UserProfile({ route, navigation }) {
                             <View style={styles.ovalAndIconsContainer}>
                               <View style={styles.ovalWrapper}>
                                 <View style={styles.ovalContainer}>
-                                  {renderOval(firstHobby)}
-                                  {renderOval(secondHobby)}
+                                  {renderOval(firstInterest)}
+                                  {renderOval(secondInterest)}
                                 </View>
 
                                 <View style={styles.ovalContainer}>
-                                  {renderOval(firstInterest)}
-                                  {renderOval(secondInterest)}
+                                  {renderOval(thirdInterest)}
+                                  {renderOval(fourthInterest)}
                                 </View>
                               </View>
                               <View style={styles.iconsContainer}>

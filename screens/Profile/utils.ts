@@ -42,7 +42,7 @@ export const fetchUserData = async (params) => {
 export const setFetchUserData = async (params) => {
     const { 
       setName, setSurname, setIsPrivate, setPhotoUrls, setUsername, 
-      setFriendCount, setFirstHobby, setSecondHobby, setFirstInterest, setSecondInterest 
+      setFriendCount, setFirstInterest, setSecondInterest, setThirdInterest, setFourthInterest 
     } = params;
 
     const user = auth.currentUser;
@@ -64,10 +64,10 @@ export const setFetchUserData = async (params) => {
         setPhotoUrls(data.photoUrls || []);
         setUsername(data.username || "");
         setFriendCount(friendsSnapshot.size);
-        setFirstHobby(data.firstHobby || "");
-        setSecondHobby(data.secondHobby || "");
         setFirstInterest(data.firstInterest || "");
         setSecondInterest(data.secondInterest || "");
+        setThirdInterest(data.thirdInterest || "");
+        setFourthInterest(data.fourthInterest || "");
       }
     } catch (error) {
       console.error("Error obteniendo datos del usuario:", error);

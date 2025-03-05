@@ -314,10 +314,10 @@ export const fetchUserData = async (params) => {
   const user = params.user
   const navigation = params.navigation
   const setPhotoUrls = params.setPhotoUrls
-  const setFirstHobby = params.setFirstHobby
-  const setSecondHobby = params.setSecondHobby
   const setFirstInterest = params.setFirstInterest
   const setSecondInterest = params.setSecondInterest
+  const setThirdInterest = params.setThirdInterest
+  const setFourthInterest = params.setFourthInterest
 
   if (selectedUser && selectedUser.id) {
     const userDoc = await getDoc(doc(database, "users", selectedUser.id));
@@ -338,10 +338,10 @@ export const fetchUserData = async (params) => {
       }
 
       setPhotoUrls(userData.photoUrls || ["https://via.placeholder.com/400"]);
-      setFirstHobby(userData.firstHobby || "");
-      setSecondHobby(userData.secondHobby || "");
       setFirstInterest(userData.firstInterest || "");
       setSecondInterest(userData.secondInterest || "");
+      setThirdInterest(userData.thirdInterest || "");
+      setFourthInterest(userData.fourthInterest || "");
     }
   }
 };

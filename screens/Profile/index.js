@@ -129,10 +129,10 @@ export default function Profile({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const [isFriendListVisible, setIsFriendListVisible] = useState(false);
-  const [firstHobby, setFirstHobby] = useState("");
-  const [secondHobby, setSecondHobby] = useState("");
   const [firstInterest, setFirstInterest] = useState("");
   const [secondInterest, setSecondInterest] = useState("");
+  const [thirdInterest, setThirdInterest] = useState("");
+  const [fourthInterest, setFourthInterest] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [isElementsVisible, setIsElementsVisible] = useState(true);
   const [heartCount, setHeartCount] = useState(0);
@@ -191,10 +191,10 @@ export default function Profile({ navigation }) {
           setPhotoUrls,
           setUsername,
           setFriendCount,
-          setFirstHobby,
-          setSecondHobby,
           setFirstInterest,
           setSecondInterest,
+          setThirdInterest,
+          setFourthInterest,
         });
 
         checkLikeStatus({ setIsHearted });
@@ -227,36 +227,48 @@ export default function Profile({ navigation }) {
   };
 
   const handleSaveChanges = async () => {
+    // Validación de nombre y apellido
     if (!validateInput(name) || !validateInput(surname)) {
       Alert.alert(t("profile.error"), t("profile.nameValidationError"));
       return;
     }
-
+  
     if (!name.trim() || !surname.trim()) {
       Alert.alert(t("profile.error"), t("profile.allFieldsRequired"));
       return;
     }
-
+  
+    // Nueva validación: verificar que los cuatro intereses tengan datos
+    if (
+      !firstInterest.trim() ||
+      !secondInterest.trim() ||
+      !thirdInterest.trim() ||
+      !fourthInterest.trim()
+    ) {
+      Alert.alert(t("profile.error"), t("profile.allInterestsRequired")); // Asegúrate de tener este key en tus traducciones o reemplázalo por un string literal
+      return;
+    }
+  
     const user = auth.currentUser;
     if (user) {
       setIsLoading(true);
-
+  
       try {
         const userDoc = await getDoc(doc(database, "users", user.uid));
         const currentData = userDoc.exists() ? userDoc.data() : {};
-
+  
         let updatedData = {};
         if (name !== currentData.firstName) updatedData.firstName = name;
         if (surname !== currentData.lastName) updatedData.lastName = surname;
-        if (firstHobby !== currentData.firstHobby)
-          updatedData.firstHobby = firstHobby;
-        if (secondHobby !== currentData.secondHobby)
-          updatedData.secondHobby = secondHobby;
         if (firstInterest !== currentData.firstInterest)
           updatedData.firstInterest = firstInterest;
         if (secondInterest !== currentData.secondInterest)
           updatedData.secondInterest = secondInterest;
-
+        if (thirdInterest !== currentData.thirdInterest)
+          updatedData.thirdInterest = thirdInterest;
+        if (fourthInterest !== currentData.fourthInterest)
+          updatedData.fourthInterest = fourthInterest;
+  
         // Subir imágenes comprimidas
         const uploadTasks = photoUrls.map(async (url, index) => {
           if (url.startsWith("file://")) {
@@ -269,7 +281,7 @@ export default function Profile({ navigation }) {
           }
           return url;
         });
-
+  
         const updatedPhotoUrls = await Promise.all(uploadTasks);
         if (
           JSON.stringify(updatedPhotoUrls) !==
@@ -277,8 +289,8 @@ export default function Profile({ navigation }) {
         ) {
           updatedData.photoUrls = updatedPhotoUrls;
         }
-
-        // Generar y subir imagen en **ultra baja calidad** solo para la primera foto
+  
+        // Generar y subir imagen en ultra baja calidad solo para la primera foto
         if (photoUrls[0].startsWith("file://")) {
           const lowQualityUri = await compressImage(photoUrls[0], true); // Comprimir aún más
           const lowQualityRef = ref(storage, `photos/${user.uid}_low.jpg`);
@@ -288,11 +300,11 @@ export default function Profile({ navigation }) {
           const lowQualityUrl = await getDownloadURL(lowQualityRef);
           updatedData.lowQualityProfileImage = lowQualityUrl; // Guardar en la base de datos
         }
-
+  
         if (Object.keys(updatedData).length > 0) {
           await updateDoc(doc(database, "users", user.uid), updatedData);
         }
-
+  
         setPhotoUrls(updatedPhotoUrls);
         setIsEditing(false);
       } catch (error) {
@@ -303,6 +315,7 @@ export default function Profile({ navigation }) {
       }
     }
   };
+  
 
   const renderSaveButton = () => {
     return (
@@ -558,19 +571,6 @@ export default function Profile({ navigation }) {
                                 <View style={styles.ovalWrapper}>
                                   <View style={styles.ovalContainer}>
                                     {renderEditableOval(
-                                      firstHobby,
-                                      setFirstHobby,
-                                      t("profile.hobby1")
-                                    )}
-                                    {renderEditableOval(
-                                      secondHobby,
-                                      setSecondHobby,
-                                      t("profile.hobby2")
-                                    )}
-                                  </View>
-
-                                  <View style={styles.ovalContainer}>
-                                    {renderEditableOval(
                                       firstInterest,
                                       setFirstInterest,
                                       t("profile.interest1")
@@ -579,6 +579,19 @@ export default function Profile({ navigation }) {
                                       secondInterest,
                                       setSecondInterest,
                                       t("profile.interest2")
+                                    )}
+                                  </View>
+
+                                  <View style={styles.ovalContainer}>
+                                    {renderEditableOval(
+                                      thirdInterest,
+                                      setThirdInterest,
+                                      t("profile.interest3")
+                                    )}
+                                    {renderEditableOval(
+                                      fourthInterest,
+                                      setFourthInterest,
+                                      t("profile.interest4")
                                     )}
                                   </View>
                                 </View>
