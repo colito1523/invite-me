@@ -22,7 +22,7 @@ export const createStoryPanResponder = ({
   handlePreviousUser,
   isCurrentUserStory,
 }) => {
-  const swipeThreshold = 2; // Umbral de distancia (menor valor = más sensible)
+  const swipeThreshold = 0.1; // Umbral de distancia (menor valor = más sensible)
   const velocityThreshold = 0.1; // Umbral de velocidad (menor valor = más sensible)
 
   return PanResponder.create({

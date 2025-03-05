@@ -812,23 +812,19 @@
         "description": "Swipe through to discover the app's features and learn how to make the most of your experience."
       },
       "2": {
-        "topText": "Vê o melhor que se passa na tua cidade, descobre os  melhores planos, sabe onde vão os outros e convida os teus amigos!"
+        "topText": "Vê o melhor que se passa na tua cidade, descobre os  melhores planos, sabe onde vão os outros e convida os teus amigos!",
+       "bottomText": "Se escolheres tornar o teu perfil privado, apenas os teus amigos poderão ver para onde vais."
       },
       "3": {
-        "topText": "A tua identidade, em três fotografias! Escolhe as que mostram o teu estilo, fala sobre os teus interesses e o que te define. Aqui, a autenticidade é o que mais importa."},
-      "4": {
-        "topText": "Ao tornares o teu perfil privado, só os teus amigos conseguem ver onde vais estar."
-      },
-      "5": {
         "topText": "A teu perfil, a tua história! Partilha os teus melhores momentos e revive as melhores memórias!"
       },
-      "6": {
+      "4": {
         "topText": "O teu calendário social, simplificado! Recebe convites dos teus amigos, acompanha os planos e mantém-te a par dos melhores eventos."
       },
-      "7": {
+      "5": {
         "topText": "Mantém-te conectado! Conversa com os amigos, organiza planos e partilha o teu estado de espírito—seja para uma noite animada ou uma noite tranquila."
       },
-      "8": {
+      "6": {
         "topText": "Assume o controlo! Cria eventos, convida as pessoas que mais combinam contigo e cria a experiência ideal."
       }
     }

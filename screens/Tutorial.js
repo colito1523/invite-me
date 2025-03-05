@@ -12,9 +12,9 @@ import { Video } from 'expo-av';
 import { Image } from 'expo-image';
 import { auth, database } from '../config/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+
 
 const { width } = Dimensions.get('window');
 
@@ -28,7 +28,7 @@ export default function Tutorial() {
     { 
       id: '1', 
       type: 'info',
-      video: require('../assets/tutorial/videos/0.mp4'),
+      video: require('../assets/tutorial/videos/1.mp4'),
       videoStyle: styles.imageStyle2,
       topTextStyle: { fontSize: 14 },      // Estilo específico para el texto superior
       bottomTextStyle: { fontSize: 14 },   // Estilo específico para el texto inferior
@@ -37,7 +37,8 @@ export default function Tutorial() {
       id: '2', 
       type: 'info',
       topText: t('tutorial.slides.2.topText'),
-      video: require('../assets/tutorial/videos/1.mp4'),
+      bottomText: t('tutorial.slides.2.bottomText'),
+      video: require('../assets/tutorial/videos/2.mp4'),
       videoStyle: styles.imageStyle2,
       topTextStyle: { fontSize: 14 },      // Estilo específico para el texto superior
       bottomTextStyle: { fontSize: 14 },   // Estilo específico para el texto inferior
@@ -46,8 +47,8 @@ export default function Tutorial() {
       id: '3', 
       type: 'info',
       topText: t('tutorial.slides.3.topText'),
-      video: require('../assets/tutorial/videos/2.mp4'),
-      videoStyle: styles.imageStyle2,
+      video: require('../assets/tutorial/videos/3.mp4'),
+      videoStyle: styles.imageStyle4,
       topTextStyle: { fontSize: 14 },
       bottomTextStyle: { fontSize: 14 },
     },
@@ -55,8 +56,8 @@ export default function Tutorial() {
       id: '4', 
       type: 'info',
       topText: t('tutorial.slides.4.topText'),
-      video: require('../assets/tutorial/videos/3.mp4'),
-      videoStyle: styles.imageStyle3,
+      video: require('../assets/tutorial/videos/4.mp4'),
+      videoStyle: styles.imageStyle4,
       topTextStyle: { fontSize: 14 },
       bottomTextStyle: { fontSize: 14 },
     },
@@ -64,34 +65,7 @@ export default function Tutorial() {
       id: '5', 
       type: 'info',
       topText: t('tutorial.slides.5.topText'),
-      video: require('../assets/tutorial/videos/4.mp4'),
-      videoStyle: styles.imageStyle4,
-      topTextStyle: { fontSize: 14 },
-      bottomTextStyle: { fontSize: 14 },
-    },
-    { 
-      id: '6', 
-      type: 'info',
-      topText: t('tutorial.slides.6.topText'),
       video: require('../assets/tutorial/videos/5.mp4'),
-      videoStyle: styles.imageStyle4,
-      topTextStyle: { fontSize: 14 },
-      bottomTextStyle: { fontSize: 14 },
-    },
-    { 
-      id: '7', 
-      type: 'info',
-      topText: t('tutorial.slides.7.topText'),
-      video: require('../assets/tutorial/videos/6.mp4'),
-      videoStyle: styles.imageStyle4,
-      topTextStyle: { fontSize: 14 },
-      bottomTextStyle: { fontSize: 14 },
-    },
-    { 
-      id: '8', 
-      type: 'info',
-      topText: t('tutorial.slides.8.topText'),
-      video: require('../assets/tutorial/videos/7.mp4'),
       videoStyle: styles.imageStyle4,
       topTextStyle: { fontSize: 14 },
       bottomTextStyle: { fontSize: 14 },
@@ -99,7 +73,7 @@ export default function Tutorial() {
   ];
 
   const renderItem = ({ item, index }) => (
-    <View style={[styles.content, { width, backgroundColor: index === 0 ? 'white' : 'black' }]}>
+    <View style={[styles.content, { width, backgroundColor: "white"}]}>
       {item.type === 'welcome' ? (
         <>
           <Image
@@ -117,7 +91,7 @@ export default function Tutorial() {
             source={item.video}
             style={[styles.logo, item.videoStyle]}
             resizeMode="contain"
-            shouldPlay    // Inicia la reproducción automáticamente
+            shouldPlay={currentIndex === index}
             isLooping     // Reproduce en loop
             useNativeControls={false}
             isMuted={true} // Mute the video
@@ -222,8 +196,9 @@ const styles = StyleSheet.create({
   skipText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'white',
+    color: 'black',
     marginRight: 5,
+    marginTop: 10,
   },
   content: {
     flex: 1,
@@ -256,14 +231,11 @@ const styles = StyleSheet.create({
   },
   overlayText: {
     position: 'absolute',
-    color: '#FFFFFF', // Texto en blanco
+    color: 'black', // Texto en blanco
     textAlign: 'center',
     width: '100%',
     paddingHorizontal: 10,
-    fontWeight: 'bold',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
+   
   },
   topOverlayText: {
     top: 20, // Posiciona el texto superior

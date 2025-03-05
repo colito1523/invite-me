@@ -820,6 +820,7 @@
   "cancel": "Cancelar",
   "login": "Iniciar sesión",
   "previewHome": "Vista previa",
+
   
 
   "tutorial": {
@@ -831,24 +832,19 @@
         "description": "Desliza para descubrir las funciones de la aplicación y aprende a sacarle el máximo partido a tu experiencia."
       },
       "2": {
-        "topText": "¡Mira lo mejor que ocurre en tu ciudad, descubre los mejores planes, averigua a dónde van los demás e invita a tus amigos!"
+        "topText": "¡Mira lo mejor que ocurre en tu ciudad, descubre los mejores planes, averigua a dónde van los demás e invita a tus amigos!",
+       "bottomText": "Si eliges hacer tu perfil privado, solo tus amigos podrán ver a dónde vas."
       },
       "3": {
-        "topText": "¡Tu identidad, en tres fotografías! Elige las que muestren tu estilo, habla sobre tus intereses y lo que te define. Aquí, la autenticidad es lo que más importa."
-      },
-      "4": {
-        "topText": "Al hacer tu perfil privado, solo tus amigos podrán ver dónde estarás."
-      },
-      "5": {
         "topText": "¡Tu perfil, tu historia! Comparte tus mejores momentos y revive los mejores recuerdos!"
       },
-      "6": {
+      "4": {
         "topText": "¡Tu calendario social, simplificado! Recibe invitaciones de tus amigos, sigue los planes y mantente al tanto de los mejores eventos."
       },
-      "7": {
+      "5": {
         "topText": "¡Mantente conectado! Habla con tus amigos, organiza planes y comparte tu estado de ánimo, ya sea para una noche animada o para una noche tranquila."
       },
-      "8": {
+      "6": {
         "topText": "¡Toma el control! Crea eventos, invita a las personas que más combinan contigo y crea la experiencia ideal."
       }
     }

@@ -840,23 +840,19 @@
         "description": "Swipe through to discover the app's features and learn how to make the most of your experience."
       },
       "2": {
-        "topText": "Explore what's happening in your city! See upcoming events, check out who's attending, and join in. Want to bring friends along? Invite them with just a tap!"
+        "topText": "Explore what's happening in your city! See upcoming events, check out who's attending, and join in. Want to bring friends along? Invite them with just a tap!",
+          "bottomText": "If you choose to make your profile private, only your friends can view where you´re going"
       },
       "3": {
-        "topText": "A profile that speaks for itself! Pick your best three photos, highlight your hobbies, and share what makes you, you. It's all about keeping it real."},
+         "topText": "Your night, your story! Post highlights from your favorite events, restaurants, and parties. Share moments with friends and relive the best times!"
+         },
       "4": {
-        "topText": "Enjoy the scene, your way! Your plans remain private, and only your friends can see where you're going. Everyone else? They only get a glimpse!"
-      },
-      "5": {
-        "topText": "Your night, your story! Post highlights from your favorite events, restaurants, and parties. Share moments with friends and relive the best times!"
-      },
-      "6": {
         "topText": "Your social calendar, made easy! Get invites from friends, track your plans, and keep up with all the best events in one place."
       },
-      "7": {
+      "5": {
         "topText": "Stay connected! Chat with friends, make plans, and share your mood—whether you're up for a big night out or a chill evening."
       },
-      "8": {
+      "6": {
         "topText": "Take control of your social scene! Create events, invite your people, and curate the perfect experience. It's all about the right crowd."
       }
     }
