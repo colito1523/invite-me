@@ -26,6 +26,7 @@ import TermsAndConditionsModal from "../../Components/Terms-And-Conditions/terms
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { Picker } from "@react-native-picker/picker";
 import styles from './styles';
 
 import es from '../../locales/es.json';
@@ -62,6 +63,38 @@ const GENDER_CONTAINER_WIDTH = width * 0.6;
 
 const ages = Array.from({ length: 85 }, (_, i) => i + 16);
 const genders = ["Male", "Female", "Other", "Prefer not to say"];
+const hobbyOptions = [
+  "First one leaving",
+  "Last one staying",
+  "Foodie",
+  "Gym",
+  "MIA person",
+  "Always on time",
+  "Reading",
+  "Traveling",
+  "Cycling",
+  "Running",
+];
+
+const interestOptions = [
+  "Music",
+  "Art",
+  "Technology",
+  "Nature",
+  "History",
+  "Science",
+  "Movies",
+  "Sports",
+];
+
+
+function chunkArray(array, size) {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}
 
 function AgeSelector({ onAgeChange, initialAge }) {
   const [selectedAge, setSelectedAge] = useState(initialAge);
@@ -772,84 +805,69 @@ export default function SignUp() {
               />
             </Animated.View>
           )}
+          
+
 
 {currentQuestion.id === "about" && (
   <View>
+    {/* EJEMPLO: Hobbies */}
+    {chunkArray(hobbyOptions, 2).map((row, rowIndex) => (
+      <View style={styles.rowInputs} key={`hobby-row-${rowIndex}`}>
+        {row.map((option) => (
+          <TouchableOpacity
+            key={option}
+            style={[
+              styles.halfInput,
+              { justifyContent: "center", alignItems: "center" },
+              // Aquí aplicas un estilo de "seleccionado" si coincide con tu estado:
+              answers.hobby1 === option || answers.hobby2 === option ||
+              answers.hobby3 === option || answers.hobby4 === option
+                ? { backgroundColor: "#e0dcd7" } // Ejemplo de estilo "seleccionado"
+                : null,
+            ]}
+            onPress={() => {
+              // Lógica para asignar el valor a hobby1, hobby2, etc.
+              // Ajusta según tu necesidad de cuántos hobbies quieres guardar.
+              handleAnswer("hobby1", option);
+            }}
+          >
+            <Text style={{ color: "#000", textAlign: "center" }}>
+              {option}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    ))}
 
-    {/* Fila 1 */}
-    <View style={styles.rowInputs}>
-      <TextInput
-        style={[styles.halfInput, { color: "black" }]}
-        placeholder={t('signup.placeholders.hobby1')}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("hobby1", text)}
-        value={answers.hobby1}
-      />
-      <TextInput
-        style={[styles.halfInput, { color: "black" }]}
-        placeholder={t('signup.placeholders.hobby2')}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("hobby2", text)}
-        value={answers.hobby2}
-      />
-    </View>
-
-    {/* Fila 2 */}
-    <View style={styles.rowInputs}>
-      <TextInput
-        style={[styles.halfInput, { color: "black" }]}
-        placeholder={t('signup.placeholders.hobby3')}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("hobby3", text)}
-        value={answers.hobby3}
-      />
-      <TextInput
-        style={[styles.halfInput, { color: "black" }]}
-        placeholder={t('signup.placeholders.hobby4')}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("hobby4", text)}
-        value={answers.hobby4}
-      />
-    </View>
-
-    {/* Fila 3 */}
-    <View style={styles.rowInputs}>
-      <TextInput
-        style={[styles.halfInput, { color: "black" }]}
-        placeholder={t('signup.placeholders.interest1')}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("interest1", text)}
-        value={answers.interest1}
-      />
-      <TextInput
-        style={[styles.halfInput, { color: "black" }]}
-        placeholder={t('signup.placeholders.interest2')}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("interest2", text)}
-        value={answers.interest2}
-      />
-    </View>
-
-    {/* Fila 4 */}
-    <View style={styles.rowInputs}>
-      <TextInput
-        style={[styles.halfInput, { color: "black" }]}
-        placeholder={t('signup.placeholders.interest3')}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("interest3", text)}
-        value={answers.interest3}
-      />
-      <TextInput
-        style={[styles.halfInput, { color: "black" }]}
-        placeholder={t('signup.placeholders.interest4')}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("interest4", text)}
-        value={answers.interest4}
-      />
-    </View>
-
+    {/* EJEMPLO: Interests */}
+    {chunkArray(interestOptions, 2).map((row, rowIndex) => (
+      <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
+        {row.map((option) => (
+          <TouchableOpacity
+            key={option}
+            style={[
+              styles.halfInput,
+              { justifyContent: "center", alignItems: "center" },
+              // Marca como seleccionado si coincide con tu estado
+              answers.interest1 === option || answers.interest2 === option
+                ? { backgroundColor: "#e0dcd7" } // Ejemplo de estilo "seleccionado"
+                : null,
+            ]}
+            onPress={() => {
+              // Lógica para asignar el valor a interest1, interest2, etc.
+              handleAnswer("interest1", option);
+            }}
+          >
+            <Text style={{ color: "#000", textAlign: "center" }}>
+              {option}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    ))}
   </View>
 )}
+
 
 
           {currentQuestion.id === "photos" && (
