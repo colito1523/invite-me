@@ -604,6 +604,8 @@
     "hobby2": "Hobby 2",
     "interest1": "Interest 1",
     "interest2": "Interest 2",
+    "interest3": "Interest 3",
+    "interest4": "Interest 4",
     "dontInteract": "You cannot interact with this user."
   },
 
@@ -816,7 +818,8 @@
       "emailInUse": "This email is already in use.",
       "weakPassword": "The password is too weak.",
       "generic": "An error occurred. Please try again.",
-      "emailContainsSpaces": "Email cannot contain spaces"
+      "emailContainsSpaces": "Email cannot contain spaces",
+      "selectFourInterests": "Please select four interests"
     },
     "welcome": {
       "title": "You're in!",

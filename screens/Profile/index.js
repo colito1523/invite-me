@@ -245,7 +245,7 @@ export default function Profile({ navigation }) {
       !thirdInterest.trim() ||
       !fourthInterest.trim()
     ) {
-      Alert.alert(t("profile.error"), t("profile.allInterestsRequired")); // Asegúrate de tener este key en tus traducciones o reemplázalo por un string literal
+      Alert.alert(t("profile.error"), t("signup.errors.selectFourInterests")); // Asegúrate de tener este key en tus traducciones o reemplázalo por un string literal
       return;
     }
   

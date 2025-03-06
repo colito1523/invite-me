@@ -592,6 +592,8 @@
   "hobby2": "Hobby 2",
   "interest1": "Interesse 1",
   "interest2": "Interesse 2",
+  "interest3": "Interesse 3",
+  "interest4": "Interesse 4",
   "dontInteract": "Não pode interagir com este utilizador."
 },
 "profileMenuSections": {
@@ -789,7 +791,8 @@
   "emailInUse": "Este email já está em uso.",
   "weakPassword": "A palavra-passe é muito fraca.",
   "generic": "Ocorreu um erro. Por favor, tente novamente.",
-  "emailContainsSpaces": "O email não pode conter espaços."
+  "emailContainsSpaces": "O email não pode conter espaços.",
+  "selectFourInterests": "Por favor, selecione quatro interesses."
 },
 "welcome": {
   "title": "Já está dentro!",

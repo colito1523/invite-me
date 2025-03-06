@@ -367,7 +367,7 @@ export default function SignUp() {
       } else if (!answers.interest4) {
         handleAnswer("interest4", option);
       } else {
-        Alert.alert(t('signup.errors.maxInterests'));
+        Alert.alert(t('signup.errors.selectFourInterests'));
       }
     }
   };
