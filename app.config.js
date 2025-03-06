@@ -18,7 +18,7 @@ export default {
     slug: "invite-me",
     version: "1.0.6",
     orientation: "portrait",
-    icon: "./assets/Logo_Invite_Me.png",
+    icon: "./assets/nuevo_logo.png",
     userInterfaceStyle: "light",
     ios: {
       bundleIdentifier: "com.airesSoftStudio.inviteMe",

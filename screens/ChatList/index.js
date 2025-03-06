@@ -420,7 +420,7 @@ export default function ChatList() {
             uid: chatUser.uid,
             username: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
             profileImage: chatUser.photoUrls?.[0],
-            userStories: stories,
+            userStories: chatUser.userStories 
           },
         ]);
         setIsModalVisible(true);
