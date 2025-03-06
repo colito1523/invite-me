@@ -153,6 +153,29 @@ const boxInfo = [
     city: "Lisboa",
     
   },
+
+  {
+    path: require("../../assets/Lisboa/Skizzo.jpg"),
+    title: "Skizzo",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "6:00 PM - 1:00 AM",
+      Martes: "6:00 PM - 1:00 AM",
+      Miércoles: "6:00 PM - 1:00 AM",
+      Jueves: "6:00 PM - 1:00 AM",
+      Viernes: "6:00 PM - 1:00 AM",
+      Sábado: "6:00 PM - 1:00 AM",
+      Domingo: "Cerrado",
+    },
+    number: "21 390 2315",
+    coordinates: {
+      latitude: 38.70855390,
+      longitude: -9.15696750,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
   {
     path: require("../../assets/Lisboa/Mona_Verde.jpg"),
     title: "Mona Verde",
@@ -440,50 +463,6 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Brilhante.jpg"),
-    title: "Brilhante",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "19:00 PM - 12:00 AM",
-      Martes: "19:00 PM - 12:00 AM",
-      Miércoles: "19:00 PM - 12:00 AM",
-      Jueves: "19:00 PM - 12:00 AM",
-      Viernes: "19:00 PM - 12:00 AM",
-      Sábado: "12:00 PM - 01:00 AM",
-      Domingo: "19:00 PM - 12:00 AM",
-    },
-    number: "21 054 7981",
-    coordinates: {
-      latitude: 38.7078843,
-      longitude: -9.1470788,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
-    path: require("../../assets/Lisboa/Incognito.jpg"),
-    title: "Incógnito",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "Cerrado",
-      Martes: "Cerrado",
-      Miércoles: "Cerrado",
-      Jueves: "11:00 PM - 04:00 AM",
-      Viernes: "11:00 PM - 04:00 AM",
-      Sábado: "11:00 PM - 04:00 AM",
-      Domingo: "Cerrado",
-},
-    number: "-",
-    coordinates: {
-      latitude: 38.71084890,
-      longitude: -9.1509367,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
     path: require("../../assets/Lisboa/jamaica.jpg"),
     title: "Jamaica",
     category: "Bars & Clubs",
@@ -764,50 +743,6 @@ const boxInfo = [
     coordinates: {
       latitude: 38.71423350,
       longitude: -9.15305580,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
-    path: require("../../assets/Lisboa/Lx_Factory.jpg"),
-    title: "Lx Factory",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-",
-    },
-    number: "-",
-    coordinates: {
-      latitude: 38.7034979,
-      longitude: -9.178873,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
-    path: require("../../assets/Lisboa/Docas.jpg"),
-    title: "Docas de Santo Amaro",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "7:00 PM - 12:00 AM",
-      Martes: "7:00 PM - 12:00 AM",
-      Miércoles: "7:00 PM - 12:00 AM",
-      Jueves: "7:00 PM - 12:00 AM",
-      Viernes: "7:00 PM - 12:00 AM",
-      Sábado: "7:00 PM - 12:00 AM",
-      Domingo: "12:00 PM - 5:00 PM",
-    },
-    number: "213 963 535",
-    coordinates: {
-      latitude: 38.6994781,
-      longitude: -9.1774925,
     },
     country: "Portugal",
     city: "Lisboa",
