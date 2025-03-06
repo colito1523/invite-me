@@ -812,8 +812,8 @@
       "selectFourInterests": "Por favor, selecciona al menos cuatro intereses"
     },
    "interestsGroup1": {
-      "firstOneIn": "El primero en llegar",
-      "lastOneOut": "El último en irse",
+      "firstOneIn": "El último en llegar",
+      "lastOneOut": "El primero en irse",
       "foodie": "Amante de la comida",
       "gym": "Gimnasio",
       "miaPerson": "Desaparecido/a",

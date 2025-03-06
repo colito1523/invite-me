@@ -168,6 +168,11 @@ export default StyleSheet.create({
     alignItems: "center",
 
   },
+
+  interestsContainer: {
+    marginTop: 60, // Increase this value to add more vertical space
+  },
+
   rowInputs: {
     flexDirection: "row",
     justifyContent: "space-between",

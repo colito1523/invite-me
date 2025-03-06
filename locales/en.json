@@ -822,8 +822,8 @@
       "selectFourInterests": "Please select four interests"
     },
     "interestsGroup1": {
-      "firstOneIn": "First one in",
-      "lastOneOut": "Last one out",
+      "firstOneIn": "Last one in",
+      "lastOneOut": "First one out",
       "foodie": "Foodie",
       "gym": "Gym",
       "miaPerson": "MIA person",

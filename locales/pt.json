@@ -796,11 +796,11 @@
   "selectFourInterests": "Por favor, selecione quatro interesses."
 },
 "interestsGroup1": {
-  "firstOneIn": "Primeiro a chegar",
-  "lastOneOut": "Último a sair",
-  "foodie": "Apaixonado por comida",
-  "gym": "Academia",
-  "miaPerson": "Pessoa desaparecida",
+  "firstOneIn": "Último a chegar",
+  "lastOneOut": "Primeiro a sair",
+  "foodie": "Foodie",
+  "gym": "Ginásio",
+  "miaPerson": "MIA person",
   "alwaysOnTime": "Pontual",
   "reading": "Leitura",
   "traveling": "Viajar",
@@ -816,8 +816,8 @@
   "festivals": "Festivais",
   "mornings": "Manhãs",
   "nights": "Noites",
-  "summerPerson": "Pessoa do verão",
-  "winterPerson": "Pessoa do inverno",
+  "summerPerson": "Verão",
+  "winterPerson": "Inverno",
   "goingOut": "Sair",
   "stayingIn": "Ficar em casa"
 },

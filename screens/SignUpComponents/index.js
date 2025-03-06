@@ -347,41 +347,42 @@ export default function SignUp() {
     }
   };
 
-  const handleInterestSelection = (optionText) => {
-    // Vemos si ya está seleccionada
+  const handleInterestSelection = (key) => {
+    // Comprobamos si la clave ya está seleccionada
     const currentInterests = [
       answers.interest1,
       answers.interest2,
       answers.interest3,
       answers.interest4,
     ].filter(Boolean);
-
-    if (currentInterests.includes(optionText)) {
+  
+    if (currentInterests.includes(key)) {
       // Deseleccionar la opción
-      if (answers.interest1 === optionText) {
+      if (answers.interest1 === key) {
         handleAnswer("interest1", "");
-      } else if (answers.interest2 === optionText) {
+      } else if (answers.interest2 === key) {
         handleAnswer("interest2", "");
-      } else if (answers.interest3 === optionText) {
+      } else if (answers.interest3 === key) {
         handleAnswer("interest3", "");
-      } else if (answers.interest4 === optionText) {
+      } else if (answers.interest4 === key) {
         handleAnswer("interest4", "");
       }
     } else {
-      // Si hay menos de 4 seleccionadas, agregar la opción
+      // Agregar la opción si hay menos de 4 seleccionadas
       if (!answers.interest1) {
-        handleAnswer("interest1", optionText);
+        handleAnswer("interest1", key);
       } else if (!answers.interest2) {
-        handleAnswer("interest2", optionText);
+        handleAnswer("interest2", key);
       } else if (!answers.interest3) {
-        handleAnswer("interest3", optionText);
+        handleAnswer("interest3", key);
       } else if (!answers.interest4) {
-        handleAnswer("interest4", optionText);
+        handleAnswer("interest4", key);
       } else {
         Alert.alert(t("signup.errors.selectFourInterests"));
       }
     }
   };
+  
 
   const validateName = (name) => {
     const nameRegex = /^[a-zA-ZÀ-ÿãÃçÇñÑ ]+$/;
@@ -872,35 +873,38 @@ export default function SignUp() {
 
             {currentQuestion.id === "about" && (
           <View>
-            {chunkArray(translatedInterestOptions1, 2).map((row, rowIndex) => (
-              <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
-                {row.map((optionText) => {
-                  const isSelected =
-                    optionText === answers.interest1 ||
-                    optionText === answers.interest2 ||
-                    optionText === answers.interest3 ||
-                    optionText === answers.interest4;
-                  return (
-                    <TouchableOpacity
-                      key={optionText}
-                      style={[
-                        styles.halfInput,
-                        isSelected ? { backgroundColor: "#e0dcd7" } : null,
-                      ]}
-                      onPress={() => handleInterestSelection(optionText)}
-                    >
-                      <Text>{optionText}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            ))}
+           {chunkArray(interestKeysGroup1, 2).map((row, rowIndex) => (
+  <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
+    {row.map((key) => {
+      const isSelected =
+        key === answers.interest1 ||
+        key === answers.interest2 ||
+        key === answers.interest3 ||
+        key === answers.interest4;
+      return (
+        <TouchableOpacity
+          key={key}
+          style={[
+            styles.halfInput,
+            isSelected ? { backgroundColor: "#e0dcd7" } : null,
+          ]}
+          onPress={() => handleInterestSelection(key)}
+        >
+          <Text>{t(`signup.interestsGroup1.${key}`)}</Text>
+        </TouchableOpacity>
+      );
+    })}
+  </View>
+))}
+
+
           </View>
         )}
 
 {currentQuestion.id === "about2" && (
-          <View>
-            {chunkArray(translatedInterestOptions2, 2).map((row, rowIndex) => (
+  <View style={styles.interestsContainer}>
+  {chunkArray(translatedInterestOptions2, 2).map((row, rowIndex) => (
+    <View >
               <View style={styles.rowInputs} key={`interest2-row-${rowIndex}`}>
                 {row.map((optionText) => {
                   const isSelected =
@@ -921,6 +925,7 @@ export default function SignUp() {
                     </TouchableOpacity>
                   );
                 })}
+              </View>
               </View>
             ))}
           </View>
