@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // Fondo por defecto en el contenedor; se verán los fondos de cada slide
-    backgroundColor: 'black',
+    backgroundColor: 'white',
   },
   skipContainer: {
     position: 'absolute',
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     marginRight: 5,
-    marginTop: 10,
+    marginTop: 20,
   },
   content: {
     flex: 1,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
    
   },
   topOverlayText: {
-    top: 20, // Posiciona el texto superior
+    top: 50, // Posiciona el texto superior
   },
   bottomOverlayText: {
     bottom: 10, // Posiciona el texto inferior
@@ -261,13 +261,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 50,
     right: 20,
-    backgroundColor: 'gray',
+    backgroundColor: "rgba(239, 232, 228, 0.7)",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
   },
   understoodButtonText: {
-    color: 'white',
+    color: 'preto',
     fontSize: 16,
     fontWeight: 'bold',
   },
