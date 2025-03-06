@@ -110,7 +110,8 @@
       "movie_night": "Palomitas y película",
       "dining_out": "Cena fuera",
       "coffee_break": "Descanso para café",
-      "out_for_a_drink": "Salir por una bebida"
+      "out_for_a_drink": "Salir por una bebida",
+      "out_for_a_run": "Salir a correr"
     }
   },
     "userProfilePrivate": {
@@ -810,9 +811,31 @@
       "emailContainsSpaces": "El correo electrónico no puede contener espacios",
       "selectFourInterests": "Por favor, selecciona al menos cuatro intereses"
     },
-    "welcome": {
-      "title": "¡Estás dentro!",
-      "subtitle": "Bienvenido a Invite Me, donde te esperan grandes experiencias."
+   "interestsGroup1": {
+      "firstOneIn": "El primero en llegar",
+      "lastOneOut": "El último en irse",
+      "foodie": "Amante de la comida",
+      "gym": "Gimnasio",
+      "miaPerson": "Desaparecido/a",
+      "alwaysOnTime": "Puntual",
+      "reading": "Lectura",
+      "traveling": "Viajar",
+      "cycling": "Ciclismo",
+      "running": "Correr"
+    },
+    "interestsGroup2": {
+      "music": "Música",
+      "art": "Arte",
+      "beach": "Playa",
+      "countryside": "Campo",
+      "cooking": "Cocina",
+      "festivals": "Festivales",
+      "mornings": "Mañanas",
+      "nights": "Noches",
+      "summerPerson": "Verano",
+      "winterPerson": "Invierno",
+      "goingOut": "Salir",
+      "stayingIn": "Quedarse en casa"
     }
   },
   

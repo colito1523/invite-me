@@ -35,7 +35,7 @@ export default StyleSheet.create({
     marginVertical: 0,
     width: "100%",
     alignSelf: "center",
-    backgroundColor: "#c8c8c8",
+    backgroundColor: "rgba(239, 232, 228, 0.7)",
   },
   question: {
     fontSize: 15,
@@ -48,16 +48,14 @@ export default StyleSheet.create({
     marginTop: 65,
     marginBottom: 35,
     textAlign: "center",
-    color: "#333333", // Change to a lighter shade of black
-    fontWeight: "bold",
+    color: 'black', // Texto en blanco
   },
   GenderQuestion: {
     fontSize: 14,
     marginVertical: 20,
     marginTop: 110,
     textAlign: "center",
-    color: "#333333", // Change to a lighter shade of black
-    fontWeight: "bold",
+    color: 'black', // Texto en blanco
   },
   questionHobies: {
     fontSize: 14,

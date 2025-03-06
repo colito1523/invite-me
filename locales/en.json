@@ -110,8 +110,8 @@
       "movie_night": "Popcorn and movie",
       "dining_out": "Dinner out",
       "coffee_break": "Coffee break",
-      "out_for_a_drink": "Out for a drink"
-    }
+      "out_for_a_drink": "Out for a drink",
+      "out_for_a_run": "Out for a run" }
   },
 
   "userProfilePrivate": {
@@ -820,6 +820,32 @@
       "generic": "An error occurred. Please try again.",
       "emailContainsSpaces": "Email cannot contain spaces",
       "selectFourInterests": "Please select four interests"
+    },
+    "interestsGroup1": {
+      "firstOneIn": "First one in",
+      "lastOneOut": "Last one out",
+      "foodie": "Foodie",
+      "gym": "Gym",
+      "miaPerson": "MIA person",
+      "alwaysOnTime": "Always on time",
+      "reading": "Reading",
+      "traveling": "Traveling",
+      "cycling": "Cycling",
+      "running": "Running"
+    },
+    "interestsGroup2": {
+      "music": "Music",
+      "art": "Art",
+      "beach": "Beach",
+      "countryside": "Country side",
+      "cooking": "Cooking",
+      "festivals": "Festivals",
+      "mornings": "Mornings",
+      "nights": "Nights",
+      "summerPerson": "Summer person",
+      "winterPerson": "Winter person",
+      "goingOut": "Going out",
+      "stayingIn": "Staying in"
     },
     "welcome": {
       "title": "You're in!",

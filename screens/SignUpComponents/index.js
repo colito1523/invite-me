@@ -16,45 +16,48 @@ import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database, storage } from "../../config/firebase";
-import { doc, setDoc, getDocs, query, where, collection, } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDocs,
+  query,
+  where,
+  collection,
+} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { Image } from "expo-image";
 import TermsAndConditionsModal from "../../Components/Terms-And-Conditions/terms-and-conditions-modal";
-import { useTranslation } from 'react-i18next';
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import { Picker } from "@react-native-picker/picker";
-import styles from './styles';
+import { useTranslation } from "react-i18next";
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import styles from "./styles";
 
-import es from '../../locales/es.json';
-import en from '../../locales/en.json';
-import pt from '../../locales/pt.json';
+import es from "../../locales/es.json";
+import en from "../../locales/en.json";
+import pt from "../../locales/pt.json";
 
 import { LanguageContext } from "../../src/contexts/LanguageContext"; // Ensure correct import of LanguageContext
 
-const LANGUAGE_KEY = '@app_language';
+const LANGUAGE_KEY = "@app_language";
 
-i18n
-  .use(initReactI18next)
-  .init({
-    compatibilityJSON: 'v3',
-    resources: {
-      es: { translation: es },
-      en: { translation: en },
-      pt: { translation: pt },
-    },
-    lng: 'es',
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false,
-    },
-  });
+i18n.use(initReactI18next).init({
+  compatibilityJSON: "v3",
+  resources: {
+    es: { translation: es },
+    en: { translation: en },
+    pt: { translation: pt },
+  },
+  lng: "es",
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 const { width, height } = Dimensions.get("window");
-
 
 const ITEM_WIDTH = width / 5;
 const ITEM_HEIGHT = 50;
@@ -64,34 +67,34 @@ const GENDER_CONTAINER_WIDTH = width * 0.6;
 const ages = Array.from({ length: 85 }, (_, i) => i + 16);
 const genders = ["Male", "Female", "Other", "Prefer not to say"];
 
-const interestOptions = [
-  "hola",
-  "chau",
-  "Foodie",
-  "Gym",
-  "MIA person",
-  "Always on time",
-  "Reading",
-  "Traveling",
-  "Cycling",
-  "Running",
-];
-// NUEVO: 2da lista de intereses
-const interestOptions2 = [
-  "Music",
-  "Art",
-  "Beach",
-  "Country side",
-  "Cooking",
-  "Festivals",
-  "Mornings",
-  "Nights",
-  "Summer person",
-  "Winter person",
-  "Going out",
-  "Staying in"
+const interestKeysGroup1 = [
+  "firstOneIn",
+  "lastOneOut",
+  "foodie",
+  "gym",
+  "miaPerson",
+  "alwaysOnTime",
+  "reading",
+  "traveling",
+  "cycling",
+  "running",
 ];
 
+// NUEVO: 2da lista de intereses
+const interestKeysGroup2 = [
+  "music",
+  "art",
+  "beach",
+  "countryside",
+  "cooking",
+  "festivals",
+  "mornings",
+  "nights",
+  "summerPerson",
+  "winterPerson",
+  "goingOut",
+  "stayingIn",
+];
 
 function chunkArray(array, size) {
   const result = [];
@@ -162,7 +165,6 @@ function AgeSelector({ onAgeChange, initialAge }) {
   );
 }
 
-
 function GenderSelector({ onGenderChange, initialGender }) {
   const [selectedGender, setSelectedGender] = useState(initialGender);
   const scrollViewRef = useRef(null);
@@ -224,7 +226,6 @@ function GenderSelector({ onGenderChange, initialGender }) {
   );
 }
 
-
 export default function SignUp() {
   const { t } = useTranslation();
   const { selectedLanguage, changeLanguage } = useContext(LanguageContext); // Use LanguageContext
@@ -249,7 +250,8 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] = useState(false);
+  const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] =
+    useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
   const navigation = useNavigation();
@@ -257,9 +259,9 @@ export default function SignUp() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'es', name: 'Español' },
-    { code: 'pt', name: 'Português' }
+    { code: "en", name: "English" },
+    { code: "es", name: "Español" },
+    { code: "pt", name: "Português" },
   ];
 
   useEffect(() => {
@@ -271,19 +273,26 @@ export default function SignUp() {
     setIsLanguageOptionsVisible(false);
   };
 
+  // Generamos arrays traducidos en cada render
+  const translatedInterestOptions1 = interestKeysGroup1.map((key) =>
+    t(`signup.interestsGroup1.${key}`)
+  );
+  const translatedInterestOptions2 = interestKeysGroup2.map((key) =>
+    t(`signup.interestsGroup2.${key}`)
+  );
 
   const questions = [
-    { id: "account", question: t('signup.questions.account') },
-    { id: "ageGender", question: t('signup.questions.ageGender') },
-    { id: "about", question: t('signup.questions.about') },
-    { id: "about2"},
-    { id: "photos", question: t('signup.questions.photos') },
-    { id: "preview1", question: t('signup.questions.preview1') },
+    { id: "account", question: t("signup.questions.account") },
+    { id: "ageGender", question: t("signup.questions.ageGender") },
+    { id: "about", question: t("signup.questions.about") },
+    { id: "about2" },
+    { id: "photos", question: t("signup.questions.photos") },
+    { id: "preview1", question: t("signup.questions.preview1") },
     { id: "photos2", question: "" },
-    { id: "preview2", question: t('signup.questions.preview2') },
+    { id: "preview2", question: t("signup.questions.preview2") },
     { id: "photos3", question: "" },
-    { id: "finalPreview", question: t('signup.questions.finalPreview') },
-    { id: "welcome", question: t('signup.questions.welcome') },
+    { id: "finalPreview", question: t("signup.questions.finalPreview") },
+    { id: "welcome", question: t("signup.questions.welcome") },
   ];
 
   useEffect(() => {
@@ -311,9 +320,7 @@ export default function SignUp() {
   const handleAnswer = (id, value) => {
     if (id === "firstName" || id === "lastName") {
       // Solo letras y espacios
-      const validValue = value
-        .replace(/[^\p{L}\p{Zs}]/gu, "")
-        .slice(0, 15);
+      const validValue = value.replace(/[^\p{L}\p{Zs}]/gu, "").slice(0, 15);
 
       setAnswers((prev) => ({ ...prev, [id]: validValue }));
     } else if (
@@ -340,40 +347,41 @@ export default function SignUp() {
     }
   };
 
-  const handleInterestSelection = (option) => {
-    const currentInterests = [];
-    if (answers.interest1) currentInterests.push(answers.interest1);
-    if (answers.interest2) currentInterests.push(answers.interest2);
-    if (answers.interest3) currentInterests.push(answers.interest3);
-    if (answers.interest4) currentInterests.push(answers.interest4);
+  const handleInterestSelection = (optionText) => {
+    // Vemos si ya está seleccionada
+    const currentInterests = [
+      answers.interest1,
+      answers.interest2,
+      answers.interest3,
+      answers.interest4,
+    ].filter(Boolean);
 
-    if (currentInterests.includes(option)) {
+    if (currentInterests.includes(optionText)) {
       // Deseleccionar la opción
-      if (answers.interest1 === option) {
+      if (answers.interest1 === optionText) {
         handleAnswer("interest1", "");
-      } else if (answers.interest2 === option) {
+      } else if (answers.interest2 === optionText) {
         handleAnswer("interest2", "");
-      } else if (answers.interest3 === option) {
+      } else if (answers.interest3 === optionText) {
         handleAnswer("interest3", "");
-      } else if (answers.interest4 === option) {
+      } else if (answers.interest4 === optionText) {
         handleAnswer("interest4", "");
       }
     } else {
       // Si hay menos de 4 seleccionadas, agregar la opción
       if (!answers.interest1) {
-        handleAnswer("interest1", option);
+        handleAnswer("interest1", optionText);
       } else if (!answers.interest2) {
-        handleAnswer("interest2", option);
+        handleAnswer("interest2", optionText);
       } else if (!answers.interest3) {
-        handleAnswer("interest3", option);
+        handleAnswer("interest3", optionText);
       } else if (!answers.interest4) {
-        handleAnswer("interest4", option);
+        handleAnswer("interest4", optionText);
       } else {
-        Alert.alert(t('signup.errors.selectFourInterests'));
+        Alert.alert(t("signup.errors.selectFourInterests"));
       }
     }
   };
-
 
   const validateName = (name) => {
     const nameRegex = /^[a-zA-ZÀ-ÿãÃçÇñÑ ]+$/;
@@ -381,7 +389,8 @@ export default function SignUp() {
   };
 
   const validateEmail = (email) => {
-    const emailRegex =/^(?!.*(.)\1{3,})(?!^\d+@)(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]{3,}(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:(?!^\d+\.)[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+    const emailRegex =
+      /^(?!.*(.)\1{3,})(?!^\d+@)(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]{3,}(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:(?!^\d+\.)[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
 
     return emailRegex.test(email);
   };
@@ -398,11 +407,10 @@ export default function SignUp() {
   };
 
   const validateSingleWord = (word) => {
-    const hobbyInterestRegex = /^[\p{L}\p{N}\p{P}\p{Zs}\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F700-\u1F77F]+$/u;
+    const hobbyInterestRegex =
+      /^[\p{L}\p{N}\p{P}\p{Zs}\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F700-\u1F77F]+$/u;
     return hobbyInterestRegex.test(word) && [...word].length <= 15; // Contar correctamente caracteres compuestos
   };
-
-
 
   const handleNext = async () => {
     setIsLoading(true);
@@ -410,109 +418,107 @@ export default function SignUp() {
 
     if (currentQuestion.id === "account") {
       if (!answers.firstName || !answers.lastName) {
-        Alert.alert(t('signup.errors.emptyName'));
+        Alert.alert(t("signup.errors.emptyName"));
         setIsLoading(false);
         return;
       }
       if (!validateName(answers.firstName) || !validateName(answers.lastName)) {
-        Alert.alert(t('signup.errors.invalidName'));
+        Alert.alert(t("signup.errors.invalidName"));
         setIsLoading(false);
         return;
       }
-      if (answers.email.includes(' ')) {
-        Alert.alert(t('signup.errors.emailContainsSpaces'));
+      if (answers.email.includes(" ")) {
+        Alert.alert(t("signup.errors.emailContainsSpaces"));
         setIsLoading(false);
         return;
       }
       if (!answers.email || !validateEmail(answers.email)) {
-        Alert.alert(t('signup.errors.invalidEmail'));
+        Alert.alert(t("signup.errors.invalidEmail"));
         setIsLoading(false);
         return;
       }
       if (!answers.username || !validateUsername(answers.username)) {
-        Alert.alert(t('signup.errors.invalidUsername'));
+        Alert.alert(t("signup.errors.invalidUsername"));
         setIsLoading(false);
         return;
       }
       if (!answers.password || !validatePassword(answers.password)) {
-        Alert.alert(t('signup.errors.invalidPassword'));
+        Alert.alert(t("signup.errors.invalidPassword"));
         setIsLoading(false);
         return;
       }
       if (!acceptedTerms) {
-        Alert.alert(t('signup.errors.termsNotAccepted'));
+        Alert.alert(t("signup.errors.termsNotAccepted"));
         setIsLoading(false);
         return;
       }
       // Verifica si el email ya está en uso
-    const emailQuery = query(
-      collection(database, "users"),
-      where("email", "==", answers.email.trim().toLowerCase())
-    );
+      const emailQuery = query(
+        collection(database, "users"),
+        where("email", "==", answers.email.trim().toLowerCase())
+      );
       try {
-      const emailSnapshot = await getDocs(emailQuery);
-      if (!emailSnapshot.empty) {
-        Alert.alert(t('signup.errors.emailInUse'));
+        const emailSnapshot = await getDocs(emailQuery);
+        if (!emailSnapshot.empty) {
+          Alert.alert(t("signup.errors.emailInUse"));
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking email:", error);
+        Alert.alert(t("signup.errors.generic"), error.message);
         setIsLoading(false);
         return;
       }
-    } catch (error) {
-      console.error("Error checking email:", error);
-      Alert.alert(t('signup.errors.generic'), error.message);
-      setIsLoading(false);
-      return;
-    }
-    const usernameQuery = query(
-      collection(database, "users"),
-      where("username", "==", answers.username.trim().toLowerCase())
-    );
+      const usernameQuery = query(
+        collection(database, "users"),
+        where("username", "==", answers.username.trim().toLowerCase())
+      );
 
-    try {
-      const usernameSnapshot = await getDocs(usernameQuery);
-      if (!usernameSnapshot.empty) {
-        Alert.alert(t('signup.errors.usernameInUse'));
+      try {
+        const usernameSnapshot = await getDocs(usernameQuery);
+        if (!usernameSnapshot.empty) {
+          Alert.alert(t("signup.errors.usernameInUse"));
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking username:", error);
+        Alert.alert(t("signup.errors.generic"), error.message);
         setIsLoading(false);
         return;
       }
-    } catch (error) {
-      console.error("Error checking username:", error);
-      Alert.alert(t('signup.errors.generic'), error.message);
-      setIsLoading(false);
-      return;
-    }
     }
 
     if (currentQuestion.id === "about") {
-     
     }
 
+    if (currentQuestion.id === "about2") {
+      // Aquí SÍ verificamos que haya 4 en total
+      const totalSelected = [
+        answers.interest1,
+        answers.interest2,
+        answers.interest3,
+        answers.interest4,
+      ].filter(Boolean).length; // filtra los que no estén vacíos
 
-if (currentQuestion.id === "about2") {
-  // Aquí SÍ verificamos que haya 4 en total
-  const totalSelected = [
-    answers.interest1,
-    answers.interest2,
-    answers.interest3,
-    answers.interest4,
-  ].filter(Boolean).length; // filtra los que no estén vacíos
+      if (totalSelected < 4) {
+        Alert.alert(t("signup.errors.selectFourInterests"));
+        setIsLoading(false);
+        return;
+      }
 
-  if (totalSelected < 4) {
-    Alert.alert(t('signup.errors.selectFourInterests'));
-    setIsLoading(false);
-    return;
-  }
-
-  if (
-    !validateSingleWord(answers.interest1) ||
-    !validateSingleWord(answers.interest2) ||
-    !validateSingleWord(answers.interest3) ||
-    !validateSingleWord(answers.interest4)
-  ) {
-    Alert.alert(t('signup.errors.invalidInterests'));
-    setIsLoading(false);
-    return;
-  }
-}
+      if (
+        !validateSingleWord(answers.interest1) ||
+        !validateSingleWord(answers.interest2) ||
+        !validateSingleWord(answers.interest3) ||
+        !validateSingleWord(answers.interest4)
+      ) {
+        Alert.alert(t("signup.errors.invalidInterests"));
+        setIsLoading(false);
+        return;
+      }
+    }
 
     if (currentQuestion.id === "photos" && !answers.photo1) {
       setIsLoading(false);
@@ -593,27 +599,27 @@ if (currentQuestion.id === "about2") {
         photoUrls: photoUrls,
         username: usernameToLower,
         preferredLanguage: i18n.language,
-        hasSeenTutorial: false // Campo para controlar si ya vio el tutorial
+        hasSeenTutorial: false, // Campo para controlar si ya vio el tutorial
       };
 
       await setDoc(doc(database, "users", user.uid), userData);
 
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Tutorial' }],
+        routes: [{ name: "Tutorial" }],
       });
-      
+
       setCurrentQuestionIndex(questions.length - 1);
       setIsSubmitting(false);
     } catch (error) {
       setIsSubmitting(false);
 
       if (error.code === "auth/email-already-in-use") {
-        Alert.alert(t('signup.errors.emailInUse'));
+        Alert.alert(t("signup.errors.emailInUse"));
       } else if (error.code === "auth/weak-password") {
-        Alert.alert(t('signup.errors.weakPassword'));
+        Alert.alert(t("signup.errors.weakPassword"));
       } else {
-        Alert.alert(t('signup.errors.generic'), error.message);
+        Alert.alert(t("signup.errors.generic"), error.message);
       }
     }
   };
@@ -631,7 +637,6 @@ if (currentQuestion.id === "about2") {
       return uri; // En caso de error, devuelve la imagen original
     }
   };
-  
 
   const pickImage = async (photoNumber) => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -639,7 +644,7 @@ if (currentQuestion.id === "about2") {
       allowsEditing: true, // Permite recortar antes de seleccionar
       quality: 1, // Máxima calidad antes de la compresión
     });
-  
+
     if (!result.canceled) {
       const compressedUri = await compressImage(result.assets[0].uri); // Comprime la imagen
       handleAnswer(`photo${photoNumber}`, compressedUri); // Guarda la imagen comprimida en el estado
@@ -669,8 +674,7 @@ if (currentQuestion.id === "about2") {
               <Text style={styles.rectangleText}>{answers.interest2}</Text>
             </View>
           </View>
-          <View style={styles.bottomRectangleContainer}>
-          </View>
+          <View style={styles.bottomRectangleContainer}></View>
           <View style={styles.bottomRectanglesContainer}>
             <View style={styles.rectangle}>
               <Text style={styles.rectangleText}>{answers.interest3}</Text>
@@ -711,356 +715,349 @@ if (currentQuestion.id === "about2") {
   const progress = (currentQuestionIndex + 1) / questions.length;
 
   return (
-
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height" }
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.logo}></View>
-          <View style={styles.languageContainer}>
-            <TouchableOpacity
-              style={styles.languageSelector}
-              onPress={() => setIsLanguageOptionsVisible(!isLanguageOptionsVisible)}
-            >
-              <Ionicons name="globe-outline" size={24} color="#000" />
-              <Text style={styles.selectedLanguage}>
-                {languages.find(lang => lang.code === selectedLanguage)?.name}
-              </Text>
-              <Ionicons name="chevron-down" size={24} color="#000" />
-            </TouchableOpacity>
-            {isLanguageOptionsVisible && (
-              <View style={styles.languageOptions}>
-                {languages.map((lang) => (
-                  <TouchableOpacity
-                    key={lang.code}
-                    style={styles.languageOption}
-                    onPress={() => handleLanguageChange(lang.code)}
-                  >
-                    <Text style={[ 
-                      styles.languageOptionText,
-                      selectedLanguage === lang.code && styles.selectedLanguageText
-                    ]}>
-                      {lang.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-          {currentQuestion.id !== "welcome" && (
-            <ProgressBar
-              progress={progress}
-              color="#333"
-              style={styles.progressBar}
-            />
-          )}
-         {currentQuestion.id !== "preview1" &&
- currentQuestion.id !== "preview2" &&
- currentQuestion.id !== "finalPreview" &&
- currentQuestion.id !== "welcome" &&
- currentQuestion.id !== "about2" && (
-  <Text
-    style={
-      currentQuestion.id === "ageGender"
-        ? styles.ageQuestion
-        : styles.question
-    }
-  >
-    {currentQuestion.question}
-  </Text>
-)}
-
-          {currentQuestion.id === "account" && (
-            <View>
-              <View style={styles.nameContainer}>
-                <TextInput
-                  style={[styles.nameInput, { color: "#4b4b4b" }]}
-                  placeholder={t('signup.placeholders.firstName')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("firstName", text)}
-                  value={answers.firstName}
-                />
-                <TextInput
-                  style={[styles.nameInput, { color: "#4b4b4b" }]}
-                  placeholder={t('signup.placeholders.lastName')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("lastName", text)}
-                  value={answers.lastName}
-                />
-              </View>
-              <TextInput
-                style={[styles.input, { color: "#4b4b4b" }]}
-                placeholder={t('signup.placeholders.email')}
-                placeholderTextColor="#4b4b4b"
-                onChangeText={(text) => handleAnswer("email", text)}
-                value={answers.email}
-                keyboardType="email-address"
-              />
-              <TextInput
-                style={[styles.inputShort, { color: "#4b4b4b" }]}
-                placeholder={t('signup.placeholders.username')}
-                placeholderTextColor="#4b4b4b"
-                onChangeText={(text) => handleAnswer("username", text)}
-                value={answers.username}
-              />
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={[styles.passwordInput, { color: "#4b4b4b" }]}
-                  placeholder={t('signup.placeholders.password')}
-                  placeholderTextColor="#4b4b4b"
-                  onChangeText={(text) => handleAnswer("password", text)}
-                  value={answers.password}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity
-                  style={styles.eyeIconButton}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Ionicons
-                    name={showPassword ? "eye-off" : "eye"}
-                    size={20}
-                    color="gray"
-                  />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.termsContainer}>
-                <TouchableOpacity
-                  style={styles.checkbox}
-                  onPress={() => setAcceptedTerms(!acceptedTerms)}
-                >
-                  {acceptedTerms && (
-                    <Ionicons name="checkmark" size={20} color="black" />
-                  )}
-                </TouchableOpacity>
-                <View style={styles.termsTextContainer}>
-                  <Text style={styles.termsText}>
-                    {t('signup.termsAndConditions.acceptText')}{' '}
-                  </Text>
-                  <TermsAndConditionsModal />
-                </View>
-              </View>
-            </View>
-          )}
-
-          {currentQuestion.id === "ageGender" && (
-            <Animated.View
-              style={[styles.ageGenderContainer, { opacity: fadeAnim }]}
-            >
-              <AgeSelector
-                onAgeChange={(age) => handleAnswer("age", age.toString())}
-                initialAge={parseInt(answers.age)}
-              />
-
-              <Text style={styles.GenderQuestion}>{t('signup.questions.gender')}</Text>
-              <GenderSelector
-                onGenderChange={(gender) => handleAnswer("gender", gender)}
-                initialGender={answers.gender}
-              />
-            </Animated.View>
-          )}
-          
-
-
-          {currentQuestion.id === "about" && (
-  <View>
-    {/* Interests */}
-    {chunkArray(interestOptions, 2).map((row, rowIndex) => (
-      <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
-        {row.map((option) => {
-          const isSelected = 
-            option === answers.interest1 || 
-            option === answers.interest2 || 
-            option === answers.interest3 || 
-            option === answers.interest4;
-          return (
-            <TouchableOpacity
-              key={option}
-              style={[
-                styles.halfInput,
-                { justifyContent: "center", alignItems: "center" },
-                isSelected ? { backgroundColor: "#e0dcd7" } : null,
-              ]}
-              onPress={() => handleInterestSelection(option)}
-            >
-              <Text style={{ color: "#000", textAlign: "center" }}>
-                {option}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    ))}
-  </View>
-)}
-
-{currentQuestion.id === "about2" && (
-  <View style={styles.about2Container}>
-    {chunkArray(interestOptions2, 2).map((row, rowIndex) => (
-      <View style={styles.rowInputs} key={`interest2-row-${rowIndex}`}>
-        {row.map((option) => {
-          const isSelected =
-            option === answers.interest1 ||
-            option === answers.interest2 ||
-            option === answers.interest3 ||
-            option === answers.interest4;
-
-          return (
-            <TouchableOpacity
-              key={option}
-              style={[
-                styles.halfInput,
-                { justifyContent: "center", alignItems: "center" },
-                isSelected ? { backgroundColor: "#e0dcd7" } : null,
-              ]}
-              onPress={() => handleInterestSelection(option)}
-            >
-              <Text style={{ color: "#000", textAlign: "center" }}>
-                {option}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    ))}
-  </View>
-)}
-
-
-
-
-
-          {currentQuestion.id === "photos" && (
-            <View style={styles.photoContainer}>
-              <TouchableOpacity
-                style={styles.photoPlaceholder}
-                onPress={() => pickImage(1)}
-              >
-                {answers.photo1 ? (
-                  <Image
-                    source={{ uri: answers.photo1 }}
-                    style={styles.photo}
-                    cachePolicy="memory-disk"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="add-photo-alternate"
-                    size={70}
-                    color="gray"
-                  />
-                )}
-                <View style={styles.numberContainer}>
-                  <Text style={styles.numberText}>1</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {currentQuestion.id === "preview1" && renderPreview(1)}
-
-          {currentQuestion.id === "photos2" && (
-            <View style={styles.photoContainer}>
-              <TouchableOpacity
-                style={styles.photoPlaceholder}
-                onPress={() => pickImage(2)}
-              >
-                {answers.photo2 ? (
-                  <Image
-                    source={{ uri: answers.photo2 }}
-                    style={styles.photo}
-                    cachePolicy="memory-disk"
-                  />
-                                ) : (
-                  <MaterialIcons
-                    name="add-photo-alternate"
-                    size={70}
-                    color="gray"
-                  />
-                )}
-                <View style={styles.numberContainer}>
-                  <Text style={styles.numberText}>2</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {currentQuestion.id === "preview2" && renderPreview(2)}
-
-          {currentQuestion.id === "photos3" && (
-            <View style={styles.photoContainer}>
-              <TouchableOpacity
-                style={styles.photoPlaceholder}
-                onPress={() => pickImage(3)}
-              >
-                {answers.photo3 ? (
-                  <Image
-                    source={{ uri: answers.photo3 }}
-                    style={styles.photo}
-                    cachePolicy="memory-disk"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="add-photo-alternate"
-                    size={70}
-                    color="gray"
-                  />
-                )}
-                <View style={styles.numberContainer}>
-                  <Text style={styles.numberText}>3</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {currentQuestion.id === "finalPreview" && renderPreview(3, true)}
-
-          {currentQuestion.id === "welcome" && (
-            <View style={styles.welcomeContainer}>
-              {isSubmitting ? (
-                <ActivityIndicator size={50} color="#0000ff" />
-              ) : (
-                <>
-                  <Text style={styles.welcomeTitle}>{t('signup.welcome.title')}</Text>
-                  <Text style={styles.welcomeSubtitle}>
-                    {t('signup.welcome.subtitle')}
-                  </Text>
-                </>
-              )}
-            </View>
-          )}
-
-          <View
-            style={
-              currentQuestionIndex === 0 || currentQuestion.id === "welcome"
-                ? styles.buttonContainerCentered
-                : styles.buttonContainer
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.logo}></View>
+        <View style={styles.languageContainer}>
+          <TouchableOpacity
+            style={styles.languageSelector}
+            onPress={() =>
+              setIsLanguageOptionsVisible(!isLanguageOptionsVisible)
             }
           >
-            {currentQuestionIndex > 0 && currentQuestion.id !== "welcome" && (
+            <Ionicons name="globe-outline" size={24} color="#000" />
+            <Text style={styles.selectedLanguage}>
+              {languages.find((lang) => lang.code === selectedLanguage)?.name}
+            </Text>
+            <Ionicons name="chevron-down" size={24} color="#000" />
+          </TouchableOpacity>
+          {isLanguageOptionsVisible && (
+            <View style={styles.languageOptions}>
+              {languages.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={styles.languageOption}
+                  onPress={() => handleLanguageChange(lang.code)}
+                >
+                  <Text
+                    style={[
+                      styles.languageOptionText,
+                      selectedLanguage === lang.code &&
+                        styles.selectedLanguageText,
+                    ]}
+                  >
+                    {lang.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+        {currentQuestion.id !== "welcome" && (
+          <ProgressBar
+            progress={progress}
+            color="#333"
+            style={styles.progressBar}
+          />
+        )}
+        {currentQuestion.id !== "preview1" &&
+          currentQuestion.id !== "preview2" &&
+          currentQuestion.id !== "finalPreview" &&
+          currentQuestion.id !== "welcome" &&
+          currentQuestion.id !== "about2" && (
+            <Text
+              style={
+                currentQuestion.id === "ageGender"
+                  ? styles.ageQuestion
+                  : styles.question
+              }
+            >
+              {currentQuestion.question}
+            </Text>
+          )}
+
+        {currentQuestion.id === "account" && (
+          <View>
+            <View style={styles.nameContainer}>
+              <TextInput
+                style={[styles.nameInput, { color: "#4b4b4b" }]}
+                placeholder={t("signup.placeholders.firstName")}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("firstName", text)}
+                value={answers.firstName}
+              />
+              <TextInput
+                style={[styles.nameInput, { color: "#4b4b4b" }]}
+                placeholder={t("signup.placeholders.lastName")}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("lastName", text)}
+                value={answers.lastName}
+              />
+            </View>
+            <TextInput
+              style={[styles.input, { color: "#4b4b4b" }]}
+              placeholder={t("signup.placeholders.email")}
+              placeholderTextColor="#4b4b4b"
+              onChangeText={(text) => handleAnswer("email", text)}
+              value={answers.email}
+              keyboardType="email-address"
+            />
+            <TextInput
+              style={[styles.inputShort, { color: "#4b4b4b" }]}
+              placeholder={t("signup.placeholders.username")}
+              placeholderTextColor="#4b4b4b"
+              onChangeText={(text) => handleAnswer("username", text)}
+              value={answers.username}
+            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[styles.passwordInput, { color: "#4b4b4b" }]}
+                placeholder={t("signup.placeholders.password")}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("password", text)}
+                value={answers.password}
+                secureTextEntry={!showPassword}
+              />
               <TouchableOpacity
-                style={styles.backButton}
-                onPress={handleBack}
-                disabled={isLoading}
+                style={styles.eyeIconButton}
+                onPress={() => setShowPassword(!showPassword)}
               >
-                <AntDesign name="left" size={24} color="black" />
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color="gray"
+                />
               </TouchableOpacity>
-            )}
-            {currentQuestionIndex < questions.length - 1 && (
+            </View>
+            <View style={styles.termsContainer}>
               <TouchableOpacity
-                style={styles.nextButton}
-                onPress={handleNext}
-                disabled={isLoading}
+                style={styles.checkbox}
+                onPress={() => setAcceptedTerms(!acceptedTerms)}
               >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#000" />
-                ) : (
-                  <AntDesign name="right" size={24} color="black" />
+                {acceptedTerms && (
+                  <Ionicons name="checkmark" size={20} color="black" />
                 )}
               </TouchableOpacity>
+              <View style={styles.termsTextContainer}>
+                <Text style={styles.termsText}>
+                  {t("signup.termsAndConditions.acceptText")}{" "}
+                </Text>
+                <TermsAndConditionsModal />
+              </View>
+            </View>
+          </View>
+        )}
+
+        {currentQuestion.id === "ageGender" && (
+          <Animated.View
+            style={[styles.ageGenderContainer, { opacity: fadeAnim }]}
+          >
+            <AgeSelector
+              onAgeChange={(age) => handleAnswer("age", age.toString())}
+              initialAge={parseInt(answers.age)}
+            />
+
+            <Text style={styles.GenderQuestion}>
+              {t("signup.questions.gender")}
+            </Text>
+            <GenderSelector
+              onGenderChange={(gender) => handleAnswer("gender", gender)}
+              initialGender={answers.gender}
+            />
+          </Animated.View>
+        )}
+
+            {currentQuestion.id === "about" && (
+          <View>
+            {chunkArray(translatedInterestOptions1, 2).map((row, rowIndex) => (
+              <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
+                {row.map((optionText) => {
+                  const isSelected =
+                    optionText === answers.interest1 ||
+                    optionText === answers.interest2 ||
+                    optionText === answers.interest3 ||
+                    optionText === answers.interest4;
+                  return (
+                    <TouchableOpacity
+                      key={optionText}
+                      style={[
+                        styles.halfInput,
+                        isSelected ? { backgroundColor: "#e0dcd7" } : null,
+                      ]}
+                      onPress={() => handleInterestSelection(optionText)}
+                    >
+                      <Text>{optionText}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        )}
+
+{currentQuestion.id === "about2" && (
+          <View>
+            {chunkArray(translatedInterestOptions2, 2).map((row, rowIndex) => (
+              <View style={styles.rowInputs} key={`interest2-row-${rowIndex}`}>
+                {row.map((optionText) => {
+                  const isSelected =
+                    optionText === answers.interest1 ||
+                    optionText === answers.interest2 ||
+                    optionText === answers.interest3 ||
+                    optionText === answers.interest4;
+                  return (
+                    <TouchableOpacity
+                      key={optionText}
+                      style={[
+                        styles.halfInput,
+                        isSelected ? { backgroundColor: "#e0dcd7" } : null,
+                      ]}
+                      onPress={() => handleInterestSelection(optionText)}
+                    >
+                      <Text>{optionText}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {currentQuestion.id === "photos" && (
+          <View style={styles.photoContainer}>
+            <TouchableOpacity
+              style={styles.photoPlaceholder}
+              onPress={() => pickImage(1)}
+            >
+              {answers.photo1 ? (
+                <Image
+                  source={{ uri: answers.photo1 }}
+                  style={styles.photo}
+                  cachePolicy="memory-disk"
+                />
+              ) : (
+                <MaterialIcons
+                  name="add-photo-alternate"
+                  size={70}
+                  color="gray"
+                />
+              )}
+              <View style={styles.numberContainer}>
+                <Text style={styles.numberText}>1</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {currentQuestion.id === "preview1" && renderPreview(1)}
+
+        {currentQuestion.id === "photos2" && (
+          <View style={styles.photoContainer}>
+            <TouchableOpacity
+              style={styles.photoPlaceholder}
+              onPress={() => pickImage(2)}
+            >
+              {answers.photo2 ? (
+                <Image
+                  source={{ uri: answers.photo2 }}
+                  style={styles.photo}
+                  cachePolicy="memory-disk"
+                />
+              ) : (
+                <MaterialIcons
+                  name="add-photo-alternate"
+                  size={70}
+                  color="gray"
+                />
+              )}
+              <View style={styles.numberContainer}>
+                <Text style={styles.numberText}>2</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {currentQuestion.id === "preview2" && renderPreview(2)}
+
+        {currentQuestion.id === "photos3" && (
+          <View style={styles.photoContainer}>
+            <TouchableOpacity
+              style={styles.photoPlaceholder}
+              onPress={() => pickImage(3)}
+            >
+              {answers.photo3 ? (
+                <Image
+                  source={{ uri: answers.photo3 }}
+                  style={styles.photo}
+                  cachePolicy="memory-disk"
+                />
+              ) : (
+                <MaterialIcons
+                  name="add-photo-alternate"
+                  size={70}
+                  color="gray"
+                />
+              )}
+              <View style={styles.numberContainer}>
+                <Text style={styles.numberText}>3</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {currentQuestion.id === "finalPreview" && renderPreview(3, true)}
+
+        {currentQuestion.id === "welcome" && (
+          <View style={styles.welcomeContainer}>
+            {isSubmitting ? (
+              <ActivityIndicator size={50} color="#0000ff" />
+            ) : (
+              <>
+                <Text style={styles.welcomeTitle}>
+                  {t("signup.welcome.title")}
+                </Text>
+                <Text style={styles.welcomeSubtitle}>
+                  {t("signup.welcome.subtitle")}
+                </Text>
+              </>
             )}
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        )}
 
+        <View
+          style={
+            currentQuestionIndex === 0 || currentQuestion.id === "welcome"
+              ? styles.buttonContainerCentered
+              : styles.buttonContainer
+          }
+        >
+          {currentQuestionIndex > 0 && currentQuestion.id !== "welcome" && (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              disabled={isLoading}
+            >
+              <AntDesign name="left" size={24} color="black" />
+            </TouchableOpacity>
+          )}
+          {currentQuestionIndex < questions.length - 1 && (
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={handleNext}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#000" />
+              ) : (
+                <AntDesign name="right" size={24} color="black" />
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

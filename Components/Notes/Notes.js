@@ -47,7 +47,8 @@ const moodOptions = [
   "movie_night",
   "dining_out",
   "coffee_break",
-  "out_for_a_drink"
+  "out_for_a_drink",
+  "out_for_a_run"
 ];
 
 export default function Notes({ refresh }) {

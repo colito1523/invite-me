@@ -112,7 +112,8 @@
       "movie_night": "Pipocas e filme",
       "dining_out": "Jantar fora",
       "coffee_break": "Coffee break",
-      "out_for_a_drink": "Out for a drink"
+      "out_for_a_drink": "Out for a drink",
+      "out_for_a_run": "A correr"
     }
 },
     "userProfilePrivate": {
@@ -793,6 +794,32 @@
   "generic": "Ocorreu um erro. Por favor, tente novamente.",
   "emailContainsSpaces": "O email não pode conter espaços.",
   "selectFourInterests": "Por favor, selecione quatro interesses."
+},
+"interestsGroup1": {
+  "firstOneIn": "Primeiro a chegar",
+  "lastOneOut": "Último a sair",
+  "foodie": "Apaixonado por comida",
+  "gym": "Academia",
+  "miaPerson": "Pessoa desaparecida",
+  "alwaysOnTime": "Pontual",
+  "reading": "Leitura",
+  "traveling": "Viajar",
+  "cycling": "Ciclismo",
+  "running": "Correr"
+},
+"interestsGroup2": {
+  "music": "Música",
+  "art": "Arte",
+  "beach": "Praia",
+  "countryside": "Campo",
+  "cooking": "Culinária",
+  "festivals": "Festivais",
+  "mornings": "Manhãs",
+  "nights": "Noites",
+  "summerPerson": "Pessoa do verão",
+  "winterPerson": "Pessoa do inverno",
+  "goingOut": "Sair",
+  "stayingIn": "Ficar em casa"
 },
 "welcome": {
   "title": "Já está dentro!",
