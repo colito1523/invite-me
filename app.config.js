@@ -20,11 +20,6 @@ export default {
     orientation: "portrait",
     icon: "./assets/Logo_Invite_Me.png",
     userInterfaceStyle: "light",
-    splash: {
-      image: "./assets/Logo_Invite_Me.png",
-      resizeMode: "contain",
-      backgroundColor: "#ffffff",
-    },
     ios: {
       bundleIdentifier: "com.airesSoftStudio.inviteMe",
       supportsTablet: false,

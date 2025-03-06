@@ -254,7 +254,7 @@ export default StyleSheet.create({
   photoPlaceholder: {
     width: width * 0.8,
     height: width * 1.2,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor: "rgba(239, 232, 228, 0.7)",
     borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
