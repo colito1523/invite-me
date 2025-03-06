@@ -168,13 +168,18 @@ export default StyleSheet.create({
     padding: 15,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 15,
+
   },
   rowInputs: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 60, // Increase this value to add more vertical space
   },
+
+  about2Container:{
+    marginTop:60,
+  },
+  
   halfInput: {
     width: "48%",
     padding: 10,

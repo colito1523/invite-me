@@ -65,8 +65,8 @@ const ages = Array.from({ length: 85 }, (_, i) => i + 16);
 const genders = ["Male", "Female", "Other", "Prefer not to say"];
 
 const interestOptions = [
-  "First one leaving",
-  "Last one staying",
+  "hola",
+  "chau",
   "Foodie",
   "Gym",
   "MIA person",
@@ -755,20 +755,21 @@ if (currentQuestion.id === "about2") {
               style={styles.progressBar}
             />
           )}
-          {currentQuestion.id !== "preview1" &&
-            currentQuestion.id !== "preview2" &&
-            currentQuestion.id !== "finalPreview" &&
-            currentQuestion.id !== "welcome" && (
-              <Text
-                style={
-                  currentQuestion.id === "ageGender"
-                    ? styles.ageQuestion
-                    : styles.question
-                }
-              >
-                {currentQuestion.question}
-              </Text>
-            )}
+         {currentQuestion.id !== "preview1" &&
+ currentQuestion.id !== "preview2" &&
+ currentQuestion.id !== "finalPreview" &&
+ currentQuestion.id !== "welcome" &&
+ currentQuestion.id !== "about2" && (
+  <Text
+    style={
+      currentQuestion.id === "ageGender"
+        ? styles.ageQuestion
+        : styles.question
+    }
+  >
+    {currentQuestion.question}
+  </Text>
+)}
 
           {currentQuestion.id === "account" && (
             <View>
@@ -894,7 +895,7 @@ if (currentQuestion.id === "about2") {
 )}
 
 {currentQuestion.id === "about2" && (
-  <View>
+  <View style={styles.about2Container}>
     {chunkArray(interestOptions2, 2).map((row, rowIndex) => (
       <View style={styles.rowInputs} key={`interest2-row-${rowIndex}`}>
         {row.map((option) => {
