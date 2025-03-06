@@ -65,29 +65,31 @@ const ages = Array.from({ length: 85 }, (_, i) => i + 16);
 const genders = ["Male", "Female", "Other", "Prefer not to say"];
 
 const interestOptions = [
-  "Music",
-  "Art",
-  "Technology",
-  "Nature",
-  "Sports",
-  "Travel",
-  "Photography",
-  "Books",
-  "Movies",
-  "Food",
+  "First one leaving",
+  "Last one staying",
+  "Foodie",
+  "Gym",
+  "MIA person",
+  "Always on time",
+  "Reading",
+  "Traveling",
+  "Cycling",
+  "Running",
 ];
 // NUEVO: 2da lista de intereses
 const interestOptions2 = [
-  "Gaming",
+  "Music",
+  "Art",
+  "Beach",
+  "Country side",
   "Cooking",
-  "Yoga",
-  "Fitness",
-  "Fashion",
-  "Dancing",
-  "Languages",
-  "Meditation",
-  "Board Games",
-  "Podcasting"
+  "Festivals",
+  "Mornings",
+  "Nights",
+  "Summer person",
+  "Winter person",
+  "Going out",
+  "Staying in"
 ];
 
 
