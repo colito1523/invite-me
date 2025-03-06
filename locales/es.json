@@ -812,9 +812,9 @@
       "selectFourInterests": "Por favor, selecciona al menos cuatro intereses"
     },
    "interestsGroup1": {
-      "firstOneIn": "El último en llegar",
-      "lastOneOut": "El primero en irse",
-      "foodie": "Amante de la comida",
+    "firstOneIn": "Último en llegar",
+    "lastOneOut": "Primero en irse",
+      "foodie": "Foodie",
       "gym": "Gimnasio",
       "miaPerson": "Desaparecido/a",
       "alwaysOnTime": "Puntual",
@@ -835,7 +835,7 @@
       "summerPerson": "Verano",
       "winterPerson": "Invierno",
       "goingOut": "Salir",
-      "stayingIn": "Quedarse en casa"
+      "stayingIn": "En casa"
     }
   },
   

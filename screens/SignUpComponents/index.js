@@ -348,7 +348,6 @@ export default function SignUp() {
   };
 
   const handleInterestSelection = (key) => {
-    // Comprobamos si la clave ya está seleccionada
     const currentInterests = [
       answers.interest1,
       answers.interest2,
@@ -357,7 +356,7 @@ export default function SignUp() {
     ].filter(Boolean);
   
     if (currentInterests.includes(key)) {
-      // Deseleccionar la opción
+      // Deselecciona
       if (answers.interest1 === key) {
         handleAnswer("interest1", "");
       } else if (answers.interest2 === key) {
@@ -368,7 +367,7 @@ export default function SignUp() {
         handleAnswer("interest4", "");
       }
     } else {
-      // Agregar la opción si hay menos de 4 seleccionadas
+      // Selecciona si hay espacio
       if (!answers.interest1) {
         handleAnswer("interest1", key);
       } else if (!answers.interest2) {
@@ -382,6 +381,19 @@ export default function SignUp() {
       }
     }
   };
+
+  function translateInterestKey(key, t) {
+    // Primero vemos en qué grupo está la clave
+    if (interestKeysGroup1.includes(key)) {
+      return t(`signup.interestsGroup1.${key}`);
+    } else if (interestKeysGroup2.includes(key)) {
+      return t(`signup.interestsGroup2.${key}`);
+    } else {
+      return key; // Si no coincide con ningún grupo
+    }
+  }
+  
+  
   
 
   const validateName = (name) => {
@@ -586,6 +598,11 @@ export default function SignUp() {
         }
       }
 
+      const finalInterest1 = translateInterestKey(answers.interest1, t);
+      const finalInterest2 = translateInterestKey(answers.interest2, t);
+      const finalInterest3 = translateInterestKey(answers.interest3, t);
+      const finalInterest4 = translateInterestKey(answers.interest4, t);
+
       const userData = {
         uid: user.uid,
         age: answers.age,
@@ -593,14 +610,17 @@ export default function SignUp() {
         firstName: answers.firstName,
         gender: answers.gender,
         lastName: answers.lastName,
-        firstInterest: answers.interest1,
-        secondInterest: answers.interest2,
-        thirdInterest: answers.interest3,
-        fourthInterest: answers.interest4,
-        photoUrls: photoUrls,
+      
+        // USAMOS LOS INTERESES TRADUCIDOS:
+        firstInterest: finalInterest1,
+        secondInterest: finalInterest2,
+        thirdInterest: finalInterest3,
+        fourthInterest: finalInterest4,
+      
+        photoUrls,
         username: usernameToLower,
         preferredLanguage: i18n.language,
-        hasSeenTutorial: false, // Campo para controlar si ya vio el tutorial
+        hasSeenTutorial: false,
       };
 
       await setDoc(doc(database, "users", user.uid), userData);
@@ -669,19 +689,27 @@ export default function SignUp() {
         <View style={styles.rectanglesContainer}>
           <View style={styles.topRectanglesContainer}>
             <View style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{answers.interest1}</Text>
+            <Text style={styles.rectangleText}>
+  {translateInterestKey(answers.interest1, t)}
+</Text>
             </View>
             <View style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{answers.interest2}</Text>
+            <Text style={styles.rectangleText}>
+  {translateInterestKey(answers.interest2, t)}
+</Text>
             </View>
           </View>
           <View style={styles.bottomRectangleContainer}></View>
           <View style={styles.bottomRectanglesContainer}>
             <View style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{answers.interest3}</Text>
+            <Text style={styles.rectangleText}>
+  {translateInterestKey(answers.interest3, t)}
+</Text>
             </View>
             <View style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{answers.interest4}</Text>
+            <Text style={styles.rectangleText}>
+  {translateInterestKey(answers.interest4, t)}
+</Text>
             </View>
           </View>
         </View>
@@ -903,33 +931,35 @@ export default function SignUp() {
 
 {currentQuestion.id === "about2" && (
   <View style={styles.interestsContainer}>
-  {chunkArray(translatedInterestOptions2, 2).map((row, rowIndex) => (
-    <View >
-              <View style={styles.rowInputs} key={`interest2-row-${rowIndex}`}>
-                {row.map((optionText) => {
-                  const isSelected =
-                    optionText === answers.interest1 ||
-                    optionText === answers.interest2 ||
-                    optionText === answers.interest3 ||
-                    optionText === answers.interest4;
-                  return (
-                    <TouchableOpacity
-                      key={optionText}
-                      style={[
-                        styles.halfInput,
-                        isSelected ? { backgroundColor: "#e0dcd7" } : null,
-                      ]}
-                      onPress={() => handleInterestSelection(optionText)}
-                    >
-                      <Text>{optionText}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-              </View>
-            ))}
-          </View>
-        )}
+    {chunkArray(interestKeysGroup2, 2).map((row, rowIndex) => (
+      <View key={`outer-container-${rowIndex}`}>
+        <View style={styles.rowInputs} key={`interest2-row-${rowIndex}`}>
+          {row.map((key, i) => {
+            const isSelected =
+              key === answers.interest1 ||
+              key === answers.interest2 ||
+              key === answers.interest3 ||
+              key === answers.interest4;
+            return (
+              <TouchableOpacity
+                key={`option-${rowIndex}-${i}`}
+                style={[
+                  styles.halfInput,
+                  isSelected ? { backgroundColor: "#e0dcd7" } : null,
+                ]}
+                onPress={() => handleInterestSelection(key)}
+              >
+                <Text>{t(`signup.interestsGroup2.${key}`)}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+    ))}
+  </View>
+)}
+
+
 
         {currentQuestion.id === "photos" && (
           <View style={styles.photoContainer}>
