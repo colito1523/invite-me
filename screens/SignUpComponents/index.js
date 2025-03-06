@@ -76,6 +76,19 @@ const interestOptions = [
   "Movies",
   "Food",
 ];
+// NUEVO: 2da lista de intereses
+const interestOptions2 = [
+  "Gaming",
+  "Cooking",
+  "Yoga",
+  "Fitness",
+  "Fashion",
+  "Dancing",
+  "Languages",
+  "Meditation",
+  "Board Games",
+  "Podcasting"
+];
 
 
 function chunkArray(array, size) {
@@ -261,6 +274,7 @@ export default function SignUp() {
     { id: "account", question: t('signup.questions.account') },
     { id: "ageGender", question: t('signup.questions.ageGender') },
     { id: "about", question: t('signup.questions.about') },
+    { id: "about2"},
     { id: "photos", question: t('signup.questions.photos') },
     { id: "preview1", question: t('signup.questions.preview1') },
     { id: "photos2", question: "" },
@@ -467,25 +481,36 @@ export default function SignUp() {
     }
 
     if (currentQuestion.id === "about") {
-      if (
-        !answers.interest1 || !answers.interest2 || 
-        !answers.interest3 || !answers.interest4
-      ) {
-        Alert.alert(t('signup.errors.selectFourInterests'));
-        setIsLoading(false);
-        return;
-      }
-      if (
-        !validateSingleWord(answers.interest1) ||
-        !validateSingleWord(answers.interest2) ||
-        !validateSingleWord(answers.interest3) ||
-        !validateSingleWord(answers.interest4)
-      ) {
-        Alert.alert(t('signup.errors.invalidInterests'));
-        setIsLoading(false);
-        return;
-      }
+     
     }
+
+
+if (currentQuestion.id === "about2") {
+  // Aquí SÍ verificamos que haya 4 en total
+  const totalSelected = [
+    answers.interest1,
+    answers.interest2,
+    answers.interest3,
+    answers.interest4,
+  ].filter(Boolean).length; // filtra los que no estén vacíos
+
+  if (totalSelected < 4) {
+    Alert.alert(t('signup.errors.selectFourInterests'));
+    setIsLoading(false);
+    return;
+  }
+
+  if (
+    !validateSingleWord(answers.interest1) ||
+    !validateSingleWord(answers.interest2) ||
+    !validateSingleWord(answers.interest3) ||
+    !validateSingleWord(answers.interest4)
+  ) {
+    Alert.alert(t('signup.errors.invalidInterests'));
+    setIsLoading(false);
+    return;
+  }
+}
 
     if (currentQuestion.id === "photos" && !answers.photo1) {
       setIsLoading(false);
@@ -837,7 +862,6 @@ export default function SignUp() {
           {currentQuestion.id === "about" && (
   <View>
     {/* Interests */}
-    <Text style={styles.questionInterests}>{t('signup.questions.interests')}</Text>
     {chunkArray(interestOptions, 2).map((row, rowIndex) => (
       <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
         {row.map((option) => {
@@ -866,6 +890,39 @@ export default function SignUp() {
     ))}
   </View>
 )}
+
+{currentQuestion.id === "about2" && (
+  <View>
+    {chunkArray(interestOptions2, 2).map((row, rowIndex) => (
+      <View style={styles.rowInputs} key={`interest2-row-${rowIndex}`}>
+        {row.map((option) => {
+          const isSelected =
+            option === answers.interest1 ||
+            option === answers.interest2 ||
+            option === answers.interest3 ||
+            option === answers.interest4;
+
+          return (
+            <TouchableOpacity
+              key={option}
+              style={[
+                styles.halfInput,
+                { justifyContent: "center", alignItems: "center" },
+                isSelected ? { backgroundColor: "#e0dcd7" } : null,
+              ]}
+              onPress={() => handleInterestSelection(option)}
+            >
+              <Text style={{ color: "#000", textAlign: "center" }}>
+                {option}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    ))}
+  </View>
+)}
+
 
 
 
