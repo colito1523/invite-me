@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 50,
-    backgroundColor: "#efe8e4",
+    backgroundColor: "rgba(239, 232, 228, 0.7)",
     borderRadius: 25,
     paddingHorizontal: 20,
     marginBottom: 15,
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   resetButton: {
     width: '50%',
     height: 50,
-    backgroundColor: "#efe8e4",
+    backgroundColor: "rgba(239, 232, 228, 0.7)",
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   languageSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#efe8e4',
+    backgroundColor: 'transparent',
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -339,17 +339,17 @@ const styles = StyleSheet.create({
 const lightTheme = {
   background: '#fff',
   text: '#333',
-  inputBackground: '#efe8e4',
+  inputBackground: "rgba(239, 232, 228, 0.7)",
   placeholder: '#999',
-  buttonBackground: '#efe8e4',
+  buttonBackground: "rgba(239, 232, 228, 0.7)",
   link: 'black',
 };
 
 const darkTheme = {
   background: '#000',
   text: '#fff',
-  inputBackground: '#1a1a1a',
+  inputBackground: "rgba(239, 232, 228, 0.7)",
   placeholder: '#666',
-  buttonBackground: '#efe8e4',
+  buttonBackground: "rgba(239, 232, 228, 0.7)",
   link: 'black',
 };

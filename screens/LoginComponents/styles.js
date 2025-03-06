@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 50,
-    backgroundColor: '#efe8e4',
+    backgroundColor: "rgba(239, 232, 228, 0.7)",
     borderRadius: 25,
     paddingHorizontal: 20,
     marginBottom: 15,
@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
   loginButton: {
     width: '50%',
     height: 50,
-    backgroundColor: '#efe8e4',
+    backgroundColor: "rgba(239, 232, 228, 0.7)",
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
@@ -99,7 +99,7 @@ export const styles = StyleSheet.create({
   languageSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#efe8e4',
+    backgroundColor: 'transparent',
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 5,
@@ -129,7 +129,7 @@ export const styles = StyleSheet.create({
   languageOption: {
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#efe8e4',
   },
   languageOptionText: {
     fontSize: 16,
@@ -143,7 +143,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#efe8e4',
+    backgroundColor: "rgba(239, 232, 228, 0.7)",
     borderRadius: 25,
     padding: 10,
     shadowColor: '#000',
@@ -160,19 +160,19 @@ export const styles = StyleSheet.create({
 export const lightTheme = {
   background: '#fff',
   text: '#333',
-  inputBackground: '#efe8e4',
+  inputBackground: "rgba(239, 232, 228, 0.7)",
   placeholder: '#999',
   icon: 'black',
-  buttonBackground: '#efe8e4',
+  buttonBackground: "rgba(239, 232, 228, 0.7)",
   link: 'black',
 };
 
 export const darkTheme = {
   background: '#000',
   text: '#fff',
-  inputBackground: '#efe8e4',
+  inputBackground: "rgba(239, 232, 228, 0.7)",
   placeholder: '#666',
   icon: 'black',
-  buttonBackground: '#efe8e4',
+  buttonBackground: "rgba(239, 232, 228, 0.7)",
   link: 'black',
 };
