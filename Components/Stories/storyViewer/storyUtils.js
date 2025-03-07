@@ -22,13 +22,13 @@ export const createStoryPanResponder = ({
   handlePreviousUser,
   isCurrentUserStory,
 }) => {
-  const swipeThreshold = 0.1; // Umbral de distancia (menor valor = más sensible)
-  const velocityThreshold = 0.1; // Umbral de velocidad (menor valor = más sensible)
+  const swipeThreshold = 0; // Umbral de distancia (menor valor = más sensible)
+  const velocityThreshold = 0; // Umbral de velocidad (menor valor = más sensible)
 
   return PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (evt, gestureState) => {
-      return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
+      return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 0;
     },
     onPanResponderMove: (evt, gestureState) => {
       // Aquí puedes añadir lógica de previsualización si es necesario
