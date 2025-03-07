@@ -177,6 +177,28 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Lisboa/Danoi.jpg"),
+    title: "Da Noi",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "6:00 PM - 1:00 AM",
+      Martes: "6:00 PM - 1:00 AM",
+      Miércoles: "6:00 PM - 1:00 AM",
+      Jueves: "6:00 PM - 1:00 AM",
+      Viernes: "6:00 PM - 1:00 AM",
+      Sábado: "6:00 PM - 1:00 AM",
+      Domingo: "Cerrado",
+    },
+    number: "21 390 0802",
+    coordinates: {
+      latitude: 38.70880950,
+      longitude: -9.15618590,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
     path: require("../../assets/Lisboa/Mona_Verde.jpg"),
     title: "Mona Verde",
     category: "Restaurants & Rooftops",
@@ -265,7 +287,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Jncquoi_Avenida.jpg"),
+    path: require("../../assets/Lisboa/Jncquoi_Avenida2.jpg"),
     title: "Jncquoi Avenida",
     category: "Restaurants & Rooftops",
     hours: {
@@ -287,7 +309,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/lux_Fragil.jpg"),
+    path: require("../../assets/Lisboa/lux_Fragil1.jpg"),
     title: "Lux Frágil",
     category: "Bars & Clubs",
     hours: {
@@ -397,7 +419,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Collect.jpg"),
+    path: require("../../assets/Lisboa/Collect4.jpg"),
     title: "Collect",
     category: "Bars & Clubs",
     hours: {
@@ -457,6 +479,28 @@ const boxInfo = [
     coordinates: {
       latitude: 38.7301071,
       longitude: -9.1532305,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/Rocco.jpg"),
+    title: "Rocco",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "8:00 AM - 1:00 AM",
+      Martes: "8:00 AM - 1:00 AM",
+      Miércoles: "8:00 AM - 1:00 AM",
+      Jueves: "8:00 AM - 1:00 AM",
+      Viernes: "8:00 AM - 1:00 AM",
+      Sábado: "8:00 AM - 1:00 AM",
+      Domingo: "8:00 AM - 1:00 AM",
+    },
+    number: "21 054 3168",
+    coordinates: {
+      latitude: 38.70955470,
+      longitude: -9.14018130,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -595,8 +639,8 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Sud_Lisboa.jpg"),
-    title: "SUD Lisboa",
+    path: require("../../assets/Lisboa/Sud_Lisboa2.jpg"),
+    title: "SUD",
     category: "Restaurants & Rooftops",
     hours: {
       Lunes: "12:00 PM - 1:00 AM",
@@ -618,7 +662,7 @@ const boxInfo = [
   },
   {
     path: require("../../assets/Lisboa/Java_Rooftop.jpg"),
-    title: "Java Rooftop",
+    title: "Java",
     category: "Restaurants & Rooftops",
     hours: {
       Lunes: "-",
@@ -705,28 +749,6 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Danoi.jpg"),
-    title: "Danoi",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "6:00 PM - 1:00 AM",
-      Martes: "6:00 PM - 1:00 AM",
-      Miércoles: "6:00 PM - 1:00 AM",
-      Jueves: "6:00 PM - 1:00 AM",
-      Viernes: "6:00 PM - 1:00 AM",
-      Sábado: "6:00 PM - 1:00 AM",
-      Domingo: "Cerrado",
-    },
-    number: "21 390 0802",
-    coordinates: {
-      latitude: 38.70880950,
-      longitude: -9.15618590,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
     path: require("../../assets/Lisboa/cinco_Lounge.jpg"),
     title: "Cinco Lounge",
     category: "Bars & Clubs",
@@ -771,7 +793,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Bar Alimentar.jpg"),
+    path: require("../../assets/Lisboa/Bar_Alimentar.jpg"),
     title: "Bar Alimentar",
     category: "Restaurants & Rooftops",
     hours: {
@@ -923,6 +945,29 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/SonarLisboa.jpg"),
+    title: "Sónar Lisboa 2025",
+    category: "Festivities",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "11:30 PM - 12:00 AM",
+      Viernes: "11:30 PM - 12:00 AM",
+      Sábado: "11:30 PM - 12:00 AM",
+      Domingo: "12:00 AM - 8:00 AM",
+    },
+    number: "-",
+    coordinates: {
+      latitude: 38.72830010,
+      longitude: -9.15268280,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    availableDates: ["11 Apr", "12 Apr", "13 Apr", "14 Apr"],
     
   },
   {

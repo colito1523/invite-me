@@ -372,6 +372,8 @@ const nightStyles = StyleSheet.create({
     width: '100%',
     marginBottom: 10,
     backgroundColor: "black",
+    borderColor: "white",
+    borderWidth: 1,
     borderRadius: 30,
     paddingHorizontal: 10,
     height: 50,
