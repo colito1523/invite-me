@@ -11,7 +11,7 @@ import {
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { Menu, Provider } from "react-native-paper";
 import { auth, database } from "../../config/firebase";
-import { collection, doc, getDoc, addDoc, Timestamp } from "firebase/firestore";
+import { collection, doc, getDoc, addDoc, Timestamp, updateDoc } from "firebase/firestore";
 import FriendListModal from "../../Components/Modals/FriendListModal";
 import Complaints from "../../Components/Complaints/Complaints";
 import MutualFriendsModal from "../../Components/Mutual-Friends-Modal/MutualFriendsModal";
@@ -289,6 +289,27 @@ export default function UserProfile({ route, navigation }) {
     }
   };
 
+  const handleNavigation = async () => {
+    try {
+      if (auth.currentUser) {
+        const userRef = doc(database, "users", auth.currentUser.uid);
+        await updateDoc(userRef, {
+          hasSeenTutorial: true,
+        });
+      }
+  
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
+      }
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
+  };
 
   useEffect(() => {
     const checkTime = () => {
@@ -455,13 +476,14 @@ export default function UserProfile({ route, navigation }) {
           >
         <View style={[styles.container, { backgroundColor: isNightMode ? "black" : "white" }]}>
           {isElementsVisible && (
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-              accessibilityLabel={t("userProfile.backButton")}
-            >
-              <Ionicons name="arrow-back" size={27} color="white" />
-            </TouchableOpacity>
+      <TouchableOpacity
+      style={styles.backButton}
+      onPress={handleNavigation}
+      accessibilityLabel={t("userProfile.backButton")}
+    >
+      <Ionicons name="arrow-back" size={27} color="white" />
+    </TouchableOpacity>
+    
           )}
           <ScrollView
             horizontal
