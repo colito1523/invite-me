@@ -463,6 +463,28 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Lisboa/Brilhante.jpg"),
+    title: "Brilhante",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "19:00 PM - 12:00 AM",
+      Martes: "19:00 PM - 12:00 AM",
+      Miércoles: "19:00 PM - 12:00 AM",
+      Jueves: "19:00 PM - 12:00 AM",
+      Viernes: "19:00 PM - 12:00 AM",
+      Sábado: "12:00 PM - 01:00 AM",
+      Domingo: "19:00 PM - 12:00 AM",
+    },
+    number: "21 054 7981",
+    coordinates: {
+      latitude: 38.7078843,
+      longitude: -9.1470788,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
     path: require("../../assets/Lisboa/jamaica.jpg"),
     title: "Jamaica",
     category: "Bars & Clubs",
@@ -677,6 +699,28 @@ const boxInfo = [
     coordinates: {
       latitude: 38.72102950,
       longitude: -9.14693150,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/Danoi.jpg"),
+    title: "Danoi",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "6:00 PM - 1:00 AM",
+      Martes: "6:00 PM - 1:00 AM",
+      Miércoles: "6:00 PM - 1:00 AM",
+      Jueves: "6:00 PM - 1:00 AM",
+      Viernes: "6:00 PM - 1:00 AM",
+      Sábado: "6:00 PM - 1:00 AM",
+      Domingo: "Cerrado",
+    },
+    number: "21 390 0802",
+    coordinates: {
+      latitude: 38.70880950,
+      longitude: -9.15618590,
     },
     country: "Portugal",
     city: "Lisboa",
