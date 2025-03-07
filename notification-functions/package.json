@@ -12,9 +12,9 @@
   "dependencies": {
     "expo-server-sdk": "^3.14.0",
     "firebase-admin": "^11.10.1",
-    "firebase-functions": "^4.0.2"
+    "firebase-functions": "^6.3.2"
   },
   "engines": {
-    "node": "18"
+    "node": "20"
   }
 }

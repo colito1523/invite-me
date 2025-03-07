@@ -131,7 +131,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/mama_shelter.jpg"),
+    path: require("../../assets/Lisboa/mama_shelter1.jpg"),
     title: "Mama Shelter",
     category: "Restaurants & Rooftops",
     hours: {
@@ -901,28 +901,6 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Corleone.jpg"),
-    title: "Corleone",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "7:00 PM - 12:00 AM",
-      Martes: "7:00 PM - 12:00 AM",
-      Miércoles: "7:00 PM - 12:00 AM",
-      Jueves: "7:00 PM - 12:00 AM",
-      Viernes: "7:00 PM - 12:00 AM",
-      Sábado: "7:00 PM - 12:00 AM",
-      Domingo: "7:00 PM - 12:00 AM",
-    },
-    number: "964 236 029",
-    coordinates: {
-      latitude: 38.69760430,
-      longitude: -9.41891520,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
     path: require("../../assets/Lisboa/malacopa.jpg"),
     title: "Malacopa",
     category: "Restaurants & Rooftops",
@@ -950,13 +928,13 @@ const boxInfo = [
     title: "Sónar Lisboa 2025",
     category: "Festivities",
     hours: {
-      Lunes: "Cerrado",
+      Lunes: "8:30 PM - ---",
       Martes: "Cerrado",
       Miércoles: "Cerrado",
-      Jueves: "11:30 PM - 12:00 AM",
-      Viernes: "11:30 PM - 12:00 AM",
-      Sábado: "11:30 PM - 12:00 AM",
-      Domingo: "12:00 AM - 8:00 AM",
+      Jueves: "Cerrado",
+      Viernes: "8:30 PM - ---",
+      Sábado: "8:30 PM - ---",
+      Domingo: "8:30 PM - ---",
     },
     number: "-",
     coordinates: {

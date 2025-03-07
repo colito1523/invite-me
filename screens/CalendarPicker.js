@@ -172,11 +172,12 @@ const nightStyles = StyleSheet.create({
   ...baseStyles,
   dateButton: {
     ...baseStyles.dateButton,
-    backgroundColor: "transparent",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+
   },
   dateText: {
     ...baseStyles.dateText,
-    color: "#FFFFFF",
+    color: "black",
   },
 });
 
