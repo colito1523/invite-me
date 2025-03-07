@@ -53,7 +53,7 @@ exports.sendGeneralNotification = functions.firestore
           ...notificationData,
           screen: 'Notifications' // Agregamos esta propiedad para indicar la pantalla destino
         },
-        image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo%20icono.png?alt=media&token=057d3468-1996-439c-869e-ed09f99344bb'
+        image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=e259cf31-f7ca-4786-9953-2d294802ea1e'
       };
       
 

@@ -38,11 +38,11 @@ export default {
       package: "com.airesSoftStudio.inviteMe",
       googleServicesFile: "./google-services.json",
       adaptiveIcon: {
-        foregroundImage: "./assets/Logo_Invite_Me.png",
+        foregroundImage: "./assets/nuevo_logo.png",
         backgroundColor: "#ffffff",
       },
       notification: {
-        icon: "./assets/notification-icon.png",
+        icon: "./assets/nuevo_logo.png",
         color: "#FFFFFF",
         iosDisplayInForeground: true,
         androidMode: "default",
@@ -68,7 +68,7 @@ export default {
       },
     },
     web: {
-      favicon: "./assets/Logo_Invite_Me.png",
+      favicon: "./assets/nuevo_logo.png",
     },
     extra: {
       apiKey: process.env.API_KEY,
