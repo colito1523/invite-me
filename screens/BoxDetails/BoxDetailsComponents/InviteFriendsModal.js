@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   searchInputNight: {
-    borderColor: "black",
+    borderColor: "#333",
     color: "white",
     backgroundColor: "#333",
   },
