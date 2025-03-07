@@ -233,6 +233,36 @@ export default function Component({ route, navigation }) {
   };
   
 
+   const handleNavigation = async () => {
+      try {
+        if (auth.currentUser) {
+          // 1) Actualizar hasSeenTutorial
+          const userRef = doc(database, "users", auth.currentUser.uid);
+          await updateDoc(userRef, { hasSeenTutorial: true });
+    
+          // 2) Obtener userData para saber el selectedCategory
+          const userDoc = await getDoc(userRef);
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          // Si necesitas un idioma específico, por ejemplo:
+          const selectedCategory =
+            userData.preferredLanguage === "en" ? "All" : "Todos";
+    
+          // 3) Ver si se puede volver atrás
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          } else {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Home", params: { selectedCategory: t("categories.all") } }],
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error updating document:", error);
+      }
+    };
+    
+
   const handleReport = async () => {
     if (!selectedUser || !selectedUser.id) {
       Alert.alert(
@@ -517,9 +547,10 @@ export default function Component({ route, navigation }) {
         keyboardShouldPersistTaps="handled"
         scrollEnabled={false}
       >
+        
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={handleNavigation}
             accessibilityLabel={t('goBack')}
           >
             <Ionicons

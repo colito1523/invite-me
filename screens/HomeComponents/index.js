@@ -130,8 +130,23 @@ useEffect(() => {
   useEffect(() => {
     if (route.params?.selectedCategory) {
       setSelectedCategory(route.params.selectedCategory);
+      // Llamar a fetchData con todos los parámetros para recargar TODOS los boxs
+      fetchData({
+        setLoading,
+        fetchBoxData,
+        fetchPrivateEvents,
+        database,
+        storage,
+        boxInfo,
+        user: auth.currentUser,
+        setBoxData,
+        selectedDate: selectedDateRef.current,
+        setPrivateEvents,
+      });
     }
   }, [route.params?.selectedCategory]);
+  
+  
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {

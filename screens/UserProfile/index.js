@@ -292,24 +292,32 @@ export default function UserProfile({ route, navigation }) {
   const handleNavigation = async () => {
     try {
       if (auth.currentUser) {
+        // 1) Actualizar hasSeenTutorial
         const userRef = doc(database, "users", auth.currentUser.uid);
-        await updateDoc(userRef, {
-          hasSeenTutorial: true,
-        });
-      }
+        await updateDoc(userRef, { hasSeenTutorial: true });
   
-      if (navigation.canGoBack()) {
-        navigation.goBack();
-      } else {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Home" }],
-        });
+        // 2) Obtener userData para saber el selectedCategory
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.exists() ? userDoc.data() : {};
+        // Si necesitas un idioma específico, por ejemplo:
+        const selectedCategory =
+          userData.preferredLanguage === "en" ? "All" : "Todos";
+  
+        // 3) Ver si se puede volver atrás
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Home", params: { selectedCategory: t("categories.all") } }],
+          });
+        }
       }
     } catch (error) {
-      console.error("Error updating document: ", error);
+      console.error("Error updating document:", error);
     }
   };
+  
 
   useEffect(() => {
     const checkTime = () => {
@@ -476,13 +484,14 @@ export default function UserProfile({ route, navigation }) {
           >
         <View style={[styles.container, { backgroundColor: isNightMode ? "black" : "white" }]}>
           {isElementsVisible && (
-      <TouchableOpacity
-      style={styles.backButton}
-      onPress={handleNavigation}
-      accessibilityLabel={t("userProfile.backButton")}
-    >
-      <Ionicons name="arrow-back" size={27} color="white" />
-    </TouchableOpacity>
+    <TouchableOpacity
+    style={styles.backButton}
+    onPress={handleNavigation}
+    accessibilityLabel={t("userProfile.backButton")}
+  >
+    <Ionicons name="arrow-back" size={27} color="white" />
+  </TouchableOpacity>
+  
     
           )}
           <ScrollView

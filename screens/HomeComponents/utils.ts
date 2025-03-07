@@ -1,5 +1,4 @@
 import { collection, doc, getDoc, onSnapshot, query, where, getDocs  } from "firebase/firestore";
-import { CommonActions } from '@react-navigation/native';
 import { ref, getDownloadURL } from "firebase/storage";
 import { auth, database, } from "../../config/firebase";
 import { signOut } from "firebase/auth";
