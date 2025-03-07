@@ -485,7 +485,7 @@
     "changeLanguage": "Change Language"
   },
 
-  "searchPlaceholder": "Search...",
+  "searchPlaceholder": "Search city...",
   "signOut": "Sign Out",
   "_comment_createEvent.js": "createEvent.js",
   "createEvent": {

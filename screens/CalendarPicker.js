@@ -98,7 +98,7 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
               maxDate={maxDate}
               onDayPress={handleDayPress}
               markedDates={{
-                [today]: { selected: true, selectedColor: "#3e3d3d" },
+                [today]: { selected: true, selectedColor: "#DFC8B9" },
               }}
               theme={{
                 backgroundColor: "transparent",
@@ -111,7 +111,7 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
                 textDisabledColor: isNightMode ? "#666666" : "#D9E1E8",
                 dotColor: "black",
                 selectedDotColor: "#FFFFFF",
-                arrowColor: "#3e3d3d",
+                arrowColor: "#DFC8B9",
                 monthTextColor: isNightMode ? "#FFFFFF" : "#000000",
                 textDayFontFamily: "System",
                 textMonthFontFamily: "System",

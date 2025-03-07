@@ -485,7 +485,7 @@
   "changeLanguage": "Mudar idioma"
 },
 
- "searchPlaceholder": "Procurar...",
+ "searchPlaceholder": "Procurar cidade...",
 "signOut": "Sair",
 
 "_comment_createEvent.js": "createEvent.js",
