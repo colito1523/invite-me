@@ -407,7 +407,7 @@ const baseStyles = {
   container: {
     position: "absolute",
     bottom: 10,
-    right: 0,
+    right: 8,
   },
   imageContainer: {
     flexDirection: "row",

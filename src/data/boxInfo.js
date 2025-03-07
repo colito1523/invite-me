@@ -574,7 +574,7 @@ const boxInfo = [
   },
   {
     path: require("../../assets/Lisboa/Sud_Lisboa.jpg"),
-    title: "SUD_Lisboa",
+    title: "SUD Lisboa",
     category: "Restaurants & Rooftops",
     hours: {
       Lunes: "12:00 PM - 1:00 AM",
@@ -749,28 +749,6 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Golden.jpg"),
-    title: "Golden Vista",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "Cerrado",
-      Martes: "6:00 PM - 2:00 AM",
-      Miércoles: "6:00 PM - 2:00 AM",
-      Jueves: "6:00 PM - 2:00 AM",
-      Viernes: "6:00 PM - 4:00 AM",
-      Sábado: "6:00 PM - 4:00 AM",
-      Domingo: "Cerrado",
-    },
-    number: "935 190 438",
-    coordinates: {
-      latitude: 38.6997337,
-      longitude: -9.1785392,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
     path: require("../../assets/Lisboa/Bom_o_mau_e_o_vilao.jpg"),
     title: "O bom o mau e o vilão",
     category: "Bars & Clubs",
@@ -810,6 +788,28 @@ const boxInfo = [
     coordinates: {
       latitude: 38.6982578,
       longitude: -9.4217543,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/Corleone.jpg"),
+    title: "Corleone",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "7:00 PM - 12:00 AM",
+      Martes: "7:00 PM - 12:00 AM",
+      Miércoles: "7:00 PM - 12:00 AM",
+      Jueves: "7:00 PM - 12:00 AM",
+      Viernes: "7:00 PM - 12:00 AM",
+      Sábado: "7:00 PM - 12:00 AM",
+      Domingo: "7:00 PM - 12:00 AM",
+    },
+    number: "964 236 029",
+    coordinates: {
+      latitude: 38.69760430,
+      longitude: -9.41891520,
     },
     country: "Portugal",
     city: "Lisboa",
