@@ -85,7 +85,7 @@ exports.sendEventNotification = functions.firestore
           screen: 'Notifications' // Agregamos esta línea
         },
         priority: 'high',
-        image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=e259cf31-f7ca-4786-9953-2d294802ea1e'
+        image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
       };
       
 

@@ -58,7 +58,7 @@ exports.sendLikeNotification = functions.firestore
           title: texts.title,
           body: texts.noteLikeBody(notificationData.fromName),
           data: { ...notificationData, screen: 'Notifications' },
-          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=e259cf31-f7ca-4786-9953-2d294802ea1e'
+          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
         };
       } else if (notificationData.type === 'like') {
         message = {
@@ -67,7 +67,7 @@ exports.sendLikeNotification = functions.firestore
           title: texts.title,
           body: texts.profileLikeBody(notificationData.fromName),
           data: { ...notificationData, screen: 'Notifications' },
-          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=e259cf31-f7ca-4786-9953-2d294802ea1e'
+          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
         };
       } else if (notificationData.type === 'storyLike') {
         message = {
@@ -76,7 +76,7 @@ exports.sendLikeNotification = functions.firestore
           title: texts.title,
           body: texts.storyLikeBody(notificationData.fromName),
           data: { ...notificationData, screen: 'Notifications' },
-          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=e259cf31-f7ca-4786-9953-2d294802ea1e'
+          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
         };
       }
 
