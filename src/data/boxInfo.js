@@ -23,6 +23,29 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Lisboa/SonarLisboa.jpg"),
+    title: "Sónar Lisboa 2025",
+    category: "Festivities",
+    hours: {
+      Lunes: "8:30 PM - ---",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "Cerrado",
+      Viernes: "8:30 PM - ---",
+      Sábado: "8:30 PM - ---",
+      Domingo: "8:30 PM - ---",
+    },
+    number: "-",
+    coordinates: {
+      latitude: 38.72830010,
+      longitude: -9.15268280,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    availableDates: ["11 Apr", "12 Apr", "13 Apr"],
+    
+  },
+  {
     path: require("../../assets/Lisboa/praia_no_parquee.jpg"),
     title: "Praia No Parque",
     category: "Restaurants & Rooftops",
@@ -279,28 +302,6 @@ const boxInfo = [
     coordinates: {
       latitude: 38.7148909,
       longitude: -9.1205341,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
-    path: require("../../assets/Lisboa/Mome.jpg"),
-    title: "MOME",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "12:00 AM - 6:00 AM",
-      Martes: "Cerrado",
-      Miércoles: "12:00 AM - 6:00 AM",
-      Jueves: "12:00 AM - 11:59 PM",
-      Viernes: "12:00 AM - 7:00 AM",
-      Sábado: "12:00 AM - 6:00 AM",
-      Domingo: "12:00 AM - 6:00 AM",
-    },
-    number: "21 151 0734",
-    coordinates: {
-      latitude: 38.7059725,
-      longitude: -9.1574549,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -703,6 +704,28 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Lisboa/Mome.jpg"),
+    title: "MOME",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "12:00 AM - 6:00 AM",
+      Martes: "Cerrado",
+      Miércoles: "12:00 AM - 6:00 AM",
+      Jueves: "12:00 AM - 11:59 PM",
+      Viernes: "12:00 AM - 7:00 AM",
+      Sábado: "12:00 AM - 6:00 AM",
+      Domingo: "12:00 AM - 6:00 AM",
+    },
+    number: "21 151 0734",
+    coordinates: {
+      latitude: 38.7059725,
+      longitude: -9.1574549,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
     path: require("../../assets/Lisboa/Rive_Rouge.jpg"),
     title: "Rive Rouge",
     category: "Bars & Clubs",
@@ -920,30 +943,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
-  },
-
-  {
-    path: require("../../assets/Lisboa/SonarLisboa.jpg"),
-    title: "Sónar Lisboa 2025",
-    category: "Festivities",
-    hours: {
-      Lunes: "8:30 PM - ---",
-      Martes: "Cerrado",
-      Miércoles: "Cerrado",
-      Jueves: "Cerrado",
-      Viernes: "8:30 PM - ---",
-      Sábado: "8:30 PM - ---",
-      Domingo: "8:30 PM - ---",
-    },
-    number: "-",
-    coordinates: {
-      latitude: 38.72830010,
-      longitude: -9.15268280,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    availableDates: ["11 Apr", "12 Apr", "13 Apr", "14 Apr"],
     
   },
   {
