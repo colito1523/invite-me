@@ -39,11 +39,11 @@ export default {
       googleServicesFile: "./google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/nuevo_logo.png",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#EBDCD5",
       },
       notification: {
         icon: "./assets/nuevo_logo.png",
-        color: "#FFFFFF",
+        color: "#EBDCD5",
         iosDisplayInForeground: true,
         androidMode: "default",
         androidCollapsedTitle: "Invite Me",

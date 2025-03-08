@@ -533,6 +533,7 @@ useEffect(() => {
       <FlatList
   data={filteredBoxData.flatMap((group) => group.data)}
   renderItem={renderItem}
+  initialNumToRender={42}
   keyExtractor={keyExtractor}
   contentContainerStyle={{ paddingBottom: 20 }} // Espacio extra para mejor desplazamiento
   removeClippedSubviews={true}
