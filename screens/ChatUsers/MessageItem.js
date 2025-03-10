@@ -65,13 +65,20 @@ const MessageItem = ({
               styles.storyResponseContainer,
             ]}
           >
-            <Text style={styles.storyResponseText}>
+            <Text
+              style={[
+                styles.storyResponseText,
+                { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
+              ]}>
               {isOwnMessage ? t("chatUsers.youAnswered") : t("chatUsers.Answered")}
             </Text>
             <Image
-              source={{ uri: item.storyUrl }}
-              style={styles.storyResponseImage}
-            />
+  source={{ uri: item.storyUrl }}
+  style={[
+    styles.storyResponseImage,
+    { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
+  ]}
+/>
             <Text style={styles.messageText}>{item.text}</Text>
             {isOwnMessage && item.seen && (
               <View style={styles.messageFooter}>

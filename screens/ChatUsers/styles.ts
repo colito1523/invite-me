@@ -287,7 +287,7 @@ export const styles = StyleSheet.create({
       width: 80,
       height: 150,
       borderRadius: 8,
-      marginRight: 12,
+   
     },
     storyResponseContent: {
       flex: 1,
