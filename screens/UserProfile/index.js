@@ -388,8 +388,8 @@ export default function UserProfile({ route, navigation }) {
               styles.mutualFriendCountBubble,
               { 
                 left: 4 * (screenWidth * 0.05),
-                backgroundColor: isNightMode ? "black" : "white",
-                borderColor: isNightMode ? "black" : "white" // Cambio aquí
+                backgroundColor: isNightMode ? "black" : "#FAEBD7",
+                borderColor: isNightMode ? "black" : "#FAEBD7" // Cambio aquí
               },
             ]}
           >

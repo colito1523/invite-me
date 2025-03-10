@@ -79,7 +79,7 @@ const MessageItem = ({
     { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
   ]}
 />
-            <Text style={styles.messageText}>{item.text}</Text>
+            <Text style={[styles.messageText,  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },]}>{item.text}</Text>
             {isOwnMessage && item.seen && (
               <View style={styles.messageFooter}>
                 <Text style={styles.timeText}>
@@ -91,7 +91,7 @@ const MessageItem = ({
                 <Ionicons
                   name="checkmark-done-sharp"
                   size={16}
-                  color="black"
+                  color="red"
                   style={styles.seenIcon}
                 />
               </View>

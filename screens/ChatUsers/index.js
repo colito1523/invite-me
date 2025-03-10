@@ -627,8 +627,66 @@ export default function Chat({ route }) {
         selectedImage.mediaType === "video" ? (
           // Aquí va la lógica para video
           <View style={styles.videoContainer}>
-            {/* ... código del video ... */}
-          </View>
+                    <Video
+                      source={{ uri: selectedImage.uri }}
+                      style={styles.fullscreenMedia}
+                      resizeMode="cover"
+                      shouldPlay={true}
+                      isLooping={false}
+                      useNativeControls={false}
+                      onPlaybackStatusUpdate={(status) => {
+                        if (status.didJustFinish) {
+                          videoRef.current.setPositionAsync(0);
+                          setIsPlaying(false);
+                          setControlsVisible(true);
+                          videoRef.current.pauseAsync();
+                        }
+                        if (status.isLoaded) {
+                          setDuration(status.durationMillis);
+                          setCurrentTime(status.positionMillis);
+                          setIsPlaying(status.isPlaying);
+                        }
+                      }}
+                      ref={videoRef}
+                    />
+                    <TouchableWithoutFeedback
+                      onPress={() => setControlsVisible((prev) => !prev)}
+                    >
+                      <View style={styles.fullScreenTouchable}>
+                        {controlsVisible && (
+                          <TouchableOpacity
+                            style={styles.playButton}
+                            onPress={() => {
+                              if (videoRef.current) {
+                                if (isPlaying) {
+                                  videoRef.current.pauseAsync();
+                                } else {
+                                  videoRef.current.playAsync();
+                                }
+                                setIsPlaying(!isPlaying);
+                              }
+                            }}
+                          >
+                            <Ionicons
+                              name={isPlaying ? "pause" : "play"}
+                              size={50}
+                              color="white"
+                            />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </TouchableWithoutFeedback>
+                    <View style={styles.videoControlsContainer}>
+                      <View style={styles.progressBar}>
+                        <View
+                          style={[
+                            styles.progress,
+                            { width: `${(currentTime / duration) * 100}%` },
+                          ]}
+                        />
+                      </View>
+                    </View>
+                  </View>
         ) : (
           <TouchableWithoutFeedback onPress={closeModal}>
           <View

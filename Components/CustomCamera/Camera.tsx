@@ -104,24 +104,34 @@ export default function Camera({ header = null }) {
       {header}
       <CameraView style={styles.camera} facing={facing} ref={cameraRef} flash={flashMode}>
         <View style={styles.buttonContainer}>
+          {/* Botón para abrir la galería (lado izquierdo) */}
+          <TouchableOpacity style={styles.galleryButton} onPress={handleOpenGallery}>
+            <Ionicons name="images-outline" size={30} color="white" />
+          </TouchableOpacity>
+  
+          {/* Botón de captura en el centro */}
           <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
             <View style={styles.innerCircle} />
           </TouchableOpacity>
+  
+          {/* Botón para cambiar cámara (lado derecho) */}
+          <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
+            <AntDesign name="retweet" size={30} color="white" />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
-          <AntDesign name="retweet" size={30} color="white" />
-        </TouchableOpacity>
+  
+        {/* Botón para activar/desactivar flash */}
         <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
-  <Ionicons
-    name={flashMode === 'off' ? 'flash-off' : 'flash'}
-    size={30}
-    color="white"
-  />
-</TouchableOpacity>
-
+          <Ionicons
+            name={flashMode === 'off' ? 'flash-off' : 'flash'}
+            size={30}
+            color="white"
+          />
+        </TouchableOpacity>
       </CameraView>
     </View>
   );
+  
 }
 
 const styles = StyleSheet.create({
@@ -158,8 +168,8 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
+    bottom: 0,
+    right: 0,
   },
   flashButton: {
     position: 'absolute',
@@ -176,5 +186,10 @@ const styles = StyleSheet.create({
     top: 50,
     left: 20,
     zIndex: 1,
+  },
+  galleryButton: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0, // 📍 Lo coloca en el lado izquierdo
   },
 });

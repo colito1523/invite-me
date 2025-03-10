@@ -127,8 +127,8 @@ const NameDisplay = ({
                       styles.mutualFriendImage,
                       styles.mutualFriendCountBubble,
                       { left: 4 * 30 },
-                      { backgroundColor: isNightMode ? "black" : "white",
-                        borderColor: isNightMode ? "black" : "white" // Cambio aquí
+                      {backgroundColor: isNightMode ? "black" : "#FAEBD7",
+                        borderColor: isNightMode ? "black" : "#FAEBD7" // Cambio aquí
                        },
                     ]}
                   >

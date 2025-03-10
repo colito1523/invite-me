@@ -1,28 +1,5 @@
 const boxInfo = [
   {
-    path: require("../../assets/Lisboa/Tagide.jpg"),
-    title: "Tágide Gastrobar",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Sábado: "19:00 - 23:00",
-      Domingo: "Cerrado",
-      Lunes: "Cerrado",
-      Martes: "19:00 - 23:00",
-      Miércoles: "19:00 - 23:00",
-      Jueves: "19:00 - 23:00",
-      Viernes: "19:00 - 23:00"
-    },
-    number: "968 842 888",
-    coordinates: {
-      latitude: 38.70831910,
-      longitude: -9.13998250,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    priority: true, // Esto hace que aparezca en la sección de priorida
-    
-  },
-  {
     path: require("../../assets/Lisboa/SonarLisboa.jpg"),
     title: "Sónar Lisboa 2025",
     category: "Festivities",

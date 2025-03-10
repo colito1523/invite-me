@@ -105,6 +105,7 @@ export function StoryViewer({
       onClose?.(localUnseenStories);
     }
   }, [deserializedStories.length]);
+  
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [storyIndex, setStoryIndex] = useState(() => {
@@ -118,6 +119,9 @@ export function StoryViewer({
   const [localStories, setLocalStories] = useState(() => [...stories]);
   const [localUnseenStories, setLocalUnseenStories] = useState(unseenStories);
   const [message, setMessage] = useState("");
+  useEffect(() => {
+    setMessage("");
+  }, [currentIndex, storyIndex]);
   const [viewersModalVisible, setViewersModalVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const longPressTimeout = useRef(null);
