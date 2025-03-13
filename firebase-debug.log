@@ -1,0 +1,111 @@
+[debug] [2025-03-13T17:17:36.166Z] ----------------------------------------------------------------------
+[debug] [2025-03-13T17:17:36.169Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\coloi\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions --force
+[debug] [2025-03-13T17:17:36.169Z] CLI Version:   13.29.1
+[debug] [2025-03-13T17:17:36.169Z] Platform:      win32
+[debug] [2025-03-13T17:17:36.169Z] Node Version:  v20.18.2
+[debug] [2025-03-13T17:17:36.169Z] Time:          Thu Mar 13 2025 17:17:36 GMT+0000 (hora estándar de Europa occidental)
+[debug] [2025-03-13T17:17:36.169Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-03-13T17:17:36.188Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-03-13T17:17:36.315Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-03-13T17:17:36.316Z] > authorizing via signed-in user (iiinvitee.me@gmail.com)
+[debug] [2025-03-13T17:17:36.316Z] [iam] checking project invite-me-32a07 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-03-13T17:17:36.317Z] Checked if tokens are valid: false, expires at: 1741612071222
+[debug] [2025-03-13T17:17:36.318Z] Checked if tokens are valid: false, expires at: 1741612071222
+[debug] [2025-03-13T17:17:36.318Z] > refreshing access token with scopes: []
+[debug] [2025-03-13T17:17:36.319Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-03-13T17:17:36.319Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-03-13T17:17:36.526Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-03-13T17:17:36.526Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-03-13T17:17:36.558Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/invite-me-32a07:testIamPermissions [none]
+[debug] [2025-03-13T17:17:36.558Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/invite-me-32a07:testIamPermissions x-goog-quota-user=projects/invite-me-32a07
+[debug] [2025-03-13T17:17:36.558Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/invite-me-32a07:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-03-13T17:17:36.586Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-03-13T17:17:36.586Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-03-13T17:17:37.264Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/invite-me-32a07:testIamPermissions 200
+[debug] [2025-03-13T17:17:37.265Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/invite-me-32a07:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-03-13T17:17:37.265Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:37.265Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:37.265Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/invite-me-32a07/serviceAccounts/invite-me-32a07@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-03-13T17:17:37.265Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/invite-me-32a07/serviceAccounts/invite-me-32a07@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-03-13T17:17:37.970Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/invite-me-32a07/serviceAccounts/invite-me-32a07@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-03-13T17:17:37.970Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/invite-me-32a07/serviceAccounts/invite-me-32a07@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'invite-me-32a07'...
+[info] 
+[info] i  deploying functions 
+[info] +  functions: Finished running predeploy script. 
+[debug] [2025-03-13T17:17:37.975Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:37.975Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:37.975Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/invite-me-32a07 [none]
+[debug] [2025-03-13T17:17:38.165Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/invite-me-32a07 200
+[debug] [2025-03-13T17:17:38.165Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/invite-me-32a07 {"projectNumber":"1003756781656","projectId":"invite-me-32a07","lifecycleState":"ACTIVE","name":"Invite-Me","labels":{"firebase":"enabled"},"createTime":"2024-10-17T14:10:25.356174Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: preparing codebase eventcleanup for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[debug] [2025-03-13T17:17:38.168Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:38.168Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:38.168Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:38.168Z] Checked if tokens are valid: true, expires at: 1741889855526
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[debug] [2025-03-13T17:17:38.169Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:38.169Z] Checked if tokens are valid: true, expires at: 1741889855526
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-03-13T17:17:38.170Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:38.170Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:38.170Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-03-13T17:17:38.170Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/invite-me-32a07
+[debug] [2025-03-13T17:17:38.171Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-03-13T17:17:38.172Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/invite-me-32a07
+[debug] [2025-03-13T17:17:38.173Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/cloudbuild.googleapis.com [none]
+[debug] [2025-03-13T17:17:38.173Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/cloudbuild.googleapis.com x-goog-quota-user=projects/invite-me-32a07
+[debug] [2025-03-13T17:17:38.175Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/artifactregistry.googleapis.com [none]
+[debug] [2025-03-13T17:17:38.175Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/artifactregistry.googleapis.com x-goog-quota-user=projects/invite-me-32a07
+[debug] [2025-03-13T17:17:39.048Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/cloudfunctions.googleapis.com 200
+[debug] [2025-03-13T17:17:39.048Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/cloudfunctions.googleapis.com [omitted]
+[info] +  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2025-03-13T17:17:39.050Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/runtimeconfig.googleapis.com 200
+[debug] [2025-03-13T17:17:39.050Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2025-03-13T17:17:39.061Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/cloudbuild.googleapis.com 200
+[debug] [2025-03-13T17:17:39.061Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/cloudbuild.googleapis.com [omitted]
+[info] +  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2025-03-13T17:17:39.109Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/artifactregistry.googleapis.com 200
+[debug] [2025-03-13T17:17:39.109Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/invite-me-32a07/services/artifactregistry.googleapis.com [omitted]
+[info] +  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2025-03-13T17:17:39.110Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:39.110Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:39.110Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/invite-me-32a07/adminSdkConfig [none]
+[debug] [2025-03-13T17:17:39.661Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/invite-me-32a07/adminSdkConfig 200
+[debug] [2025-03-13T17:17:39.661Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/invite-me-32a07/adminSdkConfig {"projectId":"invite-me-32a07","storageBucket":"invite-me-32a07.appspot.com","locationId":"europe-west"}
+[debug] [2025-03-13T17:17:39.662Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:39.662Z] Checked if tokens are valid: true, expires at: 1741889855526
+[debug] [2025-03-13T17:17:39.662Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/invite-me-32a07/configs [none]
+[debug] [2025-03-13T17:17:39.980Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/invite-me-32a07/configs 200
+[debug] [2025-03-13T17:17:39.980Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/invite-me-32a07/configs {}
+[debug] [2025-03-13T17:17:39.982Z] Validating nodejs source
+[debug] [2025-03-13T17:17:41.309Z] > [functions] package.json contents: {
+  "name": "notification-functions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "expo-server-sdk": "^3.14.0",
+    "firebase-admin": "^11.10.1",
+    "firebase-functions": "^6.3.2"
+  },
+  "engines": {
+    "node": "20"
+  }
+}
+[debug] [2025-03-13T17:17:41.310Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2025-03-13T17:17:41.312Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-03-13T17:17:41.324Z] Found firebase-functions binary at 'C:\Users\coloi\Desktop\detalles\invite-me\notification-functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8144
+

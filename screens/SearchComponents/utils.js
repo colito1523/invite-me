@@ -102,9 +102,11 @@ export const fetchUsers = async (searchTerm, setResults) => {
           (user) =>
             user.id !== auth.currentUser.uid &&
             !blockedUsers.includes(user.id) &&
-            (user.username.toLowerCase().includes(normalizedSearchTerm) ||
-              user.firstName.toLowerCase().includes(normalizedSearchTerm) ||
-              user.lastName.toLowerCase().includes(normalizedSearchTerm))
+            (
+            user.username?.toLowerCase().includes(normalizedSearchTerm) ||
+            user.firstName?.toLowerCase().includes(normalizedSearchTerm) ||
+            user.lastName?.toLowerCase().includes(normalizedSearchTerm)
+          )
         )
         .slice(0, 8); // Limitar a 10 resultados
 
