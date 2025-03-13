@@ -636,17 +636,17 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/okha.jpg"),
-    title: "OKHA",
+    path: require("../../assets/Lisboa/tuttopassa.jpg"),
+    title: "TUTTO PASSA",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "Cerrado",
-      Martes: "17:00 - 00:00",
-      Miércoles: "17:00 - 00:00",
-      Jueves: "17:00 - 00:00",
-      Viernes: "17:00 - 00:00",
-      Sábado: "17:00 - 00:00",
-      Domingo: "17:00 - 00:00"
+      Lunes: "12:30 - 01:00",
+      Martes: "12:30 - 01:00",
+      Miércoles: "12:30 - 01:00",
+      Jueves: "12:30 - 02:00",
+      Viernes: "12:30 - 03:00",
+      Sábado: "12:30 - 03:00",
+      Domingo: "12:30 - 01:00"
     },
     number: "914 110 791",
     coordinates: {

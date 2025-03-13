@@ -22,13 +22,26 @@ export default function Tutorial() {
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigation = useNavigation();
-  const { t } = useTranslation();
+  const { t, i18n  } = useTranslation();
+
+  const getVideoForLanguage = () => {
+    switch (i18n.language) {
+      case 'es': // Español
+        return require('../assets/tutorial/videos/vides.mp4');
+      case 'en': // Inglés
+        return require('../assets/tutorial/videos/viden.mp4');
+      case 'pt': // Portugués
+        return require('../assets/tutorial/videos/vidpt.mp4');
+      default: // Default a español si el idioma no está listado
+        return require('../assets/tutorial/videos/viden.mp4');
+    }
+  };
 
   const slides = [
     { 
       id: '1', 
       type: 'info',
-      video: require('../assets/tutorial/videos/1.mp4'),
+      video: getVideoForLanguage(),
       videoStyle: styles.imageStyle2,
       topTextStyle: { fontSize: 14 },      // Estilo específico para el texto superior
       bottomTextStyle: { fontSize: 14 },   // Estilo específico para el texto inferior
