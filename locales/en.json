@@ -689,7 +689,9 @@
     "hideTheirStories": "Hide their stories",
     "showMyStories": "Show my stories",
     "hideMyStories": "Hide my stories",
-    "TheyAreAlreadyFriends": "This user has already sent you a friend request. Check your notifications."
+    "TheyAreAlreadyFriends": "This user has already sent you a friend request. Check your notifications.",
+    "pending": "Pending request",
+    "pendingRequest": "This user has already sent you a friend request. Check your notifications."
   },
   "months": [
     "jan",

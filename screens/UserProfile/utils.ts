@@ -667,8 +667,8 @@ export const toggleUserStatus = async (params) => {
 
     if (!existingRequestFromThemSnapshot.empty && friendSnapshot.empty) {
       Alert.alert(
-        "Solicitud pendiente",
-        "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
+        t("userProfile.pending"),
+        t("userProfile.pendingRequest")
       );
       return {
         friendshipStatus: wasFriends,

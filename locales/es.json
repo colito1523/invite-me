@@ -690,7 +690,9 @@
     "hideTheirStories": "Ocultar sus historias",
     "showMyStories": "Mostrar mis historias",
     "hideMyStories": "Ocultar mis historias",
-    "TheyAreAlreadyFriends": "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
+    "TheyAreAlreadyFriends": "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones.",
+     "pending": "Solicitud pendiente",
+    "pendingRequest": "Este usuario ya te envió una solicitud de amistad. Revisa tus notificaciones."
   },
   "months": ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
 
