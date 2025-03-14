@@ -91,7 +91,7 @@ const MessageItem = ({
                 <Ionicons
                   name="checkmark-done-sharp"
                   size={16}
-                  color="red"
+                  color="black"
                   style={styles.seenIcon}
                 />
               </View>

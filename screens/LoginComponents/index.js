@@ -117,7 +117,7 @@ export default function Login({ navigation }) {
     const emailToLower = email.trim().toLowerCase();
 
     // Sanitización y validación con validator.js
-    const emailSanitized = validator.normalizeEmail(email.trim()); // Normaliza el email
+    const emailSanitized = email.trim();
     const passwordSanitized = validator.escape(password); // Escapa caracteres peligrosos
 
     // Validación con RegEx y validator.js
