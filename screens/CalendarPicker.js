@@ -88,7 +88,20 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   };
 
   // Verifica si la fecha seleccionada es hoy
-  const isTodaySelected = selectedDate === dayjs().format("D MMM");
+  const isTodaySelected = () => {
+    const now = dayjs();
+    const currentHour = now.hour();
+    let todayDate;
+
+    // Si estamos entre 00:00 y 06:00, comparar con el día anterior
+    if (currentHour >= 0 && currentHour < 6) {
+      todayDate = now.subtract(1, 'day').format("D MMM");
+    } else {
+      todayDate = now.format("D MMM");
+    }
+
+    return selectedDate === todayDate;
+  };
 
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 
@@ -96,7 +109,7 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
     <View>
       <TouchableOpacity style={currentStyles.dateButton} onPress={() => setModalVisible(true)}>
         <Text style={currentStyles.dateText}>
-          {isTodaySelected ? todayText : selectedDate} {/* Muestra la traducción de "Hoy" */}
+          {isTodaySelected() ? todayText : selectedDate} {/* Muestra la traducción de "Hoy" */}
         </Text>
       </TouchableOpacity>
 
