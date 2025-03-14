@@ -41,6 +41,7 @@ import {
   fetchPrivateEvents,
   getFilteredBoxData,
 } from "./utils";
+import { useDate } from "../../src/hooks/DateContext"; 
 
 const Header = ({ isNightMode, toggleMenu, handleDateChange, setLoading }) => {
   const currentStyles = isNightMode ? nightStyles : dayStyles;
@@ -65,6 +66,7 @@ const Header = ({ isNightMode, toggleMenu, handleDateChange, setLoading }) => {
 };
 
 const Home = React.memo(() => {
+  const { selectedDate, setSelectedDate } = useDate(); // Usar el contexto
   const [unreadNotifications, setUnreadNotifications] = useState(false);
   const { locationGranted, country, isNightMode } = useLocationAndTime();
   const navigation = useNavigation();
@@ -78,13 +80,12 @@ const Home = React.memo(() => {
   const [profileImage, setProfileImage] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const selectedDateRef = useRef(dayjs().format("D MMM"));
-  const [selectedDate, setSelectedDate] = useState(selectedDateRef.current);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [privateEvents, setPrivateEvents] = useState([]);
   const { hasUnreadMessages, setHasUnreadMessages } = useUnreadMessages();
   const { t } = useTranslation();
-   const storySliderRef = useRef();
+  const storySliderRef = useRef();
   const currentStyles = useMemo(
     () => (isNightMode ? nightStyles : dayStyles),
     [isNightMode],
@@ -146,7 +147,12 @@ useEffect(() => {
     }
   }, [route.params?.selectedCategory]);
   
-  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      setSelectedDate(selectedDateRef.current); // Actualizar el contexto
+    });
+    return unsubscribe;
+  }, [navigation, setSelectedDate]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -199,6 +205,10 @@ useEffect(() => {
     };
   }, [navigation, isNightMode, toggleMenu, handleDateChange, setLoading]);
 
+  useEffect(() => {
+    setSelectedDate(selectedDateRef.current);
+  }, []);
+
   const handleDateChange = useCallback(
     async (date) => {
       selectedDateRef.current = date;
@@ -219,7 +229,7 @@ useEffect(() => {
 
       setLoading(false);
     },
-    [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef],
+    [auth.currentUser, database, storage, boxInfo, setBoxData, selectedDateRef, setSelectedDate],
   );
 
   const renderStorySlider = useCallback(() => (
