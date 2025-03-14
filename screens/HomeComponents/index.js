@@ -328,30 +328,59 @@ useEffect(() => {
 
   // Agregamos este useEffect justo después para que la fecha cambie a las 06:00 AM
   useEffect(() => {
-    const checkTimeAndUpdateDate = () => {
+    const calculateTimeUntilNextUpdate = () => {
       const now = dayjs();
-      // Actualizar solo a las 6:00 AM
-      if (now.hour() === 6 && now.minute() === 0) {
-        const newDate = now.format("D MMM");
-        if (newDate !== selectedDateRef.current) {
-          handleDateChange(newDate);
-        }
+      let nextUpdateTime;
+  
+      // Si es antes de las 6:00 AM, la próxima actualización es a las 6:00 AM
+      if (now.hour() < 6) {
+        nextUpdateTime = now.set('hour', 6).set('minute', 0).set('second', 0);
       }
-      // Entre 00:00 y 06:00, mantener la fecha del día anterior
-      else if (now.hour() >= 0 && now.hour() < 6) {
-        const previousDate = now.subtract(1, 'day').format("D MMM");
-        if (previousDate !== selectedDateRef.current) {
-          handleDateChange(previousDate);
-        }
+      // Si es después de las 6:00 AM, la próxima actualización es a las 00:00 del día siguiente
+      else {
+        nextUpdateTime = now.add(1, 'day').set('hour', 0).set('minute', 0).set('second', 0);
+      }
+  
+      // Calcula la diferencia en milisegundos hasta la próxima actualización
+      return nextUpdateTime.diff(now);
+    };
+  
+    const updateDateIfNeeded = () => {
+      const now = dayjs();
+      let newDate;
+  
+      // Si es entre las 00:00 y las 06:00, usar la fecha del día anterior
+      if (now.hour() >= 0 && now.hour() < 6) {
+        newDate = now.subtract(1, 'day').format("D MMM");
+      }
+      // Si es después de las 06:00, usar la fecha actual
+      else {
+        newDate = now.format("D MMM");
+      }
+  
+      // Actualizar la fecha si es necesario
+      if (newDate !== selectedDateRef.current) {
+        handleDateChange(newDate);
       }
     };
-
-    checkTimeAndUpdateDate(); // Ejecutar inmediatamente
-    const interval = setInterval(checkTimeAndUpdateDate, 60000); // Verificar cada minuto
-
-    return () => clearInterval(interval);
-  }, []);
   
+    // Ejecutar la actualización inmediatamente
+    updateDateIfNeeded();
+  
+    // Calcular el tiempo hasta la próxima actualización
+    const timeUntilNextUpdate = calculateTimeUntilNextUpdate();
+  
+    // Configurar un timeout para la próxima actualización
+    const timeoutId = setTimeout(() => {
+      updateDateIfNeeded();
+      // Configurar un intervalo para que se actualice cada 24 horas después de la primera actualización
+      const intervalId = setInterval(updateDateIfNeeded, 24 * 60 * 60 * 1000);
+      return () => clearInterval(intervalId);
+    }, timeUntilNextUpdate);
+  
+    // Limpiar el timeout cuando el componente se desmonte
+    return () => clearTimeout(timeoutId);
+  }, [handleDateChange]);
 
   useEffect(() => {
     const user = auth.currentUser;

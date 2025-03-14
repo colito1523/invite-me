@@ -68,13 +68,22 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   const maxDate = dayjs().add(6, "month").format("YYYY-MM-DD");
 
   const handleDayPress = (day) => {
-    const formattedDate = dayjs(day.dateString).format("D MMM"); // Formato "14 Feb"
+    const now = dayjs();
+    const currentHour = now.hour();
+    let formattedDate;
+
+    // Si estamos entre 00:00 y 06:00 y seleccionamos la fecha actual
+    if (currentHour >= 0 && currentHour < 6 && dayjs(day.dateString).isSame(now, 'day')) {
+      formattedDate = now.subtract(1, 'day').format("D MMM");
+    } else {
+      formattedDate = dayjs(day.dateString).format("D MMM");
+    }
+
     setSelectedDate(formattedDate);
-  
     setModalVisible(false);
     if (onDateChange) {
       setLoading(true);
-      onDateChange(formattedDate); // Enviar en el nuevo formato a los otros componentes
+      onDateChange(formattedDate);
     }
   };
 
