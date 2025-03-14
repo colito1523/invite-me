@@ -32,7 +32,9 @@
         "autoIncrement": "buildNumber",
         "node": "22.13.0",
         "cache": {
-          "paths": ["ios/Pods"]
+          "paths": [
+            "ios/Pods"
+          ]
         },
         "env": {
           "EXPO_NO_DOTENV": "1",
@@ -44,7 +46,8 @@
           "APP_ID": "1:1003756781656:web:2843820ceb2049b147ca2d"
         },
         "channel": "production-channel"
-      }
+      },
+      "channel": "production"
     }
   },
   "cli": {

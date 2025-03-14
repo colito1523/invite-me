@@ -8,7 +8,7 @@ const db = admin.firestore();
 exports.deleteExpiredEvents = functions.runWith({
     timeoutSeconds: 540,
     memory: "2GB",
-}).pubsub.schedule("0 * * * *").onRun(async (context) => {
+}).pubsub.schedule("0 6 * * *").onRun(async (context) => {
     try {
         // Convertimos el timestamp actual a milisegundos
         const now = admin.firestore.Timestamp.now().toDate().getTime();
