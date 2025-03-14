@@ -245,7 +245,18 @@ export default function App() {
         const update = await Updates.checkForUpdateAsync();
         if (update.isAvailable) {
           await Updates.fetchUpdateAsync();
-          await Updates.reloadAsync();
+          Alert.alert(
+            "New update",
+            "A new update has been downloaded. The app will restart.",
+            [
+              {
+                text: "OK",
+                onPress: async () => {
+                  await Updates.reloadAsync();
+                }
+              }
+            ]
+          );
         }
       } catch (error) {
         console.log("Error checking for updates:", error);

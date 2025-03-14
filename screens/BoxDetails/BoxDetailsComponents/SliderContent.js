@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Dimensions, Platform } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Dimensions, Platform, Linking, TouchableOpacity  } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { useTranslation } from "react-i18next";
 
@@ -182,12 +182,20 @@ const SliderContent = ({
             <Text style={styles.contactTitle}>
               {t("SliderContent.contact")}
             </Text>
-            <Text style={styles.contactText}>
+            <TouchableOpacity
+            onPress={() => {
+              const phoneNumber = boxData.number || boxData.phoneNumber || box.phoneNumber;
+              if (phoneNumber) {
+                Linking.openURL(`tel:${phoneNumber}`);
+              }
+            }}> 
+            <Text style={[styles.contactText, { textDecorationLine: "underline", color: "white"}]}>
               {boxData.number ||
                 boxData.phoneNumber ||
                 box.phoneNumber ||
                 t("SliderContent.noContactNumber")}
             </Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>

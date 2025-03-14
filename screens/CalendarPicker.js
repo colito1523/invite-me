@@ -13,7 +13,17 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   const { selectedDate, setSelectedDate } = useDate(); // Usa el contexto
   const [modalVisible, setModalVisible] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation(); // Obtén el idioma actual
+
+  // Definir las traducciones dentro del componente
+  const translations = {
+    es: { today: "Hoy" }, // Español
+    en: { today: "Today" }, // Inglés
+    pt: { today: "Hoje" }, // Portugués
+  };
+
+  // Obtener la traducción para "Hoy" según el idioma actual
+  const todayText = translations[i18n.language]?.today || "Today"; // Default a "Today" si no se encuentra
 
   useEffect(() => {
     LocaleConfig.defaultLocale = i18n.language;
@@ -57,7 +67,6 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   const today = dayjs().format("YYYY-MM-DD");
   const maxDate = dayjs().add(6, "month").format("YYYY-MM-DD");
 
-
   const handleDayPress = (day) => {
     const formattedDate = dayjs(day.dateString).format("D MMM"); // Formato "14 Feb"
     setSelectedDate(formattedDate);
@@ -68,14 +77,18 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
       onDateChange(formattedDate); // Enviar en el nuevo formato a los otros componentes
     }
   };
-  
+
+  // Verifica si la fecha seleccionada es hoy
+  const isTodaySelected = selectedDate === dayjs().format("D MMM");
 
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 
   return (
     <View>
       <TouchableOpacity style={currentStyles.dateButton} onPress={() => setModalVisible(true)}>
-        <Text style={currentStyles.dateText}>{selectedDate}</Text>
+        <Text style={currentStyles.dateText}>
+          {isTodaySelected ? todayText : selectedDate} {/* Muestra la traducción de "Hoy" */}
+        </Text>
       </TouchableOpacity>
 
       <Modal
@@ -132,7 +145,6 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
   );
 };
 
-
 const baseStyles = StyleSheet.create({
   dateButton: {
     paddingVertical: 10,
@@ -173,7 +185,6 @@ const nightStyles = StyleSheet.create({
   dateButton: {
     ...baseStyles.dateButton,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
-
   },
   dateText: {
     ...baseStyles.dateText,

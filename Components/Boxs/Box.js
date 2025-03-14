@@ -32,21 +32,12 @@ const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, is
             <Text style={styles.priorityText}>{t('HomeIndex.Patrocinado')}</Text>
           </View>
         )}
-        {DaySpecial ? (
-          <View style={styles.daySpecialContainer}>
-            <Text style={styles.daySpecialText}>{DaySpecial}</Text>
-          </View>
-        ) : isPrivateEvent ? (
-          <View style={styles.dateContainer}>
-            <Text style={styles.dateText}>{date}</Text>
-          </View>
-        ) : (
-          displayDate && (
-            <View style={styles.dateContainer}>
-              <Text style={styles.dateText}>{displayDate}</Text>
-            </View>
-          )
-        )}
+       {isPrivateEvent && date && (
+  <View style={styles.dateContainer}>
+    <Text style={styles.dateText}>{date}</Text>
+  </View>
+)}
+
         <View style={styles.textContainer}>
           <Text style={styles.title} numberOfLines={1}>
             {title}

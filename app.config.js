@@ -91,7 +91,7 @@ export default {
       url: "https://u.expo.dev/2f585478-2f32-4de0-a5fe-edc97d5c9ab0",
       enabled: true,
       checkAutomatically: "ON_LOAD",
-      fallbackToCacheTimeout: 3000
+      fallbackToCacheTimeout: 0
     },
     runtimeVersion: {
       policy: "sdkVersion"
