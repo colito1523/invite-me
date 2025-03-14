@@ -19,37 +19,6 @@ import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-export const checkAndRemoveExpiredEvents = async (title) => {
-  const boxRef = doc(database, "GoBoxs", title);
-  const boxDoc = await getDoc(boxRef);
-
-  if (boxDoc.exists()) {
-    const data = boxDoc.data();
-    const currentDate = new Date();
-
-    for (const [dateKey, attendees] of Object.entries(data)) {
-      let eventDate = parseCustomDate(dateKey);
-
-      if (!eventDate) {
-        console.error(`El valor ${dateKey} no se pudo convertir a fecha.`);
-        continue;
-      }
-
-      const timeDifference = currentDate - eventDate;
-      const hoursPassed = timeDifference / (1000 * 60 * 60);
-
-      if (hoursPassed >= 24) {
-        try {
-          await updateDoc(boxRef, {
-            [dateKey]: deleteField(),
-          });
-        } catch (error) {
-          console.error(`Error al eliminar el evento del ${dateKey}:`, error);
-        }
-      }
-    }
-  }
-};
 
 const parseCustomDate = (dateStr) => {
   try {

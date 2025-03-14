@@ -69,14 +69,14 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
 
   const handleDayPress = (day) => {
     const formattedDate = dayjs(day.dateString).format("D MMM"); // Formato "14 Feb"
-    setSelectedDate(formattedDate);
-  
+    
     setModalVisible(false);
     if (onDateChange) {
       setLoading(true);
-      onDateChange(formattedDate); // Enviar en el nuevo formato a los otros componentes
+      onDateChange(formattedDate); // Solo notifica, no cambia `selectedDate`
     }
   };
+  
 
   // Verifica si la fecha seleccionada es hoy
   const isTodaySelected = selectedDate === dayjs().format("D MMM");

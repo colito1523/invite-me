@@ -42,7 +42,6 @@ import {
   checkNightMode,
   checkEventStatus,
   handleGeneralEventInvite,
-  checkAndRemoveExpiredEvents,
   handleSaveEdit,
   handleEditImage,
   handleDeleteEvent 
@@ -133,7 +132,6 @@ export default memo(function BoxDetails({ route, navigation }) {
         setTimeout(() => {
           fetchFriends();
           checkNightMode(setIsNightMode);
-          checkAndRemoveExpiredEvents(box.title);
         }, 300);
       } catch (error) {
         console.error("Error al cargar datos:", error);

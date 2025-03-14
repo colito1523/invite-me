@@ -326,6 +326,24 @@ useEffect(() => {
     setBoxData,
   ]);
 
+  // Agregamos este useEffect justo después para que la fecha cambie a las 06:00 AM
+  useEffect(() => {
+    const checkTimeAndUpdateDate = () => {
+      const now = dayjs();
+      if (now.hour() === 6 && now.minute() === 0) { 
+        const newDate = now.format("D MMM");
+        if (newDate !== selectedDateRef.current) {
+          handleDateChange(newDate);
+        }
+      }
+    };
+  
+    const interval = setInterval(checkTimeAndUpdateDate, 60000); // Verifica cada minuto
+  
+    return () => clearInterval(interval); // Limpia el intervalo cuando el componente se desmonta
+  }, []);
+  
+
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
