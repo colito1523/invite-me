@@ -69,14 +69,14 @@ const CalendarPicker = ({ onDateChange, setLoading }) => {
 
   const handleDayPress = (day) => {
     const formattedDate = dayjs(day.dateString).format("D MMM"); // Formato "14 Feb"
-    
+    setSelectedDate(formattedDate);
+  
     setModalVisible(false);
     if (onDateChange) {
       setLoading(true);
-      onDateChange(formattedDate); // Solo notifica, no cambia `selectedDate`
+      onDateChange(formattedDate); // Enviar en el nuevo formato a los otros componentes
     }
   };
-  
 
   // Verifica si la fecha seleccionada es hoy
   const isTodaySelected = selectedDate === dayjs().format("D MMM");
@@ -184,7 +184,7 @@ const nightStyles = StyleSheet.create({
   ...baseStyles,
   dateButton: {
     ...baseStyles.dateButton,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
   dateText: {
     ...baseStyles.dateText,

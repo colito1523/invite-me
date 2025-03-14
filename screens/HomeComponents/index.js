@@ -330,17 +330,26 @@ useEffect(() => {
   useEffect(() => {
     const checkTimeAndUpdateDate = () => {
       const now = dayjs();
-      if (now.hour() === 6 && now.minute() === 0) { 
+      // Actualizar solo a las 6:00 AM
+      if (now.hour() === 6 && now.minute() === 0) {
         const newDate = now.format("D MMM");
         if (newDate !== selectedDateRef.current) {
           handleDateChange(newDate);
         }
       }
+      // Entre 00:00 y 06:00, mantener la fecha del día anterior
+      else if (now.hour() >= 0 && now.hour() < 6) {
+        const previousDate = now.subtract(1, 'day').format("D MMM");
+        if (previousDate !== selectedDateRef.current) {
+          handleDateChange(previousDate);
+        }
+      }
     };
-  
-    const interval = setInterval(checkTimeAndUpdateDate, 60000); // Verifica cada minuto
-  
-    return () => clearInterval(interval); // Limpia el intervalo cuando el componente se desmonta
+
+    checkTimeAndUpdateDate(); // Ejecutar inmediatamente
+    const interval = setInterval(checkTimeAndUpdateDate, 60000); // Verificar cada minuto
+
+    return () => clearInterval(interval);
   }, []);
   
 
