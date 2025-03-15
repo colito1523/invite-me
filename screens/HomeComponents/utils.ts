@@ -110,28 +110,26 @@ export const checkTime = (setIsNightMode: (value: boolean) => void) => {
   setIsNightMode(currentHour >= 19 || currentHour < 6);
 };
 
-export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
+export const fetchUnreadNotifications = ({ setUnreadNotifications }) => {
   if (auth.currentUser) {
     const user = auth.currentUser;
+    let hasUnreadNotifs = false;
+    let hasUnreadRequests = false;
+
     const notificationsRef = collection(database, "users", user.uid, "notifications");
     const q = query(notificationsRef, where("seen", "==", false));
+
+    const unsubscribeNotifications = onSnapshot(q, (snapshot) => {
+      hasUnreadNotifs = !snapshot.empty;
+      setUnreadNotifications(hasUnreadNotifs || hasUnreadRequests);
+    });
+
     const friendRequestsRef = collection(database, "users", user.uid, "friendRequests");
     const friendRequestsQuery = query(friendRequestsRef, where("seen", "==", false));
 
-    const unsubscribeNotifications = onSnapshot(q, (querySnapshot) => {
-      if (!querySnapshot.empty) {
-        setUnreadNotifications(true);
-      } else {
-        setUnreadNotifications(false);
-      }
-    });
-
-    const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (querySnapshot) => {
-      if (!querySnapshot.empty) {
-        setUnreadNotifications(true);
-      } else {
-        setUnreadNotifications(false);
-      }
+    const unsubscribeFriendRequests = onSnapshot(friendRequestsQuery, (snapshot) => {
+      hasUnreadRequests = !snapshot.empty;
+      setUnreadNotifications(hasUnreadNotifs || hasUnreadRequests);
     });
 
     return () => {
@@ -140,8 +138,8 @@ export const fetchUnreadNotifications = async ({ setUnreadNotifications }) => {
     };
   }
 
-  console.warn("fetchUnreadNotifications - Usuario no autenticado");
-  return () => {}; // Return a no-op function if auth.currentUser is not set
+  console.warn("Usuario no autenticado");
+  return () => {};
 };
 
 export const fetchData = async ({ 
