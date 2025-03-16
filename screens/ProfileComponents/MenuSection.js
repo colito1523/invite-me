@@ -109,86 +109,95 @@ const MenuSection = React.memo(({
                               await deleteDoc(doc(database, "users", user.uid));
                               console.log("Documento eliminado de Firestore.");
 
-                              // Eliminar el usuario de la lista de amigos de otros usuarios
                               const usersCollection = collection(database, "users");
                               const usersSnapshot = await getDocs(usersCollection);
 
-                              const batch = writeBatch(database);
+                              const batch1 = writeBatch(database);
+                              const batch2 = writeBatch(database);
+                              const batch3 = writeBatch(database);
+                              const batch4 = writeBatch(database);
+                              const batch5 = writeBatch(database);
 
-                              for (const userDoc of usersSnapshot.docs) {
+                              const promises = [];
+
+                              usersSnapshot.docs.forEach((userDoc) => {
                                 const friendsCollection = collection(userDoc.ref, "friends");
-                                const friendsSnapshot = await getDocs(friendsCollection);
-
-                                friendsSnapshot.forEach((friendDoc) => {
-                                  const friendData = friendDoc.data();
-                                  if (friendData.friendId === user.uid) {
-                                    batch.delete(friendDoc.ref);
-                                  }
-                                });
-
-                                // Eliminar solicitudes de amistad donde el usuario es el remitente
                                 const friendRequestsCollection = collection(userDoc.ref, "friendRequests");
-                                const friendRequestsSnapshot = await getDocs(friendRequestsCollection);
-
-                                friendRequestsSnapshot.forEach((requestDoc) => {
-                                  const requestData = requestDoc.data();
-                                  if (requestData.fromId === user.uid) {
-                                    batch.delete(requestDoc.ref);
-                                  }
-                                });
-
-                                // Eliminar notificaciones donde el usuario es el remitente
                                 const notificationsCollection = collection(userDoc.ref, "notifications");
-                                const notificationsSnapshot = await getDocs(notificationsCollection);
-
-                                notificationsSnapshot.forEach((notificationDoc) => {
-                                  const notificationData = notificationDoc.data();
-                                  if (notificationData.fromId === user.uid) {
-                                    batch.delete(notificationDoc.ref);
-                                  }
-                                });
-
-                                // Eliminar likes donde el usuario es el remitente
                                 const likesCollection = collection(userDoc.ref, "likes");
-                                const likesSnapshot = await getDocs(likesCollection);
-
-                                likesSnapshot.forEach((likeDoc) => {
-                                  const likeData = likeDoc.data();
-                                  if (likeData.userId === user.uid) {
-                                    batch.delete(likeDoc.ref);
-                                  }
-                                });
-
-                                // Eliminar likes y viewers en historias
                                 const storiesCollection = collection(userDoc.ref, "stories");
-                                const storiesSnapshot = await getDocs(storiesCollection);
 
-                                storiesSnapshot.forEach((storyDoc) => {
-                                  const storyData = storyDoc.data();
-                                  const updatedLikes = storyData.likes.filter(like => like.uid !== user.uid);
-                                  const updatedViewers = storyData.viewers.filter(viewer => viewer.uid !== user.uid);
-
-                                  if (updatedLikes.length !== storyData.likes.length || updatedViewers.length !== storyData.viewers.length) {
-                                    batch.update(storyDoc.ref, {
-                                      likes: updatedLikes,
-                                      viewers: updatedViewers,
+                                promises.push(
+                                  getDocs(friendsCollection).then((friendsSnapshot) => {
+                                    friendsSnapshot.forEach((friendDoc) => {
+                                      const friendData = friendDoc.data();
+                                      if (friendData.friendId === user.uid) {
+                                        batch1.delete(friendDoc.ref);
+                                      }
                                     });
-                                  }
-                                });
-                              }
+                                  }),
 
-                              // Eliminar chats donde el usuario es un participante
+                                  getDocs(friendRequestsCollection).then((friendRequestsSnapshot) => {
+                                    friendRequestsSnapshot.forEach((requestDoc) => {
+                                      const requestData = requestDoc.data();
+                                      if (requestData.fromId === user.uid) {
+                                        batch2.delete(requestDoc.ref);
+                                      }
+                                    });
+                                  }),
+
+                                  getDocs(notificationsCollection).then((notificationsSnapshot) => {
+                                    notificationsSnapshot.forEach((notificationDoc) => {
+                                      const notificationData = notificationDoc.data();
+                                      if (notificationData.fromId === user.uid) {
+                                        batch3.delete(notificationDoc.ref);
+                                      }
+                                    });
+                                  }),
+
+                                  getDocs(likesCollection).then((likesSnapshot) => {
+                                    likesSnapshot.forEach((likeDoc) => {
+                                      const likeData = likeDoc.data();
+                                      if (likeData.userId === user.uid) {
+                                        batch4.delete(likeDoc.ref);
+                                      }
+                                    });
+                                  }),
+
+                                  getDocs(storiesCollection).then((storiesSnapshot) => {
+                                    storiesSnapshot.forEach((storyDoc) => {
+                                      const storyData = storyDoc.data();
+                                      const updatedLikes = storyData.likes.filter(like => like.uid !== user.uid);
+                                      const updatedViewers = storyData.viewers.filter(viewer => viewer.uid !== user.uid);
+
+                                      if (updatedLikes.length !== storyData.likes.length || updatedViewers.length !== storyData.viewers.length) {
+                                        batch5.update(storyDoc.ref, {
+                                          likes: updatedLikes,
+                                          viewers: updatedViewers,
+                                        });
+                                      }
+                                    });
+                                  })
+                                );
+                              });
+
                               const chatsCollection = collection(database, "chats");
                               const chatsSnapshot = await getDocs(chatsCollection);
 
                               chatsSnapshot.forEach((chatDoc) => {
                                 const chatData = chatDoc.data();
                                 if (chatData.participants.includes(user.uid)) {
-                                  batch.delete(chatDoc.ref);
+                                  batch1.delete(chatDoc.ref);
                                 }
                               });
 
-                              await batch.commit();
+                              await Promise.all(promises);
+                              await batch1.commit();
+                              await batch2.commit();
+                              await batch3.commit();
+                              await batch4.commit();
+                              await batch5.commit();
+
                               console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad, notificaciones, likes, viewers en historias y chats de otros usuarios.");
 
                               console.log("Eliminando usuario de Firebase Authentication...");
