@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimen
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../config/firebase";
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, getAuth, deleteUser } from "firebase/auth";
-import { getFirestore, deleteDoc, doc } from "firebase/firestore";
+import { getFirestore, deleteDoc, doc, collection, getDocs, writeBatch } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
@@ -22,9 +22,9 @@ const MenuSection = React.memo(({
 
   const closeMenu = useCallback(() => setMenuVisible(false), [setMenuVisible]);
 
-  const handleDeleteAccount = useCallback(() => {
+  const handleDeleteAccount = useCallback(async () => {
     console.log("Iniciando eliminación de cuenta...");
-  
+
     Alert.alert(
       t("profileMenuSections.deleteAccount"),
       t("profileMenuSections.deleteAccountQuestions"),
@@ -38,7 +38,7 @@ const MenuSection = React.memo(({
           style: "destructive",
           onPress: () => {
             console.log("Usuario confirmó eliminación.");
-  
+
             Alert.prompt(
               t("profileMenuSections.confirmEmail"),
               t("profileMenuSections.enterEmail"),
@@ -58,9 +58,9 @@ const MenuSection = React.memo(({
                       );
                       return;
                     }
-  
+
                     console.log("Email ingresado:", email);
-  
+
                     Alert.prompt(
                       t("profileMenuSections.confirmPassword"),
                       t("profileMenuSections.enterPassword"),
@@ -80,36 +80,57 @@ const MenuSection = React.memo(({
                               );
                               return;
                             }
-  
+
                             console.log("Contraseña ingresada:", password);
-  
+
                             try {
                               const auth = getAuth();
                               const database = getFirestore();
                               const user = auth.currentUser;
-  
+
                               if (!user) {
                                 console.log("Error: No hay usuario autenticado.");
                                 Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
                                 return;
                               }
-  
+
                               console.log("Usuario autenticado:", user.uid);
-  
+
                               const credential = EmailAuthProvider.credential(email, password);
                               console.log("Reautenticando usuario...");
-  
+
                               await reauthenticateWithCredential(user, credential);
                               console.log("Reautenticación exitosa.");
-  
+
                               console.log("Eliminando usuario de Firestore...");
                               await deleteDoc(doc(database, "users", user.uid));
                               console.log("Documento eliminado de Firestore.");
-  
+
+                              // Eliminar el usuario de la lista de amigos de otros usuarios
+                              const usersCollection = collection(database, "users");
+                              const usersSnapshot = await getDocs(usersCollection);
+
+                              const batch = writeBatch(database);
+
+                              for (const userDoc of usersSnapshot.docs) {
+                                const friendsCollection = collection(userDoc.ref, "friends");
+                                const friendsSnapshot = await getDocs(friendsCollection);
+
+                                friendsSnapshot.forEach((friendDoc) => {
+                                  const friendData = friendDoc.data();
+                                  if (friendData.friendId === user.uid) {
+                                    batch.delete(friendDoc.ref);
+                                  }
+                                });
+                              }
+
+                              await batch.commit();
+                              console.log("Usuario eliminado de la lista de amigos de otros usuarios.");
+
                               console.log("Eliminando usuario de Firebase Authentication...");
                               await deleteUser(user);
                               console.log("Usuario eliminado de Firebase Authentication.");
-  
+
                               Alert.alert(
                                 t("profileMenuSections.success"),
                                 t("profileMenuSections.accountDeleted"),
@@ -147,8 +168,7 @@ const MenuSection = React.memo(({
         },
       ],
     );
-  }, [t]);
-  
+  }, [t, navigation]);
 
   const handleChangePasswordAlert = () => {
     Alert.prompt(
@@ -166,19 +186,19 @@ const MenuSection = React.memo(({
               Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
               return;
             }
-  
+
             const user = auth.currentUser;
-  
+
             if (!user || !user.email) {
               Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
               return;
             }
-  
+
             try {
               const trimmedPassword = currentPassword.trim();
               const credential = EmailAuthProvider.credential(user.email, trimmedPassword);
               await reauthenticateWithCredential(user, credential);
-  
+
               Alert.prompt(
                 t("profileMenuSections.newPasswordTitle"),
                 t("profileMenuSections.newPasswordMessage"),
@@ -194,7 +214,7 @@ const MenuSection = React.memo(({
                         Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
                         return;
                       }
-  
+
                       // Validación de la nueva contraseña
                       const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
                       if (!passwordRegex.test(newPassword)) {
@@ -204,7 +224,7 @@ const MenuSection = React.memo(({
                         );
                         return;
                       }
-  
+
                       Alert.prompt(
                         t("profileMenuSections.confirmPasswordTitle"),
                         t("profileMenuSections.confirmPasswordMessage"),
@@ -319,16 +339,14 @@ const MenuSection = React.memo(({
               <Text style={styles.deleteMenuItemText}>{t("profileMenuSections.deleteAccount")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-  style={styles.menuItem}
-  onPress={() => {
-    handleChangePasswordAlert();
-    closeMenu();
-  }}
->
-  <Text style={styles.menuItemText}>{t("profileMenuSections.changePassword")}</Text>
-</TouchableOpacity>
-
-
+              style={styles.menuItem}
+              onPress={() => {
+                handleChangePasswordAlert();
+                closeMenu();
+              }}
+            >
+              <Text style={styles.menuItemText}>{t("profileMenuSections.changePassword")}</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
