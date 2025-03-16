@@ -109,18 +109,11 @@ const MenuSection = React.memo(({
                               await deleteDoc(doc(database, "users", user.uid));
                               console.log("Documento eliminado de Firestore.");
 
-                              const usersCollection = collection(database, "users");
-                              const usersSnapshot = await getDocs(usersCollection);
-
-                              const batch1 = writeBatch(database);
-                              const batch2 = writeBatch(database);
-                              const batch3 = writeBatch(database);
-                              const batch4 = writeBatch(database);
-                              const batch5 = writeBatch(database);
-
+                              const batch = writeBatch(database);
                               const promises = [];
 
-                              usersSnapshot.docs.forEach((userDoc) => {
+                              const usersSnapshot = await getDocs(collection(database, "users"));
+                              usersSnapshot.forEach((userDoc) => {
                                 const friendsCollection = collection(userDoc.ref, "friends");
                                 const friendRequestsCollection = collection(userDoc.ref, "friendRequests");
                                 const notificationsCollection = collection(userDoc.ref, "notifications");
@@ -132,7 +125,7 @@ const MenuSection = React.memo(({
                                     friendsSnapshot.forEach((friendDoc) => {
                                       const friendData = friendDoc.data();
                                       if (friendData.friendId === user.uid) {
-                                        batch1.delete(friendDoc.ref);
+                                        batch.delete(friendDoc.ref);
                                       }
                                     });
                                   }),
@@ -141,7 +134,7 @@ const MenuSection = React.memo(({
                                     friendRequestsSnapshot.forEach((requestDoc) => {
                                       const requestData = requestDoc.data();
                                       if (requestData.fromId === user.uid) {
-                                        batch2.delete(requestDoc.ref);
+                                        batch.delete(requestDoc.ref);
                                       }
                                     });
                                   }),
@@ -150,7 +143,7 @@ const MenuSection = React.memo(({
                                     notificationsSnapshot.forEach((notificationDoc) => {
                                       const notificationData = notificationDoc.data();
                                       if (notificationData.fromId === user.uid) {
-                                        batch3.delete(notificationDoc.ref);
+                                        batch.delete(notificationDoc.ref);
                                       }
                                     });
                                   }),
@@ -159,7 +152,7 @@ const MenuSection = React.memo(({
                                     likesSnapshot.forEach((likeDoc) => {
                                       const likeData = likeDoc.data();
                                       if (likeData.userId === user.uid) {
-                                        batch4.delete(likeDoc.ref);
+                                        batch.delete(likeDoc.ref);
                                       }
                                     });
                                   }),
@@ -171,7 +164,7 @@ const MenuSection = React.memo(({
                                       const updatedViewers = storyData.viewers.filter(viewer => viewer.uid !== user.uid);
 
                                       if (updatedLikes.length !== storyData.likes.length || updatedViewers.length !== storyData.viewers.length) {
-                                        batch5.update(storyDoc.ref, {
+                                        batch.update(storyDoc.ref, {
                                           likes: updatedLikes,
                                           viewers: updatedViewers,
                                         });
@@ -181,22 +174,16 @@ const MenuSection = React.memo(({
                                 );
                               });
 
-                              const chatsCollection = collection(database, "chats");
-                              const chatsSnapshot = await getDocs(chatsCollection);
-
+                              const chatsSnapshot = await getDocs(collection(database, "chats"));
                               chatsSnapshot.forEach((chatDoc) => {
                                 const chatData = chatDoc.data();
                                 if (chatData.participants.includes(user.uid)) {
-                                  batch1.delete(chatDoc.ref);
+                                  batch.delete(chatDoc.ref);
                                 }
                               });
 
                               await Promise.all(promises);
-                              await batch1.commit();
-                              await batch2.commit();
-                              await batch3.commit();
-                              await batch4.commit();
-                              await batch5.commit();
+                              await batch.commit();
 
                               console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad, notificaciones, likes, viewers en historias y chats de otros usuarios.");
 
@@ -476,4 +463,3 @@ const styles = StyleSheet.create({
 });
 
 export default MenuSection;
-

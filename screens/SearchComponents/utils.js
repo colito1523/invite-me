@@ -23,6 +23,14 @@ export const saveSearchHistory = async (user, history, blockedUsers) => {
   }
 };
 
+export const normalizeText = (text) => {
+  return text
+      .normalize("NFD") // Descompone caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, "") // Elimina los signos diacríticos
+      .toLowerCase(); // Convierte a minúsculas
+};
+
+
 
 export const fetchUsers = async (searchTerm, setResults) => {
   const auth = getAuth();
@@ -36,7 +44,7 @@ export const fetchUsers = async (searchTerm, setResults) => {
       const blockedUsers = userSnapshot.data()?.blockedUsers || [];
       const hideStoriesFrom = userSnapshot.data()?.hideStoriesFrom || [];
 
-      const normalizedSearchTerm = searchTerm.toLowerCase();
+      const normalizedSearchTerm = normalizeText(searchTerm);
 
       // Crear consulta para traer todos los usuarios
       const usersRef = collection(database, "users");
@@ -98,17 +106,18 @@ export const fetchUsers = async (searchTerm, setResults) => {
 
       // Filtrar usuarios bloqueados, el usuario actual y aplicar el término de búsqueda
       const filteredList = userList
-        .filter(
-          (user) =>
+    .filter(
+        (user) =>
             user.id !== auth.currentUser.uid &&
             !blockedUsers.includes(user.id) &&
             (
-            user.username?.toLowerCase().includes(normalizedSearchTerm) ||
-            user.firstName?.toLowerCase().includes(normalizedSearchTerm) ||
-            user.lastName?.toLowerCase().includes(normalizedSearchTerm)
-          )
-        )
-        .slice(0, 8); // Limitar a 10 resultados
+                normalizeText(user.username || "").includes(normalizedSearchTerm) ||
+                normalizeText(user.firstName || "").includes(normalizedSearchTerm) ||
+                normalizeText(user.lastName || "").includes(normalizedSearchTerm)
+            )
+    )
+    .slice(0, 8);
+
 
       setResults(filteredList);
     } catch (error) {
