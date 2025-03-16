@@ -35,7 +35,7 @@ const MenuSection = React.memo(({
           style: "cancel",
         },
         {
-          text: t("chatUsers.delete"),
+          text: t("profileMenuSections.continue"),
           style: "destructive",
           onPress: () => {
             console.log("Usuario confirmó eliminación.");
@@ -71,7 +71,7 @@ const MenuSection = React.memo(({
                           style: "cancel",
                         },
                         {
-                          text: t("chatUsers.delete"),
+                          text: t("profileMenuSections.continue"),
                           style: "destructive",
                           onPress: async (password) => {
                             if (!password) {
@@ -476,3 +476,4 @@ const styles = StyleSheet.create({
 });
 
 export default MenuSection;
+
