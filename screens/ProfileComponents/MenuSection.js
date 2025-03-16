@@ -136,6 +136,17 @@ const MenuSection = React.memo(({
                                     batch.delete(requestDoc.ref);
                                   }
                                 });
+
+                                // Eliminar notificaciones donde el usuario es el remitente
+                                const notificationsCollection = collection(userDoc.ref, "notifications");
+                                const notificationsSnapshot = await getDocs(notificationsCollection);
+
+                                notificationsSnapshot.forEach((notificationDoc) => {
+                                  const notificationData = notificationDoc.data();
+                                  if (notificationData.fromId === user.uid) {
+                                    batch.delete(notificationDoc.ref);
+                                  }
+                                });
                               }
 
                               // Eliminar chats donde el usuario es un participante
@@ -150,7 +161,7 @@ const MenuSection = React.memo(({
                               });
 
                               await batch.commit();
-                              console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad y chats de otros usuarios.");
+                              console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad, notificaciones y chats de otros usuarios.");
 
                               console.log("Eliminando usuario de Firebase Authentication...");
                               await deleteUser(user);
