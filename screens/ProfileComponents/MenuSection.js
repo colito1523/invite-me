@@ -158,6 +158,23 @@ const MenuSection = React.memo(({
                                     batch.delete(likeDoc.ref);
                                   }
                                 });
+
+                                // Eliminar likes y viewers en historias
+                                const storiesCollection = collection(userDoc.ref, "stories");
+                                const storiesSnapshot = await getDocs(storiesCollection);
+
+                                storiesSnapshot.forEach((storyDoc) => {
+                                  const storyData = storyDoc.data();
+                                  const updatedLikes = storyData.likes.filter(like => like.uid !== user.uid);
+                                  const updatedViewers = storyData.viewers.filter(viewer => viewer.uid !== user.uid);
+
+                                  if (updatedLikes.length !== storyData.likes.length || updatedViewers.length !== storyData.viewers.length) {
+                                    batch.update(storyDoc.ref, {
+                                      likes: updatedLikes,
+                                      viewers: updatedViewers,
+                                    });
+                                  }
+                                });
                               }
 
                               // Eliminar chats donde el usuario es un participante
@@ -172,7 +189,7 @@ const MenuSection = React.memo(({
                               });
 
                               await batch.commit();
-                              console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad, notificaciones, likes y chats de otros usuarios.");
+                              console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad, notificaciones, likes, viewers en historias y chats de otros usuarios.");
 
                               console.log("Eliminando usuario de Firebase Authentication...");
                               await deleteUser(user);
