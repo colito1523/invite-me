@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimensions } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimensions, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../config/firebase";
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, getAuth, deleteUser } from "firebase/auth";
@@ -19,6 +19,7 @@ const MenuSection = React.memo(({
   navigation,
 }) => {
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
 
   const closeMenu = useCallback(() => setMenuVisible(false), [setMenuVisible]);
 
@@ -82,6 +83,7 @@ const MenuSection = React.memo(({
                             }
 
                             console.log("Contraseña ingresada:", password);
+                            setLoading(true); // Mostrar indicador de carga
 
                             try {
                               const auth = getAuth();
@@ -91,6 +93,7 @@ const MenuSection = React.memo(({
                               if (!user) {
                                 console.log("Error: No hay usuario autenticado.");
                                 Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
+                                setLoading(false);
                                 return;
                               }
 
@@ -124,8 +127,19 @@ const MenuSection = React.memo(({
                                 });
                               }
 
+                              // Eliminar chats donde el usuario es un participante
+                              const chatsCollection = collection(database, "chats");
+                              const chatsSnapshot = await getDocs(chatsCollection);
+
+                              chatsSnapshot.forEach((chatDoc) => {
+                                const chatData = chatDoc.data();
+                                if (chatData.participants.includes(user.uid)) {
+                                  batch.delete(chatDoc.ref);
+                                }
+                              });
+
                               await batch.commit();
-                              console.log("Usuario eliminado de la lista de amigos de otros usuarios.");
+                              console.log("Usuario eliminado de la lista de amigos y chats de otros usuarios.");
 
                               console.log("Eliminando usuario de Firebase Authentication...");
                               await deleteUser(user);
@@ -153,6 +167,8 @@ const MenuSection = React.memo(({
                                 t("profileMenuSections.error"),
                                 t("profileMenuSections.deleteAccountError"),
                               );
+                            } finally {
+                              setLoading(false); // Ocultar indicador de carga
                             }
                           },
                         },
@@ -296,57 +312,63 @@ const MenuSection = React.memo(({
           onPress={closeMenu}
         >
           <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                handleEditProfile();
-                closeMenu();
-              }}
-            >
-              <Text style={styles.menuItemText}>{t("profile.editProfile")}</Text>
-            </TouchableOpacity>
+            {loading ? (
+              <ActivityIndicator size="large" color="#0000ff" />
+            ) : (
+              <>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    handleEditProfile();
+                    closeMenu();
+                  }}
+                >
+                  <Text style={styles.menuItemText}>{t("profile.editProfile")}</Text>
+                </TouchableOpacity>
 
-            {blockedUsers.length > 0 && (
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={() => {
-                  setIsBlockedListVisible(true);
-                  closeMenu();
-                }}
-              >
-                <Text style={styles.menuItemText}>{t("blockedUsers.modalTitle")}</Text>
-              </TouchableOpacity>
+                {blockedUsers.length > 0 && (
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => {
+                      setIsBlockedListVisible(true);
+                      closeMenu();
+                    }}
+                  >
+                    <Text style={styles.menuItemText}>{t("blockedUsers.modalTitle")}</Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    handleTogglePrivacy();
+                    closeMenu();
+                  }}
+                >
+                  <Text style={styles.menuItemText}>
+                    {isPrivate ? t("profile.makePublic") : t("profile.makePrivate")}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.menuItem, styles.deleteMenuItem]}
+                  onPress={() => {
+                    handleDeleteAccount();
+                    closeMenu();
+                  }}
+                >
+                  <Text style={styles.deleteMenuItemText}>{t("profileMenuSections.deleteAccount")}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    handleChangePasswordAlert();
+                    closeMenu();
+                  }}
+                >
+                  <Text style={styles.menuItemText}>{t("profileMenuSections.changePassword")}</Text>
+                </TouchableOpacity>
+              </>
             )}
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                handleTogglePrivacy();
-                closeMenu();
-              }}
-            >
-              <Text style={styles.menuItemText}>
-                {isPrivate ? t("profile.makePublic") : t("profile.makePrivate")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.menuItem, styles.deleteMenuItem]}
-              onPress={() => {
-                handleDeleteAccount();
-                closeMenu();
-              }}
-            >
-              <Text style={styles.deleteMenuItemText}>{t("profileMenuSections.deleteAccount")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                handleChangePasswordAlert();
-                closeMenu();
-              }}
-            >
-              <Text style={styles.menuItemText}>{t("profileMenuSections.changePassword")}</Text>
-            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
