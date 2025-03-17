@@ -268,6 +268,7 @@ export default function Chat({ route }) {
     messageType = "text",
     mediaUri = null,
     isViewOnce = false, // Este parámetro se pasará desde donde se llama a la función
+    replyTo = null, // Agregar parámetro replyTo
   ) => {
     if (isUploading) {
       Alert.alert(t("chatUsers.uploading"), t("chatUsers.waitForUpload"));
@@ -294,6 +295,11 @@ export default function Chat({ route }) {
         seen: false,
         viewedBy: [],
         isViewOnce,
+        replyTo: replyTo ? {
+          messageId: replyTo.id,
+          text: replyTo.text,
+          senderId: replyTo.senderId
+        } : null
       };
 
       // Añade la lógica para tipo de mensaje:
@@ -498,6 +504,7 @@ export default function Chat({ route }) {
       handleMediaPress={handleMediaPress}
       recipient={recipient}
       t={t}
+      onReply={(message) => handleSend('text', null, false, message)}
     />
   )}
   maxToRenderPerBatch={50}
@@ -728,8 +735,8 @@ export default function Chat({ route }) {
             />
           </View>
         </TouchableWithoutFeedback>
-        
-        
+
+
         ))}
     </View>
   </View>

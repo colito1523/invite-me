@@ -441,4 +441,22 @@ export const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
     },
+    replyAction: {
+      
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 80,
+      height: '100%',
+    },
+    replyContainer: {
+      padding: 8,
+      borderLeftWidth: 4,
+      borderLeftColor: 'red',
+      backgroundColor: 'red',
+      marginBottom: 4,
+    },
+    replyText: {
+      fontSize: 12,
+      color: '#666',
+    },
 });

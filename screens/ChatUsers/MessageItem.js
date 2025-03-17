@@ -4,6 +4,8 @@ import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import AudioPlayer from "../AudioPlayer";
 import { styles } from "./styles";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 const MessageItem = ({
   item,
@@ -18,6 +20,7 @@ const MessageItem = ({
   handleMediaPress,
   recipient,
   t,
+  //onReplyPress, // Removed onReplyPress prop
 }) => {
   // Estado para controlar la carga de la imagen (se utiliza solo si el mensaje es de imagen)
   const [imageLoading, setImageLoading] = useState(true);
@@ -52,52 +55,71 @@ const MessageItem = ({
     </View>
   );
 
+  const handleReply = (item) => {
+    // Implement your reply logic here
+    console.log("Replying to message:", item);
+  };
+
   // Caso: respuesta a historia
   if (item.isStoryResponse) {
     return (
       <>
         {!isSameDay && renderDate(currentMessageDate)}
-        <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-          <View
-            style={[
-              styles.message,
-              isOwnMessage ? styles.sent : styles.received,
-              styles.storyResponseContainer,
-            ]}
-          >
-            <Text
-              style={[
-                styles.storyResponseText,
-                { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
-              ]}>
-              {isOwnMessage ? t("chatUsers.youAnswered") : t("chatUsers.Answered")}
-            </Text>
-            <Image
-  source={{ uri: item.storyUrl }}
-  style={[
-    styles.storyResponseImage,
-    { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
-  ]}
-/>
-            <Text style={[styles.messageText,  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },]}>{item.text}</Text>
-            {isOwnMessage && item.seen && (
-              <View style={styles.messageFooter}>
-                <Text style={styles.timeText}>
-                  {currentMessageDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-                <Ionicons
-                  name="checkmark-done-sharp"
-                  size={16}
-                  color="black"
-                  style={styles.seenIcon}
-                />
-              </View>
+        <GestureHandlerRootView>
+          <Swipeable
+            renderRightActions={() => (
+              <TouchableOpacity 
+                style={styles.replyAction}
+                onPress={() => handleReply(item)}
+              >
+                <Ionicons name="arrow-undo-outline" size={24} color="white" />
+              </TouchableOpacity>
             )}
-          </View>
-        </TouchableOpacity>
+            onSwipeableOpen={() => handleReply(item)}
+          >
+            <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
+              <View
+                style={[
+                  styles.message,
+                  isOwnMessage ? styles.sent : styles.received,
+                  styles.storyResponseContainer,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.storyResponseText,
+                    { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
+                  ]}>
+                  {isOwnMessage ? t("chatUsers.youAnswered") : t("chatUsers.Answered")}
+                </Text>
+                <Image
+    source={{ uri: item.storyUrl }}
+    style={[
+      styles.storyResponseImage,
+      { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
+    ]}
+  />
+                <Text style={[styles.messageText,  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },]}>{item.text}</Text>
+                {isOwnMessage && item.seen && (
+                  <View style={styles.messageFooter}>
+                    <Text style={styles.timeText}>
+                      {currentMessageDate.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                    <Ionicons
+                      name="checkmark-done-sharp"
+                      size={16}
+                      color="black"
+                      style={styles.seenIcon}
+                    />
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          </Swipeable>
+        </GestureHandlerRootView>
       </>
     );
   }
@@ -107,50 +129,64 @@ const MessageItem = ({
     return (
       <>
         {!isSameDay && renderDate(currentMessageDate)}
-        <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-          <View
-            style={[
-              styles.message,
-              isOwnMessage ? styles.sent : styles.received,
-              styles.noteResponseContainer,
-            ]}
+        <GestureHandlerRootView>
+          <Swipeable
+            renderRightActions={() => (
+              <TouchableOpacity 
+                style={styles.replyAction}
+                onPress={() => handleReply(item)}
+              >
+                <Ionicons name="arrow-undo-outline" size={24} color="white" />
+              </TouchableOpacity>
+            )}
+            onSwipeableOpen={() => handleReply(item)}
           >
-            <Text style={styles.noteResponseText}>
-              {isOwnMessage
-                ? t("chatUsers.youAnsweredNote")
-                : t("chatUsers.AnsweredNote")}
-            </Text>
-            <Image
-              source={require("../../assets/flecha-curva.png")}
-              style={[
-                styles.arrowImage,
-                isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
-              ]}
-            />
-            <View>
-              <Text style={styles.originalNoteText}>
-                {item.noteText || "Nota no disponible"}
-              </Text>
-            </View>
-            <Text style={styles.messageTextNotas}>{item.text}</Text>
-            <View style={styles.messageFooter}>
-              <Text style={styles.timeText}>
-                {currentMessageDate.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-              {isOwnMessage && item.seen && (
-                <Ionicons
-                  name="checkmark-done-sharp"
-                  size={16}
-                  color="black"
-                  style={styles.seenIcon}
+            <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
+              <View
+                style={[
+                  styles.message,
+                  isOwnMessage ? styles.sent : styles.received,
+                  styles.noteResponseContainer,
+                ]}
+              >
+                <Text style={styles.noteResponseText}>
+                  {isOwnMessage
+                    ? t("chatUsers.youAnsweredNote")
+                    : t("chatUsers.AnsweredNote")}
+                </Text>
+                <Image
+                  source={require("../../assets/flecha-curva.png")}
+                  style={[
+                    styles.arrowImage,
+                    isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
+                  ]}
                 />
-              )}
-            </View>
-          </View>
-        </TouchableOpacity>
+                <View>
+                  <Text style={styles.originalNoteText}>
+                    {item.noteText || "Nota no disponible"}
+                  </Text>
+                </View>
+                <Text style={styles.messageTextNotas}>{item.text}</Text>
+                <View style={styles.messageFooter}>
+                  <Text style={styles.timeText}>
+                    {currentMessageDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                  {isOwnMessage && item.seen && (
+                    <Ionicons
+                      name="checkmark-done-sharp"
+                      size={16}
+                      color="black"
+                      style={styles.seenIcon}
+                    />
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          </Swipeable>
+        </GestureHandlerRootView>
       </>
     );
   }
@@ -168,135 +204,148 @@ const MessageItem = ({
   return (
     <>
       {!isSameDay && renderDate(currentMessageDate)}
+      <GestureHandlerRootView>
+        <Swipeable
+          renderRightActions={() => (
+            <TouchableOpacity 
+              style={styles.replyAction}
+              onPress={() => handleReply(item)}
+            >
+              <Ionicons name="arrow-undo-outline" size={24} color="white" />
+            </TouchableOpacity>
+          )}
+          onSwipeableOpen={() => handleReply(item)}
+        >
+          <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
+            <View style={[styles.message, isOwnMessage ? styles.sent : styles.received]}>
+              {item.text && <Text style={styles.messageText}>{item.text}</Text>}
 
-      <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-        <View style={[styles.message, isOwnMessage ? styles.sent : styles.received]}>
-          {item.text && <Text style={styles.messageText}>{item.text}</Text>}
+              {item.mediaType === "image" &&
+                (item.isViewOnce ? (
+                  // Caso: imagen de tipo "ver una vez" (se muestra un placeholder en vez de la imagen)
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleMediaPress(
+                        database,
+                        chatId,
+                        user,
+                        item.mediaUrl,
+                        "image",
+                        item.id,
+                        item.isViewOnce,
+                        setSelectedImage,
+                        setIsModalVisible,
+                        t
+                      )
+                    }
+                    style={[
+                      styles.viewOnceImagePlaceholder,
+                      item.viewedBy?.includes(user.uid)
+                        ? styles.imageViewed
+                        : styles.imageNotViewed,
+                    ]}
+                    disabled={item.viewedBy?.includes(user.uid)}
+                  >
+                    <Text style={styles.imageStatusText}>
+                      {item.viewedBy?.includes(user.uid)
+                        ? t("chatUsers.alreadyViewed")
+                        : t("chatUsers.view")}
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  // Caso: imagen normal con ActivityIndicator mientras carga
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleMediaPress(
+                        database,
+                        chatId,
+                        user,
+                        item.mediaUrl,
+                        "image",
+                        item.id,
+                        false,
+                        setSelectedImage,
+                        setIsModalVisible,
+                        t
+                      )
+                    }
+                    style={styles.normalImageContainer}
+                    onLongPress={() => handleLongPressMessage(item)}
+                  >
+                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+                      {imageLoading && (
+                        <ActivityIndicator
+                          size="small"
+                          color="gray"
+                          style={{ position: "absolute", zIndex: 1 }}
+                        />
+                      )}
+                      <Image
+                        source={{ uri: item.mediaUrl }}
+                        style={styles.messageImage}
+                        onLoadStart={() => setImageLoading(true)}
+                        onLoadEnd={() => setImageLoading(false)}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                ))}
 
-          {item.mediaType === "image" &&
-            (item.isViewOnce ? (
-              // Caso: imagen de tipo "ver una vez" (se muestra un placeholder en vez de la imagen)
-              <TouchableOpacity
-                onPress={() =>
-                  handleMediaPress(
-                    database,
-                    chatId,
-                    user,
-                    item.mediaUrl,
-                    "image",
-                    item.id,
-                    item.isViewOnce,
-                    setSelectedImage,
-                    setIsModalVisible,
-                    t
-                  )
-                }
-                style={[
-                  styles.viewOnceImagePlaceholder,
-                  item.viewedBy?.includes(user.uid)
-                    ? styles.imageViewed
-                    : styles.imageNotViewed,
-                ]}
-                disabled={item.viewedBy?.includes(user.uid)}
-              >
-                <Text style={styles.imageStatusText}>
-                  {item.viewedBy?.includes(user.uid)
-                    ? t("chatUsers.alreadyViewed")
-                    : t("chatUsers.view")}
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              // Caso: imagen normal con ActivityIndicator mientras carga
-              <TouchableOpacity
-                onPress={() =>
-                  handleMediaPress(
-                    database,
-                    chatId,
-                    user,
-                    item.mediaUrl,
-                    "image",
-                    item.id,
-                    false,
-                    setSelectedImage,
-                    setIsModalVisible,
-                    t
-                  )
-                }
-                style={styles.normalImageContainer}
-                onLongPress={() => handleLongPressMessage(item)}
-              >
-                <View style={{ justifyContent: "center", alignItems: "center" }}>
-                  {imageLoading && (
-                    <ActivityIndicator
-                      size="small"
-                      color="gray"
-                      style={{ position: "absolute", zIndex: 1 }}
+              {item.mediaType === "video" && (
+                <>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedImage({
+                        uri: item.mediaUrl,
+                        mediaType: item.mediaType,
+                      });
+                      setIsModalVisible(true);
+                    }}
+                    style={styles.videoThumbnailContainer}
+                  >
+                    <Video
+                      source={{ uri: item.mediaUrl }}
+                      style={styles.messageVideo}
+                      posterSource={{ uri: item.mediaUrl }}
+                      usePoster={true}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.playIconOverlay}>
+                      <Ionicons name="play-circle" size={40} color="white" />
+                    </View>
+                  </TouchableOpacity>
+                  {isOwnMessage && item.viewedBy?.includes(recipient.uid) && (
+                    <Ionicons
+                      name="checkmark-done-sharp"
+                      size={16}
+                      color="black"
+                      style={styles.seenIcon}
                     />
                   )}
-                  <Image
-                    source={{ uri: item.mediaUrl }}
-                    style={styles.messageImage}
-                    onLoadStart={() => setImageLoading(true)}
-                    onLoadEnd={() => setImageLoading(false)}
-                  />
-                </View>
-              </TouchableOpacity>
-            ))}
-
-          {item.mediaType === "video" && (
-            <>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedImage({
-                    uri: item.mediaUrl,
-                    mediaType: item.mediaType,
-                  });
-                  setIsModalVisible(true);
-                }}
-                style={styles.videoThumbnailContainer}
-              >
-                <Video
-                  source={{ uri: item.mediaUrl }}
-                  style={styles.messageVideo}
-                  posterSource={{ uri: item.mediaUrl }}
-                  usePoster={true}
-                  resizeMode="cover"
-                />
-                <View style={styles.playIconOverlay}>
-                  <Ionicons name="play-circle" size={40} color="white" />
-                </View>
-              </TouchableOpacity>
-              {isOwnMessage && item.viewedBy?.includes(recipient.uid) && (
-                <Ionicons
-                  name="checkmark-done-sharp"
-                  size={16}
-                  color="black"
-                  style={styles.seenIcon}
-                />
+                </>
               )}
-            </>
-          )}
 
-          {item.mediaType === "audio" && <AudioPlayer uri={item.mediaUrl} />}
+              {item.mediaType === "audio" && <AudioPlayer uri={item.mediaUrl} />}
 
-          <View style={styles.messageFooter}>
-            <Text style={styles.timeText}>
-              {currentMessageDate.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </Text>
-            {isOwnMessage && item.seen && (
-              <Ionicons
-                name="checkmark-done-sharp"
-                size={16}
-                color="black"
-                style={styles.seenIcon}
-              />
-            )}
-          </View>
-        </View>
-      </TouchableOpacity>
+              <View style={styles.messageFooter}>
+                <Text style={styles.timeText}>
+                  {currentMessageDate.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+                {isOwnMessage && item.seen && (
+                  <Ionicons
+                    name="checkmark-done-sharp"
+                    size={16}
+                    color="black"
+                    style={styles.seenIcon}
+                  />
+                )}
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Swipeable>
+      </GestureHandlerRootView>
     </>
   );
 };
