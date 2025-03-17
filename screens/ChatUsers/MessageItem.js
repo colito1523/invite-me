@@ -209,13 +209,19 @@ const MessageItem = ({
               style={styles.replyAction}
               onPress={() => handleReply(item)}
             >
-              <Ionicons name="arrow-undo-outline" size={24} color="white" />
             </TouchableOpacity>
           )}
           onSwipeableOpen={() => handleReply(item)}
         >
           <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
             <View style={[styles.message, isOwnMessage ? styles.sent : styles.received]}>
+              {/* SI ES UN MENSAJE "RESPUESTA A OTRO" (replyTo) */}
+            {item.replyTo && (
+              <View style={styles.replyBoxContainer}>
+                
+                <Text style={styles.replyBoxText}>{item.replyTo}</Text>
+              </View>
+            )}
               {item.text && <Text style={styles.messageText}>{item.text}</Text>}
 
               {item.mediaType === "image" &&

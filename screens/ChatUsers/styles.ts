@@ -44,6 +44,22 @@ export const styles = StyleSheet.create({
       alignSelf: "flex-start", 
       backgroundColor: "rgba(240, 240, 240, 1)",
     },
+
+    replyBoxContainer: {
+      backgroundColor: "#F0F0F0",
+      borderRadius: 8,
+      padding: 6,
+      marginBottom: 4,
+    },
+    replyBoxHeader: {
+      fontSize: 11,
+      color: "#757575",
+    },
+    replyBoxText: {
+      fontSize: 13,
+      color: "#333",
+      marginTop: 2,
+    },
     iconButtonGaleria: {
       marginRight: 10,
       marginLeft: 7,

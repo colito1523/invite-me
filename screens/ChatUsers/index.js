@@ -303,6 +303,12 @@ export default function Chat({ route }) {
         isViewOnce,
       };
 
+      // Si hay un replyMessage, lo guardamos
+    if (replyMessage) {
+      messageData.replyTo = replyMessage.text; 
+      setReplyMessage(null); // Cierra el ReplyBox
+    }
+
       // Añade la lógica para tipo de mensaje:
       if (messageType === "text") {
         messageData.text = message.trim();
@@ -314,10 +320,13 @@ export default function Chat({ route }) {
           ...prevMessages,
           { id: tempId, mediaType: messageType, isUploading: true },
         ]);
+
         const mediaUrl = await uploadMedia(mediaUri);
         if (!mediaUrl) return;
+
         messageData.mediaType = messageType;
         messageData.mediaUrl = mediaUrl;
+
         setIsUploading(false);
         setMessages((prevMessages) =>
           prevMessages.map((message) =>
@@ -325,6 +334,7 @@ export default function Chat({ route }) {
           ),
         );
       }
+      
       await addDoc(messagesRef, messageData);
 
       // Actualizar información del chat
