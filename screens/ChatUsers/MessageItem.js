@@ -19,6 +19,7 @@ const MessageItem = ({
   handleLongPressMessage,
   handleMediaPress,
   recipient,
+  onReferencePress, 
   onReply,
   t,
 }) => {
@@ -71,7 +72,6 @@ const MessageItem = ({
                 style={styles.replyAction}
                 onPress={() => handleReply(item)}
               >
-                <Ionicons name="arrow-undo-outline" size={24} color="white" />
               </TouchableOpacity>
             )}
             onSwipeableOpen={() => handleReply(item)}
@@ -216,12 +216,21 @@ const MessageItem = ({
           <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
             <View style={[styles.message, isOwnMessage ? styles.sent : styles.received]}>
               {/* SI ES UN MENSAJE "RESPUESTA A OTRO" (replyTo) */}
-            {item.replyTo && (
-              <View style={styles.replyBoxContainer}>
-                
-                <Text style={styles.replyBoxText}>{item.replyTo}</Text>
-              </View>
-            )}
+              {(item.replyTo || item.replyToMediaUrl) && (
+  <TouchableOpacity onPress={() => onReferencePress(item.replyToId)}>
+    <View style={styles.replyBoxContainer}>
+      {item.replyToMediaUrl ? (
+        <Image
+          source={{ uri: item.replyToMediaUrl }}
+          style={styles.replyImagePreview} // Asegúrate de definir este estilo
+        />
+      ) : (
+        <Text style={styles.replyBoxText}>{item.replyTo}</Text>
+      )}
+    </View>
+  </TouchableOpacity>
+)}
+
               {item.text && <Text style={styles.messageText}>{item.text}</Text>}
 
               {item.mediaType === "image" &&

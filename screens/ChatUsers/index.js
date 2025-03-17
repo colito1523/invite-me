@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Dimensions
+  Dimensions,
 } from "react-native";
 import { auth, database, storage } from "../../config/firebase";
 import {
@@ -39,7 +39,6 @@ import { Video } from "expo-av";
 import ChatHeader from "./ChatHeader";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { ImageBackground } from "react-native";
-import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { muteChat, handleDeleteMessage, handleMediaPress, pickMedia } from "./utils";
@@ -74,6 +73,15 @@ export default function Chat({ route }) {
   const [mutedChats, setMutedChats] = useState([]);
   const [isMuteModalVisible, setIsMuteModalVisible] = useState(false);
   const [replyMessage, setReplyMessage] = useState(null);
+  const scrollToMessage = (replyToId) => {
+    const index = messages.findIndex((msg) => msg.id === replyToId);
+    if (index >= 0) {
+      flatListRef.current?.scrollToIndex({ index, animated: true });
+    } else {
+      Alert.alert(t("chatUsers.dontFind"), t("chatUsers.dontFindMessage"));
+    }
+  };
+  
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
   const { t } = useTranslation();
@@ -304,10 +312,12 @@ export default function Chat({ route }) {
       };
 
       // Si hay un replyMessage, lo guardamos
-    if (replyMessage) {
-      messageData.replyTo = replyMessage.text; 
-      setReplyMessage(null); // Cierra el ReplyBox
-    }
+      if (replyMessage) {
+        messageData.replyTo = replyMessage.text || "Imagen"; // Muestra "Imagen" si no hay texto
+        messageData.replyToMediaUrl = replyMessage.mediaUrl || null; // Guarda la URL de la imagen
+        messageData.replyToId = replyMessage.id;
+        setReplyMessage(null);
+      }
 
       // Añade la lógica para tipo de mensaje:
       if (messageType === "text") {
@@ -516,6 +526,7 @@ export default function Chat({ route }) {
       recipient={recipient}
       t={t}
       onReply={handleReply}
+      onReferencePress={scrollToMessage} 
     />
   )}
   maxToRenderPerBatch={50}
@@ -534,10 +545,12 @@ export default function Chat({ route }) {
 
 
         <View style={{ paddingHorizontal: 8 }}>
-          <ReplyBox
-            text={replyMessage?.text}  // Mostramos el text del mensaje
-            onClose={() => setReplyMessage(null)} // Cuando toquen la X, limpiamos
-          />
+        <ReplyBox
+  text={replyMessage?.text}
+  mediaUrl={replyMessage?.mediaUrl}
+  isViewOnce={replyMessage?.isViewOnce}
+  onClose={() => setReplyMessage(null)}
+/>
         </View>
 
    

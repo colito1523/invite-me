@@ -327,7 +327,9 @@
   "twentyFourHours": "24 horas",
   "alreadyViewed": "Já visto",
   "view": "Ver",
-  "sentPhoto": "Enviou uma foto"
+  "sentPhoto": "Enviou uma foto",
+   "dontFind": "Messagem não encontrada.",
+    "dontFindMessage": "Não foi possível encontrar a mensagem."
 },
 "formatTime": {
   "yesterday": "Ontem",

@@ -1,79 +1,121 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons"; // Asegúrate de tener esta importación
 
-function ReplyBox({ text, onClose }) {
-  // If there's no text, we don't render anything
-  if (!text) return null
+function ReplyBox({ text, mediaUrl, isViewOnce, onClose }) {
+    const [imageLoading, setImageLoading] = useState(true);
 
-  return (
-    <View style={styles.replyContainer}>
-      <View style={styles.replyIndicator} />
-      <View style={styles.contentContainer}>
-        <Text style={styles.replyingToText}>Replying to</Text>
-        <Text style={styles.replyText} numberOfLines={1} ellipsizeMode="tail">
-          {text}
-        </Text>
-      </View>
-      <TouchableOpacity onPress={onClose} style={styles.closeButtonContainer}>
-        <Text style={styles.closeButton}>×</Text>
-      </TouchableOpacity>
-    </View>
-  )
+    useEffect(() => {
+        // Restablecer el estado de carga cada vez que cambia mediaUrl
+        if (mediaUrl) {
+            setImageLoading(true);
+        }
+    }, [mediaUrl]);
+
+    if (!text && !mediaUrl) return null;
+
+    return (
+        <View style={styles.replyContainer}>
+            <View style={styles.replyIndicator} />
+            <View style={styles.contentContainer}>
+                <Text style={styles.replyingToText}>Respondiendo a</Text>
+                {mediaUrl && (
+                    <View style={styles.imageContainer}>
+                        {imageLoading && !isViewOnce && (
+                            <ActivityIndicator style={styles.loader} size="small" color="#8E8E8E" />
+                        )}
+                        {isViewOnce ? (
+                            <Ionicons name="eye-off-outline" size={20} color="#8E8E8E" />
+                        ) : (
+                            <Image
+                                source={{ uri: mediaUrl }}
+                                style={styles.replyImagePreview}
+                                onLoadEnd={() => setImageLoading(false)}
+                            />
+                        )}
+                    </View>
+                )}
+                {text && (
+                    <Text style={styles.replyText} numberOfLines={1} ellipsizeMode="tail">
+                        {text}
+                    </Text>
+                )}
+            </View>
+            <TouchableOpacity onPress={onClose} style={styles.closeButtonContainer}>
+                <Text style={styles.closeButton}>×</Text>
+            </TouchableOpacity>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  replyContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F8F8F8",
-    borderRadius: 12,
-    marginBottom: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-    borderWidth: 0.5,
-    borderColor: "#EFEFEF",
-  },
-  replyIndicator: {
-    width: 2.5,
-    height: "70%",
-    backgroundColor: "#3897F0", // Instagram blue
-    borderRadius: 4,
-    marginRight: 10,
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  replyingToText: {
-    fontSize: 11,
-    color: "#8E8E8E",
-    marginBottom: 2,
-  },
-  replyText: {
-    color: "#262626",
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  closeButtonContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#EFEFEF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
-  },
-  closeButton: {
-    color: "#8E8E8E",
-    fontSize: 18,
-    fontWeight: "bold",
-    lineHeight: 22,
-  },
-})
+    replyContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#F8F8F8",
+        borderRadius: 12,
+        marginBottom: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
+        borderWidth: 0.5,
+        borderColor: "#EFEFEF",
+    },
+    replyIndicator: {
+        width: 2.5,
+        height: "70%",
+        backgroundColor: "#3897F0", // Instagram blue
+        borderRadius: 4,
+        marginRight: 10,
+    },
+    contentContainer: {
+        flex: 1,
+        justifyContent: "center",
+    },
+    replyingToText: {
+        fontSize: 11,
+        color: "#8E8E8E",
+        marginBottom: 2,
+    },
+    replyText: {
+        color: "#262626",
+        fontSize: 13,
+        fontWeight: "500",
+    },
+    imageContainer: {
+        position: 'relative',
+        width: 50,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    replyImagePreview: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 5,
+    },
+    loader: {
+        position: 'absolute',
+        zIndex: 1,
+    },
+    closeButtonContainer: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        marginLeft: 8,
+    },
+    closeButton: {
+        color: "#8E8E8E",
+        fontSize: 18,
+        fontWeight: "bold",
+        lineHeight: 22,
+    },
+});
 
-export default ReplyBox
-
+export default ReplyBox;
