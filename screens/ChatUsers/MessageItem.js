@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
-
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, } from "react-native";
+import { View, Text, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import AudioPlayer from "../AudioPlayer";
@@ -21,12 +20,10 @@ const MessageItem = ({
   handleMediaPress,
   recipient,
   t,
-  //onReplyPress, // Removed onReplyPress prop
 }) => {
-  // Estado para controlar la carga de la imagen (se utiliza solo si el mensaje es de imagen)
   const [imageLoading, setImageLoading] = useState(true);
   const swipeableRef = useRef(null);
-  // Cálculo de la fecha y comparación con el mensaje anterior
+
   const previousMessage = messages[index - 1];
   const currentMessageDate = item.createdAt
     ? new Date(item.createdAt.seconds * 1000)
@@ -40,10 +37,8 @@ const MessageItem = ({
     currentMessageDate.toDateString() === previousMessageDate.toDateString();
   const isOwnMessage = item.senderId === user.uid;
 
-  // Si el mensaje está marcado como eliminado para el usuario actual, no se renderiza
   if (item.deletedFor?.[user.uid]) return null;
 
-  // Función para renderizar la fecha cuando el día cambia
   const renderDate = (date) => (
     <View style={styles.dateContainer}>
       <Text style={styles.dateText}>
@@ -57,34 +52,27 @@ const MessageItem = ({
   );
 
   const handleReply = (item) => {
-    // Implement your reply logic here
     console.log("Replying to message:", item);
+    swipeableRef.current?.close(); // Asegúrate de cerrar el Swipeable
   };
 
-  // Caso: respuesta a historia
   if (item.isStoryResponse) {
     return (
       <>
         {!isSameDay && renderDate(currentMessageDate)}
         <GestureHandlerRootView>
-        <Swipeable
-  ref={swipeableRef}
-  renderRightActions={() => (
-    <TouchableOpacity 
-      style={styles.replyAction}
-      onPress={() => {
-        handleReply(item);
-        swipeableRef.current?.close();
-      }}
-    >
-      <Ionicons name="arrow-undo-outline" size={24} color="white" />
-    </TouchableOpacity>
-  )}
-  onSwipeableOpen={() => {
-    handleReply(item);
-    swipeableRef.current?.close();
-  }}
->
+          <Swipeable
+            ref={swipeableRef}
+            renderRightActions={() => (
+              <TouchableOpacity
+                style={styles.replyAction}
+                onPress={() => handleReply(item)}
+              >
+                <Ionicons name="arrow-undo-outline" size={24} color="white" />
+              </TouchableOpacity>
+            )}
+            onSwipeableOpen={() => handleReply(item)}
+          >
             <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
               <View
                 style={[
@@ -101,12 +89,12 @@ const MessageItem = ({
                   {isOwnMessage ? t("chatUsers.youAnswered") : t("chatUsers.Answered")}
                 </Text>
                 <Image
-    source={{ uri: item.storyUrl }}
-    style={[
-      styles.storyResponseImage,
-      { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
-    ]}
-  />
+                  source={{ uri: item.storyUrl }}
+                  style={[
+                    styles.storyResponseImage,
+                    { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
+                  ]}
+                />
                 <Text style={[styles.messageText,  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },]}>{item.text}</Text>
                 {isOwnMessage && item.seen && (
                   <View style={styles.messageFooter}>
@@ -132,15 +120,15 @@ const MessageItem = ({
     );
   }
 
-  // Caso: respuesta a nota
   if (item.isNoteResponse) {
     return (
       <>
         {!isSameDay && renderDate(currentMessageDate)}
         <GestureHandlerRootView>
           <Swipeable
+            ref={swipeableRef}
             renderRightActions={() => (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.replyAction}
                 onPress={() => handleReply(item)}
               >
@@ -199,7 +187,6 @@ const MessageItem = ({
     );
   }
 
-  // Caso: mensaje en proceso de subida
   if (item.isUploading) {
     return (
       <View style={[styles.message, styles.sent, styles.uploadingMessage]}>
@@ -208,14 +195,14 @@ const MessageItem = ({
     );
   }
 
-  // Renderizado por defecto del mensaje
   return (
     <>
       {!isSameDay && renderDate(currentMessageDate)}
       <GestureHandlerRootView>
         <Swipeable
+          ref={swipeableRef}
           renderRightActions={() => (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.replyAction}
               onPress={() => handleReply(item)}
             >
@@ -230,7 +217,6 @@ const MessageItem = ({
 
               {item.mediaType === "image" &&
                 (item.isViewOnce ? (
-                  // Caso: imagen de tipo "ver una vez" (se muestra un placeholder en vez de la imagen)
                   <TouchableOpacity
                     onPress={() =>
                       handleMediaPress(
@@ -261,7 +247,6 @@ const MessageItem = ({
                     </Text>
                   </TouchableOpacity>
                 ) : (
-                  // Caso: imagen normal con ActivityIndicator mientras carga
                   <TouchableOpacity
                     onPress={() =>
                       handleMediaPress(
