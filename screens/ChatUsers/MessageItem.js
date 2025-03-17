@@ -19,6 +19,7 @@ const MessageItem = ({
   handleLongPressMessage,
   handleMediaPress,
   recipient,
+  onReply,
   t,
 }) => {
   const [imageLoading, setImageLoading] = useState(true);
@@ -38,6 +39,7 @@ const MessageItem = ({
   const isOwnMessage = item.senderId === user.uid;
 
   if (item.deletedFor?.[user.uid]) return null;
+  
 
   const renderDate = (date) => (
     <View style={styles.dateContainer}>
@@ -53,7 +55,8 @@ const MessageItem = ({
 
   const handleReply = (item) => {
     console.log("Replying to message:", item);
-    swipeableRef.current?.close(); // Asegúrate de cerrar el Swipeable
+    onReply?.(item);  // <-- Llamamos a la función pasada por prop
+    swipeableRef.current?.close();
   };
 
   if (item.isStoryResponse) {

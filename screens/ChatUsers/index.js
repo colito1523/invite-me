@@ -39,11 +39,13 @@ import { Video } from "expo-av";
 import ChatHeader from "./ChatHeader";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { ImageBackground } from "react-native";
+import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { muteChat, handleDeleteMessage, handleMediaPress, pickMedia } from "./utils";
 
 import Complaints from "../../Components/Complaints/Complaints";
+import ReplyBox from "./ReplyBox";
 import { useTranslation } from "react-i18next";
 
 export default function Chat({ route }) {
@@ -71,11 +73,16 @@ export default function Chat({ route }) {
   const [modalImageLoading, setModalImageLoading] = useState(true);
   const [mutedChats, setMutedChats] = useState([]);
   const [isMuteModalVisible, setIsMuteModalVisible] = useState(false);
-  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyMessage, setReplyMessage] = useState(null);
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
   const { t } = useTranslation();
   const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+
+  const handleReply = (messageData) => {
+    console.log("Replying to message:", messageData);
+    setReplyMessage(messageData); // Aquí guardamos todo el objeto { text, senderId, etc. }
+  };
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -268,7 +275,6 @@ export default function Chat({ route }) {
     messageType = "text",
     mediaUri = null,
     isViewOnce = false, // Este parámetro se pasará desde donde se llama a la función
-    replyTo = replyingTo , // Agregar parámetro replyTo
   ) => {
     if (isUploading) {
       Alert.alert(t("chatUsers.uploading"), t("chatUsers.waitForUpload"));
@@ -295,11 +301,6 @@ export default function Chat({ route }) {
         seen: false,
         viewedBy: [],
         isViewOnce,
-        replyTo: replyTo ? {
-          messageId: replyTo.id,
-          text: replyTo.text,
-          senderId: replyTo.senderId
-        } : null
       };
 
       // Añade la lógica para tipo de mensaje:
@@ -355,7 +356,6 @@ export default function Chat({ route }) {
       Alert.alert(t("chatUsers.error"), t("chatUsers.sendMessageError"));
       setIsUploading(false);
     }
-    setReplyingTo(null);
   };
 
   const handleDeleteChat = async () => {
@@ -505,9 +505,7 @@ export default function Chat({ route }) {
       handleMediaPress={handleMediaPress}
       recipient={recipient}
       t={t}
-      onReply={(message) => {
-        setReplyingTo(message);
-      }}
+      onReply={handleReply}
     />
   )}
   maxToRenderPerBatch={50}
@@ -524,6 +522,16 @@ export default function Chat({ route }) {
   }}
 />
 
+
+        <View style={{ paddingHorizontal: 8 }}>
+          <ReplyBox
+            text={replyMessage?.text}  // Mostramos el text del mensaje
+            onClose={() => setReplyMessage(null)} // Cuando toquen la X, limpiamos
+          />
+        </View>
+
+   
+
         <View style={styles.containerIg}>
           <TouchableOpacity
             onPress={handleCameraLaunch}
@@ -531,26 +539,6 @@ export default function Chat({ route }) {
           >
             <Ionicons name="camera-outline" size={20} color="white" />
           </TouchableOpacity>
-          {replyingTo && (
-  <View style={styles.replyContainer}>
-    <View style={styles.replyContent}>
-      <Text style={styles.replyUsername}>
-        {replyingTo.senderId === user.uid 
-          ? t("chatUsers.you") 
-          : replyingTo.senderName}
-      </Text>
-      <Text 
-        style={styles.replyText} 
-        numberOfLines={1}
-      >
-        {replyingTo.text || t("chatUsers.mediaMessage")}
-      </Text>
-    </View>
-    <TouchableOpacity onPress={() => setReplyingTo(null)}>
-      <Ionicons name="close" size={20} color="gray" />
-    </TouchableOpacity>
-  </View>
-)}
           <TextInput
             style={styles.input}
             value={message}
@@ -758,8 +746,8 @@ export default function Chat({ route }) {
             />
           </View>
         </TouchableWithoutFeedback>
-
-
+        
+        
         ))}
     </View>
   </View>
