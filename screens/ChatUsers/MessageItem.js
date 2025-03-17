@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, ActivityIndicator } from "react-native";
+import React, { useState, useRef } from "react";
+
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, } from "react-native";
 import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import AudioPlayer from "../AudioPlayer";
@@ -24,7 +25,7 @@ const MessageItem = ({
 }) => {
   // Estado para controlar la carga de la imagen (se utiliza solo si el mensaje es de imagen)
   const [imageLoading, setImageLoading] = useState(true);
-
+  const swipeableRef = useRef(null);
   // Cálculo de la fecha y comparación con el mensaje anterior
   const previousMessage = messages[index - 1];
   const currentMessageDate = item.createdAt
@@ -66,17 +67,24 @@ const MessageItem = ({
       <>
         {!isSameDay && renderDate(currentMessageDate)}
         <GestureHandlerRootView>
-          <Swipeable
-            renderRightActions={() => (
-              <TouchableOpacity 
-                style={styles.replyAction}
-                onPress={() => handleReply(item)}
-              >
-                <Ionicons name="arrow-undo-outline" size={24} color="white" />
-              </TouchableOpacity>
-            )}
-            onSwipeableOpen={() => handleReply(item)}
-          >
+        <Swipeable
+  ref={swipeableRef}
+  renderRightActions={() => (
+    <TouchableOpacity 
+      style={styles.replyAction}
+      onPress={() => {
+        handleReply(item);
+        swipeableRef.current?.close();
+      }}
+    >
+      <Ionicons name="arrow-undo-outline" size={24} color="white" />
+    </TouchableOpacity>
+  )}
+  onSwipeableOpen={() => {
+    handleReply(item);
+    swipeableRef.current?.close();
+  }}
+>
             <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
               <View
                 style={[

@@ -449,14 +449,27 @@ export const styles = StyleSheet.create({
       height: '100%',
     },
     replyContainer: {
-      padding: 8,
-      borderLeftWidth: 4,
-      borderLeftColor: 'red',
-      backgroundColor: 'red',
-      marginBottom: 4,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: "#f0f0f0",
+      padding: 10,
+      marginHorizontal: 10,
+      borderRadius: 8,
+      marginBottom: 5,
+    },
+    replyContent: {
+      flex: 1,
+      marginRight: 10,
+    },
+    replyUsername: {
+      fontWeight: "bold",
+      color: "#666",
+      fontSize: 12,
     },
     replyText: {
+      color: "#999",
       fontSize: 12,
-      color: '#666',
+      marginTop: 2,
     },
 });

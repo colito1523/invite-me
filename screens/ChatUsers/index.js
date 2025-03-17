@@ -39,7 +39,6 @@ import { Video } from "expo-av";
 import ChatHeader from "./ChatHeader";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { ImageBackground } from "react-native";
-import { Menu } from "react-native-paper";
 import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { muteChat, handleDeleteMessage, handleMediaPress, pickMedia } from "./utils";
@@ -72,6 +71,7 @@ export default function Chat({ route }) {
   const [modalImageLoading, setModalImageLoading] = useState(true);
   const [mutedChats, setMutedChats] = useState([]);
   const [isMuteModalVisible, setIsMuteModalVisible] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
   const { t } = useTranslation();
@@ -268,7 +268,7 @@ export default function Chat({ route }) {
     messageType = "text",
     mediaUri = null,
     isViewOnce = false, // Este parámetro se pasará desde donde se llama a la función
-    replyTo = null, // Agregar parámetro replyTo
+    replyTo = replyingTo , // Agregar parámetro replyTo
   ) => {
     if (isUploading) {
       Alert.alert(t("chatUsers.uploading"), t("chatUsers.waitForUpload"));
@@ -355,6 +355,7 @@ export default function Chat({ route }) {
       Alert.alert(t("chatUsers.error"), t("chatUsers.sendMessageError"));
       setIsUploading(false);
     }
+    setReplyingTo(null);
   };
 
   const handleDeleteChat = async () => {
@@ -504,7 +505,9 @@ export default function Chat({ route }) {
       handleMediaPress={handleMediaPress}
       recipient={recipient}
       t={t}
-      onReply={(message) => handleSend('text', null, false, message)}
+      onReply={(message) => {
+        setReplyingTo(message);
+      }}
     />
   )}
   maxToRenderPerBatch={50}
@@ -528,6 +531,26 @@ export default function Chat({ route }) {
           >
             <Ionicons name="camera-outline" size={20} color="white" />
           </TouchableOpacity>
+          {replyingTo && (
+  <View style={styles.replyContainer}>
+    <View style={styles.replyContent}>
+      <Text style={styles.replyUsername}>
+        {replyingTo.senderId === user.uid 
+          ? t("chatUsers.you") 
+          : replyingTo.senderName}
+      </Text>
+      <Text 
+        style={styles.replyText} 
+        numberOfLines={1}
+      >
+        {replyingTo.text || t("chatUsers.mediaMessage")}
+      </Text>
+    </View>
+    <TouchableOpacity onPress={() => setReplyingTo(null)}>
+      <Ionicons name="close" size={20} color="gray" />
+    </TouchableOpacity>
+  </View>
+)}
           <TextInput
             style={styles.input}
             value={message}
