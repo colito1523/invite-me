@@ -79,7 +79,6 @@ export const handleMediaPress = async (
       // Marcar el mensaje como visto por el usuario actual
       await updateDoc(messageRef, {
         viewedBy: [...(messageData.viewedBy || []), user.uid],
-        seen: true,
       });
     }
 

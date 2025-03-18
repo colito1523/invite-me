@@ -396,7 +396,7 @@ export const styles = StyleSheet.create({
   
     viewOnceImagePlaceholder: {
       width: 70,
-      height: 50,
+      height: 40,
       justifyContent: "center",
       alignItems: "center",
       borderRadius: 30,
