@@ -56,7 +56,12 @@ const MessageItem = ({
 
   const handleReply = (item) => {
     console.log("Replying to message:", item);
-    onReply?.(item);  // <-- Llamamos a la función pasada por prop
+    onReply?.({
+      text: item.text,
+      mediaUrl: item.mediaUrl,
+      isViewOnce: item.isViewOnce,
+      id: item.id, // Asegúrate de pasar el ID
+    });
     swipeableRef.current?.close();
   };
 
@@ -215,21 +220,28 @@ const MessageItem = ({
         >
           <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
             <View style={[styles.message, isOwnMessage ? styles.sent : styles.received]}>
-              {/* SI ES UN MENSAJE "RESPUESTA A OTRO" (replyTo) */}
-              {(item.replyTo || item.replyToMediaUrl) && (
+            {item.replyTo || item.replyToMediaUrl ? (
   <TouchableOpacity onPress={() => onReferencePress(item.replyToId)}>
     <View style={styles.replyBoxContainer}>
       {item.replyToMediaUrl ? (
-        <Image
-          source={{ uri: item.replyToMediaUrl }}
-          style={styles.replyImagePreview} // Asegúrate de definir este estilo
-        />
+        item.replyToIsViewOnce ? (
+          <View style={styles.viewOnceContainer}>
+            <Ionicons name="eye-off-outline" size={20} color="#8E8E8E" />
+          </View>
+        ) : (
+          <Image
+            source={{ uri: item.replyToMediaUrl }}
+            style={styles.replyImagePreview}
+          />
+        )
       ) : (
         <Text style={styles.replyBoxText}>{item.replyTo}</Text>
       )}
     </View>
   </TouchableOpacity>
-)}
+) : null}
+
+
 
               {item.text && <Text style={styles.messageText}>{item.text}</Text>}
 

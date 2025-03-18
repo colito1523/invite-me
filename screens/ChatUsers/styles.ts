@@ -51,6 +51,31 @@ export const styles = StyleSheet.create({
       padding: 6,
       marginBottom: 4,
     },
+    viewOnceContainer: {
+      width: 40,
+      height: 40,
+      backgroundColor: "#F0F0F0",
+      borderRadius: 6,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    viewOnceReplyContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+      borderRadius: 6,
+      gap: 8,
+    },
+    viewOnceReplyText: {
+      color: '#8E8E8E',
+      fontSize: 12,
+    },
+    replyImagePreview: {
+      width: 40,
+      height: 40,
+      borderRadius: 6,
+    },
     replyBoxHeader: {
       fontSize: 11,
       color: "#757575",

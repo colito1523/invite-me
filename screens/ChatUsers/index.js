@@ -89,7 +89,12 @@ export default function Chat({ route }) {
 
   const handleReply = (messageData) => {
     console.log("Replying to message:", messageData);
-    setReplyMessage(messageData); // Aquí guardamos todo el objeto { text, senderId, etc. }
+    setReplyMessage({
+      text: messageData.text,
+      mediaUrl: messageData.mediaUrl,
+      isViewOnce: messageData.isViewOnce, // Asegúrate de incluir esta propiedad
+      id: messageData.id,
+    });
   };
 
   useEffect(() => {
@@ -315,6 +320,7 @@ export default function Chat({ route }) {
       if (replyMessage) {
         messageData.replyTo = replyMessage.text || "Imagen"; // Muestra "Imagen" si no hay texto
         messageData.replyToMediaUrl = replyMessage.mediaUrl || null; // Guarda la URL de la imagen
+        messageData.replyToIsViewOnce = replyMessage.isViewOnce || false; // Asegúrate de incluir esta propiedad
         messageData.replyToId = replyMessage.id;
         setReplyMessage(null);
       }
@@ -527,6 +533,7 @@ export default function Chat({ route }) {
       t={t}
       onReply={handleReply}
       onReferencePress={scrollToMessage} 
+      replyMessage={replyMessage}
     />
   )}
   maxToRenderPerBatch={50}
