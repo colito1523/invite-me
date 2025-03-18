@@ -1,4 +1,3 @@
-// camera.tsx
 import PhotoPreviewSection from './PhotoPreviewSection';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { CameraType, CameraView, FlashMode, useCameraPermissions } from 'expo-camera';
@@ -7,22 +6,22 @@ import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from '
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { debounce } from 'lodash';
+import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 
 export default function Camera() {
   const [facing, setFacing] = useState<CameraType>('back');
   const [flashMode, setFlashMode] = useState<FlashMode>('off');
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<any>(null);
+  const [zoom, setZoom] = useState(0);
 
   const cameraRef = useRef<CameraView | null>(null);
 
   const navigation = useNavigation();
   const route = useRoute();
 
-  // Extraemos lo que venga en route.params (por ejemplo: { onCapture: (...) => {} })
   const { header = null, onCapture } = route.params || {};
 
-  // Manejo de galería
   const handleOpenGallery = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -49,7 +48,6 @@ export default function Camera() {
 
   const handleOpenGalleryDebounced = debounce(handleOpenGallery, 300);
 
-  // PanResponder para arrastrar hacia arriba y abrir la galería
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -61,7 +59,6 @@ export default function Camera() {
     })
   ).current;
 
-  // Permisos de la cámara
   if (!permission) return <View />;
   if (!permission.granted) {
     return (
@@ -72,7 +69,6 @@ export default function Camera() {
     );
   }
 
-  // Funciones de toggle
   const toggleCameraFacing = () => {
     setFacing(curr => (curr === 'back' ? 'front' : 'back'));
   };
@@ -80,7 +76,6 @@ export default function Camera() {
     setFlashMode(curr => (curr === 'off' ? 'on' : 'off'));
   };
 
-  // Tomar foto
   const handleTakePhoto = async () => {
     if (!cameraRef.current) return;
     const options = {
@@ -92,60 +87,69 @@ export default function Camera() {
     };
     const takenPhoto = await cameraRef.current.takePictureAsync(options);
     console.log("Captured Photo EXIF Data:", takenPhoto.exif);
-
-    // Ya no la enviamos al chat o historias directamente;
-    // simplemente guardamos en estado y mostramos PhotoPreviewSection.
     setPhoto(takenPhoto);
   };
 
-  // Retomar la foto => reseteamos
   const handleRetakePhoto = () => setPhoto(null);
 
-  // Si ya hay foto, mostramos la sección de previsualización
+  const handlePinchGesture = (event) => {
+    const scale = event.nativeEvent.scale;
+    // Ajusta la sensibilidad del zoom
+    const sensitivity = 0.01;
+    // Reduce el rango máximo del zoom
+    const maxZoom = 0.3;
+    let newZoom = Math.min(Math.max(zoom + (scale - 1) * sensitivity, 0), maxZoom);
+    setZoom(newZoom);
+  };
+  
+  
+
   if (photo) {
     return (
       <PhotoPreviewSection
         photo={photo}
         handleRetakePhoto={handleRetakePhoto}
-        onCapture={onCapture} // Esto indica si venimos del chat o no
+        onCapture={onCapture}
       />
     );
   }
 
   return (
-    <View style={styles.container} {...panResponder.panHandlers}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <AntDesign name="close" size={30} color="white" />
-        </TouchableOpacity>
-      </View>
-
-      {header}
-
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef} flash={flashMode}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.galleryButton} onPress={handleOpenGallery}>
-            <Ionicons name="images-outline" size={30} color="white" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
-            <View style={styles.innerCircle} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
-            <AntDesign name="retweet" size={30} color="white" />
+    <PinchGestureHandler onGestureEvent={handlePinchGesture}>
+      <View style={styles.container} {...panResponder.panHandlers}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <AntDesign name="close" size={30} color="white" />
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
-          <Ionicons
-            name={flashMode === 'off' ? 'flash-off' : 'flash'}
-            size={30}
-            color="white"
-          />
-        </TouchableOpacity>
-      </CameraView>
-    </View>
+        {header}
+
+        <CameraView style={styles.camera} facing={facing} ref={cameraRef} flash={flashMode} zoom={zoom}>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.galleryButton} onPress={handleOpenGallery}>
+              <Ionicons name="images-outline" size={30} color="white" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
+              <View style={styles.innerCircle} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
+              <AntDesign name="retweet" size={30} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
+            <Ionicons
+              name={flashMode === 'off' ? 'flash-off' : 'flash'}
+              size={30}
+              color="white"
+            />
+          </TouchableOpacity>
+        </CameraView>
+      </View>
+    </PinchGestureHandler>
   );
 }
 
