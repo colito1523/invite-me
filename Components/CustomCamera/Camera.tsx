@@ -5,17 +5,24 @@ import { CameraType, CameraView, FlashMode, useCameraPermissions } from 'expo-ca
 import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { debounce } from 'lodash';
 
-export default function Camera({ header = null, onCapture }) {
+export default function Camera() {
   const [facing, setFacing] = useState<CameraType>('back');
   const [flashMode, setFlashMode] = useState<FlashMode>('off');
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<any>(null);
-  const cameraRef = useRef<CameraView | null>(null);
-  const navigation = useNavigation();
 
+  const cameraRef = useRef<CameraView | null>(null);
+
+  const navigation = useNavigation();
+  const route = useRoute();
+
+  // Extraemos lo que venga en route.params (por ejemplo: { onCapture: (...) => {} })
+  const { header = null, onCapture } = route.params || {};
+
+  // Manejo de galería
   const handleOpenGallery = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -42,6 +49,7 @@ export default function Camera({ header = null, onCapture }) {
 
   const handleOpenGalleryDebounced = debounce(handleOpenGallery, 300);
 
+  // PanResponder para arrastrar hacia arriba y abrir la galería
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -53,10 +61,8 @@ export default function Camera({ header = null, onCapture }) {
     })
   ).current;
 
-  if (!permission) {
-    return <View />;
-  }
-
+  // Permisos de la cámara
+  if (!permission) return <View />;
   if (!permission.granted) {
     return (
       <View style={styles.container}>
@@ -66,39 +72,45 @@ export default function Camera({ header = null, onCapture }) {
     );
   }
 
-  function toggleCameraFacing() {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
-  }
-
-  function toggleFlash() {
-    setFlashMode(current => (current === 'off' ? 'on' : 'off'));
-  }
-
-  const handleTakePhoto = async () => {
-    if (cameraRef.current) {
-      const options = {
-        quality: 1,
-        base64: true,
-        exif: true,
-        mirror: facing === 'front',
-        flashMode: flashMode,
-      };
-      const takenPhoto = await cameraRef.current.takePictureAsync(options);
-      console.log("Captured Photo EXIF Data:", takenPhoto.exif);
-      if (onCapture) {
-        // Si se proporciona onCapture, la foto se usa para el chat.
-        onCapture(takenPhoto);
-        navigation.goBack();
-      } else {
-        // Sino, se usa la lógica de historias (preview de foto)
-        setPhoto(takenPhoto);
-      }
-    }
+  // Funciones de toggle
+  const toggleCameraFacing = () => {
+    setFacing(curr => (curr === 'back' ? 'front' : 'back'));
+  };
+  const toggleFlash = () => {
+    setFlashMode(curr => (curr === 'off' ? 'on' : 'off'));
   };
 
+  // Tomar foto
+  const handleTakePhoto = async () => {
+    if (!cameraRef.current) return;
+    const options = {
+      quality: 1,
+      base64: true,
+      exif: true,
+      mirror: facing === 'front',
+      flashMode: flashMode,
+    };
+    const takenPhoto = await cameraRef.current.takePictureAsync(options);
+    console.log("Captured Photo EXIF Data:", takenPhoto.exif);
+
+    // Ya no la enviamos al chat o historias directamente;
+    // simplemente guardamos en estado y mostramos PhotoPreviewSection.
+    setPhoto(takenPhoto);
+  };
+
+  // Retomar la foto => reseteamos
   const handleRetakePhoto = () => setPhoto(null);
 
-  if (photo) return <PhotoPreviewSection photo={photo} handleRetakePhoto={handleRetakePhoto} />;
+  // Si ya hay foto, mostramos la sección de previsualización
+  if (photo) {
+    return (
+      <PhotoPreviewSection
+        photo={photo}
+        handleRetakePhoto={handleRetakePhoto}
+        onCapture={onCapture} // Esto indica si venimos del chat o no
+      />
+    );
+  }
 
   return (
     <View style={styles.container} {...panResponder.panHandlers}>
@@ -107,26 +119,24 @@ export default function Camera({ header = null, onCapture }) {
           <AntDesign name="close" size={30} color="white" />
         </TouchableOpacity>
       </View>
+
       {header}
+
       <CameraView style={styles.camera} facing={facing} ref={cameraRef} flash={flashMode}>
         <View style={styles.buttonContainer}>
-          {/* Botón para abrir la galería (lado izquierdo) */}
           <TouchableOpacity style={styles.galleryButton} onPress={handleOpenGallery}>
             <Ionicons name="images-outline" size={30} color="white" />
           </TouchableOpacity>
 
-          {/* Botón de captura en el centro */}
           <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
             <View style={styles.innerCircle} />
           </TouchableOpacity>
 
-          {/* Botón para cambiar cámara (lado derecho) */}
           <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
             <AntDesign name="retweet" size={30} color="white" />
           </TouchableOpacity>
         </View>
 
-        {/* Botón para activar/desactivar flash */}
         <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
           <Ionicons
             name={flashMode === 'off' ? 'flash-off' : 'flash'}

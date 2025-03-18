@@ -149,7 +149,8 @@
     "camera": "Camera",
     "gallery": "Gallery",
     "loadStoriesError": "Error loading stories:",
-    "addStory": "Add"
+    "addStory": "Add",
+    "send": "Send to chat"
 
   },
 

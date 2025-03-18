@@ -149,7 +149,8 @@
     "camera": "Cámara",
     "gallery": "Galería",
     "loadStoriesError": "Error al cargar historias:",
-     "addStory": "Agregar"
+     "addStory": "Agregar",
+     "send": "Enviar al chat"
   },
 
   "storyViewer": {
