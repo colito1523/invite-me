@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  TextInput,
   TouchableOpacity,
   FlatList,
   Text,
@@ -13,8 +12,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  ImageBackground,
 } from "react-native";
 import { auth, database, storage } from "../../config/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   collection,
   addDoc,
@@ -30,21 +31,19 @@ import {
   where,
   arrayUnion,
 } from "firebase/firestore";
-
-import MessageItem from "./MessageItem";
 import { useNavigation } from "@react-navigation/native";
-import * as ImagePicker from "expo-image-picker";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Video } from "expo-av";
 import ChatHeader from "./ChatHeader";
-import { useBlockedUsers } from "../../src/contexts/BlockContext";
-import { ImageBackground } from "react-native";
-import { Ionicons, FontAwesome, Feather } from "@expo/vector-icons";
-import { styles } from "./styles";
-import { muteChat, handleDeleteMessage, handleMediaPress, pickMedia } from "./utils";
-
+import MessageItem from "./MessageItem";
 import Complaints from "../../Components/Complaints/Complaints";
-import ReplyBox from "./ReplyBox";
+
+// Importa el nuevo componente
+import ChatInput from "./ChatInput";
+
+import { useBlockedUsers } from "../../src/contexts/BlockContext";
+import { Ionicons } from "@expo/vector-icons";
+import { styles } from "./styles";
+import { muteChat, handleDeleteMessage, handleMediaPress } from "./utils";
 import { useTranslation } from "react-i18next";
 
 export default function Chat({ route }) {
@@ -73,6 +72,7 @@ export default function Chat({ route }) {
   const [mutedChats, setMutedChats] = useState([]);
   const [isMuteModalVisible, setIsMuteModalVisible] = useState(false);
   const [replyMessage, setReplyMessage] = useState(null);
+
   const scrollToMessage = (replyToId) => {
     const index = messages.findIndex((msg) => msg.id === replyToId);
     if (index >= 0) {
@@ -81,7 +81,6 @@ export default function Chat({ route }) {
       Alert.alert(t("chatUsers.dontFind"), t("chatUsers.dontFindMessage"));
     }
   };
-  
 
   const [noteText, setNoteText] = useState(""); // Estado para almacenar el texto de la nota
   const { t } = useTranslation();
@@ -170,7 +169,7 @@ export default function Chat({ route }) {
             "chats",
             chatId,
             "messages",
-            message.id,
+            message.id
           );
           batch.update(messageRef, {
             viewedBy: arrayUnion(user.uid),
@@ -208,7 +207,7 @@ export default function Chat({ route }) {
       const participants = chatData.participants || [];
 
       const recipientId = participants.find(
-        (participant) => participant !== user.uid,
+        (participant) => participant !== user.uid
       );
 
       if (!recipientId) {
@@ -246,7 +245,7 @@ export default function Chat({ route }) {
         const chatsRef = collection(database, "chats");
         const q = query(
           chatsRef,
-          where("participants", "array-contains", user.uid),
+          where("participants", "array-contains", user.uid)
         );
 
         const querySnapshot = await getDocs(q);
@@ -287,7 +286,7 @@ export default function Chat({ route }) {
   const handleSend = async (
     messageType = "text",
     mediaUri = null,
-    isViewOnce = false, // Este parámetro se pasará desde donde se llama a la función
+    isViewOnce = false // Este parámetro se pasará desde donde se llama a la función
   ) => {
     if (isUploading) {
       Alert.alert(t("chatUsers.uploading"), t("chatUsers.waitForUpload"));
@@ -304,7 +303,7 @@ export default function Chat({ route }) {
         database,
         "chats",
         chatIdToUse,
-        "messages",
+        "messages"
       );
 
       let messageData = {
@@ -346,11 +345,11 @@ export default function Chat({ route }) {
         setIsUploading(false);
         setMessages((prevMessages) =>
           prevMessages.map((message) =>
-            message.id === tempId ? { ...messageData, id: tempId } : message,
-          ),
+            message.id === tempId ? { ...messageData, id: tempId } : message
+          )
         );
       }
-      
+
       await addDoc(messagesRef, messageData);
 
       // Actualizar información del chat
@@ -360,7 +359,7 @@ export default function Chat({ route }) {
       if (chatDoc.exists()) {
         const chatData = chatDoc.data();
         const otherParticipantId = chatData.participants.find(
-          (participant) => participant !== user.uid,
+          (participant) => participant !== user.uid
         );
 
         // Establecer isHidden a false para el receptor
@@ -424,7 +423,7 @@ export default function Chat({ route }) {
       const blob = await response.blob();
       const storageRef = ref(
         storage,
-        `media/${user.uid}/${new Date().getTime()}`,
+        `media/${user.uid}/${new Date().getTime()}`
       );
       await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(storageRef);
@@ -437,34 +436,13 @@ export default function Chat({ route }) {
       setIsUploading(false); // Finaliza la carga
     }
   };
-
-  const handleCameraLaunch = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        t("chatUsers.permissionDenied"),
-        t("chatUsers.cameraPermission"),
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const asset = result.assets[0];
-      handleSend("image", asset.uri, true); // Enviar como `isViewOnce: true`
-    }
-  };
-
+  
 
   const closeModal = () => {
-  setIsModalVisible(false);
-  setSelectedImage(null);
-  setModalImageLoading(true); // Reinicia el indicador para la próxima imagen
-};
+    setIsModalVisible(false);
+    setSelectedImage(null);
+    setModalImageLoading(true); // Reinicia el indicador para la próxima imagen
+  };
 
   const handleLongPressMessage = (message) => {
     // Allow deletion of messages sent by the current user or received from the other user
@@ -482,7 +460,7 @@ export default function Chat({ route }) {
           onPress: () => onDeleteMessage(message.id),
           style: "destructive",
         },
-      ],
+      ]
     );
   };
 
@@ -493,108 +471,73 @@ export default function Chat({ route }) {
       user,
       messageId,
       recipientUser,
-      setMessages,
+      setMessages
     ).catch((error) => Alert.alert("Error", error.message));
   };
 
-
   return (
-    <ImageBackground source={require('../../assets/fondo chat.jpg')} style={styles.container}>
+    <ImageBackground
+      source={require("../../assets/fondo chat.jpg")}
+      style={styles.container}
+    >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-       <ChatHeader
-  recipient={recipient}
-  chatId={chatId}
-  handleDeleteChat={handleDeleteChat}
-  handleReport={handleReport}
-  handleMuteChat={handleMuteChat}
-/>
+        <ChatHeader
+          recipient={recipient}
+          chatId={chatId}
+          handleDeleteChat={handleDeleteChat}
+          handleReport={handleReport}
+          handleMuteChat={handleMuteChat}
+        />
 
         <FlatList
-  ref={flatListRef}
-  data={messages}
-  keyExtractor={(item) => item.id}
-  renderItem={({ item, index }) => (
-    <MessageItem
-      item={item}
-      index={index}
-      messages={messages}
-      user={user}
-      database={database}
-      chatId={chatId}
-      setSelectedImage={setSelectedImage}
-      setIsModalVisible={setIsModalVisible}
-      handleLongPressMessage={handleLongPressMessage}
-      handleMediaPress={handleMediaPress}
-      recipient={recipient}
-      t={t}
-      onReply={handleReply}
-      onReferencePress={scrollToMessage} 
-      replyMessage={replyMessage}
-    />
-  )}
-  maxToRenderPerBatch={50}
-  windowSize={21}
-  removeClippedSubviews={false}
-  onContentSizeChange={() =>
-    flatListRef.current?.scrollToEnd({ animated: false })
-  }
-  onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
-  initialNumToRender={messages.length}
-  maintainVisibleContentPosition={{
-    minIndexForVisible: 0,
-    autoscrollToTopThreshold: 10,
-  }}
-/>
-
-
-        <View style={{ paddingHorizontal: 8 }}>
-        <ReplyBox
-  text={replyMessage?.text}
-  mediaUrl={replyMessage?.mediaUrl}
-  isViewOnce={replyMessage?.isViewOnce}
-  onClose={() => setReplyMessage(null)}
-/>
-        </View>
-
-   
-
-        <View style={styles.containerIg}>
-          <TouchableOpacity
-            onPress={handleCameraLaunch}
-            style={styles.iconButtonCamera}
-          >
-            <Ionicons name="camera-outline" size={20} color="white" />
-          </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            value={message}
-            onChangeText={setMessage}
-            placeholder={t("chatUsers.writeMessage")}
-            placeholderTextColor="#999"
-            multiline
-            numberOfLines={1}
-            textAlignVertical="center"
-          />
-          {message.trim() ? (
-            <TouchableOpacity
-              onPress={() => handleSend("text")}
-              style={styles.sendButton}
-            >
-              <FontAwesome name="send" size={20} color="white" />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-            onPress={() => pickMedia(handleSend, t)}
-              style={styles.iconButtonGaleria}
-            >
-              <Ionicons name="image-outline" size={30} color="#000" />
-            </TouchableOpacity>
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, index }) => (
+            <MessageItem
+              item={item}
+              index={index}
+              messages={messages}
+              user={user}
+              database={database}
+              chatId={chatId}
+              setSelectedImage={setSelectedImage}
+              setIsModalVisible={setIsModalVisible}
+              handleLongPressMessage={handleLongPressMessage}
+              handleMediaPress={handleMediaPress}
+              recipient={recipient}
+              t={t}
+              onReply={handleReply}
+              onReferencePress={scrollToMessage}
+              replyMessage={replyMessage}
+            />
           )}
-        </View>
+          maxToRenderPerBatch={50}
+          windowSize={21}
+          removeClippedSubviews={false}
+          onContentSizeChange={() =>
+            flatListRef.current?.scrollToEnd({ animated: false })
+          }
+          onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          initialNumToRender={messages.length}
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+            autoscrollToTopThreshold: 10,
+          }}
+        />
+
+        <ChatInput
+          message={message}
+          setMessage={setMessage}
+          handleSend={handleSend}
+          t={t}
+          replyMessage={replyMessage}
+          setReplyMessage={setReplyMessage}
+        />
 
         <Modal
           transparent={true}
@@ -658,23 +601,23 @@ export default function Chat({ route }) {
         </Modal>
 
         <Modal
-  visible={isModalVisible}
-  transparent={true}
-  onRequestClose={closeModal}
->
-  <View style={styles.modalBackground}>
-    <TouchableOpacity
-      style={styles.closeModalButton}
-      onPress={closeModal}
-    >
-      <Ionicons name="close" size={28} color="white" />
-    </TouchableOpacity>
-    <View style={styles.mediaContainer}>
-      {selectedImage &&
-        (typeof selectedImage === "object" &&
-        selectedImage.mediaType === "video" ? (
-          // Aquí va la lógica para video
-          <View style={styles.videoContainer}>
+          visible={isModalVisible}
+          transparent={true}
+          onRequestClose={closeModal}
+        >
+          <View style={styles.modalBackground}>
+            <TouchableOpacity
+              style={styles.closeModalButton}
+              onPress={closeModal}
+            >
+              <Ionicons name="close" size={28} color="white" />
+            </TouchableOpacity>
+            <View style={styles.mediaContainer}>
+              {selectedImage &&
+                (typeof selectedImage === "object" &&
+                selectedImage.mediaType === "video" ? (
+                  // Aquí va la lógica para video
+                  <View style={styles.videoContainer}>
                     <Video
                       source={{ uri: selectedImage.uri }}
                       style={styles.fullscreenMedia}
@@ -735,53 +678,51 @@ export default function Chat({ route }) {
                       </View>
                     </View>
                   </View>
-        ) : (
-          <TouchableWithoutFeedback onPress={closeModal}>
-          <View
-            style={{
-              width: windowWidth,
-              height: windowHeight,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            {modalImageLoading && (
-              <ActivityIndicator
-                size="large"
-                color="#fff"
-                style={{ position: "absolute", zIndex: 1 }}
-              />
-            )}
-            <Image
-              source={{
-                uri:
-                  typeof selectedImage === "object"
-                    ? selectedImage.uri
-                    : selectedImage,
-              }}
-              style={{
-                width: windowWidth,
-                height: windowHeight,
-                resizeMode: "contain",
-                opacity: modalImageLoading ? 0 : 1,
-              }}
-              onLoad={() => {
-                console.log("Imagen cargada correctamente");
-                setModalImageLoading(false);
-              }}
-              onError={(error) => {
-                console.error("Error al cargar la imagen", error);
-                setModalImageLoading(false);
-              }}
-            />
+                ) : (
+                  <TouchableWithoutFeedback onPress={closeModal}>
+                    <View
+                      style={{
+                        width: windowWidth,
+                        height: windowHeight,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      {modalImageLoading && (
+                        <ActivityIndicator
+                          size="large"
+                          color="#fff"
+                          style={{ position: "absolute", zIndex: 1 }}
+                        />
+                      )}
+                      <Image
+                        source={{
+                          uri:
+                            typeof selectedImage === "object"
+                              ? selectedImage.uri
+                              : selectedImage,
+                        }}
+                        style={{
+                          width: windowWidth,
+                          height: windowHeight,
+                          resizeMode: "contain",
+                          opacity: modalImageLoading ? 0 : 1,
+                        }}
+                        onLoad={() => {
+                          console.log("Imagen cargada correctamente");
+                          setModalImageLoading(false);
+                        }}
+                        onError={(error) => {
+                          console.error("Error al cargar la imagen", error);
+                          setModalImageLoading(false);
+                        }}
+                      />
+                    </View>
+                  </TouchableWithoutFeedback>
+                ))}
+            </View>
           </View>
-        </TouchableWithoutFeedback>
-        
-        
-        ))}
-    </View>
-  </View>
-</Modal>
+        </Modal>
 
         <Complaints
           isVisible={isComplaintVisible}

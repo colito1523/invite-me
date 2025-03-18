@@ -1,3 +1,4 @@
+// camera.tsx
 import PhotoPreviewSection from './PhotoPreviewSection';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { CameraType, CameraView, FlashMode, useCameraPermissions } from 'expo-camera';
@@ -7,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { debounce } from 'lodash';
 
-export default function Camera({ header = null }) {
+export default function Camera({ header = null, onCapture }) {
   const [facing, setFacing] = useState<CameraType>('back');
   const [flashMode, setFlashMode] = useState<FlashMode>('off');
   const [permission, requestPermission] = useCameraPermissions();
@@ -22,13 +23,11 @@ export default function Camera({ header = null }) {
         alert('Permission is required to access the gallery');
         return;
       }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 1,
         base64: true,
       });
-
       if (!result.canceled && result.assets?.[0]) {
         setPhoto({
           uri: result.assets[0].uri,
@@ -84,9 +83,16 @@ export default function Camera({ header = null }) {
         mirror: facing === 'front',
         flashMode: flashMode,
       };
-      const takedPhoto = await cameraRef.current.takePictureAsync(options);
-      console.log("Captured Photo EXIF Data:", takedPhoto.exif);
-      setPhoto(takedPhoto);
+      const takenPhoto = await cameraRef.current.takePictureAsync(options);
+      console.log("Captured Photo EXIF Data:", takenPhoto.exif);
+      if (onCapture) {
+        // Si se proporciona onCapture, la foto se usa para el chat.
+        onCapture(takenPhoto);
+        navigation.goBack();
+      } else {
+        // Sino, se usa la lógica de historias (preview de foto)
+        setPhoto(takenPhoto);
+      }
     }
   };
 
@@ -108,18 +114,18 @@ export default function Camera({ header = null }) {
           <TouchableOpacity style={styles.galleryButton} onPress={handleOpenGallery}>
             <Ionicons name="images-outline" size={30} color="white" />
           </TouchableOpacity>
-  
+
           {/* Botón de captura en el centro */}
           <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
             <View style={styles.innerCircle} />
           </TouchableOpacity>
-  
+
           {/* Botón para cambiar cámara (lado derecho) */}
           <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
             <AntDesign name="retweet" size={30} color="white" />
           </TouchableOpacity>
         </View>
-  
+
         {/* Botón para activar/desactivar flash */}
         <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
           <Ionicons
@@ -131,7 +137,6 @@ export default function Camera({ header = null }) {
       </CameraView>
     </View>
   );
-  
 }
 
 const styles = StyleSheet.create({
@@ -176,11 +181,6 @@ const styles = StyleSheet.create({
     top: 50,
     right: 20,
   },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
   header: {
     position: 'absolute',
     top: 50,
@@ -190,6 +190,6 @@ const styles = StyleSheet.create({
   galleryButton: {
     position: 'absolute',
     bottom: 0,
-    left: 0, // 📍 Lo coloca en el lado izquierdo
+    left: 0,
   },
 });
