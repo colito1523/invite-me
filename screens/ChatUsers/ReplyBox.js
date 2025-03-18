@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     replyIndicator: {
         width: 2.5,
         height: "70%",
-        backgroundColor: "#3897F0", // Instagram blue
+        backgroundColor: "#ebddd5", // Instagram blue
         borderRadius: 4,
         marginRight: 10,
     },

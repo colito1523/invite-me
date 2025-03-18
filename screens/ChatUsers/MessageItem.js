@@ -2,7 +2,6 @@ import React, { useState, useRef } from "react";
 import { View, Text, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
-import AudioPlayer from "../AudioPlayer";
 import { styles } from "./styles";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -19,7 +18,7 @@ const MessageItem = ({
   handleLongPressMessage,
   handleMediaPress,
   recipient,
-  onReferencePress, 
+  onReferencePress,
   onReply,
   t,
 }) => {
@@ -40,7 +39,6 @@ const MessageItem = ({
   const isOwnMessage = item.senderId === user.uid;
 
   if (item.deletedFor?.[user.uid]) return null;
-  
 
   const renderDate = (date) => (
     <View style={styles.dateContainer}>
@@ -55,12 +53,11 @@ const MessageItem = ({
   );
 
   const handleReply = (item) => {
-    console.log("Replying to message:", item);
     onReply?.({
       text: item.text,
       mediaUrl: item.mediaUrl,
       isViewOnce: item.isViewOnce,
-      id: item.id, // Asegúrate de pasar el ID
+      id: item.id,
     });
     swipeableRef.current?.close();
   };
@@ -220,28 +217,30 @@ const MessageItem = ({
         >
           <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
             <View style={[styles.message, isOwnMessage ? styles.sent : styles.received]}>
-            {item.replyTo || item.replyToMediaUrl ? (
-  <TouchableOpacity onPress={() => onReferencePress(item.replyToId)}>
-    <View style={styles.replyBoxContainer}>
-      {item.replyToMediaUrl ? (
-        item.replyToIsViewOnce ? (
-          <View style={styles.viewOnceContainer}>
-            <Ionicons name="eye-off-outline" size={20} color="#8E8E8E" />
-          </View>
-        ) : (
-          <Image
-            source={{ uri: item.replyToMediaUrl }}
-            style={styles.replyImagePreview}
-          />
-        )
-      ) : (
-        <Text style={styles.replyBoxText}>{item.replyTo}</Text>
-      )}
-    </View>
-  </TouchableOpacity>
-) : null}
-
-
+              {item.replyTo || item.replyToMediaUrl ? (
+                <TouchableOpacity onPress={() => onReferencePress(item.replyToId)}>
+                  <View style={styles.replyBoxContainer}>
+                    <View style={styles.replyIndicator} />
+                    <View style={styles.contentContainer}>
+                      <Text style={styles.replyingToText}>Respondiendo a</Text>
+                      {item.replyToMediaUrl ? (
+                        item.replyToIsViewOnce ? (
+                          <View style={styles.imageContainer}>
+                            <Ionicons name="eye-off-outline" size={20} color="#8E8E8E" />
+                          </View>
+                        ) : (
+                          <Image
+                            source={{ uri: item.replyToMediaUrl }}
+                            style={styles.replyImagePreview}
+                          />
+                        )
+                      ) : (
+                        <Text style={styles.replyText}>{item.replyTo}</Text>
+                      )}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ) : null}
 
               {item.text && <Text style={styles.messageText}>{item.text}</Text>}
 

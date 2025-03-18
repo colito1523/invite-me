@@ -46,10 +46,47 @@ export const styles = StyleSheet.create({
     },
 
     replyBoxContainer: {
-      backgroundColor: "#F0F0F0",
-      borderRadius: 8,
+      backgroundColor: "#F8F8F8",
+      borderRadius: 12,
       padding: 6,
       marginBottom: 4,
+      flexDirection: 'row',
+      alignItems: 'center',
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 2,
+      borderWidth: 0.5,
+      borderColor: "#EFEFEF",
+    },
+    replyIndicator: {
+      width: 2.5,
+      height: "70%",
+      backgroundColor: "#ebddd5", // Instagram blue
+      borderRadius: 4,
+      marginRight: 10,
+    },
+    replyingToText: {
+      fontSize: 11,
+      color: "#8E8E8E",
+      marginBottom: 2,
+    },
+    replyText: {
+      color: "#262626",
+      fontSize: 13,
+      fontWeight: "500",
+    },
+    imageContainer: {
+      position: 'relative',
+      width: 50,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loader: {
+      position: 'absolute',
+      zIndex: 1,
     },
     viewOnceContainer: {
       width: 40,
@@ -507,10 +544,5 @@ export const styles = StyleSheet.create({
       fontWeight: "bold",
       color: "#666",
       fontSize: 12,
-    },
-    replyText: {
-      color: "#999",
-      fontSize: 12,
-      marginTop: 2,
     },
 });
