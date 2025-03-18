@@ -11,11 +11,12 @@ import { useTranslation } from "react-i18next";
 import { uploadStory } from '../Stories/storySlider/storySliderUtils'; 
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as MediaLibrary from 'expo-media-library';
+import { Video } from 'expo-av';  // Importamos el reproductor de video
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface Props {
-  photo: CameraCapturedPicture;
+  photo: CameraCapturedPicture & { type?: 'image' | 'video' }; // Agregamos la propiedad 'type' para diferenciar imágenes y videos
   handleRetakePhoto: () => void;
   onCapture?: (photoData: CameraCapturedPicture) => void; // opcional si venimos del chat
 }
@@ -37,6 +38,7 @@ const PhotoPreviewSection = ({
 
   // Estado para la opción "isViewOnce" en modo chat
   const [isViewOnce, setIsViewOnce] = useState(false);
+  const videoRef = React.useRef<Video | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -96,30 +98,6 @@ const PhotoPreviewSection = ({
     }
   };
 
-  // --- Descargar foto al dispositivo ---
-  const handleDownloadPhoto = async () => {
-    if (!hasMediaLibraryPermission) return;
-    setDownloadStatus('loading');
-
-    try {
-      const asset = await MediaLibrary.createAssetAsync(photo.uri);
-      const albumName = "Historias Guardadas";
-      let album = await MediaLibrary.getAlbumAsync(albumName);
-      
-      if (!album) {
-        album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
-      } else {
-        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-      }
-      
-      setDownloadStatus('success');
-      setTimeout(() => setDownloadStatus('default'), 2000);
-    } catch (error) {
-      console.error('Error al descargar la imagen:', error);
-      setDownloadStatus('default');
-    }
-  };
-
   // Ajuste de rotación si la foto salió en horizontal
   let rotation = 0;
   if (photo.width > photo.height) {
@@ -128,6 +106,29 @@ const PhotoPreviewSection = ({
     rotation = 0;
   }
 
+  const handleDownloadMedia = async () => {
+    if (!hasMediaLibraryPermission) return;
+    setDownloadStatus('loading');
+
+    try {
+      const asset = await MediaLibrary.createAssetAsync(photo.uri);
+      const albumName = "Historias Guardadas";
+      let album = await MediaLibrary.getAlbumAsync(albumName);
+
+      if (!album) {
+        album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
+      } else {
+        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+      }
+
+      setDownloadStatus('success');
+      setTimeout(() => setDownloadStatus('default'), 2000);
+    } catch (error) {
+      console.error('Error al descargar el archivo:', error);
+      setDownloadStatus('default');
+    }
+  };
+
   // Etiqueta y acción del botón principal:
   const isChatMode = !!onCapture;
   const mainButtonLabel = isChatMode ? t("storySlider.send") : t("storySlider.addStory");
@@ -135,28 +136,31 @@ const PhotoPreviewSection = ({
 
   return (
     <View style={styles.container}>
-      <Image
-        style={[
-          styles.previewContainer,
-          {
-            width: photo.width > photo.height ? screenHeight : screenWidth,
-            height: photo.width > photo.height ? screenWidth : screenHeight,
-            alignSelf: 'center',
-            position: 'absolute',
-            transform: [{ rotate: `${rotation}deg` }],
-          },
-        ]}
-        source={{ uri: photo.uri }}
-        resizeMode="cover"
-      />
+      {photo.type === 'video' ? (
+        <Video
+          ref={videoRef}
+          source={{ uri: photo.uri }}
+          style={styles.video}
+          useNativeControls
+          resizeMode="contain"
+          isLooping
+          shouldPlay
+        />
+      ) : (
+        <Image
+          style={styles.previewImage}
+          source={{ uri: photo.uri }}
+          resizeMode="cover"
+        />
+      )}
 
-      {/* Botón "Cerrar" o "Retomar foto" */}
+      {/* Botón "Cerrar" o "Retomar foto/video" */}
       <TouchableOpacity style={styles.closeButton} onPress={handleRetakePhoto}>
         <Ionicons name="close" size={30} color="white" />
       </TouchableOpacity>
 
       {/* Botón de descarga */}
-      <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadPhoto}>
+      <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadMedia}>
         {downloadStatus === 'loading' ? (
           <ActivityIndicator size="small" color="white" />
         ) : downloadStatus === 'success' ? (
@@ -167,22 +171,24 @@ const PhotoPreviewSection = ({
       </TouchableOpacity>
 
       {/* Botón principal (enviar al chat o subir historia) */}
-      <TouchableOpacity
-        style={styles.uploadButton}
-        onPress={mainButtonAction}
-        disabled={isUploading}
-      >
-        {isUploading ? (
-          <ActivityIndicator size="small" color="black" />
-        ) : (
-          <>
-            <Text style={styles.uploadButtonText}>{mainButtonLabel}</Text>
-            <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
-          </>
-        )}
-      </TouchableOpacity>
+      {mainButtonAction && (
+        <TouchableOpacity
+          style={styles.uploadButton}
+          onPress={mainButtonAction}
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            <ActivityIndicator size="small" color="black" />
+          ) : (
+            <>
+              <Text style={styles.uploadButtonText}>{mainButtonLabel}</Text>
+              <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
+            </>
+          )}
+        </TouchableOpacity>
+      )}
 
-      {/* Si es modo chat, se muestra la opción para isViewOnce en la esquina inferior izquierda */}
+      {/* Si es modo chat, se muestra la opción para isViewOnce */}
       {isChatMode && (
         <TouchableOpacity
           style={styles.viewOnceToggle}
@@ -206,8 +212,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  previewContainer: {
+  previewImage: {
+    width: screenWidth,
+    height: screenHeight,
+    alignSelf: 'center',
     position: 'absolute',
+  },
+  video: {
+    width: screenWidth,
+    height: screenHeight,
+    alignSelf: 'center',
   },
   closeButton: {
     position: 'absolute',
@@ -243,10 +257,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 50,
     left: 30,
-  },
-  viewOnceText: {
-    color: "black",
-    fontWeight: "bold",
   },
 });
 
