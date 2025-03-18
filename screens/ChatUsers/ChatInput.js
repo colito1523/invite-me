@@ -1,8 +1,6 @@
-// ChatInput.js
 import React from "react";
 import { View, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
-import { pickMedia } from "./utils";
 import ReplyBox from "./ReplyBox";
 import { styles } from "./styles";
 import { useNavigation } from "@react-navigation/native";
@@ -18,12 +16,11 @@ export default function ChatInput({
   const navigation = useNavigation();
 
   const handleCameraForChat = () => {
-    navigation.navigate("Camera",  {
-        mode: "chat",
+    navigation.navigate("Camera", {
+      mode: "chat",
       onCapture: (photo) => {
-        // Aquí envías la imagen en el chat
-        // Por ejemplo, usando la función handleSend del chat:
-        handleSend("image", photo.uri, false);
+        // Aquí envías la imagen en el chat, pasando el valor de isViewOnce que definió el usuario en PhotoPreviewSection
+        handleSend("image", photo.uri, photo.isViewOnce);
       },
     });
   };
@@ -38,7 +35,7 @@ export default function ChatInput({
         onClose={() => setReplyMessage(null)}
       />
 
-      {/* Contenedor del input, cámara y galería */}
+      {/* Contenedor del input, cámara y enviar mensaje */}
       <View style={styles.containerIg}>
         <TouchableOpacity
           onPress={handleCameraForChat}
@@ -65,14 +62,7 @@ export default function ChatInput({
           >
             <FontAwesome name="send" size={20} color="white" />
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            onPress={() => pickMedia(handleSend, t)}
-            style={styles.iconButtonGaleria}
-          >
-            <Ionicons name="image-outline" size={30} color="#000" />
-          </TouchableOpacity>
-        )}
+        ) : null}
       </View>
     </View>
   );

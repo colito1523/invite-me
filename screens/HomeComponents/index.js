@@ -656,7 +656,7 @@ useEffect(() => {
           <Ionicons
             name="notifications"
             size={24}
-            color={isNightMode ? "white" : "black"}
+            color={isNightMode ? "#ebddd5" : "black"}
           />
           {unreadNotifications && (
             <View
@@ -670,7 +670,7 @@ useEffect(() => {
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Ionicons name="mail" size={25} color={isNightMode ? "white" : "black"} />
           {unreadMessages && (
-            <View style={[styles.unreadIndicator, { backgroundColor: isNightMode ? "white" : "black" }]} />
+            <View style={[styles.unreadIndicator, { backgroundColor: isNightMode ? "#ebddd5" : "black" }]} />
           )}
         </TouchableOpacity>
       </View>

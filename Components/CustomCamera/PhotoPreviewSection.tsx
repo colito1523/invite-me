@@ -35,6 +35,9 @@ const PhotoPreviewSection = ({
   const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState<boolean | null>(null);
   const [downloadStatus, setDownloadStatus] = useState<'default' | 'loading' | 'success'>('default');
 
+  // Estado para la opción "isViewOnce" en modo chat
+  const [isViewOnce, setIsViewOnce] = useState(false);
+
   useEffect(() => {
     (async () => {
       const { status } = await MediaLibrary.requestPermissionsAsync();
@@ -87,7 +90,8 @@ const PhotoPreviewSection = ({
   // --- Botón "Enviar al chat" (si SÍ hay onCapture) ---
   const handleSendToChat = () => {
     if (onCapture) {
-      onCapture(photo);
+      // Se añade la propiedad isViewOnce a la foto antes de enviarla
+      onCapture({ ...photo, isViewOnce });
       navigation.goBack();
     }
   };
@@ -126,7 +130,7 @@ const PhotoPreviewSection = ({
 
   // Etiqueta y acción del botón principal:
   const isChatMode = !!onCapture;
-  const mainButtonLabel = isChatMode ? t("storySlider.send"): t("storySlider.addStory");
+  const mainButtonLabel = isChatMode ? t("storySlider.send") : t("storySlider.addStory");
   const mainButtonAction = isChatMode ? handleSendToChat : handleUploadStory;
 
   return (
@@ -162,7 +166,7 @@ const PhotoPreviewSection = ({
         )}
       </TouchableOpacity>
 
-      {/* Botón principal (enviar chat o subir historia) */}
+      {/* Botón principal (enviar al chat o subir historia) */}
       <TouchableOpacity
         style={styles.uploadButton}
         onPress={mainButtonAction}
@@ -177,6 +181,20 @@ const PhotoPreviewSection = ({
           </>
         )}
       </TouchableOpacity>
+
+      {/* Si es modo chat, se muestra la opción para isViewOnce en la esquina inferior izquierda */}
+      {isChatMode && (
+        <TouchableOpacity
+          style={styles.viewOnceToggle}
+          onPress={() => setIsViewOnce(prev => !prev)}
+        >
+          <Ionicons
+            name={isViewOnce ? "eye-off-outline" : "eye-outline"}
+            size={30}
+            color="white"
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -220,6 +238,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginRight: 15,
+  },
+  viewOnceToggle: {
+    position: "absolute",
+    bottom: 50,
+    left: 30,
+  },
+  viewOnceText: {
+    color: "black",
+    fontWeight: "bold",
   },
 });
 

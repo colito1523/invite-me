@@ -222,7 +222,7 @@ const MessageItem = ({
                   <View style={styles.replyBoxContainer}>
                     <View style={styles.replyIndicator} />
                     <View style={styles.contentContainer}>
-                      <Text style={styles.replyingToText}>Respondiendo a</Text>
+                      <Text style={styles.replyingToText}>{t("chatUsers.ReplyTo")}</Text>
                       {item.replyToMediaUrl ? (
                         item.replyToIsViewOnce ? (
                           <View style={styles.imageContainer}>

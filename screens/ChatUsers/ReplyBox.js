@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Asegúrate de tener esta importación
+import { useTranslation } from "react-i18next";
 
 function ReplyBox({ text, mediaUrl, isViewOnce, onClose }) {
     const [imageLoading, setImageLoading] = useState(true);
+    const { t } = useTranslation();
 
     useEffect(() => {
         // Restablecer el estado de carga cada vez que cambia mediaUrl
@@ -18,7 +20,7 @@ function ReplyBox({ text, mediaUrl, isViewOnce, onClose }) {
         <View style={styles.replyContainer}>
             <View style={styles.replyIndicator} />
             <View style={styles.contentContainer}>
-                <Text style={styles.replyingToText}>Respondiendo a</Text>
+                <Text style={styles.replyingToText}>{t("chatUsers.ReplyTo")}</Text>
                 {mediaUrl && (
                     <View style={styles.imageContainer}>
                         {imageLoading && !isViewOnce && (

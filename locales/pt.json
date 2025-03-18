@@ -330,7 +330,8 @@
   "view": "Ver",
   "sentPhoto": "Enviou uma foto",
    "dontFind": "Messagem não encontrada.",
-    "dontFindMessage": "Não foi possível encontrar a mensagem."
+    "dontFindMessage": "Não foi possível encontrar a mensagem.",
+    "ReplyTo": "A responder a"
 },
 "formatTime": {
   "yesterday": "Ontem",

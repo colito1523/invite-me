@@ -334,7 +334,8 @@
     "view":"Ver",
     "sentPhoto": "Te ha enviado una foto",
     "dontFind": "Mensaje no encontrado",
-    "dontFindMessage": "El mensaje original no se pudo localizar."
+    "dontFindMessage": "El mensaje original no se pudo localizar.",
+    "ReplyTo": "Respondiendo a"
   },
   "formatTime": {
     "yesterday": "Ayer",

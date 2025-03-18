@@ -330,7 +330,8 @@
     "view":"View",
     "sentPhoto": "Sent a photo",
     "dontFind": "Don't find the message",
-    "dontFindMessage": "Could not find the message."
+    "dontFindMessage": "Could not find the message.",
+    "ReplyTo": "Replying to"
 
   },
   "formatTime": {
