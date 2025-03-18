@@ -126,5 +126,5 @@ export const darkTheme = {
   inputBackground: "#1a1a1a",
   placeholder: "#666",
   icon: "black",
-  buttonBackground: "#333",
+  buttonBackground: "#ebddd5",
 };

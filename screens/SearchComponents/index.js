@@ -317,7 +317,7 @@ const sections = searchTerm.length === 0
         : []), // Si no hay historial, no se agrega esta sección
       {
         title: t("suggestionsForYou"),
-        data: recommendations.slice(0, 4),
+        data: recommendations.slice(0, 8),
         sectionKey: "suggestions",
       },
     ]

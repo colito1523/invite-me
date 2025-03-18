@@ -206,7 +206,7 @@ const nightStyles = StyleSheet.create({
   ...baseStyles,
   dateButton: {
     ...baseStyles.dateButton,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "#ebddd5",
   },
   dateText: {
     ...baseStyles.dateText,
