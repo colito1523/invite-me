@@ -29,22 +29,39 @@ export default function Camera() {
         alert('Permission is required to access the gallery');
         return;
       }
+  
+      // Verificar si el modo es "chat", permitiendo imágenes y videos. De lo contrario, solo imágenes.
+      const mediaTypes = route.params?.mode === "chat" 
+        ? ImagePicker.MediaTypeOptions.All  // Permite imágenes y videos
+        : ImagePicker.MediaTypeOptions.Images; // Solo imágenes
+  
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: mediaTypes,
         quality: 1,
         base64: true,
       });
+  
       if (!result.canceled && result.assets?.[0]) {
+        const selectedAsset = result.assets[0];
+  
+        if (selectedAsset.type === "video" && route.params?.mode !== "chat") {
+          alert("Solo se pueden seleccionar imágenes en este modo.");
+          return;
+        }
+  
         setPhoto({
-          uri: result.assets[0].uri,
-          base64: result.assets[0].base64,
+          uri: selectedAsset.uri,
+          base64: selectedAsset.base64,
+          type: selectedAsset.type,
         });
       }
     } catch (error) {
-      console.error('Error al abrir la galería:', error);
-      alert('There was an error opening the gallery. Please try again.');
+      console.error("Error al abrir la galería:", error);
+      alert("Hubo un error al abrir la galería. Por favor, intenta nuevamente.");
     }
   };
+  
+  
 
   const handleOpenGalleryDebounced = debounce(handleOpenGallery, 300);
 
