@@ -191,6 +191,7 @@ interface PhotoData {
   type?: string;
 }
 
+// utils.ts (fragmento final con el hook)
 export const usePinchPanGestures = (photo: PhotoData) => {
   // a) Shared values
   const scale = useSharedValue(1);
@@ -201,16 +202,19 @@ export const usePinchPanGestures = (photo: PhotoData) => {
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
 
+  // Para rotación:
+  const rotation = useSharedValue(0);
+  const initialRotation = useSharedValue(0);
+
   // b) Pinch Gesture
   const pinchGesture = Gesture.Pinch()
     .onStart(() => {
-      initialScale.value = scale.value;  // Escala acumulada previa
+      initialScale.value = scale.value;
     })
     .onUpdate((event) => {
-      scale.value = initialScale.value * event.scale;  // Multiplicamos
+      scale.value = initialScale.value * event.scale;
     })
     .onEnd(() => {
-      // Limitamos a un mínimo si quieres
       if (scale.value < 0.8) {
         scale.value = withSpring(0.8);
       }
@@ -231,33 +235,51 @@ export const usePinchPanGestures = (photo: PhotoData) => {
       translateY.value = withSpring(translateY.value);
     });
 
-  // d) Combinamos ambos gestos
-  const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
+  // d) Rotation Gesture
+  const rotationGesture = Gesture.Rotation()
+    .onStart(() => {
+      initialRotation.value = rotation.value;
+    })
+    .onUpdate((event) => {
+      rotation.value = initialRotation.value + event.rotation;
+    })
+    .onEnd(() => {
+      // Si quisieras animación, algo como:
+      // rotation.value = withSpring(rotation.value);
+    });
 
-  // e) Estilo animado
+  // e) Combinamos los tres gestos
+  const combinedGesture = Gesture.Simultaneous(
+    pinchGesture,
+    panGesture,
+    rotationGesture
+  );
+
+  // f) Estilo animado
   const animatedImageStyle = useAnimatedStyle(() => {
-    let rotation = 0;
+    let exifRotation = 0;
     if (photo.width && photo.height && photo.width > photo.height) {
-      // Ajuste según EXIF
-      rotation = photo.exif?.Orientation === 3 ? 270 : 90;
+      exifRotation = photo.exif?.Orientation === 3 ? 270 : 90;
     }
+
+    const rotationInDegrees = (rotation.value * 180) / Math.PI;
 
     return {
       transform: [
         { translateX: translateX.value },
         { translateY: translateY.value },
         { scale: scale.value },
-        { rotate: `${rotation}deg` },
+        { rotate: `${exifRotation + rotationInDegrees}deg` },
       ],
     };
   });
 
-  // Retornamos todo lo que necesitemos usar en PhotoPreviewSection
   return {
     combinedGesture,
     animatedImageStyle,
   };
 };
+
 
 
 
