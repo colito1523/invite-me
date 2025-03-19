@@ -3,6 +3,15 @@ import { captureRef } from 'react-native-view-shot';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { uploadStory } from '../Stories/storySlider/storySliderUtils';
 import i18n from 'i18next';
+import { MediaLibrary } from 'expo-media-library';
+
+// --- Imports para Pinch & Pan:
+import { Gesture } from 'react-native-gesture-handler';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring 
+} from 'react-native-reanimated';
 
 interface UploadStoryParams {
   photo: { 
@@ -171,6 +180,83 @@ export const handleSendToChatUtil = async ({
   }
 
   navigation.goBack();
+};
+
+
+interface PhotoData {
+  uri: string;
+  width?: number;
+  height?: number;
+  exif?: any;
+  type?: string;
+}
+
+export const usePinchPanGestures = (photo: PhotoData) => {
+  // a) Shared values
+  const scale = useSharedValue(1);
+  const initialScale = useSharedValue(1);
+
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const offsetX = useSharedValue(0);
+  const offsetY = useSharedValue(0);
+
+  // b) Pinch Gesture
+  const pinchGesture = Gesture.Pinch()
+    .onStart(() => {
+      initialScale.value = scale.value;  // Escala acumulada previa
+    })
+    .onUpdate((event) => {
+      scale.value = initialScale.value * event.scale;  // Multiplicamos
+    })
+    .onEnd(() => {
+      // Limitamos a un mínimo si quieres
+      if (scale.value < 0.8) {
+        scale.value = withSpring(0.8);
+      }
+    });
+
+  // c) Pan Gesture
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      offsetX.value = translateX.value;
+      offsetY.value = translateY.value;
+    })
+    .onUpdate((event) => {
+      translateX.value = offsetX.value + event.translationX;
+      translateY.value = offsetY.value + event.translationY;
+    })
+    .onEnd(() => {
+      translateX.value = withSpring(translateX.value);
+      translateY.value = withSpring(translateY.value);
+    });
+
+  // d) Combinamos ambos gestos
+  const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
+
+  // e) Estilo animado
+  const animatedImageStyle = useAnimatedStyle(() => {
+    let rotation = 0;
+    if (photo.width && photo.height && photo.width > photo.height) {
+      // Ajuste según EXIF
+      rotation = photo.exif?.Orientation === 3 ? 270 : 90;
+    }
+
+    return {
+      transform: [
+        { translateX: translateX.value },
+        { translateY: translateY.value },
+        { scale: scale.value },
+        { rotate: `${rotation}deg` },
+      ],
+    };
+  });
+
+  // Retornamos todo lo que necesitemos usar en PhotoPreviewSection
+  return {
+    combinedGesture,
+    animatedImageStyle,
+  };
 };
 
 

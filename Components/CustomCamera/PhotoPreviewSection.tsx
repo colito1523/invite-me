@@ -14,15 +14,11 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from "react-i18next";
 import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';  // Importamos el reproductor de video
-import { handleDownloadMediaUtil, handleSendToChatUtil, handleUploadStoryUtil } from './utils';
+import { handleDownloadMediaUtil, handleSendToChatUtil, handleUploadStoryUtil, usePinchPanGestures  } from './utils';
 
 // ---- Imports para Pinch & Pan + captura de pantalla ----
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withSpring 
-} from 'react-native-reanimated';
+import { GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 import ViewShot from 'react-native-view-shot';
 
 interface Props {
@@ -63,68 +59,9 @@ const PhotoPreviewSection = ({
     })();
   }, []);
 
-  // ---------------- Pinch & Pan solo para imágenes ---------------- //
-  // (Si es un video, mantenemos la reproducción normal sin pinch/zoom)
-  const scale = useSharedValue(1);
-  const initialScale = useSharedValue(1); // valor acumulado hasta el gesto anterior
-  
-  const pinchGesture = Gesture.Pinch()
-    .onStart(() => {
-      initialScale.value = scale.value; // guardamos la escala previa
-    })
-    .onUpdate((event) => {
-      scale.value = initialScale.value * event.scale; // multiplicamos
-    })
-    .onEnd(() => {
-      if (scale.value < 0.8) {
-        scale.value = withSpring(0.8);
-      }
-    });
-  
 
-  // Pan gesture
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const offsetX = useSharedValue(0); // valor acumulado
-  const offsetY = useSharedValue(0); // valor acumulado
-  
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      offsetX.value = translateX.value; // guardamos la posición previa
-      offsetY.value = translateY.value;
-    })
-    .onUpdate((event) => {
-      translateX.value = offsetX.value + event.translationX;
-      translateY.value = offsetY.value + event.translationY;
-    })
-    .onEnd(() => {
-      translateX.value = withSpring(translateX.value);
-      translateY.value = withSpring(translateY.value);
-    });
-  
-
-  // Combinamos los dos gestos simultáneamente
-  const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
-
-  // Estilo animado para la imagen
-  const animatedImageStyle = useAnimatedStyle(() => {
-    // Ajustamos posible rotación si la foto es horizontal (lógica original)
-    let rotation = 0;
-    if (photo.width > photo.height) {
-      // Ajuste según exif
-      rotation = photo.exif?.Orientation === 3 ? 270 : 90;
-    }
-
-    return {
-      transform: [
-        { translateX: translateX.value },
-        { translateY: translateY.value },
-        { scale: scale.value },
-        { rotate: `${rotation}deg` },
-      ],
-    };
-  });
-
+  const { combinedGesture, animatedImageStyle } = usePinchPanGestures(photo);
+ 
   // -----------------------------------------------------------------
   // Funciones de BOTONES principales
   // -----------------------------------------------------------------
