@@ -189,18 +189,18 @@ const PhotoPreviewSection = ({
       )}
 
       {/* Si es modo chat, se muestra la opción para isViewOnce */}
-      {isChatMode && (
-        <TouchableOpacity
-          style={styles.viewOnceToggle}
-          onPress={() => setIsViewOnce(prev => !prev)}
-        >
-          <Ionicons
-            name={isViewOnce ? "eye-off-outline" : "eye-outline"}
-            size={30}
-            color="white"
-          />
-        </TouchableOpacity>
-      )}
+      {isChatMode && photo.type !== 'video' && (
+  <TouchableOpacity
+    style={styles.viewOnceToggle}
+    onPress={() => setIsViewOnce(prev => !prev)}
+  >
+    <Ionicons
+      name={isViewOnce ? "eye-off-outline" : "eye-outline"}
+      size={30}
+      color="white"
+    />
+  </TouchableOpacity>
+)}
     </View>
   );
 };
