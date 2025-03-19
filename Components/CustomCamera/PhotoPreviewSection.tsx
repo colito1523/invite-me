@@ -3,22 +3,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { CameraCapturedPicture } from 'expo-camera';
 import { useState, useEffect, useRef } from "react";
 import { ActivityIndicator } from "react-native";
+import { styles } from "./styles";
 import React from "react";
-import i18n from 'i18next';
 import { 
   TouchableOpacity, 
   View, 
-  Image, 
-  StyleSheet, 
   Text, 
-  Dimensions 
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from "react-i18next";
-import { uploadStory } from '../Stories/storySlider/storySliderUtils'; 
-import * as ImageManipulator from 'expo-image-manipulator';
 import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';  // Importamos el reproductor de video
+import { handleDownloadMediaUtil, handleSendToChatUtil, handleUploadStoryUtil } from './utils';
 
 // ---- Imports para Pinch & Pan + captura de pantalla ----
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -27,9 +23,7 @@ import Animated, {
   useAnimatedStyle, 
   withSpring 
 } from 'react-native-reanimated';
-import ViewShot, { captureRef } from 'react-native-view-shot';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+import ViewShot from 'react-native-view-shot';
 
 interface Props {
   photo: CameraCapturedPicture & { type?: 'image' | 'video' }; // propiedad 'type' para diferenciar imágenes y videos
@@ -125,88 +119,40 @@ const PhotoPreviewSection = ({
   // Funciones de BOTONES principales
   // -----------------------------------------------------------------
 
-  // --- Botón "Subir historia" (si NO hay onCapture) ---
   const handleUploadStory = async () => {
-    setIsUploading(true);
-
-    try {
-      if (photo.type === 'image') {
-        // 1) Capturamos la vista (con pinch/zoom aplicado)
-        const uriFinal = await captureRef(viewShotRef, { format: 'png', quality: 0.9 });
-
-        // 2) Manipulamos (resize/compress) si quieres
-        const manipulatedResult = await ImageManipulator.manipulateAsync(
-          uriFinal,
-          [{ resize: { width: 1080 } }],
-          { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG }
-        );
-
-        // 3) Subir la imagen resultante
-        await uploadStory(
-          manipulatedResult.uri,
-          () => {},
-          setIsUploading,
-          setUploadProgress,
-          setStories,
-          setUnseenStories
-        );
-      } else {
-        // Si es video, conservamos la lógica original (sin pinch/zoom):
-        const manipulatedResult = await ImageManipulator.manipulateAsync(
-          photo.uri,
-          [{ resize: { width: 1080 } }],
-          { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG }
-        );
-
-        await uploadStory(
-          manipulatedResult.uri,
-          () => {},
-          setIsUploading,
-          setUploadProgress,
-          setStories,
-          setUnseenStories
-        );
-      }
-
-      // Pausa para que la animación de subida sea visible
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const selectedCategory = i18n.language === "en" ? "All" : "Todos";
-
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'Home',
-            params: { 
-              selectedCategory,
-              forceStoryUpdate: true,
-              timestamp: Date.now(),
-            },
-          },
-        ],
-      });
-    } catch (error) {
-      console.error('Error al subir la imagen/video:', error);
-    }
-
-    setIsUploading(false);
+    await handleUploadStoryUtil({
+      photo,
+      viewShotRef,
+      navigation,
+      setIsUploading,
+      setUploadProgress,
+      setStories,
+      setUnseenStories,
+    });
   };
 
-  // --- Botón "Enviar al chat" (si SÍ hay onCapture) ---
   const handleSendToChat = async () => {
-    if (!onCapture) return;
+    await handleSendToChatUtil({
+      photo,
+      viewShotRef,
+      onCapture,
+      navigation,
+      isViewOnce,
+    });
+  };
 
-    // Si es imagen, capturamos la vista con pinch & zoom
-    if (photo.type === 'image') {
-      const uriFinal = await captureRef(viewShotRef, { format: 'png', quality: 0.9 });
-      onCapture({ ...photo, uri: uriFinal, isViewOnce });
-    } else {
-      // Video -> enviamos tal cual
-      onCapture({ ...photo, isViewOnce });
+  const handleDownloadMedia = async () => {
+    if (!hasMediaLibraryPermission) return;
+    setDownloadStatus('loading');
+    const result = await handleDownloadMediaUtil({
+      photo,
+      hasMediaLibraryPermission,
+      viewShotRef,
+    });
+    setDownloadStatus(result);
+    if (result === 'success') {
+      setTimeout(() => setDownloadStatus('default'), 2000);
     }
-
-    navigation.goBack();
   };
 
   // --- Botón principal: subir o enviar ---
@@ -214,49 +160,6 @@ const PhotoPreviewSection = ({
   const mainButtonLabel = isChatMode ? t("storySlider.send") : t("storySlider.addStory");
   const mainButtonAction = isChatMode ? handleSendToChat : handleUploadStory;
 
-  // --- Botón para descargar a la galería local ---
-  const handleDownloadMedia = async () => {
-    if (!hasMediaLibraryPermission) return;
-    setDownloadStatus('loading');
-
-    try {
-      if (photo.type === 'image') {
-        // Capturamos la vista (con pinch & zoom)
-        const uriFinal = await captureRef(viewShotRef, { format: 'png', quality: 0.9 });
-        const asset = await MediaLibrary.createAssetAsync(uriFinal);
-
-        const albumName = "Historias Guardadas";
-        let album = await MediaLibrary.getAlbumAsync(albumName);
-
-        if (!album) {
-          album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
-        } else {
-          await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-        }
-      } else {
-        // Video -> guardamos la URI original
-        const asset = await MediaLibrary.createAssetAsync(photo.uri);
-        const albumName = "Historias Guardadas";
-        let album = await MediaLibrary.getAlbumAsync(albumName);
-
-        if (!album) {
-          album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
-        } else {
-          await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-        }
-      }
-
-      setDownloadStatus('success');
-      setTimeout(() => setDownloadStatus('default'), 2000);
-    } catch (error) {
-      console.error('Error al descargar el archivo:', error);
-      setDownloadStatus('default');
-    }
-  };
-
-  // -----------------------------------------------------------------
-  // Render
-  // -----------------------------------------------------------------
   return (
     <View style={styles.container}>
 
@@ -338,65 +241,3 @@ const PhotoPreviewSection = ({
 
 export default PhotoPreviewSection;
 
-// ------------------- ESTILOS -------------------
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black', 
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // Contenedor que envuelve la imagen y será "capturado"
-  viewShotContainer: {
-    width: screenWidth,
-    height: screenHeight,
-    position: 'absolute',
-    backgroundColor: "black"
-  },
-  previewImage: {
-    width: screenWidth,
-    height: screenHeight,
-    alignSelf: 'center',
-  },
-  video: {
-    width: screenWidth,
-    height: screenHeight,
-    alignSelf: 'center',
-    position: 'absolute',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 1,
-  },
-  downloadButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 1,
-  },
-  uploadButton: {
-    position: "absolute",
-    bottom: 40,
-    right: 10,
-    backgroundColor: "white",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  uploadButtonText: {
-    color: "rgba(0, 0, 0, 0.6)",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginRight: 15,
-  },
-  viewOnceToggle: {
-    position: "absolute",
-    bottom: 50,
-    left: 30,
-  },
-});
