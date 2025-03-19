@@ -66,32 +66,42 @@ const PhotoPreviewSection = ({
   // ---------------- Pinch & Pan solo para imágenes ---------------- //
   // (Si es un video, mantenemos la reproducción normal sin pinch/zoom)
   const scale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-
-  // Pinch gesture
+  const initialScale = useSharedValue(1); // valor acumulado hasta el gesto anterior
+  
   const pinchGesture = Gesture.Pinch()
+    .onStart(() => {
+      initialScale.value = scale.value; // guardamos la escala previa
+    })
     .onUpdate((event) => {
-      scale.value = event.scale;
+      scale.value = initialScale.value * event.scale; // multiplicamos
     })
     .onEnd(() => {
-      // Volver suave si se achicó mucho
       if (scale.value < 0.8) {
         scale.value = withSpring(0.8);
       }
     });
+  
 
   // Pan gesture
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const offsetX = useSharedValue(0); // valor acumulado
+  const offsetY = useSharedValue(0); // valor acumulado
+  
   const panGesture = Gesture.Pan()
+    .onStart(() => {
+      offsetX.value = translateX.value; // guardamos la posición previa
+      offsetY.value = translateY.value;
+    })
     .onUpdate((event) => {
-      translateX.value = event.translationX;
-      translateY.value = event.translationY;
+      translateX.value = offsetX.value + event.translationX;
+      translateY.value = offsetY.value + event.translationY;
     })
     .onEnd(() => {
-      // Suavizado con spring
       translateX.value = withSpring(translateX.value);
       translateY.value = withSpring(translateY.value);
     });
+  
 
   // Combinamos los dos gestos simultáneamente
   const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
