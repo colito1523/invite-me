@@ -351,6 +351,7 @@ const styles = StyleSheet.create({
     width: screenWidth,
     height: screenHeight,
     position: 'absolute',
+    backgroundColor: "black"
   },
   previewImage: {
     width: screenWidth,
