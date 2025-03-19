@@ -92,7 +92,7 @@ export default function Camera() {
   const toggleFlash = () => {
     setFlashMode(curr => (curr === 'off' ? 'on' : 'off'));
   };
-
+  
   const handleTakePhoto = async () => {
     if (!cameraRef.current) return;
     const options = {
@@ -104,7 +104,7 @@ export default function Camera() {
     };
     const takenPhoto = await cameraRef.current.takePictureAsync(options);
     console.log("Captured Photo EXIF Data:", takenPhoto.exif);
-    setPhoto(takenPhoto);
+    setPhoto({ ...takenPhoto, type: 'image' }); // Establece el tipo como 'image'
   };
 
   const handleRetakePhoto = () => setPhoto(null);

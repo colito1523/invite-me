@@ -20,10 +20,11 @@ export default function ChatInput({
       mode: "chat",
       onCapture: (photo) => {
         // Aquí envías la imagen en el chat, pasando el valor de isViewOnce que definió el usuario en PhotoPreviewSection
-        handleSend("image", photo.uri, photo.isViewOnce);
+        handleSend(photo.type, photo.uri, photo.isViewOnce);
       },
     });
   };
+  
 
   return (
     <View style={{ paddingHorizontal: 8 }}>
