@@ -16,10 +16,7 @@ import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database } from "../../config/firebase";
-import {
-  doc,
-  setDoc
-} from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import TermsAndConditionsModal from "../../Components/Terms-And-Conditions/terms-and-conditions-modal";
@@ -28,7 +25,20 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import styles from "./styles";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { handleNext, handleVerifyCode, chunkArray, validateName, validateEmail, validateUsername, validatePassword, validateSingleWord, handleInterestSelection , uploadImage, pickImage, handleBack   } from "./utils";
+import {
+  handleNext,
+  handleVerifyCode,
+  chunkArray,
+  validateName,
+  validateEmail,
+  validateUsername,
+  validatePassword,
+  validateSingleWord,
+  handleInterestSelection,
+  uploadImage,
+  pickImage,
+  handleBack,
+} from "./utils";
 import GenderSelector from "./GenderSelector";
 import AgeSelector from "./AgeSelector";
 import es from "../../locales/es.json";
@@ -56,7 +66,6 @@ i18n.use(initReactI18next).init({
 const { width, height } = Dimensions.get("window");
 
 const ITEM_WIDTH = width / 5;
-
 
 const ages = Array.from({ length: 85 }, (_, i) => i + 16);
 
@@ -89,7 +98,6 @@ const interestKeysGroup2 = [
   "stayingIn",
 ];
 
-
 export default function SignUp() {
   const { t } = useTranslation();
   const { selectedLanguage, changeLanguage } = useContext(LanguageContext); // Use LanguageContext
@@ -119,12 +127,15 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
   const navigation = useNavigation();
-  const [isCodeSent, setIsCodeSent] = useState(false);  // Código enviado
-const [emailVerified, setEmailVerified] = useState(false);  // Email verificado
-const [verificationCode, setVerificationCode] = useState("");  // Código ingresado
-const functions = getFunctions();
-const sendVerificationCodeFn = httpsCallable(functions, "sendVerificationCode");
-const verifyCodeFn = httpsCallable(functions, "verifyCode");
+  const [isCodeSent, setIsCodeSent] = useState(false); // Código enviado
+  const [emailVerified, setEmailVerified] = useState(false); // Email verificado
+  const [verificationCode, setVerificationCode] = useState(""); // Código ingresado
+  const functions = getFunctions();
+  const sendVerificationCodeFn = httpsCallable(
+    functions,
+    "sendVerificationCode"
+  );
+  const verifyCodeFn = httpsCallable(functions, "verifyCode");
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -217,7 +228,6 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
     }
   };
 
- 
   function translateInterestKey(key, t) {
     // Primero vemos en qué grupo está la clave
     if (interestKeysGroup1.includes(key)) {
@@ -261,13 +271,13 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
         firstName: answers.firstName,
         gender: answers.gender,
         lastName: answers.lastName,
-      
+
         // USAMOS LOS INTERESES TRADUCIDOS:
         firstInterest: finalInterest1,
         secondInterest: finalInterest2,
         thirdInterest: finalInterest3,
         fourthInterest: finalInterest4,
-      
+
         photoUrls,
         username: usernameToLower,
         preferredLanguage: i18n.language,
@@ -296,7 +306,6 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
     }
   };
 
-
   const renderPreview = (photoNumber, showIcons = false) => (
     <View style={styles.photoContainer}>
       <View style={[styles.photoPlaceholder, styles.photoPreviewContainer]}>
@@ -313,27 +322,27 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
         <View style={styles.rectanglesContainer}>
           <View style={styles.topRectanglesContainer}>
             <View style={styles.rectangle}>
-            <Text style={styles.rectangleText}>
-  {translateInterestKey(answers.interest1, t)}
-</Text>
+              <Text style={styles.rectangleText}>
+                {translateInterestKey(answers.interest1, t)}
+              </Text>
             </View>
             <View style={styles.rectangle}>
-            <Text style={styles.rectangleText}>
-  {translateInterestKey(answers.interest2, t)}
-</Text>
+              <Text style={styles.rectangleText}>
+                {translateInterestKey(answers.interest2, t)}
+              </Text>
             </View>
           </View>
           <View style={styles.bottomRectangleContainer}></View>
           <View style={styles.bottomRectanglesContainer}>
             <View style={styles.rectangle}>
-            <Text style={styles.rectangleText}>
-  {translateInterestKey(answers.interest3, t)}
-</Text>
+              <Text style={styles.rectangleText}>
+                {translateInterestKey(answers.interest3, t)}
+              </Text>
             </View>
             <View style={styles.rectangle}>
-            <Text style={styles.rectangleText}>
-  {translateInterestKey(answers.interest4, t)}
-</Text>
+              <Text style={styles.rectangleText}>
+                {translateInterestKey(answers.interest4, t)}
+              </Text>
             </View>
           </View>
         </View>
@@ -432,127 +441,130 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
             </Text>
           )}
 
-{currentQuestion.id === "account" && (
-  <View>
-    {/* Nombre y Apellido */}
-    <View style={styles.nameContainer}>
-      <TextInput
-        style={[styles.nameInput, { color: "#4b4b4b" }]}
-        placeholder={t("signup.placeholders.firstName")}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("firstName", text)}
-        value={answers.firstName}
-      />
-      <TextInput
-        style={[styles.nameInput, { color: "#4b4b4b" }]}
-        placeholder={t("signup.placeholders.lastName")}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("lastName", text)}
-        value={answers.lastName}
-      />
-    </View>
+        {currentQuestion.id === "account" && (
+          <View>
+            {/* Nombre y Apellido */}
+            <View style={styles.nameContainer}>
+              <TextInput
+                style={[styles.nameInput, { color: "#4b4b4b" }]}
+                placeholder={t("signup.placeholders.firstName")}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("firstName", text)}
+                value={answers.firstName}
+              />
+              <TextInput
+                style={[styles.nameInput, { color: "#4b4b4b" }]}
+                placeholder={t("signup.placeholders.lastName")}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("lastName", text)}
+                value={answers.lastName}
+              />
+            </View>
 
-    {/* Email con verificación */}
-    <TextInput
-      style={[styles.input, { color: "#4b4b4b" }]}
-      placeholder={t("signup.placeholders.email")}
-      placeholderTextColor="#4b4b4b"
-      onChangeText={(text) => handleAnswer("email", text)}
-      value={answers.email}
-      keyboardType="email-address"
-      editable={!isCodeSent} // No permitir cambios después de enviar el código
-    />
+            {/* Email con verificación */}
+            <TextInput
+              style={[styles.input, { color: "#4b4b4b" }]}
+              placeholder={t("signup.placeholders.email")}
+              placeholderTextColor="#4b4b4b"
+              onChangeText={(text) => handleAnswer("email", text)}
+              value={answers.email}
+              keyboardType="email-address"
+              editable={!isCodeSent} // No permitir cambios después de enviar el código
+            />
 
-    {/* Si el código ya fue enviado pero no verificado, mostrar input para ingresarlo */}
-    {!emailVerified && isCodeSent && (
-      <>
-        <TextInput
-          style={[styles.input, { color: "#4b4b4b", marginTop: 10 }]}
-          placeholder="Ingresa el código de verificación"
-          placeholderTextColor="#4b4b4b"
-          onChangeText={(text) => setVerificationCode(text)}
-          value={verificationCode}
-          keyboardType="number-pad"
-        />
-       <TouchableOpacity
-  style={styles.verifyButton}
-  onPress={() =>
-    handleVerifyCode({
-      answers,
-      verificationCode,
-      setIsLoading,
-      verifyCodeFn,
-      t,
-      setEmailVerified,
-    })
-  }
-  disabled={isLoading}
->
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.verifyButtonText}>Verificar Código</Text>
-          )}
-        </TouchableOpacity>
-      </>
-    )}
+            {/* Si el código ya fue enviado pero no verificado, mostrar input para ingresarlo */}
+            {!emailVerified && isCodeSent && (
+              <>
+                <TextInput
+                  style={[styles.input, { color: "#4b4b4b", marginTop: 10 }]}
+                  placeholder="Ingresa el código de verificación"
+                  placeholderTextColor="#4b4b4b"
+                  onChangeText={(text) => setVerificationCode(text)}
+                  value={verificationCode}
+                  keyboardType="number-pad"
+                />
+                <TouchableOpacity
+                  style={styles.verifyButton}
+                  onPress={() =>
+                    handleVerifyCode({
+                      answers,
+                      verificationCode,
+                      setIsLoading,
+                      verifyCodeFn,
+                      t,
+                      setEmailVerified,
+                    })
+                  }
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.verifyButtonText}>
+                      Verificar Código
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
 
-    {/* Si el código fue verificado, mostrar mensaje */}
-    {emailVerified && (
-      <Text style={{ color: "green", marginTop: 10 }}>✔️ Email verificado</Text>
-    )}
+            {/* Si el código fue verificado, mostrar mensaje */}
+            {emailVerified && (
+              <Text style={{ color: "green", marginTop: 10 }}>
+                ✔️ Email verificado
+              </Text>
+            )}
 
-    {/* Nombre de usuario */}
-    <TextInput
-      style={[styles.inputShort, { color: "#4b4b4b" }]}
-      placeholder={t("signup.placeholders.username")}
-      placeholderTextColor="#4b4b4b"
-      onChangeText={(text) => handleAnswer("username", text)}
-      value={answers.username}
-    />
+            {/* Nombre de usuario */}
+            <TextInput
+              style={[styles.inputShort, { color: "#4b4b4b" }]}
+              placeholder={t("signup.placeholders.username")}
+              placeholderTextColor="#4b4b4b"
+              onChangeText={(text) => handleAnswer("username", text)}
+              value={answers.username}
+            />
 
-    {/* Contraseña con icono de visibilidad */}
-    <View style={styles.passwordContainer}>
-      <TextInput
-        style={[styles.passwordInput, { color: "#4b4b4b" }]}
-        placeholder={t("signup.placeholders.password")}
-        placeholderTextColor="#4b4b4b"
-        onChangeText={(text) => handleAnswer("password", text)}
-        value={answers.password}
-        secureTextEntry={!showPassword}
-      />
-      <TouchableOpacity
-        style={styles.eyeIconButton}
-        onPress={() => setShowPassword(!showPassword)}
-      >
-        <Ionicons
-          name={showPassword ? "eye-off" : "eye"}
-          size={20}
-          color="gray"
-        />
-      </TouchableOpacity>
-    </View>
+            {/* Contraseña con icono de visibilidad */}
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[styles.passwordInput, { color: "#4b4b4b" }]}
+                placeholder={t("signup.placeholders.password")}
+                placeholderTextColor="#4b4b4b"
+                onChangeText={(text) => handleAnswer("password", text)}
+                value={answers.password}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity
+                style={styles.eyeIconButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
 
-    {/* Términos y Condiciones */}
-    <View style={styles.termsContainer}>
-      <TouchableOpacity
-        style={styles.checkbox}
-        onPress={() => setAcceptedTerms(!acceptedTerms)}
-      >
-        {acceptedTerms && (
-          <Ionicons name="checkmark" size={20} color="black" />
+            {/* Términos y Condiciones */}
+            <View style={styles.termsContainer}>
+              <TouchableOpacity
+                style={styles.checkbox}
+                onPress={() => setAcceptedTerms(!acceptedTerms)}
+              >
+                {acceptedTerms && (
+                  <Ionicons name="checkmark" size={20} color="black" />
+                )}
+              </TouchableOpacity>
+              <View style={styles.termsTextContainer}>
+                <Text style={styles.termsText}>
+                  {t("signup.termsAndConditions.acceptText")}{" "}
+                </Text>
+                <TermsAndConditionsModal />
+              </View>
+            </View>
+          </View>
         )}
-      </TouchableOpacity>
-      <View style={styles.termsTextContainer}>
-        <Text style={styles.termsText}>
-          {t("signup.termsAndConditions.acceptText")}{" "}
-        </Text>
-        <TermsAndConditionsModal />
-      </View>
-    </View>
-  </View>
-)}
-
 
         {currentQuestion.id === "ageGender" && (
           <Animated.View
@@ -573,67 +585,70 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
           </Animated.View>
         )}
 
-            {currentQuestion.id === "about" && (
+        {currentQuestion.id === "about" && (
           <View>
-           {chunkArray(interestKeysGroup1, 2).map((row, rowIndex) => (
-  <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
-    {row.map((key) => {
-      const isSelected =
-        key === answers.interest1 ||
-        key === answers.interest2 ||
-        key === answers.interest3 ||
-        key === answers.interest4;
-      return (
-        <TouchableOpacity
-          key={key}
-          style={[
-            styles.halfInput,
-            isSelected ? { backgroundColor: "#e0dcd7" } : null,
-          ]}
-          onPress={() => handleInterestSelection(key, answers, handleAnswer, t)}
-        >
-          <Text>{t(`signup.interestsGroup1.${key}`)}</Text>
-        </TouchableOpacity>
-      );
-    })}
-  </View>
-))}
-
-
+            {chunkArray(interestKeysGroup1, 2).map((row, rowIndex) => (
+              <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
+                {row.map((key) => {
+                  const isSelected =
+                    key === answers.interest1 ||
+                    key === answers.interest2 ||
+                    key === answers.interest3 ||
+                    key === answers.interest4;
+                  return (
+                    <TouchableOpacity
+                      key={key}
+                      style={[
+                        styles.halfInput,
+                        isSelected ? { backgroundColor: "#e0dcd7" } : null,
+                      ]}
+                      onPress={() =>
+                        handleInterestSelection(key, answers, handleAnswer, t)
+                      }
+                    >
+                      <Text>{t(`signup.interestsGroup1.${key}`)}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
           </View>
         )}
 
-{currentQuestion.id === "about2" && (
-  <View style={styles.interestsContainer}>
-    {chunkArray(interestKeysGroup2, 2).map((row, rowIndex) => (
-      <View key={`outer-container-${rowIndex}`}>
-        <View style={styles.rowInputs} key={`interest2-row-${rowIndex}`}>
-          {row.map((key, i) => {
-            const isSelected =
-              key === answers.interest1 ||
-              key === answers.interest2 ||
-              key === answers.interest3 ||
-              key === answers.interest4;
-            return (
-              <TouchableOpacity
-                key={`option-${rowIndex}-${i}`}
-                style={[
-                  styles.halfInput,
-                  isSelected ? { backgroundColor: "#e0dcd7" } : null,
-                ]}
-                onPress={() => handleInterestSelection(key, answers, handleAnswer, t)}
-              >
-                <Text>{t(`signup.interestsGroup2.${key}`)}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
-    ))}
-  </View>
-)}
-
-
+        {currentQuestion.id === "about2" && (
+          <View style={styles.interestsContainer}>
+            {chunkArray(interestKeysGroup2, 2).map((row, rowIndex) => (
+              <View key={`outer-container-${rowIndex}`}>
+                <View
+                  style={styles.rowInputs}
+                  key={`interest2-row-${rowIndex}`}
+                >
+                  {row.map((key, i) => {
+                    const isSelected =
+                      key === answers.interest1 ||
+                      key === answers.interest2 ||
+                      key === answers.interest3 ||
+                      key === answers.interest4;
+                    return (
+                      <TouchableOpacity
+                        key={`option-${rowIndex}-${i}`}
+                        style={[
+                          styles.halfInput,
+                          isSelected ? { backgroundColor: "#e0dcd7" } : null,
+                        ]}
+                        onPress={() =>
+                          handleInterestSelection(key, answers, handleAnswer, t)
+                        }
+                      >
+                        <Text>{t(`signup.interestsGroup2.${key}`)}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
 
         {currentQuestion.id === "photos" && (
           <View style={styles.photoContainer}>
@@ -746,39 +761,41 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
           {currentQuestionIndex > 0 && currentQuestion.id !== "welcome" && (
             <TouchableOpacity
               style={styles.backButton}
-              onPress={() => handleBack(currentQuestionIndex, setCurrentQuestionIndex)}
+              onPress={() =>
+                handleBack(currentQuestionIndex, setCurrentQuestionIndex)
+              }
               disabled={isLoading}
             >
               <AntDesign name="left" size={24} color="black" />
             </TouchableOpacity>
           )}
           {currentQuestionIndex < questions.length - 1 && (
-           <TouchableOpacity
-           style={styles.nextButton}
-           onPress={() =>
-             handleNext({
-               currentQuestionIndex,
-               questions,
-               answers,
-               acceptedTerms,
-               setIsLoading,
-               setCurrentQuestionIndex,
-               handleSubmit,
-               t,
-               validateName,
-               validateEmail,
-               validateUsername,
-               validatePassword,
-               validateSingleWord,
-               database,
-               sendVerificationCodeFn,
-               isCodeSent,
-               setIsCodeSent,
-               emailVerified,
-             })
-           }
-           disabled={isLoading}
-         >
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={() =>
+                handleNext({
+                  currentQuestionIndex,
+                  questions,
+                  answers,
+                  acceptedTerms,
+                  setIsLoading,
+                  setCurrentQuestionIndex,
+                  handleSubmit,
+                  t,
+                  validateName,
+                  validateEmail,
+                  validateUsername,
+                  validatePassword,
+                  validateSingleWord,
+                  database,
+                  sendVerificationCodeFn,
+                  isCodeSent,
+                  setIsCodeSent,
+                  emailVerified,
+                })
+              }
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <ActivityIndicator size="small" color="#000" />
               ) : (
