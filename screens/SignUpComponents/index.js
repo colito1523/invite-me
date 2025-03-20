@@ -28,7 +28,6 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   handleNext,
   handleVerifyCode,
-  chunkArray,
   validateName,
   validateEmail,
   validateUsername,
@@ -41,6 +40,7 @@ import {
 } from "./utils";
 import GenderSelector from "./GenderSelector";
 import AgeSelector from "./AgeSelector";
+import InterestsSelector from "./InterestsSelector";
 import es from "../../locales/es.json";
 import en from "../../locales/en.json";
 import pt from "../../locales/pt.json";
@@ -585,70 +585,32 @@ export default function SignUp() {
           </Animated.View>
         )}
 
-        {currentQuestion.id === "about" && (
-          <View>
-            {chunkArray(interestKeysGroup1, 2).map((row, rowIndex) => (
-              <View style={styles.rowInputs} key={`interest-row-${rowIndex}`}>
-                {row.map((key) => {
-                  const isSelected =
-                    key === answers.interest1 ||
-                    key === answers.interest2 ||
-                    key === answers.interest3 ||
-                    key === answers.interest4;
-                  return (
-                    <TouchableOpacity
-                      key={key}
-                      style={[
-                        styles.halfInput,
-                        isSelected ? { backgroundColor: "#e0dcd7" } : null,
-                      ]}
-                      onPress={() =>
-                        handleInterestSelection(key, answers, handleAnswer, t)
-                      }
-                    >
-                      <Text>{t(`signup.interestsGroup1.${key}`)}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            ))}
-          </View>
-        )}
+{currentQuestion.id === "about" && (
+  <InterestsSelector
+    group="group1"
+    keys={interestKeysGroup1}
+    answers={answers}
+    handleAnswer={handleAnswer}
+    handleInterestSelection={handleInterestSelection}
+    t={t}
+  />
+)}
 
-        {currentQuestion.id === "about2" && (
-          <View style={styles.interestsContainer}>
-            {chunkArray(interestKeysGroup2, 2).map((row, rowIndex) => (
-              <View key={`outer-container-${rowIndex}`}>
-                <View
-                  style={styles.rowInputs}
-                  key={`interest2-row-${rowIndex}`}
-                >
-                  {row.map((key, i) => {
-                    const isSelected =
-                      key === answers.interest1 ||
-                      key === answers.interest2 ||
-                      key === answers.interest3 ||
-                      key === answers.interest4;
-                    return (
-                      <TouchableOpacity
-                        key={`option-${rowIndex}-${i}`}
-                        style={[
-                          styles.halfInput,
-                          isSelected ? { backgroundColor: "#e0dcd7" } : null,
-                        ]}
-                        onPress={() =>
-                          handleInterestSelection(key, answers, handleAnswer, t)
-                        }
-                      >
-                        <Text>{t(`signup.interestsGroup2.${key}`)}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
+{currentQuestion.id === "about2" && (
+  <View style={{ marginTop: 70 }}>
+    <InterestsSelector
+      group="group2"
+      keys={interestKeysGroup2}
+      answers={answers}
+      handleAnswer={handleAnswer}
+      handleInterestSelection={handleInterestSelection}
+      t={t}
+    />
+  </View>
+)}
+
+
+
 
         {currentQuestion.id === "photos" && (
           <View style={styles.photoContainer}>
