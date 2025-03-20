@@ -3,26 +3,19 @@
     {
       "source": "notification-functions",
       "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"],
       "runtime": "nodejs20"
     },
     {
       "source": "eventcleanup",
       "codebase": "eventcleanup",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "predeploy": []
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"]
+    },
+    {
+      "source": "verification-functions", 
+      "codebase": "verification",         
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "*.local"],
+      "runtime": "nodejs20"
     }
   ],
   "firestore": {
