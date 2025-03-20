@@ -212,3 +212,33 @@ export const handleVerifyCode = async ({
   }
   setIsLoading(false);
 };
+
+
+export const validateName = (name) => {
+    const nameRegex = /^[a-zA-ZÀ-ÿãÃçÇñÑ ]+$/;
+    return nameRegex.test(name);
+};
+
+export const validateEmail = (email) => {
+    const emailRegex =
+      /^(?!.*(.)\1{3,})(?!^\d+@)(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]{3,}(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:(?!^\d+\.)[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+};
+
+export const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+    return passwordRegex.test(password);
+};
+
+export const validateUsername = (username) => {
+    const usernameRegex = /^[a-zA-Z0-9._]+$/;
+    return usernameRegex.test(username);
+};
+
+export const validateSingleWord = (word) => {
+    const hobbyInterestRegex =
+      /^[\p{L}\p{N}\p{P}\p{Zs}\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F700-\u1F77F]+$/u;
+    return hobbyInterestRegex.test(word) && [...word].length <= 15;
+};
+

@@ -31,7 +31,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import styles from "./styles";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { handleNext, handleVerifyCode, chunkArray  } from "./utils";
+import { handleNext, handleVerifyCode, chunkArray, validateName, validateEmail, validateUsername, validatePassword, validateSingleWord,  } from "./utils";
 
 
 import es from "../../locales/es.json";
@@ -390,37 +390,6 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
       return key; // Si no coincide con ningún grupo
     }
   }
-
-  const validateName = (name) => {
-    const nameRegex = /^[a-zA-ZÀ-ÿãÃçÇñÑ ]+$/;
-    return nameRegex.test(name);
-  };
-
-  const validateEmail = (email) => {
-    const emailRegex =
-      /^(?!.*(.)\1{3,})(?!^\d+@)(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]{3,}(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:(?!^\d+\.)[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-
-    return emailRegex.test(email);
-  };
-
-  const validatePassword = (password) => {
-    const passwordRegex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
-    return passwordRegex.test(password);
-  };
-
-  const validateUsername = (username) => {
-    const usernameRegex = /^[a-zA-Z0-9._]+$/; // Allow uppercase letters in the regex
-    return usernameRegex.test(username);
-  };
-
-  const validateSingleWord = (word) => {
-    const hobbyInterestRegex =
-      /^[\p{L}\p{N}\p{P}\p{Zs}\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F700-\u1F77F]+$/u;
-    return hobbyInterestRegex.test(word) && [...word].length <= 15; // Contar correctamente caracteres compuestos
-  };
-
-
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
