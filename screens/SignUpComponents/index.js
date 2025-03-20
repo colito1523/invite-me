@@ -18,11 +18,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database, storage } from "../../config/firebase";
 import {
   doc,
-  setDoc,
-  getDocs,
-  query,
-  where,
-  collection,
+  setDoc
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/native";
@@ -35,6 +31,8 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import styles from "./styles";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { handleNext, handleVerifyCode } from "./utils";
+
 
 import es from "../../locales/es.json";
 import en from "../../locales/en.json";
@@ -399,9 +397,6 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
       return key; // Si no coincide con ningún grupo
     }
   }
-  
-  
-  
 
   const validateName = (name) => {
     const nameRegex = /^[a-zA-ZÀ-ÿãÃçÇñÑ ]+$/;
@@ -432,194 +427,11 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
     return hobbyInterestRegex.test(word) && [...word].length <= 15; // Contar correctamente caracteres compuestos
   };
 
-  const handleNext = async () => {
-    setIsLoading(true);
-    const currentQuestion = questions[currentQuestionIndex];
-  
-    if (currentQuestion.id === "account") {
-      if (!answers.firstName || !answers.lastName) {
-        Alert.alert(t("signup.errors.emptyName"));
-        setIsLoading(false);
-        return;
-      }
-      if (!validateName(answers.firstName) || !validateName(answers.lastName)) {
-        Alert.alert(t("signup.errors.invalidName"));
-        setIsLoading(false);
-        return;
-      }
-      if (answers.email.includes(" ")) {
-        Alert.alert(t("signup.errors.emailContainsSpaces"));
-        setIsLoading(false);
-        return;
-      }
-      if (!answers.email || !validateEmail(answers.email)) {
-        Alert.alert(t("signup.errors.invalidEmail"));
-        setIsLoading(false);
-        return;
-      }
-      if (!answers.username || !validateUsername(answers.username)) {
-        Alert.alert(t("signup.errors.invalidUsername"));
-        setIsLoading(false);
-        return;
-      }
-      if (!answers.password || !validatePassword(answers.password)) {
-        Alert.alert(t("signup.errors.invalidPassword"));
-        setIsLoading(false);
-        return;
-      }
-      if (!acceptedTerms) {
-        Alert.alert(t("signup.errors.termsNotAccepted"));
-        setIsLoading(false);
-        return;
-      }
-  
-      // 🚀 Verifica si el email ya está en uso
-      const emailQuery = query(
-        collection(database, "users"),
-        where("email", "==", answers.email.trim().toLowerCase())
-      );
-      try {
-        const emailSnapshot = await getDocs(emailQuery);
-        if (!emailSnapshot.empty) {
-          Alert.alert(t("signup.errors.emailInUse"));
-          setIsLoading(false);
-          return;
-        }
-      } catch (error) {
-        console.error("Error checking email:", error);
-        Alert.alert(t("signup.errors.generic"), error.message);
-        setIsLoading(false);
-        return;
-      }
-  
-      // 🚀 **Si el código aún no ha sido enviado, enviarlo ahora**
-      if (!isCodeSent) {
-        try {
-          await sendVerificationCodeFn({ email: answers.email.trim().toLowerCase() });
-          setIsCodeSent(true);
-          Alert.alert("Código enviado", "Revisa tu email y escribe el código.");
-        } catch (error) {
-          console.error("Error enviando código:", error);
-          Alert.alert("Error", "No se pudo enviar el código.");
-        }
-        setIsLoading(false);
-        return;
-      }
-  
-      // 🚀 **Si el código fue enviado pero aún no verificado, no permitir avanzar**
-      if (!emailVerified) {
-        Alert.alert("Verifica tu email", "Debes ingresar el código antes de continuar.");
-        setIsLoading(false);
-        return;
-      }
-  
-      // 🚀 Verifica si el username ya está en uso
-      const usernameQuery = query(
-        collection(database, "users"),
-        where("username", "==", answers.username.trim().toLowerCase())
-      );
-  
-      try {
-        const usernameSnapshot = await getDocs(usernameQuery);
-        if (!usernameSnapshot.empty) {
-          Alert.alert(t("signup.errors.usernameInUse"));
-          setIsLoading(false);
-          return;
-        }
-      } catch (error) {
-        console.error("Error checking username:", error);
-        Alert.alert(t("signup.errors.generic"), error.message);
-        setIsLoading(false);
-        return;
-      }
-    }
-  
-    if (currentQuestion.id === "about") {
-    }
-  
-    if (currentQuestion.id === "about2") {
-      // Aquí SÍ verificamos que haya 4 en total
-      const totalSelected = [
-        answers.interest1,
-        answers.interest2,
-        answers.interest3,
-        answers.interest4,
-      ].filter(Boolean).length; // filtra los que no estén vacíos
-  
-      if (totalSelected < 4) {
-        Alert.alert(t("signup.errors.selectFourInterests"));
-        setIsLoading(false);
-        return;
-      }
-  
-      if (
-        !validateSingleWord(answers.interest1) ||
-        !validateSingleWord(answers.interest2) ||
-        !validateSingleWord(answers.interest3) ||
-        !validateSingleWord(answers.interest4)
-      ) {
-        Alert.alert(t("signup.errors.invalidInterests"));
-        setIsLoading(false);
-        return;
-      }
-    }
-  
-    if (currentQuestion.id === "photos" && !answers.photo1) {
-      setIsLoading(false);
-      return;
-    }
-    if (currentQuestion.id === "photos2" && !answers.photo2) {
-      setIsLoading(false);
-      return;
-    }
-    if (currentQuestion.id === "photos3" && !answers.photo3) {
-      setIsLoading(false);
-      return;
-    }
-  
-    if (currentQuestionIndex < questions.length - 2) {
-      setCurrentQuestionIndex((prev) => prev + 1);
-    } else if (currentQuestionIndex === questions.length - 2) {
-      await handleSubmit();
-    }
-    setIsLoading(false);
-  };
-  
-  const handleVerifyCode = async () => {
-    setIsLoading(true);
-    try {
-      const result = await verifyCodeFn({ 
-        email: answers.email.trim().toLowerCase(), 
-        code: verificationCode 
-      });
-  
-      if (result.data.success) {
-        setEmailVerified(true);
-        Alert.alert("✅ Verificado", "Email verificado correctamente.");
-      } else {
-        Alert.alert("❌ Código incorrecto", "Inténtalo de nuevo.");
-      }
-    } catch (error) {
-      console.error("Error verificando código:", error);
-      Alert.alert("❌ Error", "Código inválido o expirado.");
-    }
-    setIsLoading(false);
-  };
-  
 
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
     }
-  };
-
-  const manipulateImage = async (uri) => {
-    const manipulatedImage = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 500 } }],
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-    );
-    return manipulatedImage.uri;
   };
 
   const uploadImage = async (uri) => {
@@ -903,11 +715,20 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
           value={verificationCode}
           keyboardType="number-pad"
         />
-        <TouchableOpacity
-          style={styles.verifyButton}
-          onPress={handleVerifyCode}
-          disabled={isLoading}
-        >
+       <TouchableOpacity
+  style={styles.verifyButton}
+  onPress={() =>
+    handleVerifyCode({
+      answers,
+      verificationCode,
+      setIsLoading,
+      verifyCodeFn,
+      t,
+      setEmailVerified,
+    })
+  }
+  disabled={isLoading}
+>
           {isLoading ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
@@ -1173,11 +994,32 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
             </TouchableOpacity>
           )}
           {currentQuestionIndex < questions.length - 1 && (
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={handleNext}
-              disabled={isLoading}
-            >
+           <TouchableOpacity
+           style={styles.nextButton}
+           onPress={() =>
+             handleNext({
+               currentQuestionIndex,
+               questions,
+               answers,
+               acceptedTerms,
+               setIsLoading,
+               setCurrentQuestionIndex,
+               handleSubmit,
+               t,
+               validateName,
+               validateEmail,
+               validateUsername,
+               validatePassword,
+               validateSingleWord,
+               database,
+               sendVerificationCodeFn,
+               isCodeSent,
+               setIsCodeSent,
+               emailVerified,
+             })
+           }
+           disabled={isLoading}
+         >
               {isLoading ? (
                 <ActivityIndicator size="small" color="#000" />
               ) : (
