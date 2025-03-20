@@ -326,7 +326,7 @@ export const pickImage = async (photoNumber, handleAnswer, handleNext) => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true, // Permite recortar antes de seleccionar
+        allowsEditing: false, // Permite recortar antes de seleccionar
         quality: 1, // Máxima calidad antes de la compresión
       });
   
