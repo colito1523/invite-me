@@ -55,7 +55,6 @@ const AccountForm = ({
         keyboardType="email-address"
         editable={!isCodeSent}
       />
-      {emailVerified && <Text style={styles.emailVerifiedText}>✔️ Email verificado</Text>}
 
       {/* Nombre de usuario */}
       <TextInput
