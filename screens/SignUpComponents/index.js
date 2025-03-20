@@ -123,6 +123,7 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [isLanguageOptionsVisible, setIsLanguageOptionsVisible] =
     useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -460,6 +461,8 @@ export default function SignUp() {
     verifyCodeFn={verifyCodeFn}       // se pasa la función de verificación
     setIsLoading={setIsLoading}       // se pasa la función para actualizar el loading
     setEmailVerified={setEmailVerified} // se pasa la función para actualizar la verificación
+    modalVisible={modalVisible}         // Se pasa la visibilidad del modal
+    setModalVisible={setModalVisible}
   />
 )}
 
@@ -630,6 +633,7 @@ export default function SignUp() {
                   isCodeSent,
                   setIsCodeSent,
                   emailVerified,
+                  setModalVisible,
                 })
               }
               disabled={isLoading}

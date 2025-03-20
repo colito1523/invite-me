@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import TermsAndConditionsModal from "../../Components/Terms-And-Conditions/terms-and-conditions-modal";
 import styles from "./styles";
@@ -18,10 +18,13 @@ const AccountForm = ({
   t,
   acceptedTerms,
   setAcceptedTerms,
-  verifyCodeFn,      // nuevo prop
-  setIsLoading,      // nuevo prop
-  setEmailVerified,  // nuevo prop
+  verifyCodeFn,
+  setIsLoading,
+  setEmailVerified,
+  modalVisible,      // Nuevo prop
+  setModalVisible, 
 }) => {
+
   return (
     <View>
       {/* Nombre y Apellido */}
@@ -42,7 +45,7 @@ const AccountForm = ({
         />
       </View>
 
-      {/* Email con verificación */}
+      {/* Email */}
       <TextInput
         style={[styles.input, { color: "#4b4b4b" }]}
         placeholder={t("signup.placeholders.email")}
@@ -52,41 +55,7 @@ const AccountForm = ({
         keyboardType="email-address"
         editable={!isCodeSent}
       />
-      {!emailVerified && isCodeSent && (
-        <>
-          <TextInput
-            style={[styles.input, { color: "#4b4b4b", marginTop: 10 }]}
-            placeholder="Ingresa el código de verificación"
-            placeholderTextColor="#4b4b4b"
-            onChangeText={(text) => setVerificationCode(text)}
-            value={verificationCode}
-            keyboardType="number-pad"
-          />
-          <TouchableOpacity
-            style={styles.verifyButton}
-            onPress={() =>
-              handleVerifyCode({
-                answers,
-                verificationCode,
-                t,
-                setEmailVerified,
-                setIsLoading,
-                verifyCodeFn,  // se pasa la función aquí
-              })
-            }
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.verifyButtonText}>Verificar Código</Text>
-            )}
-          </TouchableOpacity>
-        </>
-      )}
-      {emailVerified && (
-        <Text style={{ color: "green", marginTop: 10 }}>✔️ Email verificado</Text>
-      )}
+      {emailVerified && <Text style={styles.emailVerifiedText}>✔️ Email verificado</Text>}
 
       {/* Nombre de usuario */}
       <TextInput
@@ -122,6 +91,52 @@ const AccountForm = ({
           <TermsAndConditionsModal />
         </View>
       </View>
+
+      {/* Modal para ingresar código de verificación */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Verificación de Email</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Ingresa el código de verificación"
+              placeholderTextColor="#4b4b4b"
+              onChangeText={(text) => setVerificationCode(text)}
+              value={verificationCode}
+              keyboardType="number-pad"
+            />
+            <TouchableOpacity
+              style={styles.verifyButton}
+              onPress={() => {
+                handleVerifyCode({
+                  answers,
+                  verificationCode,
+                  t,
+                  setEmailVerified,
+                  setIsLoading,
+                  verifyCodeFn,
+                });
+                setModalVisible(false);
+              }}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.verifyButtonText}>Verificar Código</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeModalButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeModalText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

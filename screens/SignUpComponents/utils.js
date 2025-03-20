@@ -26,6 +26,7 @@ export const handleNext = async ({
   isCodeSent,
   setIsCodeSent,
   emailVerified,
+  setModalVisible, // Nuevo parámetro para abrir el modal
 }) => {
   setIsLoading(true);
   const currentQuestion = questions[currentQuestionIndex];
@@ -92,7 +93,11 @@ export const handleNext = async ({
       try {
         await sendVerificationCodeFn({ email: answers.email.trim().toLowerCase() });
         setIsCodeSent(true);
-        Alert.alert("Código enviado", "Revisa tu email y escribe el código.");
+        Alert.alert(
+          "Código enviado",
+          "Revisa tu email y escribe el código.",
+          [{ text: "OK", onPress: () => setModalVisible(true) }] // Se abre el modal tras confirmar
+        );
       } catch (error) {
         console.error("Error sending code:", error);
         Alert.alert("Error", "No se pudo enviar el código.");
