@@ -29,6 +29,8 @@ import { initReactI18next } from "react-i18next";
 import styles from "./styles";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { handleNext, handleVerifyCode, chunkArray, validateName, validateEmail, validateUsername, validatePassword, validateSingleWord, handleInterestSelection , uploadImage, pickImage, handleBack   } from "./utils";
+import GenderSelector from "./GenderSelector";
+import AgeSelector from "./AgeSelector";
 import es from "../../locales/es.json";
 import en from "../../locales/en.json";
 import pt from "../../locales/pt.json";
@@ -54,12 +56,9 @@ i18n.use(initReactI18next).init({
 const { width, height } = Dimensions.get("window");
 
 const ITEM_WIDTH = width / 5;
-const ITEM_HEIGHT = 50;
-const GENDER_ITEM_HEIGHT = 50;
-const GENDER_CONTAINER_WIDTH = width * 0.6;
+
 
 const ages = Array.from({ length: 85 }, (_, i) => i + 16);
-const genders = ["Male", "Female", "Other", "Prefer not to say"];
 
 const interestKeysGroup1 = [
   "firstOneIn",
@@ -90,128 +89,6 @@ const interestKeysGroup2 = [
   "stayingIn",
 ];
 
-
-function AgeSelector({ onAgeChange, initialAge }) {
-  const [selectedAge, setSelectedAge] = useState(initialAge);
-  const scrollViewRef = useRef(null);
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    const initialIndex = ages.indexOf(initialAge);
-    if (initialIndex !== -1) {
-      scrollViewRef.current?.scrollTo({
-        x: initialIndex * ITEM_WIDTH,
-        animated: false,
-      });
-    }
-  }, []);
-
-  const handleScroll = (event) => {
-    const scrollPosition = event.nativeEvent.contentOffset.x;
-    const index = Math.round(scrollPosition / ITEM_WIDTH);
-    const newAge = ages[index];
-    setSelectedAge(newAge);
-    onAgeChange(newAge);
-  };
-
-  const renderAgeItem = (age, index) => {
-    const isSelected = age === selectedAge;
-    return (
-      <View
-        key={`${age}-${index}`}
-        style={[
-          styles.ageItem,
-          isSelected && styles.selectedItem,
-          { justifyContent: "center", alignItems: "center", flex: 1 },
-        ]}
-      >
-        <Text style={[styles.ageText, isSelected && styles.selectedText]}>
-          {age}
-        </Text>
-      </View>
-    );
-  };
-
-  return (
-    <View style={styles.ageSelectorContainer}>
-      {/* Se agrega pointerEvents="none" para que el overlay no bloquee toques */}
-      <View style={styles.selectedOverlayAge} pointerEvents="none" />
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={ITEM_WIDTH}
-        decelerationRate="fast"
-        onMomentumScrollEnd={handleScroll}
-        contentContainerStyle={styles.scrollViewContent}
-        nestedScrollEnabled={true}
-      >
-        {ages.map((age, index) => renderAgeItem(age, index))}
-      </ScrollView>
-    </View>
-  );
-}
-
-function GenderSelector({ onGenderChange, initialGender }) {
-  const [selectedGender, setSelectedGender] = useState(initialGender);
-  const scrollViewRef = useRef(null);
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    const initialIndex = genders.indexOf(initialGender);
-    if (initialIndex !== -1) {
-      scrollViewRef.current?.scrollTo({
-        y: initialIndex * GENDER_ITEM_HEIGHT,
-        animated: false,
-      });
-    }
-  }, []);
-
-  const handleScroll = (event) => {
-    const scrollPosition = event.nativeEvent.contentOffset.y;
-    const index =
-      Math.round(scrollPosition / GENDER_ITEM_HEIGHT) % genders.length;
-    const newGender = genders[index];
-    setSelectedGender(newGender);
-    onGenderChange(newGender);
-  };
-
-  const renderGenderItem = (gender, index) => {
-    const isSelected = gender === selectedGender;
-    return (
-      <View
-        key={`${gender}-${index}`}
-        style={[
-          styles.genderItem,
-          isSelected && styles.selectedGenderItem,
-          { flex: 1, justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <Text style={[styles.genderText, isSelected && styles.selectedText]}>
-          {t(`signup.genders.${gender.toLowerCase()}`)}
-        </Text>
-      </View>
-    );
-  };
-
-  return (
-    <View style={styles.genderContainer}>
-      {/* Se agrega pointerEvents="none" para que el overlay no bloquee toques */}
-      <View style={styles.selectedOverlay} pointerEvents="none" />
-      <ScrollView
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={false}
-        snapToInterval={GENDER_ITEM_HEIGHT}
-        decelerationRate="fast"
-        onMomentumScrollEnd={handleScroll}
-        contentContainerStyle={styles.genderScrollViewContent}
-        nestedScrollEnabled={true}
-      >
-        {genders.map((gender, index) => renderGenderItem(gender, index))}
-      </ScrollView>
-    </View>
-  );
-}
 
 export default function SignUp() {
   const { t } = useTranslation();
