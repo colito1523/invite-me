@@ -15,15 +15,12 @@ import {
 import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, database, storage } from "../../config/firebase";
+import { auth, database } from "../../config/firebase";
 import {
   doc,
   setDoc
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/native";
-import * as ImagePicker from "expo-image-picker";
-import * as ImageManipulator from "expo-image-manipulator";
 import { Image } from "expo-image";
 import TermsAndConditionsModal from "../../Components/Terms-And-Conditions/terms-and-conditions-modal";
 import { useTranslation } from "react-i18next";
@@ -31,9 +28,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import styles from "./styles";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { handleNext, handleVerifyCode, chunkArray, validateName, validateEmail, validateUsername, validatePassword, validateSingleWord,  } from "./utils";
-
-
+import { handleNext, handleVerifyCode, chunkArray, validateName, validateEmail, validateUsername, validatePassword, validateSingleWord, handleInterestSelection , uploadImage, pickImage, handleBack   } from "./utils";
 import es from "../../locales/es.json";
 import en from "../../locales/en.json";
 import pt from "../../locales/pt.json";
@@ -345,41 +340,7 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
     }
   };
 
-  const handleInterestSelection = (key) => {
-    const currentInterests = [
-      answers.interest1,
-      answers.interest2,
-      answers.interest3,
-      answers.interest4,
-    ].filter(Boolean);
-  
-    if (currentInterests.includes(key)) {
-      // Deselecciona
-      if (answers.interest1 === key) {
-        handleAnswer("interest1", "");
-      } else if (answers.interest2 === key) {
-        handleAnswer("interest2", "");
-      } else if (answers.interest3 === key) {
-        handleAnswer("interest3", "");
-      } else if (answers.interest4 === key) {
-        handleAnswer("interest4", "");
-      }
-    } else {
-      // Selecciona si hay espacio
-      if (!answers.interest1) {
-        handleAnswer("interest1", key);
-      } else if (!answers.interest2) {
-        handleAnswer("interest2", key);
-      } else if (!answers.interest3) {
-        handleAnswer("interest3", key);
-      } else if (!answers.interest4) {
-        handleAnswer("interest4", key);
-      } else {
-        Alert.alert(t("signup.errors.selectFourInterests"));
-      }
-    }
-  };
-
+ 
   function translateInterestKey(key, t) {
     // Primero vemos en qué grupo está la clave
     if (interestKeysGroup1.includes(key)) {
@@ -390,20 +351,6 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
       return key; // Si no coincide con ningún grupo
     }
   }
-  const handleBack = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
-    }
-  };
-
-  const uploadImage = async (uri) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const filename = uri.substring(uri.lastIndexOf("/") + 1);
-    const storageRef = ref(storage, `photos/${filename}`);
-    await uploadBytes(storageRef, blob);
-    return await getDownloadURL(storageRef);
-  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -472,33 +419,6 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
     }
   };
 
-  const compressImage = async (uri) => {
-    try {
-      const manipulatedImage = await ImageManipulator.manipulateAsync(
-        uri,
-        [{ resize: { width: 1080 } }], // Redimensiona la imagen a un ancho máximo de 1080px
-        { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG } // Comprime al 60% de calidad
-      );
-      return manipulatedImage.uri;
-    } catch (error) {
-      console.error("Error al comprimir la imagen:", error);
-      return uri; // En caso de error, devuelve la imagen original
-    }
-  };
-
-  const pickImage = async (photoNumber) => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true, // Permite recortar antes de seleccionar
-      quality: 1, // Máxima calidad antes de la compresión
-    });
-
-    if (!result.canceled) {
-      const compressedUri = await compressImage(result.assets[0].uri); // Comprime la imagen
-      handleAnswer(`photo${photoNumber}`, compressedUri); // Guarda la imagen comprimida en el estado
-      handleNext(); // Pasa a la siguiente pregunta
-    }
-  };
 
   const renderPreview = (photoNumber, showIcons = false) => (
     <View style={styles.photoContainer}>
@@ -793,7 +713,7 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
             styles.halfInput,
             isSelected ? { backgroundColor: "#e0dcd7" } : null,
           ]}
-          onPress={() => handleInterestSelection(key)}
+          onPress={() => handleInterestSelection(key, answers, handleAnswer, t)}
         >
           <Text>{t(`signup.interestsGroup1.${key}`)}</Text>
         </TouchableOpacity>
@@ -824,7 +744,7 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
                   styles.halfInput,
                   isSelected ? { backgroundColor: "#e0dcd7" } : null,
                 ]}
-                onPress={() => handleInterestSelection(key)}
+                onPress={() => handleInterestSelection(key, answers, handleAnswer, t)}
               >
                 <Text>{t(`signup.interestsGroup2.${key}`)}</Text>
               </TouchableOpacity>
@@ -842,7 +762,7 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
           <View style={styles.photoContainer}>
             <TouchableOpacity
               style={styles.photoPlaceholder}
-              onPress={() => pickImage(1)}
+              onPress={() => pickImage(1, handleAnswer, handleNext)}
             >
               {answers.photo1 ? (
                 <Image
@@ -870,7 +790,7 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
           <View style={styles.photoContainer}>
             <TouchableOpacity
               style={styles.photoPlaceholder}
-              onPress={() => pickImage(2)}
+              onPress={() => pickImage(2, handleAnswer, handleNext)}
             >
               {answers.photo2 ? (
                 <Image
@@ -898,7 +818,7 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
           <View style={styles.photoContainer}>
             <TouchableOpacity
               style={styles.photoPlaceholder}
-              onPress={() => pickImage(3)}
+              onPress={() => pickImage(3, handleAnswer, handleNext)}
             >
               {answers.photo3 ? (
                 <Image
@@ -949,7 +869,7 @@ const verifyCodeFn = httpsCallable(functions, "verifyCode");
           {currentQuestionIndex > 0 && currentQuestion.id !== "welcome" && (
             <TouchableOpacity
               style={styles.backButton}
-              onPress={handleBack}
+              onPress={() => handleBack(currentQuestionIndex, setCurrentQuestionIndex)}
               disabled={isLoading}
             >
               <AntDesign name="left" size={24} color="black" />

@@ -2,6 +2,10 @@
 
 import { Alert } from "react-native";
 import { getDocs, query, where, collection } from "firebase/firestore";
+import * as ImageManipulator from "expo-image-manipulator";
+import * as ImagePicker from "expo-image-picker";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../config/firebase";
 
 export const handleNext = async ({
   currentQuestionIndex,
@@ -241,4 +245,99 @@ export const validateSingleWord = (word) => {
       /^[\p{L}\p{N}\p{P}\p{Zs}\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F700-\u1F77F]+$/u;
     return hobbyInterestRegex.test(word) && [...word].length <= 15;
 };
+
+
+export const handleInterestSelection = (key, answers, handleAnswer, t) => {
+    const currentInterests = [
+      answers.interest1,
+      answers.interest2,
+      answers.interest3,
+      answers.interest4,
+    ].filter(Boolean);
+  
+    if (currentInterests.includes(key)) {
+      // Deselecciona
+      if (answers.interest1 === key) {
+        handleAnswer("interest1", "");
+      } else if (answers.interest2 === key) {
+        handleAnswer("interest2", "");
+      } else if (answers.interest3 === key) {
+        handleAnswer("interest3", "");
+      } else if (answers.interest4 === key) {
+        handleAnswer("interest4", "");
+      }
+    } else {
+      // Selecciona si hay espacio
+      if (!answers.interest1) {
+        handleAnswer("interest1", key);
+      } else if (!answers.interest2) {
+        handleAnswer("interest2", key);
+      } else if (!answers.interest3) {
+        handleAnswer("interest3", key);
+      } else if (!answers.interest4) {
+        handleAnswer("interest4", key);
+      } else {
+        Alert.alert(t("signup.errors.selectFourInterests"));
+      }
+    }
+  };
+
+
+  export const compressImage = async (uri) => {
+    try {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1080 } }], // Redimensiona la imagen a un ancho máximo de 1080px
+        { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG } // Comprime al 60% de calidad
+      );
+      return manipulatedImage.uri;
+    } catch (error) {
+      console.error("Error al comprimir la imagen:", error);
+      return uri; // En caso de error, devuelve la imagen original
+    }
+  };
+
+
+export const uploadImage = async (uri) => {
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const filename = uri.substring(uri.lastIndexOf("/") + 1);
+    const storageRef = ref(storage, `photos/${filename}`);
+    await uploadBytes(storageRef, blob);
+    return await getDownloadURL(storageRef);
+  } catch (error) {
+    console.error("Error al subir la imagen:", error);
+    return null;
+  }
+};
+
+
+export const pickImage = async (photoNumber, handleAnswer, handleNext) => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true, // Permite recortar antes de seleccionar
+        quality: 1, // Máxima calidad antes de la compresión
+      });
+  
+      if (!result.canceled) {
+        const compressedUri = await compressImage(result.assets[0].uri); // Comprime la imagen
+        handleAnswer(`photo${photoNumber}`, compressedUri); // Guarda la imagen comprimida en el estado
+        handleNext(); // Pasa a la siguiente pregunta
+      }
+    } catch (error) {
+      console.error("Error al seleccionar la imagen:", error);
+    }
+  };
+
+
+export const handleBack = (currentQuestionIndex, setCurrentQuestionIndex) => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+    }
+};
+  
+
+  
 
