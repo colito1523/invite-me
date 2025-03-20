@@ -40,6 +40,8 @@ import GenderSelector from "./GenderSelector";
 import AgeSelector from "./AgeSelector";
 import InterestsSelector from "./InterestsSelector";
 import AccountForm from "./AccountForm";
+import PhotoSelector from "./PhotoSelector";
+import PhotoPreview from "./PhotoPreview";
 import es from "../../locales/es.json";
 import en from "../../locales/en.json";
 import pt from "../../locales/pt.json";
@@ -504,93 +506,71 @@ export default function SignUp() {
     />
   </View>
 )}
+{currentQuestion.id === "photos" && (
+  <PhotoSelector
+    photo={answers.photo1}
+    onSelect={() => pickImage(1, handleAnswer, handleNext)}
+    photoNumber={1}
+  />
+)}
 
+{currentQuestion.id === "preview1" && (
+  <PhotoPreview
+    photo={answers.photo1}
+    photoNumber={1}
+    name={`${answers.firstName} ${answers.lastName}`}
+    interests={[]} // No se muestran intereses en este preview
+    showIcons={false}
+    translateInterestKey={translateInterestKey}
+    t={t}
+  />
+)}
 
+{currentQuestion.id === "photos2" && (
+  <PhotoSelector
+    photo={answers.photo2}
+    onSelect={() => pickImage(2, handleAnswer, handleNext)}
+    photoNumber={2}
+  />
+)}
 
+{currentQuestion.id === "preview2" && (
+  <PhotoPreview
+    photo={answers.photo2}
+    photoNumber={2}
+    name={`${answers.firstName} ${answers.lastName}`}
+    interests={[]} // Tampoco se muestran intereses en este preview
+    showIcons={false}
+    translateInterestKey={translateInterestKey}
+    t={t}
+  />
+)}
 
-        {currentQuestion.id === "photos" && (
-          <View style={styles.photoContainer}>
-            <TouchableOpacity
-              style={styles.photoPlaceholder}
-              onPress={() => pickImage(1, handleAnswer, handleNext)}
-            >
-              {answers.photo1 ? (
-                <Image
-                  source={{ uri: answers.photo1 }}
-                  style={styles.photo}
-                  cachePolicy="memory-disk"
-                />
-              ) : (
-                <MaterialIcons
-                  name="add-photo-alternate"
-                  size={70}
-                  color="gray"
-                />
-              )}
-              <View style={styles.numberContainer}>
-                <Text style={styles.numberText}>1</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
+{currentQuestion.id === "photos3" && (
+  <PhotoSelector
+    photo={answers.photo3}
+    onSelect={() => pickImage(3, handleAnswer, handleNext)}
+    photoNumber={3}
+  />
+)}
 
-        {currentQuestion.id === "preview1" && renderPreview(1)}
+{currentQuestion.id === "finalPreview" && (
+  <PhotoPreview
+    photo={answers.photo3}
+    photoNumber={3}
+    name={`${answers.firstName} ${answers.lastName}`}
+    interests={[
+      answers.interest1,
+      answers.interest2,
+      answers.interest3,
+      answers.interest4,
+    ]}
+    showIcons={true}
+    translateInterestKey={translateInterestKey}
+    t={t}
+  />
+)}
 
-        {currentQuestion.id === "photos2" && (
-          <View style={styles.photoContainer}>
-            <TouchableOpacity
-              style={styles.photoPlaceholder}
-              onPress={() => pickImage(2, handleAnswer, handleNext)}
-            >
-              {answers.photo2 ? (
-                <Image
-                  source={{ uri: answers.photo2 }}
-                  style={styles.photo}
-                  cachePolicy="memory-disk"
-                />
-              ) : (
-                <MaterialIcons
-                  name="add-photo-alternate"
-                  size={70}
-                  color="gray"
-                />
-              )}
-              <View style={styles.numberContainer}>
-                <Text style={styles.numberText}>2</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {currentQuestion.id === "preview2" && renderPreview(2)}
-
-        {currentQuestion.id === "photos3" && (
-          <View style={styles.photoContainer}>
-            <TouchableOpacity
-              style={styles.photoPlaceholder}
-              onPress={() => pickImage(3, handleAnswer, handleNext)}
-            >
-              {answers.photo3 ? (
-                <Image
-                  source={{ uri: answers.photo3 }}
-                  style={styles.photo}
-                  cachePolicy="memory-disk"
-                />
-              ) : (
-                <MaterialIcons
-                  name="add-photo-alternate"
-                  size={70}
-                  color="gray"
-                />
-              )}
-              <View style={styles.numberContainer}>
-                <Text style={styles.numberText}>3</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {currentQuestion.id === "finalPreview" && renderPreview(3, true)}
 
         {currentQuestion.id === "welcome" && (
           <View style={styles.welcomeContainer}>
