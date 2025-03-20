@@ -463,6 +463,7 @@ export default function SignUp() {
     setEmailVerified={setEmailVerified} // se pasa la función para actualizar la verificación
     modalVisible={modalVisible}         // Se pasa la visibilidad del modal
     setModalVisible={setModalVisible}
+    sendVerificationCodeFn={sendVerificationCodeFn} 
   />
 )}
 

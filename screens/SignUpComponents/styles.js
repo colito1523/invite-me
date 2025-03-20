@@ -436,72 +436,113 @@ export default StyleSheet.create({
 
   openModalButton: {
     marginTop: 10,
-    backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: "rgba(0, 0, 0, 0.8)", // Color oscuro translúcido
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25, // Bordes redondeados más elegantes
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   openModalText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    letterSpacing: 0.8, // Un poco más de espacio entre letras
   },
   emailVerifiedText: {
-    color: "green",
+    color: "#1DB954", // Un verde más elegante (Spotify Green)
     marginTop: 10,
     fontSize: 16,
     fontWeight: "bold",
+    textAlign: "center",
   },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)", // Oscurece el fondo con transparencia
   },
   modalContent: {
-    width: "80%",
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
+    width: "85%",
+    backgroundColor: "#fff", // Un gris oscuro para modernidad
+    paddingVertical: 25,
+    paddingHorizontal: 20,
+    borderRadius: 20, // Bordes bien redondeados
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 15,
+    color: "black", // Texto blanco para resaltar en fondo oscuro
+    textAlign: "center",
   },
   modalInput: {
     width: "100%",
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
+    borderColor: "gray", // Borde sutil blanco translúcido
+    borderRadius: 15, // Bordes suaves
     marginBottom: 15,
-    color: "#4b4b4b",
+    color: "black", // Texto blanco
+    fontSize: 16,
   },
   verifyButton: {
-    backgroundColor: "#28a745",
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: "#ebddd5", // Verde moderno y vibrante
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25,
     alignItems: "center",
     width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   verifyButtonText: {
-    color: "#fff",
+    color: "black",
     fontSize: 16,
     fontWeight: "bold",
+    textTransform: "uppercase", // Letras en mayúscula para más presencia
+    letterSpacing: 1, // Espaciado para mayor claridad
   },
   closeModalButton: {
-    marginTop: 10,
-    backgroundColor: "#dc3545",
-    padding: 10,
-    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 25,
     alignItems: "center",
     width: "100%",
   },
   closeModalText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: "#black",
+    fontSize: 13,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
+  resendButton: {
+    marginTop: 10,
+    backgroundColor: "transparent", // Botón sin fondo
+    paddingVertical: 10,
+    alignItems: "center",
+    width: "100%",
+  },
+  resendButtonText: {
+    color: "#ebddd5", // Verde moderno
+    fontSize: 14,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  
 });

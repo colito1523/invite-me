@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Modal } from "react-native";
+import React from "react";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Modal, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import TermsAndConditionsModal from "../../Components/Terms-And-Conditions/terms-and-conditions-modal";
 import styles from "./styles";
@@ -23,7 +23,20 @@ const AccountForm = ({
   setEmailVerified,
   modalVisible,      // Nuevo prop
   setModalVisible, 
+  sendVerificationCodeFn,
 }) => {
+
+  const handleResendCode = async () => {
+    setIsLoading(true);
+    try {
+      await sendVerificationCodeFn({ email: answers.email.trim().toLowerCase() });
+      Alert.alert("Código reenviado", "Hemos enviado un nuevo código a tu correo.");
+    } catch (error) {
+      console.error("Error re-enviando código:", error);
+      Alert.alert("Error", "No se pudo reenviar el código. Intenta nuevamente.");
+    }
+    setIsLoading(false);
+  };
 
   return (
     <View>
@@ -130,6 +143,12 @@ const AccountForm = ({
                 <Text style={styles.verifyButtonText}>Verificar Código</Text>
               )}
             </TouchableOpacity>
+
+            {/* Botón para reenviar código */}
+            <TouchableOpacity style={styles.resendButton} onPress={handleResendCode} disabled={isLoading}>
+              <Text style={styles.resendButtonText}>Reenviar Código</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity style={styles.closeModalButton} onPress={() => setModalVisible(false)}>
               <Text style={styles.closeModalText}>Cerrar</Text>
             </TouchableOpacity>
