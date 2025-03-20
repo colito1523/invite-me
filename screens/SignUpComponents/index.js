@@ -12,7 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { ProgressBar } from "react-native-paper";
-import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Ionicons, } from "@expo/vector-icons";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database } from "../../config/firebase";
 import { doc, setDoc } from "firebase/firestore";

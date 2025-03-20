@@ -1,8 +1,10 @@
-// PhotoPreview.js
+
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { AntDesign } from "@expo/vector-icons";
+import { GestureDetector, GestureHandlerRootView, Gesture } from "react-native-gesture-handler";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import styles from "./styles";
 
 export default function PhotoPreview({
@@ -14,14 +16,54 @@ export default function PhotoPreview({
   translateInterestKey,
   t,
 }) {
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
+  const offsetX = useSharedValue(0);
+  const offsetY = useSharedValue(0);
+  const savedOffsetX = useSharedValue(0);
+  const savedOffsetY = useSharedValue(0);
+
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((e) => {
+      scale.value = savedScale.value * e.scale;
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
+    });
+
+  const panGesture = Gesture.Pan()
+    .onUpdate((e) => {
+      offsetX.value = savedOffsetX.value + e.translationX;
+      offsetY.value = savedOffsetY.value + e.translationY;
+    })
+    .onEnd(() => {
+      savedOffsetX.value = offsetX.value;
+      savedOffsetY.value = offsetY.value;
+    });
+
+  const composed = Gesture.Simultaneous(pinchGesture, panGesture);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: offsetX.value },
+      { translateY: offsetY.value },
+      { scale: scale.value },
+    ],
+  }));
+
   return (
-    <View style={styles.photoContainer}>
+    <GestureHandlerRootView style={styles.photoContainer}>
       <View style={[styles.photoPlaceholder, styles.photoPreviewContainer]}>
-        <Image
-          source={{ uri: photo }}
-          style={[styles.photo, styles.photoPreview]}
-          cachePolicy="memory-disk"
-        />
+        <GestureDetector gesture={composed}>
+          <Animated.View style={[styles.imageContainer, animatedStyle]}>
+            <Image
+              source={{ uri: photo }}
+              style={[styles.photo, styles.photoPreview]}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+            />
+          </Animated.View>
+        </GestureDetector>
       </View>
       <Text style={styles.nameText}>{name}</Text>
       {photoNumber === 3 ? (
@@ -76,6 +118,6 @@ export default function PhotoPreview({
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </GestureHandlerRootView>
   );
 }

@@ -20,7 +20,7 @@ export default StyleSheet.create({
     backgroundColor: "white",
     flexGrow: 1,
     padding: 20,
-    paddingTop: 60, // Add this line to increase the top padding
+    paddingTop: 60, 
   },
   logo: {
     width: 200,
@@ -41,28 +41,28 @@ export default StyleSheet.create({
     fontSize: 15,
     marginVertical: 65,
     textAlign: "center",
-    color: 'black', // Texto en blanco
+    color: 'black', 
   },
   ageQuestion: {
     fontSize: 14,
     marginTop: 65,
     marginBottom: 35,
     textAlign: "center",
-    color: 'black', // Texto en blanco
+    color: 'black', 
   },
   GenderQuestion: {
     fontSize: 14,
     marginVertical: 20,
     marginTop: 110,
     textAlign: "center",
-    color: 'black', // Texto en blanco
+    color: 'black', 
   },
   questionHobies: {
     fontSize: 14,
     marginTop: 0,
     marginBottom: 35,
     textAlign: "center",
-    color: "#333333", // Change to a lighter shade of black
+    color: "#333333", 
     fontWeight: "bold",
   },
   questionInterests: {
@@ -70,7 +70,7 @@ export default StyleSheet.create({
     marginTop: 30,
     marginBottom: 35,
     textAlign: "center",
-    color: "#333333", // Change to a lighter shade of black
+    color: "#333333", 
     fontWeight: "bold",
   },
   nameContainer: {
@@ -170,13 +170,13 @@ export default StyleSheet.create({
   },
 
   interestsContainer: {
-    marginTop: 60, // Increase this value to add more vertical space
+    marginTop: 60, 
   },
 
   rowInputs: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 60, // Increase this value to add more vertical space
+    marginBottom: 60, 
   },
 
   about2Container:{
@@ -278,14 +278,20 @@ export default StyleSheet.create({
     width: "100%",
     height: 650,
   },
-  photo: {
+  imageContainer: {
     width: "100%",
     height: "100%",
-    borderRadius: 30,
+    overflow: "hidden",
   },
   photoPreview: {
     width: "100%",
     height: "100%",
+    backgroundColor: "transparent",
+  },
+  photo: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 30,
   },
   selectedOverlay: {
     position: "absolute",
@@ -380,7 +386,7 @@ export default StyleSheet.create({
   },
   languageContainer: {
     position: 'absolute',
-    top: 60, // Adjust this value to move the language selector down
+    top: 60, 
     right: 20,
     zIndex: 1,
   },
