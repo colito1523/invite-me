@@ -34,6 +34,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import styles from "./styles";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 import es from "../../locales/es.json";
 import en from "../../locales/en.json";
@@ -255,6 +256,12 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
   const navigation = useNavigation();
+  const [isCodeSent, setIsCodeSent] = useState(false);  // Código enviado
+const [emailVerified, setEmailVerified] = useState(false);  // Email verificado
+const [verificationCode, setVerificationCode] = useState("");  // Código ingresado
+const functions = getFunctions();
+const sendVerificationCodeFn = httpsCallable(functions, "sendVerificationCode");
+const verifyCodeFn = httpsCallable(functions, "verifyCode");
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -428,7 +435,7 @@ export default function SignUp() {
   const handleNext = async () => {
     setIsLoading(true);
     const currentQuestion = questions[currentQuestionIndex];
-
+  
     if (currentQuestion.id === "account") {
       if (!answers.firstName || !answers.lastName) {
         Alert.alert(t("signup.errors.emptyName"));
@@ -465,7 +472,8 @@ export default function SignUp() {
         setIsLoading(false);
         return;
       }
-      // Verifica si el email ya está en uso
+  
+      // 🚀 Verifica si el email ya está en uso
       const emailQuery = query(
         collection(database, "users"),
         where("email", "==", answers.email.trim().toLowerCase())
@@ -483,11 +491,34 @@ export default function SignUp() {
         setIsLoading(false);
         return;
       }
+  
+      // 🚀 **Si el código aún no ha sido enviado, enviarlo ahora**
+      if (!isCodeSent) {
+        try {
+          await sendVerificationCodeFn({ email: answers.email.trim().toLowerCase() });
+          setIsCodeSent(true);
+          Alert.alert("Código enviado", "Revisa tu email y escribe el código.");
+        } catch (error) {
+          console.error("Error enviando código:", error);
+          Alert.alert("Error", "No se pudo enviar el código.");
+        }
+        setIsLoading(false);
+        return;
+      }
+  
+      // 🚀 **Si el código fue enviado pero aún no verificado, no permitir avanzar**
+      if (!emailVerified) {
+        Alert.alert("Verifica tu email", "Debes ingresar el código antes de continuar.");
+        setIsLoading(false);
+        return;
+      }
+  
+      // 🚀 Verifica si el username ya está en uso
       const usernameQuery = query(
         collection(database, "users"),
         where("username", "==", answers.username.trim().toLowerCase())
       );
-
+  
       try {
         const usernameSnapshot = await getDocs(usernameQuery);
         if (!usernameSnapshot.empty) {
@@ -502,10 +533,10 @@ export default function SignUp() {
         return;
       }
     }
-
+  
     if (currentQuestion.id === "about") {
     }
-
+  
     if (currentQuestion.id === "about2") {
       // Aquí SÍ verificamos que haya 4 en total
       const totalSelected = [
@@ -514,13 +545,13 @@ export default function SignUp() {
         answers.interest3,
         answers.interest4,
       ].filter(Boolean).length; // filtra los que no estén vacíos
-
+  
       if (totalSelected < 4) {
         Alert.alert(t("signup.errors.selectFourInterests"));
         setIsLoading(false);
         return;
       }
-
+  
       if (
         !validateSingleWord(answers.interest1) ||
         !validateSingleWord(answers.interest2) ||
@@ -532,7 +563,7 @@ export default function SignUp() {
         return;
       }
     }
-
+  
     if (currentQuestion.id === "photos" && !answers.photo1) {
       setIsLoading(false);
       return;
@@ -545,7 +576,7 @@ export default function SignUp() {
       setIsLoading(false);
       return;
     }
-
+  
     if (currentQuestionIndex < questions.length - 2) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else if (currentQuestionIndex === questions.length - 2) {
@@ -553,6 +584,28 @@ export default function SignUp() {
     }
     setIsLoading(false);
   };
+  
+  const handleVerifyCode = async () => {
+    setIsLoading(true);
+    try {
+      const result = await verifyCodeFn({ 
+        email: answers.email.trim().toLowerCase(), 
+        code: verificationCode 
+      });
+  
+      if (result.data.success) {
+        setEmailVerified(true);
+        Alert.alert("✅ Verificado", "Email verificado correctamente.");
+      } else {
+        Alert.alert("❌ Código incorrecto", "Inténtalo de nuevo.");
+      }
+    } catch (error) {
+      console.error("Error verificando código:", error);
+      Alert.alert("❌ Error", "Código inválido o expirado.");
+    }
+    setIsLoading(false);
+  };
+  
 
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
@@ -808,77 +861,118 @@ export default function SignUp() {
             </Text>
           )}
 
-        {currentQuestion.id === "account" && (
-          <View>
-            <View style={styles.nameContainer}>
-              <TextInput
-                style={[styles.nameInput, { color: "#4b4b4b" }]}
-                placeholder={t("signup.placeholders.firstName")}
-                placeholderTextColor="#4b4b4b"
-                onChangeText={(text) => handleAnswer("firstName", text)}
-                value={answers.firstName}
-              />
-              <TextInput
-                style={[styles.nameInput, { color: "#4b4b4b" }]}
-                placeholder={t("signup.placeholders.lastName")}
-                placeholderTextColor="#4b4b4b"
-                onChangeText={(text) => handleAnswer("lastName", text)}
-                value={answers.lastName}
-              />
-            </View>
-            <TextInput
-              style={[styles.input, { color: "#4b4b4b" }]}
-              placeholder={t("signup.placeholders.email")}
-              placeholderTextColor="#4b4b4b"
-              onChangeText={(text) => handleAnswer("email", text)}
-              value={answers.email}
-              keyboardType="email-address"
-            />
-            <TextInput
-              style={[styles.inputShort, { color: "#4b4b4b" }]}
-              placeholder={t("signup.placeholders.username")}
-              placeholderTextColor="#4b4b4b"
-              onChangeText={(text) => handleAnswer("username", text)}
-              value={answers.username}
-            />
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={[styles.passwordInput, { color: "#4b4b4b" }]}
-                placeholder={t("signup.placeholders.password")}
-                placeholderTextColor="#4b4b4b"
-                onChangeText={(text) => handleAnswer("password", text)}
-                value={answers.password}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity
-                style={styles.eyeIconButton}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={20}
-                  color="gray"
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.termsContainer}>
-              <TouchableOpacity
-                style={styles.checkbox}
-                onPress={() => setAcceptedTerms(!acceptedTerms)}
-              >
-                {acceptedTerms && (
-                  <Ionicons name="checkmark" size={20} color="black" />
-                )}
-              </TouchableOpacity>
-              <View style={styles.termsTextContainer}>
-                <Text style={styles.termsText}>
-                  {t("signup.termsAndConditions.acceptText")}{" "}
-                </Text>
-                <TermsAndConditionsModal />
-              </View>
-            </View>
-          </View>
+{currentQuestion.id === "account" && (
+  <View>
+    {/* Nombre y Apellido */}
+    <View style={styles.nameContainer}>
+      <TextInput
+        style={[styles.nameInput, { color: "#4b4b4b" }]}
+        placeholder={t("signup.placeholders.firstName")}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("firstName", text)}
+        value={answers.firstName}
+      />
+      <TextInput
+        style={[styles.nameInput, { color: "#4b4b4b" }]}
+        placeholder={t("signup.placeholders.lastName")}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("lastName", text)}
+        value={answers.lastName}
+      />
+    </View>
+
+    {/* Email con verificación */}
+    <TextInput
+      style={[styles.input, { color: "#4b4b4b" }]}
+      placeholder={t("signup.placeholders.email")}
+      placeholderTextColor="#4b4b4b"
+      onChangeText={(text) => handleAnswer("email", text)}
+      value={answers.email}
+      keyboardType="email-address"
+      editable={!isCodeSent} // No permitir cambios después de enviar el código
+    />
+
+    {/* Si el código ya fue enviado pero no verificado, mostrar input para ingresarlo */}
+    {!emailVerified && isCodeSent && (
+      <>
+        <TextInput
+          style={[styles.input, { color: "#4b4b4b", marginTop: 10 }]}
+          placeholder="Ingresa el código de verificación"
+          placeholderTextColor="#4b4b4b"
+          onChangeText={(text) => setVerificationCode(text)}
+          value={verificationCode}
+          keyboardType="number-pad"
+        />
+        <TouchableOpacity
+          style={styles.verifyButton}
+          onPress={handleVerifyCode}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.verifyButtonText}>Verificar Código</Text>
+          )}
+        </TouchableOpacity>
+      </>
+    )}
+
+    {/* Si el código fue verificado, mostrar mensaje */}
+    {emailVerified && (
+      <Text style={{ color: "green", marginTop: 10 }}>✔️ Email verificado</Text>
+    )}
+
+    {/* Nombre de usuario */}
+    <TextInput
+      style={[styles.inputShort, { color: "#4b4b4b" }]}
+      placeholder={t("signup.placeholders.username")}
+      placeholderTextColor="#4b4b4b"
+      onChangeText={(text) => handleAnswer("username", text)}
+      value={answers.username}
+    />
+
+    {/* Contraseña con icono de visibilidad */}
+    <View style={styles.passwordContainer}>
+      <TextInput
+        style={[styles.passwordInput, { color: "#4b4b4b" }]}
+        placeholder={t("signup.placeholders.password")}
+        placeholderTextColor="#4b4b4b"
+        onChangeText={(text) => handleAnswer("password", text)}
+        value={answers.password}
+        secureTextEntry={!showPassword}
+      />
+      <TouchableOpacity
+        style={styles.eyeIconButton}
+        onPress={() => setShowPassword(!showPassword)}
+      >
+        <Ionicons
+          name={showPassword ? "eye-off" : "eye"}
+          size={20}
+          color="gray"
+        />
+      </TouchableOpacity>
+    </View>
+
+    {/* Términos y Condiciones */}
+    <View style={styles.termsContainer}>
+      <TouchableOpacity
+        style={styles.checkbox}
+        onPress={() => setAcceptedTerms(!acceptedTerms)}
+      >
+        {acceptedTerms && (
+          <Ionicons name="checkmark" size={20} color="black" />
         )}
+      </TouchableOpacity>
+      <View style={styles.termsTextContainer}>
+        <Text style={styles.termsText}>
+          {t("signup.termsAndConditions.acceptText")}{" "}
+        </Text>
+        <TermsAndConditionsModal />
+      </View>
+    </View>
+  </View>
+)}
+
 
         {currentQuestion.id === "ageGender" && (
           <Animated.View
