@@ -31,7 +31,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import styles from "./styles";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { handleNext, handleVerifyCode } from "./utils";
+import { handleNext, handleVerifyCode, chunkArray  } from "./utils";
 
 
 import es from "../../locales/es.json";
@@ -95,13 +95,6 @@ const interestKeysGroup2 = [
   "stayingIn",
 ];
 
-function chunkArray(array, size) {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
-}
 
 function AgeSelector({ onAgeChange, initialAge }) {
   const [selectedAge, setSelectedAge] = useState(initialAge);
