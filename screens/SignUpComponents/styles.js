@@ -255,10 +255,10 @@ export default StyleSheet.create({
     width: width * 0.8,
     height: width * 1.2,
     backgroundColor: "rgba(239, 232, 228, 0.7)",
-    borderRadius: 40,
+    borderRadius: 30,
+    overflow: "hidden", // Evita que la imagen se salga del contenedor
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
     position: "relative",
   },
   numberContainer: {
@@ -281,7 +281,7 @@ export default StyleSheet.create({
   imageContainer: {
     width: "100%",
     height: "100%",
-    overflow: "hidden",
+    position: "absolute",
   },
   photoPreview: {
     width: "100%",
@@ -292,6 +292,7 @@ export default StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 30,
+    resizeMode: "contain",
   },
   selectedOverlay: {
     position: "absolute",
