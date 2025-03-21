@@ -517,10 +517,9 @@ export default StyleSheet.create({
   },
   verifyButtonText: {
     color: "black",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 13,
     textTransform: "uppercase", // Letras en mayúscula para más presencia
-    letterSpacing: 1, // Espaciado para mayor claridad
+    
   },
   closeModalButton: {
     paddingVertical: 10,
@@ -543,7 +542,7 @@ export default StyleSheet.create({
     width: "100%",
   },
   resendButtonText: {
-    color: "#ebddd5", // Verde moderno
+    color: "#d6c8c0", // Verde moderno
     fontSize: 14,
     fontWeight: "bold",
     textTransform: "uppercase",
