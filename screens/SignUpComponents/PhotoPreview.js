@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { Image } from "expo-image";
+import { Image } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { GestureDetector, GestureHandlerRootView, Gesture } from "react-native-gesture-handler";
 import { runOnJS, useDerivedValue } from "react-native-reanimated";
+import { Image as ExpoImage } from "expo-image"; // para renderizar
+import { Image as RNImage } from "react-native";  // para medir
 import * as ImageManipulator from "expo-image-manipulator";
 import Animated, {
   useSharedValue,
@@ -49,32 +51,45 @@ export default function PhotoPreview({
   };
 
   const cropVisibleRegion = async (scaleVal, translateXVal, translateYVal) => {
-    const scaledWidth = containerSize.width * scaleVal;
-    const scaledHeight = containerSize.height * scaleVal;
-
-    const offsetX = (scaledWidth - containerSize.width) / 2 - translateXVal;
-    const offsetY = (scaledHeight - containerSize.height) / 2 - translateYVal;
-
-    const cropConfig = {
-      originX: Math.max(offsetX, 0),
-      originY: Math.max(offsetY, 0),
-      width: containerSize.width,
-      height: containerSize.height,
-    };
-
     try {
+      // 1. Obtener tamaño real de la imagen original
+      const imageSize = await new Promise((resolve, reject) => {
+        RNImage.getSize(
+          photo,
+          (width, height) => resolve({ width, height }),
+          (error) => reject(error)
+        );
+      });
+      const { width: imageWidth, height: imageHeight } = imageSize;  
+      // 2. Calcular escalado respecto al contenedor visible
+      const scaleRatioX = imageWidth / (containerSize.width * scaleVal);
+      const scaleRatioY = imageHeight / (containerSize.height * scaleVal);
+  
+      // 3. Calcular desplazamiento relativo
+      const offsetX = (translateXVal * scaleRatioX) + (imageWidth - containerSize.width * scaleRatioX) / 2;
+      const offsetY = (translateYVal * scaleRatioY) + (imageHeight - containerSize.height * scaleRatioY) / 2;
+  
+      // 4. Recorte exacto respecto a la imagen original
+      const cropConfig = {
+        originX: Math.max(offsetX, 0),
+        originY: Math.max(offsetY, 0),
+        width: containerSize.width * scaleRatioX,
+        height: containerSize.height * scaleRatioY,
+      };
+  
       const result = await ImageManipulator.manipulateAsync(
         photo,
         [{ crop: cropConfig }],
         { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
       );
-
+  
       handleAnswer(`photo${photoNumber}`, result.uri);
       console.log("✅ Imagen recortada guardada:", result.uri);
     } catch (err) {
       console.error("❌ Error al recortar imagen:", err);
     }
   };
+  
 
   useDerivedValue(() => {
     if (shouldCrop.value) {
