@@ -78,6 +78,7 @@ export default function PhotoPreview({
       // Guardamos posición inicial
       startX.value = translateX.value;
       startY.value = translateY.value;
+      console.log("📍 Posición inicial:", startX.value, startY.value); 
     })
     .onUpdate((event) => {
       // Calcula la traslación con factor de sensibilidad
@@ -86,19 +87,43 @@ export default function PhotoPreview({
       // Sumamos a la posición inicial
       translateX.value = startX.value + dx;
       translateY.value = startY.value + dy;
+      console.log("🔄 Posición actual:", translateX.value, translateY.value); // 👈 AÑADIR ACÁ
     })
     .onEnd(() => {
-      // Al soltar, calculamos los límites
       const scaledWidth = containerSize.width * scale.value;
       const scaledHeight = containerSize.height * scale.value;
-
+    
       const maxX = (scaledWidth - containerSize.width) / 2;
       const maxY = (scaledHeight - containerSize.height) / 2;
-
-      // Forzamos a quedar dentro del contenedor
-      translateX.value = withSpring(clamp(translateX.value, -maxX, maxX));
-      translateY.value = withSpring(clamp(translateY.value, -maxY, maxY));
-    });
+    
+      // Clamp
+      const clampedX = clamp(translateX.value, -maxX, maxX);
+      const clampedY = clamp(translateY.value, -maxY, maxY);
+    
+      translateX.value = withSpring(clampedX);
+      translateY.value = withSpring(clampedY);
+    
+      console.log("✅ Posición final (clamp):", clampedX, clampedY);
+    
+      // ---- Cálculo de recorte en la imagen original ----
+    
+      // Proporción de desplazamiento en la imagen original
+      const offsetX = (scaledWidth - containerSize.width) / 2 - clampedX;
+      const offsetY = (scaledHeight - containerSize.height) / 2 - clampedY;
+    
+      const visibleX = offsetX / scaledWidth;
+      const visibleY = offsetY / scaledHeight;
+    
+      const visibleWidth = containerSize.width / scaledWidth;
+      const visibleHeight = containerSize.height / scaledHeight;
+    
+      console.log("📸 Región visible relativa:");
+      console.log("X:", visibleX.toFixed(3));
+      console.log("Y:", visibleY.toFixed(3));
+      console.log("Width:", visibleWidth.toFixed(3));
+      console.log("Height:", visibleHeight.toFixed(3));
+    })
+    
 
   // Combinamos ambos gestos
   const composedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
