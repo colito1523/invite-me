@@ -249,8 +249,12 @@ export default StyleSheet.create({
     color: "#999",
   },
   photoContainer: {
+    // El View padre que encapsula todo
     alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 10,
   },
+  
   photoPlaceholder: {
     width: width * 0.8,
     height: width * 1.2,
@@ -281,18 +285,18 @@ export default StyleSheet.create({
   imageContainer: {
     width: "100%",
     height: "100%",
-    position: "absolute",
+
   },
   photoPreview: {
     width: "100%",
     height: "100%",
     backgroundColor: "transparent",
   },
+
   photo: {
     width: "100%",
     height: "100%",
-    borderRadius: 30,
-    resizeMode: "contain",
+    // Nota: con expo-image se usa contentFit="cover" en la prop
   },
   selectedOverlay: {
     position: "absolute",
