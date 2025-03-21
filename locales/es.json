@@ -344,6 +344,16 @@
     "weeks": "Sem"
   },
 
+  "camera": {
+    "permissionRequired": "Necesitamos tu permiso para mostrar la cámara"
+  },
+  "gallery": {
+    "permissionRequired": "Se requiere permiso para acceder a la galería",
+    "imagesOnly": "Solo se pueden seleccionar imágenes en este modo.",
+    "videoTooLong": "El video no puede durar más de 2 minutos.",
+    "errorOpening": "Hubo un error al abrir la galería. Por favor, intenta nuevamente."
+  },
+
   "notifications": {
     "deleteNotificationTitle": "Eliminar notificación",
     "deleteNotificationMessage": "¿Estás seguro de que deseas eliminar esta notificación?",

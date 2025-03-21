@@ -6,7 +6,8 @@ import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from '
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { debounce } from 'lodash';
-import { PinchGestureHandler, State } from 'react-native-gesture-handler';
+import { PinchGestureHandler } from 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
 
 export default function Camera() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -14,6 +15,7 @@ export default function Camera() {
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<any>(null);
   const [zoom, setZoom] = useState(0);
+  const { t } = useTranslation();
 
   const cameraRef = useRef<CameraView | null>(null);
 
@@ -26,14 +28,13 @@ export default function Camera() {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        alert('Permission is required to access the gallery');
+        alert(t('gallery.permissionRequired'));
         return;
       }
   
-      // Verificar si el modo es "chat", permitiendo imágenes y videos. De lo contrario, solo imágenes.
-      const mediaTypes = route.params?.mode === "chat" 
-        ? ImagePicker.MediaTypeOptions.All  // Permite imágenes y videos
-        : ImagePicker.MediaTypeOptions.Images; // Solo imágenes
+      const mediaTypes = route.params?.mode === "chat"
+        ? ImagePicker.MediaTypeOptions.All
+        : ImagePicker.MediaTypeOptions.Images;
   
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: mediaTypes,
@@ -44,9 +45,24 @@ export default function Camera() {
       if (!result.canceled && result.assets?.[0]) {
         const selectedAsset = result.assets[0];
   
-        if (selectedAsset.type === "video" && route.params?.mode !== "chat") {
-          alert("Solo se pueden seleccionar imágenes en este modo.");
-          return;
+        if (selectedAsset.type === "video") {
+          if (route.params?.mode !== "chat") {
+            alert(t('gallery.imagesOnly'));
+            return;
+          }
+  
+          // Verificar duración del video (normalizado)
+          let durationInSeconds = Number(selectedAsset.duration);
+          if (durationInSeconds > 300) {
+            durationInSeconds = durationInSeconds / 1000;
+          }
+  
+          console.log("Duración del video en segundos:", durationInSeconds);
+  
+          if (durationInSeconds > 120) {
+            alert(t('gallery.videoTooLong'));
+            return;
+          }
         }
   
         setPhoto({
@@ -55,11 +71,13 @@ export default function Camera() {
           type: selectedAsset.type,
         });
       }
+  
     } catch (error) {
       console.error("Error al abrir la galería:", error);
-      alert("Hubo un error al abrir la galería. Por favor, intenta nuevamente.");
+      alert(t('gallery.errorOpening'));
     }
   };
+  
   
   
 
@@ -80,7 +98,7 @@ export default function Camera() {
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
+        <Text style={{ textAlign: 'center' }}>{t('camera.permissionRequired')}</Text>
         <Button onPress={requestPermission} title="grant permission" />
       </View>
     );

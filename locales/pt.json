@@ -194,6 +194,15 @@
   "cancel": "Cancelar",
   "saving": "A guardar..."
 },
+"camera": {
+    "permissionRequired": "Precisamos da tua permissão para mostrar a câmara"
+  },
+"gallery": {
+    "permissionRequired": "É necessário permissão para aceder à galeria",
+    "imagesOnly": "Só é possível selecionar imagens neste modo.",
+    "videoTooLong": "O vídeo não pode ter mais de 2 minutos.",
+    "errorOpening": "Ocorreu um erro ao abrir a galeria. Por favor, tenta novamente."
+  },
 
 "header": {
   "backButton": "Voltar",

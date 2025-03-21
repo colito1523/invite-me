@@ -106,9 +106,9 @@ const NameDisplay = React.memo(
             onPress={handleFriendCountClick}
             style={styles.friendCountContainer}
           >
-            <Text style={styles.friendsText}>
-              {friendCount > 0 ? friendCount : t("profile.loading")}
-            </Text>
+           <Text style={styles.friendsText}>
+  {friendCount !== null ? friendCount : t("profile.loading")}
+</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -123,7 +123,7 @@ export default function Profile({ navigation }) {
   const [photoUrls, setPhotoUrls] = useState(["", "", ""]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
-  const [friendCount, setFriendCount] = useState(0);
+  const [friendCount, setFriendCount] = useState(null);
   const [events, setEvents] = useState([]);
   const [isNightMode, setIsNightMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
