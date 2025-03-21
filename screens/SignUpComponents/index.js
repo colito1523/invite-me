@@ -454,6 +454,7 @@ export default function SignUp() {
 
 {currentQuestion.id === "preview1" && (
   <PhotoPreview
+  key={answers.photo1} // 👈 esto fuerza el remount cuando cambia la URI
     photo={answers.photo1}
     photoNumber={1}
     name={`${answers.firstName} ${answers.lastName}`}
@@ -461,6 +462,7 @@ export default function SignUp() {
     showIcons={false}
     translateInterestKey={translateInterestKey}
     t={t}
+    handleAnswer={handleAnswer} 
   />
 )}
 
@@ -474,6 +476,7 @@ export default function SignUp() {
 
 {currentQuestion.id === "preview2" && (
   <PhotoPreview
+  key={answers.photo2} // 👈 esto fuerza el remount cuando cambia la URI
     photo={answers.photo2}
     photoNumber={2}
     name={`${answers.firstName} ${answers.lastName}`}
@@ -481,6 +484,7 @@ export default function SignUp() {
     showIcons={false}
     translateInterestKey={translateInterestKey}
     t={t}
+    handleAnswer={handleAnswer} 
   />
 )}
 
@@ -494,6 +498,7 @@ export default function SignUp() {
 
 {currentQuestion.id === "finalPreview" && (
   <PhotoPreview
+  key={answers.photo3} // 👈 esto fuerza el remount cuando cambia la URI
     photo={answers.photo3}
     photoNumber={3}
     name={`${answers.firstName} ${answers.lastName}`}
@@ -506,6 +511,7 @@ export default function SignUp() {
     showIcons={true}
     translateInterestKey={translateInterestKey}
     t={t}
+    handleAnswer={handleAnswer} 
   />
 )}
 
