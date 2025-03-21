@@ -30,10 +30,10 @@ const AccountForm = ({
     setIsLoading(true);
     try {
       await sendVerificationCodeFn({ email: answers.email.trim().toLowerCase() });
-      Alert.alert("Código reenviado", "Hemos enviado un nuevo código a tu correo.");
+      Alert.alert(t('signup.AlertVerificationResendCode'), t('signup.AlertVerificationResendCodeDetail'));
     } catch (error) {
       console.error("Error re-enviando código:", error);
-      Alert.alert("Error", "No se pudo reenviar el código. Intenta nuevamente.");
+      Alert.alert(t('signup.error'), t('signup.CouldNotBeResent'));
     }
     setIsLoading(false);
   };
@@ -113,10 +113,10 @@ const AccountForm = ({
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Verificación de Email</Text>
+            <Text style={styles.modalTitle}>{t("signup.EmailVerificationTittle")}</Text>
             <TextInput
-              style={styles.modalInput}
-              placeholder="Ingresa el código de verificación"
+              style={styles.modalInput} 
+              placeholder= {t("signup.EmailVerificationplaceholder")}
               placeholderTextColor="#4b4b4b"
               onChangeText={(text) => setVerificationCode(text)}
               value={verificationCode}
@@ -140,17 +140,17 @@ const AccountForm = ({
               {isLoading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={styles.verifyButtonText}>Verificar Código</Text>
+                <Text style={styles.verifyButtonText}>{t("signup.EmailVerificationButtomCode")}</Text>
               )}
             </TouchableOpacity>
 
             {/* Botón para reenviar código */}
             <TouchableOpacity style={styles.resendButton} onPress={handleResendCode} disabled={isLoading}>
-              <Text style={styles.resendButtonText}>Reenviar Código</Text>
+              <Text style={styles.resendButtonText}>{t("signup.EmailVerificationResendCode")}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.closeModalButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeModalText}>Cerrar</Text>
+              <Text style={styles.closeModalText}>{t("blockedUsers.closeButtonText")}</Text>
             </TouchableOpacity>
           </View>
         </View>

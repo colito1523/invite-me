@@ -780,6 +780,30 @@
   },
 
   "signup": {
+    "EmailVerificationTittle":"Email Verification", 
+    "EmailVerificationplaceholder":"Enter the verification code",
+    "EmailVerificationButtomCode":"Verify Code",
+    "EmailVerificationResendCode":"Resend Code",
+    "AlertVerificationResendCode":"Code resent",
+    "AlertVerificationResendCodeDetail":"We’ve sent a new code to your email.",
+    "Error":"Error",
+    "CouldNotBeResent":"The code could not be resent. Please try again.",
+
+    "alerts": {
+    "good":"Verified",
+    "goodVerification":"Email verified successfully.",
+    "codeSentTitle": "Code sent",
+    "codeSentBody": "Check your email and enter the code.",
+    "verifyTitle": "Verify your email",
+    "verifyBody": "You must enter the code before continuing.",
+    "invalidCodeTitle": "❌ Incorrect code",
+    "invalidCodeBody": "Please try again.",
+    "codeError": "❌ Error",
+    "codeExpired": "Invalid or expired code.",
+    "codeResendFailed": "Could not resend the code. Please try again."
+
+  },
+
     "questions": {
       "account": "Let's create your account together!",
       "ageGender": "What's your age?",
@@ -792,6 +816,7 @@
       "welcome": "Welcome to Invite Me!",
       "hobbies": "What's two of your favourite hobbies?",
       "interests": "What's some of your interests?"
+      
     },
     "placeholders": {
       "firstName": "First Name",
@@ -859,7 +884,6 @@
       "subtitle": "Welcome to Invite Me, Where great experiences await you."
     }
   },
-
   "accessRequiredTitle": "Access required",
   "accessRequiredMessage": "To access all features, please log in.",
   "cancel": "Cancel",

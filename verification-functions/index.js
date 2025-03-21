@@ -14,9 +14,9 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: functions.config().email.user, 
-    pass: functions.config().email.pass
-  }
+    user: functions.config().email.user,
+    pass: functions.config().email.pass,
+  },
 });
 
 /**
@@ -28,7 +28,10 @@ const transporter = nodemailer.createTransport({
 exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
   const { email } = data;
   if (!email) {
-    throw new functions.https.HttpsError("invalid-argument", "Email is required.");
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "Email is required."
+    );
   }
 
   // Generar OTP
@@ -43,16 +46,24 @@ exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
 
   // Enviar correo
   const mailOptions = {
-    from: "TuApp <tu_correo@gmail.com>",
+    from: "Invite Me <tu_correo@gmail.com>",
     to: email,
-    subject: "Código de verificación",
-    text: `Tu código es: ${code}`
+    subject: "Your Invite Me Verification Code",
+    text: `Hello!
+
+Thank you for signing up for Invite Me! To verify your email and complete your registration, please enter the following code in the app:
+
+${code}
+
+This code will expire in 5 minutes. If you didn´t request this, you can ignore this email.
+
+See you inside!
+The Invite Me Team`,
   };
   await transporter.sendMail(mailOptions);
 
   return { success: true };
 });
-
 
 /**
  * verifyCode
@@ -64,7 +75,10 @@ exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
 exports.verifyCode = functions.https.onCall(async (data, context) => {
   const { email, code } = data;
   if (!email || !code) {
-    throw new functions.https.HttpsError("invalid-argument", "Email and code are required.");
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "Email and code are required."
+    );
   }
 
   const docRef = db.collection("emailVerifications").doc(email);
@@ -76,16 +90,22 @@ exports.verifyCode = functions.https.onCall(async (data, context) => {
   const { code: storedCode, createdAt, verified } = docSnap.data();
 
   if (verified) {
-    throw new functions.https.HttpsError("already-exists", "Email already verified.");
+    throw new functions.https.HttpsError(
+      "already-exists",
+      "Email already verified."
+    );
   }
   if (storedCode !== code) {
-    throw new functions.https.HttpsError("failed-precondition", "Incorrect code.");
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "Incorrect code."
+    );
   }
 
   // Ejemplo: expira a los 5 min (300 seg)
   const now = admin.firestore.Timestamp.now();
   const diffSeconds = now.seconds - createdAt.seconds;
-  if (diffSeconds > 300) {
+  if (diffSeconds > 600) {
     throw new functions.https.HttpsError("deadline-exceeded", "Code expired.");
   }
 

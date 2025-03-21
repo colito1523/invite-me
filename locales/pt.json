@@ -753,6 +753,14 @@
 },
 
   "signup": {
+    "EmailVerificationTittle":"Verificação de Email",
+    "EmailVerificationplaceholder":"Introduz o código de verificação",
+    "EmailVerificationButtomCode":"Verificar Código",
+    "EmailVerificationResendCode":"Reenviar Código",
+     "AlertVerificationResendCode":"Código reenviado",
+     "AlertVerificationResendCodeDetail":"Enviámos um novo código para o teu e-mail.",
+     "Error":"Erro",
+     "CouldNotBeResent":"Não foi possível reenviar o código. Tenta novamente.",
     "questions": {
       "account": "Vamos criar a tua conta juntos!",
       "ageGender": "Qual é a tua idade?",
@@ -765,6 +773,20 @@
       "welcome": "Bem-vindo ao Invite Me!",
       "hobbies": "Quais são dois dos seus hobbies favoritos?",
       "interests": "Quais são alguns dos seus interesses?"
+    },
+
+    "alerts": {
+      "good":"Verificado",
+    "goodVerification":"E-mail verificado com sucesso.",
+      "codeSentTitle": "Código enviado",
+      "codeSentBody": "Verifica o teu e-mail e introduz o código.",
+      "verifyTitle": "Verifica o teu e-mail",
+      "verifyBody": "Tens de introduzir o código antes de continuar.",
+      "invalidCodeTitle": "❌ Código incorreto",
+      "invalidCodeBody": "Tenta novamente.",
+      "codeError": "❌ Erro",
+      "codeExpired": "Código inválido ou expirado.",
+      "codeResendFailed": "Não foi possível reenviar o código. Tenta novamente."
     },
     "placeholders": {
       "firstName": "Nome",

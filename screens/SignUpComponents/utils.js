@@ -94,17 +94,20 @@ export const handleNext = async ({
         await sendVerificationCodeFn({ email: answers.email.trim().toLowerCase() });
         setIsCodeSent(true);
         Alert.alert(
-          "Código enviado",
-          "Revisa tu email y escribe el código.",
+          t("signup.alerts.codeSentTitle"),
+          t("signup.alerts.codeSentBody"),
           [{ text: "OK", onPress: () => setModalVisible(true) }] // Se abre el modal tras confirmar
         );
       } catch (error) {
-        console.error("Error sending code:", error);
-        Alert.alert("Error", "No se pudo enviar el código.");
-      }
-      setIsLoading(false);
-      return;
-    }
+    console.error("Error sending code:", error);
+    Alert.alert(
+      t("signup.alerts.codeError"),
+      t("signup.alerts.codeResendFailed") // Podés agregar esta nueva clave si querés traducir también el error
+    );
+  }
+  setIsLoading(false);
+  return;
+}
 
     // Si el código fue enviado pero aún no verificado, no permitir avanzar
     if (!emailVerified) {
@@ -215,13 +218,22 @@ export const handleVerifyCode = async ({
     });
     if (result.data.success) {
       setEmailVerified(true);
-      Alert.alert("✅ Verificado", "Email verificado correctamente.");
+      Alert.alert(
+        t("signup.alerts.good"),
+        t("signup.alerts.goodVerification") // Podés agregar esta nueva clave si querés traducir también el error
+      );
     } else {
-      Alert.alert("❌ Código incorrecto", "Inténtalo de nuevo.");
+      Alert.alert(
+        t("signup.alerts.invalidCodeTitle"),
+        t("signup.alerts.invalidCodeBody") // Podés agregar esta nueva clave si querés traducir también el error
+      );
     }
   } catch (error) {
     console.error("Error verificando código:", error);
-    Alert.alert("❌ Error", "Código inválido o expirado.");
+    Alert.alert(
+      t("signup.alerts.codeError"),
+      t("signup.alerts.codeExpired") // Podés agregar esta nueva clave si querés traducir también el error
+    );
   }
   setIsLoading(false);
 };

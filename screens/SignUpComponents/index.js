@@ -17,7 +17,6 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database } from "../../config/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
-import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
