@@ -52,29 +52,46 @@ export default function PhotoPreview({
 
   const cropVisibleRegion = async (scaleVal, translateXVal, translateYVal) => {
     try {
-      // 1. Obtener tamaño real de la imagen original
       const imageSize = await new Promise((resolve, reject) => {
-        RNImage.getSize(
-          photo,
-          (width, height) => resolve({ width, height }),
-          (error) => reject(error)
-        );
+        RNImage.getSize(photo, (width, height) => resolve({ width, height }), reject);
       });
-      const { width: imageWidth, height: imageHeight } = imageSize;  
-      // 2. Calcular escalado respecto al contenedor visible
-      const scaleRatioX = imageWidth / (containerSize.width * scaleVal);
-      const scaleRatioY = imageHeight / (containerSize.height * scaleVal);
+      const { width: imageWidth, height: imageHeight } = imageSize;
   
-      // 3. Calcular desplazamiento relativo
-      const offsetX = (translateXVal * scaleRatioX) + (imageWidth - containerSize.width * scaleRatioX) / 2;
-      const offsetY = (translateYVal * scaleRatioY) + (imageHeight - containerSize.height * scaleRatioY) / 2;
+      const containerRatio = containerSize.width / containerSize.height;
+      const imageRatio = imageWidth / imageHeight;
   
-      // 4. Recorte exacto respecto a la imagen original
+      let fittedWidth, fittedHeight;
+      if (imageRatio > containerRatio) {
+        // Imagen más ancha que el contenedor → recorte horizontal
+        fittedHeight = containerSize.height;
+        fittedWidth = containerSize.height * imageRatio;
+      } else {
+        // Imagen más alta que el contenedor → recorte vertical
+        fittedWidth = containerSize.width;
+        fittedHeight = containerSize.width / imageRatio;
+      }
+  
+      // Escala total aplicada (zoom + ajuste de cover)
+      const totalScale = scaleVal;
+      const scaledWidth = fittedWidth * totalScale;
+      const scaledHeight = fittedHeight * totalScale;
+  
+      // Offset visual del centro desplazado
+      const offsetX = (scaledWidth - containerSize.width) / 2 - translateXVal;
+      const offsetY = (scaledHeight - containerSize.height) / 2 - translateYVal;
+  
+      // Proporciones relativas respecto a imagen renderizada
+      const visibleXRatio = offsetX / scaledWidth;
+      const visibleYRatio = offsetY / scaledHeight;
+      const visibleWRatio = containerSize.width / scaledWidth;
+      const visibleHRatio = containerSize.height / scaledHeight;
+  
+      // Convertimos a coordenadas reales sobre la imagen original
       const cropConfig = {
-        originX: Math.max(offsetX, 0),
-        originY: Math.max(offsetY, 0),
-        width: containerSize.width * scaleRatioX,
-        height: containerSize.height * scaleRatioY,
+        originX: Math.max(visibleXRatio * imageWidth, 0),
+        originY: Math.max(visibleYRatio * imageHeight, 0),
+        width: visibleWRatio * imageWidth,
+        height: visibleHRatio * imageHeight,
       };
   
       const result = await ImageManipulator.manipulateAsync(
@@ -84,11 +101,12 @@ export default function PhotoPreview({
       );
   
       handleAnswer(`photo${photoNumber}`, result.uri);
-      console.log("✅ Imagen recortada guardada:", result.uri);
+      console.log("✅ Imagen recortada correctamente:", result.uri);
     } catch (err) {
       console.error("❌ Error al recortar imagen:", err);
     }
   };
+  
   
 
   useDerivedValue(() => {
