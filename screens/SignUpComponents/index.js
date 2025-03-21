@@ -152,6 +152,7 @@ export default function SignUp() {
 
   const handleLanguageChange = (langCode) => {
     changeLanguage(langCode);
+    setAnswers((prev) => ({ ...prev, preferredLanguage: langCode }));
     setIsLanguageOptionsVisible(false);
   };
 
@@ -397,6 +398,7 @@ export default function SignUp() {
     modalVisible={modalVisible}         // Se pasa la visibilidad del modal
     setModalVisible={setModalVisible}
     sendVerificationCodeFn={sendVerificationCodeFn} 
+    preferredLanguage={selectedLanguage} // <--- agregar esto
   />
 )}
 
@@ -551,39 +553,45 @@ export default function SignUp() {
             </TouchableOpacity>
           )}
           {currentQuestionIndex < questions.length - 1 && (
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={() =>
-                handleNext({
-                  currentQuestionIndex,
-                  questions,
-                  answers,
-                  acceptedTerms,
-                  setIsLoading,
-                  setCurrentQuestionIndex,
-                  handleSubmit,
-                  t,
-                  validateName,
-                  validateEmail,
-                  validateUsername,
-                  validatePassword,
-                  validateSingleWord,
-                  database,
-                  sendVerificationCodeFn,
-                  isCodeSent,
-                  setIsCodeSent,
-                  emailVerified,
-                  setModalVisible,
-                })
-              }
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#000" />
-              ) : (
-                <AntDesign name="right" size={24} color="black" />
-              )}
-            </TouchableOpacity>
+           <TouchableOpacity
+           style={styles.nextButton}
+           onPress={() => {
+             const enrichedAnswers = {
+               ...answers,
+               preferredLanguage: selectedLanguage, // 👈 añadimos el idioma actual
+             };
+         
+             handleNext({
+               currentQuestionIndex,
+               questions,
+               answers: enrichedAnswers, // 👈 usamos el objeto enriquecido
+               acceptedTerms,
+               setIsLoading,
+               setCurrentQuestionIndex,
+               handleSubmit,
+               t,
+               validateName,
+               validateEmail,
+               validateUsername,
+               validatePassword,
+               validateSingleWord,
+               database,
+               sendVerificationCodeFn,
+               isCodeSent,
+               setIsCodeSent,
+               emailVerified,
+               setModalVisible,
+             });
+           }}
+           disabled={isLoading}
+         >
+           {isLoading ? (
+             <ActivityIndicator size="small" color="#000" />
+           ) : (
+             <AntDesign name="right" size={24} color="black" />
+           )}
+         </TouchableOpacity>
+         
           )}
         </View>
       </ScrollView>

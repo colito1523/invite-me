@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
  * 3) Envía un correo al usuario con ese código
  */
 exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
-  const { email } = data;
+  const { email, language = "en" } = data;
   if (!email) {
     throw new functions.https.HttpsError(
       "invalid-argument",
@@ -34,32 +34,66 @@ exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
     );
   }
 
-  // Generar OTP
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Guardar en Firestore
   await db.collection("emailVerifications").doc(email).set({
     code,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     verified: false,
   });
 
-  // Enviar correo
-  const mailOptions = {
-    from: "Invite Me <tu_correo@gmail.com>",
-    to: email,
-    subject: "Your Invite Me Verification Code",
-    text: `Hello!
+  // Traducciones
+  const translations = {
+    es: {
+      subject: "Tu código de verificación de Invite Me",
+      text: `¡Hola!
+
+Gracias por registrarte en Invite Me. Para verificar tu correo electrónico y completar tu registro, por favor ingresa el siguiente código en la app:
+
+${code}
+
+Este código expirará en 10 minutos. Si no solicitaste esto, simplemente ignora este mensaje.
+
+¡Nos vemos adentro!
+El equipo de Invite Me`,
+    },
+    en: {
+      subject: "Your Invite Me Verification Code",
+      text: `Hello!
 
 Thank you for signing up for Invite Me! To verify your email and complete your registration, please enter the following code in the app:
 
 ${code}
 
-This code will expire in 5 minutes. If you didn´t request this, you can ignore this email.
+This code will expire in 10 minutes. If you didn't request this, you can ignore this email.
 
 See you inside!
 The Invite Me Team`,
+    },
+    pt: {
+      subject: "O teu código de verificação do Invite Me",
+      text: `Olá!
+
+Obrigado por te registares no Invite Me. Para verificares o teu e-mail e completares o registo, introduz o seguinte código na app:
+
+${code}
+
+Este código expira em 10 minutos. Se não foste tu a solicitar isto, ignora este e-mail.
+
+Até já!
+A equipa do Invite Me`,
+    },
   };
+
+  const selected = translations[language] || translations["en"];
+
+  const mailOptions = {
+    from: "Invite Me <tu_correo@gmail.com>",
+    to: email,
+    subject: selected.subject,
+    text: selected.text,
+  };
+
   await transporter.sendMail(mailOptions);
 
   return { success: true };

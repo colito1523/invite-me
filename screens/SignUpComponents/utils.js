@@ -91,7 +91,10 @@ export const handleNext = async ({
     // Si el código aún no se ha enviado, envíalo ahora
     if (!isCodeSent) {
       try {
-        await sendVerificationCodeFn({ email: answers.email.trim().toLowerCase() });
+        await sendVerificationCodeFn({
+          email: answers.email.trim().toLowerCase(),
+          language: answers.preferredLanguage || "en", // asegurate de que esto esté disponible
+        });
         setIsCodeSent(true);
         Alert.alert(
           t("signup.alerts.codeSentTitle"),

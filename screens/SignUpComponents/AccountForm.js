@@ -24,12 +24,16 @@ const AccountForm = ({
   modalVisible,      // Nuevo prop
   setModalVisible, 
   sendVerificationCodeFn,
+  preferredLanguage,
 }) => {
 
   const handleResendCode = async () => {
     setIsLoading(true);
     try {
-      await sendVerificationCodeFn({ email: answers.email.trim().toLowerCase() });
+      await sendVerificationCodeFn({ 
+        email: answers.email.trim().toLowerCase(),
+        language: preferredLanguage || "en", // usa el idioma si existe
+      });
       Alert.alert(t('signup.AlertVerificationResendCode'), t('signup.AlertVerificationResendCodeDetail'));
     } catch (error) {
       console.error("Error re-enviando código:", error);
