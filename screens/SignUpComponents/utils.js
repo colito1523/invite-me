@@ -112,9 +112,9 @@ export const handleNext = async ({
     // Si el código fue enviado pero aún no verificado, no permitir avanzar
     if (!emailVerified) {
       Alert.alert(
-        "Verifica tu email",
-        "Debes ingresar el código antes de continuar.",
-        [{ text: "OK", onPress: () => setModalVisible(true) }] // Se abre el modal tras confirmar
+        t("signup.alerts.verifyTitle"),
+        t("signup.alerts.verifyBody"),
+        [{ text: "OK", onPress: () => setModalVisible(true) }]
       );
       setIsLoading(false);
       return;
