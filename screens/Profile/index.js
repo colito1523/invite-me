@@ -33,6 +33,7 @@ import MenuSection from "../ProfileComponents/MenuSection";
 import EventsSection from "../ProfileComponents/EventsSection";
 import { FlatList } from "react-native-gesture-handler";
 import { styles } from "./styles";
+import EditablePhoto from "./EditablePhoto";
 import {
   fetchUserData,
   setFetchUserData,
@@ -516,15 +517,28 @@ export default function Profile({ navigation }) {
                     onLongPress={handleLongPress}
                     onPressOut={handlePressOut}
                   >
-                    <Image
-                      source={{ uri: item }}
-                      style={styles.backgroundImage}
-                      contentFit="cover"
-                      cachePolicy="memory-disk"
-                      priority="high"
-                      placeholderContentFit="cover"
-                      transition={0}
-                    />
+                   {isEditing ? (
+  <EditablePhoto
+    uri={item}
+    index={index}
+    onSave={(newUri) => {
+      const updated = [...photoUrls];
+      updated[index] = newUri;
+      setPhotoUrls(updated);
+    }}
+  />
+) : (
+  <Image
+    source={{ uri: item }}
+    style={styles.backgroundImage}
+    contentFit="cover"
+    cachePolicy="memory-disk"
+    priority="high"
+    placeholderContentFit="cover"
+    transition={0}
+  />
+)}
+
 
                     {isElementsVisible && (
                       <View style={styles.overlay}>
