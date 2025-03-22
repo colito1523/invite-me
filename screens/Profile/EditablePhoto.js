@@ -51,12 +51,12 @@ export default function EditablePhoto({ uri, index, onSave }) {
       const containerRatio = containerSize.width / containerSize.height;
       const imageRatio = imageWidth / imageHeight;
 
-      let fittedWidth, fittedHeight;
+      let fittedWidth = containerSize.width;
+      let fittedHeight = containerSize.height;
+
       if (imageRatio > containerRatio) {
-        fittedHeight = containerSize.height;
         fittedWidth = containerSize.height * imageRatio;
       } else {
-        fittedWidth = containerSize.width;
         fittedHeight = containerSize.width / imageRatio;
       }
 
@@ -168,7 +168,7 @@ export default function EditablePhoto({ uri, index, onSave }) {
             <ExpoImage
               source={{ uri }}
               style={[styles.photo, styles.photoPreview]}
-              contentFit="cover"
+              contentFit="contain" // Ajusta la imagen completa sin cortarla
               cachePolicy="memory-disk"
             />
           </Animated.View>
@@ -181,7 +181,7 @@ export default function EditablePhoto({ uri, index, onSave }) {
 const styles = StyleSheet.create({
     photoPreviewContainer: {
         width: screenWidth,
-        height: screenHeight * 0.6, // o el valor que uses normalmente
+        height: screenHeight , // o el valor que uses normalmente
         overflow: "hidden",
         backgroundColor: "#000", // para ver el contorno
       },
