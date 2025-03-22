@@ -118,33 +118,37 @@ export default function EditablePhoto({ uri, index, onSave }) {
       shouldCrop.value = true;
     });
 
-  const panGesture = Gesture.Pan()
-    .onBegin(() => {
+    const panGesture = Gesture.Pan()
+    .onBegin((event) => {
+      if (event.numberOfPointers < 2) return; // 🔒 Solo permitir si hay 2 dedos
       startX.value = translateX.value;
       startY.value = translateY.value;
     })
     .onUpdate((event) => {
+      if (event.numberOfPointers < 2) return; // 🔒 Ignorar si no son 2 dedos
       const dx = event.translationX * PAN_FACTOR;
       const dy = event.translationY * PAN_FACTOR;
       translateX.value = startX.value + dx;
       translateY.value = startY.value + dy;
     })
-    .onEnd(() => {
+    .onEnd((event) => {
+      if (event.numberOfPointers < 2) return; // 🔒 No terminar si no son 2 dedos
+  
       const scaledWidth = containerSize.width * scale.value;
       const scaledHeight = containerSize.height * scale.value;
       const maxX = (scaledWidth - containerSize.width) / 2;
       const maxY = (scaledHeight - containerSize.height) / 2;
-
+  
       const clampedX = clamp(translateX.value, -maxX, maxX);
       const clampedY = clamp(translateY.value, -maxY, maxY);
-
+  
       translateX.value = withSpring(clampedX);
       translateY.value = withSpring(clampedY);
-
+  
       targetScale.value = scale.value;
       shouldCrop.value = true;
     });
-
+  
   const composedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
 
   const animatedStyle = useAnimatedStyle(() => {
