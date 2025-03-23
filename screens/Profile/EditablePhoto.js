@@ -119,21 +119,19 @@ export default function EditablePhoto({ uri, index, onSave }) {
     });
 
     const panGesture = Gesture.Pan()
-    .onBegin((event) => {
-      if (event.numberOfPointers < 2) return; // 🔒 Solo permitir si hay 2 dedos
+    .minPointers(2)  // Solo activar con 2 dedos
+    .maxPointers(2)
+    .onBegin(() => {
       startX.value = translateX.value;
       startY.value = translateY.value;
     })
     .onUpdate((event) => {
-      if (event.numberOfPointers < 2) return; // 🔒 Ignorar si no son 2 dedos
       const dx = event.translationX * PAN_FACTOR;
       const dy = event.translationY * PAN_FACTOR;
       translateX.value = startX.value + dx;
       translateY.value = startY.value + dy;
     })
-    .onEnd((event) => {
-      if (event.numberOfPointers < 2) return; // 🔒 No terminar si no son 2 dedos
-  
+    .onEnd(() => {
       const scaledWidth = containerSize.width * scale.value;
       const scaledHeight = containerSize.height * scale.value;
       const maxX = (scaledWidth - containerSize.width) / 2;
