@@ -23,6 +23,52 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Lisboa/moga.jpg"),
+    title: "MOGA CAPARICA 2025",
+    category: "Festivities",
+    hours: {
+      Lunes: "8:30 PM - ---",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "Cerrado",
+      Viernes: "8:30 PM - ---",
+      Sábado: "8:30 PM - ---",
+      Domingo: "8:30 PM - ---",
+    },
+    number: "-",
+    coordinates: {
+      latitude: 38.60324800,
+      longitude: -9.21120900,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    availableDates: ["28 May", "29 May", "30 May","31 May", "1 Jun",],
+    
+  },
+  {
+    path: require("../../assets/Lisboa/lisbon.jpg"),
+    title: "LISB-ON",
+    category: "Festivities",
+    hours: {
+      Lunes: "8:30 PM - ---",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "Cerrado",
+      Viernes: "8:30 PM - ---",
+      Sábado: "8:30 PM - ---",
+      Domingo: "8:30 PM - ---",
+    },
+    number: "-",
+    coordinates: {
+      latitude: 38.70728280,
+      longitude: -9.13636130,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    availableDates: ["27 Jun", "28 Jun", "29 Jun"],
+    
+  },
+  {
     path: require("../../assets/Lisboa/praia_no_parquee.jpg"),
     title: "Praia No Parque",
     category: "Restaurants & Rooftops",
@@ -366,6 +412,28 @@ const boxInfo = [
     coordinates: {
       latitude: 38.6963541,
       longitude: -9.1917573,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/Cabal.jpg"),
+    title: "Cabal",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "18:00 - 00:00",
+      Martes: "18:00 - 00:00",
+      Miércoles: "18:00 - 00:00",
+      Jueves: "18:00 - 00:00",
+      Viernes: "12:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00",
+    },
+    number: "964 057 333",
+    coordinates: {
+      latitude: 38.71515280,
+      longitude: -9.13865350,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -986,6 +1054,31 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Madrid/Blondie.jpg"),
+    title: "Blondie Club",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "23:00 - 5:30",
+      Viernes: "23:00 - 5:30",
+      Sábado: "23:00 - 5:30",
+      Domingo: "Cerrado"
+    },
+    number: "917 373 837",
+    coordinates: {
+      latitude: 40.42549240,
+      longitude: -3.68546890,
+    },
+    country: "España",
+    city: "Madrid",
+    
+  },
+
+
+
+  {
     path: require("../../assets/Madrid/slvj2.jpg"),
     title: "SLVJ",
     category: "Restaurants & Rooftops",
@@ -1234,6 +1327,27 @@ const boxInfo = [
     coordinates: {
       latitude: 40.4195293,
       longitude: -3.6895932,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/Charrua.jpg"),
+    title: "Charrúa Madrid",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "19:30 - 00:00",
+      Martes: "19:30 - 00:00",
+      Miércoles: "19:30 - 00:00",
+      Jueves: "19:30 - 00:00",
+      Viernes: "19:30 - 00:00",
+      Sábado: "19:30 - 00:00",
+      Domingo: "19:30 - 00:00"
+    },
+    number: "912 791 601",
+    coordinates: {
+      latitude: 40.42230760,
+      longitude: -3.69407760,
     },
     country: "España",
     city: "Madrid",
