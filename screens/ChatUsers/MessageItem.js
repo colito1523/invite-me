@@ -335,14 +335,6 @@ const MessageItem = ({
                       <Ionicons name="play-circle" size={40} color="white" />
                     </View>
                   </TouchableOpacity>
-                  {isOwnMessage && item.viewedBy?.includes(recipient.uid) && (
-                    <Ionicons
-                      name="checkmark-done-sharp"
-                      size={16}
-                      color="black"
-                      style={styles.seenIcon}
-                    />
-                  )}
                 </>
               )}
 
