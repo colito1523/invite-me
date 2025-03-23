@@ -6,6 +6,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
   useDerivedValue,
   runOnJS,
 } from "react-native-reanimated";
@@ -101,51 +102,50 @@ export default function EditablePhoto({ uri, index, onSave }) {
       shouldCrop.value = false;
     }
   });
+  
+  
 
   const pinchGesture = Gesture.Pinch()
-    .onBegin(() => {
-      startScale.value = scale.value;
-    })
-    .onUpdate((event) => {
-      const pinchDelta = (event.scale - 1) * PINCH_FACTOR;
-      const newScale = startScale.value + pinchDelta;
-      scale.value = newScale;
-    })
-    .onEnd(() => {
-      const clamped = clamp(scale.value, MIN_SCALE, MAX_SCALE);
-      scale.value = withSpring(clamped);
-      targetScale.value = clamped;
-      shouldCrop.value = true;
-    });
+  .onBegin(() => {
+    startScale.value = scale.value;
+  })
+  .onUpdate((event) => {
+    let newScale = startScale.value + (event.scale - 1) * PINCH_FACTOR;
+    newScale = clamp(newScale, MIN_SCALE, MAX_SCALE);
+    scale.value = newScale;
+  })
+  .onEnd(() => {
+    targetScale.value = scale.value;
+    shouldCrop.value = true;  // <<--- ACTIVAR el recorte
+  });
 
-    const panGesture = Gesture.Pan()
-    .minPointers(2)  // Solo activar con 2 dedos
-    .maxPointers(2)
-    .onBegin(() => {
-      startX.value = translateX.value;
-      startY.value = translateY.value;
-    })
-    .onUpdate((event) => {
-      const dx = event.translationX * PAN_FACTOR;
-      const dy = event.translationY * PAN_FACTOR;
-      translateX.value = startX.value + dx;
-      translateY.value = startY.value + dy;
-    })
-    .onEnd(() => {
-      const scaledWidth = containerSize.width * scale.value;
-      const scaledHeight = containerSize.height * scale.value;
-      const maxX = (scaledWidth - containerSize.width) / 2;
-      const maxY = (scaledHeight - containerSize.height) / 2;
-  
-      const clampedX = clamp(translateX.value, -maxX, maxX);
-      const clampedY = clamp(translateY.value, -maxY, maxY);
-  
-      translateX.value = withSpring(clampedX);
-      translateY.value = withSpring(clampedY);
-  
-      targetScale.value = scale.value;
-      shouldCrop.value = true;
-    });
+const panGesture = Gesture.Pan()
+  .minPointers(2)
+  .maxPointers(2)
+  .onBegin(() => {
+    startX.value = translateX.value;
+    startY.value = translateY.value;
+  })
+  .onUpdate((event) => {
+    const dx = event.translationX * PAN_FACTOR;
+    const dy = event.translationY * PAN_FACTOR;
+    let newX = startX.value + dx;
+    let newY = startY.value + dy;
+    const scaledWidth = containerSize.width * scale.value;
+    const scaledHeight = containerSize.height * scale.value;
+    const maxX = (scaledWidth - containerSize.width) / 2;
+    const maxY = (scaledHeight - containerSize.height) / 2;
+    newX = clamp(newX, -maxX, maxX);
+    newY = clamp(newY, -maxY, maxY);
+    translateX.value = newX;
+    translateY.value = newY;
+  })
+  .onEnd(() => {
+    targetScale.value = scale.value;
+    shouldCrop.value = true;  // <<--- ACTIVAR el recorte
+  });
+
+
   
   const composedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
 
@@ -167,12 +167,19 @@ export default function EditablePhoto({ uri, index, onSave }) {
       >
         <GestureDetector gesture={composedGesture}>
           <Animated.View style={[styles.imageContainer, animatedStyle]}>
-            <ExpoImage
-              source={{ uri }}
-              style={[styles.photo, styles.photoPreview]}
-              contentFit="contain" // Ajusta la imagen completa sin cortarla
-              cachePolicy="memory-disk"
-            />
+          <ExpoImage
+  source={{ uri }}
+  onLoad={() => {
+    // Una vez que se cargue la nueva imagen recortada,
+    // resetea inmediatamente los valores de transformación.
+    scale.value = 1;
+    translateX.value = 0;
+    translateY.value = 0;
+  }}
+  style={[styles.photo, styles.photoPreview]}
+  contentFit="cover"
+  cachePolicy="memory-disk"
+/>
           </Animated.View>
         </GestureDetector>
       </View>
