@@ -79,6 +79,13 @@ const MessageItem = ({
               >
               </TouchableOpacity>
             )}
+            gestureHandlerProps={{
+              hitSlop: { left: 0 },
+              activeOffsetX: [-30, 30], // solo reconoce gestos intencionales
+              enabled: true,
+              failOffsetX: [-10, 10], // más tolerancia para que el sistema recupere el gesto back
+              waitFor: [] // explícitamente dejamos libre el gesto
+            }}
             onSwipeableOpen={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               handleReply(item);
@@ -147,6 +154,13 @@ const MessageItem = ({
                 <Ionicons name="arrow-undo-outline" size={24} color="white" />
               </TouchableOpacity>
             )}
+            gestureHandlerProps={{
+              hitSlop: { left: 0 },
+              activeOffsetX: [-30, 30], // solo reconoce gestos intencionales
+              enabled: true,
+              failOffsetX: [-10, 10], // más tolerancia para que el sistema recupere el gesto back
+              waitFor: [] // explícitamente dejamos libre el gesto
+            }}
             onSwipeableOpen={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               handleReply(item);
@@ -224,6 +238,13 @@ const MessageItem = ({
             >
             </TouchableOpacity>
           )}
+          gestureHandlerProps={{
+            hitSlop: { left: 0 },
+            activeOffsetX: [-30, 30], // solo reconoce gestos intencionales
+            enabled: true,
+            failOffsetX: [-10, 10], // más tolerancia para que el sistema recupere el gesto back
+            waitFor: [] // explícitamente dejamos libre el gesto
+          }}
           onSwipeableOpen={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             handleReply(item);
