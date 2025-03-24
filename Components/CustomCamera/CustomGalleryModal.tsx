@@ -20,6 +20,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import * as VideoThumbnails from 'expo-video-thumbnails';
+import * as FileSystem from 'expo-file-system';
 
 const screenWidth = Dimensions.get('window').width;
 const numColumns = 3;
@@ -49,6 +50,8 @@ export default function CustomGalleryModal({ visible, onClose, onSelect, allowVi
   const [endCursor, setEndCursor] = useState<string | null>(null);
 const [hasNextPage, setHasNextPage] = useState(true);
 const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+
 
 const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: (_: GestureResponderEvent, gestureState: PanResponderGestureState) => {
@@ -104,10 +107,26 @@ const panResponder = PanResponder.create({
       
           if (asset.mediaType === 'video') {
             try {
-              const { uri: thumb } = await VideoThumbnails.getThumbnailAsync(thumbnailUri, {
-                time: 10,
-              });
-              thumbnailUri = thumb;
+              const videoOriginalUri = assetInfo.localUri || assetInfo.uri;
+
+              try {
+                const fileName = videoOriginalUri.split('/').pop() || `temp_video_${Date.now()}.mov`;
+                const tempPath = FileSystem.cacheDirectory + fileName;
+              
+                // Copiamos el video al cache si no está ya ahí
+                await FileSystem.copyAsync({
+                  from: videoOriginalUri,
+                  to: tempPath,
+                });
+              
+                const { uri: thumb } = await VideoThumbnails.getThumbnailAsync(tempPath, {
+                  time: 10,
+                });
+                thumbnailUri = thumb;
+              } catch (err) {
+                console.warn('Error generando miniatura de video:', err);
+                thumbnailUri = videoOriginalUri; // fallback
+              }
             } catch (err) {
               console.warn('Error generando miniatura de video:', err);
             }
