@@ -152,6 +152,7 @@ export default function Camera() {
         <CustomGalleryModal
           visible={showCustomGallery}
           onClose={() => setShowCustomGallery(false)}
+          allowVideos={!!onCapture} 
           onSelect={async (item) => {
             const cleanUri = item.uri.split('#')[0];
             let finalUri = cleanUri;

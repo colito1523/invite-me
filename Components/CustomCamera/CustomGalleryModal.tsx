@@ -39,9 +39,10 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   onSelect: (item: MediaItem) => void;
+  allowVideos?: boolean; // <- nuevo
 };
 
-export default function CustomGalleryModal({ visible, onClose, onSelect }: Props) {
+export default function CustomGalleryModal({ visible, onClose, onSelect, allowVideos = false }: Props) {
   const [mediaList, setMediaList] = useState<MediaItem[]>([]);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -84,7 +85,7 @@ const panResponder = PanResponder.create({
       }
   
       const media = await MediaLibrary.getAssetsAsync({
-        mediaType: MediaLibrary.MediaType.all,
+        mediaType: allowVideos ? MediaLibrary.MediaType.all : MediaLibrary.MediaType.photo,
         first: 50,
         sortBy: ['creationTime'],
         after,
