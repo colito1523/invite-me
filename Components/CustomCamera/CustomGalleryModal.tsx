@@ -9,11 +9,17 @@ import {
   Text,
   StyleSheet,
   Button,
-  Platform
+  Dimensions 
 } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
+
+const screenWidth = Dimensions.get('window').width;
+const numColumns = 3;
+const itemSpacing = 10;
+const itemSize = (screenWidth - itemSpacing * (numColumns + 1)) / numColumns;
+const screenHeight = Dimensions.get('window').height;
 
 
 type MediaItem = {
@@ -31,6 +37,7 @@ export default function CustomGalleryModal({ visible, onClose, onSelect }: Props
   const [mediaList, setMediaList] = useState<MediaItem[]>([]);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
 
   useEffect(() => {
     if (visible) {
@@ -91,75 +98,91 @@ const loadMedia = async () => {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modal}>
-        <Text style={styles.title}>Tu galería</Text>
-        
-        {hasPermission === false ? (
-          <View style={styles.permissionContainer}>
-            <Text style={styles.permissionText}>Permiso requerido para acceder a la galería</Text>
-            <Button title="Otorgar permiso" onPress={loadMedia} />
-          </View>
-        ) : isLoading ? (
-          <Text style={styles.loadingText}>Cargando...</Text>
-        ) : (
-          <FlatList
-            data={mediaList}
-            numColumns={3}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity 
-                style={styles.item} 
-                onPress={() => onSelect(item)}
-              >
-                {item.type === 'image' ? (
-                  <Image 
-                    source={{ uri: item.uri }} 
-                    style={styles.media}
-                    resizeMode="cover"
-                    onError={(e) => console.log('Error loading image:', e.nativeEvent.error)}
-                  />
-                ) : (
-                    <Video
-                    source={{ uri: item.uri }}
-                    style={styles.media}
-                    resizeMode="cover"
-                    isMuted
-                    shouldPlay={false}
-                    useNativeControls={false}
-                  />
-                )}
-              </TouchableOpacity>
-            )}
-          />
-        )}
+<Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modal}>
 
-        <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-          <Text style={styles.closeText}>Cerrar</Text>
-        </TouchableOpacity>
-      </View>
-    </Modal>
+      {hasPermission === false ? (
+        <View style={styles.permissionContainer}>
+          <Text style={styles.permissionText}>Permiso requerido para acceder a la galería</Text>
+          <Button title="Otorgar permiso" onPress={loadMedia} />
+        </View>
+      ) : isLoading ? (
+        <Text style={styles.loadingText}>Cargando...</Text>
+      ) : (
+        <FlatList
+          data={mediaList}
+          numColumns={3}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.galleryContainer}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.item} onPress={() => onSelect(item)}>
+              {item.type === 'image' ? (
+                <Image
+                  source={{ uri: item.uri }}
+                  style={styles.media}
+                  resizeMode="cover"
+                  onError={(e) => console.log('Error loading image:', e.nativeEvent.error)}
+                />
+              ) : (
+                <Video
+                  source={{ uri: item.uri }}
+                  style={styles.media}
+                  resizeMode="cover"
+                  isMuted
+                  shouldPlay={false}
+                  useNativeControls={false}
+                />
+              )}
+            </TouchableOpacity>
+          )}
+        />
+      )}
+
+      <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+        <Text style={styles.closeText}>Cerrar</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
   );
 }
 
 const styles = StyleSheet.create({
-  modal: { 
-    flex: 1, 
-    backgroundColor: 'black', 
-    paddingTop: 40 
-  },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "transparent",
+        justifyContent: 'flex-end',
+      },
+      modal: {
+        height: screenHeight * 0.8,
+        backgroundColor: 'black',
+        paddingTop: 40,
+        width: '100%',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+      },
   title: { 
     color: 'white', 
     fontSize: 20, 
     textAlign: 'center', 
     marginBottom: 10 
   },
-  item: { 
-    margin: 5 
+  galleryContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 20,
+    paddingHorizontal: itemSpacing,
+  },
+  item: {
+    width: itemSize,
+    height: itemSize,
+    margin: itemSpacing / 2,
   },
   media: {
-    width: 100,
-    height: 100,
+    width: '100%',
+    height: '100%',
     borderRadius: 8,
     backgroundColor: '#333',
   },
