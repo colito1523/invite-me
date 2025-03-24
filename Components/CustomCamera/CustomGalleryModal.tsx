@@ -13,8 +13,6 @@ import {
     ActivityIndicator,
     TouchableWithoutFeedback,
     PanResponder,
-    GestureResponderEvent,
-    PanResponderGestureState,
   } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
@@ -26,8 +24,6 @@ const numColumns = 3;
 const itemSpacing = 10;
 const itemSize = (screenWidth - itemSpacing * (numColumns + 1)) / numColumns;
 const screenHeight = Dimensions.get('window').height;
-
-
 
 
 type MediaItem = {

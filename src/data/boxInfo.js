@@ -1,5 +1,28 @@
 const boxInfo = [
   {
+    path: require("../../assets/Lisboa/Tagide.jpg"),
+    title: "Tágide Gastrobar",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "18:30 - 23:00",
+      Miércoles: "18:30 - 23:00",
+      Jueves: "18:30 - 23:00",
+      Viernes: "18:30 - 23:00",
+      Sábado: "18:30 - 23:00",
+      Domingo: "Cerrado"
+    },
+    number: "968 842 888",
+    coordinates: {
+      latitude: 38.70831910,
+      longitude: -9.13998250,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    priority: true, // Esto hace que aparezca en la sección de priorida
+    
+  },
+  {
     path: require("../../assets/Lisboa/SonarLisboa.jpg"),
     title: "Sónar Lisboa 2025",
     category: "Festivities",
@@ -418,28 +441,6 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/Cabal.jpg"),
-    title: "Cabal",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "18:00 - 00:00",
-      Martes: "18:00 - 00:00",
-      Miércoles: "18:00 - 00:00",
-      Jueves: "18:00 - 00:00",
-      Viernes: "12:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
-    },
-    number: "964 057 333",
-    coordinates: {
-      latitude: 38.71515280,
-      longitude: -9.13865350,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-    
-  },
-  {
     path: require("../../assets/Lisboa/marvila.jpg"),
     title: "8 marvila",
     category: "Bars & Clubs",
@@ -654,6 +655,28 @@ const boxInfo = [
     coordinates: {
       latitude: 38.72102950,
       longitude: -9.14693150,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    
+  },
+  {
+    path: require("../../assets/Lisboa/Cabal.jpg"),
+    title: "Cabal",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "18:00 - 00:00",
+      Martes: "18:00 - 00:00",
+      Miércoles: "18:00 - 00:00",
+      Jueves: "18:00 - 00:00",
+      Viernes: "12:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00",
+    },
+    number: "964 057 333",
+    coordinates: {
+      latitude: 38.71515280,
+      longitude: -9.13865350,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -1054,6 +1077,27 @@ const boxInfo = [
     
   },
   {
+    path: require("../../assets/Madrid/Charrua.jpg"),
+    title: "Charrúa Madrid",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "19:30 - 00:00",
+      Martes: "19:30 - 00:00",
+      Miércoles: "19:30 - 00:00",
+      Jueves: "19:30 - 00:00",
+      Viernes: "19:30 - 00:00",
+      Sábado: "19:30 - 00:00",
+      Domingo: "19:30 - 00:00"
+    },
+    number: "912 791 601",
+    coordinates: {
+      latitude: 40.42230760,
+      longitude: -3.69407760,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
     path: require("../../assets/Madrid/Blondie.jpg"),
     title: "Blondie Club",
     category: "Bars & Clubs",
@@ -1327,27 +1371,6 @@ const boxInfo = [
     coordinates: {
       latitude: 40.4195293,
       longitude: -3.6895932,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/Charrua.jpg"),
-    title: "Charrúa Madrid",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "19:30 - 00:00",
-      Martes: "19:30 - 00:00",
-      Miércoles: "19:30 - 00:00",
-      Jueves: "19:30 - 00:00",
-      Viernes: "19:30 - 00:00",
-      Sábado: "19:30 - 00:00",
-      Domingo: "19:30 - 00:00"
-    },
-    number: "912 791 601",
-    coordinates: {
-      latitude: 40.42230760,
-      longitude: -3.69407760,
     },
     country: "España",
     city: "Madrid",

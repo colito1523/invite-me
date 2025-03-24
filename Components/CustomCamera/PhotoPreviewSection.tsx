@@ -172,7 +172,7 @@ const PhotoPreviewSection = ({
             <Animated.Image
               source={{ uri: photo.uri }}
               style={[styles.previewImage, animatedImageStyle]}
-              resizeMode="cover"
+              resizeMode="contain"
             />
           </GestureDetector>
         </ViewShot>
