@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   FlatList,
   Text,
-  Image,
   Modal,
   TouchableWithoutFeedback,
   Alert,
@@ -16,6 +15,7 @@ import {
 } from "react-native";
 import { auth, database, storage } from "../../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Image } from "expo-image";
 import {
   collection,
   addDoc,
@@ -708,6 +708,7 @@ export default function Chat({ route }) {
                           resizeMode: "contain",
                           opacity: modalImageLoading ? 0 : 1,
                         }}
+                        cachePolicy="memory-disk"
                         onLoad={() => {
                           console.log("Imagen cargada correctamente");
                           setModalImageLoading(false);

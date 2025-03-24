@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { View, Text, TouchableOpacity, Image, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Image } from 'expo-image';
 import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
@@ -100,6 +101,7 @@ const MessageItem = ({
                 </Text>
                 <Image
                   source={{ uri: item.storyUrl }}
+                  cachePolicy="disk" // o "memory-disk"
                   style={[
                     styles.storyResponseImage,
                     { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
@@ -165,6 +167,7 @@ const MessageItem = ({
                 </Text>
                 <Image
                   source={require("../../assets/flecha-curva.png")}
+                  cachePolicy="disk" // o "memory-disk"
                   style={[
                     styles.arrowImage,
                     isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived,
@@ -241,6 +244,7 @@ const MessageItem = ({
                           </View>
                         ) : (
                           <Image
+                          cachePolicy="disk" // o "memory-disk"
                             source={{ uri: item.replyToMediaUrl }}
                             style={styles.replyImagePreview}
                           />
@@ -314,6 +318,7 @@ const MessageItem = ({
                         />
                       )}
                       <Image
+                       cachePolicy="disk" // o "memory-disk"
                         source={{ uri: item.mediaUrl }}
                         style={styles.messageImage}
                         onLoadStart={() => setImageLoading(true)}
@@ -338,7 +343,7 @@ const MessageItem = ({
                     <Video
                       source={{ uri: item.mediaUrl }}
                       style={styles.messageVideo}
-                      posterSource={{ uri: item.mediaUrl }}
+                      osterSource={{ uri: item.mediaUrl, cache: "force-cache" }}
                       usePoster={true}
                       resizeMode="cover"
                     />
