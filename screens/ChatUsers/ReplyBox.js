@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { Image } from 'expo-image';
 import { Ionicons } from "@expo/vector-icons"; // Asegúrate de tener esta importación
 import { useTranslation } from "react-i18next";
 
 function ReplyBox({ text, mediaUrl, isViewOnce, onClose }) {
     const [imageLoading, setImageLoading] = useState(true);
+    const [showFallbackIcon, setShowFallbackIcon] = useState(false);
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Restablecer el estado de carga cada vez que cambia mediaUrl
         if (mediaUrl) {
-            setImageLoading(true);
+          setImageLoading(true);
+          setShowFallbackIcon(false);
         }
-    }, [mediaUrl]);
+      }, [mediaUrl]);
 
     if (!text && !mediaUrl) return null;
 
@@ -22,21 +24,40 @@ function ReplyBox({ text, mediaUrl, isViewOnce, onClose }) {
             <View style={styles.contentContainer}>
                 <Text style={styles.replyingToText}>{t("chatUsers.ReplyTo")}</Text>
                 {mediaUrl && (
-                    <View style={styles.imageContainer}>
-                        {imageLoading && !isViewOnce && (
-                            <ActivityIndicator style={styles.loader} size="small" color="#8E8E8E" />
-                        )}
-                        {isViewOnce ? (
-                            <Ionicons name="eye-off-outline" size={20} color="#8E8E8E" />
-                        ) : (
-                            <Image
-                                source={{ uri: mediaUrl }}
-                                style={styles.replyImagePreview}
-                                onLoadEnd={() => setImageLoading(false)}
-                            />
-                        )}
-                    </View>
-                )}
+  <View style={styles.imageContainer}>
+    {imageLoading && !isViewOnce && (
+      <ActivityIndicator style={styles.loader} size="small" color="#8E8E8E" />
+    )}
+
+    {isViewOnce ? (
+      <Ionicons name="eye-off-outline" size={20} color="#8E8E8E" />
+    ) : (
+      <Image
+        source={{ uri: mediaUrl }}
+        style={styles.replyImagePreview}
+        cachePolicy="memory-disk"
+        contentFit="cover"
+        onLoadStart={() => setImageLoading(true)}
+        onLoadEnd={() => setImageLoading(false)}
+        onError={() => {
+          setImageLoading(false);
+          setShowFallbackIcon(true);
+        }}
+        transition={300}
+      />
+    )}
+
+    {/* Fallback por si falla la carga de imagen (probablemente sea video) */}
+    {!imageLoading && showFallbackIcon && !isViewOnce && (
+      <Ionicons
+        name="videocam-outline"
+        size={24}
+        color="#8E8E8E"
+        style={{ position: 'absolute' }}
+      />
+    )}
+  </View>
+)}
                 {text && (
                     <Text style={styles.replyText} numberOfLines={1} ellipsizeMode="tail">
                         {text}
