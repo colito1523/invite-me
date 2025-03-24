@@ -92,8 +92,14 @@ const panResponder = PanResponder.create({
       const items = await Promise.all(
         media.assets.map(async (asset) => {
           const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+      
+          // Filtrar videos que duren más de 2 minutos (120 segundos)
+          if (asset.mediaType === 'video' && asset.duration && asset.duration > 120) {
+            return null;
+          }
+      
           let thumbnailUri = assetInfo.localUri || assetInfo.uri;
-  
+      
           if (asset.mediaType === 'video') {
             try {
               const { uri: thumb } = await VideoThumbnails.getThumbnailAsync(thumbnailUri, {
@@ -104,7 +110,7 @@ const panResponder = PanResponder.create({
               console.warn('Error generando miniatura de video:', err);
             }
           }
-  
+      
           return {
             uri: assetInfo.localUri || assetInfo.uri,
             type: asset.mediaType === 'video' ? 'video' : 'image',
@@ -112,11 +118,15 @@ const panResponder = PanResponder.create({
           };
         })
       );
+      
+      // Eliminar los `null` de los videos descartados
+      const filteredItems = items.filter((item) => item !== null) as MediaItem[];
+      
   
       if (after) {
-        setMediaList((prev) => [...prev, ...items]);
+        setMediaList((prev) => [...prev, ...filteredItems]);
       } else {
-        setMediaList(items);
+        setMediaList(filteredItems);
       }
   
       setEndCursor(media.endCursor || null);
@@ -209,17 +219,11 @@ const styles = StyleSheet.create({
       modal: {
         height: screenHeight * 0.8,
         backgroundColor: 'black',
-        paddingTop: 40,
         width: '100%',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
       },
-  title: { 
-    color: 'white', 
-    fontSize: 20, 
-    textAlign: 'center', 
-    marginBottom: 10 
-  },
+
   galleryContainer: {
     justifyContent: 'center',
     alignItems: 'center',
