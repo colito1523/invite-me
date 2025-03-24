@@ -22,6 +22,7 @@ import {
   getDoc,
   updateDoc,
 } from "firebase/firestore";
+
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -30,6 +31,7 @@ import FriendListModal from "../../Components/Modals/FriendListModal";
 import { useTranslation } from "react-i18next";
 import BlockedListModal from "../../Components/BlockedUsers/BlockedUsers";
 import MenuSection from "../ProfileComponents/MenuSection";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import EventsSection from "../ProfileComponents/EventsSection";
 import { FlatList } from "react-native-gesture-handler";
 import { styles } from "./styles";
@@ -455,17 +457,15 @@ export default function Profile({ navigation }) {
 
   return (
     <Provider>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={0}
-      >
-        <ScrollView
-          contentContainerStyle={[styles.scrollViewContent, { flexGrow: 1 }]}
-          ref={scrollRef}
-          keyboardShouldPersistTaps="handled"
-          scrollEnabled={false} // Disable vertical scrolling
-        >
+  <KeyboardAwareScrollView
+  ref={(ref) => {
+    scrollRef.current = ref;
+  }}
+  contentContainerStyle={{ flexGrow: 1 }}
+  enableOnAndroid
+  extraScrollHeight={0}
+  keyboardShouldPersistTaps="handled"
+>
           <View style={styles.container}>
             {isElementsVisible && (
               <TouchableOpacity
@@ -663,8 +663,7 @@ export default function Profile({ navigation }) {
               />
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </KeyboardAwareScrollView>
 
       <FriendListModal
         isVisible={isFriendListVisible}
