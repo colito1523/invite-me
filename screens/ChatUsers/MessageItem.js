@@ -5,6 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
+import * as Haptics from 'expo-haptics';
+
 
 const MessageItem = ({
   item,
@@ -69,14 +71,17 @@ const MessageItem = ({
         <GestureHandlerRootView>
           <Swipeable
             ref={swipeableRef}
-            renderRightActions={() => (
+            renderLeftActions={() => (
               <TouchableOpacity
                 style={styles.replyAction}
                 onPress={() => handleReply(item)}
               >
               </TouchableOpacity>
             )}
-            onSwipeableOpen={() => handleReply(item)}
+            onSwipeableOpen={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              handleReply(item);
+            }}
           >
             <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
               <View
@@ -132,7 +137,7 @@ const MessageItem = ({
         <GestureHandlerRootView>
           <Swipeable
             ref={swipeableRef}
-            renderRightActions={() => (
+            renderLeftActions={() => (
               <TouchableOpacity
                 style={styles.replyAction}
                 onPress={() => handleReply(item)}
@@ -140,7 +145,10 @@ const MessageItem = ({
                 <Ionicons name="arrow-undo-outline" size={24} color="white" />
               </TouchableOpacity>
             )}
-            onSwipeableOpen={() => handleReply(item)}
+            onSwipeableOpen={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              handleReply(item);
+            }}
           >
             <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
               <View
@@ -206,14 +214,17 @@ const MessageItem = ({
       <GestureHandlerRootView>
         <Swipeable
           ref={swipeableRef}
-          renderRightActions={() => (
+          renderLeftActions={() => (
             <TouchableOpacity
               style={styles.replyAction}
               onPress={() => handleReply(item)}
             >
             </TouchableOpacity>
           )}
-          onSwipeableOpen={() => handleReply(item)}
+          onSwipeableOpen={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleReply(item);
+          }}
         >
           <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
             <View style={[styles.message, isOwnMessage ? styles.sent : styles.received]}>
