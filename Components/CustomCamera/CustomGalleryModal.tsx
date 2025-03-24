@@ -1,17 +1,21 @@
 // CustomGalleryModal.tsx
 import React, { useEffect, useState } from 'react';
 import {
-  Modal,
-  View,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  Button,
-  Dimensions,
-  ActivityIndicator 
-} from 'react-native';
+    Modal,
+    View,
+    FlatList,
+    Image,
+    TouchableOpacity,
+    Text,
+    StyleSheet,
+    Button,
+    Dimensions,
+    ActivityIndicator,
+    TouchableWithoutFeedback,
+    PanResponder,
+    GestureResponderEvent,
+    PanResponderGestureState,
+  } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
@@ -43,6 +47,17 @@ export default function CustomGalleryModal({ visible, onClose, onSelect }: Props
 const [hasNextPage, setHasNextPage] = useState(true);
 const [isFetchingMore, setIsFetchingMore] = useState(false);
 
+const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_: GestureResponderEvent, gestureState: PanResponderGestureState) => {
+      return gestureState.dy > 20; // detecta si se desliza hacia abajo
+    },
+    onPanResponderRelease: (_: GestureResponderEvent, gestureState: PanResponderGestureState) => {
+      if (gestureState.dy > 50) {
+        onClose();
+      }
+    },
+  });
+
 
   useEffect(() => {
     if (visible) {
@@ -68,7 +83,7 @@ const [isFetchingMore, setIsFetchingMore] = useState(false);
   
       const media = await MediaLibrary.getAssetsAsync({
         mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
-        first: 70,
+        first: 50,
         sortBy: ['creationTime'],
         after,
       });
@@ -111,9 +126,12 @@ setIsFetchingMore(false);
 
   return (
 <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+<TouchableWithoutFeedback onPress={onClose}>
   <View style={styles.modalOverlay}>
-    <View style={styles.modal}>
-
+    <View
+      style={styles.modal}
+      {...panResponder.panHandlers} // <--- importante para el swipe
+    >
       {hasPermission === false ? (
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionText}>Permiso requerido para acceder a la galería</Text>
@@ -167,6 +185,7 @@ setIsFetchingMore(false);
      
     </View>
   </View>
+  </TouchableWithoutFeedback>
 </Modal>
 
   );
