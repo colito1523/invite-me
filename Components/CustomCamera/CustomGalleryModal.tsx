@@ -41,25 +41,47 @@ export default function CustomGalleryModal({ visible, onClose, onSelect }: Props
 
 const loadMedia = async () => {
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
+      console.log('Solicitando permisos...');
+      
+      // Solicitar permiso de MediaLibrary
+      const { status: libraryStatus } = await MediaLibrary.requestPermissionsAsync();
+      console.log('Estado permiso MediaLibrary:', libraryStatus);
+      
+      // Solicitar permiso de ImagePicker
+      const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('Estado permiso ImagePicker:', mediaStatus);
+      
+      const hasAllPermissions = libraryStatus === 'granted' && mediaStatus === 'granted';
+      setHasPermission(hasAllPermissions);
+      console.log('¿Tiene todos los permisos?:', hasAllPermissions);
 
-      if (status !== 'granted') return;
+      if (!hasAllPermissions) {
+        console.log('Permisos denegados:', { libraryStatus, mediaStatus });
+        alert('Se necesitan permisos para acceder a la galería');
+        return;
+      }
 
       const media = await MediaLibrary.getAssetsAsync({
-        mediaType: ['photo', 'video'],
-        sortBy: [MediaLibrary.SortBy.creationTime],
-        first: 100,
+        mediaType: MediaLibrary.MediaType.photo,
+        first: 20,
+        sortBy: ['creationTime'],
+        album: undefined
       });
 
-      const items = await Promise.all(media.assets.map(async (asset) => {
-        const uri = asset.uri;
-        return {
-          uri: uri,
-          type: asset.mediaType === 'video' ? 'video' : 'image'
-        };
-      }));
+      console.log('Media loaded:', media.assets.length, 'items');
 
+      const items = await Promise.all(
+        media.assets.map(async (asset) => {
+          // Asegurarse de que la URI sea accesible
+          const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+          return {
+            uri: assetInfo.localUri || assetInfo.uri,
+            type: 'image'
+          };
+        })
+      );
+
+      console.log('Primer item URI:', items[0]?.uri);
       setMediaList(items);
       setIsLoading(false);
     } catch (error) {
@@ -93,7 +115,9 @@ const loadMedia = async () => {
                 {item.type === 'image' ? (
                   <Image 
                     source={{ uri: item.uri }} 
-                    style={styles.media} 
+                    style={styles.media}
+                    resizeMode="cover"
+                    onError={(e) => console.log('Error loading image:', e.nativeEvent.error)}
                   />
                 ) : (
                     <Video
@@ -138,7 +162,6 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 8,
     backgroundColor: '#333',
-    resizeMode: 'cover',
   },
   closeBtn: { 
     alignSelf: 'center', 
