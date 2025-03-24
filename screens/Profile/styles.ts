@@ -171,6 +171,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-evenly",
     gap: screenWidth * 0.03,
+
   },
   centerOvalContainer: {
     alignItems: "center",

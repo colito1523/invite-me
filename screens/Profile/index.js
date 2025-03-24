@@ -143,6 +143,7 @@ export default function Profile({ navigation }) {
   const [userData, setUserData] = useState(null);
   const { t } = useTranslation();
   const [screenCategory, setScreenCategory] = useState("");
+  const scrollRef = useRef(null);
 
   const nameInputRef = useRef(null);
   const surnameInputRef = useRef(null);
@@ -434,6 +435,9 @@ export default function Profile({ navigation }) {
     if (isEditing) {
       return (
         <TextInput
+        onFocus={() => {
+          scrollRef.current?.scrollToEnd({ animated: true });
+        }}
           style={[styles.oval, styles.ovalInput]}
           value={value}
           onChangeText={setValue}
@@ -458,6 +462,7 @@ export default function Profile({ navigation }) {
       >
         <ScrollView
           contentContainerStyle={[styles.scrollViewContent, { flexGrow: 1 }]}
+          ref={scrollRef}
           keyboardShouldPersistTaps="handled"
           scrollEnabled={false} // Disable vertical scrolling
         >
