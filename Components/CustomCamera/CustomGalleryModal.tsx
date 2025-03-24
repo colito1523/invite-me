@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
+
 
 type MediaItem = {
   uri: string;
@@ -31,33 +33,38 @@ export default function CustomGalleryModal({ visible, onClose, onSelect }: Props
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (visible) loadMedia();
+    if (visible) {
+      setIsLoading(true);
+      loadMedia();
+    }
   }, [visible]);
 
-// Modificar la función loadMedia en CustomGalleryModal.tsx
 const loadMedia = async () => {
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
       setHasPermission(status === 'granted');
-      
+
       if (status !== 'granted') return;
-  
+
       const media = await MediaLibrary.getAssetsAsync({
         mediaType: ['photo', 'video'],
-        sortBy: ['creationTime'],
+        sortBy: [MediaLibrary.SortBy.creationTime],
         first: 100,
       });
-  
-      const items = media.assets.map((asset) => ({
-        uri: asset.uri,
-        type: asset.mediaType === 'video' ? 'video' : 'image',
-        // Para iOS, usar el URI compatible
-        uri: Platform.OS === 'ios' ? asset.uri.replace('file://', '') : asset.uri
+
+      const items = await Promise.all(media.assets.map(async (asset) => {
+        const uri = asset.uri;
+        return {
+          uri: uri,
+          type: asset.mediaType === 'video' ? 'video' : 'image'
+        };
       }));
-  
+
       setMediaList(items);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error loading media:', error);
+      setIsLoading(false);
     }
   };
 
@@ -71,6 +78,8 @@ const loadMedia = async () => {
             <Text style={styles.permissionText}>Permiso requerido para acceder a la galería</Text>
             <Button title="Otorgar permiso" onPress={loadMedia} />
           </View>
+        ) : isLoading ? (
+          <Text style={styles.loadingText}>Cargando...</Text>
         ) : (
           <FlatList
             data={mediaList}
@@ -124,12 +133,12 @@ const styles = StyleSheet.create({
   item: { 
     margin: 5 
   },
-// Modificar los estilos de media
-media: {
+  media: {
     width: 100,
     height: 100,
     borderRadius: 8,
-    backgroundColor: '#333', // Fondo para elementos vacíos
+    backgroundColor: '#333',
+    resizeMode: 'cover',
   },
   closeBtn: { 
     alignSelf: 'center', 
@@ -150,5 +159,11 @@ media: {
     fontSize: 16,
     marginBottom: 20,
     textAlign: 'center'
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: '50%'
   }
 });

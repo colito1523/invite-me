@@ -9,6 +9,7 @@ import { debounce } from 'lodash';
 import { PinchGestureHandler } from 'react-native-gesture-handler';
 import CustomGalleryModal from './CustomGalleryModal';
 import { useTranslation } from 'react-i18next';
+import * as MediaLibrary from 'expo-media-library'; // Added import
 
 export default function Camera() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -37,13 +38,13 @@ export default function Camera() {
   };
 
   // En Camera.tsx, agregar este efecto para solicitar permisos de galería
-useEffect(() => {
-  (async () => {
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-  })();
-}, []);
-  
-  
+  useEffect(() => {
+    (async () => {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+    })();
+  }, []);
+
+
   const handleOpenGalleryDebounced = debounce(handleOpenGallery, 300);
 
   const panResponder = useRef(
@@ -73,7 +74,7 @@ useEffect(() => {
   const toggleFlash = () => {
     setFlashMode(curr => (curr === 'off' ? 'on' : 'off'));
   };
-  
+
   const handleTakePhoto = async () => {
     if (!cameraRef.current) return;
     const options = {
@@ -99,8 +100,8 @@ useEffect(() => {
     let newZoom = Math.min(Math.max(zoom + (scale - 1) * sensitivity, 0), maxZoom);
     setZoom(newZoom);
   };
-  
-  
+
+
 
   if (photo) {
     return (
@@ -114,51 +115,51 @@ useEffect(() => {
 
   return (
     <PinchGestureHandler onGestureEvent={handlePinchGesture}>
-       <View style={{ flex: 1 }}>
-      <View style={styles.container} {...panResponder.panHandlers}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <AntDesign name="close" size={30} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        {header}
-
-        <CameraView style={styles.camera} facing={facing} ref={cameraRef} flash={flashMode} zoom={zoom}>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.galleryButton} onPress={handleOpenGallery}>
-              <Ionicons name="images-outline" size={30} color="white" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
-              <View style={styles.innerCircle} />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
-              <AntDesign name="retweet" size={30} color="white" />
+      <View style={{ flex: 1 }}>
+        <View style={styles.container} {...panResponder.panHandlers}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <AntDesign name="close" size={30} color="white" />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
-            <Ionicons
-              name={flashMode === 'off' ? 'flash-off' : 'flash'}
-              size={30}
-              color="white"
-            />
-          </TouchableOpacity>
-        </CameraView>
+          {header}
+
+          <CameraView style={styles.camera} facing={facing} ref={cameraRef} flash={flashMode} zoom={zoom}>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.galleryButton} onPress={handleOpenGallery}>
+                <Ionicons name="images-outline" size={30} color="white" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
+                <View style={styles.innerCircle} />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.toggleButton} onPress={toggleCameraFacing}>
+                <AntDesign name="retweet" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
+              <Ionicons
+                name={flashMode === 'off' ? 'flash-off' : 'flash'}
+                size={30}
+                color="white"
+              />
+            </TouchableOpacity>
+          </CameraView>
+        </View>
+        <CustomGalleryModal
+          visible={showCustomGallery}
+          onClose={() => setShowCustomGallery(false)}
+          onSelect={(item) => {
+            setPhoto({ ...item, base64: null });
+            setShowCustomGallery(false);
+          }}
+        />
+
+
       </View>
-      <CustomGalleryModal
-  visible={showCustomGallery}
-  onClose={() => setShowCustomGallery(false)}
-  onSelect={(item) => {
-    setPhoto({ ...item, base64: null });
-    setShowCustomGallery(false);
-  }}
-/>
-
-
-</View>
     </PinchGestureHandler>
   );
 }
