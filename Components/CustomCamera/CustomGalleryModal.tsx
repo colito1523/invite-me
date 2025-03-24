@@ -97,7 +97,7 @@ const panResponder = PanResponder.create({
           if (asset.mediaType === 'video') {
             try {
               const { uri: thumb } = await VideoThumbnails.getThumbnailAsync(thumbnailUri, {
-                time: 1000,
+                time: 10,
               });
               thumbnailUri = thumb;
             } catch (err) {
@@ -140,12 +140,19 @@ const panResponder = PanResponder.create({
 
   return (
 <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-<TouchableWithoutFeedback onPress={onClose}>
   <View style={styles.modalOverlay}>
-    <View style={styles.modal}>
-    <View style={styles.dragHandle} {...panResponder.panHandlers}>
-  <View style={styles.dragIndicator} />
-</View>
+
+    {/* Capa exterior invisible que detecta toques fuera del modal */}
+    <TouchableWithoutFeedback onPress={onClose}>
+      <View style={StyleSheet.absoluteFill} />
+    </TouchableWithoutFeedback>
+
+    {/* Contenedor principal del modal */}
+    <View style={styles.modal} {...panResponder.panHandlers}>
+      <View style={styles.dragHandle}>
+        <View style={styles.dragIndicator} />
+      </View>
+
       {hasPermission === false ? (
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionText}>Permiso requerido para acceder a la galería</Text>
@@ -153,17 +160,17 @@ const panResponder = PanResponder.create({
         </View>
       ) : isLoading ? (
         <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color="#fff" />
-      </View>
+          <ActivityIndicator size="small" color="#fff" />
+        </View>
       ) : (
         <FlatList
-        data={mediaList}
-        numColumns={3}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.galleryContainer}
-        onEndReached={loadMoreMedia}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
+          data={mediaList}
+          numColumns={3}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.galleryContainer}
+          onEndReached={loadMoreMedia}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
             isFetchingMore ? (
               <View style={styles.footerLoader}>
                 <ActivityIndicator size="small" color="#fff" />
@@ -173,27 +180,21 @@ const panResponder = PanResponder.create({
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.item} onPress={() => onSelect(item)}>
               <Image
-  source={{ uri: item.thumbnail }}
-  style={styles.media}
-  resizeMode="cover"
-/>
-{item.type === 'video' && (
-  <View style={styles.videoOverlay}>
-    <Text style={styles.videoIcon}>▶</Text>
-  </View>
-)}
+                source={{ uri: item.thumbnail }}
+                style={styles.media}
+                resizeMode="cover"
+              />
+              {item.type === 'video' && (
+                <View style={styles.videoOverlay}>
+                  <Text style={styles.videoIcon}>▶</Text>
+                </View>
+              )}
             </TouchableOpacity>
           )}
-          
-      />
-      
-      
+        />
       )}
-
-     
     </View>
   </View>
-  </TouchableWithoutFeedback>
 </Modal>
 
   );
