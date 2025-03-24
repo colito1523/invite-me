@@ -107,52 +107,6 @@ export const handleUploadStoryUtil = async ({
 };
 
 
-interface DownloadParams {
-  photo: { uri: string; type: 'image' | 'video' };
-  hasMediaLibraryPermission: boolean;
-  viewShotRef: any;
-}
-
-export const handleDownloadMediaUtil = async ({
-  photo,
-  hasMediaLibraryPermission,
-  viewShotRef,
-}: DownloadParams): Promise<'default' | 'loading' | 'success'> => {
-  if (!hasMediaLibraryPermission) return 'default';
-
-  try {
-    if (photo.type === 'image') {
-      const uriFinal = await captureRef(viewShotRef, { format: 'png', quality: 0.9 });
-      const asset = await MediaLibrary.createAssetAsync(uriFinal);
-
-      const albumName = 'Historias Guardadas';
-      let album = await MediaLibrary.getAlbumAsync(albumName);
-
-      if (!album) {
-        album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
-      } else {
-        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-      }
-    } else {
-      // Para videos, usamos la URI original
-      const asset = await MediaLibrary.createAssetAsync(photo.uri);
-      const albumName = 'Historias Guardadas';
-      let album = await MediaLibrary.getAlbumAsync(albumName);
-
-      if (!album) {
-        album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
-      } else {
-        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-      }
-    }
-
-    return 'success';
-  } catch (error) {
-    console.error('Error al descargar el archivo:', error);
-    return 'default';
-  }
-};
-
 
 
 interface ChatParams {

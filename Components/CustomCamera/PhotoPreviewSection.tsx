@@ -14,7 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from "react-i18next";
 import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';  // Importamos el reproductor de video
-import { handleDownloadMediaUtil, handleSendToChatUtil, handleUploadStoryUtil, usePinchPanGestures  } from './utils';
+import { handleSendToChatUtil, handleUploadStoryUtil, usePinchPanGestures  } from './utils';
 
 // ---- Imports para Pinch & Pan + captura de pantalla ----
 import { GestureDetector } from 'react-native-gesture-handler';
@@ -65,6 +65,29 @@ const PhotoPreviewSection = ({
   // -----------------------------------------------------------------
   // Funciones de BOTONES principales
   // -----------------------------------------------------------------
+
+  const handleDownloadPhoto = async () => {
+    if (!hasMediaLibraryPermission) return;
+    setDownloadStatus('loading');
+
+    try {
+        const asset = await MediaLibrary.createAssetAsync(photo.uri);
+        const albumName = "Historias Guardadas";
+        let album = await MediaLibrary.getAlbumAsync(albumName);
+        
+        if (!album) {
+            album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
+        } else {
+            await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+        }
+        
+        setDownloadStatus('success');
+        setTimeout(() => setDownloadStatus('default'), 2000);
+    } catch (error) {
+        console.error('Error al descargar la imagen:', error);
+        setDownloadStatus('default');
+    }
+};
 
   const handleUploadStory = async () => {
     await handleUploadStoryUtil({
@@ -141,7 +164,7 @@ const PhotoPreviewSection = ({
       </TouchableOpacity>
 
       {/* Botón de descarga */}
-      <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadMedia}>
+      <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadPhoto}>
         {downloadStatus === 'loading' ? (
           <ActivityIndicator size="small" color="white" />
         ) : downloadStatus === 'success' ? (
