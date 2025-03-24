@@ -192,9 +192,9 @@ const panResponder = PanResponder.create({
           <Button title="Otorgar permiso" onPress={loadMedia} />
         </View>
       ) : isLoading ? (
-        <View style={styles.footerLoader}>
-          <ActivityIndicator size="small" color="#fff" />
-        </View>
+        <View style={styles.centeredLoader}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
       ) : (
         <FlatList
           data={mediaList}
@@ -324,6 +324,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 30,
     fontWeight: 'bold',
+  },
+
+  centeredLoader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   
 });
