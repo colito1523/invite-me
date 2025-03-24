@@ -465,6 +465,7 @@ export default function Profile({ navigation }) {
   enableOnAndroid
   extraScrollHeight={0}
   keyboardShouldPersistTaps="handled"
+  scrollEnabled={false} 
 >
           <View style={styles.container}>
             {isElementsVisible && (
