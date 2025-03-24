@@ -128,10 +128,10 @@ setIsFetchingMore(false);
 <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
 <TouchableWithoutFeedback onPress={onClose}>
   <View style={styles.modalOverlay}>
-    <View
-      style={styles.modal}
-      {...panResponder.panHandlers} // <--- importante para el swipe
-    >
+    <View style={styles.modal}>
+    <View style={styles.dragHandle} {...panResponder.panHandlers}>
+  <View style={styles.dragIndicator} />
+</View>
       {hasPermission === false ? (
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionText}>Permiso requerido para acceder a la galería</Text>
@@ -258,5 +258,18 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  dragHandle: {
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 5,
+  },
+  
+  dragIndicator: {
+    width: 40,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: '#555',
   },
 });
