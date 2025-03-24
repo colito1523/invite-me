@@ -1,12 +1,13 @@
 import PhotoPreviewSection from './PhotoPreviewSection';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { CameraType, CameraView, FlashMode, useCameraPermissions } from 'expo-camera';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { debounce } from 'lodash';
 import { PinchGestureHandler } from 'react-native-gesture-handler';
+import CustomGalleryModal from './CustomGalleryModal';
 import { useTranslation } from 'react-i18next';
 
 export default function Camera() {
@@ -16,6 +17,13 @@ export default function Camera() {
   const [photo, setPhoto] = useState<any>(null);
   const [zoom, setZoom] = useState(0);
   const { t } = useTranslation();
+  const [showCustomGallery, setShowCustomGallery] = useState(false);
+  const mediaList = [
+    { uri: 'https://tuservidor.com/imagen1.jpg', type: 'image' },
+    { uri: 'https://tuservidor.com/video1.mp4', type: 'video' },
+    // podés cargarlo dinámicamente desde Firebase si querés
+  ];
+
 
   const cameraRef = useRef<CameraView | null>(null);
 
@@ -24,63 +32,18 @@ export default function Camera() {
 
   const { header = null, onCapture } = route.params || {};
 
-  const handleOpenGallery = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert(t('gallery.permissionRequired'));
-        return;
-      }
-  
-      const mediaTypes = route.params?.mode === "chat"
-        ? ImagePicker.MediaTypeOptions.All
-        : ImagePicker.MediaTypeOptions.Images;
-  
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: mediaTypes,
-        quality: 1,
-        base64: true,
-      });
-  
-      if (!result.canceled && result.assets?.[0]) {
-        const selectedAsset = result.assets[0];
-  
-        if (selectedAsset.type === "video") {
-          if (route.params?.mode !== "chat") {
-            alert(t('gallery.imagesOnly'));
-            return;
-          }
-  
-          // Verificar duración del video (normalizado)
-          let durationInSeconds = Number(selectedAsset.duration);
-          if (durationInSeconds > 300) {
-            durationInSeconds = durationInSeconds / 1000;
-          }
-  
-          console.log("Duración del video en segundos:", durationInSeconds);
-  
-          if (durationInSeconds > 120) {
-            alert(t('gallery.videoTooLong'));
-            return;
-          }
-        }
-  
-        setPhoto({
-          uri: selectedAsset.uri,
-          base64: selectedAsset.base64,
-          type: selectedAsset.type,
-        });
-      }
-  
-    } catch (error) {
-      console.error("Error al abrir la galería:", error);
-      alert(t('gallery.errorOpening'));
-    }
+  const handleOpenGallery = () => {
+    setShowCustomGallery(true);
   };
-  
-  
-  
 
+  // En Camera.tsx, agregar este efecto para solicitar permisos de galería
+useEffect(() => {
+  (async () => {
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+  })();
+}, []);
+  
+  
   const handleOpenGalleryDebounced = debounce(handleOpenGallery, 300);
 
   const panResponder = useRef(
@@ -151,6 +114,7 @@ export default function Camera() {
 
   return (
     <PinchGestureHandler onGestureEvent={handlePinchGesture}>
+       <View style={{ flex: 1 }}>
       <View style={styles.container} {...panResponder.panHandlers}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -184,6 +148,17 @@ export default function Camera() {
           </TouchableOpacity>
         </CameraView>
       </View>
+      <CustomGalleryModal
+  visible={showCustomGallery}
+  onClose={() => setShowCustomGallery(false)}
+  onSelect={(item) => {
+    setPhoto({ ...item, base64: null });
+    setShowCustomGallery(false);
+  }}
+/>
+
+
+</View>
     </PinchGestureHandler>
   );
 }
