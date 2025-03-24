@@ -69,8 +69,8 @@ const loadMedia = async () => {
       }
 
       const media = await MediaLibrary.getAssetsAsync({
-        mediaType: MediaLibrary.MediaType.photo,
-        first: 20,
+        mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
+        first: 40, // valor alto para traer todos (límite interno de Expo ~10k)
         sortBy: ['creationTime'],
         album: undefined
       });
@@ -83,7 +83,7 @@ const loadMedia = async () => {
           const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
           return {
             uri: assetInfo.localUri || assetInfo.uri,
-            type: 'image'
+            type: asset.mediaType === 'video' ? 'video' : 'image'
           };
         })
       );
