@@ -1,9 +1,9 @@
 import PhotoPreviewSection from './PhotoPreviewSection';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
 import { CameraType, CameraView, FlashMode, useCameraPermissions } from 'expo-camera';
 import { useRef, useState, useEffect } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, PanResponder } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { debounce } from 'lodash';
 import { PinchGestureHandler } from 'react-native-gesture-handler';
@@ -152,10 +152,39 @@ export default function Camera() {
         <CustomGalleryModal
           visible={showCustomGallery}
           onClose={() => setShowCustomGallery(false)}
-          onSelect={(item) => {
-            setPhoto({ ...item, base64: null });
+          onSelect={async (item) => {
+            const cleanUri = item.uri.split('#')[0];
+            let finalUri = cleanUri;
+          
+            // Si es un video, lo copiamos al caché
+            if (item.type === 'video') {
+              try {
+                const fileName = cleanUri.split('/').pop(); // Extrae el nombre del archivo
+                const newPath = FileSystem.cacheDirectory + fileName;
+          
+                // Copia el video al nuevo path
+                await FileSystem.copyAsync({
+                  from: cleanUri,
+                  to: newPath,
+                });
+          
+                finalUri = newPath;
+                console.log('Video copiado a:', finalUri);
+              } catch (error) {
+                console.error('Error copiando el video:', error);
+              }
+            }
+          
+            setPhoto({
+              uri: finalUri,
+              type: item.type,
+              base64: null,
+              thumbnail: item.thumbnail,
+            });
+          
             setShowCustomGallery(false);
           }}
+          
         />
 
 

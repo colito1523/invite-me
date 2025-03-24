@@ -32,6 +32,7 @@ const screenHeight = Dimensions.get('window').height;
 type MediaItem = {
   uri: string;
   type: 'image' | 'video';
+  thumbnail?: string;
 };
 
 type Props = {
@@ -112,10 +113,12 @@ const panResponder = PanResponder.create({
           }
       
           return {
-            uri: assetInfo.localUri || assetInfo.uri,
+            uri: assetInfo.localUri || assetInfo.uri, // esto convierte el ph:// en file://
             type: asset.mediaType === 'video' ? 'video' : 'image',
             thumbnail: thumbnailUri,
           };
+          
+          
         })
       );
       

@@ -27,6 +27,7 @@ export default {
       infoPlist: {
         NSCameraUsageDescription: "Access to the camera is required to upload stories.",
   NSPhotoLibraryUsageDescription: "Access to the photo library is required to upload stories.",
+   NSMicrophoneUsageDescription: "Access to the al Microphone for record voices in videos",
   NSPhotoLibraryAddUsageDescription: "Permission is needed to save photos to your gallery.",
   NSUserNotificationsUsageDescription: "Access is required to send you important notifications about events and updates.",
   NSLocationWhenInUseUsageDescription: "Access to your location is needed to show nearby events.",

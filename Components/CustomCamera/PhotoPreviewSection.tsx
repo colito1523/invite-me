@@ -32,6 +32,9 @@ const PhotoPreviewSection = ({
   handleRetakePhoto,
   onCapture,
 }: Props) => {
+  useEffect(() => {
+    console.log('Vista previa:', photo);
+  }, [photo]);
   const navigation = useNavigation();
   const { t } = useTranslation();
 
