@@ -17,7 +17,6 @@ import {
     PanResponderGestureState,
   } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
-import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import * as FileSystem from 'expo-file-system';
@@ -27,6 +26,7 @@ const numColumns = 3;
 const itemSpacing = 10;
 const itemSize = (screenWidth - itemSpacing * (numColumns + 1)) / numColumns;
 const screenHeight = Dimensions.get('window').height;
+
 
 
 
@@ -50,19 +50,22 @@ export default function CustomGalleryModal({ visible, onClose, onSelect, allowVi
   const [endCursor, setEndCursor] = useState<string | null>(null);
 const [hasNextPage, setHasNextPage] = useState(true);
 const [isFetchingMore, setIsFetchingMore] = useState(false);
+const [scrollOffset, setScrollOffset] = useState(0);
+const scrollRef = React.useRef<FlatList>(null);
 
 
 
 const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: (_: GestureResponderEvent, gestureState: PanResponderGestureState) => {
-      return gestureState.dy > 20; // detecta si se desliza hacia abajo
-    },
-    onPanResponderRelease: (_: GestureResponderEvent, gestureState: PanResponderGestureState) => {
-      if (gestureState.dy > 50) {
-        onClose();
-      }
-    },
-  });
+  onMoveShouldSetPanResponder: (_evt, gestureState) => {
+    return scrollOffset <= 0 && gestureState.dy > 20;
+  },
+  onPanResponderRelease: (_evt, gestureState) => {
+    if (scrollOffset <= 0 && gestureState.dy > 50) {
+      onClose();
+    }
+  },
+});
+
 
 
   useEffect(() => {
@@ -198,11 +201,16 @@ const panResponder = PanResponder.create({
       ) : (
         <FlatList
           data={mediaList}
+          ref={scrollRef}
           numColumns={3}
           keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.galleryContainer}
           onEndReached={loadMoreMedia}
           onEndReachedThreshold={0.5}
+          onScroll={(event) => {
+            setScrollOffset(event.nativeEvent.contentOffset.y);
+          }}
+          scrollEventThrottle={16}
           ListFooterComponent={
             isFetchingMore ? (
               <View style={styles.footerLoader}>
