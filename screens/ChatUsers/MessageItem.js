@@ -351,27 +351,30 @@ const MessageItem = ({
 
               {item.mediaType === "video" && (
                 <>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setSelectedImage({
-                        uri: item.mediaUrl,
-                        mediaType: item.mediaType,
-                      });
-                      setIsModalVisible(true);
-                    }}
-                    style={styles.videoThumbnailContainer}
-                  >
-                    <Video
-                      source={{ uri: item.mediaUrl }}
-                      style={styles.messageVideo}
-                      osterSource={{ uri: item.mediaUrl, cache: "force-cache" }}
-                      usePoster={true}
-                      resizeMode="cover"
-                    />
-                    <View style={styles.playIconOverlay}>
-                      <Ionicons name="play-circle" size={40} color="white" />
-                    </View>
-                  </TouchableOpacity>
+                <TouchableOpacity
+  onPress={() => {
+    setSelectedImage({
+      uri: item.mediaUrl,
+      mediaType: item.mediaType,
+    });
+    setIsModalVisible(true);
+  }}
+  onLongPress={() => handleLongPressMessage(item)} // 👈 AGREGADO
+  delayLongPress={300}
+  style={styles.videoThumbnailContainer}
+>
+  <Video
+    source={{ uri: item.mediaUrl }}
+    style={styles.messageVideo}
+    posterSource={{ uri: item.mediaUrl, cache: "force-cache" }}
+    usePoster={true}
+    resizeMode="cover"
+  />
+  <View style={styles.playIconOverlay}>
+    <Ionicons name="play-circle" size={40} color="white" />
+  </View>
+</TouchableOpacity>
+
                 </>
               )}
 

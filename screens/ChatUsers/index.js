@@ -43,7 +43,7 @@ import ChatInput from "./ChatInput";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
-import { muteChat, handleDeleteMessage, handleMediaPress } from "./utils";
+import { muteChat, handleDeleteMessage, handleMediaPress, configureAudioPlayback  } from "./utils";
 import { useTranslation } from "react-i18next";
 
 export default function Chat({ route }) {
@@ -105,6 +105,10 @@ export default function Chat({ route }) {
   const handleMuteChat = (hours) => {
     muteChat(user.uid, chatId, hours, setMutedChats);
   };
+
+  useEffect(() => {
+    configureAudioPlayback();
+  }, []);
 
   // Verificación de usuarios bloqueados
   useEffect(() => {

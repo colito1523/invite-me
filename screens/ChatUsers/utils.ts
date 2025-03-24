@@ -2,6 +2,23 @@ import { doc, updateDoc, getDoc,  } from "firebase/firestore";
 import { database } from "../../config/firebase";
 import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { Audio } from 'expo-av';
+
+export const configureAudioPlayback = async () => {
+  try {
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      staysActiveInBackground: false,
+      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+      playThroughEarpieceAndroid: false,
+    });
+  } catch (error) {
+    console.warn("Error al configurar el modo de audio:", error);
+  }
+};
 
 export const muteChat = async (
   userId: string,
