@@ -19,6 +19,7 @@ import {
 import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
+import * as VideoThumbnails from 'expo-video-thumbnails';
 
 const screenWidth = Dimensions.get('window').width;
 const numColumns = 3;
@@ -82,7 +83,7 @@ const panResponder = PanResponder.create({
       }
   
       const media = await MediaLibrary.getAssetsAsync({
-        mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
+        mediaType: MediaLibrary.MediaType.all,
         first: 50,
         sortBy: ['creationTime'],
         after,
@@ -91,9 +92,23 @@ const panResponder = PanResponder.create({
       const items = await Promise.all(
         media.assets.map(async (asset) => {
           const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+          let thumbnailUri = assetInfo.localUri || assetInfo.uri;
+  
+          if (asset.mediaType === 'video') {
+            try {
+              const { uri: thumb } = await VideoThumbnails.getThumbnailAsync(thumbnailUri, {
+                time: 1000,
+              });
+              thumbnailUri = thumb;
+            } catch (err) {
+              console.warn('Error generando miniatura de video:', err);
+            }
+          }
+  
           return {
             uri: assetInfo.localUri || assetInfo.uri,
             type: asset.mediaType === 'video' ? 'video' : 'image',
+            thumbnail: thumbnailUri,
           };
         })
       );
@@ -105,10 +120,9 @@ const panResponder = PanResponder.create({
       }
   
       setEndCursor(media.endCursor || null);
-setHasNextPage(media.hasNextPage ?? false);
-setIsLoading(false);
-setIsFetchingMore(false);
-
+      setHasNextPage(media.hasNextPage ?? false);
+      setIsLoading(false);
+      setIsFetchingMore(false);
     } catch (error) {
       console.error('Error loading media:', error);
       setIsLoading(false);
@@ -156,27 +170,21 @@ setIsFetchingMore(false);
               </View>
             ) : null
           }
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.item} onPress={() => onSelect(item)}>
-            {item.type === 'image' ? (
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.item} onPress={() => onSelect(item)}>
               <Image
-                source={{ uri: item.uri }}
-                style={styles.media}
-                resizeMode="cover"
-                onError={(e) => console.log('Error loading image:', e.nativeEvent.error)}
-              />
-            ) : (
-              <Video
-                source={{ uri: item.uri }}
-                style={styles.media}
-                resizeMode="cover"
-                isMuted
-                shouldPlay={false}
-                useNativeControls={false}
-              />
-            )}
-          </TouchableOpacity>
-        )}
+  source={{ uri: item.thumbnail }}
+  style={styles.media}
+  resizeMode="cover"
+/>
+{item.type === 'video' && (
+  <View style={styles.videoOverlay}>
+    <Text style={styles.videoIcon}>▶</Text>
+  </View>
+)}
+            </TouchableOpacity>
+          )}
+          
       />
       
       
@@ -272,4 +280,22 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: '#555',
   },
+  videoOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  
+  videoIcon: {
+    color: 'white',
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  
 });
