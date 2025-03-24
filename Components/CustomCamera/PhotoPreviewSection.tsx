@@ -4,6 +4,7 @@ import { CameraCapturedPicture } from 'expo-camera';
 import { useState, useEffect, useRef } from "react";
 import { ActivityIndicator } from "react-native";
 import { styles } from "./styles";
+import { Audio } from 'expo-av';
 import React from "react";
 import { 
   TouchableOpacity, 
@@ -61,6 +62,22 @@ const PhotoPreviewSection = ({
       setHasMediaLibraryPermission(status === 'granted');
     })();
   }, []);
+  useEffect(() => {
+    (async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+          playsInSilentModeIOS: true, // 🔈 Esto es CLAVE en iOS
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+        });
+      } catch (error) {
+        console.error('Error configurando el audio:', error);
+      }
+    })();
+  }, []);
+  
 
 
   const { combinedGesture, animatedImageStyle } = usePinchPanGestures(photo);
