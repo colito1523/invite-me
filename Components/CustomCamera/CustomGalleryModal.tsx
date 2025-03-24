@@ -89,7 +89,7 @@ const panResponder = PanResponder.create({
   
       const media = await MediaLibrary.getAssetsAsync({
         mediaType: allowVideos ? MediaLibrary.MediaType.all : MediaLibrary.MediaType.photo,
-        first: 50,
+        first: 10,
         sortBy: ['creationTime'],
         after,
       });
