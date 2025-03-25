@@ -692,6 +692,7 @@ export const handleAcceptGeneralEvent = async (params) => {
         dateArray: [item.eventDate],
         expirationDate: item.expirationDate || null,
         eventId: item.eventTitle, // Add this line
+        details: item.details || "",
       });
 
       // Actualizar la notificación existente

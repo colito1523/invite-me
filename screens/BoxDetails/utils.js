@@ -663,6 +663,7 @@ export const handleAcceptGeneralEvent = async (params) => {
         eventId: item.eventId,
         status: "accepted",
         coordinates: item.coordinates || {},
+        details: item.details || "",
       };
 
       await updateDoc(eventRef, {
