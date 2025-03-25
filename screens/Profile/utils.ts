@@ -256,6 +256,7 @@ export const handleBoxPress = ({ event, navigation, t }) => {
           locationLink: event.locationLink || t("profile.noLocation"),
           coordinates: event.coordinates || { latitude: 0, longitude: 0 },
           description: event.description || "",
+          details: event.details || "", // ✅ asegurate de que esté incluido
 
         };
 

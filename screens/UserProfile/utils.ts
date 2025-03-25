@@ -521,10 +521,13 @@ export const handleBoxPress = (params) => {
       phoneNumber: box.phoneNumber || t("userProfile.noNumber"),
       locationLink: box.locationLink || t("userProfile.noLocation"),
       coordinates: coordinates,
+      details: box.details || "", // 👈 agregar esto
+      category: box.category || "", // 👈 por si necesitás evaluar category en SliderContent
     },
     selectedDate: box.date || t("userProfile.noDate"),
   });
 };
+
 
 export const handleToggleHiddenStories = async (params) => {
   const user = params.user
