@@ -286,7 +286,10 @@
     },
     "muteDurationSelected": "Muted for {{hours}} hours",
     "muteDurationNotSelected": "No duration selected",
-    "tittle": "Messages"
+    "tittle": "Messages",
+  "youSentMedia": "You sent a...",
+"theySentMedia": "Sent you a..."
+
   },
 
   "chatUsers": {

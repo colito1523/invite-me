@@ -290,7 +290,9 @@
     },
     "muteDurationSelected": "Silenciado por {{hours}} horas",
     "muteDurationNotSelected": "No se ha seleccionado duración",
-    "tittle": "Mensajes"
+    "tittle": "Mensajes",
+    "youSentMedia": "Enviaste un...",
+"theySentMedia": "Te envió un..."
   },
 
   "chatUsers": {

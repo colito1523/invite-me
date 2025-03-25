@@ -114,6 +114,7 @@ export default function ChatList() {
             unseenMessagesCount: unseenMessagesSnapshot.size,
             lastMessage: chatData.lastMessage || "",
             lastMessageTimestamp: chatData.lastMessageTimestamp || null,
+            lastMessageSenderId: chatData.lastMessageSenderId || "",
           };
         })
       );
@@ -190,6 +191,7 @@ export default function ChatList() {
             unseenMessagesCount: unseenMessagesSnapshot.size,
             lastMessage: chatData.lastMessage || "",
             lastMessageTimestamp: chatData.lastMessageTimestamp || null,
+            lastMessageSenderId: chatData.lastMessageSenderId || "", 
           };
         })
       );
@@ -328,6 +330,7 @@ export default function ChatList() {
                 unseenMessagesCount: unseenMessagesSnapshot.size,
                 lastMessage: chatData.lastMessage || "",
                 lastMessageTimestamp: chatData.lastMessageTimestamp || null,
+                lastMessageSenderId: chatData.lastMessageSenderId || "",
               };
             })
           );
@@ -524,6 +527,18 @@ export default function ChatList() {
     const isMuted = mutedChats.some(
       (mute) => mute.chatId === item.id && new Date(mute.muteUntil) > new Date()
     );
+    const getTranslatedLastMessage = (message, lastSenderId) => {
+      if (message === "Sent a ...") {
+        return lastSenderId === user.uid
+          ? t("indexChatList.youSentMedia")
+          : t("indexChatList.theySentMedia");
+      }
+    
+      // Para otros mensajes, truncar si es necesario
+      return truncateMessage(message, 10); // o el largo que prefieras
+    };
+    
+    
 
     return (
       <TouchableOpacity
@@ -602,7 +617,8 @@ export default function ChatList() {
                 { color: isNightMode ? "white" : "black" },
               ]}
             >
-              {truncateMessage(item.lastMessage || "")}
+           {getTranslatedLastMessage(item.lastMessage || "", item.lastMessageSenderId)}
+
             </Text>
           )}
         </View>
