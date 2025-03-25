@@ -3,6 +3,8 @@ import { auth, database } from "../../config/firebase";
 import { Alert } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { localEventImages } from "../../src/constants/localEventImages"; // o la ruta que uses
+
 
 export const compressImage = async (uri, isLowQuality = false) => {
     try {
@@ -240,33 +242,36 @@ export const pickImage = async (index, ImagePicker, photoUrls, setPhotoUrls, set
 
 
 
-export const handleBoxPress = ({ event, navigation, t }) => {
+  export const handleBoxPress = ({ event, navigation, t }) => {
     const isPrivateEvent = event.category === "EventoParaAmigos";
-
-    // Definir el objeto `box` dependiendo del tipo de evento
-    const box = isPrivateEvent
-      ? event
-      : {
-          category: event.category || "General",
-          title: event.title || t("profile.noTitle"),
-          imageUrl: event.imageUrl || "https://via.placeholder.com/150",
-          dateArray: event.dateArray || [],
-          hours: event.hours || {},
-          phoneNumber: event.phoneNumber || t("profile.noNumber"),
-          locationLink: event.locationLink || t("profile.noLocation"),
-          coordinates: event.coordinates || { latitude: 0, longitude: 0 },
-          description: event.description || "",
-          details: event.details || "", // ✅ asegurate de que esté incluido
-
-        };
-
-    // Navegar al componente `BoxDetails`
+  
+    const image =
+      isPrivateEvent
+        ? event.imageUrl // una URL de Firebase
+        : localEventImages[event.imageUrl] ;
+  
+    const box = {
+      ...event,
+      imageUrl: image,
+      category: event.category || "General",
+      title: event.title || t("profile.noTitle"),
+      dateArray: event.dateArray || [],
+      hours: event.hours || {},
+      phoneNumber: event.phoneNumber || t("profile.noNumber"),
+      locationLink: event.locationLink || t("profile.noLocation"),
+      coordinates: event.coordinates || { latitude: 0, longitude: 0 },
+      description: event.description || "",
+      details: event.details || "",
+      isPrivate: isPrivateEvent,
+    };
+  
     navigation.navigate("BoxDetails", {
-      box: box,
+      box,
       collectionType: isPrivateEvent ? "EventsPriv" : "GoBoxs",
       selectedDate: event.date || t("profile.noDate"),
     });
   };
+  
 
 export const fetchProfileImage = async ({setProfileImage}) => {
     const user = auth.currentUser;

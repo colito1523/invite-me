@@ -452,7 +452,9 @@ export default memo(function BoxDetails({ route, navigation }) {
       description: box.description || "",
       details: box.details || "", 
       address: box.address || "",
-      imageUrl: box.imageUrl || "",
+      imageUrl: isPrivateEvent
+      ? box.imageUrl // usar directamente la URL para eventos privados
+      : box.imageName || box.title.replace(/\s/g, "_").toLowerCase(), // usar el identificador local para eventos generales    
       date: eventDate,
       phoneNumber: box.number || "Sin número",
       locationLink: box.locationLink || "Sin ubicación especificada",
