@@ -3,7 +3,6 @@ import { auth, database } from "../../config/firebase";
 import { Alert } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { localEventImages } from "../../src/constants/localEventImages"; // o la ruta que uses
 
 
 export const compressImage = async (uri, isLowQuality = false) => {

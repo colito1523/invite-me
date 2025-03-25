@@ -36,6 +36,8 @@ import {
   toggleUserStatus,
 } from "./utils";
 import { ActivityIndicator } from "react-native";
+import { localEventImages } from "../../src/constants/localEventImages";
+import { generateImageKey } from "../Profile/utils"; // ajustá esta ruta según tu estructura
 
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
@@ -440,11 +442,20 @@ export default function UserProfile({ route, navigation }) {
     return (
       <View style={styles.buttonContainer}>
         {filteredEvents.map((event, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.button}
-            onPress={() => handleBoxPress({ box: event, navigation, t })}
-          >
+         <TouchableOpacity
+         key={index}
+         style={styles.button}
+         onPress={() => {
+           const imageKey = generateImageKey(event.title);
+           const localImage = localEventImages[imageKey];
+           handleBoxPress({
+             box: { ...event, imageUrl: localImage || event.imageUrl },
+             navigation,
+             t,
+           });
+         }}
+       >
+       
             <Text style={styles.buttonText}>
               {event.title.length > 9
                 ? event.title.substring(0, 5) + "..."

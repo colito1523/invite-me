@@ -3,14 +3,11 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   TextInput,
   Alert,
   Pressable,
   ActivityIndicator,
   Dimensions,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";

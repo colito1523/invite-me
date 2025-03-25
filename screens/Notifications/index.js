@@ -85,6 +85,28 @@ export default function NotificationsComponent() {
   const [fetchingMore, setFetchingMore] = useState(false);
   const user = auth.currentUser;
 
+  const handleGeneralEventPress = (item) => {
+    const matchedBox = boxInfo.find((box) => box.title === item.eventTitle);
+    const localImage = matchedBox?.path;
+  
+    navigation.navigate("BoxDetails", {
+      box: {
+        title: item.eventTitle,
+        imageUrl: localImage || item.imageUrl || item.eventImage,
+        date: item.eventDate,
+        coordinates: item.coordinates || matchedBox?.coordinates || { latitude: 0, longitude: 0 },
+        hours: item.hours || matchedBox?.hours || {},
+        number: item.number || matchedBox?.number || "",
+        locationLink: matchedBox?.locationLink || "",
+        details: item.details || "",
+        category: item.details ? "Festivities" : (matchedBox?.category || "General"),
+        isPrivate: false,
+      },
+      selectedDate: item.eventDate,
+      isFromNotification: true,
+    });
+  };
+
 
   const loadInitialNotifications = useCallback(async () => {
     if (!user) return;
@@ -430,23 +452,7 @@ export default function NotificationsComponent() {
       : "https://via.placeholder.com/150";
     return (
       <TouchableOpacity
-      onPress={() => {
-        navigation.navigate("BoxDetails", {
-          box: {
-            title: item.eventTitle,
-            imageUrl: eventImage,
-            date: eventDate,
-            isPrivate: false,
-            hours: item.hours,
-            number: item.number,
-            coordinates: item.coordinates,
-            details: item.details || "", // ✅ AGREGA ESTA LÍNEA
-            ...(item.details ? { category: "Festivities" } : {}), // ✅ AGREGA CONDICIÓN
-          },
-          selectedDate: eventDate,
-          isFromNotification: true,
-        });
-      }}
+      onPress={() => handleGeneralEventPress(item)}
       style={[styles.notificationContainer]}
     >
         <View style={styles.notificationContent}>
@@ -559,26 +565,7 @@ export default function NotificationsComponent() {
     const handleNotificationPress = () => {
       if (isEventInvitation) {
         if (item.eventCategory === "EventoParaAmigos" || item.isPrivate) {
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: item.eventImage,
-              date: item.eventDate,
-              day: item.day,
-              description: item.description, // Asegúrate de pasar esto
-              hour: item.hour, // Agrega la hora
-              address: item.address, // Pasar dirección
-              location: item.eventLocation || t("notifications.noLocation"),
-              coordinates: item.coordinates || { latitude: 0, longitude: 0 },
-              hours: item.hours || {},
-              number: item.phoneNumber || t("notifications.noNumber"),
-              isPrivate: item.isPrivate || false,
-              details: item.details || "", // ✅ agregar esta línea
-              category: item.eventCategory || "General",
-            },
-            selectedDate: item.eventDate,
-            isFromNotification: true, // Indicamos que es desde la notificación
-          });
+          handleGeneralEventPress(item);
         } else {
           if (
             !item.coordinates ||
