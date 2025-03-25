@@ -450,6 +450,7 @@ export default memo(function BoxDetails({ route, navigation }) {
       date: box.date,
       dateArray: [eventDate],
       description: box.description || "",
+      details: box.details || "", 
       address: box.address || "",
       imageUrl: box.imageUrl || "",
       date: eventDate,

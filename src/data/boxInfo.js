@@ -3,6 +3,7 @@ const boxInfo = [
     path: require("../../assets/Lisboa/Tagide.jpg"),
     title: "Tágide Gastrobar",
     category: "Restaurants & Rooftops",
+    details: "Sónar Lisboa es un festival de música electrónica que reúne a artistas de todo el mundo en una experiencia audiovisual única.",
     hours: {
       Lunes: "Cerrado",
       Martes: "18:30 - 23:00",
