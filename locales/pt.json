@@ -394,7 +394,9 @@
   "reject": "Rejeitar",
   "on": "o",
   "alreadyInEvent": "Já está no evento",
-  "alreadyParticipant": "Erro"
+  "alreadyParticipant": "Erro",
+  "Notice": "Aviso",
+    "alreadyParticipating":"Já estás a participar neste evento."   
 },
 
  "accessPrivately": "Entrar",

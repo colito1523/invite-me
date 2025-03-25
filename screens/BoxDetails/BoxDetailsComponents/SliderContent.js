@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Dimensions, Platform, Linking, Touc
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { useTranslation } from "react-i18next";
 
+
 const { width } = Dimensions.get("window");
 
 const SliderContent = ({
@@ -14,7 +15,7 @@ const SliderContent = ({
 }) => {
   const [mapRegion, setMapRegion] = useState(null);
   const [markerCoordinate, setMarkerCoordinate] = useState(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     let isMounted = true;
@@ -130,7 +131,8 @@ box.category === "Festivities" &&
           {t("SliderContent.description")}
         </Text>
         <Text style={styles.descriptionText}>
-  {box.details || boxData.details}
+        {(box.details?.[i18n.language] || boxData.details?.[i18n.language]) ??
+  box.details ?? boxData.details ?? t("SliderContent.descriptionNotAvailable")}
 </Text>
       </View>
     ) : box.category === "EventoParaAmigos" && box.day && box.hour ? (

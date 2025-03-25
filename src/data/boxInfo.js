@@ -3,7 +3,6 @@ const boxInfo = [
     path: require("../../assets/Lisboa/Tagide.jpg"),
     title: "Tágide Gastrobar",
     category: "Restaurants & Rooftops",
-    details: "Sónar Lisboa es un festival de música electrónica que reúne a artistas de todo el mundo en una experiencia audiovisual única.",
     hours: {
       Lunes: "Cerrado",
       Martes: "18:30 - 23:00",
@@ -27,8 +26,11 @@ const boxInfo = [
     path: require("../../assets/Lisboa/SonarLisboa.jpg"),
     title: "Sónar Lisboa 2025",
     category: "Festivities",
-    details: "Sónar Lisboa es un festival de música electrónica que reúne a artistas de todo el mundo en una experiencia audiovisual única.",
-    number: "-",
+    details: {
+      es: "Sónar Lisboa es un festival de música electrónica que reúne a artistas de todo el mundo en una experiencia audiovisual única.",
+      en: "Sónar Lisboa is an electronic music festival that brings together artists from around the world in a unique audiovisual experience.",
+      pt: "O Sónar Lisboa é um festival de música eletrónica que reúne artistas de todo o mundo numa experiência audiovisual única.",
+    },    number: "-",
     coordinates: {
       latitude: 38.72830010,
       longitude: -9.15268280,

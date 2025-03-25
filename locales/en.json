@@ -399,7 +399,9 @@
     "reject": "Reject",
     "on": "on",
     "alreadyInEvent": "You are already in this event.",
-    "alreadyParticipant": "Error"   
+    "alreadyParticipant": "Error",
+    "Notice": "Notice",
+    "alreadyParticipating":"You are already participating in this event."   
   },
 
   "accessPrivately": "Log In",

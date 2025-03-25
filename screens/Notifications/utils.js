@@ -664,7 +664,7 @@ export const handleAcceptGeneralEvent = async (params) => {
     if (eventDoc.exists()) {
       const participants = eventDoc.data()[item.eventDate] || [];
       if (participants.some((p) => p.uid === user.uid)) {
-        Alert.alert("Aviso", "Ya estás participando en este evento.");
+        Alert.alert(t("notifications.Notice"), t("notifications.alreadyParticipating"));
         setLoadingEventId(null);
         return;
       }
