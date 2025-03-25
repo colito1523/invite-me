@@ -299,6 +299,7 @@ export const handleGeneralEventInvite = async (params) => {
       seen: false,
       imageUrl: box.imageUrl || "https://via.placeholder.com/150",
       expirationDate: expirationDate,
+      details: box.details || "",
     });
   } catch (error) {
     console.error("Error al invitar al evento general:", error);
