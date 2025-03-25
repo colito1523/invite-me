@@ -26,15 +26,7 @@ const boxInfo = [
     path: require("../../assets/Lisboa/SonarLisboa.jpg"),
     title: "Sónar Lisboa 2025",
     category: "Festivities",
-    hours: {
-      Lunes: "8:30 PM - ---",
-      Martes: "Cerrado",
-      Miércoles: "Cerrado",
-      Jueves: "Cerrado",
-      Viernes: "8:30 PM - ---",
-      Sábado: "8:30 PM - ---",
-      Domingo: "8:30 PM - ---",
-    },
+    details: "Sónar Lisboa es un festival de música electrónica que reúne a artistas de todo el mundo en una experiencia audiovisual única.",
     number: "-",
     coordinates: {
       latitude: 38.72830010,

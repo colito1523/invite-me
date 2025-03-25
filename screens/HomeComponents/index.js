@@ -505,6 +505,7 @@ useEffect(() => {
       const boxWithAdmin = {
         ...box,
         Admin: box.Admin || box.uid || undefined, // Usar el Admin existente o el uid del evento
+        details: box.details || "",
       };
       navigation.navigate("BoxDetails", {
         box: boxWithAdmin,

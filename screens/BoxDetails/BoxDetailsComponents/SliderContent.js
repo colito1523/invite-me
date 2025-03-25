@@ -119,52 +119,69 @@ const SliderContent = ({
       </View>
 
       {/* Segundo Slider: Horarios */}
-      <View style={styles.sliderPart}>
-        <View style={styles.hoursContainer}>
-          {box.category === "EventoParaAmigos" && box.day && box.hour ? (
-            <View style={styles.notificationHours}>
-              <Text
-                style={styles.hoursText}
-              >{`${t("SliderContent.hour")}: ${box.hour}`}</Text>
-              <Text style={styles.dayText}>{box.day}</Text>
-            </View>
-          ) : isFromNotification && (box.hour || box.day) ? (
-            <View style={styles.notificationHours}>
-              <Text style={styles.hoursText}>
-                {`${t("SliderContent.hours")}: ${box.hour || t("SliderContent.notAvailable")}`}
-              </Text>
-              <Text style={styles.dayText}>
-                {`${t("SliderContent.day")}: ${box.day || t("SliderContent.notAvailable")}`}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.hoursContent}>
-              <View style={styles.column}>
-                {Object.keys(boxData.hours || {}).map((day, index) => (
-                  <Text key={index} style={styles.dayText}>
-                    {box.category === "EventoParaAmigos" ? (
-                      <Text>{day}</Text>
-                    ) : (
-                      <Text>{t(`days.${day.toLowerCase()}`)}</Text>
-                    )}
-                  </Text>
-                ))}
-              </View>
-              <View style={styles.column}>
-                {Object.keys(boxData.hours || {}).map((day, index) => (
-                  <Text key={index} style={styles.timeText}>
-                    {boxData.hours[day] === "Cerrado" ||
-                    boxData.hours[day] === "Fechado" ||
-                    boxData.hours[day] === "Closed"
-                      ? t("SliderContent.closed")
-                      : boxData.hours[day] || t("SliderContent.notAvailable")}
-                  </Text>
-                ))}
-              </View>
-            </View>
-          )}
+   {/* Segundo Slider: Horarios o Detalles para Festivities */}
+<View style={styles.sliderPart}>
+  <View style={styles.hoursContainer}>
+    {box.category !== "EventoParaAmigos" &&
+box.category === "Festivities" &&
+(box.details || boxData.details)? (
+      <View style={styles.descriptionContainer}>
+        <Text style={styles.descriptionTitle}>
+          {t("SliderContent.description")}
+        </Text>
+        <Text style={styles.descriptionText}>
+  {box.details || boxData.details}
+</Text>
+      </View>
+    ) : box.category === "EventoParaAmigos" && box.day && box.hour ? (
+      <View style={styles.notificationHours}>
+        <Text style={styles.hoursText}>
+          {`${t("SliderContent.hour")}: ${box.hour}`}
+        </Text>
+        <Text style={styles.dayText}>{box.day}</Text>
+      </View>
+    ) : isFromNotification && (box.hour || box.day) ? (
+      <View style={styles.notificationHours}>
+        <Text style={styles.hoursText}>
+          {`${t("SliderContent.hours")}: ${
+            box.hour || t("SliderContent.notAvailable")
+          }`}
+        </Text>
+        <Text style={styles.dayText}>
+          {`${t("SliderContent.day")}: ${
+            box.day || t("SliderContent.notAvailable")
+          }`}
+        </Text>
+      </View>
+    ) : (
+      <View style={styles.hoursContent}>
+        <View style={styles.column}>
+          {Object.keys(boxData.hours || {}).map((day, index) => (
+            <Text key={index} style={styles.dayText}>
+              {box.category === "EventoParaAmigos" ? (
+                <Text>{day}</Text>
+              ) : (
+                <Text>{t(`days.${day.toLowerCase()}`)}</Text>
+              )}
+            </Text>
+          ))}
+        </View>
+        <View style={styles.column}>
+          {Object.keys(boxData.hours || {}).map((day, index) => (
+            <Text key={index} style={styles.timeText}>
+              {["Cerrado", "Fechado", "Closed"].includes(
+                boxData.hours[day]
+              )
+                ? t("SliderContent.closed")
+                : boxData.hours[day] || t("SliderContent.notAvailable")}
+            </Text>
+          ))}
         </View>
       </View>
+    )}
+  </View>
+</View>
+
 
       {/* Tercer Slider: Ubicación o Contacto */}
       <View style={styles.sliderPart}>

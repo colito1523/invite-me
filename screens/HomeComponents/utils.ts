@@ -264,7 +264,7 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
 
     const data = await Promise.all(
       boxInfo.map(
-        async ({ path, title, category, hours, number, coordinates, country, city, priority, availableDates }) => {
+        async ({ path, title, category, hours, number, coordinates, country, city, priority, availableDates, details }) => {
           // Verificar si el evento tiene fechas disponibles y si la fecha seleccionada está incluida
           if (availableDates && !availableDates.includes(selectedDate)) {
             return null; // No incluir este evento si no está disponible en la fecha seleccionada
@@ -301,6 +301,7 @@ export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxDat
             coordinates,
             country,
             city,
+            details,
             attendees: filteredAttendees,
             attendeesCount: filteredAttendees.length || 0,
             priority: priority || false,
