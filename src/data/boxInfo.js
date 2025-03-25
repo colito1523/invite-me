@@ -87,7 +87,6 @@ const boxInfo = [
     
   },
   {
-    imageName: "praia_no_parquee",
     path: require("../../assets/Lisboa/praia_no_parquee.jpg"),
     title: "Praia No Parque",
     category: "Restaurants & Rooftops",
@@ -437,7 +436,7 @@ const boxInfo = [
     
   },
   {
-    path: require("../../assets/Lisboa/marvila.jpg"),
+    path: require("../../assets/Lisboa/8_marvila.jpg"),
     title: "8 marvila",
     category: "Bars & Clubs",
     hours: {

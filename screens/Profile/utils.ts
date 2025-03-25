@@ -246,9 +246,10 @@ export const pickImage = async (index, ImagePicker, photoUrls, setPhotoUrls, set
     const isPrivateEvent = event.category === "EventoParaAmigos";
   
     const image =
-      isPrivateEvent
-        ? event.imageUrl // una URL de Firebase
-        : localEventImages[event.imageUrl] ;
+    isPrivateEvent
+      ? event.imageUrl
+      : event.localImage;
+  
   
     const box = {
       ...event,
@@ -305,4 +306,14 @@ export const fetchProfileImage = async ({setProfileImage}) => {
         console.error("Error loading profile image:", error);
       }
     }
+};
+
+export const generateImageKey = (title) => {
+  return title
+    .normalize("NFD") // separa letras de acentos
+    .replace(/\p{Diacritic}/gu, "") // elimina acentos/diacríticos
+    .replace(/[^a-zA-Z0-9 ]/g, "") // elimina caracteres raros (como comas, guiones)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_"); // convierte espacios a guiones bajos
 };

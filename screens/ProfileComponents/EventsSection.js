@@ -1,12 +1,20 @@
 import React, { useCallback } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from "react-native";
+import { generateImageKey } from "../Profile/utils"; // ajustá esta ruta según tu estructura
+import { localEventImages } from "../../src/constants/localEventImages"; // ajustá también esta ruta
+
 
 const { width, height } = Dimensions.get("window");
 
 const EventsSection = React.memo(({ events, handleBoxPress, t }) => {
   const handlePress = useCallback((event) => {
-    handleBoxPress(event);
+    const imageKey = generateImageKey(event.title);
+    const localImage = localEventImages[imageKey]; // Esto te da la imagen local si existe
+    handleBoxPress({ ...event, localImage });
   }, [handleBoxPress]);
+  
+
+  
 
   return (
     <View style={styles.buttonContainer}>
