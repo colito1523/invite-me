@@ -430,23 +430,25 @@ export default function NotificationsComponent() {
       : "https://via.placeholder.com/150";
     return (
       <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("BoxDetails", {
-            box: {
-              title: item.eventTitle,
-              imageUrl: eventImage,
-              date: eventDate,
-              isPrivate: false,
-              hours: item.hours,
-              number: item.number,
-              coordinates: item.coordinates,
-            },
-            selectedDate: eventDate,
-            isFromNotification: true,
-          });
-        }}
-        style={[styles.notificationContainer]}
-      >
+      onPress={() => {
+        navigation.navigate("BoxDetails", {
+          box: {
+            title: item.eventTitle,
+            imageUrl: eventImage,
+            date: eventDate,
+            isPrivate: false,
+            hours: item.hours,
+            number: item.number,
+            coordinates: item.coordinates,
+            details: item.details || "", // ✅ AGREGA ESTA LÍNEA
+            ...(item.details ? { category: "Festivities" } : {}), // ✅ AGREGA CONDICIÓN
+          },
+          selectedDate: eventDate,
+          isFromNotification: true,
+        });
+      }}
+      style={[styles.notificationContainer]}
+    >
         <View style={styles.notificationContent}>
           <Image source={{ uri: item.fromImage }} style={styles.profileImage} />
           <View style={styles.textContainer}>
@@ -571,6 +573,8 @@ export default function NotificationsComponent() {
               hours: item.hours || {},
               number: item.phoneNumber || t("notifications.noNumber"),
               isPrivate: item.isPrivate || false,
+              details: item.details || "", // ✅ agregar esta línea
+              category: item.eventCategory || "General",
             },
             selectedDate: item.eventDate,
             isFromNotification: true, // Indicamos que es desde la notificación
