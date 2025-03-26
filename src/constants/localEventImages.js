@@ -67,6 +67,26 @@ export const localEventImages = {
     picalagartos_sky_bar_restaurant: require("../../assets/Madrid/picalagartos.jpg"),
     tatel: require("../../assets/Madrid/Tatel.jpg"),
     perrachica: require("../../assets/Madrid/Perrachica.jpg"),
+    victoria: require("../../assets/Madrid/victoria.jpg"),
+    margarita: require("../../assets/Madrid/margarita.jpg"),
+    lula_club: require("../../assets/Madrid/Lula_Club.jpg"),
+    jungle_jazz_club: require("../../assets/Madrid/Jungle_Jazz_Club.jpg"),
+los_33: require("../../assets/Madrid/Los_33.jpg"),
+castellana_8: require("../../assets/Madrid/Castellana_8.jpg"),
+morris_club: require("../../assets/Madrid/Morris_Club.jpg"),
+toni_2_piano_bar: require("../../assets/Madrid/Toni_2_piano_Bar.jpg"),
+casa_suecia: require("../../assets/Madrid/Casa_Suecia.jpg"),
+la_flaca: require("../../assets/Madrid/La_Flaca.jpg"),
+chambao_madrid: require("../../assets/Madrid/Chambao_Madrid.jpg"),
+numa_pompilio: require("../../assets/Madrid/Numa_pompilio.jpg"),
+terraza_abc_sky: require("../../assets/Madrid/Terraza_abc_Sky.jpg"),
+red_project_sushi: require("../../assets/Madrid/Red_Project_Sushi.jpg"),
+la_fonda_lironda: require("../../assets/Madrid/La_fonda_lironda.jpg"),
+inclan_brutal_bar: require("../../assets/Madrid/Inclan_Brutal_Bar.jpg"),
+kuikku_handroll_bar: require("../../assets/Madrid/Kuu_Kuu.jpg"), // ← confirmame si este es el correcto
+ten_con_ten: require("../../assets/Madrid/ten_con_ten.jpg"),
+
+
   };
   
   

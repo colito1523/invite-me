@@ -1160,7 +1160,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Jungle Jazz Club.jpg"),
+    path: require("../../assets/Madrid/Jungle_Jazz_Club.jpg"),
     title: "Jungle Jazz Club",
     category: "Bars & Clubs",
     hours: {
@@ -1181,7 +1181,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Los 33.jpg"),
+    path: require("../../assets/Madrid/Los_33.jpg"),
     title: "Los 33",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1202,7 +1202,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Castellana 8.jpg"),
+    path: require("../../assets/Madrid/Castellana_8.jpg"),
     title: "Castellana 8",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1287,7 +1287,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/La Flaca.jpg"),
+    path: require("../../assets/Madrid/La_Flaca.jpg"),
     title: "La Flaca",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1308,7 +1308,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Chambao Madrid.jpg"),
+    path: require("../../assets/Madrid/Chambao_Madrid.jpg"),
     title: "Chambao Madrid",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1371,7 +1371,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Casa Suecia.jpg"),
+    path: require("../../assets/Madrid/Casa_Suecia.jpg"),
     title: "Casa Suecia",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1413,7 +1413,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Toni 2 piano Bar.jpg"),
+    path: require("../../assets/Madrid/Toni_2_piano_Bar.jpg"),
     title: "Toni 2 piano Bar",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1476,7 +1476,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Morris Club.jpg"),
+    path: require("../../assets/Madrid/Morris_Club.jpg"),
     title: "Morris Club",
     category: "Bars & Clubs",
     hours: {
@@ -1561,7 +1561,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Lula Club.jpg"),
+    path: require("../../assets/Madrid/Lula_Club.jpg"),
     title: "Lula Club",
     category: "Bars & Clubs",
     hours: {
@@ -1603,7 +1603,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Numa pompilio.jpg"),
+    path: require("../../assets/Madrid/Numa_pompilio.jpg"),
     title: "Numa Pompilio",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1709,7 +1709,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Terraza abc Sky.jpg"),
+    path: require("../../assets/Madrid/Terraza_abc_Sky.jpg"),
     title: "Terraza abc Sky",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1730,7 +1730,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Red Project Sushi.jpg"),
+    path: require("../../assets/Madrid/Red_Project_Sushi.jpg"),
     title: "Red Project Sushi",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1751,7 +1751,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Kuu Kuu.jpg"),
+    path: require("../../assets/Madrid/Kuu_Kuu.jpg"),
     title: "Kuikku Handroll Bar",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1772,7 +1772,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/ten con ten.jpg"),
+    path: require("../../assets/Madrid/ten_con_ten.jpg"),
     title: "Ten con Ten",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1814,7 +1814,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/La fonda lironda.jpg"),
+    path: require("../../assets/Madrid/La_fonda_lironda.jpg"),
     title: "La Fonda Lironda",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1835,7 +1835,7 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Inclan Brutal Bar.jpg"),
+    path: require("../../assets/Madrid/Inclan_Brutal_Bar.jpg"),
     title: "Inclan Brutal Bar",
     category: "Restaurants & Rooftops",
     hours: {
