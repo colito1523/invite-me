@@ -85,7 +85,6 @@ export default function Camera() {
       flashMode: flashMode,
     };
     const takenPhoto = await cameraRef.current.takePictureAsync(options);
-    console.log("Captured Photo EXIF Data:", takenPhoto.exif);
     setPhoto({ ...takenPhoto, type: 'image' }); // Establece el tipo como 'image'
   };
 
@@ -170,7 +169,6 @@ export default function Camera() {
                 });
           
                 finalUri = newPath;
-                console.log('Video copiado a:', finalUri);
               } catch (error) {
                 console.error('Error copiando el video:', error);
               }

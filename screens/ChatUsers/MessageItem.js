@@ -283,7 +283,16 @@ const MessageItem = ({
               {item.mediaType === "image" &&
                 (item.isViewOnce ? (
                   <TouchableOpacity
-                    onPress={() =>
+                  onPress={() => {
+                    // Abrir el modal con la imagen
+                    setSelectedImage({
+                      uri: item.mediaUrl,
+                      mediaType: "image",
+                    });
+                    setIsModalVisible(true);
+                
+                    // Lógica para marcar como vista sin frenar el modal
+                    setTimeout(() => {
                       handleMediaPress(
                         database,
                         chatId,
@@ -292,25 +301,28 @@ const MessageItem = ({
                         "image",
                         item.id,
                         item.isViewOnce,
-                        setSelectedImage,
-                        setIsModalVisible,
+                        () => {}, // no setea imagen de nuevo
+                        () => {}, // no vuelve a abrir modal
                         t
-                      )
-                    }
-                    style={[
-                      styles.viewOnceImagePlaceholder,
-                      item.viewedBy?.includes(user.uid)
-                        ? styles.imageViewed
-                        : styles.imageNotViewed,
-                    ]}
-                    disabled={item.viewedBy?.includes(user.uid)}
-                  >
-                    <Text style={styles.imageStatusText}>
-                      {item.viewedBy?.includes(user.uid)
-                        ? t("chatUsers.alreadyViewed")
-                        : t("chatUsers.view")}
-                    </Text>
-                  </TouchableOpacity>
+                      );
+                    }, 100); // da un pequeño respiro al render antes de correr lógica pesada
+                  }}
+                  style={[
+                    styles.viewOnceImagePlaceholder,
+                    item.viewedBy?.includes(user.uid)
+                      ? styles.imageViewed
+                      : styles.imageNotViewed,
+                  ]}
+                  disabled={item.viewedBy?.includes(user.uid)}
+                >
+                  <Text style={styles.imageStatusText}>
+                    {item.viewedBy?.includes(user.uid)
+                      ? t("chatUsers.alreadyViewed")
+                      : t("chatUsers.view")}
+                  </Text>
+                </TouchableOpacity>
+                
+                
                 ) : (
                   <TouchableOpacity
                     onPress={() =>

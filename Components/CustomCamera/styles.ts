@@ -62,4 +62,22 @@ export const styles = StyleSheet.create({
     bottom: 50,
     left: 30,
   },
+  viewOnceButton: {
+  position: "absolute",
+  bottom: 40,
+  left: 10,
+  backgroundColor: "white",
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  borderRadius: 25,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+},
+viewOnceText: {
+  color: "rgba(0, 0, 0, 0.6)",
+  fontSize: 16,
+  fontWeight: "bold",
+},
+
 });

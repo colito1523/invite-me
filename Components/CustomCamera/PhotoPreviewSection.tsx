@@ -34,7 +34,6 @@ const PhotoPreviewSection = ({
   onCapture,
 }: Props) => {
   useEffect(() => {
-    console.log('Vista previa:', photo);
   }, [photo]);
   const navigation = useNavigation();
   const { t } = useTranslation();
@@ -214,17 +213,16 @@ const PhotoPreviewSection = ({
 
       {/* Si es modo chat y es imagen, se muestra la opción para isViewOnce */}
       {isChatMode && photo.type !== 'video' && (
-        <TouchableOpacity
-          style={styles.viewOnceToggle}
-          onPress={() => setIsViewOnce(prev => !prev)}
-        >
-          <Ionicons
-            name={isViewOnce ? "eye-off-outline" : "eye-outline"}
-            size={30}
-            color="white"
-          />
-        </TouchableOpacity>
-      )}
+  <TouchableOpacity
+    style={styles.viewOnceButton}
+    onPress={() => setIsViewOnce(prev => !prev)}
+  >
+    <Text style={styles.viewOnceText}>
+      {isViewOnce ? "View Once" : "Keep in Chat"}
+    </Text>
+  </TouchableOpacity>
+)}
+
     </View>
   );
 };
