@@ -13,6 +13,7 @@ import { initReactI18next } from 'react-i18next';
 import useNotifications from "./src/hooks/useNotifications"; // Importa el hook personalizado
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as ExpoNotifications from 'expo-notifications';
+import ForceUpdate from './Components/ForceUpdate';
 
 // Configuración de notificaciones
 ExpoNotifications.setNotificationHandler({
@@ -277,6 +278,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
+      <ForceUpdate>
         <AuthenticatedUserProvider>
           <UnreadMessagesProvider> 
             <PaperProvider>
@@ -286,6 +288,7 @@ export default function App() {
             </PaperProvider>
           </UnreadMessagesProvider>
         </AuthenticatedUserProvider>
+        </ForceUpdate>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
