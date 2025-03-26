@@ -334,7 +334,9 @@
     "sentPhoto": "Sent a photo",
     "dontFind": "Don't find the message",
     "dontFindMessage": "Could not find the message.",
-    "ReplyTo": "Replying to"
+    "ReplyTo": "Replying to",
+    "viewOnce": "View Once",
+    "keepInChat": "Keep In Chat"
 
   },
   "formatTime": {

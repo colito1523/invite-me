@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect  } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Image } from 'expo-image';
 import { Video } from "expo-av";
@@ -42,6 +42,19 @@ const MessageItem = ({
   const isOwnMessage = item.senderId === user.uid;
 
   if (item.deletedFor?.[user.uid]) return null;
+  
+  useEffect(() => {
+    if (item.isViewOnce && item.mediaType === "image") {
+      Image.prefetch(item.mediaUrl)
+        .then(() => {
+          // Imagen precargada con éxito
+          // console.log("Imagen precargada:", item.mediaUrl);
+        })
+        .catch(() => {
+          // Si falla, no pasa nada
+        });
+    }
+  }, []);
 
   const renderDate = (date) => (
     <View style={styles.dateContainer}>

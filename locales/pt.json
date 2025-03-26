@@ -342,7 +342,9 @@
   "sentPhoto": "Enviou uma foto",
    "dontFind": "Messagem não encontrada.",
     "dontFindMessage": "Não foi possível encontrar a mensagem.",
-    "ReplyTo": "A responder a"
+    "ReplyTo": "A responder a",
+    "viewOnce": "Ver uma vez",
+    "keepInChat": "Manter no chat"
 },
 "formatTime": {
   "yesterday": "Ontem",

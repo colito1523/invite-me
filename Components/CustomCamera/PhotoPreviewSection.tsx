@@ -205,7 +205,7 @@ const PhotoPreviewSection = ({
           ) : (
             <>
               <Text style={styles.uploadButtonText}>{mainButtonLabel}</Text>
-              <Ionicons name="arrow-forward" size={24} color="rgba(0, 0, 0, 0.6)" />
+              <Ionicons name="arrow-forward" size={20} color="black" />
             </>
           )}
         </TouchableOpacity>
@@ -218,7 +218,7 @@ const PhotoPreviewSection = ({
     onPress={() => setIsViewOnce(prev => !prev)}
   >
     <Text style={styles.viewOnceText}>
-      {isViewOnce ? "View Once" : "Keep in Chat"}
+    {isViewOnce ? t("chatUsers.viewOnce") : t("chatUsers.keepInChat")}
     </Text>
   </TouchableOpacity>
 )}
