@@ -49,10 +49,6 @@ import {
 
 export default memo(function BoxDetails({ route, navigation }) {
   const { t } = useTranslation();
-  useEffect(() => {
-    console.log("📦 box:", box);
-    console.log("📦 boxData:", boxData);
-  }, [box, boxData]);
   const { box, selectedDate, isFromNotification } = route.params || {};
   const [isEventSaved, setIsEventSaved] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);

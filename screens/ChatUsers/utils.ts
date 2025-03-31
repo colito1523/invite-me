@@ -4,6 +4,21 @@ import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Audio } from 'expo-av';
 
+
+export const getLoggedInUserData = async (uid) => {
+  try {
+    const userRef = doc(database, "users", uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      return userSnap.data();
+    }
+    return null;
+  } catch (error) {
+    console.error("Error al obtener usuario:", error);
+    return null;
+  }
+};
+
 export const configureAudioPlayback = async () => {
   try {
     await Audio.setAudioModeAsync({

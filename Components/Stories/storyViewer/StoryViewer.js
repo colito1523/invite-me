@@ -51,7 +51,9 @@ import {
   handleCloseViewersModal,
   useStoryProgress,
   calculateHoursAgo,
+  fetchLoggedInUserData 
 } from "./storyUtils"; // Fix import path
+
 
 export function StoryViewer({
   stories,

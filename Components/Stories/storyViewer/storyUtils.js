@@ -13,7 +13,8 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { useEffect } from "react";
-import { ref, deleteObject } from "firebase/storage";
+import { ref, deleteObject} from "firebase/storage";
+import { database } from "../../../config/firebase";
 
 export const createStoryPanResponder = ({
   handleCloseViewer,
@@ -57,6 +58,19 @@ export const createStoryPanResponder = ({
       }
     },
   });
+};
+
+export const fetchLoggedInUserData = async (user) => {
+  try {
+    const userRef = doc(database, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      return userSnap.data();
+    }
+  } catch (error) {
+    console.error("Error al obtener datos del usuario:", error);
+  }
+  return null;
 };
 
 export const handleNextUser = ({
@@ -253,6 +267,7 @@ export const handleSendMessage = async ({
   setIsPaused,
   setShowSendConfirmation,
 }) => {
+  const loggedInUserData = await fetchLoggedInUserData(auth.currentUser);
   if (message.trim()) {
     const currentStory = stories[currentIndex]?.userStories[storyIndex];
     if (currentStory) {
@@ -295,8 +310,7 @@ export const handleSendMessage = async ({
         const newMessage = {
           text: message,
           senderId: senderId,
-          senderName:
-            auth.currentUser.displayName || t("storyViewer.anonymous"),
+         senderName: loggedInUserData?.username || "Anónimo",
           createdAt: new Date(),
           seen: false, // Cambiar de array a boolean
           storyUrl: currentStory.storyUrl,

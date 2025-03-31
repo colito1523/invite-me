@@ -27,9 +27,9 @@ const boxInfo = [
     title: "Sónar Lisboa 2025",
     category: "Festivities",
     details: {
-      es: "Sónar Lisboa es un festival de música electrónica que reúne a artistas de todo el mundo en una experiencia audiovisual única.",
-      en: "Sónar Lisboa is an electronic music festival that brings together artists from around the world in a unique audiovisual experience.",
-      pt: "O Sónar Lisboa é um festival de música eletrónica que reúne artistas de todo o mundo numa experiência audiovisual única.",
+      es: "El Sónar regresa a Lisboa los días 11, 12 y 13 de abril de 2025 para dos días y dos noches de música, creatividad y tecnología en el Parque Eduardo VII",
+      en: "Sónar returns to Lisbon on April 11, 12 and 13, 2025 for two days and two nights of music, creativity, and technology at Parque Eduardo VII.",
+      pt: "O Sónar regressa a Lisboa nos dias 11, 12 e 13 de abril de 2025 para dois dias e duas noites de música, criatividade e tecnologia no Parque Eduardo VII",
     },    number: "-",
     coordinates: {
       latitude: 38.72830010,
@@ -44,15 +44,11 @@ const boxInfo = [
     path: require("../../assets/Lisboa/moga.jpg"),
     title: "MOGA CAPARICA 2025",
     category: "Festivities",
-    hours: {
-      Lunes: "8:30 PM - ---",
-      Martes: "Cerrado",
-      Miércoles: "Cerrado",
-      Jueves: "Cerrado",
-      Viernes: "8:30 PM - ---",
-      Sábado: "8:30 PM - ---",
-      Domingo: "8:30 PM - ---",
-    },
+    details: {
+      es: "El MOGA regresa a la deslumbrante Costa da Caparica, en Portugal (a 20 minutos al sur de Lisboa), del 28 de mayo al 1 de junio de 2025.",
+      en: "MOGA returns to the stunning Costa da Caparica in Portugal (20 minutes south of Lisbon), from May 28 to June 1, 2025.",
+      pt: "O MOGA retorna à deslumbrante Costa da Caparica, em Portugal (20 min ao sul de Lisboa), de 28 de maio a 1 de junho de 2025.",
+    },    
     number: "-",
     coordinates: {
       latitude: 38.60324800,
@@ -67,15 +63,11 @@ const boxInfo = [
     path: require("../../assets/Lisboa/lisbon.jpg"),
     title: "LISB-ON",
     category: "Festivities",
-    hours: {
-      Lunes: "8:30 PM - ---",
-      Martes: "Cerrado",
-      Miércoles: "Cerrado",
-      Jueves: "Cerrado",
-      Viernes: "8:30 PM - ---",
-      Sábado: "8:30 PM - ---",
-      Domingo: "8:30 PM - ---",
-    },
+    details: {
+      es: "Lisb-On es un festival vibrante al aire libre que transforma Lisboa en un jardín sonoro, combinando música electrónica, arte y naturaleza. Con una vibra única y un lineup de artistas de renombre, es el evento ideal para vivir Lisboa al ritmo de la mejor música.",
+      en: "Lisb-On is a vibrant open-air festival that transforms Lisbon into a sound garden, blending electronic music, art, and nature. With a unique vibe and a lineup of renowned artists, it's the perfect event to experience Lisbon to the sound of the best music.",
+      pt: "O Lisb-On é um festival vibrante ao ar livre que transforma Lisboa num jardim sonoro, combinando música eletrónica, arte e natureza. Com uma vibe única e um lineup de artistas de renome, é o evento ideal para viver Lisboa ao som da melhor música!",
+    },  
     number: "-",
     coordinates: {
       latitude: 38.70728280,

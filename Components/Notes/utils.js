@@ -1,4 +1,21 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { doc, getDoc } from "firebase/firestore";
+import { database } from "../../config/firebase"; // ajustá la ruta si es necesario
+
+export const getLoggedInUserData = async (uid) => {
+  try {
+    const userRef = doc(database, "users", uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      return userSnap.data();
+    }
+    return null;
+  } catch (error) {
+    console.error("Error al obtener usuario:", error);
+    return null;
+  }
+};
+
 
 export const saveUserNoteToCache = async (note) => {
   try {

@@ -9,10 +9,8 @@ import {
   Alert,
   Modal,
   Animated,
-  Dimensions,
   TouchableWithoutFeedback,
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   Platform
 } from "react-native";
@@ -354,7 +352,7 @@ export default function Notes({ refresh }) {
         const newMessage = {
           text: responseMessage,
           senderId: user.uid,
-          senderName: user.displayName || t("notes.anonymous"),
+          senderName: userData?.username || t("notes.anonymous"),
           createdAt: new Date(),
           seen: false, // Cambiar de array a boolean
           isNoteResponse: true, // Mark as a note response
@@ -499,7 +497,7 @@ export default function Notes({ refresh }) {
       const newMessage = {
         text: responseMessage,
         senderId: user.uid,
-        senderName: user.displayName || t("notes.anonymous"),
+        senderName: userData?.username || t("notes.anonymous"),
         createdAt: new Date(),
         seen: false, // Cambiar de array a boolean
         isNoteResponse: true,

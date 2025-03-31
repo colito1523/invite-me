@@ -43,7 +43,7 @@ import ChatInput from "./ChatInput";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
-import { muteChat, handleDeleteMessage, handleMediaPress, configureAudioPlayback  } from "./utils";
+import { muteChat, handleDeleteMessage, handleMediaPress, configureAudioPlayback, getLoggedInUserData  } from "./utils";
 import { useTranslation } from "react-i18next";
 
 export default function Chat({ route }) {
@@ -72,6 +72,16 @@ export default function Chat({ route }) {
   const [mutedChats, setMutedChats] = useState([]);
   const [isMuteModalVisible, setIsMuteModalVisible] = useState(false);
   const [replyMessage, setReplyMessage] = useState(null);
+  const [loggedInUserData, setLoggedInUserData] = useState(null);
+
+  useEffect(() => {
+    if (user?.uid) {
+      getLoggedInUserData(user.uid).then((data) => {
+        setLoggedInUserData(data);
+      });
+    }
+  }, []);
+
 
   const scrollToMessage = (replyToId) => {
     const index = messages.findIndex((msg) => msg.id === replyToId);
@@ -312,7 +322,7 @@ export default function Chat({ route }) {
 
       let messageData = {
         senderId: user.uid,
-        senderName: user.displayName || "Anónimo",
+        senderName: loggedInUserData?.username || "Anónimo",
         createdAt: new Date(),
         seen: false,
         viewedBy: [],
@@ -371,7 +381,7 @@ export default function Chat({ route }) {
           lastMessage: messageData.text || "Sent a ...",
           lastMessageTimestamp: messageData.createdAt,
           lastMessageSenderId: user.uid,
-          lastMessageSenderName: user.displayName || "Anónimo",
+          lastMessageSenderName: loggedInUserData?.username || "Anónimo",
           [`isHidden.${user.uid}`]: false,
           [`deletedFor.${user.uid}`]: false,
           [`isHidden.${otherParticipantId}`]: false,
