@@ -175,46 +175,48 @@ export default function Menu({
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={currentStyles.modalOverlay}>
           <View style={currentStyles.modalContent}>
-            <View style={currentStyles.searchInputContainer}>
-              <Ionicons name="search" size={23} color={isNightMode ? "white" : "black"} style={currentStyles.searchIcon} />
-              <TextInput
-                style={currentStyles.searchInput}
-                placeholder={t('searchPlaceholder')}
-                placeholderTextColor={isNightMode ? "#888" : "#666"}
-                value={searchQuery}
-                onChangeText={handleSearchChange}
-              />
-            </View>
-
-            {filteredCities.length > 0 && (
-              <View style={currentStyles.autocompleteContainer}>
-                <FlatList
-                  data={filteredCities}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item, index }) => (
-                    <TouchableOpacity
-                      style={[
-                        currentStyles.autocompleteItem,
-                        index === filteredCities.length - 1 && currentStyles.lastAutocompleteItem
-                      ]}
-                      onPress={() => handleCitySelect(item)}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons 
-                        name="location-outline" 
-                        size={18} 
-                        color={isNightMode ? "#aaa" : "#666"} 
-                        style={currentStyles.cityIcon} 
-                      />
-                      <Text style={currentStyles.cityText}>{item}</Text>
-                    </TouchableOpacity>
-                  )}
-                  ItemSeparatorComponent={() => <View style={currentStyles.cityDivider} />}
-                  style={currentStyles.autocompleteList}
-                  bounces={false}
+            <View style={currentStyles.searchContainer}>
+              <View style={currentStyles.searchInputContainer}>
+                <Ionicons name="search" size={23} color={isNightMode ? "white" : "black"} style={currentStyles.searchIcon} />
+                <TextInput
+                  style={currentStyles.searchInput}
+                  placeholder={t('searchPlaceholder')}
+                  placeholderTextColor={isNightMode ? "#888" : "#666"}
+                  value={searchQuery}
+                  onChangeText={handleSearchChange}
                 />
               </View>
-            )}
+              
+              {filteredCities.length > 0 && (
+                <View style={currentStyles.autocompleteContainer}>
+                  <FlatList
+                    data={filteredCities}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item, index }) => (
+                      <TouchableOpacity
+                        style={[
+                          currentStyles.autocompleteItem,
+                          index === filteredCities.length - 1 && currentStyles.lastAutocompleteItem
+                        ]}
+                        onPress={() => handleCitySelect(item)}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons 
+                          name="location-outline" 
+                          size={18} 
+                          color={isNightMode ? "#ebddd5" : "#666"} 
+                          style={currentStyles.cityIcon} 
+                        />
+                        <Text style={currentStyles.cityText}>{item}</Text>
+                      </TouchableOpacity>
+                    )}
+                    ItemSeparatorComponent={() => <View style={currentStyles.cityDivider} />}
+                    style={currentStyles.autocompleteList}
+                    bounces={false}
+                  />
+                </View>
+              )}
+            </View>
 
             <View style={currentStyles.separator} />
             {categories.map((category, index) => (
@@ -297,6 +299,11 @@ const dayStyles = StyleSheet.create({
     textAlign: "center",
     paddingVertical: 7,
   },
+  searchContainer: {
+    width: '100%',
+    position: 'relative',
+    zIndex: 10,
+  },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -315,9 +322,11 @@ const dayStyles = StyleSheet.create({
     color: 'black',
   },
   autocompleteContainer: {
-    width: '100%',
-    marginBottom: 10,
-    zIndex: 10,
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    zIndex: 20,
   },
   autocompleteList: {
     maxHeight: 150,
@@ -326,9 +335,9 @@ const dayStyles = StyleSheet.create({
     borderRadius: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
   },
   autocompleteItem: {
     paddingVertical: 12,
@@ -403,6 +412,11 @@ const nightStyles = StyleSheet.create({
     textAlign: "center",
     paddingVertical: 7,
   },
+  searchContainer: {
+    width: '100%',
+    position: 'relative',
+    zIndex: 10,
+  },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -423,20 +437,24 @@ const nightStyles = StyleSheet.create({
     color: 'white',
   },
   autocompleteContainer: {
-    width: '100%',
-    marginBottom: 10,
-    zIndex: 10,
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    zIndex: 20,
   },
   autocompleteList: {
     maxHeight: 150,
     width: '100%',
-    backgroundColor: '#222',
+    backgroundColor: 'black',
     borderRadius: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#444',
   },
   autocompleteItem: {
     paddingVertical: 12,
@@ -454,7 +472,6 @@ const nightStyles = StyleSheet.create({
   cityText: {
     fontSize: 16,
     color: '#eee',
-    fontWeight: '500',
   },
   cityDivider: {
     height: 1,

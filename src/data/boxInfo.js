@@ -2247,6 +2247,111 @@ const boxInfo = [
     country: "Inglaterra",
     city: "Londres",
   },
+  {
+    path: require("../../assets/Londres/KOKO.jpg"),
+    title: "KOKO",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Maddox London.jpg"),
+    title: "Maddox London",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Park Chinois.jpg"),
+    title: "Park Chinois",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Stereo.jpg"),
+    title: "Stereo",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/fabric London.jpg"),
+    title: "fabric London",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
 ];
 
 export default boxInfo;
