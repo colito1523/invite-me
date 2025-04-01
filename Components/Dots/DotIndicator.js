@@ -343,7 +343,10 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       </View>
 
       <FlatList
-        data={filteredAttendees}
+        data={filteredAttendees.filter(item => 
+          searchTerm === '' || 
+          (item.username && item.username.toLowerCase().includes(searchTerm.toLowerCase()))
+        )}
         keyExtractor={(item) => item.uid || item.username}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ flexGrow: 1 }}
