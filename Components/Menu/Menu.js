@@ -51,7 +51,7 @@ export default function Menu({
     t('categories.changeLanguage'), // Nueva categoría para cambiar el idioma
   ];
 
-  const cities = ['Lisboa', 'Madrid'];
+  const cities = ['Lisboa', 'Madrid', 'Londres'];
 
   const handleSearchChange = useCallback((text) => {
     setSearchQuery(text);
@@ -187,19 +187,33 @@ export default function Menu({
             </View>
 
             {filteredCities.length > 0 && (
-              <FlatList
-                data={filteredCities}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={currentStyles.autocompleteItem}
-                    onPress={() => handleCitySelect(item)}
-                  >
-                    <Text style={currentStyles.menuItemText}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-                style={currentStyles.autocompleteList}
-              />
+              <View style={currentStyles.autocompleteContainer}>
+                <FlatList
+                  data={filteredCities}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item, index }) => (
+                    <TouchableOpacity
+                      style={[
+                        currentStyles.autocompleteItem,
+                        index === filteredCities.length - 1 && currentStyles.lastAutocompleteItem
+                      ]}
+                      onPress={() => handleCitySelect(item)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons 
+                        name="location-outline" 
+                        size={18} 
+                        color={isNightMode ? "#aaa" : "#666"} 
+                        style={currentStyles.cityIcon} 
+                      />
+                      <Text style={currentStyles.cityText}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                  ItemSeparatorComponent={() => <View style={currentStyles.cityDivider} />}
+                  style={currentStyles.autocompleteList}
+                  bounces={false}
+                />
+              </View>
             )}
 
             <View style={currentStyles.separator} />
@@ -245,7 +259,6 @@ const dayStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    // Puedes ajustar el backgroundColor según prefieras
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   modalContent: {
@@ -301,19 +314,43 @@ const dayStyles = StyleSheet.create({
     ...commonInputStyles,
     color: 'black',
   },
-  autocompleteList: {
-    maxHeight: 100,
+  autocompleteContainer: {
     width: '100%',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    marginTop: 5,
+    marginBottom: 10,
+    zIndex: 10,
+  },
+  autocompleteList: {
+    maxHeight: 150,
+    width: '100%',
     backgroundColor: '#fff',
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   autocompleteItem: {
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  lastAutocompleteItem: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  cityIcon: {
+    marginRight: 10,
+  },
+  cityText: {
     fontSize: 16,
-    color: 'black',
+    color: '#333',
+  },
+  cityDivider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    marginHorizontal: 16,
   },
 });
 
@@ -385,19 +422,43 @@ const nightStyles = StyleSheet.create({
     ...commonInputStyles,
     color: 'white',
   },
-  autocompleteList: {
-    maxHeight: 100,
+  autocompleteContainer: {
     width: '100%',
-    borderWidth: 1,
-    borderColor: '#444',
-    borderRadius: 5,
-    marginTop: 5,
-    backgroundColor: 'black',
+    marginBottom: 10,
+    zIndex: 10,
+  },
+  autocompleteList: {
+    maxHeight: 150,
+    width: '100%',
+    backgroundColor: '#222',
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   autocompleteItem: {
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  lastAutocompleteItem: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  cityIcon: {
+    marginRight: 10,
+  },
+  cityText: {
     fontSize: 16,
-    color: 'white',
+    color: '#eee',
+    fontWeight: '500',
+  },
+  cityDivider: {
+    height: 1,
+    backgroundColor: '#333',
+    marginHorizontal: 16,
   },
 });
-

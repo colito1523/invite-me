@@ -163,9 +163,20 @@ useEffect(() => {
 
   useEffect(() => {
     if (country) {
-      setSelectedCity(country === "Portugal" ? "Lisboa" : "Madrid");
+      if (country === "Portugal") {
+        setSelectedCity("Lisboa");
+      } else if (country === "España") {
+        setSelectedCity("Madrid");
+      } else if (country === "Inglaterra") {
+        setSelectedCity("Londres");
+      } else {
+        // Si estás en un país que no está definido, que no muestre nada
+        setSelectedCity("All Cities");
+      }
+      console.log("📌 País detectado:", country, "| Ciudad seleccionada:", selectedCity);
     }
   }, [country]);
+  
 
   useEffect(() => {
     const updateHeader = () => {

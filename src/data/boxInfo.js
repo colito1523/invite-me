@@ -1847,6 +1847,406 @@ const boxInfo = [
     country: "España",
     city: "Madrid",
   },
+
+  {
+    path: require("../../assets/Londres/34 Mayfair.jpg"),
+    title: "34 Mayfair",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/The aqua Shard.jpg"),
+    title: "The aqua Shard",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Dear Darling Mayfair.jpg"),
+    title: "Dear Darling Mayfair",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/HUMO.jpg"),
+    title: "HUMO",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Sushisamba.jpg"),
+    title: "Sushisamba",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/The Cukoo Club.jpg"),
+    title: "The Cukoo Club",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/B London.jpg"),
+    title: "B London",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Soho House.jpg"),
+    title: "Soho House",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Maison Estelle.jpg"),
+    title: "Maison Estelle",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/The scotch of St James.jpg"),
+    title: "The scotch of St James",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/The Twenty Two.jpg"),
+    title: "The Twenty Two",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/The Box Soho.jpg"),
+    title: "The Box Soho",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Bagatelle London.jpg"),
+    title: "Bagatelle London",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Tramp.jpg"),
+    title: "Tramp",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/100 wardour street.jpg"),
+    title: "100 wardour street",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Cache cache.jpg"),
+    title: "Cache cache",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Madison.jpg"),
+    title: "Madison",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Annabels.jpg"),
+    title: "Annabel’s",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Cirque Le Soir.jpg"),
+    title: "Cirque Le Soir",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
 ];
 
 export default boxInfo;
