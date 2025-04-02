@@ -63,7 +63,6 @@ export const localEventImages = {
     rubicon: require("../../assets/Madrid/Rubicon.jpg"),
     gabana: require("../../assets/Madrid/Gabana.jpg"),
     gunilla: require("../../assets/Madrid/Gunilla.jpg"),
-    almagro_cafe_bar_restaurante: require("../../assets/Madrid/almagro.jpg"),
     zuma: require("../../assets/Madrid/Zuma.jpg"),
     picalagartos_sky_bar_restaurant: require("../../assets/Madrid/picalagartos.jpg"),
     tatel: require("../../assets/Madrid/Tatel.jpg"),

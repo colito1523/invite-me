@@ -12,10 +12,12 @@ import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get('window');
 
-const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, isPrivateEvent, priority }) => {
+const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, isPrivateEvent, priority, membersClub  }) => {
   const displayDate = isPrivateEvent ? DaySpecial : selectedDate;
   const { t } = useTranslation();
   const defaultImageUrl = "https://example.com/default-image.jpg";
+
+  console.log("🎯 membersClub:", membersClub, "| title:", title);
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.touchable}>
@@ -32,6 +34,11 @@ const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, is
             <Text style={styles.priorityText}>{t('HomeIndex.Patrocinado')}</Text>
           </View>
         )}
+        {membersClub && (
+  <View style={styles.membersClubContainer}>
+    <Text style={styles.membersClubText}>{t('HomeIndex.MembersClub')}</Text>
+  </View>
+)}
        {isPrivateEvent && date && (
   <View style={styles.dateContainer}>
     <Text style={styles.dateText}>{date}</Text>
@@ -129,6 +136,21 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   priorityText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  membersClubContainer: {
+    position: 'absolute',
+    top: 10,
+    left: 10, // 👈 esquina superior derecha
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+    zIndex: 10,
+  },
+  membersClubText: {
     color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "bold",

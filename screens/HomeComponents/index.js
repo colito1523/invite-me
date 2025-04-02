@@ -538,6 +538,7 @@ useEffect(() => {
           date={item.date}
           isPrivateEvent={item.category === "EventoParaAmigos"}
           priority={item.priority} // Ensure the priority property is passed to the Box component
+          membersClub={item.membersClub}
         />
         {item.attendees && item.attendees.length > 0 && (
           <DotIndicator

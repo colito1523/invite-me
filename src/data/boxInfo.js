@@ -20,7 +20,8 @@ const boxInfo = [
     country: "Portugal",
     city: "Lisboa",
     priority: true, // Esto hace que aparezca en la sección de priorida
-    
+
+
   },
   {
     path: require("../../assets/Lisboa/SonarLisboa.jpg"),
@@ -98,6 +99,7 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
+    membersClub: true,
     
   },
   {
@@ -1569,27 +1571,6 @@ const boxInfo = [
     coordinates: {
       latitude: 40.4213789,
       longitude: -3.707142,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/almagro.jpg"),
-    title: "Almagro Café & Bar Restaurante",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "08:00 - 02:00",
-      Martes: "08:00 - 02:00",
-      Miércoles: "08:00 - 02:00",
-      Jueves: "08:00 - 02:00",
-      Viernes: "08:00 - 02:00",
-      Sábado: "08:00 - 02:00",
-      Domingo: "10:00 - 01:00"
-    },
-    number: "+34 913 082 931",
-    coordinates: {
-      latitude: 40.4286449,
-      longitude: -3.6944338,
     },
     country: "España",
     city: "Madrid",
