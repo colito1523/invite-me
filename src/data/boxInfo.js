@@ -1893,7 +1893,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Dear Darling Mayfair.jpg"),
     title: "Dear Darling Mayfair",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -1956,7 +1956,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/The Cukoo Club.jpg"),
     title: "The Cukoo Club",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -1977,7 +1977,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/B London.jpg"),
     title: "B London",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -1998,7 +1998,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Soho House.jpg"),
     title: "Soho House",
-    category: "Restaurants & Rooftops",
+    category: ["Restaurants & Rooftops", "Bars & Clubs"],
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2019,7 +2019,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Maison Estelle.jpg"),
     title: "Maison Estelle",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2040,7 +2040,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/The scotch of St James.jpg"),
     title: "The scotch of St James",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2061,7 +2061,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/The Twenty Two.jpg"),
     title: "The Twenty Two",
-    category: "Restaurants & Rooftops",
+    category: ["Restaurants & Rooftops", "Bars & Clubs"],
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2082,7 +2082,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/The Box Soho.jpg"),
     title: "The Box Soho",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2124,7 +2124,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Tramp.jpg"),
     title: "Tramp",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2166,7 +2166,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Cache cache.jpg"),
     title: "Cache cache",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2208,7 +2208,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Annabels.jpg"),
     title: "Annabel’s",
-    category: "Restaurants & Rooftops",
+    category: ["Restaurants & Rooftops", "Bars & Clubs"],
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2229,7 +2229,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Cirque Le Soir.jpg"),
     title: "Cirque Le Soir",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2250,7 +2250,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/KOKO.jpg"),
     title: "KOKO",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2271,7 +2271,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Maddox London.jpg"),
     title: "Maddox London",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2292,7 +2292,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Park Chinois.jpg"),
     title: "Park Chinois",
-    category: "Restaurants & Rooftops",
+    category: ["Restaurants & Rooftops", "Bars & Clubs"],
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2313,7 +2313,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Stereo.jpg"),
     title: "Stereo",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",
@@ -2334,7 +2334,49 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/fabric London.jpg"),
     title: "fabric London",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Tape London.jpg"),
+    title: "Tape London",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "-",
+    coordinates: {
+      latitude: 40.4220598,
+      longitude: -3.6859164,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Isabel.jpg"),
+    title: "Isabel",
+    category: ["Restaurants & Rooftops", "Bars & Clubs"],
     hours: {
       Lunes: "Cerrado",
       Martes: "20:00 - 02:00",

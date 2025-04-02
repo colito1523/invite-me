@@ -443,7 +443,13 @@ export const getFilteredBoxData = (boxData, selectedCity, selectedCategory, t, s
         box.category === "Festivities" || box.category === "EventoParaAmigos"
       );
     } else {
-      filteredData = filteredData.filter((box) => box.category === selectedCategory);
+      filteredData = filteredData.filter((box) => {
+        if (Array.isArray(box.category)) {
+          return box.category.includes(selectedCategory);
+        }
+        return box.category === selectedCategory;
+      });
+      
     }
   }
 
