@@ -214,7 +214,7 @@
     "locationNotAvailable": "Location not available",
     "contact": "Contact",
     "closed": "Closed",
-    "noContactNumber": "No contact number"
+    "noContactNumber": ""
   },
 
   "indexBoxDetails": {

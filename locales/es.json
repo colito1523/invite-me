@@ -213,7 +213,7 @@
     "locationNotAvailable": "Ubicación no disponible",
     "contact": "Contacto",
     "closed": "Cerrado",
-    "noContactNumber": "Sin número de contacto"
+    "noContactNumber": ""
   },
 
   "indexBoxDetails": {

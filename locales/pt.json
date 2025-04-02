@@ -223,7 +223,7 @@
   "locationNotAvailable": "Localização não disponível",
   "contact": "Contacto",
   "closed": "Fechado",
-  "noContactNumber": "Sem número de contacto"
+  "noContactNumber": "-"
 },
 
 "indexBoxDetails": {
