@@ -99,7 +99,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    membersClub: true,
     
   },
   {
@@ -1890,6 +1889,7 @@ const boxInfo = [
     },
     country: "España",
     city: "Madrid",
+    membersClub: true,
   },
   {
     path: require("../../assets/Madrid/ForbesHouse.jpg"),
@@ -1911,7 +1911,51 @@ const boxInfo = [
     },
     country: "España",
     city: "Madrid",
+    membersClub: true,
   },
+  {
+    path: require("../../assets/Madrid/FITZ.jpg"),
+    title: "FITZ",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+34 919 93 03 85",
+    coordinates: {
+      latitude: 40.42452900,
+      longitude: -3.71207100,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/PunchRoom.jpg"),
+    title: "Punch Room - The Madrid EDITION",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "08:00 - 02:00",
+      Jueves: "08:00 - 02:00",
+      Viernes: "08:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "Cerrado"
+    },
+    number: "+34 919 54 54 88",
+    coordinates: {
+      latitude: 40.41766980,
+      longitude: -3.70626980,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+
 
   {
     path: require("../../assets/Londres/34 Mayfair.jpg"),

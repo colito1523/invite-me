@@ -131,6 +131,18 @@ export default function Menu({
     // Navega a Home con el parámetro adecuado sin cerrar el menú
     navigation.navigate('Home', { selectedCategory });
   };
+
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      const matches = cities.filter(city =>
+        city.toLowerCase().startsWith(searchQuery.toLowerCase())
+      );
+      setFilteredCities(matches);
+    } else {
+      setFilteredCities([]);
+    }
+  }, [isVisible, searchQuery]);
+  
   
   
   

@@ -17,7 +17,6 @@ const Box = memo(({ imageUrl, title, onPress, selectedDate, DaySpecial, date, is
   const { t } = useTranslation();
   const defaultImageUrl = "https://example.com/default-image.jpg";
 
-  console.log("🎯 membersClub:", membersClub, "| title:", title);
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.touchable}>
