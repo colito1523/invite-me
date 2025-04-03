@@ -1893,6 +1893,238 @@ const boxInfo = [
     country: "España",
     city: "Barcelona",
   },
+  {
+    path: require("../../assets/Barcelona/Opium.jpg"),
+    title: "Opium",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Macarena_Club.jpg"),
+    title: "Macarena Club",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Sutton_Club.jpg"),
+    title: "Sutton Club",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Sala_Apolo.jpg"),
+    title: "Sala Apolo",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Bling_Bling.jpg"),
+    title: "Bling Bling",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/La_Terrrazza.jpg"),
+    title: "La Terrrazza",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Bobbys_Free.jpg"),
+    title: "Bobby’s Free",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Paradiso.jpg"),
+    title: "Paradiso",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Nuts_Indulgence_Club.jpg"),
+    title: "Nuts Indulgence Club",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Nitsa_Club.jpg"),
+    title: "Nitsa Club",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Boca_Grande.jpg"),
+    title: "Boca Grande",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+
 
 
 
