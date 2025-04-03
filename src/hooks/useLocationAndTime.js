@@ -6,6 +6,7 @@ import { auth, database } from "../../config/firebase";
 export const useLocationAndTime = () => {
   const [locationGranted, setLocationGranted] = useState(true);
   const [country, setCountry] = useState("Portugal");
+  const [city, setCity] = useState(null); 
   const [isNightMode, setIsNightMode] = useState(false);
 
   useEffect(() => {
@@ -28,9 +29,9 @@ export const useLocationAndTime = () => {
             // Lista de ciudades disponibles
             const cities = [
               { name: "Madrid", lat: 40.4168, lon: -3.7038, country: "España" },
+              { name: "Barcelona", lat: 41.3851, lon: 2.1734, country: "España" },
               { name: "Lisboa", lat: 38.7223, lon: -9.1393, country: "Portugal" },
               { name: "Londres", lat: 51.5074, lon: -0.1278, country: "Inglaterra" },
-              // Agregá más ciudades acá si querés
             ];
 
             // Buscar la ciudad más cercana
@@ -65,9 +66,8 @@ export const useLocationAndTime = () => {
                 nearestCountry: nearestCity.country,
               });
               setCountry(nearestCity.country);
-            } else {
-              setCountry(detectedCountry || "Portugal");
-            }
+              setCity(nearestCity.name); // 👉 ESTA LÍNEA ES LA QUE FALTABA
+            }            
           }
         } else {
           // Si no se otorgan permisos, usar Lisboa como predeterminado
@@ -102,5 +102,5 @@ export const useLocationAndTime = () => {
     return () => clearInterval(interval);
   }, []);
 
-  return { locationGranted, country, isNightMode };
+  return { locationGranted, country, city, isNightMode };
 };

@@ -1872,6 +1872,29 @@ const boxInfo = [
   },
 
 
+  {
+    path: require("../../assets/Barcelona/Razzmatazz.jpg"),
+    title: "Razzmatazz",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+
+
 
   {
     path: require("../../assets/Londres/The_aqua_Shard.jpg"),

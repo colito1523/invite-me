@@ -68,7 +68,7 @@ const Header = ({ isNightMode, toggleMenu, handleDateChange, setLoading }) => {
 const Home = React.memo(() => {
   const { selectedDate, setSelectedDate } = useDate(); // Usar el contexto
   const [unreadNotifications, setUnreadNotifications] = useState(false);
-  const { locationGranted, country, isNightMode } = useLocationAndTime();
+  const { locationGranted, country, city, isNightMode } = useLocationAndTime();
   const navigation = useNavigation();
   const route = useRoute();
   const [errorMessage, setErrorMessage] = useState(null);
@@ -162,20 +162,20 @@ useEffect(() => {
   }, [navigation]);
 
   useEffect(() => {
-    if (country) {
-      if (country === "Portugal") {
-        setSelectedCity("Lisboa");
-      } else if (country === "España") {
-        setSelectedCity("Madrid");
-      } else if (country === "Inglaterra") {
-        setSelectedCity("Londres");
-      } else {
-        // Si estás en un país que no está definido, que no muestre nada
-        setSelectedCity("All Cities");
-      }
-      console.log("📌 País detectado:", country, "| Ciudad seleccionada:", selectedCity);
+    if (city) {
+      setSelectedCity(city);
+    } else if (country === "Portugal") {
+      setSelectedCity("Lisboa");
+    } else if (country === "España") {
+      setSelectedCity("Madrid");
+    } else if (country === "Inglaterra") {
+      setSelectedCity("Londres");
+    } else {
+      setSelectedCity("All Cities");
     }
-  }, [country]);
+  
+    console.log("📌 País:", country, "| Ciudad seleccionada:", city);
+  }, [country, city]);
   
 
   useEffect(() => {
