@@ -91,7 +91,7 @@ export const localEventImages = {
     fitz: require("../../assets/Madrid/FITZ.jpg"),
     punch_room: require("../../assets/Madrid/PunchRoom.jpg"),
 
-    "34_Mayfair": require("../../assets/Londres/34_Mayfair.jpg"),
+    "34_mayfair": require("../../assets/Londres/34_mayfair.jpg"),
     the_aqua_shard: require("../../assets/Londres/The_aqua_Shard.jpg"),
     dear_darling_mayfair: require("../../assets/Londres/Dear_Darling_Mayfair.jpg"),
     humo: require("../../assets/Londres/HUMO.jpg"),
@@ -117,17 +117,17 @@ export const localEventImages = {
     fabric_london: require("../../assets/Londres/fabric_London.jpg"),
     tape_london: require("../../assets/Londres/tape_london.jpg"),
     isabel: require("../../assets/Londres/Isabel.jpg"),
-    somo_soho: require("../../assets/Londres/SOMOSoho.jpg"),
+    soma_soho: require("../../assets/Londres/SOMOSoho.jpg"),
     la_bodega_negra: require("../../assets/Londres/LaBodegaNegra.jpg"),
-    zumabarbarossa: require("../../assets/Londres/ZumaBarbarossa.jpg"),
-    experimental_cocktail_club_chinatown: require("../../assets/Londres/ExperimentalCocktailClubChinatown.jpg"),
+    zuma_barbarossa: require("../../assets/Londres/zuma_barbarossa.jpg"),
+    experimental_cocktail_club: require("../../assets/Londres/ExperimentalCocktailClubChinatown.jpg"), 
     nighjar_carnaby: require("../../assets/Londres/NighjarCarnaby.jpg"),
     boneca: require("../../assets/Londres/Boneca.jpg"),
     house_of_koko: require("../../assets/Londres/HouseofKOKO.jpg"),
-    mnkyhse: require("../../assets/Londres/MNKYHSE.jpg"),
+    mnky_hse: require("../../assets/Londres/MNKYHSE.jpg"),
     beatz_london: require("../../assets/Londres/BeatzLondon.jpg"),
-    buddah_bar_london: require("../../assets/Londres/Buddah-BarLondon.jpg"),
-    hakkasan_may_fair: require("../../assets/Londres/HakkasanMayfair.jpg"),
+    buddah_bar_london: require("../../assets/Londres/Buddah_BarLondon.jpg"),
+    hakkasan_mayfair: require("../../assets/Londres/HakkasanMayfair.jpg"),
   };
   
   

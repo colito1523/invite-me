@@ -1937,7 +1937,7 @@ const boxInfo = [
 
 
   {
-    path: require("../../assets/Londres/34_Mayfair.jpg"),
+    path: require("../../assets/Londres/34_mayfair.jpg"),
     title: "34 Mayfair",
     category: "Restaurants & Rooftops",
     hours: {
@@ -2526,7 +2526,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/ZumaBarbarossa.jpg"),
+    path: require("../../assets/Londres/zuma_barbarossa.jpg"),
     title: "Zuma Barbarossa",
     category: "Bars & Clubs",
     hours: {
@@ -2673,7 +2673,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Buddah-BarLondon.jpg"),
+    path: require("../../assets/Londres/Buddah_BarLondon.jpg"),
     title: "Buddah-Bar London",
     category: "Restaurants & Rooftops",
     hours: {
