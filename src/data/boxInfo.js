@@ -1723,27 +1723,6 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Kuu_Kuu.jpg"),
-    title: "Kuikku Handroll Bar",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "20:00 - 23:00",
-      Martes: "20:00 - 23:00",
-      Miércoles: "20:00 - 23:00",
-      Jueves: "19:30 - 23:00",
-      Viernes: "13:00 - 00:00",
-      Sábado: "13:00 - 00:00",
-      Domingo: "13:00 - 18:00"
-    },
-    number: "+34 914 88 39 92",
-    coordinates: {
-      latitude: 40.4283953,
-      longitude: -3.6840741,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
     path: require("../../assets/Madrid/ten_con_ten.jpg"),
     title: "Ten con Ten",
     category: "Restaurants & Rooftops",
@@ -1958,7 +1937,7 @@ const boxInfo = [
 
 
   {
-    path: require("../../assets/Londres/34 Mayfair.jpg"),
+    path: require("../../assets/Londres/34_Mayfair.jpg"),
     title: "34 Mayfair",
     category: "Restaurants & Rooftops",
     hours: {
@@ -1979,7 +1958,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/The aqua Shard.jpg"),
+    path: require("../../assets/Londres/The_aqua_Shard.jpg"),
     title: "The aqua Shard",
     category: "Restaurants & Rooftops",
     hours: {
@@ -2000,7 +1979,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Dear Darling Mayfair.jpg"),
+    path: require("../../assets/Londres/Dear_Darling_Mayfair.jpg"),
     title: "Dear Darling Mayfair",
     category: "Bars & Clubs",
     hours: {
@@ -2063,7 +2042,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/The Cukoo Club.jpg"),
+    path: require("../../assets/Londres/The_Cukoo_Club.jpg"),
     title: "The Cukoo Club",
     category: "Bars & Clubs",
     hours: {
@@ -2084,7 +2063,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/B London.jpg"),
+    path: require("../../assets/Londres/B_London.jpg"),
     title: "B London",
     category: "Bars & Clubs",
     hours: {
@@ -2105,7 +2084,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Soho House.jpg"),
+    path: require("../../assets/Londres/Soho_House.jpg"),
     title: "Soho House",
     category: ["Restaurants & Rooftops", "Bars & Clubs"],
     hours: {
@@ -2126,7 +2105,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Maison Estelle.jpg"),
+    path: require("../../assets/Londres/maison_estelle.jpg"),
     title: "Maison Estelle",
     category: "Bars & Clubs",
     hours: {
@@ -2147,7 +2126,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/The scotch of St James.jpg"),
+    path: require("../../assets/Londres/the_scotch_of_st_james.jpg"),
     title: "The scotch of St James",
     category: "Bars & Clubs",
     hours: {
@@ -2168,7 +2147,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/The Twenty Two.jpg"),
+    path: require("../../assets/Londres/the_twenty_two.jpg"),
     title: "The Twenty Two",
     category: ["Restaurants & Rooftops", "Bars & Clubs"],
     hours: {
@@ -2189,7 +2168,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/The Box Soho.jpg"),
+    path: require("../../assets/Londres/the_box_soho.jpg"),
     title: "The Box Soho",
     category: "Bars & Clubs",
     hours: {
@@ -2210,7 +2189,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Bagatelle London.jpg"),
+    path: require("../../assets/Londres/bagatelle_london.jpg"),
     title: "Bagatelle London",
     category: "Restaurants & Rooftops",
     hours: {
@@ -2252,7 +2231,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/100 wardour street.jpg"),
+    path: require("../../assets/Londres/100_wardour_street.jpg"),
     title: "100 Wardour Street",
     category: "Restaurants & Rooftops",
     hours: {
@@ -2273,7 +2252,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Cache cache.jpg"),
+    path: require("../../assets/Londres/Cache_cache.jpg"),
     title: "Cache Cache",
     category: "Bars & Clubs",
     hours: {
@@ -2336,7 +2315,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Cirque Le Soir.jpg"),
+    path: require("../../assets/Londres/Cirque_Le_Soir.jpg"),
     title: "Cirque Le Soir",
     category: "Bars & Clubs",
     hours: {
@@ -2378,7 +2357,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Maddox London.jpg"),
+    path: require("../../assets/Londres/Maddox_London.jpg"),
     title: "Maddox London",
     category: "Bars & Clubs",
     hours: {
@@ -2441,7 +2420,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/fabric London.jpg"),
+    path: require("../../assets/Londres/fabric_London.jpg"),
     title: "Fabric London",
     category: "Bars & Clubs",
     hours: {
@@ -2462,7 +2441,7 @@ const boxInfo = [
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/Tape London.jpg"),
+    path: require("../../assets/Londres/tape_london.jpg"),
     title: "Tape London",
     category: "Bars & Clubs",
     hours: {
