@@ -1149,6 +1149,7 @@ const boxInfo = [
     },
     country: "España",
     city: "Madrid",
+    membersClub: true,
   },
   {
     path: require("../../assets/Madrid/Amazonico.jpg"),
@@ -1511,27 +1512,6 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/La_Flaca.jpg"),
-    title: "La Flaca",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
-    },
-    number: "+34 609 089 494",
-    coordinates: {
-      latitude: 40.4288828,
-      longitude: -3.6874267,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
     path: require("../../assets/Madrid/Casa_Suecia.jpg"),
     title: "Casa Suecia",
     category: "Restaurants & Rooftops",
@@ -1744,27 +1724,6 @@ const boxInfo = [
     city: "Madrid",
   },
   {
-    path: require("../../assets/Madrid/Tatel.jpg"),
-    title: "Tatel",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "13:00 - 01:00",
-      Martes: "13:00 - 01:00",
-      Miércoles: "13:00 - 01:00",
-      Jueves: "13:00 - 02:00",
-      Viernes: "13:00 - 02:00",
-      Sábado: "13:00 - 02:00",
-      Domingo: "13:00 - 01:00"
-    },    
-    number: "+34 911 721 841",
-    coordinates: {
-      latitude: 40.4324618,
-      longitude: -3.6878034,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
     path: require("../../assets/Madrid/Perrachica.jpg"),
     title: "Perrachica",
     category: "Restaurants & Rooftops",
@@ -1890,6 +1849,27 @@ const boxInfo = [
     country: "España",
     city: "Madrid",
   },
+  {
+    path: require("../../assets/Madrid/La_Flaca.jpg"),
+    title: "La Flaca",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Madrid",
+  },
 
 
 
@@ -1956,6 +1936,7 @@ const boxInfo = [
     },
     country: "Inglaterra",
     city: "Londres",
+    membersClub: true,
   },
   {
     path: require("../../assets/Londres/Isabel.jpg"),
@@ -1977,6 +1958,7 @@ const boxInfo = [
     },
     country: "Inglaterra",
     city: "Londres",
+    membersClub: true,
   },
   {
     path: require("../../assets/Londres/Sushisamba.jpg"),
@@ -2147,7 +2129,6 @@ const boxInfo = [
     },
     country: "Inglaterra",
     city: "Londres",
-    membersClub: true,
   },
   {
     path: require("../../assets/Londres/HouseofKOKO.jpg"),
@@ -2170,27 +2151,6 @@ const boxInfo = [
     country: "Inglaterra",
     city: "Londres",
     membersClub: true,
-  },
-  {
-    path: require("../../assets/Londres/Boneca.jpg"),
-    title: "Boneca",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "Cerrado",
-      Martes: "20:00 - 02:00",
-      Miércoles: "20:00 - 02:00",
-      Jueves: "20:00 - 02:00",
-      Viernes: "18:00 - 03:00",
-      Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
-    },
-    number: "",
-    coordinates: {
-      latitude: 51.50882470,
-      longitude: -0.22301030,
-    },
-    country: "Inglaterra",
-    city: "Londres",
   },
   {
     path: require("../../assets/Londres/The_Cukoo_Club.jpg"),
@@ -2275,7 +2235,6 @@ const boxInfo = [
     },
     country: "Inglaterra",
     city: "Londres",
-    membersClub: true,
   },
   {
     path: require("../../assets/Londres/maison_estelle.jpg"),
@@ -2555,6 +2514,27 @@ const boxInfo = [
     city: "Londres",
   },
   {
+    path: require("../../assets/Londres/B_London.jpg"),
+    title: "B London",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "22:00 - 02:00",
+      Jueves: "22:00 - 03:00",
+      Viernes: "22:00 - 03:00",
+      Sábado: "22:00 - 03:00",
+      Domingo: "Cerrado"
+    },    
+    number: "020 7584 2000",
+    coordinates: {
+      latitude: 51.49238460,
+      longitude: -0.17799800,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
     path: require("../../assets/Londres/Buddah_BarLondon.jpg"),
     title: "Buddah-Bar London",
     category: "Restaurants & Rooftops",
@@ -2592,27 +2572,6 @@ const boxInfo = [
     coordinates: {
       latitude: 51.50945060,
       longitude: -0.15172310,
-    },
-    country: "Inglaterra",
-    city: "Londres",
-  },
-  {
-    path: require("../../assets/Londres/B_London.jpg"),
-    title: "B London",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "Cerrado",
-      Martes: "Cerrado",
-      Miércoles: "22:00 - 02:00",
-      Jueves: "22:00 - 03:00",
-      Viernes: "22:00 - 03:00",
-      Sábado: "22:00 - 03:00",
-      Domingo: "Cerrado"
-    },    
-    number: "020 7584 2000",
-    coordinates: {
-      latitude: 51.49238460,
-      longitude: -0.17799800,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2681,6 +2640,7 @@ const boxInfo = [
     },
     country: "Inglaterra",
     city: "Londres",
+    membersClub: true,
   },
 ];
 
