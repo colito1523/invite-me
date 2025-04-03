@@ -31,7 +31,8 @@ const boxInfo = [
       es: "El Sónar regresa a Lisboa los días 11, 12 y 13 de abril de 2025 para dos días y dos noches de música, creatividad y tecnología en el Parque Eduardo VII",
       en: "Sónar returns to Lisbon on April 11, 12 and 13, 2025 for two days and two nights of music, creativity, and technology at Parque Eduardo VII.",
       pt: "O Sónar regressa a Lisboa nos dias 11, 12 e 13 de abril de 2025 para dois dias e duas noites de música, criatividade e tecnologia no Parque Eduardo VII",
-    },    number: "-",
+    },  
+      number: "",
     coordinates: {
       latitude: 38.72830010,
       longitude: -9.15268280,
@@ -50,7 +51,7 @@ const boxInfo = [
       en: "MOGA returns to the stunning Costa da Caparica in Portugal (20 minutes south of Lisbon), from May 28 to June 1, 2025.",
       pt: "O MOGA retorna à deslumbrante Costa da Caparica, em Portugal (20 min ao sul de Lisboa), de 28 de maio a 1 de junho de 2025.",
     },    
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 38.60324800,
       longitude: -9.21120900,
@@ -69,7 +70,7 @@ const boxInfo = [
       en: "Lisb-On is a vibrant open-air festival that transforms Lisbon into a sound garden, blending electronic music, art, and nature. With a unique vibe and a lineup of renowned artists, it's the perfect event to experience Lisbon to the sound of the best music.",
       pt: "O Lisb-On é um festival vibrante ao ar livre que transforma Lisboa num jardim sonoro, combinando música eletrónica, arte e natureza. Com uma vibe única e um lineup de artistas de renome, é o evento ideal para viver Lisboa ao som da melhor música!",
     },  
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 38.70728280,
       longitude: -9.13636130,
@@ -135,7 +136,7 @@ const boxInfo = [
       Sábado: "-",
       Domingo: "-",
     },
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 38.714855,
       longitude: -9.1516277,
@@ -265,7 +266,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "Cerrado"
     },
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 38.7253583,
       longitude: -9.1535022,
@@ -441,7 +442,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 22:00"
     },    
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 38.74228450,
       longitude: -9.10209180,
@@ -463,7 +464,7 @@ const boxInfo = [
       Sábado: "-",
       Domingo: "-",
     },
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 38.7128331,
       longitude: -9.1450582,
@@ -859,7 +860,7 @@ const boxInfo = [
       Sábado: "23:30 - 08:00",
       Domingo: "00:00 - 08:00"
     },
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 38.70716500,
       longitude: -9.13718600,
@@ -991,7 +992,7 @@ const boxInfo = [
       Sábado: "18:00 - 03:00",
       Domingo: "18:00 - 23:00"
     },
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 40.4220598,
       longitude: -3.6859164,
@@ -1915,7 +1916,7 @@ const boxInfo = [
   },
   {
     path: require("../../assets/Madrid/PunchRoom.jpg"),
-    title: "Punch Room - The Madrid EDITION",
+    title: "Punch Room - TME",
     category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
@@ -2054,7 +2055,7 @@ const boxInfo = [
       Sábado: "23:00 - 03:30",
       Domingo: "Cerrado"
     },    
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 51.50996320,
       longitude: -0.13792690,
@@ -2117,7 +2118,7 @@ const boxInfo = [
       Sábado: "11:00 - 03:00",
       Domingo: "11:00 - 19:00"
     },    
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 51.50986000,
       longitude: -0.14360450,
@@ -2201,7 +2202,7 @@ const boxInfo = [
       Sábado: "18:30 - 01:00",
       Domingo: "19:30 - 00:30"
     },
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 51.50886440,
       longitude: -0.14262860,
@@ -2432,7 +2433,7 @@ const boxInfo = [
       Sábado: "12:00 - 06:00",
       Domingo: "00:00 - 07:00"
     },
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 51.51951740,
       longitude: -0.10275890,
@@ -2453,7 +2454,7 @@ const boxInfo = [
       Sábado: "23:00 - 03:30",
       Domingo: "23:00 - 03:30"
     },    
-    number: "-",
+    number: "",
     coordinates: {
       latitude: 51.51433090,
       longitude: -0.14468680,
