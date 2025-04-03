@@ -979,6 +979,12 @@ const boxInfo = [
     city: "Lisboa",
     
   },
+
+
+
+
+
+
   {
     path: require("../../assets/Madrid/Gaston.jpg"),
     title: "Gaston",
@@ -1872,10 +1878,14 @@ const boxInfo = [
   },
 
 
+
+
+
+
   {
     path: require("../../assets/Barcelona/Razzmatazz.jpg"),
     title: "Razzmatazz",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -1885,7 +1895,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 933 208 200",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -1896,7 +1906,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Opium.jpg"),
     title: "Opium",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -1906,7 +1916,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 655 576 998",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -1917,7 +1927,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Macarena_Club.jpg"),
     title: "Macarena Club",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -1927,7 +1937,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 933 014 001",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -1938,7 +1948,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Sutton_Club.jpg"),
     title: "Sutton Club",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -1948,7 +1958,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 689 785 046",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -1959,7 +1969,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Sala_Apolo.jpg"),
     title: "Sala Apolo",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -1969,7 +1979,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 934 414 001",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -1980,7 +1990,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Bling_Bling.jpg"),
     title: "Bling Bling",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -1990,28 +2000,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
-    coordinates: {
-      latitude: 40.4288828,
-      longitude: -3.6874267,
-    },
-    country: "España",
-    city: "Barcelona",
-  },
-  {
-    path: require("../../assets/Barcelona/La_Terrrazza.jpg"),
-    title: "La Terrrazza",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
-    },
-    number: "+34 609 089 494",
+    number: "+34 627 099 253",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -2022,7 +2011,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Bobbys_Free.jpg"),
     title: "Bobby’s Free",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -2032,7 +2021,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 932 779 773",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -2043,7 +2032,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Paradiso.jpg"),
     title: "Paradiso",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -2064,7 +2053,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Nuts_Indulgence_Club.jpg"),
     title: "Nuts Indulgence Club",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -2074,7 +2063,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 691 728 237",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -2085,7 +2074,7 @@ const boxInfo = [
   {
     path: require("../../assets/Barcelona/Nitsa_Club.jpg"),
     title: "Nitsa Club",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
@@ -2095,7 +2084,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 934 414 001",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -2116,7 +2105,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00"
     },
-    number: "+34 609 089 494",
+    number: "+34 934 675 149",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -2124,6 +2113,302 @@ const boxInfo = [
     country: "España",
     city: "Barcelona",
   },
+  {
+    path: require("../../assets/Barcelona/Soho_House.jpg"),
+    title: "Soho House",
+    category: "+34 932 204 600",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 609 089 494",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+    membersClub: true,
+  },
+  {
+    path: require("../../assets/Barcelona/Eclipse_Bar_W_Barcelona.jpg"),
+    title: "Eclipse Bar - W Barcelona",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 697 485 000",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Chica_Club.jpg"),
+    title: "Chica Club",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 699 232 543",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Lena_Barcelona.jpg"),
+    title: "Leña Barcelona",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 930 47 59 90",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Gatsby.jpg"),
+    title: "Gatsby",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 937 00 44 53",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Ocana_Barcelona.jpg"),
+    title: "Ocaña Barcelona",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 936 76 48 14",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/El_Nacional.jpg"),
+    title: "El Nacional",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 935 18 50 53",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/The_Rooftop_The_Barcelona_Edition.jpg"),
+    title: "The Rooftop - TBE",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/feroz.jpg"),
+    title: "FEROZ",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 932 00 91 29",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Pez_Vela.jpg"),
+    title: "Pez Vela",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 932 21 63 17",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Jaqueline.jpg"),
+    title: "Jaqueline",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 930 46 75 11",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Carmina.jpg"),
+    title: "Carmina",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 936 061 524",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/Nobu_Barcelona.jpg"),
+    title: "Nobu Barcelona",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 936 428 800",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+  {
+    path: require("../../assets/Barcelona/coya.jpg"),
+    title: "COYA",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 933 568 034",
+    coordinates: {
+      latitude: 40.4288828,
+      longitude: -3.6874267,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
+
 
 
 
