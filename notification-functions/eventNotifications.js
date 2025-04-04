@@ -19,12 +19,11 @@ exports.sendEventNotification = functions.firestore
 
     try {
       const userDoc = await db.collection('users').doc(userId).get();
-      const expoPushToken = userDoc.data()?.expoPushToken;
+      const tokens = userDoc.data()?.expoPushTokens || [];
+      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
 
-      if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) {
-
-        return;
-      }
+      const validTokens = tokens.filter(token => Expo.isExpoPushToken(token));
+      if (validTokens.length === 0) return;
 
       const getNotificationText = (lang) => {
         const texts = {
@@ -50,9 +49,8 @@ exports.sendEventNotification = functions.firestore
         return texts[lang] || texts['en'];
       };
 
-      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
       const texts = getNotificationText(preferredLanguage);
-      
+
       let title = texts.defaultTitle;
       let body = '';
 
@@ -63,12 +61,11 @@ exports.sendEventNotification = functions.firestore
         title = texts.generalEventTitle;
         body = texts.inviteText(notificationData.fromName, notificationData.eventTitle);
       } else {
-
         return;
       }
 
-      const message = {
-        to: expoPushToken,
+      const messages = validTokens.map((token) => ({
+        to: token,
         sound: 'default',
         title: title,
         body: body,
@@ -82,14 +79,13 @@ exports.sendEventNotification = functions.firestore
           number: notificationData.number || '',
           imageUrl: notificationData.imageUrl || '',
           _displayInNotificationScreen: true,
-          screen: 'Notifications' // Agregamos esta línea
+          screen: 'Notifications'
         },
         priority: 'high',
         image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
-      };
-      
+      }));
 
-      const chunks = expo.chunkPushNotifications([message]);
+      const chunks = expo.chunkPushNotifications(messages);
       for (let chunk of chunks) {
         try {
           await expo.sendPushNotificationsAsync(chunk);

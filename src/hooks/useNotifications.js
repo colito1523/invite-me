@@ -7,6 +7,7 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 import { onAuthStateChanged } from "firebase/auth";
+import { arrayUnion, updateDoc } from "firebase/firestore";
 
 // Configuración de notificaciones push
 Notifications.setNotificationHandler({
@@ -67,46 +68,54 @@ async function registerForPushNotificationsAsync() {
 
   return token;
 }
-export const registerPushToken = async () => {
+const registerPushToken = async () => {
   if (!auth.currentUser) return;
+
   const userRef = doc(database, "users", auth.currentUser.uid);
   const userDoc = await getDoc(userRef);
+  const token = await registerForPushNotificationsAsync();
 
-  if (!userDoc.exists() || !userDoc.data().expoPushToken) {
-    const token = await registerForPushNotificationsAsync();
-    if (token) {
-      await setDoc(userRef, { expoPushToken: token }, { merge: true });
-      console.log("Expo Push Token guardado en Firestore.");
-      return token;
-    }
+  if (!token) return;
+
+  const existingTokens = userDoc.exists() ? userDoc.data().expoPushTokens || [] : [];
+
+  if (!existingTokens.includes(token)) {
+    await updateDoc(userRef, {
+      expoPushTokens: arrayUnion(token),
+    });
+    console.log("✅ Expo Push Token agregado a Firestore.");
   } else {
-    return userDoc.data().expoPushToken;
+    console.log("ℹ️ Token ya registrado previamente.");
   }
+
+  return token;
 };
+
+const removePushToken = async (tokenToRemove) => {
+  const user = auth.currentUser;
+  if (!user || !tokenToRemove) return;
+
+  const userRef = doc(database, "users", user.uid);
+  const userDoc = await getDoc(userRef);
+  if (!userDoc.exists()) return;
+
+  const currentTokens = userDoc.data().expoPushTokens || [];
+  const updatedTokens = currentTokens.filter(token => token !== tokenToRemove);
+
+  await updateDoc(userRef, { expoPushTokens: updatedTokens });
+  console.log("❌ Token eliminado correctamente de Firestore.");
+};
+
 
 const useNotifications = (navigation) => { 
   const { t } = useTranslation();
   const [expoPushToken, setExpoPushToken] = useState("");
 
   useEffect(() => {
-    // Nos suscribimos a los cambios en la autenticación
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userRef = doc(database, "users", user.uid);
-        const userDoc = await getDoc(userRef);
-
-        // Si no existe token en Firestore, se registra y guarda
-        if (!userDoc.exists() || !userDoc.data().expoPushToken) {
-          const token = await registerForPushNotificationsAsync();
-          if (token) {
-            setExpoPushToken(token);
-            await setDoc(userRef, { expoPushToken: token }, { merge: true });
-            console.log("Expo Push Token guardado en Firestore.");
-          }
-        } else {
-          // Si ya existe, se utiliza el token existente
-          setExpoPushToken(userDoc.data().expoPushToken);
-        }
+        const token = await registerPushToken(); // tu nueva función que guarda en expoPushTokens
+        if (token) setExpoPushToken(token);
       }
     });
 
@@ -141,3 +150,4 @@ const useNotifications = (navigation) => {
 };
 
 export default useNotifications;
+export { registerPushToken, removePushToken };

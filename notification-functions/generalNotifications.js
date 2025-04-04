@@ -15,13 +15,18 @@ exports.sendGeneralNotification = functions.firestore
     const { userId } = context.params;
     const notificationData = snapshot.data();
 
-    if (['friend_request', 'like', 'event_invitation', 'noteLike', 'generalEventInvitation', 'invitation'].includes(notificationData.type)) return;
+    if (
+      ['friend_request', 'like', 'event_invitation', 'noteLike', 'generalEventInvitation', 'invitation']
+        .includes(notificationData.type)
+    ) return;
 
     try {
       const userDoc = await db.collection('users').doc(userId).get();
-      const expoPushToken = userDoc.data()?.expoPushToken;
+      const tokens = userDoc.data()?.expoPushTokens || [];
+      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
 
-      if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
+      const validTokens = tokens.filter(token => Expo.isExpoPushToken(token));
+      if (validTokens.length === 0) return;
 
       const getNotificationText = (lang) => {
         const texts = {
@@ -41,23 +46,21 @@ exports.sendGeneralNotification = functions.firestore
         return texts[lang] || texts['en'];
       };
 
-      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
       const texts = getNotificationText(preferredLanguage);
 
-      const message = {
-        to: expoPushToken,
+      const messages = validTokens.map(token => ({
+        to: token,
         sound: 'default',
         title: texts.title,
         body: notificationData.message || texts.defaultMessage,
-        data: { 
+        data: {
           ...notificationData,
-          screen: 'Notifications' // Agregamos esta propiedad para indicar la pantalla destino
+          screen: 'Notifications'
         },
         image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
-      };
-      
+      }));
 
-      await expo.sendPushNotificationsAsync([message]);
+      await expo.sendPushNotificationsAsync(messages);
     } catch (error) {
       console.error('Error sending general notification:', error);
     }

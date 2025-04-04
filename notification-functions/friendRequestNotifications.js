@@ -17,9 +17,11 @@ exports.sendFriendRequestNotification = functions.firestore
 
     try {
       const userDoc = await db.collection('users').doc(userId).get();
-      const expoPushToken = userDoc.data()?.expoPushToken;
+      const tokens = userDoc.data()?.expoPushTokens || [];
+      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
 
-      if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
+      const validTokens = tokens.filter(token => Expo.isExpoPushToken(token));
+      if (validTokens.length === 0) return;
 
       const getNotificationText = (lang) => {
         const texts = {
@@ -39,11 +41,10 @@ exports.sendFriendRequestNotification = functions.firestore
         return texts[lang] || texts['en'];
       };
 
-      const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
       const texts = getNotificationText(preferredLanguage);
 
-      const message = {
-        to: expoPushToken,
+      const messages = validTokens.map((token) => ({
+        to: token,
         sound: 'default',
         title: texts.title,
         body: texts.body(requestData.fromName),
@@ -52,14 +53,14 @@ exports.sendFriendRequestNotification = functions.firestore
           fromId: requestData.fromId,
           fromName: requestData.fromName,
           fromImage: requestData.fromImage,
-          screen: 'Notifications' // Agregamos esta línea
+          screen: 'Notifications'
         },
         image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
-      };
-      
-      await expo.sendPushNotificationsAsync([message]);
+      }));
 
-      // Create notification record
+      await expo.sendPushNotificationsAsync(messages);
+
+      // Crear notificación en la subcolección del usuario
       const notificationRef = db.collection('users').doc(userId).collection('notifications');
       await notificationRef.add({
         type: 'friend_request',

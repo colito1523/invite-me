@@ -31,6 +31,7 @@ import { useTranslation } from "react-i18next";
 import { dayStyles, nightStyles, styles } from "./styles";
 import { useUnreadMessages } from "../../src/hooks/UnreadMessagesContext";
 import { registerPushToken } from "../../src/hooks/useNotifications";
+import useNotifications from "../../src/hooks/useNotifications";
 import {
   fetchUnreadNotifications,
   fetchData,
@@ -84,6 +85,7 @@ const Home = React.memo(() => {
   const [searchQuery, setSearchQuery] = useState("");
   const [privateEvents, setPrivateEvents] = useState([]);
   const { hasUnreadMessages, setHasUnreadMessages } = useUnreadMessages();
+  const expoPushToken = useNotifications(navigation);
   const { t } = useTranslation();
   const storySliderRef = useRef();
   const currentStyles = useMemo(
@@ -565,6 +567,7 @@ useEffect(() => {
         onSignOut={handleSignOut} // Aquí pasamos la función
         isNightMode={isNightMode}
         searchQuery={searchQuery}
+        expoPushToken={expoPushToken} // 💥 Agregá esto
         setSearchQuery={setSearchQuery}
       />
     ),
@@ -576,6 +579,7 @@ useEffect(() => {
       handleSignOut,
       isNightMode,
       searchQuery,
+      expoPushToken,
       setSearchQuery,
     ],
   );

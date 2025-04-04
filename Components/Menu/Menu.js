@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import i18n from 'i18next';
 import { doc, updateDoc } from 'firebase/firestore';
+import { removePushToken } from "../../src/hooks/useNotifications";
 import { auth, database } from '../../config/firebase'; // Ajusta el path según tu configuración
 
 
@@ -17,7 +18,8 @@ export default function Menu({
   searchQuery,
   setSearchQuery,
   onCitySelect,
-  country
+  country,
+  expoPushToken
 }) {
   const [isNightMode, setIsNightMode] = useState(false);
   const { t } = useTranslation();
@@ -93,6 +95,17 @@ export default function Menu({
         onCategorySelect(mappedCategory);
     }
 }, [onClose, navigation, onCategorySelect, t]);
+
+const handleSignOut = async () => {
+  try {
+    await removePushToken(expoPushToken); // Elimina el token actual
+    await auth.signOut();                 // Cierra la sesión
+    onSignOut?.();                        // Ejecuta cualquier función extra
+  } catch (error) {
+    console.error("❌ Error al cerrar sesión:", error);
+  }
+};
+
 
 
   const handleSupportPress = useCallback(async () => {
@@ -243,7 +256,7 @@ export default function Menu({
               </TouchableOpacity>
             ))}
             <View style={currentStyles.separator} />
-            <TouchableOpacity onPress={onSignOut}>
+            <TouchableOpacity onPress={handleSignOut}>
               <Text style={currentStyles.menuItem}>{t('signOut')}</Text>
             </TouchableOpacity>
           </View>

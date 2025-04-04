@@ -15,14 +15,15 @@ exports.sendLikeNotification = functions.firestore
     const { userId } = context.params;
     const notificationData = snapshot.data();
 
-    if (!['like', 'noteLike', 'storyLike'].includes(notificationData.type)) return; // Agregamos storyLike
+    if (!['like', 'noteLike', 'storyLike'].includes(notificationData.type)) return;
 
     try {
       const userDoc = await db.collection('users').doc(userId).get();
-      const expoPushToken = userDoc.data()?.expoPushToken;
+      const tokens = userDoc.data()?.expoPushTokens || [];
       const preferredLanguage = userDoc.data()?.preferredLanguage || 'en';
 
-      if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken)) return;
+      const validTokens = tokens.filter(token => Expo.isExpoPushToken(token));
+      if (validTokens.length === 0) return;
 
       const getNotificationText = (lang) => {
         const texts = {
@@ -50,37 +51,23 @@ exports.sendLikeNotification = functions.firestore
 
       const texts = getNotificationText(preferredLanguage);
 
-      let message;
-      if (notificationData.type === 'noteLike') {
-        message = {
-          to: expoPushToken,
-          sound: 'default',
-          title: texts.title,
-          body: texts.noteLikeBody(notificationData.fromName),
-          data: { ...notificationData, screen: 'Notifications' },
-          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
-        };
-      } else if (notificationData.type === 'like') {
-        message = {
-          to: expoPushToken,
-          sound: 'default',
-          title: texts.title,
-          body: texts.profileLikeBody(notificationData.fromName),
-          data: { ...notificationData, screen: 'Notifications' },
-          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
-        };
-      } else if (notificationData.type === 'storyLike') {
-        message = {
-          to: expoPushToken,
-          sound: 'default',
-          title: texts.title,
-          body: texts.storyLikeBody(notificationData.fromName),
-          data: { ...notificationData, screen: 'Notifications' },
-          image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
-        };
-      }
+      const bodyText =
+        notificationData.type === 'noteLike'
+          ? texts.noteLikeBody(notificationData.fromName)
+          : notificationData.type === 'like'
+          ? texts.profileLikeBody(notificationData.fromName)
+          : texts.storyLikeBody(notificationData.fromName);
 
-      await expo.sendPushNotificationsAsync([message]);
+      const messages = validTokens.map((token) => ({
+        to: token,
+        sound: 'default',
+        title: texts.title,
+        body: bodyText,
+        data: { ...notificationData, screen: 'Notifications' },
+        image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a',
+      }));
+
+      await expo.sendPushNotificationsAsync(messages);
     } catch (error) {
       console.error('Error sending like notification:', error);
     }
