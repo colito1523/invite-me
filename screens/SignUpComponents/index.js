@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard
 } from "react-native";
 import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, } from "@expo/vector-icons";
@@ -314,10 +316,11 @@ export default function SignUp() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+    style={{ flex: 1, backgroundColor: 'white' }} // 👈 agregá este color de fondo (o el que uses en tu app)
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
+  >
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
+      <ScrollView contentContainerStyle={styles.scrollContainer}  keyboardShouldPersistTaps="handled">
         <View style={styles.logo}></View>
         <View style={styles.languageContainer}>
           <TouchableOpacity
@@ -595,6 +598,7 @@ export default function SignUp() {
           )}
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
   );
 }
