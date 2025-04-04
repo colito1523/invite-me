@@ -44,6 +44,7 @@ export const localEventImages = {
     cinco_lounge: require("../../assets/Lisboa/cinco_Lounge.jpg"),
     hifen: require("../../assets/Lisboa/hifen.jpg"),
     malacopa: require("../../assets/Lisboa/malacopa.jpg"),
+    espada: require("../../assets/Lisboa/ESPADA.jpg"),
 
     gaston: require("../../assets/Madrid/Gaston.jpg"),
     tuetano: require("../../assets/Madrid/Tuetano.jpg"),
@@ -114,7 +115,9 @@ export const localEventImages = {
     coya: require("../../assets/Barcelona/coya.jpg"),
     la_terrrazza: require("../../assets/Barcelona/La_Terrrazza.jpg"),
 
+    Hovarda: require("../../assets/Londres/Hovarda.jpg"),
     the_aqua_shard: require("../../assets/Londres/The_aqua_Shard.jpg"),
+    Kave: require("../../assets/Londres/Kave.jpg"),
     dear_darling_mayfair: require("../../assets/Londres/Dear_Darling_Mayfair.jpg"),
     the_box_soho: require("../../assets/Londres/the_box_soho.jpg"),
     isabel: require("../../assets/Londres/Isabel.jpg"),
@@ -141,7 +144,7 @@ export const localEventImages = {
     soma_soho: require("../../assets/Londres/SOMOSoho.jpg"),
     nighjar_carnaby: require("../../assets/Londres/NighjarCarnaby.jpg"),
     madison: require("../../assets/Londres/Madison.jpg"),
-    beatz_london: require("../../assets/Londres/BeatzLondon.jpg"),
+    beat_london: require("../../assets/Londres/beat.jpg"),
     maddox_london: require("../../assets/Londres/Maddox_London.jpg"),
     tape_london: require("../../assets/Londres/tape_london.jpg"),
     b_london: require("../../assets/Londres/B_London.jpg"),
@@ -152,6 +155,7 @@ export const localEventImages = {
     mnky_hse: require("../../assets/Londres/MNKYHSE.jpg"),
     pirana: require("../../assets/Londres/Pirana.jpg"),
     bacchanalia_mayfair: require("../../assets/Londres/BacchanaliaMayfair.jpg"),
+    cipriani: require("../../assets/Londres/Cipriani.jpg"),
 
 
   };

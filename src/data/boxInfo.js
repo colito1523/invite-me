@@ -10,18 +10,16 @@ const boxInfo = [
       Jueves: "18:30 - 23:00",
       Viernes: "18:30 - 23:00",
       Sábado: "18:30 - 23:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+351 968 842 888",
     coordinates: {
-      latitude: 38.70831910,
-      longitude: -9.13998250,
+      latitude: 38.7083191,
+      longitude: -9.1399825,
     },
     country: "Portugal",
     city: "Lisboa",
     priority: true, // Esto hace que aparezca en la sección de priorida
-
-
   },
   {
     path: require("../../assets/Lisboa/SonarLisboa.jpg"),
@@ -31,16 +29,15 @@ const boxInfo = [
       es: "El Sónar regresa a Lisboa los días 11, 12 y 13 de abril de 2025 para dos días y dos noches de música, creatividad y tecnología en el Parque Eduardo VII",
       en: "Sónar returns to Lisbon on April 11, 12 and 13, 2025 for two days and two nights of music, creativity, and technology at Parque Eduardo VII.",
       pt: "O Sónar regressa a Lisboa nos dias 11, 12 e 13 de abril de 2025 para dois dias e duas noites de música, criatividade e tecnologia no Parque Eduardo VII",
-    },  
-      number: "",
+    },
+    number: "",
     coordinates: {
-      latitude: 38.72830010,
-      longitude: -9.15268280,
+      latitude: 38.7283001,
+      longitude: -9.1526828,
     },
     country: "Portugal",
     city: "Lisboa",
     availableDates: ["11 Apr", "12 Apr", "13 Apr"],
-    
   },
   {
     path: require("../../assets/Lisboa/moga.jpg"),
@@ -50,16 +47,15 @@ const boxInfo = [
       es: "El MOGA regresa a la deslumbrante Costa da Caparica, en Portugal (a 20 minutos al sur de Lisboa), del 28 de mayo al 1 de junio de 2025.",
       en: "MOGA returns to the stunning Costa da Caparica in Portugal (20 minutes south of Lisbon), from May 28 to June 1, 2025.",
       pt: "O MOGA retorna à deslumbrante Costa da Caparica, em Portugal (20 min ao sul de Lisboa), de 28 de maio a 1 de junho de 2025.",
-    },    
+    },
     number: "",
     coordinates: {
-      latitude: 38.60324800,
-      longitude: -9.21120900,
+      latitude: 38.603248,
+      longitude: -9.211209,
     },
     country: "Portugal",
     city: "Lisboa",
-    availableDates: ["28 May", "29 May", "30 May","31 May", "1 Jun",],
-    
+    availableDates: ["28 May", "29 May", "30 May", "31 May", "1 Jun"],
   },
   {
     path: require("../../assets/Lisboa/lisbon.jpg"),
@@ -69,16 +65,15 @@ const boxInfo = [
       es: "Lisb-On es un festival vibrante al aire libre que transforma Lisboa en un jardín sonoro, combinando música electrónica, arte y naturaleza. Con una vibra única y un lineup de artistas de renombre, es el evento ideal para vivir Lisboa al ritmo de la mejor música.",
       en: "Lisb-On is a vibrant open-air festival that transforms Lisbon into a sound garden, blending electronic music, art, and nature. With a unique vibe and a lineup of renowned artists, it's the perfect event to experience Lisbon to the sound of the best music.",
       pt: "O Lisb-On é um festival vibrante ao ar livre que transforma Lisboa num jardim sonoro, combinando música eletrónica, arte e natureza. Com uma vibe única e um lineup de artistas de renome, é o evento ideal para viver Lisboa ao som da melhor música!",
-    },  
+    },
     number: "",
     coordinates: {
-      latitude: 38.70728280,
-      longitude: -9.13636130,
+      latitude: 38.7072828,
+      longitude: -9.1363613,
     },
     country: "Portugal",
     city: "Lisboa",
     availableDates: ["27 Jun", "28 Jun", "29 Jun"],
-    
   },
   {
     path: require("../../assets/Lisboa/praia_no_parquee.jpg"),
@@ -91,7 +86,7 @@ const boxInfo = [
       Martes: "12:30 - 00:00",
       Miércoles: "12:30 - 00:00",
       Jueves: "12:30 - 02:00",
-      Viernes: "12:30 - 03:00"
+      Viernes: "12:30 - 03:00",
     },
     number: "+351 968 842 888",
     coordinates: {
@@ -100,7 +95,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/palacio_Chaiado.jpg"),
@@ -113,7 +107,7 @@ const boxInfo = [
       Jueves: "12:30 - 02:00",
       Viernes: "12:30 - 02:00",
       Sábado: "12:30 - 02:00",
-      Domingo: "12:30 - 00:00"
+      Domingo: "12:30 - 00:00",
     },
     number: "+351 210 101 184",
     coordinates: {
@@ -143,7 +137,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Rumu.jpg"),
@@ -156,7 +149,7 @@ const boxInfo = [
       Jueves: "20:00 - 04:00",
       Viernes: "20:00 - 04:00",
       Sábado: "20:00 - 04:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+351 963 048 787",
     coordinates: {
@@ -220,16 +213,15 @@ const boxInfo = [
       Jueves: "18:00 - 01:00",
       Viernes: "18:00 - 01:00",
       Sábado: "18:00 - 01:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+351 213 902 315",
     coordinates: {
-      latitude: 38.70855390,
-      longitude: -9.15696750,
+      latitude: 38.7085539,
+      longitude: -9.1569675,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Danoi.jpg"),
@@ -242,16 +234,15 @@ const boxInfo = [
       Jueves: "18:00 - 01:00",
       Viernes: "18:00 - 01:00",
       Sábado: "18:00 - 01:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+351 213 900 802",
     coordinates: {
-      latitude: 38.70880950,
-      longitude: -9.15618590,
+      latitude: 38.7088095,
+      longitude: -9.1561859,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/corner2.jpg"),
@@ -264,7 +255,7 @@ const boxInfo = [
       Jueves: "12:00 - 02:00",
       Viernes: "12:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "",
     coordinates: {
@@ -273,7 +264,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Collect4.jpg"),
@@ -286,16 +276,15 @@ const boxInfo = [
       Jueves: "17:00 - 02:00",
       Viernes: "12:00 - 03:00",
       Sábado: "12:00 - 03:00",
-      Domingo: "12:00 - 02:00"
+      Domingo: "12:00 - 02:00",
     },
     number: "+351 913 808 371",
     coordinates: {
-      latitude: 38.70742840,
-      longitude: -9.14410890,
+      latitude: 38.7074284,
+      longitude: -9.1441089,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Java_Rooftop.jpg"),
@@ -308,7 +297,7 @@ const boxInfo = [
       Jueves: "12:00 - 01:00",
       Viernes: "12:00 - 01:00",
       Sábado: "12:00 - 01:00",
-      Domingo: "12:00 - 01:00"
+      Domingo: "12:00 - 01:00",
     },
     number: "+351 935 945 545",
     coordinates: {
@@ -317,7 +306,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/lux_Fragil1.jpg"),
@@ -327,11 +315,11 @@ const boxInfo = [
       Lunes: "Cerrado",
       Martes: "Cerrado",
       Miércoles: "Cerrado",
-      Jueves:  "-",
+      Jueves: "-",
       Viernes: "23:00 - 06:00",
       Sábado: "23:00 - 06:00",
-      Domingo: "00:00 - 06:00"
-    },    
+      Domingo: "00:00 - 06:00",
+    },
     number: "+351 218 820 890",
     coordinates: {
       latitude: 38.7148909,
@@ -339,7 +327,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Jncquoi_Avenida2.jpg"),
@@ -352,7 +339,7 @@ const boxInfo = [
       Jueves: "12:00 - 02:00",
       Viernes: "12:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+351 219 369 900",
     coordinates: {
@@ -361,7 +348,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/SEEN.jpg"),
@@ -374,16 +360,15 @@ const boxInfo = [
       Jueves: "18:30 - 01:00",
       Viernes: "18:30 - 02:00",
       Sábado: "18:30 - 02:00",
-      Domingo: "18:30 - 01:00"
+      Domingo: "18:30 - 01:00",
     },
     number: "+351 210 965 775",
     coordinates: {
-      latitude: 38.72105140,
-      longitude: -9.14728440,
+      latitude: 38.7210514,
+      longitude: -9.1472844,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Rocco.jpg"),
@@ -396,16 +381,15 @@ const boxInfo = [
       Jueves: "08:00 - 01:00",
       Viernes: "08:00 - 01:00",
       Sábado: "08:00 - 01:00",
-      Domingo: "08:00 - 01:00"
+      Domingo: "08:00 - 01:00",
     },
     number: "+351 210 543 168",
     coordinates: {
-      latitude: 38.70955470,
-      longitude: -9.14018130,
+      latitude: 38.7095547,
+      longitude: -9.1401813,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Sud_Lisboa2.jpg"),
@@ -418,7 +402,7 @@ const boxInfo = [
       Jueves: "12:00 - 01:00",
       Viernes: "12:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 01:00"
+      Domingo: "12:00 - 01:00",
     },
     number: "+351 211 592 700",
     coordinates: {
@@ -427,7 +411,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/8_marvila.jpg"),
@@ -440,16 +423,15 @@ const boxInfo = [
       Jueves: "12:00 - 00:00",
       Viernes: "12:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 22:00"
-    },    
+      Domingo: "12:00 - 22:00",
+    },
     number: "",
     coordinates: {
-      latitude: 38.74228450,
-      longitude: -9.10209180,
+      latitude: 38.7422845,
+      longitude: -9.1020918,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Bairro_alto.webp"),
@@ -471,7 +453,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Bar_Alimentar.jpg"),
@@ -488,12 +469,11 @@ const boxInfo = [
     },
     number: "+351 927 932 885",
     coordinates: {
-      latitude: 38.71423350,
-      longitude: -9.15305580,
+      latitude: 38.7142335,
+      longitude: -9.1530558,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Meceiria.jpg"),
@@ -506,16 +486,15 @@ const boxInfo = [
       Jueves: "08:00 - 22:00",
       Viernes: "08:00 - 22:00",
       Sábado: "08:00 - 22:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+351 915 394 817",
     coordinates: {
-      latitude: 38.72447670,
-      longitude: -9.15598330,
+      latitude: 38.7244767,
+      longitude: -9.1559833,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/faz_frio.jpg"),
@@ -528,7 +507,7 @@ const boxInfo = [
       Jueves: "12:00 - 00:00",
       Viernes: "12:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+351 215 814 296",
     coordinates: {
@@ -537,7 +516,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Bom_o_mau_e_o_vilao.jpg"),
@@ -550,7 +528,7 @@ const boxInfo = [
       Jueves: "19:00 - 02:00",
       Viernes: "19:00 - 03:00",
       Sábado: "19:00 - 03:00",
-      Domingo: "19:00 - 02:00"
+      Domingo: "19:00 - 02:00",
     },
     number: "+351 963 982 094",
     coordinates: {
@@ -559,7 +537,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/SKY_BAR.jpg"),
@@ -572,8 +549,8 @@ const boxInfo = [
       Jueves: "12:30 - 01:00",
       Viernes: "12:30 - 02:00",
       Sábado: "12:30 - 02:00",
-      Domingo: "12:30 - 01:00"
-    },    
+      Domingo: "12:30 - 01:00",
+    },
     number: "+351 210 965 775",
     coordinates: {
       latitude: 38.7209984,
@@ -581,7 +558,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Mini_Bar_Avillez.jpg"),
@@ -594,7 +570,7 @@ const boxInfo = [
       Jueves: "19:00 - 03:00",
       Viernes: "19:00 - 03:00",
       Sábado: "19:00 - 03:00",
-      Domingo: "19:00 - 02:00"
+      Domingo: "19:00 - 02:00",
     },
     number: "+351 211 305 393",
     coordinates: {
@@ -603,7 +579,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Brilhante.jpg"),
@@ -616,7 +591,7 @@ const boxInfo = [
       Jueves: "19:00 - 01:00",
       Viernes: "19:00 - 01:00",
       Sábado: "12:00 - 00:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+351 210 547 981",
     coordinates: {
@@ -625,7 +600,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/cerbejaria_liberdade.jpg"),
@@ -638,16 +612,15 @@ const boxInfo = [
       Jueves: "12:30 - 23:30",
       Viernes: "12:30 - 23:30",
       Sábado: "12:30 - 23:30",
-      Domingo: "12:30 - 23:30"
+      Domingo: "12:30 - 23:30",
     },
     number: "+351 213 198 620",
     coordinates: {
-      latitude: 38.72102950,
-      longitude: -9.14693150,
+      latitude: 38.7210295,
+      longitude: -9.1469315,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Cabal.jpg"),
@@ -664,12 +637,11 @@ const boxInfo = [
     },
     number: "+351 964 057 333",
     coordinates: {
-      latitude: 38.71515280,
-      longitude: -9.13865350,
+      latitude: 38.7151528,
+      longitude: -9.1386535,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/douro.jpg"),
@@ -682,7 +654,7 @@ const boxInfo = [
       Jueves: "12:00 - 00:00",
       Viernes: "12:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+351 968 842 888",
     coordinates: {
@@ -691,7 +663,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/hangar.jpg"),
@@ -704,7 +675,7 @@ const boxInfo = [
       Jueves: "15:00 - 19:00",
       Viernes: "15:00 - 19:00",
       Sábado: "15:00 - 19:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+351 910 271 177",
     coordinates: {
@@ -713,7 +684,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/tuttopassa.jpg"),
@@ -726,7 +696,7 @@ const boxInfo = [
       Jueves: "12:30 - 02:00",
       Viernes: "12:30 - 03:00",
       Sábado: "12:30 - 03:00",
-      Domingo: "12:30 - 01:00"
+      Domingo: "12:30 - 01:00",
     },
     number: "+351 914 110 791",
     coordinates: {
@@ -735,7 +705,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Mome.jpg"),
@@ -748,7 +717,7 @@ const boxInfo = [
       Jueves: "00:00 - 06:00",
       Viernes: "00:00 - 07:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "00:00 - 06:00"
+      Domingo: "00:00 - 06:00",
     },
     number: "+351 211 510 734",
     coordinates: {
@@ -757,7 +726,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Rive_Rouge.jpg"),
@@ -767,10 +735,10 @@ const boxInfo = [
       Lunes: "Cerrado",
       Martes: "Cerrado",
       Miércoles: "Cerrado",
-      Jueves:  "-",
+      Jueves: "-",
       Viernes: "23:30 - 06:00",
       Sábado: "23:30 - 06:00",
-      Domingo: "00:00 - 06:00"
+      Domingo: "00:00 - 06:00",
     },
     number: "+351 213 461 117",
     coordinates: {
@@ -779,7 +747,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Plateau.jpg"),
@@ -792,7 +759,7 @@ const boxInfo = [
       Jueves: "00:00 - 06:00",
       Viernes: "00:00 - 06:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "00:00 - 06:00"
+      Domingo: "00:00 - 06:00",
     },
     number: "+351 911 126 402",
     coordinates: {
@@ -801,7 +768,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/lust_in_rio.jpg"),
@@ -814,7 +780,7 @@ const boxInfo = [
       Jueves: "00:00 - 06:00",
       Viernes: "00:00 - 06:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+351 913 795 242",
     coordinates: {
@@ -823,7 +789,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/K Urban Beachh.jpg"),
@@ -840,12 +805,11 @@ const boxInfo = [
     },
     number: "+351 961 312 719",
     coordinates: {
-      latitude: 38.70487280,
-      longitude: -9.15498770,
+      latitude: 38.7048728,
+      longitude: -9.1549877,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/MInisterium.jpg"),
@@ -855,19 +819,18 @@ const boxInfo = [
       Lunes: "Cerrado",
       Martes: "Cerrado",
       Miércoles: "Cerrado",
-      Jueves:  "-",
+      Jueves: "-",
       Viernes: "23:30 - 08:00",
       Sábado: "23:30 - 08:00",
-      Domingo: "00:00 - 08:00"
+      Domingo: "00:00 - 08:00",
     },
     number: "",
     coordinates: {
-      latitude: 38.70716500,
-      longitude: -9.13718600,
+      latitude: 38.707165,
+      longitude: -9.137186,
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/Casa_Santi.jpg"),
@@ -880,7 +843,7 @@ const boxInfo = [
       Jueves: "12:00 - 02:00",
       Viernes: "12:00 - 02:00",
       Sábado: "18:00 - 02:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+351 926 286 634",
     coordinates: {
@@ -889,7 +852,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/jamaica.jpg"),
@@ -911,7 +873,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/cinco_Lounge.jpg"),
@@ -924,7 +885,7 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "20:00 - 02:00",
       Sábado: "20:00 - 02:00",
-      Domingo: "20:00 - 02:00"
+      Domingo: "20:00 - 02:00",
     },
     number: "+351 213 424 033",
     coordinates: {
@@ -933,7 +894,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/hifen.jpg"),
@@ -946,7 +906,7 @@ const boxInfo = [
       Jueves: "12:30 - 00:00",
       Viernes: "12:30 - 02:00",
       Sábado: "12:30 - 02:00",
-      Domingo: "12:30 - 00:00"
+      Domingo: "12:30 - 00:00",
     },
     number: "+351 915 546 537",
     coordinates: {
@@ -955,7 +915,6 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
   {
     path: require("../../assets/Lisboa/malacopa.jpg"),
@@ -968,8 +927,8 @@ const boxInfo = [
       Jueves: "12:00 - 00:00",
       Viernes: "12:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
-    },    
+      Domingo: "12:00 - 00:00",
+    },
     number: "+351 967 643 319",
     coordinates: {
       latitude: 38.6982578,
@@ -977,13 +936,28 @@ const boxInfo = [
     },
     country: "Portugal",
     city: "Lisboa",
-    
   },
-
-
-
-
-
+  {
+    path: require("../../assets/Lisboa/ESPADA.jpg"),
+    title: "ESPADA",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-",
+    },
+    number: "+351 21 347 1948",
+    coordinates: {
+      latitude: 38.7074358,
+      longitude: -9.1431707,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+  },
 
   {
     path: require("../../assets/Madrid/Gaston.jpg"),
@@ -996,7 +970,7 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "",
     coordinates: {
@@ -1017,7 +991,7 @@ const boxInfo = [
       Jueves: "13:00 - 02:00",
       Viernes: "13:00 - 02:00",
       Sábado: "12:30 - 02:00",
-      Domingo: "12:30 - 17:00"
+      Domingo: "12:30 - 17:00",
     },
     number: "+34 919 900 299",
     coordinates: {
@@ -1038,7 +1012,7 @@ const boxInfo = [
       Jueves: "00:00 - 05:30",
       Viernes: "00:30 - 06:00",
       Sábado: "00:30 - 06:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+34 661 785 374",
     coordinates: {
@@ -1047,7 +1021,6 @@ const boxInfo = [
     },
     country: "España",
     city: "Madrid",
-    
   },
   {
     path: require("../../assets/Madrid/Los_33.jpg"),
@@ -1060,8 +1033,8 @@ const boxInfo = [
       Jueves: "13:00 - 02:00",
       Viernes: "13:00 - 02:30",
       Sábado: "11:30 - 02:30",
-      Domingo: "12:30 - 19:00"
-    },    
+      Domingo: "12:30 - 19:00",
+    },
     number: "+34 914 997 258",
     coordinates: {
       latitude: 40.4238428,
@@ -1081,8 +1054,8 @@ const boxInfo = [
       Jueves: "20:00 - 05:00",
       Viernes: "20:00 - 05:00",
       Sábado: "20:00 - 05:00",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "+34 621 146 274",
     coordinates: {
       latitude: 40.4225554,
@@ -1090,7 +1063,6 @@ const boxInfo = [
     },
     country: "España",
     city: "Madrid",
-    
   },
   {
     path: require("../../assets/Madrid/Charrua.jpg"),
@@ -1103,12 +1075,12 @@ const boxInfo = [
       Jueves: "19:30 - 00:00",
       Viernes: "19:30 - 00:00",
       Sábado: "19:30 - 00:00",
-      Domingo: "19:30 - 00:00"
+      Domingo: "19:30 - 00:00",
     },
     number: "+34 912 791 601",
     coordinates: {
-      latitude: 40.42230760,
-      longitude: -3.69407760,
+      latitude: 40.4223076,
+      longitude: -3.6940776,
     },
     country: "España",
     city: "Madrid",
@@ -1124,7 +1096,7 @@ const boxInfo = [
       Jueves: "13:30 - 04:00",
       Viernes: "13:30 - 04:00",
       Sábado: "13:30 - 04:00",
-      Domingo: "13:30 - 04:00"
+      Domingo: "13:30 - 04:00",
     },
     number: "+34 911 088 818",
     coordinates: {
@@ -1134,7 +1106,7 @@ const boxInfo = [
     country: "España",
     city: "Madrid",
   },
- 
+
   {
     path: require("../../assets/Madrid/ClubMatador.jpg"),
     title: "Club Matador",
@@ -1146,12 +1118,12 @@ const boxInfo = [
       Jueves: "08:30 - 01:00",
       Viernes: "08:30 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 18:00"
-    },    
+      Domingo: "12:00 - 18:00",
+    },
     number: "+34 918 057 277",
     coordinates: {
-      latitude: 40.42417700,
-      longitude: -3.68734340,
+      latitude: 40.424177,
+      longitude: -3.6873434,
     },
     country: "España",
     city: "Madrid",
@@ -1168,7 +1140,7 @@ const boxInfo = [
       Jueves: "13:00 - 02:30",
       Viernes: "13:00 - 02:30",
       Sábado: "13:00 - 02:30",
-      Domingo: "13:00 - 02:30"
+      Domingo: "13:00 - 02:30",
     },
     number: "+34 915 154 332",
     coordinates: {
@@ -1189,7 +1161,7 @@ const boxInfo = [
       Jueves: "20:00 - 04:00",
       Viernes: "20:00 - 04:00",
       Sábado: "20:00 - 04:00",
-      Domingo: "20:00 - 04:00"
+      Domingo: "20:00 - 04:00",
     },
     number: "+34 915 154 332",
     coordinates: {
@@ -1210,16 +1182,15 @@ const boxInfo = [
       Jueves: "23:00 - 5:30",
       Viernes: "23:00 - 5:30",
       Sábado: "23:00 - 5:30",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+34 917 373 837",
     coordinates: {
-      latitude: 40.42549240,
-      longitude: -3.68546890,
+      latitude: 40.4254924,
+      longitude: -3.6854689,
     },
     country: "España",
     city: "Madrid",
-    
   },
   {
     path: require("../../assets/Madrid/TheLibraryWineBoutique.jpg"),
@@ -1232,12 +1203,12 @@ const boxInfo = [
       Jueves: "10:00 - 02:00",
       Viernes: "10:00 - 02:30",
       Sábado: "10:00 - 02:30",
-      Domingo: "10:00 - 02:00"
-    },    
+      Domingo: "10:00 - 02:00",
+    },
     number: "+34 913 304 262",
     coordinates: {
-      latitude: 40.42074380,
-      longitude: -3.68837000,
+      latitude: 40.4207438,
+      longitude: -3.68837,
     },
     country: "España",
     city: "Madrid",
@@ -1253,7 +1224,7 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "20:00 - 02:00",
       Sábado: "20:00 - 02:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+34 630 656 961",
     coordinates: {
@@ -1274,8 +1245,8 @@ const boxInfo = [
       Jueves: "00:00 - 06:00",
       Viernes: "00:00 - 06:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "+34 919 930 385",
     coordinates: {
       latitude: 40.4251922,
@@ -1295,12 +1266,12 @@ const boxInfo = [
       Jueves: "-",
       Viernes: "-",
       Sábado: "-",
-      Domingo: "-"
+      Domingo: "-",
     },
     number: "+34 919 93 03 85",
     coordinates: {
-      latitude: 40.42452900,
-      longitude: -3.71207100,
+      latitude: 40.424529,
+      longitude: -3.712071,
     },
     country: "España",
     city: "Madrid",
@@ -1316,7 +1287,7 @@ const boxInfo = [
       Jueves: "13:00 - 02:00",
       Viernes: "13:00 - 02:00",
       Sábado: "13:00 - 02:00",
-      Domingo: "13:00 - 02:00"
+      Domingo: "13:00 - 02:00",
     },
     number: "+34 910 889 330",
     coordinates: {
@@ -1337,9 +1308,8 @@ const boxInfo = [
       Jueves: "20:00 - 04:00",
       Viernes: "20:00 - 04:00",
       Sábado: "18:00 - 04:00",
-      Domingo: "Cerrado"
-    }
-    ,
+      Domingo: "Cerrado",
+    },
     number: "+34 671 334 996",
     coordinates: {
       latitude: 40.4274487,
@@ -1359,7 +1329,7 @@ const boxInfo = [
       Jueves: "13:00 - 02:00",
       Viernes: "13:00 - 02:00",
       Sábado: "13:00 - 02:00",
-      Domingo: "13:00 - 02:00"
+      Domingo: "13:00 - 02:00",
     },
     number: "+34 916 009 647",
     coordinates: {
@@ -1380,7 +1350,7 @@ const boxInfo = [
       Jueves: "13:30 - 00:00",
       Viernes: "14:00 - 00:00",
       Sábado: "13:30 - 00:00",
-      Domingo: "13:30 - 00:00"
+      Domingo: "13:30 - 00:00",
     },
     number: "+34 910 888 840",
     coordinates: {
@@ -1401,7 +1371,7 @@ const boxInfo = [
       Jueves: "13:00 - 02:00",
       Viernes: "13:00 - 02:00",
       Sábado: "13:00 - 02:00",
-      Domingo: "13:00 - 02:00"
+      Domingo: "13:00 - 02:00",
     },
     number: "+34 911 988 880",
     coordinates: {
@@ -1422,12 +1392,12 @@ const boxInfo = [
       Jueves: "-",
       Viernes: "-",
       Sábado: "-",
-      Domingo: "-"
+      Domingo: "-",
     },
     number: "+34 911 263 744",
     coordinates: {
-      latitude: 40.42717870,
-      longitude: -3.69153510,
+      latitude: 40.4271787,
+      longitude: -3.6915351,
     },
     country: "España",
     city: "Madrid",
@@ -1444,7 +1414,7 @@ const boxInfo = [
       Jueves: "13:00 - 02:00",
       Viernes: "13:00 - 02:00",
       Sábado: "13:00 - 02:00",
-      Domingo: "13:00 - 01:00"
+      Domingo: "13:00 - 01:00",
     },
     number: "+34 911 042 760",
     coordinates: {
@@ -1465,7 +1435,7 @@ const boxInfo = [
       Jueves: "23:30 - 05:30",
       Viernes: "22:00 - 06:00",
       Sábado: "22:00 - 06:00",
-      Domingo: "23:30 - 05:30"
+      Domingo: "23:30 - 05:30",
     },
     number: "+34 915 320 011",
     coordinates: {
@@ -1486,8 +1456,8 @@ const boxInfo = [
       Jueves: "20:00 - 03:00",
       Viernes: "20:00 - 03:00",
       Sábado: "20:00 - 03:00",
-      Domingo: "20:30 - 03:30"
-    },    
+      Domingo: "20:30 - 03:30",
+    },
     number: "+34 689 879 114",
     coordinates: {
       latitude: 40.4361839,
@@ -1507,12 +1477,12 @@ const boxInfo = [
       Jueves: "20:00 - 01:00",
       Viernes: "14:00 - 02:00",
       Sábado: "13:30 - 02:00",
-      Domingo: "13:30 - 01:00"
-    },    
+      Domingo: "13:30 - 01:00",
+    },
     number: "+34 917 37 69 70",
     coordinates: {
-      latitude: 40.43326880,
-      longitude: -3.68328290,
+      latitude: 40.4332688,
+      longitude: -3.6832829,
     },
     country: "España",
     city: "Madrid",
@@ -1528,7 +1498,7 @@ const boxInfo = [
       Jueves: "08:00 - 03:30",
       Viernes: "08:00 - 03:30",
       Sábado: "08:00 - 03:30",
-      Domingo: "08:00 - 01:00"
+      Domingo: "08:00 - 01:00",
     },
     number: "+34 910 513 592",
     coordinates: {
@@ -1549,7 +1519,7 @@ const boxInfo = [
       Jueves: "13:00 - 02:00",
       Viernes: "13:00 - 02:30",
       Sábado: "11:00 - 02:30",
-      Domingo: "11:00 - 02:30"
+      Domingo: "11:00 - 02:30",
     },
     number: "+34 917 372 017",
     coordinates: {
@@ -1570,7 +1540,7 @@ const boxInfo = [
       Jueves: "00:00 - 05:00",
       Viernes: "00:00 - 06:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+34 603 482 073",
     coordinates: {
@@ -1591,7 +1561,7 @@ const boxInfo = [
       Jueves: "00:00 - 06:00",
       Viernes: "00:00 - 06:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "00:00 - 06:00"
+      Domingo: "00:00 - 06:00",
     },
     number: "+34 913 192 651",
     coordinates: {
@@ -1612,9 +1582,8 @@ const boxInfo = [
       Jueves: "00:00 - 05:30",
       Viernes: "00:00 - 06:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "Cerrado"
-    }
-    ,
+      Domingo: "Cerrado",
+    },
     number: "+34 682 182 405",
     coordinates: {
       latitude: 40.4225137,
@@ -1634,8 +1603,8 @@ const boxInfo = [
       Jueves: "00:00 - 05:30",
       Viernes: "00:00 - 06:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "+34 919 992 323",
     coordinates: {
       latitude: 40.4376559,
@@ -1655,7 +1624,7 @@ const boxInfo = [
       Jueves: "00:00 - 05:30",
       Viernes: "00:00 - 05:30",
       Sábado: "00:00 - 05:30",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+34 910 562 953",
     coordinates: {
@@ -1676,7 +1645,7 @@ const boxInfo = [
       Jueves: "00:00 - 06:00",
       Viernes: "00:00 - 06:00",
       Sábado: "00:00 - 06:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+34 917 37 80 40",
     coordinates: {
@@ -1697,9 +1666,8 @@ const boxInfo = [
       Jueves: "13:00 - 01:30",
       Viernes: "13:00 - 01:30",
       Sábado: "13:00 - 01:30",
-      Domingo: "13:00 - 01:30"
-    }
-    ,
+      Domingo: "13:00 - 01:30",
+    },
     number: "+34 916 859 719",
     coordinates: {
       latitude: 40.4233521,
@@ -1719,7 +1687,7 @@ const boxInfo = [
       Jueves: "13:00 - 01:00",
       Viernes: "13:00 - 02:00",
       Sábado: "12:15 - 02:00",
-      Domingo: "12:15 - 01:00"
+      Domingo: "12:15 - 01:00",
     },
     number: "+34 915 301 761",
     coordinates: {
@@ -1740,7 +1708,7 @@ const boxInfo = [
       Jueves: "12:00 - 02:00",
       Viernes: "12:00 - 02:00",
       Sábado: "11:00 - 02:30",
-      Domingo: "11:00 - 02:00"
+      Domingo: "11:00 - 02:00",
     },
     number: "+34 917 377 775",
     coordinates: {
@@ -1761,7 +1729,7 @@ const boxInfo = [
       Jueves: "19:00 - 01:00",
       Viernes: "19:00 - 01:00",
       Sábado: "13:30 - 01:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+34 616 844 224",
     coordinates: {
@@ -1782,7 +1750,7 @@ const boxInfo = [
       Jueves: "13:00 - 02:00",
       Viernes: "13:00 - 02:30",
       Sábado: "13:00 - 02:30",
-      Domingo: "13:00 - 01:00"
+      Domingo: "13:00 - 01:00",
     },
     number: "+34 911 088 881",
     coordinates: {
@@ -1803,7 +1771,7 @@ const boxInfo = [
       Jueves: "13:30 - 00:00",
       Viernes: "13:30 - 01:00",
       Sábado: "13:30 - 01:00",
-      Domingo: "13:30 - 01:00"
+      Domingo: "13:30 - 01:00",
     },
     number: "+34 910 881 541",
     coordinates: {
@@ -1824,7 +1792,7 @@ const boxInfo = [
       Jueves: "13:00 - 01:30",
       Viernes: "13:00 - 02:00",
       Sábado: "13:00 - 02:00",
-      Domingo: "13:00 - 01:30"
+      Domingo: "13:00 - 01:30",
     },
     number: "+34 910 238 038",
     coordinates: {
@@ -1845,12 +1813,12 @@ const boxInfo = [
       Jueves: "08:00 - 02:00",
       Viernes: "08:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "+34 919 54 54 88",
     coordinates: {
-      latitude: 40.41766980,
-      longitude: -3.70626980,
+      latitude: 40.4176698,
+      longitude: -3.7062698,
     },
     country: "España",
     city: "Madrid",
@@ -1866,7 +1834,7 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 609 089 494",
     coordinates: {
@@ -1876,11 +1844,6 @@ const boxInfo = [
     country: "España",
     city: "Madrid",
   },
-
-
-
-
-
 
   {
     path: require("../../assets/Barcelona/Razzmatazz.jpg"),
@@ -1893,12 +1856,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 933 208 200",
     coordinates: {
-      latitude: 41.39773230,
-      longitude: 2.19111080,
+      latitude: 41.3977323,
+      longitude: 2.1911108,
     },
     country: "España",
     city: "Barcelona",
@@ -1914,12 +1877,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 655 576 998",
     coordinates: {
-      latitude: 41.38533650,
-      longitude: 2.19675340,
+      latitude: 41.3853365,
+      longitude: 2.1967534,
     },
     country: "España",
     city: "Barcelona",
@@ -1935,12 +1898,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 933 014 001",
     coordinates: {
-      latitude: 41.37946030,
-      longitude: 2.17685160,
+      latitude: 41.3794603,
+      longitude: 2.1768516,
     },
     country: "España",
     city: "Barcelona",
@@ -1956,12 +1919,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 689 785 046",
     coordinates: {
-      latitude: 41.39595000,
-      longitude: 2.15163300,
+      latitude: 41.39595,
+      longitude: 2.151633,
     },
     country: "España",
     city: "Barcelona",
@@ -1977,12 +1940,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 934 414 001",
     coordinates: {
-      latitude: 41.37440260,
-      longitude: 2.16957390,
+      latitude: 41.3744026,
+      longitude: 2.1695739,
     },
     country: "España",
     city: "Barcelona",
@@ -1998,12 +1961,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 627 099 253",
     coordinates: {
-      latitude: 41.39554410,
-      longitude: 2.15271310,
+      latitude: 41.3955441,
+      longitude: 2.1527131,
     },
     country: "España",
     city: "Barcelona",
@@ -2019,12 +1982,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 932 779 773",
     coordinates: {
-      latitude: 41.38983490,
-      longitude: 2.17054510,
+      latitude: 41.3898349,
+      longitude: 2.1705451,
     },
     country: "España",
     city: "Barcelona",
@@ -2040,12 +2003,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 609 089 494",
     coordinates: {
-      latitude: 41.38367740,
-      longitude: 2.18369130,
+      latitude: 41.3836774,
+      longitude: 2.1836913,
     },
     country: "España",
     city: "Barcelona",
@@ -2061,12 +2024,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 691 728 237",
     coordinates: {
-      latitude: 41.39048850,
-      longitude: 2.15404060,
+      latitude: 41.3904885,
+      longitude: 2.1540406,
     },
     country: "España",
     city: "Barcelona",
@@ -2082,12 +2045,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 934 414 001",
     coordinates: {
-      latitude: 41.37430150,
-      longitude: 2.16968450,
+      latitude: 41.3743015,
+      longitude: 2.1696845,
     },
     country: "España",
     city: "Barcelona",
@@ -2103,12 +2066,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 934 675 149",
     coordinates: {
-      latitude: 41.39452650,
-      longitude: 2.15983300,
+      latitude: 41.3945265,
+      longitude: 2.159833,
     },
     country: "España",
     city: "Barcelona",
@@ -2124,12 +2087,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 609 089 494",
     coordinates: {
-      latitude: 41.37849360,
-      longitude: 2.17933920,
+      latitude: 41.3784936,
+      longitude: 2.1793392,
     },
     country: "España",
     city: "Barcelona",
@@ -2146,11 +2109,11 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 697 485 000",
     coordinates: {
-      latitude: 41.36837890,
+      latitude: 41.3683789,
       longitude: 2.1904562,
     },
     country: "España",
@@ -2167,12 +2130,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 699 232 543",
     coordinates: {
-      latitude: 41.39316400,
-      longitude: 2.15680000,
+      latitude: 41.393164,
+      longitude: 2.1568,
     },
     country: "España",
     city: "Barcelona",
@@ -2188,12 +2151,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 930 47 59 90",
     coordinates: {
-      latitude: 41.38642690,
-      longitude: 2.12313510,
+      latitude: 41.3864269,
+      longitude: 2.1231351,
     },
     country: "España",
     city: "Barcelona",
@@ -2209,12 +2172,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 937 00 44 53",
     coordinates: {
-      latitude: 41.39618890,
-      longitude: 2.15140660,
+      latitude: 41.3961889,
+      longitude: 2.1514066,
     },
     country: "España",
     city: "Barcelona",
@@ -2230,12 +2193,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 936 76 48 14",
     coordinates: {
-      latitude: 41.37982660,
-      longitude: 2.17570530,
+      latitude: 41.3798266,
+      longitude: 2.1757053,
     },
     country: "España",
     city: "Barcelona",
@@ -2251,12 +2214,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 935 18 50 53",
     coordinates: {
-      latitude: 41.39058300,
-      longitude: 2.16839140,
+      latitude: 41.390583,
+      longitude: 2.1683914,
     },
     country: "España",
     city: "Barcelona",
@@ -2272,12 +2235,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "",
     coordinates: {
-      latitude: 41.38594400,
-      longitude: 2.17781030,
+      latitude: 41.385944,
+      longitude: 2.1778103,
     },
     country: "España",
     city: "Barcelona",
@@ -2293,12 +2256,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 932 00 91 29",
     coordinates: {
-      latitude: 41.39652410,
-      longitude: 2.15089620,
+      latitude: 41.3965241,
+      longitude: 2.1508962,
     },
     country: "España",
     city: "Barcelona",
@@ -2314,12 +2277,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 932 21 63 17",
     coordinates: {
-      latitude: 41.36916010,
-      longitude: 2.18968320,
+      latitude: 41.3691601,
+      longitude: 2.1896832,
     },
     country: "España",
     city: "Barcelona",
@@ -2335,12 +2298,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 930 46 75 11",
     coordinates: {
-      latitude: 41.39214080,
-      longitude: 2.15690250,
+      latitude: 41.3921408,
+      longitude: 2.1569025,
     },
     country: "España",
     city: "Barcelona",
@@ -2356,12 +2319,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 936 061 524",
     coordinates: {
-      latitude: 41.38377920,
-      longitude: 2.18005440,
+      latitude: 41.3837792,
+      longitude: 2.1800544,
     },
     country: "España",
     city: "Barcelona",
@@ -2377,12 +2340,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 936 428 800",
     coordinates: {
-      latitude: 41.37986840,
-      longitude: 2.14269330,
+      latitude: 41.3798684,
+      longitude: 2.1426933,
     },
     country: "España",
     city: "Barcelona",
@@ -2398,12 +2361,12 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 933 568 034",
     coordinates: {
-      latitude: 41.36870330,
-      longitude: 2.18962030,
+      latitude: 41.3687033,
+      longitude: 2.1896203,
     },
     country: "España",
     city: "Barcelona",
@@ -2419,21 +2382,38 @@ const boxInfo = [
       Jueves: "09:00 - 01:00",
       Viernes: "09:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
+      Domingo: "12:00 - 00:00",
     },
     number: "+34 933 568 034",
     coordinates: {
-      latitude: 41.36870330,
-      longitude: 2.18962030,
+      latitude: 41.3687033,
+      longitude: 2.1896203,
     },
     country: "España",
     city: "Barcelona",
   },
 
-
-
-
-
+  {
+    path: require("../../assets/Londres/Hovarda.jpg"),
+    title: "Hovarda",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "17:00 - 01:00",
+      Miércoles: "17:00 - 01:00",
+      Jueves: "17:00 - 01:00",
+      Viernes: "17:00 - 01:00",
+      Sábado: "17:00 - 01:00",
+      Domingo: "Cerrado",
+    },
+    number: "020 3019 3460",
+    coordinates: {
+      latitude: 51.51126820,
+      longitude: -0.13271550,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
   {
     path: require("../../assets/Londres/The_aqua_Shard.jpg"),
     title: "The Aqua Shard",
@@ -2445,12 +2425,33 @@ const boxInfo = [
       Jueves: "17:30 - 22:30",
       Viernes: "Cerrado",
       Sábado: "Cerrado",
-      Domingo: "17:30 - 22:30"
+      Domingo: "17:30 - 22:30",
     },
     number: "020 3011 1256",
     coordinates: {
-      latitude: 51.50423110,
-      longitude: -0.08656240,
+      latitude: 51.5042311,
+      longitude: -0.0865624,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Kave.jpg"),
+    title: "Kave",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "19:00 - 01:00",
+      Viernes: "19:00 - 01:00",
+      Sábado: "19:00 - 01:00",
+      Domingo: "Cerrado"
+    },
+    number: "020 7874 297 158",
+    coordinates: {
+      latitude: 51.51923790,
+      longitude: -0.14106780,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2466,12 +2467,12 @@ const boxInfo = [
       Jueves: "23:00 - 03:30",
       Viernes: "23:00 - 03:30",
       Sábado: "23:00 - 03:30",
-      Domingo: "23:00 - 03:30"
+      Domingo: "23:00 - 03:30",
     },
     number: "020 3740 6936",
     coordinates: {
-      latitude: 51.50828830,
-      longitude: -0.13708580,
+      latitude: 51.5082883,
+      longitude: -0.1370858,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2488,12 +2489,12 @@ const boxInfo = [
       Jueves: "23:00 - 04:00",
       Viernes: "23:00 - 04:00",
       Sábado: "23:00 - 04:00",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "020 7434 4374",
     coordinates: {
-      latitude: 51.51259740,
-      longitude: -0.13402690,
+      latitude: 51.5125974,
+      longitude: -0.1340269,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2510,12 +2511,12 @@ const boxInfo = [
       Jueves: "12:00 - 03:00",
       Viernes: "12:00 - 03:00",
       Sábado: "12:00 - 03:00",
-      Domingo: "12:00 - 00:00"
-    },    
+      Domingo: "12:00 - 00:00",
+    },
     number: "",
     coordinates: {
-      latitude: 51.50968360,
-      longitude:  -0.14253800,
+      latitude: 51.5096836,
+      longitude: -0.142538,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2532,12 +2533,12 @@ const boxInfo = [
       Jueves: "12:00 - 01:30",
       Viernes: "12:00 - 01:30",
       Sábado: "12:00 - 01:30",
-      Domingo: "12:00 - 01:30"
-    },    
+      Domingo: "12:00 - 01:30",
+    },
     number: "020 3640 7330",
     coordinates: {
-      latitude: 51.51625290,
-      longitude: -0.08094490,
+      latitude: 51.5162529,
+      longitude: -0.0809449,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2553,12 +2554,12 @@ const boxInfo = [
       Jueves: "-",
       Viernes: "-",
       Sábado: "-",
-      Domingo: "-"
+      Domingo: "-",
     },
     number: "020 3988 5022",
     coordinates: {
-      latitude: 51.51132600,
-      longitude: -0.14992190 ,
+      latitude: 51.511326,
+      longitude: -0.1499219,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2575,12 +2576,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 4580 1186",
     coordinates: {
-      latitude: 51.51365000,
-      longitude: -0.12986560,
+      latitude: 51.51365,
+      longitude: -0.1298656,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2596,12 +2597,12 @@ const boxInfo = [
       Jueves: "07:30 - 03:00",
       Viernes: "07:30 - 03:00",
       Sábado: "11:30 - 03:00",
-      Domingo: "11:30 - 00:00"
-    },    
+      Domingo: "11:30 - 00:00",
+    },
     number: "020 3915 4046",
     coordinates: {
-      latitude: 51.50953280,
-      longitude: -0.14490400,
+      latitude: 51.5095328,
+      longitude: -0.144904,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2618,12 +2619,12 @@ const boxInfo = [
       Jueves: "17:30 - 03:00",
       Viernes: "17:30 - 03:00",
       Sábado: "15:00 - 03:00",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "020 3146 9637",
     coordinates: {
-      latitude: 51.51172370,
-      longitude: -0.12213360,
+      latitude: 51.5117237,
+      longitude: -0.1221336,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2639,12 +2640,12 @@ const boxInfo = [
       Jueves: "12:00 - 01:00",
       Viernes: "12:00 - 03:00",
       Sábado: "12:00 - 03:00",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "020 7314 4000",
     coordinates: {
-      latitude: 51.51346390,
-      longitude: -0.13384150,
+      latitude: 51.5134639,
+      longitude: -0.1338415,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2660,12 +2661,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "",
     coordinates: {
-      latitude: 51.51502960,
-      longitude: -0.13341290 ,
+      latitude: 51.5150296,
+      longitude: -0.1334129,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2681,12 +2682,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 7907 1888",
     coordinates: {
-      latitude: 51.51018040,
-      longitude: -0.14544430,
+      latitude: 51.5101804,
+      longitude: -0.1454443,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2702,12 +2703,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "",
     coordinates: {
-      latitude: 51.53466580,
-      longitude: -0.13770630,
+      latitude: 51.5346658,
+      longitude: -0.1377063,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2724,12 +2725,12 @@ const boxInfo = [
       Jueves: "23:00 - 03:30",
       Viernes: "23:00 - 03:30",
       Sábado: "23:00 - 03:30",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "",
     coordinates: {
-      latitude: 51.50996320,
-      longitude: -0.13792690,
+      latitude: 51.5099632,
+      longitude: -0.1379269,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2745,12 +2746,12 @@ const boxInfo = [
       Jueves: "10:00 - 17:00",
       Viernes: "23:00 - 00:00",
       Sábado: "12:00 - 06:00",
-      Domingo: "00:00 - 07:00"
+      Domingo: "00:00 - 07:00",
     },
     number: "",
     coordinates: {
-      latitude: 51.51951740,
-      longitude: -0.10275890,
+      latitude: 51.5195174,
+      longitude: -0.1027589,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2766,12 +2767,12 @@ const boxInfo = [
       Jueves: "Cerrado",
       Viernes: "23:00 - 03:00",
       Sábado: "23:00 - 03:00",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "020 7287 8771",
     coordinates: {
-      latitude: 51.51339660,
-      longitude: -0.13858630,
+      latitude: 51.5133966,
+      longitude: -0.1385863,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2787,12 +2788,12 @@ const boxInfo = [
       Jueves: "18:30 - 01:00",
       Viernes: "18:30 - 01:00",
       Sábado: "18:30 - 01:00",
-      Domingo: "19:30 - 00:30"
+      Domingo: "19:30 - 00:30",
     },
     number: "",
     coordinates: {
-      latitude: 51.50886440,
-      longitude: -0.14262860,
+      latitude: 51.5088644,
+      longitude: -0.1426286,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2808,12 +2809,12 @@ const boxInfo = [
       Jueves: "07:30 - 03:00",
       Viernes: "07:30 - 03:00",
       Sábado: "11:00 - 03:00",
-      Domingo: "11:00 - 19:00"
-    },    
+      Domingo: "11:00 - 19:00",
+    },
     number: "",
     coordinates: {
-      latitude: 51.50986000,
-      longitude: -0.14360450,
+      latitude: 51.50986,
+      longitude: -0.1436045,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2830,12 +2831,12 @@ const boxInfo = [
       Jueves: "18:00 - 00:00",
       Viernes: "18:00 - 00:30",
       Sábado: "18:00 - 00:30",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "07555 031010",
     coordinates: {
-      latitude: 51.51227370,
-      longitude: -0.12344920,
+      latitude: 51.5122737,
+      longitude: -0.1234492,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2852,12 +2853,12 @@ const boxInfo = [
       Jueves: "23:00 - 05:00",
       Viernes: "23:00 - 05:00",
       Sábado: "23:00 - 05:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "020 7930 7031",
     coordinates: {
-      latitude: 51.50773500,
-      longitude: -0.13695250,
+      latitude: 51.507735,
+      longitude: -0.1369525,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2873,7 +2874,7 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 7734 5188",
     coordinates: {
@@ -2895,12 +2896,12 @@ const boxInfo = [
       Jueves: "19:00 - 23:30",
       Viernes: "18:00 - 05:00",
       Sábado: "18:00 - 05:00",
-      Domingo: "19:00 - 23:30"
-    },    
+      Domingo: "19:00 - 23:30",
+    },
     number: "020 7388 3222",
     coordinates: {
-      latitude: 51.53475890,
-      longitude: -0.13813610,
+      latitude: 51.5347589,
+      longitude: -0.1381361,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2916,12 +2917,12 @@ const boxInfo = [
       Jueves: "19:00 - 03:00",
       Viernes: "19:00 - 03:00",
       Sábado: "19:00 - 03:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "020 7629 8888",
     coordinates: {
-      latitude: 51.50781150,
-      longitude: -0.13852020,
+      latitude: 51.5078115,
+      longitude: -0.1385202,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2938,12 +2939,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 7434 3559",
     coordinates: {
-      latitude: 51.51182810,
-      longitude: -0.13094680,
+      latitude: 51.5118281,
+      longitude: -0.1309468,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2959,12 +2960,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 3675 1933",
     coordinates: {
-      latitude: 51.51072390,
-      longitude:  -0.13537880 ,
+      latitude: 51.5107239,
+      longitude: -0.1353788,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -2980,12 +2981,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "",
     coordinates: {
-      latitude: 51.51274740,
-      longitude: -0.13851050 ,
+      latitude: 51.5127474,
+      longitude: -0.1385105,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3001,19 +3002,19 @@ const boxInfo = [
       Jueves: "12:00 - 22:00",
       Viernes: "12:00 - 22:30",
       Sábado: "12:00 - 22:30",
-      Domingo: "12:00 - 21:30"
+      Domingo: "12:00 - 21:30",
     },
     number: "020 3693 5160",
     coordinates: {
-      latitude: 51.51387130,
-      longitude: -0.09545930,
+      latitude: 51.5138713,
+      longitude: -0.0954593,
     },
     country: "Inglaterra",
     city: "Londres",
   },
   {
-    path: require("../../assets/Londres/BeatzLondon.jpg"),
-    title: "Beatz London",
+    path: require("../../assets/Londres/beat.jpg"),
+    title: "BEAT",
     category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
@@ -3022,15 +3023,16 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "07496 978396",
     coordinates: {
-      latitude: 51.51362530,
-      longitude:  -0.08286450,
+      latitude: 51.5136253,
+      longitude: -0.0828645,
     },
     country: "Inglaterra",
     city: "Londres",
+    membersClub: true,
   },
   {
     path: require("../../assets/Londres/Maddox_London.jpg"),
@@ -3043,12 +3045,12 @@ const boxInfo = [
       Jueves: "-",
       Viernes: "-",
       Sábado: "-",
-      Domingo: "-"
-    },    
+      Domingo: "-",
+    },
     number: "020 7629 8877",
     coordinates: {
-      latitude: 51.51265750,
-      longitude: -0.14249950,
+      latitude: 51.5126575,
+      longitude: -0.1424995,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3064,12 +3066,12 @@ const boxInfo = [
       Jueves: "Cerrado",
       Viernes: "23:00 - 03:30",
       Sábado: "23:00 - 03:30",
-      Domingo: "23:00 - 03:30"
-    },    
+      Domingo: "23:00 - 03:30",
+    },
     number: "",
     coordinates: {
-      latitude: 51.51433090,
-      longitude: -0.14468680,
+      latitude: 51.5143309,
+      longitude: -0.1446868,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3085,12 +3087,12 @@ const boxInfo = [
       Jueves: "22:00 - 03:00",
       Viernes: "22:00 - 03:00",
       Sábado: "22:00 - 03:00",
-      Domingo: "Cerrado"
-    },    
+      Domingo: "Cerrado",
+    },
     number: "020 7584 2000",
     coordinates: {
-      latitude: 51.49238460,
-      longitude: -0.17799800,
+      latitude: 51.4923846,
+      longitude: -0.177998,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3106,12 +3108,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 3667 5222",
     coordinates: {
-      latitude: 51.50159140,
-      longitude: -0.16203340,
+      latitude: 51.5015914,
+      longitude: -0.1620334,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3127,12 +3129,12 @@ const boxInfo = [
       Jueves: "12:00 - 23:00",
       Viernes: "12:00 - 23:00",
       Sábado: "11:00 - 23:00",
-      Domingo: "11:00 - 22:00"
+      Domingo: "11:00 - 22:00",
     },
     number: "020 3350 3434",
     coordinates: {
-      latitude: 51.50945060,
-      longitude: -0.15172310,
+      latitude: 51.5094506,
+      longitude: -0.1517231,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3148,12 +3150,12 @@ const boxInfo = [
       Jueves: "18:00 - 22:00",
       Viernes: "18:00 - 22:00",
       Sábado: "18:00 - 22:00",
-      Domingo: "Cerrado"
+      Domingo: "Cerrado",
     },
     number: "020 3327 3690",
     coordinates: {
-      latitude: 51.51249320,
-      longitude: -0.14308650,
+      latitude: 51.5124932,
+      longitude: -0.1430865,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3170,12 +3172,12 @@ const boxInfo = [
       Jueves: "12:00 - 02:00",
       Viernes: "12:00 - 02:00",
       Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00"
-    },    
+      Domingo: "12:00 - 00:00",
+    },
     number: "020 3327 8888",
     coordinates: {
-      latitude: 51.50858060,
-      longitude: -0.14371030,
+      latitude: 51.5085806,
+      longitude: -0.1437103,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3192,12 +3194,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 3870 4880",
     coordinates: {
-      latitude: 51.50817020,
-      longitude: -0.14192050,
+      latitude: 51.5081702,
+      longitude: -0.1419205,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3214,12 +3216,12 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 3870 4880",
     coordinates: {
-      latitude: 51.50817020,
-      longitude: -0.14192050,
+      latitude: 51.5081702,
+      longitude: -0.1419205,
     },
     country: "Inglaterra",
     city: "Londres",
@@ -3235,12 +3237,33 @@ const boxInfo = [
       Jueves: "20:00 - 02:00",
       Viernes: "18:00 - 03:00",
       Sábado: "18:00 - 03:00",
-      Domingo: "18:00 - 23:00"
+      Domingo: "18:00 - 23:00",
     },
     number: "020 3870 4880",
     coordinates: {
-      latitude: 51.50817020,
-      longitude: -0.14192050,
+      latitude: 51.5081702,
+      longitude: -0.1419205,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/Cipriani.jpg"),
+    title: "Cipriani",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "18:00 - 23:00",
+      Martes: "18:00 - 23:00",
+      Miércoles: "18:00 - 23:00",
+      Jueves: "18:00 - 23:00",
+      Viernes: "18:00 - 23:00",
+      Sábado: "18:00 - 23:00",
+      Domingo: "18:00 - 22:00",
+    },
+    number: "020 7399 0500",
+    coordinates: {
+      latitude: 51.5111111,
+      longitude: -0.1477778,
     },
     country: "Inglaterra",
     city: "Londres",
