@@ -2,6 +2,7 @@ export const localEventImages = {
     tagide_gastrobar: require("../../assets/Lisboa/Tagide.jpg"),
     sonar_lisboa_2025: require("../../assets/Lisboa/SonarLisboa.jpg"),
     moga_caparica_2025: require("../../assets/Lisboa/moga.jpg"),
+    yard: require("../../assets/Lisboa/YARD.jpg"),
     lisbon: require("../../assets/Lisboa/lisbon.jpg"),
     praia_no_parque: require("../../assets/Lisboa/praia_no_parquee.jpg"),
     palacio_chiado: require("../../assets/Lisboa/palacio_Chaiado.jpg"),
@@ -113,7 +114,6 @@ export const localEventImages = {
     carmina: require("../../assets/Barcelona/Carmina.jpg"),
     nobu_barcelona: require("../../assets/Barcelona/Nobu_Barcelona.jpg"),
     coya: require("../../assets/Barcelona/coya.jpg"),
-    la_terrrazza: require("../../assets/Barcelona/La_Terrrazza.jpg"),
 
     Hovarda: require("../../assets/Londres/Hovarda.jpg"),
     the_aqua_shard: require("../../assets/Londres/The_aqua_Shard.jpg"),
