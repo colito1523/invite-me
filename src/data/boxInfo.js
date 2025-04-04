@@ -2408,6 +2408,27 @@ const boxInfo = [
     country: "España",
     city: "Barcelona",
   },
+  {
+    path: require("../../assets/Barcelona/La_Terrrazza.jpg"),
+    title: "La Terrrazza",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "09:00 - 00:00",
+      Martes: "09:00 - 00:00",
+      Miércoles: "09:00 - 01:00",
+      Jueves: "09:00 - 01:00",
+      Viernes: "09:00 - 02:00",
+      Sábado: "12:00 - 02:00",
+      Domingo: "12:00 - 00:00"
+    },
+    number: "+34 933 568 034",
+    coordinates: {
+      latitude: 41.36870330,
+      longitude: 2.18962030,
+    },
+    country: "España",
+    city: "Barcelona",
+  },
 
 
 
@@ -3181,6 +3202,48 @@ const boxInfo = [
     country: "Inglaterra",
     city: "Londres",
     membersClub: true,
+  },
+  {
+    path: require("../../assets/Londres/Pirana.jpg"),
+    title: "Piraña",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "020 3870 4880",
+    coordinates: {
+      latitude: 51.50817020,
+      longitude: -0.14192050,
+    },
+    country: "Inglaterra",
+    city: "Londres",
+  },
+  {
+    path: require("../../assets/Londres/BacchanaliaMayfair.jpg"),
+    title: "Bacchanalia Mayfair",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "20:00 - 02:00",
+      Miércoles: "20:00 - 02:00",
+      Jueves: "20:00 - 02:00",
+      Viernes: "18:00 - 03:00",
+      Sábado: "18:00 - 03:00",
+      Domingo: "18:00 - 23:00"
+    },
+    number: "020 3870 4880",
+    coordinates: {
+      latitude: 51.50817020,
+      longitude: -0.14192050,
+    },
+    country: "Inglaterra",
+    city: "Londres",
   },
 ];
 
