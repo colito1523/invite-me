@@ -674,10 +674,10 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00",
     },
-    number: "+351 968 842 888",
+    number: "+351 926 472 698",
     coordinates: {
-      latitude: 38.7301071,
-      longitude: -9.1532305,
+      latitude: 38.70782860,
+      longitude: -9.15150760,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -779,7 +779,7 @@ const boxInfo = [
       Sábado: "00:00 - 06:00",
       Domingo: "00:00 - 06:00",
     },
-    number: "+351 911 126 402",
+    number: "",
     coordinates: {
       latitude: 38.7063889,
       longitude: -9.1575,
@@ -1138,7 +1138,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 18:00",
     },
-    number: "+34 918 057 277",
+    number: "+34 910 60 98 83",
     coordinates: {
       latitude: 40.424177,
       longitude: -3.6873434,
@@ -1436,8 +1436,8 @@ const boxInfo = [
     },
     number: "+34 911 042 760",
     coordinates: {
-      latitude: 0,
-      longitude: 0,
+      latitude: 40.42067120,
+      longitude: -3.68747030,
     },
     country: "España",
     city: "Madrid",
@@ -1665,7 +1665,7 @@ const boxInfo = [
       Sábado: "00:00 - 06:00",
       Domingo: "Cerrado",
     },
-    number: "+34 917 37 80 40",
+    number: "+34 667 69 11 31",
     coordinates: {
       latitude: 40.4213789,
       longitude: -3.707142,
@@ -1854,7 +1854,7 @@ const boxInfo = [
       Sábado: "12:00 - 02:00",
       Domingo: "12:00 - 00:00",
     },
-    number: "+34 609 089 494",
+    number: "+34 911 98 03 32",
     coordinates: {
       latitude: 40.4288828,
       longitude: -3.6874267,
@@ -2435,7 +2435,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Kave.jpg"),
     title: "Kave",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "Cerrado",
       Martes: "Cerrado",
@@ -2500,7 +2500,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Isabel.jpg"),
     title: "Isabel",
-    category: ["Restaurants & Rooftops", "Bars & Clubs"],
+    category: "Restaurants & Rooftops",
     hours: {
       Lunes: "12:00 - 03:00",
       Martes: "12:00 - 03:00",
@@ -2510,7 +2510,7 @@ const boxInfo = [
       Sábado: "12:00 - 03:00",
       Domingo: "12:00 - 00:00",
     },
-    number: "",
+    number: "020 30 969 292",
     coordinates: {
       latitude: 51.5096836,
       longitude: -0.142538,
@@ -2660,7 +2660,7 @@ const boxInfo = [
       Sábado: "18:00 - 03:00",
       Domingo: "18:00 - 23:00",
     },
-    number: "",
+    number: "020 4525 0733",
     coordinates: {
       latitude: 51.51409650,
       longitude: -0.13291940,
@@ -2702,7 +2702,7 @@ const boxInfo = [
       Sábado: "18:00 - 03:00",
       Domingo: "18:00 - 23:00",
     },
-    number: "",
+    number: "020 7388 3222",
     coordinates: {
       latitude: 51.5346658,
       longitude: -0.1377063,
@@ -2724,7 +2724,7 @@ const boxInfo = [
       Sábado: "23:00 - 03:30",
       Domingo: "Cerrado",
     },
-    number: "",
+    number: "0 20 7287 4300",
     coordinates: {
       latitude: 51.50971250,
       longitude: -0.13791410,
@@ -2745,7 +2745,7 @@ const boxInfo = [
       Sábado: "12:00 - 06:00",
       Domingo: "00:00 - 07:00",
     },
-    number: "",
+    number: "020 7336 8898",
     coordinates: {
       latitude: 51.5195174,
       longitude: -0.1027589,
@@ -2766,7 +2766,7 @@ const boxInfo = [
       Sábado: "23:00 - 03:00",
       Domingo: "Cerrado",
     },
-    number: "020 7287 8771",
+    number: "020 7287 8001",
     coordinates: {
       latitude: 51.51288220,
       longitude: -0.13915170,
@@ -2787,7 +2787,7 @@ const boxInfo = [
       Sábado: "18:30 - 01:00",
       Domingo: "19:30 - 00:30",
     },
-    number: "",
+    number: "020 3972 7000",
     coordinates: {
       latitude: 51.5088644,
       longitude: -0.1426286,
@@ -2820,7 +2820,7 @@ const boxInfo = [
   {
     path: require("../../assets/Londres/Cache_cache.jpg"),
     title: "Cache Cache",
-    category: "Bars & Clubs",
+    category: "Restaurants & Rooftops",
     hours: {
       Lunes: "Cerrado",
       Martes: "18:00 - 23:30",
@@ -2938,7 +2938,7 @@ const boxInfo = [
       Sábado: "18:00 - 03:00",
       Domingo: "18:00 - 23:00",
     },
-    number: "020 7434 3559",
+    number: "",
     coordinates: {
       latitude: 51.5118281,
       longitude: -0.1309468,
@@ -3065,7 +3065,7 @@ const boxInfo = [
       Sábado: "23:00 - 03:30",
       Domingo: "23:00 - 03:30",
     },
-    number: "",
+    number: "020 7629 8877",
     coordinates: {
       latitude: 51.5143309,
       longitude: -0.1446868,
@@ -3107,7 +3107,7 @@ const boxInfo = [
       Sábado: "18:00 - 03:00",
       Domingo: "18:00 - 23:00",
     },
-    number: "020 3667 5222",
+    number: "",
     coordinates: {
       latitude: 51.5015914,
       longitude: -0.1620334,
@@ -3215,7 +3215,7 @@ const boxInfo = [
       Sábado: "18:00 - 03:00",
       Domingo: "18:00 - 23:00",
     },
-    number: "020 3870 4880",
+    number: "020 3150 0079",
     coordinates: {
       latitude: 51.50574550,
       longitude: -0.13844560,
@@ -3236,7 +3236,7 @@ const boxInfo = [
       Sábado: "18:00 - 03:00",
       Domingo: "18:00 - 23:00",
     },
-    number: "020 3870 4880",
+    number: "020 3161 9720",
     coordinates: {
       latitude: 51.51033220,
       longitude: -0.14766020,
