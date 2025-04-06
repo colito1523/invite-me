@@ -475,7 +475,7 @@ const boxInfo = [
   {
     path: require("../../assets/Lisboa/Bar_Alimentar.jpg"),
     title: "Bar Alimentar",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "-",
       Martes: "-",
@@ -580,7 +580,7 @@ const boxInfo = [
   {
     path: require("../../assets/Lisboa/Mini_Bar_Avillez.jpg"),
     title: "Mini Bar Avillez",
-    category: "Bars & Clubs",
+    category: "Restaurants & Rooftops",
     hours: {
       Lunes: "19:00 - 02:00",
       Martes: "19:00 - 02:00",
@@ -1445,7 +1445,7 @@ const boxInfo = [
   {
     path: require("../../assets/Madrid/Toni_2_piano_Bar.jpg"),
     title: "Toni 2 piano Bar",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "23:30 - 05:30",
       Martes: "23:30 - 05:30",
@@ -1466,7 +1466,7 @@ const boxInfo = [
   {
     path: require("../../assets/Madrid/Panthera.jpg"),
     title: "Panthera",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "20:00 - 02:00",
       Martes: "20:00 - 02:00",
@@ -1844,7 +1844,7 @@ const boxInfo = [
   {
     path: require("../../assets/Madrid/La_Flaca.jpg"),
     title: "La Flaca",
-    category: "Restaurants & Rooftops",
+    category: "Bars & Clubs",
     hours: {
       Lunes: "09:00 - 00:00",
       Martes: "09:00 - 00:00",
