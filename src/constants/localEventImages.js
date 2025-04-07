@@ -115,6 +115,7 @@ export const localEventImages = {
     carmina: require("../../assets/Barcelona/Carmina.jpg"),
     nobu_barcelona: require("../../assets/Barcelona/Nobu_Barcelona.jpg"),
     coya: require("../../assets/Barcelona/coya.jpg"),
+    les_enfantes_brillants: require("../../assets/Barcelona/Les_Enfantes_Brillants.jpg"),
 
     hovarda: require("../../assets/Londres/Hovarda.jpg"),
     the_aqua_shard: require("../../assets/Londres/The_aqua_Shard.jpg"),

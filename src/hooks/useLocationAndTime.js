@@ -64,10 +64,14 @@ export const useLocationAndTime = () => {
               await updateDoc(userRef, {
                 nearestCity: nearestCity.name,
                 nearestCountry: nearestCity.country,
+                detectedLocation: {
+                  city: detectedCity,
+                  country: detectedCountry,
+                },
               });
               setCountry(nearestCity.country);
-              setCity(nearestCity.name); // 👉 ESTA LÍNEA ES LA QUE FALTABA
-            }            
+              setCity(nearestCity.name);
+            }
           }
         } else {
           // Si no se otorgan permisos, usar Lisboa como predeterminado
@@ -79,6 +83,10 @@ export const useLocationAndTime = () => {
             await updateDoc(userRef, {
               nearestCity: "Lisboa",
               nearestCountry: "Portugal",
+              detectedLocation: {
+                city: null,
+                country: null,
+              },
             });
           }
         }
@@ -86,6 +94,18 @@ export const useLocationAndTime = () => {
         console.error("Error al solicitar permisos de ubicación:", error);
         setLocationGranted(true);
         setCountry("Portugal");
+
+        if (auth.currentUser) {
+          const userRef = doc(database, "users", auth.currentUser.uid);
+          await updateDoc(userRef, {
+            nearestCity: "Lisboa",
+            nearestCountry: "Portugal",
+            detectedLocation: {
+              city: null,
+              country: null,
+            },
+          });
+        }
       }
     };
 
