@@ -127,9 +127,7 @@ const SliderContent = ({
 box.category === "Festivities" &&
 (box.details || boxData.details)? (
       <View style={styles.descriptionContainer}>
-        <Text style={styles.descriptionTitle}>
-          {t("SliderContent.description")}
-        </Text>
+       
         <Text style={styles.descriptionText}>
         {(box.details?.[i18n.language] || boxData.details?.[i18n.language]) ??
   box.details ?? boxData.details ?? t("SliderContent.descriptionNotAvailable")}

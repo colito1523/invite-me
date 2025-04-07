@@ -205,7 +205,6 @@
     "hour": "Hora",
     "hours": "{{count}} hora",
     "hours_plural": "{{count}} horas",
-    "description": "Descripción",
     "descriptionNotAvailable": "-",
     "day": "Día",
     "notAvailable": "No disponible",
@@ -786,7 +785,7 @@
 
   "signup": {
     "EmailVerificationTittle":"Verificación de Email",
-    "EmailVerificationplaceholder":"Ingresa el código de verificación",
+    "EmailVerificationplaceholder":"Verificar en Spam",
     "EmailVerificationButtomCode":"Verificar Código",
     "EmailVerificationResendCode":"Reenviar Código",
      "AlertVerificationResendCode":"Código reenviado",

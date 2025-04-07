@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     height: 300,
   },
   imageStyle2: {
-    top: 40,
+    top: 10,
     width: 640,
     height: 640,
     marginBottom: 20,

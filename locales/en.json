@@ -207,7 +207,6 @@
     "hour": "Hour",
     "hours": "{{count}} hour",
     "hours_plural": "{{count}} hours",
-    "description": "Description",
     "descriptionNotAvailable": "-",
     "day": "Day",
     "notAvailable": "Not available",
@@ -800,7 +799,7 @@
 
   "signup": {
     "EmailVerificationTittle":"Email Verification", 
-    "EmailVerificationplaceholder":"Enter the verification code",
+    "EmailVerificationplaceholder":"Check on Spam",
     "EmailVerificationButtomCode":"Verify Code",
     "EmailVerificationResendCode":"Resend Code",
     "AlertVerificationResendCode":"Code resent",
