@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 
 export const styles = StyleSheet.create({
     container: {
@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
       borderBottomWidth: 1,
       borderBottomColor: "white",
       marginBottom: 0,
-      marginTop:60,
+      marginTop: Platform.OS === "ios" ? 60 : 45, 
     },
     backButton: {
       marginRight: 15,

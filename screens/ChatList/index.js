@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, } from "react";
 import { 
   View, 
   Text, 
@@ -752,12 +752,13 @@ export default function ChatList() {
                     }
                   >
                     <Menu.Item
-                      onPress={() => {
-                        setIsSelectionMode(true);
-                        setShowOptionsMenu(false);
-                      }}
-                      title={t("indexChatList.deleteChats")}
-                    />
+  onPress={() => {
+    setIsSelectionMode(true);
+    setShowMuteOptions(false); // 👈 Esto limpia la opción de mute
+    setShowOptionsMenu(false);
+  }}
+  title={t("indexChatList.deleteChats")}
+/>
                     <Menu.Item
                       onPress={() => {
                         setIsSelectionMode(true);
@@ -789,64 +790,70 @@ export default function ChatList() {
               </>
             }
           />
-  
-          {isSelectionMode && (
-            <View
-              style={[
-                styles.selectionModeContainer,
-                { backgroundColor: theme.selectionModeBackground },
-              ]}
-            >
-              <TouchableOpacity
-                style={[
-                  styles.selectionModeButton,
-                  { backgroundColor: theme.selectionModeButtonBackground },
-                ]}
-                onPress={handleDeleteSelectedChatsLocal}
-              >
-                <Text
-                  style={[
-                    styles.selectionModeButtonText,
-                    { color: theme.selectionModeButtonText },
-                  ]}
-                >
-                  {t("indexChatList.delete")}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.selectionModeButton,
-                  { backgroundColor: theme.selectionModeButtonBackground },
-                ]}
-                onPress={handleMuteSelectedChatsLocal}
-              >
-                <Text
-                  style={[
-                    styles.selectionModeButtonText,
-                    { color: theme.selectionModeButtonText },
-                  ]}
-                >
-                  {t("indexChatList.mute")}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.selectionModeButton,
-                  { backgroundColor: theme.selectionModeButtonBackground },
-                ]}
-                onPress={handleCancel}
-              >
-                <Text
-                  style={[
-                    styles.selectionModeButtonText,
-                    { color: theme.selectionModeButtonText },
-                  ]}
-                >
-                  {t("indexChatList.cancel")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+
+{isSelectionMode && (
+  <View style={[
+    styles.selectionModeContainer,
+    { backgroundColor: theme.selectionModeBackground },
+  ]}>
+    {!showMuteOptions && (
+      <TouchableOpacity
+        style={[
+          styles.selectionModeButton,
+          { backgroundColor: theme.selectionModeButtonBackground },
+        ]}
+        onPress={handleDeleteSelectedChatsLocal}
+      >
+        <Text
+          style={[
+            styles.selectionModeButtonText,
+            { color: theme.selectionModeButtonText },
+          ]}
+        >
+          {t("indexChatList.delete")}
+        </Text>
+      </TouchableOpacity>
+    )}
+
+    {showMuteOptions && (
+      <TouchableOpacity
+        style={[
+          styles.selectionModeButton,
+          { backgroundColor: theme.selectionModeButtonBackground },
+        ]}
+        onPress={handleMuteSelectedChatsLocal}
+      >
+        <Text
+          style={[
+            styles.selectionModeButtonText,
+            { color: theme.selectionModeButtonText },
+          ]}
+        >
+          {t("indexChatList.mute")}
+        </Text>
+      </TouchableOpacity>
+    )}
+
+    <TouchableOpacity
+      style={[
+        styles.selectionModeButton,
+        { backgroundColor: theme.selectionModeButtonBackground },
+      ]}
+      onPress={handleCancel}
+    >
+      <Text
+        style={[
+          styles.selectionModeButtonText,
+          { color: theme.selectionModeButtonText },
+        ]}
+      >
+        {t("indexChatList.cancel")}
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
+
+
   
           {isModalVisible && (
             <Modal
