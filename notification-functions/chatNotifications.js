@@ -18,27 +18,25 @@ exports.sendChatNotification = functions.firestore
     try {
       const chatDoc = await db.collection('chats').doc(chatId).get();
       const chatData = chatDoc.data();
-      
-      // Get sender data
+
       const senderDoc = await db.collection('users').doc(messageData.senderId).get();
       const senderData = senderDoc.data();
-      
-      // Get recipient (the user who didn't send the message)
+
       const recipientId = chatData.participants.find(id => id !== messageData.senderId);
-      
-      // Get recipient's push token and muted chats
       const recipientDoc = await db.collection('users').doc(recipientId).get();
       const recipientData = recipientDoc.data();
-      const expoPushToken = recipientData?.expoPushToken;
+      const tokens = recipientData?.expoPushTokens || [];
       const mutedChats = recipientData?.mutedChats || [];
 
-      // Check if chat is muted and mute time hasn't expired
-      const isChatMuted = mutedChats.some(mute => 
-        mute.chatId === chatId && 
+      const validTokens = tokens.filter(token => Expo.isExpoPushToken(token));
+      if (validTokens.length === 0) return;
+
+      // Verificar si el chat está silenciado
+      const isChatMuted = mutedChats.some(mute =>
+        mute.chatId === chatId &&
         mute.muteUntil.toDate() > new Date()
       );
-
-      if (!expoPushToken || !Expo.isExpoPushToken(expoPushToken) || isChatMuted) return;
+      if (isChatMuted) return;
 
       const getMessageBody = (lang, isImage) => {
         if (isImage) {
@@ -55,24 +53,30 @@ exports.sendChatNotification = functions.firestore
         }[lang] || 'New message received';
       };
 
-      const message = {
-        to: expoPushToken,
+      const lang = recipientData.preferredLanguage || 'en';
+      const isImage = !!messageData.image;
+
+      const bodyText = messageData.text || getMessageBody(lang, isImage);
+      const senderName = `${senderData.firstName} ${senderData.lastName}`;
+
+      const messages = validTokens.map(token => ({
+        to: token,
         sound: 'default',
-        title: `${senderData.firstName} ${senderData.lastName}`,
-        body: messageData.image ? getMessageBody(recipientData.preferredLanguage, true) : (messageData.text || getMessageBody(recipientData.preferredLanguage, false)),
-        data: { 
-          chatId, 
+        title: senderName,
+        body: bodyText,
+        data: {
+          chatId,
           messageId: snapshot.id,
           senderId: messageData.senderId,
-          senderName: `${senderData.firstName} ${senderData.lastName}`,
+          senderName,
           senderPhoto: senderData.photoUrls?.[0],
           screen: 'ChatUsers'
         },
         channelId: 'chat-messages',
         image: 'https://firebasestorage.googleapis.com/v0/b/invite-me-32a07.appspot.com/o/FCMImages%2Fnuevo_logo.png?alt=media&token=1803b6b5-e77b-4b6e-81eb-9a978604ad6a'
-      };
+      }));
 
-      await expo.sendPushNotificationsAsync([message]);
+      await expo.sendPushNotificationsAsync(messages);
     } catch (error) {
       console.error('Error sending chat notification:', error);
     }
