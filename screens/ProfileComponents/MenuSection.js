@@ -425,7 +425,7 @@ const MenuSection = React.memo(({
 const styles = StyleSheet.create({
   menuContainer: {
     position: "absolute",
-    top: Platform.OS === "ios" ? height * 0.1 : height * 0.05, // top responsivo: 10% para iOS, 5% para Android
+    top: Platform.OS === "ios" ? height * 0.1 : height * 0.1, // top responsivo: 10% para iOS, 5% para Android
     right: width * 0.05, // 5% del ancho desde la derecha
     zIndex: 10,
   },

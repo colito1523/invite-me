@@ -5,8 +5,6 @@ import { Image as RNImage } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withTiming,
   useDerivedValue,
   runOnJS,
 } from "react-native-reanimated";

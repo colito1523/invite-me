@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: Platform.OS === "ios" ? "10%" : "5%",
+    top: Platform.OS === "ios" ? "10%" : "10%",
     left: "5%",
     zIndex: 10,
   },
@@ -134,7 +134,7 @@ export const styles = StyleSheet.create({
   },
   menuContainer: {
     position: "absolute",
-    top: Platform.OS === "ios" ? "10%" : "5%",
+    top: Platform.OS === "ios" ? "10%" : "10%",
     right: "5%",
     zIndex: 10,
   },

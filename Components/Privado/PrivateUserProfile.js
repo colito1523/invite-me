@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
     // Aproximadamente 70px en iOS y 50px en Android, convertidos a porcentaje
-    top: Platform.OS === "ios" ? screenHeight * 0.0875 : screenHeight * 0.0625,
+    top: Platform.OS === "ios" ? screenHeight * 0.0875 : screenHeight * 0.0875 ,
     left: screenWidth * 0.05,
     zIndex: 10,
   },
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
   // Posición del menú relativa a la pantalla
   menuContainer: {
     position: "absolute",
-    top: Platform.OS === "ios" ? screenHeight * 0.0875 : screenHeight * 0.0625,
+    top: Platform.OS === "ios" ? screenHeight * 0.0875 : screenHeight * 0.0875,
     right: screenWidth * 0.05,
     zIndex: 10,
   },
