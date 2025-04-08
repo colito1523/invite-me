@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimensions, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimensions, ActivityIndicator, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../config/firebase";
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, getAuth, deleteUser } from "firebase/auth";
@@ -20,6 +20,13 @@ const MenuSection = React.memo(({
 }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+const [currentPassword, setCurrentPassword] = useState("");
+const [newPassword, setNewPassword] = useState("");
+const [confirmPassword, setConfirmPassword] = useState("");
+const [step, setStep] = useState(1);
+
 
   const closeMenu = useCallback(() => setMenuVisible(false), [setMenuVisible]);
 
@@ -231,111 +238,116 @@ const MenuSection = React.memo(({
       ],
     );
   }, [t, navigation]);
-
+  
   const handleChangePasswordAlert = () => {
-    Alert.prompt(
-      t("profileMenuSections.currentPasswordTitle"),
-      t("profileMenuSections.currentPasswordMessage"),
-      [
-        {
-          text: t("chatUsers.cancel"),
-          style: "cancel",
-        },
-        {
-          text: t("profileMenuSections.continue"),
-          onPress: async (currentPassword) => {
-            if (!currentPassword) {
-              Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
-              return;
-            }
-
-            const user = auth.currentUser;
-
-            if (!user || !user.email) {
-              Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
-              return;
-            }
-
-            try {
-              const trimmedPassword = currentPassword.trim();
-              const credential = EmailAuthProvider.credential(user.email, trimmedPassword);
-              await reauthenticateWithCredential(user, credential);
-
-              Alert.prompt(
-                t("profileMenuSections.newPasswordTitle"),
-                t("profileMenuSections.newPasswordMessage"),
-                [
-                  {
-                    text: t("chatUsers.cancel"),
-                    style: "cancel",
-                  },
-                  {
-                    text: t("profileMenuSections.continue"),
-                    onPress: (newPassword) => {
-                      if (!newPassword) {
-                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
-                        return;
-                      }
-
-                      // Validación de la nueva contraseña
-                      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
-                      if (!passwordRegex.test(newPassword)) {
-                        Alert.alert(
-                          t("profileMenuSections.error"),
-                          t("profileMenuSections.invalidPassword") // Mensaje de error traducido
-                        );
-                        return;
-                      }
-
-                      Alert.prompt(
-                        t("profileMenuSections.confirmPasswordTitle"),
-                        t("profileMenuSections.confirmPasswordMessage"),
-                        [
-                          {
-                            text: t("chatUsers.cancel"),
-                            style: "cancel",
-                          },
-                          {
-                            text: t("profileMenuSections.accept"),
-                            onPress: async (confirmPassword) => {
-                              if (!confirmPassword) {
-                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.confirmPasswordRequired"));
-                                return;
-                              }
-                              if (newPassword !== confirmPassword) {
-                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordMismatch"));
-                                return;
-                              }
-                              try {
-                                await updatePassword(user, newPassword);
-                                Alert.alert(t("profileMenuSections.success"), t("profileMenuSections.passwordChanged"));
-                              } catch (error) {
-                                console.error("Error al cambiar la contraseña:", error);
-                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordChangeFailed"));
-                              }
-                            },
-                          },
-                        ],
-                        "secure-text"
-                      );
-                    },
-                  },
-                ],
-                "secure-text"
-              );
-            } catch (error) {
-              if (error.code === "auth/wrong-password") {
-                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidCurrentPassword"));
-              } else {
-                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordVerificationFailed"));
-              }
-            }
+    if (Platform.OS === "ios") {
+      // iOS: mantener uso de Alert.prompt con flujo completo
+      Alert.prompt(
+        t("profileMenuSections.currentPasswordTitle"),
+        t("profileMenuSections.currentPasswordMessage"),
+        [
+          {
+            text: t("chatUsers.cancel"),
+            style: "cancel",
           },
-        },
-      ],
-      "secure-text"
-    );
+          {
+            text: t("profileMenuSections.continue"),
+            onPress: async (currentPassword) => {
+              if (!currentPassword) {
+                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
+                return;
+              }
+  
+              const user = auth.currentUser;
+              if (!user || !user.email) {
+                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
+                return;
+              }
+  
+              try {
+                const credential = EmailAuthProvider.credential(user.email, currentPassword.trim());
+                await reauthenticateWithCredential(user, credential);
+  
+                Alert.prompt(
+                  t("profileMenuSections.newPasswordTitle"),
+                  t("profileMenuSections.newPasswordMessage"),
+                  [
+                    {
+                      text: t("chatUsers.cancel"),
+                      style: "cancel",
+                    },
+                    {
+                      text: t("profileMenuSections.continue"),
+                      onPress: (newPassword) => {
+                        if (!newPassword) {
+                          Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
+                          return;
+                        }
+  
+                        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+                        if (!passwordRegex.test(newPassword)) {
+                          Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidPassword"));
+                          return;
+                        }
+  
+                        Alert.prompt(
+                          t("profileMenuSections.confirmPasswordTitle"),
+                          t("profileMenuSections.confirmPasswordMessage"),
+                          [
+                            {
+                              text: t("chatUsers.cancel"),
+                              style: "cancel",
+                            },
+                            {
+                              text: t("profileMenuSections.accept"),
+                              onPress: async (confirmPassword) => {
+                                if (!confirmPassword) {
+                                  Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.confirmPasswordRequired"));
+                                  return;
+                                }
+                                if (newPassword !== confirmPassword) {
+                                  Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordMismatch"));
+                                  return;
+                                }
+                                try {
+                                  await updatePassword(user, newPassword);
+                                  Alert.alert(t("profileMenuSections.success"), t("profileMenuSections.passwordChanged"));
+                                } catch (error) {
+                                  Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordChangeFailed"));
+                                }
+                              },
+                            },
+                          ],
+                          "secure-text"
+                        );
+                      },
+                    },
+                  ],
+                  "secure-text"
+                );
+              } catch (error) {
+                if (error.code === "auth/wrong-password") {
+                  Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidCurrentPassword"));
+                } else {
+                  Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordVerificationFailed"));
+                }
+              }
+            },
+          },
+        ],
+        "secure-text"
+      );
+    } else {
+      // Android: iniciar flujo por etapas con modal
+      setPasswordModalVisible(true);
+      setStep(1); // empezamos por la etapa 1: contraseña actual
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
   };
+  
+  
 
   return (
     <View style={styles.menuContainer}>
@@ -418,7 +430,138 @@ const MenuSection = React.memo(({
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {Platform.OS === "android" && (
+    <Modal visible={passwordModalVisible} transparent animationType="fade">
+      <View style={styles.overlayCentered}>
+        <View style={styles.androidAlertModal}>
+          <Text style={styles.androidAlertTitle}>
+            {step === 1
+              ? t("profileMenuSections.currentPasswordTitle")
+              : step === 2
+              ? t("profileMenuSections.newPasswordTitle")
+              : t("profileMenuSections.confirmPasswordTitle")}
+          </Text>
+  
+          {step === 1 && (
+            <TextInput
+              placeholder={t("profileMenuSections.currentPasswordMessage")}
+              placeholderTextColor="#999"
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+              secureTextEntry
+              style={styles.androidAlertInput}
+            />
+          )}
+          {step === 2 && (
+            <TextInput
+              placeholder={t("profileMenuSections.newPasswordMessage")}
+              placeholderTextColor="#999"
+              value={newPassword}
+              onChangeText={setNewPassword}
+              secureTextEntry
+              style={styles.androidAlertInput}
+            />
+          )}
+          {step === 3 && (
+            <TextInput
+              placeholder={t("profileMenuSections.confirmPasswordMessage")}
+              placeholderTextColor="#999"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              style={styles.androidAlertInput}
+            />
+          )}
+  
+          <View style={styles.androidAlertButtons}>
+            <TouchableOpacity
+              style={styles.androidAlertButton}
+              onPress={() => {
+                setPasswordModalVisible(false);
+                setStep(1);
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
+            >
+              <Text style={styles.androidAlertCancelText}>{t("chatUsers.cancel")}</Text>
+            </TouchableOpacity>
+  
+            <TouchableOpacity
+              style={styles.androidAlertButton}
+              onPress={async () => {
+                const user = auth.currentUser;
+  
+                if (!user || !user.email) {
+                  Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
+                  return;
+                }
+  
+                if (step === 1) {
+                  if (!currentPassword) {
+                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
+                    return;
+                  }
+                  try {
+                    const credential = EmailAuthProvider.credential(user.email, currentPassword.trim());
+                    await reauthenticateWithCredential(user, credential);
+                    setStep(2);
+                  } catch (error) {
+                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidCurrentPassword"));
+                  }
+                }
+  
+                if (step === 2) {
+                  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+                  if (!newPassword) {
+                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
+                    return;
+                  }
+                  if (!passwordRegex.test(newPassword)) {
+                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidPassword"));
+                    return;
+                  }
+                  setStep(3);
+                }
+  
+                if (step === 3) {
+                  if (!confirmPassword) {
+                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.confirmPasswordRequired"));
+                    return;
+                  }
+                  if (newPassword !== confirmPassword) {
+                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordMismatch"));
+                    return;
+                  }
+  
+                  try {
+                    await updatePassword(user, newPassword);
+                    Alert.alert(t("profileMenuSections.success"), t("profileMenuSections.passwordChanged"));
+                    setPasswordModalVisible(false);
+                    setStep(1);
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setConfirmPassword("");
+                  } catch (error) {
+                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordChangeFailed"));
+                  }
+                }
+              }}
+            >
+              <Text style={styles.androidAlertConfirmText}>
+                {step === 3 ? t("profileMenuSections.accept") : t("profileMenuSections.continue")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  )}
+     
+
     </View>
+    
   );
 });
 
@@ -460,6 +603,59 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: "center",
   },
+  overlayCentered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  androidAlertModal: {
+    width: "85%",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  androidAlertTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    textAlign: "center",
+    marginBottom: 15,
+    color: "#111",
+  },
+  androidAlertInput: {
+    borderWidth: 1,
+    borderRadius:50,
+    borderBottomColor: "#ccc",
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    fontSize: 15,
+    marginBottom: 15,
+    color: "#000",
+  },
+  androidAlertButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 16,
+  },
+  androidAlertButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  androidAlertCancelText: {
+    fontSize: 16,
+    color: "#888",
+  },
+  androidAlertConfirmText: {
+    fontSize: 16,
+    color: "black", // estilo iOS-like
+    fontWeight: "600",
+  },
+  
 });
 
 export default MenuSection;
