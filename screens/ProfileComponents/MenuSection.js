@@ -20,225 +20,235 @@ const MenuSection = React.memo(({
 }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
-const [currentPassword, setCurrentPassword] = useState("");
-const [newPassword, setNewPassword] = useState("");
-const [confirmPassword, setConfirmPassword] = useState("");
-const [step, setStep] = useState(1);
-
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [step, setStep] = useState(1);
+  const [deleteStep, setDeleteStep] = useState(1);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
 
   const closeMenu = useCallback(() => setMenuVisible(false), [setMenuVisible]);
 
   const handleDeleteAccount = useCallback(async () => {
     console.log("Iniciando eliminación de cuenta...");
 
-    Alert.alert(
-      t("profileMenuSections.deleteAccount"),
-      t("profileMenuSections.deleteAccountQuestions"),
-      [
-        {
-          text: t("chatUsers.cancel"),
-          style: "cancel",
-        },
-        {
-          text: t("profileMenuSections.continue"),
-          style: "destructive",
-          onPress: () => {
-            console.log("Usuario confirmó eliminación.");
+    if (Platform.OS === "ios") {
+      Alert.alert(
+        t("profileMenuSections.deleteAccount"),
+        t("profileMenuSections.deleteAccountQuestions"),
+        [
+          {
+            text: t("chatUsers.cancel"),
+            style: "cancel",
+          },
+          {
+            text: t("profileMenuSections.continue"),
+            style: "destructive",
+            onPress: () => {
+              console.log("Usuario confirmó eliminación.");
 
-            Alert.prompt(
-              t("profileMenuSections.confirmEmail"),
-              t("profileMenuSections.enterEmail"),
-              [
-                {
-                  text: t("chatUsers.cancel"),
-                  style: "cancel",
-                },
-                {
-                  text: t("profileMenuSections.continue"),
-                  style: "default",
-                  onPress: (email) => {
-                    if (!email) {
-                      Alert.alert(
-                        t("profileMenuSections.error"),
-                        t("profileMenuSections.emailRequired"),
-                      );
-                      return;
-                    }
+              Alert.prompt(
+                t("profileMenuSections.confirmEmail"),
+                t("profileMenuSections.enterEmail"),
+                [
+                  {
+                    text: t("chatUsers.cancel"),
+                    style: "cancel",
+                  },
+                  {
+                    text: t("profileMenuSections.continue"),
+                    style: "default",
+                    onPress: (email) => {
+                      if (!email) {
+                        Alert.alert(
+                          t("profileMenuSections.error"),
+                          t("profileMenuSections.emailRequired"),
+                        );
+                        return;
+                      }
 
-                    console.log("Email ingresado:", email);
+                      console.log("Email ingresado:", email);
 
-                    Alert.prompt(
-                      t("profileMenuSections.confirmPassword"),
-                      t("profileMenuSections.enterPassword"),
-                      [
-                        {
-                          text: t("chatUsers.cancel"),
-                          style: "cancel",
-                        },
-                        {
-                          text: t("profileMenuSections.continue"),
-                          style: "destructive",
-                          onPress: async (password) => {
-                            if (!password) {
-                              Alert.alert(
-                                t("profileMenuSections.error"),
-                                t("profileMenuSections.passwordRequired"),
-                              );
-                              return;
-                            }
-
-                            console.log("Contraseña ingresada:", password);
-                            setLoading(true); // Mostrar indicador de carga
-
-                            try {
-                              const auth = getAuth();
-                              const database = getFirestore();
-                              const user = auth.currentUser;
-
-                              if (!user) {
-                                console.log("Error: No hay usuario autenticado.");
-                                Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
-                                setLoading(false);
+                      Alert.prompt(
+                        t("profileMenuSections.confirmPassword"),
+                        t("profileMenuSections.enterPassword"),
+                        [
+                          {
+                            text: t("chatUsers.cancel"),
+                            style: "cancel",
+                          },
+                          {
+                            text: t("profileMenuSections.continue"),
+                            style: "destructive",
+                            onPress: async (password) => {
+                              if (!password) {
+                                Alert.alert(
+                                  t("profileMenuSections.error"),
+                                  t("profileMenuSections.passwordRequired"),
+                                );
                                 return;
                               }
 
-                              console.log("Usuario autenticado:", user.uid);
+                              console.log("Contraseña ingresada:", password);
+                              setLoading(true); // Mostrar indicador de carga
 
-                              const credential = EmailAuthProvider.credential(email, password);
-                              console.log("Reautenticando usuario...");
+                              try {
+                                const auth = getAuth();
+                                const database = getFirestore();
+                                const user = auth.currentUser;
 
-                              await reauthenticateWithCredential(user, credential);
-                              console.log("Reautenticación exitosa.");
-
-                              console.log("Eliminando usuario de Firestore...");
-                              await deleteDoc(doc(database, "users", user.uid));
-                              console.log("Documento eliminado de Firestore.");
-
-                              const batch = writeBatch(database);
-                              const promises = [];
-
-                              const usersSnapshot = await getDocs(collection(database, "users"));
-                              usersSnapshot.forEach((userDoc) => {
-                                const friendsCollection = collection(userDoc.ref, "friends");
-                                const friendRequestsCollection = collection(userDoc.ref, "friendRequests");
-                                const notificationsCollection = collection(userDoc.ref, "notifications");
-                                const likesCollection = collection(userDoc.ref, "likes");
-                                const storiesCollection = collection(userDoc.ref, "stories");
-
-                                promises.push(
-                                  getDocs(friendsCollection).then((friendsSnapshot) => {
-                                    friendsSnapshot.forEach((friendDoc) => {
-                                      const friendData = friendDoc.data();
-                                      if (friendData.friendId === user.uid) {
-                                        batch.delete(friendDoc.ref);
-                                      }
-                                    });
-                                  }),
-
-                                  getDocs(friendRequestsCollection).then((friendRequestsSnapshot) => {
-                                    friendRequestsSnapshot.forEach((requestDoc) => {
-                                      const requestData = requestDoc.data();
-                                      if (requestData.fromId === user.uid) {
-                                        batch.delete(requestDoc.ref);
-                                      }
-                                    });
-                                  }),
-
-                                  getDocs(notificationsCollection).then((notificationsSnapshot) => {
-                                    notificationsSnapshot.forEach((notificationDoc) => {
-                                      const notificationData = notificationDoc.data();
-                                      if (notificationData.fromId === user.uid) {
-                                        batch.delete(notificationDoc.ref);
-                                      }
-                                    });
-                                  }),
-
-                                  getDocs(likesCollection).then((likesSnapshot) => {
-                                    likesSnapshot.forEach((likeDoc) => {
-                                      const likeData = likeDoc.data();
-                                      if (likeData.userId === user.uid) {
-                                        batch.delete(likeDoc.ref);
-                                      }
-                                    });
-                                  }),
-
-                                  getDocs(storiesCollection).then((storiesSnapshot) => {
-                                    storiesSnapshot.forEach((storyDoc) => {
-                                      const storyData = storyDoc.data();
-                                      const updatedLikes = storyData.likes.filter(like => like.uid !== user.uid);
-                                      const updatedViewers = storyData.viewers.filter(viewer => viewer.uid !== user.uid);
-
-                                      if (updatedLikes.length !== storyData.likes.length || updatedViewers.length !== storyData.viewers.length) {
-                                        batch.update(storyDoc.ref, {
-                                          likes: updatedLikes,
-                                          viewers: updatedViewers,
-                                        });
-                                      }
-                                    });
-                                  })
-                                );
-                              });
-
-                              const chatsSnapshot = await getDocs(collection(database, "chats"));
-                              chatsSnapshot.forEach((chatDoc) => {
-                                const chatData = chatDoc.data();
-                                if (chatData.participants.includes(user.uid)) {
-                                  batch.delete(chatDoc.ref);
+                                if (!user) {
+                                  console.log("Error: No hay usuario autenticado.");
+                                  Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
+                                  setLoading(false);
+                                  return;
                                 }
-                              });
 
-                              await Promise.all(promises);
-                              await batch.commit();
+                                console.log("Usuario autenticado:", user.uid);
 
-                              console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad, notificaciones, likes, viewers en historias y chats de otros usuarios.");
+                                const credential = EmailAuthProvider.credential(email, password);
+                                console.log("Reautenticando usuario...");
 
-                              console.log("Eliminando usuario de Firebase Authentication...");
-                              await deleteUser(user);
-                              console.log("Usuario eliminado de Firebase Authentication.");
+                                await reauthenticateWithCredential(user, credential);
+                                console.log("Reautenticación exitosa.");
 
-                              Alert.alert(
-                                t("profileMenuSections.success"),
-                                t("profileMenuSections.accountDeleted"),
-                                [
-                                  {
-                                    text: t("chatUsers.success"),
-                                    onPress: () => {
-                                      console.log("Redirigiendo a Login...");
-                                      navigation.reset({
-                                        index: 0,
-                                        routes: [{ name: "Login" }],
+                                console.log("Eliminando usuario de Firestore...");
+                                await deleteDoc(doc(database, "users", user.uid));
+                                console.log("Documento eliminado de Firestore.");
+
+                                const batch = writeBatch(database);
+                                const promises = [];
+
+                                const usersSnapshot = await getDocs(collection(database, "users"));
+                                usersSnapshot.forEach((userDoc) => {
+                                  const friendsCollection = collection(userDoc.ref, "friends");
+                                  const friendRequestsCollection = collection(userDoc.ref, "friendRequests");
+                                  const notificationsCollection = collection(userDoc.ref, "notifications");
+                                  const likesCollection = collection(userDoc.ref, "likes");
+                                  const storiesCollection = collection(userDoc.ref, "stories");
+
+                                  promises.push(
+                                    getDocs(friendsCollection).then((friendsSnapshot) => {
+                                      friendsSnapshot.forEach((friendDoc) => {
+                                        const friendData = friendDoc.data();
+                                        if (friendData.friendId === user.uid) {
+                                          batch.delete(friendDoc.ref);
+                                        }
                                       });
+                                    }),
+
+                                    getDocs(friendRequestsCollection).then((friendRequestsSnapshot) => {
+                                      friendRequestsSnapshot.forEach((requestDoc) => {
+                                        const requestData = requestDoc.data();
+                                        if (requestData.fromId === user.uid) {
+                                          batch.delete(requestDoc.ref);
+                                        }
+                                      });
+                                    }),
+
+                                    getDocs(notificationsCollection).then((notificationsSnapshot) => {
+                                      notificationsSnapshot.forEach((notificationDoc) => {
+                                        const notificationData = notificationDoc.data();
+                                        if (notificationData.fromId === user.uid) {
+                                          batch.delete(notificationDoc.ref);
+                                        }
+                                      });
+                                    }),
+
+                                    getDocs(likesCollection).then((likesSnapshot) => {
+                                      likesSnapshot.forEach((likeDoc) => {
+                                        const likeData = likeDoc.data();
+                                        if (likeData.userId === user.uid) {
+                                          batch.delete(likeDoc.ref);
+                                        }
+                                      });
+                                    }),
+
+                                    getDocs(storiesCollection).then((storiesSnapshot) => {
+                                      storiesSnapshot.forEach((storyDoc) => {
+                                        const storyData = storyDoc.data();
+                                        const updatedLikes = storyData.likes.filter(like => like.uid !== user.uid);
+                                        const updatedViewers = storyData.viewers.filter(viewer => viewer.uid !== user.uid);
+
+                                        if (updatedLikes.length !== storyData.likes.length || updatedViewers.length !== storyData.viewers.length) {
+                                          batch.update(storyDoc.ref, {
+                                            likes: updatedLikes,
+                                            viewers: updatedViewers,
+                                          });
+                                        }
+                                      });
+                                    })
+                                  );
+                                });
+
+                                const chatsSnapshot = await getDocs(collection(database, "chats"));
+                                chatsSnapshot.forEach((chatDoc) => {
+                                  const chatData = chatDoc.data();
+                                  if (chatData.participants.includes(user.uid)) {
+                                    batch.delete(chatDoc.ref);
+                                  }
+                                });
+
+                                await Promise.all(promises);
+                                await batch.commit();
+
+                                console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad, notificaciones, likes, viewers en historias y chats de otros usuarios.");
+
+                                console.log("Eliminando usuario de Firebase Authentication...");
+                                await deleteUser(user);
+                                console.log("Usuario eliminado de Firebase Authentication.");
+
+                                Alert.alert(
+                                  t("profileMenuSections.success"),
+                                  t("profileMenuSections.accountDeleted"),
+                                  [
+                                    {
+                                      text: t("chatUsers.success"),
+                                      onPress: () => {
+                                        console.log("Redirigiendo a Login...");
+                                        navigation.reset({
+                                          index: 0,
+                                          routes: [{ name: "Login" }],
+                                        });
+                                      },
                                     },
-                                  },
-                                ],
-                              );
-                            } catch (error) {
-                              console.log("Error al eliminar la cuenta:", error);
-                              Alert.alert(
-                                t("profileMenuSections.error"),
-                                t("profileMenuSections.deleteAccountError"),
-                              );
-                            } finally {
-                              setLoading(false); // Ocultar indicador de carga
-                            }
+                                  ],
+                                );
+                              } catch (error) {
+                                console.log("Error al eliminar la cuenta:", error);
+                                Alert.alert(
+                                  t("profileMenuSections.error"),
+                                  t("profileMenuSections.deleteAccountError"),
+                                );
+                              } finally {
+                                setLoading(false); // Ocultar indicador de carga
+                              }
+                            },
                           },
-                        },
-                      ],
-                      "secure-text",
-                    );
+                        ],
+                        "secure-text",
+                      );
+                    },
                   },
-                },
-              ],
-              "plain-text",
-            );
+                ],
+                "plain-text",
+              );
+            },
           },
-        },
-      ],
-    );
+        ],
+      );
+    } else {
+      // Android: iniciar flujo por etapas con modal
+      setDeleteModalVisible(true);
+      setDeleteStep(1); // empezamos por la etapa 1: confirmar email
+      setDeleteEmail("");
+      setDeletePassword("");
+    }
   }, [t, navigation]);
-  
+
   const handleChangePasswordAlert = () => {
     if (Platform.OS === "ios") {
       // iOS: mantener uso de Alert.prompt con flujo completo
@@ -257,17 +267,17 @@ const [step, setStep] = useState(1);
                 Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
                 return;
               }
-  
+
               const user = auth.currentUser;
               if (!user || !user.email) {
                 Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
                 return;
               }
-  
+
               try {
                 const credential = EmailAuthProvider.credential(user.email, currentPassword.trim());
                 await reauthenticateWithCredential(user, credential);
-  
+
                 Alert.prompt(
                   t("profileMenuSections.newPasswordTitle"),
                   t("profileMenuSections.newPasswordMessage"),
@@ -283,13 +293,13 @@ const [step, setStep] = useState(1);
                           Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
                           return;
                         }
-  
+
                         const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
                         if (!passwordRegex.test(newPassword)) {
                           Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidPassword"));
                           return;
                         }
-  
+
                         Alert.prompt(
                           t("profileMenuSections.confirmPasswordTitle"),
                           t("profileMenuSections.confirmPasswordMessage"),
@@ -346,8 +356,6 @@ const [step, setStep] = useState(1);
       setConfirmPassword("");
     }
   };
-  
-  
 
   return (
     <View style={styles.menuContainer}>
@@ -432,136 +440,341 @@ const [step, setStep] = useState(1);
       </Modal>
 
       {Platform.OS === "android" && (
-    <Modal visible={passwordModalVisible} transparent animationType="fade">
-      <View style={styles.overlayCentered}>
-        <View style={styles.androidAlertModal}>
-          <Text style={styles.androidAlertTitle}>
-            {step === 1
-              ? t("profileMenuSections.currentPasswordTitle")
-              : step === 2
-              ? t("profileMenuSections.newPasswordTitle")
-              : t("profileMenuSections.confirmPasswordTitle")}
-          </Text>
-  
-          {step === 1 && (
-            <TextInput
-              placeholder={t("profileMenuSections.currentPasswordMessage")}
-              placeholderTextColor="#999"
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              secureTextEntry
-              style={styles.androidAlertInput}
-            />
-          )}
-          {step === 2 && (
-            <TextInput
-              placeholder={t("profileMenuSections.newPasswordMessage")}
-              placeholderTextColor="#999"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry
-              style={styles.androidAlertInput}
-            />
-          )}
-          {step === 3 && (
-            <TextInput
-              placeholder={t("profileMenuSections.confirmPasswordMessage")}
-              placeholderTextColor="#999"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              style={styles.androidAlertInput}
-            />
-          )}
-  
-          <View style={styles.androidAlertButtons}>
-            <TouchableOpacity
-              style={styles.androidAlertButton}
-              onPress={() => {
-                setPasswordModalVisible(false);
-                setStep(1);
-                setCurrentPassword("");
-                setNewPassword("");
-                setConfirmPassword("");
-              }}
-            >
-              <Text style={styles.androidAlertCancelText}>{t("chatUsers.cancel")}</Text>
-            </TouchableOpacity>
-  
-            <TouchableOpacity
-              style={styles.androidAlertButton}
-              onPress={async () => {
-                const user = auth.currentUser;
-  
-                if (!user || !user.email) {
-                  Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
-                  return;
-                }
-  
-                if (step === 1) {
-                  if (!currentPassword) {
-                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
-                    return;
-                  }
-                  try {
-                    const credential = EmailAuthProvider.credential(user.email, currentPassword.trim());
-                    await reauthenticateWithCredential(user, credential);
-                    setStep(2);
-                  } catch (error) {
-                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidCurrentPassword"));
-                  }
-                }
-  
-                if (step === 2) {
-                  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
-                  if (!newPassword) {
-                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
-                    return;
-                  }
-                  if (!passwordRegex.test(newPassword)) {
-                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidPassword"));
-                    return;
-                  }
-                  setStep(3);
-                }
-  
-                if (step === 3) {
-                  if (!confirmPassword) {
-                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.confirmPasswordRequired"));
-                    return;
-                  }
-                  if (newPassword !== confirmPassword) {
-                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordMismatch"));
-                    return;
-                  }
-  
-                  try {
-                    await updatePassword(user, newPassword);
-                    Alert.alert(t("profileMenuSections.success"), t("profileMenuSections.passwordChanged"));
+        <Modal visible={passwordModalVisible} transparent animationType="fade">
+          <View style={styles.overlayCentered}>
+            <View style={styles.androidAlertModal}>
+              <Text style={styles.androidAlertTitle}>
+                {step === 1
+                  ? t("profileMenuSections.currentPasswordTitle")
+                  : step === 2
+                  ? t("profileMenuSections.newPasswordTitle")
+                  : t("profileMenuSections.confirmPasswordTitle")}
+              </Text>
+
+              {step === 1 && (
+                <TextInput
+                  placeholder={t("profileMenuSections.currentPasswordMessage")}
+                  placeholderTextColor="#999"
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  secureTextEntry
+                  style={styles.androidAlertInput}
+                />
+              )}
+              {step === 2 && (
+                <TextInput
+                  placeholder={t("profileMenuSections.newPasswordMessage")}
+                  placeholderTextColor="#999"
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  secureTextEntry
+                  style={styles.androidAlertInput}
+                />
+              )}
+              {step === 3 && (
+                <TextInput
+                  placeholder={t("profileMenuSections.confirmPasswordMessage")}
+                  placeholderTextColor="#999"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  style={styles.androidAlertInput}
+                />
+              )}
+
+              <View style={styles.androidAlertButtons}>
+                <TouchableOpacity
+                  style={styles.androidAlertButton}
+                  onPress={() => {
                     setPasswordModalVisible(false);
                     setStep(1);
                     setCurrentPassword("");
                     setNewPassword("");
                     setConfirmPassword("");
-                  } catch (error) {
-                    Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordChangeFailed"));
-                  }
-                }
-              }}
-            >
-              <Text style={styles.androidAlertConfirmText}>
-                {step === 3 ? t("profileMenuSections.accept") : t("profileMenuSections.continue")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  )}
-     
+                  }}
+                >
+                  <Text style={styles.androidAlertCancelText}>{t("chatUsers.cancel")}</Text>
+                </TouchableOpacity>
 
+                <TouchableOpacity
+                  style={styles.androidAlertButton}
+                  onPress={async () => {
+                    const user = auth.currentUser;
+
+                    if (!user || !user.email) {
+                      Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
+                      return;
+                    }
+
+                    if (step === 1) {
+                      if (!currentPassword) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
+                        return;
+                      }
+                      try {
+                        const credential = EmailAuthProvider.credential(user.email, currentPassword.trim());
+                        await reauthenticateWithCredential(user, credential);
+                        setStep(2);
+                      } catch (error) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidCurrentPassword"));
+                      }
+                    }
+
+                    if (step === 2) {
+                      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+                      if (!newPassword) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
+                        return;
+                      }
+                      if (!passwordRegex.test(newPassword)) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidPassword"));
+                        return;
+                      }
+                      setStep(3);
+                    }
+
+                    if (step === 3) {
+                      if (!confirmPassword) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.confirmPasswordRequired"));
+                        return;
+                      }
+                      if (newPassword !== confirmPassword) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordMismatch"));
+                        return;
+                      }
+
+                      try {
+                        await updatePassword(user, newPassword);
+                        Alert.alert(t("profileMenuSections.success"), t("profileMenuSections.passwordChanged"));
+                        setPasswordModalVisible(false);
+                        setStep(1);
+                        setCurrentPassword("");
+                        setNewPassword("");
+                        setConfirmPassword("");
+                      } catch (error) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordChangeFailed"));
+                      }
+                    }
+                  }}
+                >
+                  <Text style={styles.androidAlertConfirmText}>
+                    {step === 3 ? t("profileMenuSections.accept") : t("profileMenuSections.continue")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {Platform.OS === "android" && (
+        <Modal visible={deleteModalVisible} transparent animationType="fade">
+          <View style={styles.overlayCentered}>
+            <View style={styles.androidAlertModal}>
+              <Text style={styles.androidAlertTitle}>
+                {deleteStep === 1
+                  ? t("profileMenuSections.confirmEmail")
+                  : t("profileMenuSections.confirmPassword")}
+              </Text>
+
+              {deleteStep === 1 && (
+                <TextInput
+                  placeholder="Email"
+                  placeholderTextColor="#999"
+                  value={deleteEmail}
+                  onChangeText={setDeleteEmail}
+                  style={styles.androidAlertInput}
+                />
+              )}
+              {deleteStep === 2 && (
+                <TextInput
+                  placeholder={t("profileMenuSections.enterPassword")}
+                  placeholderTextColor="#999"
+                  value={deletePassword}
+                  onChangeText={setDeletePassword}
+                  secureTextEntry
+                  style={styles.androidAlertInput}
+                />
+              )}
+
+              <View style={styles.androidAlertButtons}>
+                <TouchableOpacity
+                  style={styles.androidAlertButton}
+                  onPress={() => {
+                    setDeleteModalVisible(false);
+                    setDeleteStep(1);
+                    setDeleteEmail("");
+                    setDeletePassword("");
+                  }}
+                >
+                  <Text style={styles.androidAlertCancelText}>{t("chatUsers.cancel")}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.androidAlertButton}
+                  onPress={async () => {
+                    if (deleteStep === 1) {
+                      if (!deleteEmail) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.emailRequired"));
+                        return;
+                      }
+                      setDeleteStep(2);
+                    } else if (deleteStep === 2) {
+                      if (!deletePassword) {
+                        Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.passwordRequired"));
+                        return;
+                      }
+
+                      setLoading(true); // Mostrar indicador de carga
+
+                      try {
+                        const auth = getAuth();
+                        const database = getFirestore();
+                        const user = auth.currentUser;
+
+                        if (!user) {
+                          console.log("Error: No hay usuario autenticado.");
+                          Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.userNotFound"));
+                          setLoading(false);
+                          return;
+                        }
+
+                        console.log("Usuario autenticado:", user.uid);
+
+                        const credential = EmailAuthProvider.credential(deleteEmail, deletePassword);
+                        console.log("Reautenticando usuario...");
+
+                        await reauthenticateWithCredential(user, credential);
+                        console.log("Reautenticación exitosa.");
+
+                        console.log("Eliminando usuario de Firestore...");
+                        await deleteDoc(doc(database, "users", user.uid));
+                        console.log("Documento eliminado de Firestore.");
+
+                        const batch = writeBatch(database);
+                        const promises = [];
+
+                        const usersSnapshot = await getDocs(collection(database, "users"));
+                        usersSnapshot.forEach((userDoc) => {
+                          const friendsCollection = collection(userDoc.ref, "friends");
+                          const friendRequestsCollection = collection(userDoc.ref, "friendRequests");
+                          const notificationsCollection = collection(userDoc.ref, "notifications");
+                          const likesCollection = collection(userDoc.ref, "likes");
+                          const storiesCollection = collection(userDoc.ref, "stories");
+
+                          promises.push(
+                            getDocs(friendsCollection).then((friendsSnapshot) => {
+                              friendsSnapshot.forEach((friendDoc) => {
+                                const friendData = friendDoc.data();
+                                if (friendData.friendId === user.uid) {
+                                  batch.delete(friendDoc.ref);
+                                }
+                              });
+                            }),
+
+                            getDocs(friendRequestsCollection).then((friendRequestsSnapshot) => {
+                              friendRequestsSnapshot.forEach((requestDoc) => {
+                                const requestData = requestDoc.data();
+                                if (requestData.fromId === user.uid) {
+                                  batch.delete(requestDoc.ref);
+                                }
+                              });
+                            }),
+
+                            getDocs(notificationsCollection).then((notificationsSnapshot) => {
+                              notificationsSnapshot.forEach((notificationDoc) => {
+                                const notificationData = notificationDoc.data();
+                                if (notificationData.fromId === user.uid) {
+                                  batch.delete(notificationDoc.ref);
+                                }
+                              });
+                            }),
+
+                            getDocs(likesCollection).then((likesSnapshot) => {
+                              likesSnapshot.forEach((likeDoc) => {
+                                const likeData = likeDoc.data();
+                                if (likeData.userId === user.uid) {
+                                  batch.delete(likeDoc.ref);
+                                }
+                              });
+                            }),
+
+                            getDocs(storiesCollection).then((storiesSnapshot) => {
+                              storiesSnapshot.forEach((storyDoc) => {
+                                const storyData = storyDoc.data();
+                                const updatedLikes = storyData.likes.filter(like => like.uid !== user.uid);
+                                const updatedViewers = storyData.viewers.filter(viewer => viewer.uid !== user.uid);
+
+                                if (updatedLikes.length !== storyData.likes.length || updatedViewers.length !== storyData.viewers.length) {
+                                  batch.update(storyDoc.ref, {
+                                    likes: updatedLikes,
+                                    viewers: updatedViewers,
+                                  });
+                                }
+                              });
+                            })
+                          );
+                        });
+
+                        const chatsSnapshot = await getDocs(collection(database, "chats"));
+                        chatsSnapshot.forEach((chatDoc) => {
+                          const chatData = chatDoc.data();
+                          if (chatData.participants.includes(user.uid)) {
+                            batch.delete(chatDoc.ref);
+                          }
+                        });
+
+                        await Promise.all(promises);
+                        await batch.commit();
+
+                        console.log("Usuario eliminado de la lista de amigos, solicitudes de amistad, notificaciones, likes, viewers en historias y chats de otros usuarios.");
+
+                        console.log("Eliminando usuario de Firebase Authentication...");
+                        await deleteUser(user);
+                        console.log("Usuario eliminado de Firebase Authentication.");
+
+                        Alert.alert(
+                          t("profileMenuSections.success"),
+                          t("profileMenuSections.accountDeleted"),
+                          [
+                            {
+                              text: t("chatUsers.success"),
+                              onPress: () => {
+                                console.log("Redirigiendo a Login...");
+                                navigation.reset({
+                                  index: 0,
+                                  routes: [{ name: "Login" }],
+                                });
+                              },
+                            },
+                          ],
+                        );
+                      } catch (error) {
+                        console.log("Error al eliminar la cuenta:", error);
+                        Alert.alert(
+                          t("profileMenuSections.error"),
+                          t("profileMenuSections.deleteAccountError"),
+                        );
+                      } finally {
+                        setLoading(false); // Ocultar indicador de carga
+                        setDeleteModalVisible(false);
+                        setDeleteStep(1);
+                        setDeleteEmail("");
+                        setDeletePassword("");
+                      }
+                    }
+                  }}
+                >
+                  <Text style={styles.androidAlertConfirmText}>
+                    {t("profileMenuSections.continue")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
-    
   );
 });
 
@@ -629,17 +842,19 @@ const styles = StyleSheet.create({
   },
   androidAlertInput: {
     borderWidth: 1,
-    borderRadius:50,
+    borderRadius: 50,
     borderBottomColor: "#ccc",
     paddingVertical: 8,
     paddingHorizontal: 4,
     fontSize: 15,
     marginBottom: 15,
     color: "#000",
+    textAlign: "left",
+    paddingLeft: 20
   },
   androidAlertButtons: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     gap: 16,
   },
   androidAlertButton: {
@@ -655,7 +870,6 @@ const styles = StyleSheet.create({
     color: "black", // estilo iOS-like
     fontWeight: "600",
   },
-  
 });
 
 export default MenuSection;

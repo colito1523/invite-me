@@ -26,6 +26,7 @@ const transporter = nodemailer.createTransport({
  * 3) Envía un correo al usuario con ese código
  */
 exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
+  console.log("Verificación iniciada"); // 👈 agregá esto
   const { email, language = "en" } = data;
   if (!email) {
     throw new functions.https.HttpsError(
