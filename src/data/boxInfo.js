@@ -1862,6 +1862,27 @@ const boxInfo = [
     country: "España",
     city: "Madrid",
   },
+  {
+    path: require("../../assets/Madrid/Liberty.jpg"),
+    title: "Liberty",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "Cerrado",
+      Martes: "Cerrado",
+      Miércoles: "Cerrado",
+      Jueves: "00:00 - 05:30",
+      Viernes: "00:00 - 05:30",
+      Sábado: "00:00 - 05:30",
+      Domingo: "Cerrado",
+    },
+    number: "+34 640 02 79 71",
+    coordinates: {
+      latitude: 40.43278890,
+      longitude:  -3.67885860,
+    },
+    country: "España",
+    city: "Madrid",
+  },
 
   {
     path: require("../../assets/Barcelona/Chica_Club.jpg"),

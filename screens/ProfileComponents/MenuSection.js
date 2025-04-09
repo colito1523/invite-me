@@ -294,7 +294,7 @@ const MenuSection = React.memo(({
                           return;
                         }
 
-                        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+                        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+.-]{8,}$/;
                         if (!passwordRegex.test(newPassword)) {
                           Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.invalidPassword"));
                           return;
@@ -521,7 +521,7 @@ const MenuSection = React.memo(({
                     }
 
                     if (step === 2) {
-                      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+                      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+.-]{8,}$/;
                       if (!newPassword) {
                         Alert.alert(t("profileMenuSections.error"), t("profileMenuSections.newPasswordRequired"));
                         return;

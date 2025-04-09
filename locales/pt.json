@@ -648,7 +648,7 @@
   "passwordVerificationFailed": "Não foi possível verificar a palavra-passe. Tenta mais tarde.",
   "userNotFound": "Não foi encontrado um utilizador autenticado.",
   "accept": "Aceitar",
-  "invalidPassword": "A nova palavra-passe deve ter pelo menos 8 caracteres, uma letra maiúscula, um número e um carácter especial."
+  "invalidPassword": "A nova palavra-passe deve ter pelo menos 8 caracteres, uma letra maiúscula e um número."
 },
   
   "userProfile": {
@@ -827,7 +827,7 @@
   "invalidName": "Os nomes só podem conter letras (sem números, símbolos ou espaços).",
   "invalidEmail": "Por favor, insira um endereço de email válido.",
   "invalidUsername": "O nome de utilizador deve ter entre 1 e 30 caracteres e só pode conter letras minúsculas, números, pontos e sublinhados.",
-  "invalidPassword": "A palavra-passe deve conter pelo menos uma letra maiúscula, um número e um caractere especial.",
+  "invalidPassword": "A palavra-passe deve conter pelo menos uma letra maiúscula e um número.",
   "termsNotAccepted": "Por favor, aceite os termos e condições.",
   "invalidHobbies": "Os hobbies devem ser palavras únicas sem espaços ou números.",
   "invalidInterests": "Os interesses devem ser palavras únicas sem espaços ou números.",

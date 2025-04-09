@@ -663,7 +663,7 @@
      "passwordVerificationFailed": "No se pudo verificar la contraseña. Inténtalo más tarde.",
      "userNotFound": "No se encontró un usuario autenticado.",
      "accept": "Aceptar",
-     "invalidPassword": "La nueva contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial."
+     "invalidPassword": "La nueva contraseña debe tener al menos 8 caracteres, una mayúscula y un número."
   },
   "notificationss": {
     "tokenError": "Tienes que aceptar los permisos para recibir notificaciones"
@@ -843,7 +843,7 @@
       "invalidName": "Los nombres solo pueden contener letras (sin números, símbolos o espacios)",
       "invalidEmail": "Por favor, ingresa una dirección de correo electrónico válida",
       "invalidUsername": "El nombre de usuario debe tener entre 1 y 30 caracteres y solo puede contener letras minúsculas, números, puntos y guiones bajos",
-      "invalidPassword": "La contraseña debe contener al menos una letra mayúscula, un número y un carácter especial",
+      "invalidPassword": "La contraseña debe contener al menos una letra mayúscula y un número.",
       "termsNotAccepted": "Por favor, acepta los términos y condiciones",
       "invalidHobbies": "Los pasatiempos deben ser palabras individuales sin espacios ni números",
       "invalidInterests": "Los intereses deben ser palabras individuales sin espacios ni números",

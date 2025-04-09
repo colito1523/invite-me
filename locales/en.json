@@ -665,7 +665,7 @@
   "passwordVerificationFailed": "Could not verify the password. Please try again later.",
   "userNotFound": "No authenticated user was found.",
   "accept": "Accept",
-  "invalidPassword": "The new password must have at least 8 characters, one uppercase letter, one number, and one special character."
+  "invalidPassword": "The new password must have at least 8 characters, one uppercase letter and one number."
   },
   "notificationss": {
   "tokenError": "You need to accept the permissions to receive notifications."
@@ -861,7 +861,7 @@
       "invalidName": "Names can only contain letters (no numbers, symbols, or spaces)",
       "invalidEmail": "Please enter a valid email address",
       "invalidUsername": "Username must be 1-30 characters long and can only contain lowercase letters, numbers, periods, and underscores",
-      "invalidPassword": "Password must contain at least one uppercase letter, one number, and one special character",
+      "invalidPassword": "Password must contain at least one uppercase letter and one number",
       "termsNotAccepted": "Please accept the terms and conditions",
       "invalidHobbies": "Hobbies must be single words without spaces or numbers",
       "invalidInterests": "Interests must be single words without spaces or numbers",

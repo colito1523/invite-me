@@ -92,7 +92,7 @@ const SliderContent = ({
                 loadingIndicatorColor="#999999"
                 loadingBackgroundColor="#ffffff"
                 moveOnMarkerPress={false}
-                showsUserLocation={true}
+                showsUserLocation={Platform.OS === "ios"}
                 toolbarEnabled={true}
                 zoomEnabled={true}
                 zoomControlEnabled={true}

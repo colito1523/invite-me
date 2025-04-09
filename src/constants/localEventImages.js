@@ -89,6 +89,7 @@ export const localEventImages = {
     inclan_brutal_bar: require("../../assets/Madrid/Inclan_Brutal_Bar.jpg"),
     punch_room_tme: require("../../assets/Madrid/PunchRoom.jpg"),
     la_flaca: require("../../assets/Madrid/La_Flaca.jpg"),
+    liberty: require("../../assets/Madrid/Liberty.jpg"),
 
     razzmatazz: require("../../assets/Barcelona/Razzmatazz.jpg"),
     opium: require("../../assets/Barcelona/Opium.jpg"),

@@ -1,4 +1,4 @@
-import { PanResponder, Alert, Image } from "react-native";
+import { PanResponder, Alert, Image, Platform } from "react-native";
 import {
   doc,
   updateDoc,
@@ -15,6 +15,7 @@ import {
 import { useEffect } from "react";
 import { ref, deleteObject} from "firebase/storage";
 import { database } from "../../../config/firebase";
+
 
 export const createStoryPanResponder = ({
   handleCloseViewer,
@@ -919,7 +920,7 @@ export const useStoryProgress = ({
   setProgress,
   onComplete, // función a llamar cuando progress llega a 1
   interval = 16,       // 16 ms por actualización (~60 FPS)
-  increment = 1 / 250, // 250 actualizaciones para 4 segundos (~0.004 por actualización)
+  increment = Platform.OS === "android" ? 1 / 200 : 1 / 250
 }) => {
   useEffect(() => {
     let timer;
