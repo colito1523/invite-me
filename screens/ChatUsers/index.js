@@ -46,6 +46,8 @@ import { styles } from "./styles";
 import { muteChat, handleDeleteMessage, handleMediaPress, configureAudioPlayback, getLoggedInUserData  } from "./utils";
 import { useTranslation } from "react-i18next";
 
+const HEADER_HEIGHT_ESTIMATE = 90;
+
 export default function Chat({ route }) {
   const { currentChatId, recipientUser, imageUri } = route.params; //a Params no le llega el initialchatId
   const [backgroundImage, setBackgroundImage] = useState(imageUri || null);

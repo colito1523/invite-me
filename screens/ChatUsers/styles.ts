@@ -216,7 +216,7 @@ export const styles = StyleSheet.create({
       paddingHorizontal: 10,
       paddingVertical: 10,
       marginHorizontal: 0,
-      marginBottom: 20,
+      marginBottom: Platform.OS === "ios" ? 20 : 10, 
     },
     input: {
       flex: 1,
@@ -378,6 +378,8 @@ export const styles = StyleSheet.create({
     },
     menuContainer: {
       borderRadius: 20,
+      marginTop: Platform.OS === "ios" ? 0 : 60, 
+      
     },
     menuItemText: {
       fontWeight: "bold",
@@ -385,9 +387,6 @@ export const styles = StyleSheet.create({
       fontSize: 13,
       textAlign: "center",
       borderRadius: 20,
-    },
-    menuItemContainer: {
-      marginVertical: 0,
     },
     normalImageContainer: {
       borderRadius: 10,
