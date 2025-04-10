@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from "react-native"
 
 const styles = StyleSheet.create({
   sliderContainer: {
@@ -12,8 +12,8 @@ const styles = StyleSheet.create({
   },
   centeredAddStoryCircle: {
     justifyContent: "center",
-    alignItems: "center",  // Asegura alineación vertical
-    width: 70,  // Igual a storyCircle
+    alignItems: "center", // Asegura alineación vertical
+    width: 70, // Igual a storyCircle
     height: 70, // Igual a storyCircle
   },
   storyImageWrapper: {
@@ -26,14 +26,18 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 40,
     overflow: "hidden",
-   
+    position: "relative", // Añadir esta línea para posicionar el ícono "+" correctamente
   },
   storyImage: {
     width: "100%",
     height: "100%",
     borderRadius: 38,
-    borderWidth: 2, 
-    borderColor: "transparent", 
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  storyImageWithBorder: {
+    borderWidth: 2,
+    borderColor: "black",
   },
   unseenStoryCircle: {
     borderWidth: 2,
@@ -115,6 +119,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginRight: 15,
   },
-});
 
-export default styles;
+  addIconOverlay: {
+    position: "absolute",
+    bottom: -2,
+    right: -2,
+    backgroundColor: "black",
+    borderRadius: 12,
+    padding: 2,
+    zIndex: 10,
+  },
+  
+})
+
+export default styles
