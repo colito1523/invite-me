@@ -8,7 +8,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   addStoryCircle: {
-    marginRight: 10,
+    marginRight: 25,
+    marginBottom:25,
+    marginLeft:10
   },
   centeredAddStoryCircle: {
     justifyContent: "center",
@@ -128,6 +130,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 2,
     zIndex: 10,
+  },
+  storyCircleWrapper: {
+    position: "relative",
+    width: 70,
+    height: 70,
+    justifyContent: "center",
+    alignItems: "center",
   },
   
 })

@@ -280,32 +280,40 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
     <View style={currentStyles.container}>
       {/* Renderizamos las “bolitas” usando la lista filtrada */}
       <TouchableOpacity onPress={handlePresss} style={currentStyles.imageContainer}>
-  {filteredAttendees.slice(0, 6).map((attendee, index) => (
-    <View
-      key={attendee.uid}
-      style={[
-        currentStyles.unseenStoryCircle,
-        attendee.hasStories && { borderColor: "white" },
-        { marginLeft: index > 0 ? -10 : 0, zIndex: 6 - index },
-      ]}
-    >
-      <Image
-        source={{
-          uri: attendee.profileImage || "https://via.placeholder.com/150",
-        }}
-        style={currentStyles.profileImage}
-        cachePolicy="memory-disk"
-      />
-    </View>
-  ))}
-  {filteredAttendees.length > 6 && (
-    <View style={currentStyles.moreContainer}>
-      <Text style={currentStyles.moreText}>
-        +{filteredAttendees.length - 6}
-      </Text>
-    </View>
-  )}
+
+{filteredAttendees.slice(0, 5).map((attendee, index) => (
+  <View
+    key={attendee.uid}
+    style={[
+      currentStyles.unseenStoryCircle,
+      attendee.hasStories && { borderColor: "white" },
+      {
+        marginLeft: index === 0 ? 0 : -10, // ya no pisan el "more"
+        zIndex: 10 - index, // pisan al círculo "more"
+      },
+    ]}
+  >
+    <Image
+      source={{
+        uri: attendee.profileImage || "https://via.placeholder.com/150",
+      }}
+      style={currentStyles.profileImage}
+      cachePolicy="memory-disk"
+    />
+  </View>
+))}
+
+{filteredAttendees.length > 6 && (
+  <View style={[currentStyles.moreContainer, { marginLeft: -15, zIndex: 0 }]}>
+    <Text style={currentStyles.moreText}>
+      {filteredAttendees.length - 5}
+    </Text>
+  </View>
+)}
+
 </TouchableOpacity>
+
+
 
 
 <Modal visible={modalVisible} transparent={true} animationType="fade">

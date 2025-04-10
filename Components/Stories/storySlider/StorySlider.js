@@ -254,20 +254,21 @@ const renderStory = ({ item, index }) => {
     <View
       style={[
         styles.storyImageWrapper,
-        hasStories
-          ? {
-              borderWidth: 2,
-              borderStyle: "solid",
-              borderColor: isNightMode ? "white" : "black",
-              borderRadius: styles.storyCircle.borderRadius + 2,
-              opacity: isCurrentUserStory ? 1 : hasUnseenStories ? 1 : 0.2,
-            }
-          : {
-              borderWidth: 0,
-            },
+        hasStories && {
+          borderWidth: 2,
+          borderStyle: "solid",
+          borderColor: isNightMode ? "white" : "black",
+          borderRadius: styles.storyCircle.borderRadius + 2,
+          opacity: isCurrentUserStory ? 1 : hasUnseenStories ? 1 : 0.2,
+          marginRight: isCurrentUserStory ? 25 : 4, // 💥 margen correcto afuera del borde blanco
+        },
       ]}
     >
-   <View style={styles.storyCircleWrapper}>
+  <View
+  style={[
+    styles.storyCircleWrapper,
+  ]}
+>
   <TouchableOpacity
     style={styles.storyCircle}
     onPress={() => {
@@ -313,28 +314,24 @@ const renderStory = ({ item, index }) => {
           renderItem={({ item, index }) =>
             item.uid === "addStory" ? (
               <View style={[styles.addStoryCircle, styles.centeredAddStoryCircle]}>
+              <View style={styles.storyCircleWrapper}>
                 <TouchableOpacity style={styles.storyCircle} onPress={handleAddStory}>
                   <Image
                     source={{ uri: userProfileImage }}
-                    style={[styles.storyImage, { borderWidth: 2, borderColor: isNightMode ? "white" : "black" }]}
+                    style={styles.storyImage}
                     defaultSource={require("../../../assets/perfil.jpg")}
                     resizeMode="cover"
                   />
-                  <View
-                  addIconOverlay
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      right: 0,
-                      backgroundColor: isNightMode ? "red" : "black",
-                      borderRadius: 12,
-                      padding: 2,
-                    }}
-                  >
-                    <Ionicons name="add" size={20} color="white" />
-                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.addIconOverlay}
+                  onPress={handleAddStory}
+                >
+                  <Ionicons name="add" size={20} color="white" />
                 </TouchableOpacity>
               </View>
+            </View>
+            
             ) : (
               renderStory({ item, index: userHasStories ? index : index - 1 })
             )
