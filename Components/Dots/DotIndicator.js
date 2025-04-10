@@ -281,7 +281,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       {/* Renderizamos las “bolitas” usando la lista filtrada */}
       <TouchableOpacity onPress={handlePresss} style={currentStyles.imageContainer}>
 
-{filteredAttendees.slice(0, 5).map((attendee, index) => (
+{filteredAttendees.slice(0, 4).map((attendee, index) => (
   <View
     key={attendee.uid}
     style={[
@@ -303,10 +303,10 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   </View>
 ))}
 
-{filteredAttendees.length > 6 && (
+{filteredAttendees.length > 4 && (
   <View style={[currentStyles.moreContainer, { marginLeft: -15, zIndex: 0 }]}>
     <Text style={currentStyles.moreText}>
-      {filteredAttendees.length - 5}
+      {filteredAttendees.length - 4}
     </Text>
   </View>
 )}
