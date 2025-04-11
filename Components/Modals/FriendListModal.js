@@ -34,14 +34,26 @@ export default function FriendListModal({ isVisible, onClose, userId, updateFrie
 
       const friendsRef = collection(database, 'users', userId, 'friends');
       const friendsSnapshot = await getDocs(friendsRef);
-      const friendsList = friendsSnapshot.docs.map((doc) => {
-        const friendData = doc.data();
-        return {
-          id: friendData.friendId,
-          name: friendData.friendName,
-          imageUrl: friendData.friendImage || 'https://via.placeholder.com/150',
-        };
-      });
+      const friendsList = await Promise.all(
+        friendsSnapshot.docs.map(async (docSnap) => {
+          const friendData = docSnap.data();
+          const friendId = friendData.friendId;
+      
+          // Buscar datos actualizados del usuario
+          const friendDoc = await getDoc(doc(database, "users", friendId));
+          const friendUserData = friendDoc.exists() ? friendDoc.data() : {};
+      
+          return {
+            id: friendId,
+            name: friendUserData.username || friendData.friendName || "Usuario",
+            imageUrl:
+              friendUserData.photoUrls?.[0] ||
+              friendData.friendImage ||
+              "https://via.placeholder.com/150",
+          };
+        })
+      );
+      
       setFriends(friendsList);
       setTotalFriends(friendsList.length);
     } catch (error) {
