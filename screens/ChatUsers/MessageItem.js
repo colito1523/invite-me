@@ -4,12 +4,17 @@ import { Image } from "expo-image";
 import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  TapGestureHandler,
+  State,
+} from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import * as Haptics from "expo-haptics";
+import { handleDoubleTap as handleDoubleTapUtil } from "./utils";
 
 // Si tienes un AudioPlayer definido/importado en otro archivo, asegúrate de importarlo.
-// Por ejemplo: import AudioPlayer from "./AudioPlayer"; 
+// Por ejemplo: import AudioPlayer from "./AudioPlayer";
 // (Si no lo tienes, créalo o quita la parte de audio.)
 
 /* ----------------------------------
@@ -24,7 +29,7 @@ function StoryMessage({
   swipeableRef,
   handleReply,
   handleLongPressMessage,
-  t
+  t,
 }) {
   return (
     <>
@@ -45,7 +50,7 @@ function StoryMessage({
             activeOffsetX: [-30, 30],
             enabled: true,
             failOffsetX: [-10, 10],
-            waitFor: []
+            waitFor: [],
           }}
           onSwipeableOpen={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -57,13 +62,13 @@ function StoryMessage({
               style={[
                 styles.message,
                 isOwnMessage ? styles.sent : styles.received,
-                styles.storyResponseContainer
+                styles.storyResponseContainer,
               ]}
             >
               <Text
                 style={[
                   styles.storyResponseText,
-                  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" }
+                  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
                 ]}
               >
                 {isOwnMessage
@@ -76,14 +81,14 @@ function StoryMessage({
                 cachePolicy="disk"
                 style={[
                   styles.storyResponseImage,
-                  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" }
+                  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
                 ]}
               />
 
               <Text
                 style={[
                   styles.messageText,
-                  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" }
+                  { alignSelf: isOwnMessage ? "flex-end" : "flex-start" },
                 ]}
               >
                 {item.text}
@@ -94,7 +99,7 @@ function StoryMessage({
                   <Text style={styles.timeText}>
                     {currentMessageDate.toLocaleTimeString([], {
                       hour: "2-digit",
-                      minute: "2-digit"
+                      minute: "2-digit",
                     })}
                   </Text>
                   <Ionicons
@@ -125,7 +130,7 @@ function NoteMessage({
   swipeableRef,
   handleReply,
   handleLongPressMessage,
-  t
+  t,
 }) {
   return (
     <>
@@ -147,7 +152,7 @@ function NoteMessage({
             activeOffsetX: [-30, 30],
             enabled: true,
             failOffsetX: [-10, 10],
-            waitFor: []
+            waitFor: [],
           }}
           onSwipeableOpen={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -159,7 +164,7 @@ function NoteMessage({
               style={[
                 styles.message,
                 isOwnMessage ? styles.sent : styles.received,
-                styles.noteResponseContainer
+                styles.noteResponseContainer,
               ]}
             >
               <Text style={styles.noteResponseText}>
@@ -173,7 +178,9 @@ function NoteMessage({
                 cachePolicy="disk"
                 style={[
                   styles.arrowImage,
-                  isOwnMessage ? styles.arrowImageSent : styles.arrowImageReceived
+                  isOwnMessage
+                    ? styles.arrowImageSent
+                    : styles.arrowImageReceived,
                 ]}
               />
 
@@ -189,7 +196,7 @@ function NoteMessage({
                 <Text style={styles.timeText}>
                   {currentMessageDate.toLocaleTimeString([], {
                     hour: "2-digit",
-                    minute: "2-digit"
+                    minute: "2-digit",
                   })}
                 </Text>
 
@@ -243,7 +250,7 @@ function RegularMessage({
   handleMediaPress,
   imageLoading,
   setImageLoading,
-  onReferencePress
+  onReferencePress,
 }) {
   return (
     <>
@@ -263,72 +270,126 @@ function RegularMessage({
             activeOffsetX: [-30, 30],
             enabled: true,
             failOffsetX: [-10, 10],
-            waitFor: []
+            waitFor: [],
           }}
           onSwipeableOpen={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             handleReply(item);
           }}
         >
-          <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
-            <View
-              style={[
-                styles.message,
-                isOwnMessage ? styles.sent : styles.received
-              ]}
-            >
-              {/* Respuesta (Reply) a un mensaje anterior */}
-              {(item.replyTo || item.replyToMediaUrl) && (
-                <TouchableOpacity
-                  onPress={() => onReferencePress(item.replyToId)}
-                >
-                  <View style={styles.replyBoxContainer}>
-                    <View style={styles.replyIndicator} />
-                    <View style={styles.contentContainer}>
-                      <Text style={styles.replyingToText}>
-                        {t("chatUsers.ReplyTo")}
-                      </Text>
-                      {item.replyToMediaUrl ? (
-                        item.replyToIsViewOnce ? (
-                          <View style={styles.imageContainer}>
-                            <Ionicons
-                              name="eye-off-outline"
-                              size={20}
-                              color="#8E8E8E"
-                            />
-                          </View>
-                        ) : (
-                          <Image
-                            cachePolicy="disk"
-                            source={{ uri: item.replyToMediaUrl }}
-                            style={styles.replyImagePreview}
-                          />
-                        )
-                      ) : (
-                        <Text style={styles.replyText}>{item.replyTo}</Text>
-                      )}
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              )}
-
-              {/* Texto normal */}
-              {item.text && <Text style={styles.messageText}>{item.text}</Text>}
-
-              {/* Imagen */}
-              {item.mediaType === "image" &&
-                (item.isViewOnce ? (
+          <TapGestureHandler
+            numberOfTaps={2}
+            onHandlerStateChange={({ nativeEvent }) => {
+              if (nativeEvent.state === State.ACTIVE) {
+                handleDoubleTapUtil({ msg: item, database, chatId, user });
+              }
+            }}
+          >
+            <TouchableOpacity onLongPress={() => handleLongPressMessage(item)}>
+              <View
+                style={[
+                  styles.message,
+                  isOwnMessage ? styles.sent : styles.received,
+                ]}
+              >
+                {item.likedBy?.length > 0 && (
+  <View
+    style={{
+      alignSelf: isOwnMessage ? "flex-start" : "flex-end",
+      marginBottom: 4,
+      paddingHorizontal: 6,
+      flexDirection: "row",
+      alignItems: "center",
+    }}
+  >
+    <Ionicons name="heart" size={16} color="red" />
+  </View>
+)}
+                {/* Respuesta (Reply) a un mensaje anterior */}
+                {(item.replyTo || item.replyToMediaUrl) && (
                   <TouchableOpacity
-                    onPress={() => {
-                      // Abrir el modal con la imagen
-                      setSelectedImage({
-                        uri: item.mediaUrl,
-                        mediaType: "image"
-                      });
-                      setIsModalVisible(true);
+                    onPress={() => onReferencePress(item.replyToId)}
+                  >
+                    <View style={styles.replyBoxContainer}>
+                      <View style={styles.replyIndicator} />
+                      <View style={styles.contentContainer}>
+                        <Text style={styles.replyingToText}>
+                          {t("chatUsers.ReplyTo")}
+                        </Text>
+                        {item.replyToMediaUrl ? (
+                          item.replyToIsViewOnce ? (
+                            <View style={styles.imageContainer}>
+                              <Ionicons
+                                name="eye-off-outline"
+                                size={20}
+                                color="#8E8E8E"
+                              />
+                            </View>
+                          ) : (
+                            <Image
+                              cachePolicy="disk"
+                              source={{ uri: item.replyToMediaUrl }}
+                              style={styles.replyImagePreview}
+                            />
+                          )
+                        ) : (
+                          <Text style={styles.replyText}>{item.replyTo}</Text>
+                        )}
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
 
-                      // Lógica para marcar como vista
-                      setTimeout(() => {
+                {/* Texto normal */}
+                {item.text && (
+                  <Text style={styles.messageText}>{item.text}</Text>
+                )}
+
+                {/* Imagen */}
+                {item.mediaType === "image" &&
+                  (item.isViewOnce ? (
+                    <TouchableOpacity
+                      onPress={() => {
+                        // Abrir el modal con la imagen
+                        setSelectedImage({
+                          uri: item.mediaUrl,
+                          mediaType: "image",
+                        });
+                        setIsModalVisible(true);
+
+                        // Lógica para marcar como vista
+                        setTimeout(() => {
+                          handleMediaPress(
+                            database,
+                            chatId,
+                            user,
+                            item.mediaUrl,
+                            "image",
+                            item.id,
+                            item.isViewOnce,
+                            () => {},
+                            () => {},
+                            t
+                          );
+                        }, 100);
+                      }}
+                      style={[
+                        styles.viewOnceImagePlaceholder,
+                        item.viewedBy?.includes(user.uid)
+                          ? styles.imageViewed
+                          : styles.imageNotViewed,
+                      ]}
+                      disabled={item.viewedBy?.includes(user.uid)}
+                    >
+                      <Text style={styles.imageStatusText}>
+                        {item.viewedBy?.includes(user.uid)
+                          ? t("chatUsers.alreadyViewed")
+                          : t("chatUsers.view")}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() =>
                         handleMediaPress(
                           database,
                           chatId,
@@ -336,118 +397,96 @@ function RegularMessage({
                           item.mediaUrl,
                           "image",
                           item.id,
-                          item.isViewOnce,
-                          () => {},
-                          () => {},
+                          false,
+                          setSelectedImage,
+                          setIsModalVisible,
                           t
-                        );
-                      }, 100);
-                    }}
-                    style={[
-                      styles.viewOnceImagePlaceholder,
-                      item.viewedBy?.includes(user.uid)
-                        ? styles.imageViewed
-                        : styles.imageNotViewed
-                    ]}
-                    disabled={item.viewedBy?.includes(user.uid)}
-                  >
-                    <Text style={styles.imageStatusText}>
-                      {item.viewedBy?.includes(user.uid)
-                        ? t("chatUsers.alreadyViewed")
-                        : t("chatUsers.view")}
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleMediaPress(
-                        database,
-                        chatId,
-                        user,
-                        item.mediaUrl,
-                        "image",
-                        item.id,
-                        false,
-                        setSelectedImage,
-                        setIsModalVisible,
-                        t
-                      )
-                    }
-                    style={styles.normalImageContainer}
-                    onLongPress={() => handleLongPressMessage(item)}
-                  >
-                    <View style={{ justifyContent: "center", alignItems: "center" }}>
-                      {imageLoading && (
-                        <ActivityIndicator
-                          size="small"
-                          color="gray"
-                          style={{ position: "absolute", zIndex: 1 }}
+                        )
+                      }
+                      style={styles.normalImageContainer}
+                      onLongPress={() => handleLongPressMessage(item)}
+                    >
+                      <View
+                        style={{
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        {imageLoading && (
+                          <ActivityIndicator
+                            size="small"
+                            color="gray"
+                            style={{ position: "absolute", zIndex: 1 }}
+                          />
+                        )}
+                        <Image
+                          cachePolicy="disk"
+                          source={{ uri: item.mediaUrl }}
+                          style={styles.messageImage}
+                          onLoadStart={() => setImageLoading(true)}
+                          onLoadEnd={() => setImageLoading(false)}
                         />
-                      )}
-                      <Image
-                        cachePolicy="disk"
-                        source={{ uri: item.mediaUrl }}
-                        style={styles.messageImage}
-                        onLoadStart={() => setImageLoading(true)}
-                        onLoadEnd={() => setImageLoading(false)}
-                      />
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+
+                {/* Video */}
+                {item.mediaType === "video" && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedImage({
+                        uri: item.mediaUrl,
+                        mediaType: item.mediaType,
+                      });
+                      setIsModalVisible(true);
+                    }}
+                    onLongPress={() => handleLongPressMessage(item)}
+                    delayLongPress={300}
+                    style={styles.videoThumbnailContainer}
+                  >
+                    <Video
+                      source={{ uri: item.mediaUrl }}
+                      style={styles.messageVideo}
+                      posterSource={{
+                        uri: item.mediaUrl,
+                        cache: "force-cache",
+                      }}
+                      usePoster={true}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.playIconOverlay}>
+                      <Ionicons name="play-circle" size={40} color="white" />
                     </View>
                   </TouchableOpacity>
-                ))}
-
-              {/* Video */}
-              {item.mediaType === "video" && (
-                <TouchableOpacity
-                  onPress={() => {
-                    setSelectedImage({
-                      uri: item.mediaUrl,
-                      mediaType: item.mediaType
-                    });
-                    setIsModalVisible(true);
-                  }}
-                  onLongPress={() => handleLongPressMessage(item)}
-                  delayLongPress={300}
-                  style={styles.videoThumbnailContainer}
-                >
-                  <Video
-                    source={{ uri: item.mediaUrl }}
-                    style={styles.messageVideo}
-                    posterSource={{ uri: item.mediaUrl, cache: "force-cache" }}
-                    usePoster={true}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.playIconOverlay}>
-                    <Ionicons name="play-circle" size={40} color="white" />
-                  </View>
-                </TouchableOpacity>
-              )}
-
-              {/* Audio (si tienes un componente AudioPlayer) */}
-              {item.mediaType === "audio" && (
-                // Asegúrate de tener un AudioPlayer o cambiarlo
-                <AudioPlayer uri={item.mediaUrl} />
-              )}
-
-              {/* Footer con hora y check de leído */}
-              <View style={styles.messageFooter}>
-                <Text style={styles.timeText}>
-                  {currentMessageDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  })}
-                </Text>
-
-                {isOwnMessage && item.seen && (
-                  <Ionicons
-                    name="checkmark-done-sharp"
-                    size={16}
-                    color="black"
-                    style={styles.seenIcon}
-                  />
                 )}
+
+                {/* Audio (si tienes un componente AudioPlayer) */}
+                {item.mediaType === "audio" && (
+                  // Asegúrate de tener un AudioPlayer o cambiarlo
+                  <AudioPlayer uri={item.mediaUrl} />
+                )}
+
+                {/* Footer con hora y check de leído */}
+                <View style={styles.messageFooter}>
+                  <Text style={styles.timeText}>
+                    {currentMessageDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+
+                  {isOwnMessage && item.seen && (
+                    <Ionicons
+                      name="checkmark-done-sharp"
+                      size={16}
+                      color="black"
+                      style={styles.seenIcon}
+                    />
+                  )}
+                </View>
               </View>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </TapGestureHandler>
         </Swipeable>
       </GestureHandlerRootView>
     </>
@@ -471,7 +510,7 @@ export default function MessageItem({
   recipient,
   onReferencePress,
   onReply,
-  t
+  t,
 }) {
   // HOOKS:
   const [imageLoading, setImageLoading] = useState(true);
@@ -507,7 +546,7 @@ export default function MessageItem({
         {date.toLocaleDateString([], {
           year: "numeric",
           month: "long",
-          day: "numeric"
+          day: "numeric",
         })}
       </Text>
     </View>
@@ -519,7 +558,7 @@ export default function MessageItem({
       text: msg.text,
       mediaUrl: msg.mediaUrl,
       isViewOnce: msg.isViewOnce,
-      id: msg.id
+      id: msg.id,
     });
     swipeableRef.current?.close();
   };

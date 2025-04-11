@@ -1,8 +1,10 @@
-import { doc, updateDoc, getDoc,  } from "firebase/firestore";
+import { doc, updateDoc, getDoc, arrayUnion  } from "firebase/firestore";
 import { database } from "../../config/firebase";
 import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Audio } from 'expo-av';
+import * as Haptics from "expo-haptics";
+
 
 
 export const getLoggedInUserData = async (uid) => {
@@ -16,6 +18,20 @@ export const getLoggedInUserData = async (uid) => {
   } catch (error) {
     console.error("Error al obtener usuario:", error);
     return null;
+  }
+};
+
+export const handleDoubleTap = async ({ msg, database, chatId, user }) => {
+  try {
+    const messageRef = doc(database, "chats", chatId, "messages", msg.id);
+
+    await updateDoc(messageRef, {
+      likedBy: arrayUnion(user.uid)
+    });
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  } catch (error) {
+    console.error("Error al dar like:", error);
   }
 };
 
