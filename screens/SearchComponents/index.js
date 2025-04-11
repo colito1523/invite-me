@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Modal,
 } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -27,6 +28,7 @@ import {
   query,
   where,
   getDocs,
+  onSnapshot
 } from "firebase/firestore";
 import RecommendedUserItem from "./RecommendedUserItem";
 import SearchHistory from "./SearchHistory";
@@ -53,6 +55,30 @@ export default function Search({ route }) {
 
   const user = auth.currentUser;
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (!user) return;
+  
+    const friendsRef = collection(database, "users", user.uid, "friends");
+  
+    const unsubscribe = onSnapshot(friendsRef, () => {
+      // 🔁 Se vuelve a cargar automáticamente cuando hay cambios
+      fetchRecommendations(user, setRecommendations, true); // true = forzar actualización
+    });
+  
+    return () => unsubscribe();
+  }, [user]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
+  
+      // 🔄 Al enfocar la pantalla, refrescamos desde Firebase (sin depender del snapshot)
+      fetchRecommendations(user, setRecommendations, true);
+  
+    }, [user])
+  );
+
 
   useEffect(() => {
     const loadCachedRecommendations = async () => {

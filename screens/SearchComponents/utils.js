@@ -219,14 +219,17 @@ export const fetchRecommendations = async (user, setRecommendations, forceRefres
       }
     }
 
-    setRecommendations(recommendedUsers);
+    const finalRecommendations = recommendedUsers.filter((user) => !user.isFriend);
+setRecommendations(finalRecommendations);
 
-    await AsyncStorage.setItem(
-      `recommendations_${user.uid}`,
-      JSON.stringify({
-        recommendations: recommendedUsers,
-      })
-    );
+
+await AsyncStorage.setItem(
+  `recommendations_${user.uid}`,
+  JSON.stringify({
+    recommendations: finalRecommendations, 
+  })
+);
+
   } catch (error) {
     console.error("Error fetching friend recommendations:", error);
   }
