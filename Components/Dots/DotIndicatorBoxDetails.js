@@ -175,7 +175,11 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
             isFriend,
             hasStories,
             userStories,
-          };
+            profileImage:
+            userData.photoUrls?.[0] ||
+            originalAttendee.profileImage ||
+            "https://via.placeholder.com/150",
+        };
         })
       );
 

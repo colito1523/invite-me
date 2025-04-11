@@ -255,9 +255,7 @@ export default memo(function BoxDetails({ route, navigation }) {
                 friendId: friendId,
                 friendName: friendData.data().username,
                 friendImage:
-                  friendData.data().friendImage ||
-                  friendDoc.data().friendImage ||
-                  "https://via.placeholder.com/150",
+                (friendData.data().photoUrls && friendData.data().photoUrls[0]) || "https://via.placeholder.com/150",
                 invited: false,
               };
             }

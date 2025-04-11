@@ -179,7 +179,15 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
             }))
             .filter((story) => story.expiresAt > now);
   
-          return { ...attendee, hasStories: userStories.length > 0, userStories };
+            return {
+              ...attendee,
+              hasStories: userStories.length > 0,
+              userStories,
+              profileImage:
+                userData.photoUrls?.[0] ||
+                attendee.profileImage ||
+                "https://via.placeholder.com/150",
+            };
         })
       );
       // Filtrar los valores nulos
