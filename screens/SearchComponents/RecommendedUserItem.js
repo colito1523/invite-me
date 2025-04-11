@@ -18,6 +18,12 @@ const RecommendedUserItem = ({ item, index, onUserPress, theme, isNightMode }) =
   useEffect(() => {
     const fetchFriendRequestStatus = async () => {
       try {
+        // Si ya son amigos, no mostrar el botón
+        if (item.isFriend) {
+          setStatus('accepted');
+          return;
+        }
+
         const requestRef = collection(
           database,
           "users",
@@ -44,6 +50,11 @@ const RecommendedUserItem = ({ item, index, onUserPress, theme, isNightMode }) =
     fetchFriendRequestStatus();
   }, [item]);
 
+  // Si ya son amigos, no renderizar este componente
+  if (item.isFriend) {
+    return null;
+  }
+
   const toggleFriendRequest = async () => {
     setIsProcessing(true);
     try {
@@ -65,15 +76,14 @@ const RecommendedUserItem = ({ item, index, onUserPress, theme, isNightMode }) =
       style={styles.recommendationItem}
       onPress={() => onUserPress(item)}
     >
- <Image
-  source={{
-    uri: item.profileImage,
-    cache: "force-cache", // Usa la caché de Expo para evitar recargas innecesarias
-  }}
-  style={styles.userImageRecommender}
-  contentFit="cover"
-/>
-
+      <Image
+        source={{
+          uri: item.profileImage,
+          cache: "force-cache",
+        }}
+        style={styles.userImageRecommender}
+        contentFit="cover"
+      />
 
       <View style={styles.textContainer}>
         <Text style={[styles.resultText, { color: theme.text }]}>

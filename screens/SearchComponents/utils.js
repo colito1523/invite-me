@@ -144,24 +144,37 @@ export const fetchRecommendations = async (user, setRecommendations, forceRefres
     const userSnapshot = await getDoc(userRef);
     const blockedUsers = userSnapshot.data()?.blockedUsers || [];
 
+    // Obtener lista de amigos actuales
     const friendsRef = collection(database, "users", user.uid, "friends");
     const friendsSnapshot = await getDocs(friendsRef);
     const friendsList = friendsSnapshot.docs.map(doc => doc.data().friendId);
 
-    if (!friendsList.length) {
-      setRecommendations([]);
-      return;
-    }
+    // Obtener lista de solicitudes de amistad pendientes
+    const sentRequestsRef = collection(database, "users", user.uid, "sentFriendRequests");
+    const sentRequestsSnapshot = await getDocs(sentRequestsRef);
+    const sentRequestsList = sentRequestsSnapshot.docs.map(doc => doc.data().toId);
 
     let potentialFriends = [];
-    for (const friendId of friendsList) {
-      const friendFriendsRef = collection(database, "users", friendId, "friends");
-      const friendFriendsSnapshot = await getDocs(friendFriendsRef);
-      potentialFriends.push(...friendFriendsSnapshot.docs.map(doc => doc.data().friendId));
+    
+    // Solo buscar recomendaciones si el usuario tiene amigos
+    if (friendsList.length > 0) {
+      for (const friendId of friendsList) {
+        const friendFriendsRef = collection(database, "users", friendId, "friends");
+        const friendFriendsSnapshot = await getDocs(friendFriendsRef);
+        potentialFriends.push(...friendFriendsSnapshot.docs.map(doc => doc.data().friendId));
+      }
     }
 
+    // Filtrar usuarios que:
+    // 1. No son el usuario actual
+    // 2. No son ya amigos
+    // 3. No están bloqueados
+    // 4. No tienen solicitudes pendientes
     potentialFriends = potentialFriends.filter(
-      id => id !== user.uid && !friendsList.includes(id) && !blockedUsers.includes(id)
+      id => id !== user.uid && 
+            !friendsList.includes(id) && 
+            !blockedUsers.includes(id) &&
+            !sentRequestsList.includes(id)
     );
 
     const uniquePotentialFriends = [...new Set(potentialFriends)];
@@ -187,6 +200,11 @@ export const fetchRecommendations = async (user, setRecommendations, forceRefres
       for (const docSnap of chunkSnapshot.docs) {
         if (docSnap.exists()) {
           const userData = docSnap.data();
+          
+          // Verificar si ya son amigos (por si acaso)
+          const isFriend = friendsList.includes(docSnap.id);
+          if (isFriend) continue; // Saltar si ya son amigos
+          
           const profileImage = userData.photoUrls?.[0] || "https://via.placeholder.com/150";
           const lowQualityProfileImage = profileImage ? `${profileImage}?alt=media&w=30&h=30&q=1` : null;
 
@@ -195,6 +213,7 @@ export const fetchRecommendations = async (user, setRecommendations, forceRefres
             ...userData,
             profileImage,
             lowQualityProfileImage,
+            isFriend // Añadir esta propiedad para facilitar el filtrado
           });
         }
       }
@@ -205,7 +224,7 @@ export const fetchRecommendations = async (user, setRecommendations, forceRefres
     await AsyncStorage.setItem(
       `recommendations_${user.uid}`,
       JSON.stringify({
-        recommendations: recommendedUsers, // Guardamos las recomendaciones sin timestamp
+        recommendations: recommendedUsers,
       })
     );
   } catch (error) {
