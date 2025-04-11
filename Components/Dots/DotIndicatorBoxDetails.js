@@ -5,17 +5,18 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
-  Alert,
   Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { collection,
+import { 
+  collection,
   getDocs,
   doc,
   query,
   where,
-  getDoc} from 'firebase/firestore';
-import { database, auth } from '../../config/firebase'; // Asegúrate de importar correctamente `auth`
+  getDoc 
+} from 'firebase/firestore';
+import { database, auth } from '../../config/firebase'; 
 import { Image } from 'expo-image';
 import StoryViewer from '../Stories/storyViewer/StoryViewer';
 import { useTranslation } from "react-i18next";
@@ -26,16 +27,20 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [filteredAttendees, setFilteredAttendees] = useState([]);
   const [amIGoing, setAmIGoing] = useState(true);
   const [isNightMode, setIsNightMode] = useState(false);
+  
   const { width } = Dimensions.get('window');
   const ITEM_SIZE = 80;
   const SPACING = 10;
   const scrollX = useRef(new Animated.Value(0)).current;
+  
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
   const [friendsList, setFriendsList] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [viewedStories, setViewedStories] = useState({});
+  const [maxToRender, setMaxToRender] = useState(4);
+  
   const { t } = useTranslation();
 
   const handleCloseStoryViewer = (updatedUnseenStories) => {
@@ -45,6 +50,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     }));
   };
 
+  // Carga de la lista de amigos
   useEffect(() => {
     const fetchFriendsList = async () => {
       try {
@@ -63,11 +69,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     fetchFriendsList();
   }, []);
 
-
-  
-  
-
-  // Cargar usuarios bloqueados
+  // Carga de usuarios bloqueados
   useEffect(() => {
     const fetchBlockedUsers = async () => {
       try {
@@ -88,49 +90,71 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     fetchBlockedUsers();
   }, []);
 
-
-  useEffect(() => {
-    const updateFilteredAttendeesWithStories = async () => {
+  // NUEVA FUNCIÓN en BATCH (solo una vez, fuera del useEffect interno)
+  const updateFilteredAttendeesWithStories = async () => {
+    try {
       if (!attendeesList || attendeesList.length === 0) {
         setFilteredAttendees([]);
         setIsLoaded(true);
         return;
       }
+
+      // 1. Obtenemos todos los UID de los asistentes
+      const allUids = attendeesList.map((a) => a.uid);
+
+      // 2. Partimos en lotes de 10 (Firestore limita 'in' query a 10).
+      const chunkSize = 10;
+      let userDocs = [];
+
+      for (let i = 0; i < allUids.length; i += chunkSize) {
+        const chunk = allUids.slice(i, i + chunkSize);
+        
+        // Consulta en la colección 'users' donde el campo uid esté en 'chunk'.
+        const q = query(
+          collection(database, "users"),
+          where("uid", "in", chunk)
+        );
+        
+        const snapshot = await getDocs(q);
+        snapshot.forEach((docSnap) => {
+          userDocs.push({
+            // docSnap.id asume que el id del documento = uid del usuario
+            // si tus docs tienen doc.id distinto, usa docSnap.data().uid en su lugar:
+            uid: docSnap.id,
+            ...docSnap.data(),
+          });
+        });
+      }
+
+      // 3. Recorremos nuestros userDocs para filtrar y cargar historias.
+      const now = new Date();
       const updated = await Promise.all(
-        attendeesList.map(async (attendee) => {
-          // Para el usuario actual:
-          if (attendee.uid === auth.currentUser.uid) {
-            if (!amIGoing) return null;
-            const userDoc = await getDoc(doc(database, "users", attendee.uid));
-            let hasStories = false;
-            let userStories = [];
-            if (userDoc.exists()) {
-              const storiesRef = collection(doc(database, "users", attendee.uid), "stories");
-              const storiesSnapshot = await getDocs(storiesRef);
-              const now = new Date();
-              userStories = storiesSnapshot.docs
-                .map((doc) => ({
-                  id: doc.id,
-                  ...doc.data(),
-                  createdAt: doc.data().createdAt?.toDate(),
-                  expiresAt: doc.data().expiresAt?.toDate(),
-                }))
-                .filter((story) => story.expiresAt > now);
-              hasStories = userStories.length > 0;
-            }
-            return { ...attendee, hasStories, userStories };
+        userDocs.map(async (userData) => {
+          // Encuentra al asistente original (por ejemplo, para "amIGoing")
+          const originalAttendee = attendeesList.find((a) => a.uid === userData.uid);
+          if (!originalAttendee) return null; // No se encontró en la lista original
+
+          // a) Si es el usuario actual y no "amIGoing", descartamos.
+          if (userData.uid === auth.currentUser?.uid && !amIGoing) {
+            return null;
           }
-          // Para otros asistentes:
-          if (blockedUsers.includes(attendee.uid)) return null;
-          const userDoc = await getDoc(doc(database, "users", attendee.uid));
-          if (!userDoc.exists()) return null;
-          const userData = userDoc.data();
+
+          // b) Si está bloqueado, descartamos.
+          if (blockedUsers.includes(userData.uid)) {
+            return null;
+          }
+
+          // c) Chequeo si es privado y no somos amigos
           const isPrivate = userData.isPrivate || false;
-          const isFriend = friendsList.includes(attendee.uid);
-          if (isPrivate && !isFriend) return null;
-          const storiesRef = collection(doc(database, "users", attendee.uid), "stories");
+          const isFriend = friendsList.includes(userData.uid);
+          if (isPrivate && !isFriend && userData.uid !== auth.currentUser?.uid) {
+            return null;
+          }
+
+          // d) Cargar historias (subcolección)
+          const storiesRef = collection(database, "users", userData.uid, "stories");
           const storiesSnapshot = await getDocs(storiesRef);
-          const now = new Date();
+
           const userStories = storiesSnapshot.docs
             .map((doc) => ({
               id: doc.id,
@@ -139,21 +163,35 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
               expiresAt: doc.data().expiresAt?.toDate(),
             }))
             .filter((story) => story.expiresAt > now);
+
           const hasStories = userStories.length > 0;
-          return { ...attendee, isPrivate, isFriend, hasStories, userStories };
+
+          // e) Devuelve objeto con info combinada
+          return {
+            ...originalAttendee,
+            // campos extra
+            ...userData,
+            isPrivate,
+            isFriend,
+            hasStories,
+            userStories,
+          };
         })
       );
+
       const finalFiltered = updated.filter(Boolean);
       setFilteredAttendees(finalFiltered);
       setIsLoaded(true);
-    };
-  
+    } catch (error) {
+      console.error("Error fetching attendees in batch", error);
+      setIsLoaded(true);
+    }
+  };
+
+  // Llamada al cargar/actualizar
+  useEffect(() => {
     updateFilteredAttendeesWithStories();
   }, [attendeesList, blockedUsers, friendsList, amIGoing]);
-  
-  
-  
-  
 
   // Modo nocturno
   useEffect(() => {
@@ -205,34 +243,38 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     </TouchableOpacity>
   );
   
-
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 
   return (
     <View style={currentStyles.container}>
-    {isLoaded && filteredAttendees.length > 0 ? (
-      <Animated.FlatList
-        data={filteredAttendees}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.uid}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.flatListContent}
-        snapToInterval={ITEM_SIZE + SPACING}
-        decelerationRate="fast"
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
-        )}
-      />
-    ) : null}
+      {isLoaded && filteredAttendees.length > 0 ? (
+        <Animated.FlatList
+        data={filteredAttendees.slice(0, maxToRender)}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.uid}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.flatListContent}
+          snapToInterval={ITEM_SIZE + SPACING}
+          decelerationRate="fast"
+          onEndReached={() => {
+            // Por ejemplo: cargar 4 más cada vez
+            setMaxToRender((prev) => prev + 4);
+          }}
+          onEndReachedThreshold={0.7} 
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: true }
+          )}
+        />
+      ) : null}
 
       {/* Modal para StoryViewer */}
       {isModalVisible && (
         <Modal
           visible={isModalVisible}
           animationType="slide"
-          transparent={false} // Cambia a false para asegurarte de que ocupa toda la pantalla
+          transparent={false}
         >
           <StoryViewer
             stories={selectedStories}
@@ -281,10 +323,6 @@ const styles = StyleSheet.create({
   itemContainer: {
     width: 80,
     marginHorizontal: 5,
-  },
-  itemContainer: {
-    width: 80,
-    marginHorizontal: 5,
     alignItems: "center", 
     justifyContent: "center",
   },
@@ -298,7 +336,7 @@ const styles = StyleSheet.create({
     width: 75,
     height: 75,
     borderRadius: 40,
-    borderWidth: 2, // Borde negro externo
+    borderWidth: 2, 
     borderColor: "black",
     justifyContent: "center",
     alignItems: "center",
@@ -307,29 +345,16 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    borderWidth: 2, // Borde blanco interno
+    borderWidth: 2, 
     borderColor: "white",
     justifyContent: "center",
     alignItems: "center",
   },
   noBorderContainer: {
-    width: 75, // Mantiene el mismo tamaño que `outerBorder`
+    width: 75,
     height: 75,
     justifyContent: "center",
     alignItems: "center",
-  },
-  profileImage: {
-    width: 65,
-    height: 65,
-    borderRadius: 35,
-  },
-  imageContainer: {
-    width: 75,
-    height: 75,
-    borderRadius: 40,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   profileImage: {
     width: 65,
