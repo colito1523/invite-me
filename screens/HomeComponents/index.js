@@ -101,13 +101,25 @@ const Home = React.memo(() => {
 }, [navigation]);
 
 useEffect(() => {
+  setLoading(true); // ⚡ Mostrar loading lo más rápido posible
+}, []);
+
+useEffect(() => {
   setUnreadMessages(hasUnreadMessages); // Añade esta línea
 }, [hasUnreadMessages]); // Añade esta línea
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      fetchData({
+useEffect(() => {
+  const user = auth.currentUser;
+
+  const cargarDatos = async () => {
+    if (!user) {
+      console.warn("⚠️ Usuario no autenticado al intentar cargar datos iniciales.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await fetchData({
         setLoading,
         fetchBoxData,
         fetchPrivateEvents,
@@ -119,35 +131,57 @@ useEffect(() => {
         selectedDate: selectedDateRef.current,
         setPrivateEvents,
       });
+    } catch (error) {
+      console.error("❌ Error al cargar datos iniciales:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [
-    auth.currentUser,
-    database,
-    storage,
-    boxInfo,
-    setBoxData,
-    selectedDateRef,
-    fetchPrivateEvents,
-  ]);
+  };
 
-  useEffect(() => {
-    if (route.params?.selectedCategory) {
-      setSelectedCategory(route.params.selectedCategory);
-      // Llamar a fetchData con todos los parámetros para recargar TODOS los boxs
-      fetchData({
+  cargarDatos();
+}, [
+  database,
+  storage,
+  boxInfo,
+  setBoxData,
+  selectedDateRef,
+  fetchPrivateEvents,
+]);
+
+
+useEffect(() => {
+  const cargarCategoria = async () => {
+    const user = auth.currentUser;
+    if (!route.params?.selectedCategory || !user) {
+      return;
+    }
+
+    setSelectedCategory(route.params.selectedCategory);
+    setLoading(true);
+
+    try {
+      await fetchData({
         setLoading,
         fetchBoxData,
         fetchPrivateEvents,
         database,
         storage,
         boxInfo,
-        user: auth.currentUser,
+        user,
         setBoxData,
         selectedDate: selectedDateRef.current,
         setPrivateEvents,
       });
+    } catch (error) {
+      console.error("❌ Error al cargar por categoría:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [route.params?.selectedCategory]);
+  };
+
+  cargarCategoria();
+}, [route.params?.selectedCategory]);
+
   
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -266,10 +300,12 @@ useEffect(() => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    setLoading(true); // Aseguramos el inicio de la carga
     const user = auth.currentUser;
-    if (user) {
-      await registerPushToken();
-      try {
+  
+    try {
+      if (user) {
+        await registerPushToken();
         await fetchData({
           setLoading,
           fetchBoxData,
@@ -283,15 +319,15 @@ useEffect(() => {
           setPrivateEvents,
         });
         await fetchProfileImage({ setProfileImage });
-        // Refrescar el StorySlider
         storySliderRef.current?.loadExistingStories();
-      } catch (error) {
-        console.error("Error al recargar datos:", error);
       }
+    } catch (error) {
+      console.error("Error al recargar datos:", error);
+    } finally {
+      setRefreshing(false);
+      setLoading(false); // Nunca se queda colgado en "true"
     }
-    setRefreshing(false);
   }, [
-    auth.currentUser,
     database,
     storage,
     boxInfo,
@@ -407,22 +443,37 @@ useEffect(() => {
 
   useEffect(() => {
     const user = auth.currentUser;
-    if (user) {
-      fetchData({
-        setLoading,
-        fetchBoxData,
-        fetchPrivateEvents,
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
-        setPrivateEvents, // Este valor debe pasar correctamente
-      });
-    }
+  
+    const cargarPorCambio = async () => {
+      if (!user) {
+        console.warn("⚠️ Usuario no autenticado al intentar cargar datos por cambio de props.");
+        setLoading(false);
+        return;
+      }
+  
+      setLoading(true);
+      try {
+        await fetchData({
+          setLoading,
+          fetchBoxData,
+          fetchPrivateEvents,
+          database,
+          storage,
+          boxInfo,
+          user,
+          setBoxData,
+          selectedDate: selectedDateRef.current,
+          setPrivateEvents,
+        });
+      } catch (error) {
+        console.error("❌ Error al cargar datos por cambio:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    cargarPorCambio();
   }, [
-    auth.currentUser,
     database,
     storage,
     boxInfo,
@@ -430,6 +481,7 @@ useEffect(() => {
     selectedDateRef,
     fetchPrivateEvents,
   ]);
+  
 
   // para modulizar inicio
 
@@ -439,30 +491,6 @@ useEffect(() => {
 
   // para modulizar final
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      fetchBoxData({
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
-      });
-    }
-
-    fetchPrivateEvents();
-  }, [
-    selectedDate,
-    auth.currentUser,
-    database,
-    storage,
-    boxInfo,
-    setBoxData,
-    selectedDateRef,
-    fetchPrivateEvents,
-  ]);
 
 
   useEffect(() => {
