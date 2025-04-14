@@ -21,6 +21,7 @@ import {
   fetchUsers,
   fetchRecommendations,
   handleUserPress as handleUserPressUtil,
+  prefetchUsers, filterPrefetchedUsers
 } from "./utils";
 import { database } from "../../config/firebase";
 import {
@@ -52,6 +53,10 @@ export default function Search({ route }) {
 
   const user = auth.currentUser;
   const navigation = useNavigation();
+
+  useEffect(() => {
+    prefetchUsers(); // se ejecuta solo una vez al entrar
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -174,12 +179,34 @@ const onRefresh = useCallback(async () => {
 }, [searchTerm, user]);
  
 
-  useEffect(() => {
-    const delaySearch = setTimeout(() => {
-      fetchUsers(searchTerm, setResults);
-    }, 1);
-    return () => clearTimeout(delaySearch);
-  }, [searchTerm]);
+useEffect(() => {
+  let active = true;
+
+  const search = async () => {
+    if (!searchTerm.trim()) {
+      setResults([]);
+      return;
+    }
+
+    // Mostrar resultados instantáneos con datos locales
+    const localResults = await filterPrefetchedUsers(searchTerm);
+    if (active) {
+      setResults(localResults);
+    }
+
+    // Hacer luego la búsqueda completa y reemplazar si hay cambios
+    fetchUsers(searchTerm, (firebaseResults) => {
+      if (active) setResults(firebaseResults);
+    });
+  };
+
+  search();
+
+  return () => {
+    active = false;
+  };
+}, [searchTerm]);
+
 
 
   useEffect(() => {

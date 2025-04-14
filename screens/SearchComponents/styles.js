@@ -57,7 +57,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 10,
     borderRadius: 12,
-    marginVertical: 5,
+    marginVertical: 0,
   },
   historyTextContainer: {
     flex: 1,

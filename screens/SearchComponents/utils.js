@@ -3,6 +3,7 @@ import { database} from "../../config/firebase";
 import { getAuth } from "firebase/auth"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import { limit } from "firebase/firestore";
 
 export const saveSearchHistory = async (user, history, blockedUsers) => {
   try {
@@ -30,9 +31,64 @@ export const normalizeText = (text) => {
       .toLowerCase(); // Convierte a minúsculas
 };
 
+export const prefetchUsers = async () => {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) return;
+
+  try {
+    const usersRef = collection(database, "users");
+    const q = query(usersRef, where("isPrivate", "==", false), limit(300));
+    const snap = await getDocs(q);
+
+    const result = snap.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        username: data.username || "",
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        profileImage: data.photoUrls?.[0] || "https://via.placeholder.com/150",
+        isPrivate: false,
+        isFriend: false,
+        hasStories: false,
+        userStories: [],
+      };
+    });
+
+    await AsyncStorage.setItem("prefetched_users", JSON.stringify(result));
+  } catch (err) {
+    console.error("Error prefetching users:", err);
+  }
+};
 
 
-export const fetchUsers = async (searchTerm, setResults) => {
+export const filterPrefetchedUsers = async (searchTerm) => {
+  const normalized = normalizeText(searchTerm.trim());
+  if (!normalized) return [];
+
+  try {
+    const data = await AsyncStorage.getItem("prefetched_users");
+    if (!data) return [];
+
+    const users = JSON.parse(data);
+    return users.filter((u) => {
+      return (
+        normalizeText(u.username).startsWith(normalized) ||
+        normalizeText(u.firstName).startsWith(normalized) ||
+        normalizeText(u.lastName).startsWith(normalized)
+      );
+    }).slice(0, 8);
+  } catch (e) {
+    console.log("Error filtering prefetched users:", e);
+    return [];
+  }
+};
+
+
+
+
+export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
   const auth = getAuth();
   const user = auth.currentUser;
   if (!user) return;
@@ -45,6 +101,23 @@ export const fetchUsers = async (searchTerm, setResults) => {
     return;
   }
 
+  const cacheKey = `searchCache_${user.uid}_${normalizedSearchTerm}`;
+
+  // 🧠 Mostrar desde caché inmediatamente
+  if (useCache) {
+    try {
+      const cachedData = await AsyncStorage.getItem(cacheKey);
+      if (cachedData) {
+        const parsed = JSON.parse(cachedData);
+        if (parsed?.users?.length) {
+          setResults(parsed.users); // mostrar resultados cacheados al instante
+        }
+      }
+    } catch (e) {
+      console.log("Error leyendo caché de búsqueda:", e);
+    }
+  }
+
   try {
     const userRef = doc(database, "users", user.uid);
     const userSnapshot = await getDoc(userRef);
@@ -53,12 +126,10 @@ export const fetchUsers = async (searchTerm, setResults) => {
 
     const usersRef = collection(database, "users");
 
-    // 🔁 Agregá esto para traer todos los amigos una vez
-const friendsRef = collection(database, "users", user.uid, "friends");
-const friendsSnap = await getDocs(friendsRef);
-const friendsSet = new Set(friendsSnap.docs.map(doc => doc.data().friendId));
+    const friendsRef = collection(database, "users", user.uid, "friends");
+    const friendsSnap = await getDocs(friendsRef);
+    const friendsSet = new Set(friendsSnap.docs.map(doc => doc.data().friendId));
 
-    // 🔍 3 búsquedas individuales con prefijo
     const queries = [
       query(usersRef, where("username", ">=", normalizedSearchTerm), where("username", "<=", normalizedSearchTerm + "\uf8ff")),
       query(usersRef, where("firstName", ">=", normalizedSearchTerm), where("firstName", "<=", normalizedSearchTerm + "\uf8ff")),
@@ -74,7 +145,6 @@ const friendsSet = new Set(friendsSnap.docs.map(doc => doc.data().friendId));
     ];
 
     const uniqueUsers = new Map();
-    
 
     for (const docSnap of combinedDocs) {
       if (!docSnap.exists()) continue;
@@ -89,8 +159,6 @@ const friendsSet = new Set(friendsSnap.docs.map(doc => doc.data().friendId));
       ) continue;
 
       const isPrivate = data.isPrivate || false;
-
-      // 🔁 Verificar si es amigo
       const isFriend = friendsSet.has(userId);
 
       let hasStories = false;
@@ -129,12 +197,24 @@ const friendsSet = new Set(friendsSnap.docs.map(doc => doc.data().friendId));
       });
     }
 
-    setResults(Array.from(uniqueUsers.values()).slice(0, 8));
+    const finalResults = Array.from(uniqueUsers.values()).slice(0, 8);
+
+    // 🧠 Comparar con caché
+    const oldCache = await AsyncStorage.getItem(cacheKey);
+    const oldResults = oldCache ? JSON.parse(oldCache)?.users : [];
+    const changed = JSON.stringify(oldResults) !== JSON.stringify(finalResults);
+
+    if (changed) {
+      setResults(finalResults);
+      await AsyncStorage.setItem(cacheKey, JSON.stringify({ users: finalResults }));
+    }
+
   } catch (error) {
     console.error("Error fetching users:", error);
     setResults([]);
   }
 };
+
 
 
 
