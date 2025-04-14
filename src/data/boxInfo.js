@@ -2516,7 +2516,7 @@ const boxInfo = [
       longitude: -0.0865624,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Hovarda.jpg"),
@@ -2537,7 +2537,7 @@ const boxInfo = [
       longitude: -0.13271550,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Kave.jpg"),
@@ -2558,7 +2558,7 @@ const boxInfo = [
       longitude: -0.14106780,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Dear_Darling_Mayfair.jpg"),
@@ -2579,7 +2579,7 @@ const boxInfo = [
       longitude: -0.1370858,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
     membersClub: true,
   },
   {
@@ -2601,7 +2601,7 @@ const boxInfo = [
       longitude: -0.13402690,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Isabel.jpg"),
@@ -2622,7 +2622,7 @@ const boxInfo = [
       longitude: -0.142538,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Sushisamba.jpg"),
@@ -2643,7 +2643,7 @@ const boxInfo = [
       longitude: -0.0809449,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/the_twenty_two.jpg"),
@@ -2664,7 +2664,7 @@ const boxInfo = [
       longitude: -0.14992190,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
     membersClub: true,
   },
   {
@@ -2686,7 +2686,7 @@ const boxInfo = [
       longitude: -0.1298656,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Annabels.jpg"),
@@ -2707,7 +2707,7 @@ const boxInfo = [
       longitude: -0.14629550,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
     membersClub: true,
   },
   {
@@ -2729,7 +2729,7 @@ const boxInfo = [
       longitude: -0.0828645,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
     membersClub: true,
   },
   {
@@ -2751,7 +2751,7 @@ const boxInfo = [
       longitude: -0.1338415,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/zuma_barbarossa.jpg"),
@@ -2772,7 +2772,7 @@ const boxInfo = [
       longitude: -0.13291940,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/HakkasanMayfair.jpg"),
@@ -2793,7 +2793,7 @@ const boxInfo = [
       longitude: -0.1454443,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/HouseofKOKO.jpg"),
@@ -2814,7 +2814,7 @@ const boxInfo = [
       longitude: -0.1377063,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
     membersClub: true,
   },
   {
@@ -2837,7 +2837,7 @@ const boxInfo = [
       longitude: -0.13791410,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/fabric_London.jpg"),
@@ -2858,7 +2858,7 @@ const boxInfo = [
       longitude: -0.1027589,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Cirque_Le_Soir.jpg"),
@@ -2879,7 +2879,7 @@ const boxInfo = [
       longitude: -0.13915170,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/bagatelle_london.jpg"),
@@ -2900,7 +2900,7 @@ const boxInfo = [
       longitude: -0.1426286,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/maison_estelle.jpg"),
@@ -2921,7 +2921,7 @@ const boxInfo = [
       longitude: -0.14381240,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
     membersClub: true,
   },
   {
@@ -2943,7 +2943,7 @@ const boxInfo = [
       longitude: -0.12280480,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Stereo.jpg"),
@@ -2964,7 +2964,7 @@ const boxInfo = [
       longitude: -0.1221336,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/the_scotch_of_st_james.jpg"),
@@ -2985,7 +2985,7 @@ const boxInfo = [
       longitude: -0.1369525,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Soho_House.jpg"),
@@ -3006,7 +3006,7 @@ const boxInfo = [
       longitude: -0.13058170,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
     membersClub: true,
   },
   {
@@ -3028,7 +3028,7 @@ const boxInfo = [
       longitude: -0.1381361,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Tramp.jpg"),
@@ -3049,7 +3049,7 @@ const boxInfo = [
       longitude: -0.13852020,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
     membersClub: true,
   },
   {
@@ -3071,7 +3071,7 @@ const boxInfo = [
       longitude: -0.1309468,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/SOMOSoho.jpg"),
@@ -3092,7 +3092,7 @@ const boxInfo = [
       longitude: -0.13537880,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/NighjarCarnaby.jpg"),
@@ -3113,7 +3113,7 @@ const boxInfo = [
       longitude: -0.13851050,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Madison.jpg"),
@@ -3134,7 +3134,7 @@ const boxInfo = [
       longitude: -0.0954593,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Maddox_London.jpg"),
@@ -3155,7 +3155,7 @@ const boxInfo = [
       longitude: -0.1424995,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/tape_london.jpg"),
@@ -3176,7 +3176,7 @@ const boxInfo = [
       longitude: -0.1446868,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/B_London.jpg"),
@@ -3197,7 +3197,7 @@ const boxInfo = [
       longitude: -0.177998,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Buddah_BarLondon.jpg"),
@@ -3218,7 +3218,7 @@ const boxInfo = [
       longitude: -0.1620334,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/34_mayfair.jpg"),
@@ -3239,7 +3239,7 @@ const boxInfo = [
       longitude: -0.15172310,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/HUMO.jpg"),
@@ -3260,7 +3260,7 @@ const boxInfo = [
       longitude: -0.1430865,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
 
   {
@@ -3282,7 +3282,7 @@ const boxInfo = [
       longitude: -0.1437103,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/MNKYHSE.jpg"),
@@ -3303,7 +3303,7 @@ const boxInfo = [
       longitude: -0.1419205,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Pirana.jpg"),
@@ -3324,7 +3324,7 @@ const boxInfo = [
       longitude: -0.13844560,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/BacchanaliaMayfair.jpg"),
@@ -3345,7 +3345,7 @@ const boxInfo = [
       longitude: -0.14766020,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
   {
     path: require("../../assets/Londres/Cipriani.jpg"),
@@ -3366,7 +3366,7 @@ const boxInfo = [
       longitude: -0.14777780,
     },
     country: "Inglaterra",
-    city: "Londres",
+    city: "London",
   },
 ];
 

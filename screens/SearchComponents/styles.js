@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 10,
     borderRadius: 12,
-    marginVertical: 5,
+    marginVertical: 0,
   },
   recommendationItem: {
     paddingHorizontal: 20,
@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     padding: 10,
     borderRadius: 12,
-    marginVertical: 5,
+    marginVertical: 0,
   },
   textContainer: {
     flex: 1,

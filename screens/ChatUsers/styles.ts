@@ -38,7 +38,7 @@ export const styles = StyleSheet.create({
     message: {
       padding: 10,
       borderRadius: 20,
-      marginVertical: 8,
+      marginVertical: 0,
       maxWidth: "80%",
       flexDirection: "column",
       alignSelf: "flex-start", 
@@ -165,7 +165,7 @@ export const styles = StyleSheet.create({
       marginLeft: 7, 
     },
     messageText: {
-      marginTop: 20,
+      marginTop: 0,
       color: "#262626",
       fontSize: 14,
       padding: 10,

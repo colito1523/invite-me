@@ -704,6 +704,8 @@ export default function ChatList() {
             data={filteredChats}
             keyExtractor={(item) => `chat-${item.id}`}
             renderItem={({ item }) => renderChatItem({ item })}
+            ListFooterComponent={null}
+            contentContainerStyle={{ paddingBottom: 0 }}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -711,6 +713,7 @@ export default function ChatList() {
                 colors={[isNightMode ? "#fff" : "#000"]}
                 tintColor={isNightMode ? "#fff" : "#000"}
               />
+              
             }
             ListHeaderComponent={
               <>

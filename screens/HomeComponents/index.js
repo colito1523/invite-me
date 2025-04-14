@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   TouchableOpacity, // Necesario para el TabBar
   Image,
+  AppState 
 } from "react-native";
 import { collection, query, where, onSnapshot, getDocs } from "firebase/firestore";
 import { auth, storage, database } from "../../config/firebase";
@@ -43,6 +44,7 @@ import {
   getFilteredBoxData,
 } from "./utils";
 import { useDate } from "../../src/hooks/DateContext"; 
+
 
 const Header = ({ isNightMode, toggleMenu, handleDateChange, setLoading }) => {
   const currentStyles = isNightMode ? nightStyles : dayStyles;
@@ -88,6 +90,7 @@ const Home = React.memo(() => {
   const expoPushToken = useNotifications(navigation);
   const { t } = useTranslation();
   const storySliderRef = useRef();
+  const appState = useRef(AppState.currentState);
   const currentStyles = useMemo(
     () => (isNightMode ? nightStyles : dayStyles),
     [isNightMode],
@@ -442,46 +445,46 @@ useEffect(() => {
   }, [handleDateChange]);
 
   useEffect(() => {
-    const user = auth.currentUser;
+    const subscription = AppState.addEventListener("change", async (nextAppState) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        if (!loading) { // ✅ Solo recargar si no estaba ya cargando
+          console.log("🟢 App volvió al foreground, recargando datos...");
+          setLoading(true);
   
-    const cargarPorCambio = async () => {
-      if (!user) {
-        console.warn("⚠️ Usuario no autenticado al intentar cargar datos por cambio de props.");
-        setLoading(false);
-        return;
+          const user = auth.currentUser;
+          if (user) {
+            try {
+              await fetchData({
+                setLoading,
+                fetchBoxData,
+                fetchPrivateEvents,
+                database,
+                storage,
+                boxInfo,
+                user,
+                setBoxData,
+                selectedDate: selectedDateRef.current,
+                setPrivateEvents,
+              });
+            } catch (error) {
+              console.error("❌ Error al recargar al volver:", error);
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
       }
   
-      setLoading(true);
-      try {
-        await fetchData({
-          setLoading,
-          fetchBoxData,
-          fetchPrivateEvents,
-          database,
-          storage,
-          boxInfo,
-          user,
-          setBoxData,
-          selectedDate: selectedDateRef.current,
-          setPrivateEvents,
-        });
-      } catch (error) {
-        console.error("❌ Error al cargar datos por cambio:", error);
-      } finally {
-        setLoading(false);
-      }
+      appState.current = nextAppState;
+    });
+  
+    return () => {
+      subscription.remove();
     };
-  
-    cargarPorCambio();
-  }, [
-    database,
-    storage,
-    boxInfo,
-    setBoxData,
-    selectedDateRef,
-    fetchPrivateEvents,
-  ]);
-  
+  }, [loading]); // 👈 Agregá "loading" como dependencia
 
   // para modulizar inicio
 

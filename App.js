@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -6,6 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getDoc, doc, updateDoc } from "firebase/firestore"; // Añadir updateDoc para actualizar Firestore
 import * as Updates from 'expo-updates';
 import { BlockProvider } from "./src/contexts/BlockContext";
+import { AppState } from "react-native"; // Agregalo arriba
 import { Provider as PaperProvider } from "react-native-paper";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18next';
@@ -151,18 +152,43 @@ function AuthStack() {
 function RootNavigator() {
   const { user, setUser } = React.useContext(AuthenticatedUserContext);
   const [loading, setLoading] = React.useState(true);
+  const appState = useRef(AppState.currentState); // Trackea el estado de la app
 
-  React.useEffect(() => {
+  // Escuchamos los cambios de AppState (foreground / background)
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", nextAppState => {
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  // Solo actualizamos el usuario si es necesario
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authenticatedUser) => {
+      // ✅ Evitamos actualizar si solo volvió del background y ya estaba autenticado
+      if (
+        appState.current === "active" &&
+        user &&
+        authenticatedUser?.uid === user.uid
+      ) {
+        setLoading(false);
+        return;
+      }
+
       if (authenticatedUser) {
         setUser(authenticatedUser);
         const userDoc = doc(database, "users", authenticatedUser.uid);
-        await getDoc(userDoc); // Obtener los datos del usuario (puedes agregar lógica según tus necesidades)
+        await getDoc(userDoc); // Podés agregar lógica extra acá si querés
       } else {
         setUser(null);
       }
+
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, [user]);
 

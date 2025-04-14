@@ -53,7 +53,7 @@ export default function Menu({
     t('categories.changeLanguage'), // Nueva categoría para cambiar el idioma
   ];
 
-  const cities = ['Lisboa', 'Madrid', 'Barcelona','Londres'];
+  const cities = ['Lisboa', 'Madrid', 'Barcelona','London'];
 
   const handleSearchChange = useCallback((text) => {
     setSearchQuery(text);
