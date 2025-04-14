@@ -34,96 +34,104 @@ export const normalizeText = (text) => {
 
 export const fetchUsers = async (searchTerm, setResults) => {
   const auth = getAuth();
-  if (!auth.currentUser) return;
+  const user = auth.currentUser;
+  if (!user) return;
 
-  if (searchTerm.trim().length > 0) {
-    try {
-      const user = auth.currentUser;
-      const userRef = doc(database, "users", user.uid);
-      const userSnapshot = await getDoc(userRef);
-      const blockedUsers = userSnapshot.data()?.blockedUsers || [];
-      const hideStoriesFrom = userSnapshot.data()?.hideStoriesFrom || [];
+  const trimmed = searchTerm.trim();
+  const normalizedSearchTerm = normalizeText(trimmed);
 
-      const normalizedSearchTerm = normalizeText(searchTerm);
+  if (!trimmed) {
+    setResults([]);
+    return;
+  }
 
-      // Crear consulta para traer todos los usuarios
-      const usersRef = collection(database, "users");
-      const q = query(usersRef);
-      const querySnapshot = await getDocs(q);
+  try {
+    const userRef = doc(database, "users", user.uid);
+    const userSnapshot = await getDoc(userRef);
+    const blockedUsers = userSnapshot.data()?.blockedUsers || [];
+    const hideStoriesFrom = userSnapshot.data()?.hideStoriesFrom || [];
 
-      // Procesar cada usuario y verificar si tiene historias activas
-      const userList = await Promise.all(
-        querySnapshot.docs.map(async (doc) => {
-          const data = doc.data();
-          const userId = doc.id;
+    const usersRef = collection(database, "users");
 
-          // Verificar si el usuario actual es amigo del usuario encontrado
-          const friendsRef = collection(database, "users", auth.currentUser.uid, "friends");
-          const friendSnapshot = await getDocs(query(friendsRef, where("friendId", "==", userId)));
-          const isFriend = !friendSnapshot.empty;
+    // 🔁 Agregá esto para traer todos los amigos una vez
+const friendsRef = collection(database, "users", user.uid, "friends");
+const friendsSnap = await getDocs(friendsRef);
+const friendsSet = new Set(friendsSnap.docs.map(doc => doc.data().friendId));
 
-          // Verificar si el usuario es privado
-          const isPrivate = data.isPrivate || false;
+    // 🔍 3 búsquedas individuales con prefijo
+    const queries = [
+      query(usersRef, where("username", ">=", normalizedSearchTerm), where("username", "<=", normalizedSearchTerm + "\uf8ff")),
+      query(usersRef, where("firstName", ">=", normalizedSearchTerm), where("firstName", "<=", normalizedSearchTerm + "\uf8ff")),
+      query(usersRef, where("lastName", ">=", normalizedSearchTerm), where("lastName", "<=", normalizedSearchTerm + "\uf8ff")),
+    ];
 
-          let hasStories = false;
-          let userStories = [];
+    const snapshots = await Promise.all(queries.map(getDocs));
 
-          // Solo verificar historias si el usuario no es privado o si el usuario actual es su amigo
-          if (!isPrivate || isFriend) {
-            const storiesRef = collection(database, "users", userId, "stories");
-            const storiesSnapshot = await getDocs(storiesRef);
-            const now = new Date();
+    const combinedDocs = [
+      ...snapshots[0].docs,
+      ...snapshots[1].docs,
+      ...snapshots[2].docs,
+    ];
 
-            // Filtrar historias activas (no expiradas)
-            userStories = storiesSnapshot.docs
-              .map((storyDoc) => {
-                const storyData = storyDoc.data();
-                return {
-                  id: storyDoc.id,
-                  ...storyData,
-                  expiresAt: storyData.expiresAt.toDate(),
-                };
-              })
-              .filter((story) => story.expiresAt > now && !hideStoriesFrom.includes(userId));
+    const uniqueUsers = new Map();
+    
 
-            hasStories = userStories.length > 0;
-          }
+    for (const docSnap of combinedDocs) {
+      if (!docSnap.exists()) continue;
 
-          return {
-            id: userId,
-            ...data,
-            isFriend,
-            isPrivate,
-            hasStories,
-            userStories,
-            profileImage:
-              data.photoUrls && data.photoUrls.length > 0
-                ? data.photoUrls[0]
-                : "https://via.placeholder.com/150",
-          };
-        })
-      );
+      const data = docSnap.data();
+      const userId = docSnap.id;
 
-      // Filtrar usuarios bloqueados, el usuario actual y aplicar el término de búsqueda
-      const filteredList = userList
-    .filter(
-        (user) =>
-            user.id !== auth.currentUser.uid &&
-            !blockedUsers.includes(user.id) &&
-            (
-                normalizeText(user.username || "").includes(normalizedSearchTerm) ||
-                normalizeText(user.firstName || "").includes(normalizedSearchTerm) ||
-                normalizeText(user.lastName || "").includes(normalizedSearchTerm)
-            )
-    )
-    .slice(0, 8);
+      if (
+        userId === user.uid ||
+        blockedUsers.includes(userId) ||
+        uniqueUsers.has(userId)
+      ) continue;
 
+      const isPrivate = data.isPrivate || false;
 
-      setResults(filteredList);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+      // 🔁 Verificar si es amigo
+      const isFriend = friendsSet.has(userId);
+
+      let hasStories = false;
+      let userStories = [];
+
+      if (!isPrivate || isFriend) {
+        const storiesRef = collection(database, "users", userId, "stories");
+        const storiesSnap = await getDocs(storiesRef);
+        const now = new Date();
+
+        userStories = storiesSnap.docs
+          .map((doc) => {
+            const story = doc.data();
+            return {
+              id: doc.id,
+              ...story,
+              expiresAt: story.expiresAt?.toDate?.() || new Date(0),
+            };
+          })
+          .filter(
+            (story) =>
+              story.expiresAt > now && !hideStoriesFrom.includes(userId)
+          );
+
+        hasStories = userStories.length > 0;
+      }
+
+      uniqueUsers.set(userId, {
+        id: userId,
+        ...data,
+        profileImage: data.photoUrls?.[0] || "https://via.placeholder.com/150",
+        isFriend,
+        isPrivate,
+        hasStories,
+        userStories,
+      });
     }
-  } else {
+
+    setResults(Array.from(uniqueUsers.values()).slice(0, 8));
+  } catch (error) {
+    console.error("Error fetching users:", error);
     setResults([]);
   }
 };

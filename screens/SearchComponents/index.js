@@ -47,9 +47,6 @@ export default function Search({ route }) {
   const [refreshing, setRefreshing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState(null);
-  const [focusKey, setFocusKey] = useState(0);
-  const [stories, setStories] = useState([]);
-  const [unseenStories, setUnseenStories] = useState({});
   const blockedUsers = useBlockedUsers();
   const { t } = useTranslation();
 
