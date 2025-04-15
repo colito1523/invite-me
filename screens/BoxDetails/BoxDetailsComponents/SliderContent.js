@@ -70,9 +70,6 @@ const SliderContent = ({
       <View style={styles.sliderPart}>
         {showDescription ? (
           <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionTitle}>
-              {t("SliderContent.description")}
-            </Text>
             <Text style={styles.descriptionText}>
               {boxData.description ||
                 t("SliderContent.descriptionNotAvailable")}

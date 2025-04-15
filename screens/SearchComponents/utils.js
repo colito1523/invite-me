@@ -193,10 +193,13 @@ export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
     const oldResults = oldCache ? JSON.parse(oldCache)?.users : [];
     const changed = JSON.stringify(oldResults) !== JSON.stringify(finalResults);
 
-    if (changed) {
-      setResults(finalResults);
-      await AsyncStorage.setItem(cacheKey, JSON.stringify({ users: finalResults }));
-    }
+setResults(finalResults);
+try {
+  await AsyncStorage.setItem(cacheKey, JSON.stringify({ users: finalResults }));
+} catch (e) {
+  console.log("Error guardando en caché:", e);
+}
+
 
   } catch (error) {
     console.error("Error fetching users (searchIndex):", error);
