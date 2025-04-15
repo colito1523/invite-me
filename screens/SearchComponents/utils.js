@@ -49,6 +49,7 @@ export const prefetchUsers = async () => {
         firstName: data.firstName || "",
         lastName: data.lastName || "",
         profileImage: data.photoUrls?.[0] || "https://via.placeholder.com/150",
+        searchIndex: data.searchIndex || [],
         isPrivate: false,
         isFriend: false,
         hasStories: false,
@@ -63,6 +64,7 @@ export const prefetchUsers = async () => {
 };
 
 
+
 export const filterPrefetchedUsers = async (searchTerm) => {
   const normalized = normalizeText(searchTerm.trim());
   if (!normalized) return [];
@@ -72,18 +74,15 @@ export const filterPrefetchedUsers = async (searchTerm) => {
     if (!data) return [];
 
     const users = JSON.parse(data);
-    return users.filter((u) => {
-      return (
-        normalizeText(u.username).startsWith(normalized) ||
-        normalizeText(u.firstName).startsWith(normalized) ||
-        normalizeText(u.lastName).startsWith(normalized)
-      );
-    }).slice(0, 8);
+    return users
+      .filter((u) => u.searchIndex && u.searchIndex.includes(normalized))
+      .slice(0, 8);
   } catch (e) {
     console.log("Error filtering prefetched users:", e);
     return [];
   }
 };
+
 
 
 
@@ -103,14 +102,14 @@ export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
 
   const cacheKey = `searchCache_${user.uid}_${normalizedSearchTerm}`;
 
-  // 🧠 Mostrar desde caché inmediatamente
+  // 🧠 Mostrar desde caché inmediatamente (si existe y se permite)
   if (useCache) {
     try {
       const cachedData = await AsyncStorage.getItem(cacheKey);
       if (cachedData) {
         const parsed = JSON.parse(cachedData);
         if (parsed?.users?.length) {
-          setResults(parsed.users); // mostrar resultados cacheados al instante
+          setResults(parsed.users);
         }
       }
     } catch (e) {
@@ -124,29 +123,22 @@ export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
     const blockedUsers = userSnapshot.data()?.blockedUsers || [];
     const hideStoriesFrom = userSnapshot.data()?.hideStoriesFrom || [];
 
-    const usersRef = collection(database, "users");
-
     const friendsRef = collection(database, "users", user.uid, "friends");
     const friendsSnap = await getDocs(friendsRef);
     const friendsSet = new Set(friendsSnap.docs.map(doc => doc.data().friendId));
 
-    const queries = [
-      query(usersRef, where("username", ">=", normalizedSearchTerm), where("username", "<=", normalizedSearchTerm + "\uf8ff")),
-      query(usersRef, where("firstName", ">=", normalizedSearchTerm), where("firstName", "<=", normalizedSearchTerm + "\uf8ff")),
-      query(usersRef, where("lastName", ">=", normalizedSearchTerm), where("lastName", "<=", normalizedSearchTerm + "\uf8ff")),
-    ];
+    // 🔍 SOLO una query usando searchIndex
+    const usersQuery = query(
+      collection(database, "users"),
+      where("searchIndex", "array-contains", normalizedSearchTerm),
+      limit(8)
+    );
 
-    const snapshots = await Promise.all(queries.map(getDocs));
+    const snapshot = await getDocs(usersQuery);
 
-    const combinedDocs = [
-      ...snapshots[0].docs,
-      ...snapshots[1].docs,
-      ...snapshots[2].docs,
-    ];
+    const finalResults = [];
 
-    const uniqueUsers = new Map();
-
-    for (const docSnap of combinedDocs) {
+    for (const docSnap of snapshot.docs) {
       if (!docSnap.exists()) continue;
 
       const data = docSnap.data();
@@ -154,8 +146,7 @@ export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
 
       if (
         userId === user.uid ||
-        blockedUsers.includes(userId) ||
-        uniqueUsers.has(userId)
+        blockedUsers.includes(userId)
       ) continue;
 
       const isPrivate = data.isPrivate || false;
@@ -186,7 +177,7 @@ export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
         hasStories = userStories.length > 0;
       }
 
-      uniqueUsers.set(userId, {
+      finalResults.push({
         id: userId,
         ...data,
         profileImage: data.photoUrls?.[0] || "https://via.placeholder.com/150",
@@ -196,8 +187,6 @@ export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
         userStories,
       });
     }
-
-    const finalResults = Array.from(uniqueUsers.values()).slice(0, 8);
 
     // 🧠 Comparar con caché
     const oldCache = await AsyncStorage.getItem(cacheKey);
@@ -210,10 +199,11 @@ export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
     }
 
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.error("Error fetching users (searchIndex):", error);
     setResults([]);
   }
 };
+
 
 
 
