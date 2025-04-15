@@ -171,6 +171,7 @@
   "deletePermissionError": "Não tem permissão para apagar esta história.",
   "deleteError": "Não foi possível apagar a história. Por favor, tente novamente.",
   "hoursAgo": "{{hours}}h",
+   "minutesAgo": "{{minutes}}m",
   "typePlaceholder": "Escreva...",
   "searchPlaceholder": "Pesquisar...",
   "viewers": "Visualizadores",

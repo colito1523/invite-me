@@ -170,6 +170,7 @@
     "deletePermissionError": "You don't have permission to delete this story.",
     "deleteError": "Could not delete the story. Please try again.",
     "hoursAgo": "{{hours}}h",
+     "minutesAgo": "{{minutes}}m",
     "typePlaceholder": "Type...",
     "searchPlaceholder": "Search...",
     "viewers": "Viewers",

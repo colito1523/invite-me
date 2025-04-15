@@ -168,6 +168,7 @@
     "deletePermissionError": "No tienes permiso para eliminar esta historia.",
     "deleteError": "No se pudo eliminar la historia. Por favor, inténtalo de nuevo.",
     "hoursAgo": "{{hours}}h",
+     "minutesAgo": "{{minutes}}m",
     "typePlaceholder": "Escribe...",
     "searchPlaceholder": "Buscar...",
     "viewers": "Espectadores",
