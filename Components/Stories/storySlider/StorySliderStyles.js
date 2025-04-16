@@ -23,6 +23,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 1,
   },
+  loadingPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'black',
+  },
   storyCircle: {
     width: 70,
     height: 70,

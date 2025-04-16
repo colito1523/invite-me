@@ -10,6 +10,8 @@ import {
   Modal,
   TouchableWithoutFeedback,
   ScrollView,
+  Animated,
+  ActivityIndicator
 } from "react-native"
 import * as ImagePicker from "expo-image-picker"
 import { Ionicons } from "@expo/vector-icons"
@@ -39,6 +41,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0)
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [isNightMode, setIsNightMode] = useState(false)
+  const [isPreloading, setIsPreloading] = useState(false);
 
   // Add default value for props.route
   const route = props.route || {}
@@ -195,16 +198,24 @@ export default React.forwardRef(function StorySlider(props, ref) {
   }, [route.params?.photoUri])
 
   const handleOpenViewer = async (index) => {
-    const userStories = stories[index].userStories
+    const userStories = stories[index]?.userStories || [];
     const unseenIndex = userStories.findIndex(
-      (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid),
-    )
-
-    setSelectedStoryIndex(index)
-    setStoryViewerVisible(true)
-    await AsyncStorage.setItem("lastViewedStoryIndex", JSON.stringify(index))
-    setSelectedStoryIndex(index) // Ensure the correct story index is set
-  }
+      (story) => !story.viewers?.some((viewer) => viewer.uid === auth.currentUser.uid)
+    );
+    
+    // Precargar la primera imagen
+    setIsPreloading(true);
+    try {
+      await Image.prefetch(stories[index].userStories[unseenIndex !== -1 ? unseenIndex : 0].storyUrl);
+    } catch (error) {
+      console.error("Error preloading image:", error);
+    }
+    setIsPreloading(false);
+  
+    setSelectedStoryIndex(index);
+    setStoryViewerVisible(true);
+    await AsyncStorage.setItem("lastViewedStoryIndex", JSON.stringify(index));
+  };
 
   const handleAddStory = () => {
     navigation.navigate("Camera")
@@ -370,28 +381,37 @@ const renderStory = ({ item, index }) => {
           </View>
         </Modal>
 
-        <Modal
-          visible={storyViewerVisible}
-          transparent={false}
-          animationType="slide"
-          onRequestClose={() => {
-            setStoryViewerVisible(false)
-            return true
-          }}
-        >
-          <StoryViewer
-            stories={stories}
-            initialIndex={selectedStoryIndex}
-            onClose={(updatedUnseenStories) => {
-              setStoryViewerVisible(false)
-              updateUnseenStories(updatedUnseenStories)
-              loadExistingStories(t, setStories, setUnseenStories, isUploading)
-            }}
-            onStoryDeleted={handleStoryDeleted}
-            unseenStories={unseenStories}
-            navigation={navigation}
-          />
-        </Modal>
+  
+<Modal
+  visible={storyViewerVisible}
+  transparent={true}
+  animationType="fade"
+  onRequestClose={() => {
+    setStoryViewerVisible(false)
+    return true
+  }}
+>
+  <Animated.View style={{ flex: 1, backgroundColor: 'black' }}>
+    {isPreloading ? (
+      <View style={styles.loadingPlaceholder}>
+        <ActivityIndicator size="large" color="white" />
+      </View>
+    ) : (
+      <StoryViewer
+        stories={stories}
+        initialIndex={selectedStoryIndex}
+        onClose={(updatedUnseenStories) => {
+          setStoryViewerVisible(false)
+          updateUnseenStories(updatedUnseenStories)
+          loadExistingStories(t, setStories, setUnseenStories, isUploading)
+        }}
+        onStoryDeleted={handleStoryDeleted}
+        unseenStories={unseenStories}
+        navigation={navigation}
+      />
+    )}
+  </Animated.View>
+</Modal>
         <Modal transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
           <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
             <View style={styles.modalContainer}>
