@@ -53,9 +53,12 @@ const StoryHeader = ({
           placeholder={{ blurhash: "LEHV6nWB2yk8pyo0adR*.7kCMdnj" }}
           defaultSource={require("../../../assets/perfil.jpg")}
         />
-        <Text style={styles.username}>
-          {`${currentStory.username} ${currentStory.lastName || ""}`}
-        </Text>
+       <Text style={styles.username}>
+  {currentStory.username?.trim()
+    ? `${currentStory.username.trim()} ${currentStory.lastName || ""}`.trim()
+    : `${currentStory.firstName || ""} ${currentStory.lastName || ""}`.trim()}
+</Text>
+
       </TouchableOpacity>
       <View style={styles.rightInfo}>
         <Text style={styles.timeAgo}>

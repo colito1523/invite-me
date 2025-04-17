@@ -6,6 +6,7 @@ import {
   Dimensions,
   Animated,
   Modal,
+  Text
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { 
@@ -21,6 +22,8 @@ import { Image } from 'expo-image';
 import StoryViewer from '../Stories/storyViewer/StoryViewer';
 import { useTranslation } from "react-i18next";
 import { handleUserPress } from "./utils";
+import { calculateHoursAgo } from "../Stories/storyViewer/storyUtils";
+
 
 const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [blockedUsers, setBlockedUsers] = useState([]);
@@ -156,30 +159,47 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
           const storiesSnapshot = await getDocs(storiesRef);
 
           const userStories = storiesSnapshot.docs
-            .map((doc) => ({
+          .map((doc) => {
+            const data = doc.data();
+            const createdAt = data.createdAt?.toDate?.() || null;
+            const expiresAt = data.expiresAt?.toDate?.() || null;
+        
+            return {
               id: doc.id,
-              ...doc.data(),
-              createdAt: doc.data().createdAt?.toDate(),
-              expiresAt: doc.data().expiresAt?.toDate(),
-            }))
-            .filter((story) => story.expiresAt > now);
+              ...data,
+              createdAt: data.createdAt,
+              expiresAt: data.expiresAt,
+              hoursAgo: createdAt ? calculateHoursAgo(createdAt) : "0m",
+            };
+          })
+          .filter((story) => story.expiresAt?.toDate?.() > now);
+        
+
+        
+
+          
+            if (userStories.length > 0) {
+              console.log(`Cargando historia de ${userData.username || userData.firstName || "Usuario sin nombre"}:`, userStories[0]);
+            }
 
           const hasStories = userStories.length > 0;
 
           // e) Devuelve objeto con info combinada
           return {
             ...originalAttendee,
-            // campos extra
             ...userData,
             isPrivate,
             isFriend,
             hasStories,
             userStories,
+            // 👇 aseguramos los campos correctos
+            firstName: userData.firstName || "",
+            lastName: userData.lastName || "",
             profileImage:
-            userData.photoUrls?.[0] ||
-            originalAttendee.profileImage ||
-            "https://via.placeholder.com/150",
-        };
+              userData.photoUrls?.[0] ||
+              originalAttendee.profileImage ||
+              "https://via.placeholder.com/150",
+          };
         })
       );
 
@@ -210,15 +230,23 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   }, []);
 
   const handlePress = async (uid) => {
-    await handleUserPress({
-      uid,
-      navigation,
-      blockedUsers,
-      t,
-      setSelectedStories,
-      setIsModalVisible,
-    });
+    const selectedUser = filteredAttendees.find((u) => u.uid === uid);
+    if (!selectedUser || !selectedUser.userStories?.length) return;
+  
+    console.log("🧾 Usuario seleccionado:", selectedUser);
+  
+    setSelectedStories([{
+      uid: selectedUser.uid,
+      firstName: selectedUser.firstName || "",
+      lastName: selectedUser.lastName || "",
+      profileImage: selectedUser.profileImage || "https://via.placeholder.com/150",
+      userStories: selectedUser.userStories,
+    }]);
+  
+    setIsModalVisible(true);
   };
+  
+  
 
   // Renderizar asistentes
   const renderItem = ({ item }) => (

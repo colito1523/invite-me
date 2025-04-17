@@ -73,7 +73,7 @@ export function StoryViewer({
     typeof initialIndex === "number" &&
     initialIndex >= 0 &&
     initialIndex < validStories.length;
-
+    
   useEffect(() => {
     if (!isValidStories) {
       console.error("Prop 'stories' no es un array válido:", stories);
@@ -89,15 +89,22 @@ export function StoryViewer({
   const deserializedStories = isValidStories
     ? stories.map((storyGroup) => ({
         ...storyGroup,
-        userStories: storyGroup.userStories.map((story) => ({
-          ...story,
-          createdAt: story.createdAt?.toDate
+        userStories: storyGroup.userStories.map((story) => {
+          const createdAtDate = story.createdAt?.toDate
             ? story.createdAt.toDate()
-            : new Date(story.createdAt),
-          expiresAt: story.expiresAt?.toDate
+            : new Date(story.createdAt);
+          const expiresAtDate = story.expiresAt?.toDate
             ? story.expiresAt.toDate()
-            : new Date(story.expiresAt),
-        })),
+            : new Date(story.expiresAt);
+        
+          return {
+            ...story,
+            createdAt: createdAtDate,
+            expiresAt: expiresAtDate,
+            hoursAgo: calculateHoursAgo(createdAtDate), // ✅ solucionamos acá
+          };
+        }),
+        
       })).filter(group => group.userStories.length > 0)
     : [];
 
