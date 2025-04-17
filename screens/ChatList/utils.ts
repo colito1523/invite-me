@@ -200,11 +200,15 @@ export const checkStories = async (chats: any[], userId: string) => {
                   const expiresAt = doc.data().expiresAt instanceof Timestamp
                     ? doc.data().expiresAt.toDate()
                     : new Date();
+                  
+                  const hoursAgo = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+
                   return {
                     id: doc.id,
                     ...doc.data(),
                     createdAt,
                     expiresAt,
+                    hoursAgo,
                   };
                 })
                 .filter((story) => story.expiresAt > now);
@@ -226,6 +230,7 @@ export const checkStories = async (chats: any[], userId: string) => {
     return chats;
   }
 };
+
 
 // Guardar la lista de chats en la caché
 export const saveChatsToCache = async (chats) => {

@@ -231,20 +231,44 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
 
   const handlePress = async (uid) => {
     const selectedUser = filteredAttendees.find((u) => u.uid === uid);
-    if (!selectedUser || !selectedUser.userStories?.length) return;
+    if (!selectedUser) return;
   
-    console.log("🧾 Usuario seleccionado:", selectedUser);
+    // Si NO tiene historias, lo mandamos al perfil
+    if (!selectedUser.userStories || selectedUser.userStories.length === 0) {
+      // Si es el usuario actual, navega al perfil propio
+      if (uid === auth.currentUser.uid) {
+        return navigation.navigate("Profile");
+      }
+  
+      return navigation.navigate("UserProfile", {
+        selectedUser: {
+          id: uid,
+          username: selectedUser.username || t("dotIndicatorBoxDetails.unknownUser"),
+          firstName: selectedUser.firstName || "",
+          lastName: selectedUser.lastName || "",
+          profileImage:
+            selectedUser.profileImage || "https://via.placeholder.com/150",
+          isPrivate: selectedUser.isPrivate || false,
+        },
+      });
+    }
+  
+    // Si tiene historias, mostramos el visor
+    console.log("🧾 Historia seleccionada:", selectedUser.userStories[0]);
   
     setSelectedStories([{
       uid: selectedUser.uid,
       firstName: selectedUser.firstName || "",
       lastName: selectedUser.lastName || "",
-      profileImage: selectedUser.profileImage || "https://via.placeholder.com/150",
+
+      profileImage:
+        selectedUser.profileImage || "https://via.placeholder.com/150",
       userStories: selectedUser.userStories,
     }]);
   
     setIsModalVisible(true);
   };
+  
   
   
 

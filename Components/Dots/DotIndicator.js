@@ -306,31 +306,31 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         })
         .filter((story) => story.expiresAt > now);
   
-      if (userStories.length === 0) return;
+      if (userStories.length === 0) {
+        // 🔁 No hay historias → Navegar al perfil
+        return navigateToUserProfile(uid);
+      }
   
-      const firstName = userData.firstName || "";
-      const lastName = userData.lastName || "";
-      const username = userData.username?.trim();
-      const profileImage =
-        userData.photoUrls?.[0] || "https://via.placeholder.com/150";
+      const profileImage = userData.photoUrls?.[0] || "https://via.placeholder.com/150";
   
-        const storyData = {
-          uid,
-          firstName: userData.firstName || "",
-          lastName: userData.lastName || "",
-          secondName: userData.secondName || "",
-          profileImage: profileImage || "https://via.placeholder.com/150",
-          userStories,
-        };
+      const storyData = {
+        uid,
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        secondName: userData.secondName || "",
+        profileImage,
+        userStories,
+      };
   
-      console.log(`🧾 Historia de ${username || firstName}:`, userStories[0]);
+      console.log(`🧾 Historia de ${storyData.username || storyData.firstName}:`, userStories[0]);
   
       setSelectedStories([storyData]);
       setIsModalVisible(true);
     } catch (error) {
-      console.error("Error al cargar la historia:", error);
+      console.error("Error al cargar la historia o navegar al perfil:", error);
     }
   };
+  
   
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 

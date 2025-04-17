@@ -411,23 +411,52 @@ export default function ChatList() {
         });
         return;
       }
-
       if (chatUser.hasStories) {
-        const stories = chatUser.userStories.map((story) => ({
-          ...story,
-          createdAt: story.createdAt?.toDate ? story.createdAt : Timestamp.fromDate(new Date()),
-          expiresAt: story.expiresAt?.toDate ? story.expiresAt : Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
-        }));
+        const now = Date.now();
+      
+        const enrichedStories = chatUser.userStories.map((story) => {
+          const createdAt = story.createdAt?.toDate ? story.createdAt.toDate() : new Date();
+          const expiresAt = story.expiresAt?.toDate ? story.expiresAt.toDate() : new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
+          const diffInMs = now - createdAt.getTime();
+          const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+          
+          let timeAgoText = "";
+          if (diffInMinutes < 1) {
+            timeAgoText = "1m";
+          } else if (diffInMinutes < 60) {
+            timeAgoText = `${diffInMinutes}m`;
+          } else if (diffInMinutes < 1440) {
+            timeAgoText = `${Math.floor(diffInMinutes / 60)}h`;
+          } else {
+            timeAgoText = `${Math.floor(diffInMinutes / 1440)}d`;
+          }
+          
+      
+          return {
+            ...story,
+            createdAt,
+            expiresAt,
+            timeAgoText,
+          };
+        });
+      
+        enrichedStories.forEach((story) => {
+          console.log(`🧾 Historia de ${chatUser.username.trim()} :`, story);
+        });
+      
         setSelectedStories([
           {
             uid: chatUser.uid,
             username: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
             profileImage: chatUser.photoUrls?.[0],
-            userStories: chatUser.userStories 
+            userStories: enrichedStories,
+            timeAgoText: enrichedStories[0]?.timeAgoText ?? "0m"
           },
         ]);
         setIsModalVisible(true);
-      } else {
+      }
+      
+       else {
         handleChatPressLocalWrapper(chat);
       }
     } catch (error) {
@@ -861,7 +890,7 @@ export default function ChatList() {
           {isModalVisible && (
             <Modal
               visible={isModalVisible}
-              animationType="slide"
+              animationType="fade"
               transparent={false}
             >
               <StoryViewer
