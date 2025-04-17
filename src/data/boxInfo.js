@@ -1208,27 +1208,6 @@ const boxInfo = [
     city: "Porto",
   },
   {
-    path: require("../../assets/Porto/The_Bakery_Club.jpg"),
-    title: "The Bakery Club",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+351 962 984 986",
-    coordinates: {
-      latitude: 41.15514150,
-      longitude: -8.68004120,
-    },
-    country: "Portugal",
-    city: "Porto",
-  },
-  {
     path: require("../../assets/Porto/Base.jpg"),
     title: "Base",
     category: "Bars & Clubs",
@@ -1565,27 +1544,6 @@ const boxInfo = [
     city: "Porto",
   },
   {
-    path: require("../../assets/Porto/neri.jpg"),
-    title: "NERI",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+351 961 635 258",
-    coordinates: {
-      latitude: 41.14732230,
-      longitude: -8.66218550 ,
-    },
-    country: "Portugal",
-    city: "Porto",
-  },
-  {
     path: require("../../assets/Porto/Nogueiras.jpg"),
     title: "Nogueira’s",
     category: "Restaurants & Rooftops",
@@ -1627,27 +1585,7 @@ const boxInfo = [
     country: "Portugal",
     city: "Porto",
   },
-  {
-    path: require("../../assets/Porto/Guilty.jpg"),
-    title: "Guilty",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+351 224 919 106",
-    coordinates: {
-      latitude: 41.15544880,
-      longitude: -8.62695060,
-    },
-    country: "Portugal",
-    city: "Porto",
-  },
+ 
 
 
 
