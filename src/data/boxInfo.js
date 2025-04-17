@@ -981,13 +981,13 @@ const boxInfo = [
     title: "INCÓGNITO",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "Cerrado",
-      Martes: "19:00 - 01:00",
-      Miércoles: "19:00 - 01:00",
-      Jueves: "19:00 - 01:00",
-      Viernes: "19:00 - 02:00",
-      Sábado: "19:00 - 02:00",
-      Domingo: "19:00 - 01:00"
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "",
     coordinates: {
@@ -1002,13 +1002,13 @@ const boxInfo = [
     title: "Bar Badassery",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "Cerrado",
-      Martes: "19:00 - 01:00",
-      Miércoles: "19:00 - 01:00",
-      Jueves: "19:00 - 01:00",
-      Viernes: "19:00 - 02:00",
-      Sábado: "19:00 - 02:00",
-      Domingo: "19:00 - 01:00"
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "",
     coordinates: {
@@ -1023,13 +1023,13 @@ const boxInfo = [
     title: "Locke de Santa Joana",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "Cerrado",
-      Martes: "19:00 - 01:00",
-      Miércoles: "19:00 - 01:00",
-      Jueves: "19:00 - 01:00",
-      Viernes: "19:00 - 02:00",
-      Sábado: "19:00 - 02:00",
-      Domingo: "19:00 - 01:00"
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "+351 21 155 5590",
     coordinates: {
@@ -1044,13 +1044,13 @@ const boxInfo = [
     title: "Fúria",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "Cerrado",
-      Martes: "19:00 - 01:00",
-      Miércoles: "19:00 - 01:00",
-      Jueves: "19:00 - 01:00",
-      Viernes: "19:00 - 02:00",
-      Sábado: "19:00 - 02:00",
-      Domingo: "19:00 - 01:00"
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "",
     coordinates: {
@@ -1065,13 +1065,13 @@ const boxInfo = [
     title: "Baz",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "Cerrado",
-      Martes: "19:00 - 01:00",
-      Miércoles: "19:00 - 01:00",
-      Jueves: "19:00 - 01:00",
-      Viernes: "19:00 - 02:00",
-      Sábado: "19:00 - 02:00",
-      Domingo: "19:00 - 01:00"
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "",
     coordinates: {
@@ -1086,13 +1086,13 @@ const boxInfo = [
     title: "Boavista Social Club",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "Cerrado",
-      Martes: "19:00 - 01:00",
-      Miércoles: "19:00 - 01:00",
-      Jueves: "19:00 - 01:00",
-      Viernes: "19:00 - 02:00",
-      Sábado: "19:00 - 02:00",
-      Domingo: "19:00 - 01:00"
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "",
     coordinates: {
@@ -1107,13 +1107,13 @@ const boxInfo = [
     title: "Polémico",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "Cerrado",
-      Martes: "19:00 - 01:00",
-      Miércoles: "19:00 - 01:00",
-      Jueves: "19:00 - 01:00",
-      Viernes: "19:00 - 02:00",
-      Sábado: "19:00 - 02:00",
-      Domingo: "19:00 - 01:00"
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "+351 915 542 795",
     coordinates: {
@@ -1123,6 +1123,471 @@ const boxInfo = [
     country: "Portugal",
     city: "Lisboa",
   },
+
+  {
+    path: require("../../assets/Porto/Praia_da_Luz.jpg"),
+    title: "Praia da Luz",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 22 617 3234",
+    coordinates: {
+      latitude: 41.15342550,
+      longitude: -8.67894360,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+
+  {
+    path: require("../../assets/Porto/tokkotai.jpg"),
+    title: "Tokkotai",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 913 037 171",
+    coordinates: {
+      latitude: 41.14237610,
+      longitude: -8.61564350,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/galerias.jpg"),
+    title: "Galerias",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 965 477 037",
+    coordinates: {
+      latitude: 41.14693550,
+      longitude: -8.61453780 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/The_Bakery_Club.jpg"),
+    title: "The Bakery Club",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 962 984 986",
+    coordinates: {
+      latitude: 41.15514150,
+      longitude: -8.68004120,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/Base.jpg"),
+    title: "Base",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 41.14615890,
+      longitude: -8.61475030,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/Boite.jpg"),
+    title: "Boîte",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 965 477 037",
+    coordinates: {
+      latitude: 41.14692540,
+      longitude: -8.60581590,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/tony_de_angeiras.jpg"),
+    title: "Tony de Angeiras",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 917 380 680",
+    coordinates: {
+      latitude: 41.26198330,
+      longitude: -8.72541880,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/Enoteca_17_._56.jpg"),
+    title: "Enoteca 17 . 56",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 222 448 500",
+    coordinates: {
+      latitude: 41.13681930,
+      longitude: -8.61858130 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/mistu.jpg"),
+    title: "MISTU",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 222 054 016",
+    coordinates: {
+      latitude: 41.14226020,
+      longitude: -8.61617300,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/Yakuza.jpg"),
+    title: "Yakuza",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 924 180 702",
+    coordinates: {
+      latitude: 41.14839390,
+      longitude: -8.61148920,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/Flow.jpg"),
+    title: "Flow",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 926 682 620",
+    coordinates: {
+      latitude: 41.14988870 ,
+      longitude: -8.61457630 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/fe_wine_club.jpg"),
+    title: "Fé Wine & Club",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 927 223 446",
+    coordinates: {
+      latitude: 41.14777780 ,
+      longitude: -8.61222220 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/bosco.jpg"),
+    title: "BOSCO",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 936 290 956",
+    coordinates: {
+      latitude: 41.14480210,
+      longitude: -8.61840810 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/Reitoria.jpg"),
+    title: "Reitoria",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 927 608 628",
+    coordinates: {
+      latitude: 41.14762510,
+      longitude: -8.61539900 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/terra.jpg"),
+    title: "Terra",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 226 177 339",
+    coordinates: {
+      latitude: 41.15671080,
+      longitude: -8.67976000 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/lapa_lapa.jpg"),
+    title: "Lapa Lapa",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 41.15592810,
+      longitude: -8.68088870 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/plano_b.jpg"),
+    title: "Plano B",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 41.14654920,
+      longitude: -8.61385540 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/dstrkt_club.jpg"),
+    title: "DSTRKT Club",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 912 520 970",
+    coordinates: {
+      latitude: 41.14746810,
+      longitude: -8.61082520,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/neri.jpg"),
+    title: "NERI",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 961 635 258",
+    coordinates: {
+      latitude: 41.14732230,
+      longitude: -8.66218550 ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/Nogueiras.jpg"),
+    title: "Nogueira’s",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 913 037 171",
+    coordinates: {
+      latitude: 41.14816110,
+      longitude: -8.61358610,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/maria_pistolas.jpg"),
+    title: "Maria Pistolas",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 963 113 450",
+    coordinates: {
+      latitude: 41.14839770,
+      longitude: -8.61274980  ,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/Guilty.jpg"),
+    title: "Guilty",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 224 919 106",
+    coordinates: {
+      latitude: 41.15544880,
+      longitude: -8.62695060,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+
 
   {
     path: require("../../assets/Madrid/Gaston.jpg"),
@@ -2035,13 +2500,13 @@ const boxInfo = [
     title: "Casa Salesas",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "+34 910 05 48 48",
     coordinates: {
@@ -2056,13 +2521,13 @@ const boxInfo = [
     title: "Bar Trafalgar",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "+34 609 70 26 73",
     coordinates: {
@@ -2077,13 +2542,13 @@ const boxInfo = [
     title: "Casa Canito",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "",
     coordinates: {
@@ -2098,13 +2563,13 @@ const boxInfo = [
     title: "Juana La Loca",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "+34 914 50 02 36",
     coordinates: {
@@ -2119,13 +2584,13 @@ const boxInfo = [
     title: "CASA MÚSICA",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "+34 913 323 837",
     coordinates: {
@@ -2140,13 +2605,13 @@ const boxInfo = [
     title: "La Notaria",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "+34 914 50 02 36",
     coordinates: {
@@ -2161,13 +2626,13 @@ const boxInfo = [
     title: "Ficus Bar",
     category: "Bars & Clubs",
     hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "",
     coordinates: {
@@ -2182,13 +2647,13 @@ const boxInfo = [
     title: "PABBLO",
     category: "Restaurants & Rooftops",
     hours: {
-      Lunes: "09:00 - 00:00",
-      Martes: "09:00 - 00:00",
-      Miércoles: "09:00 - 01:00",
-      Jueves: "09:00 - 01:00",
-      Viernes: "09:00 - 02:00",
-      Sábado: "12:00 - 02:00",
-      Domingo: "12:00 - 00:00",
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
     },
     number: "+34 910 88 22 01",
     coordinates: {

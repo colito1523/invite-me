@@ -31,6 +31,7 @@ export const useLocationAndTime = () => {
               { name: "Madrid", lat: 40.4168, lon: -3.7038, country: "España" },
               { name: "Barcelona", lat: 41.3851, lon: 2.1734, country: "España" },
               { name: "Lisboa", lat: 38.7223, lon: -9.1393, country: "Portugal" },
+              { name: "Porto", lat: 41.1579, lon: -8.6291, country: "Portugal" },
               { name: "Londres", lat: 51.5074, lon: -0.1278, country: "Inglaterra" },
             ];
 

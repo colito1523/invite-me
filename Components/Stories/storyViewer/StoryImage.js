@@ -4,21 +4,19 @@ import { Image, Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-export default function StoryImage({ currentStory, ...rest }) {
+export default function StoryImage({ currentStory, isPreloaded, ...rest }) {
   const [imageDimensions, setImageDimensions] = useState({
     width: "100%",
     height: "100%",
   });
 
-  if (!currentStory?.storyUrl) {
-    return null;
-  }
+  if (!currentStory?.storyUrl) return null;
 
   return (
     <Image
-    source={{ uri: currentStory.storyUrl }}
+      source={{ uri: currentStory.storyUrl }}
       style={[imageDimensions, rest.style]}
-      fadeDuration={0}
+      fadeDuration={isPreloaded ? 0 : 300} // 💥 animación solo si no está precargada
       onLoadStart={() => {
         currentStory.loadStartTime = Date.now();
       }}
@@ -36,7 +34,7 @@ export default function StoryImage({ currentStory, ...rest }) {
       onError={(error) => {
         console.error(`Error cargando historia ${currentStory.id}:`, error);
       }}
-      {...rest} // Permite pasar cualquier otra prop a <Image> desde <StoryViewer>
-    />
+      {...rest}
+/>
   );
 }

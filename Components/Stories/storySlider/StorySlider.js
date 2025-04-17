@@ -42,6 +42,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [isNightMode, setIsNightMode] = useState(false)
   const [isPreloading, setIsPreloading] = useState(false);
+  const [cachedImages, setCachedImages] = useState({});
 
   // Add default value for props.route
   const route = props.route || {}
@@ -152,8 +153,39 @@ export default React.forwardRef(function StorySlider(props, ref) {
   }, [])
 
   useEffect(() => {
-    loadExistingStories(t, setStories, setUnseenStories, isUploading)
+    loadExistingStories(t, (newStories) => {
+      setStories(newStories)
+  
+      // 👉 Log solo una vez al cargar
+      newStories.forEach((item) => {
+        if (item.userStories && item.userStories.length > 0) {
+          console.log(`Cargando historia de ${item.username}:`, item.userStories[0])
+        }
+      })
+    }, setUnseenStories, isUploading)
   }, [])
+  useEffect(() => {
+    const preloadImages = async () => {
+      const newCache = {};
+      for (const story of stories) {
+        const firstImage = story.userStories?.[0]?.storyUrl;
+        if (firstImage) {
+          try {
+            await Image.prefetch(firstImage);
+            newCache[story.uid] = firstImage;
+          } catch (e) {
+            console.warn(`Error precargando imagen de ${story.username}:`, e);
+          }
+        }
+      }
+      setCachedImages(newCache);
+    };
+  
+    if (stories.length > 0) {
+      preloadImages();
+    }
+  }, [stories]);
+  
 
   const updateUnseenStories = (updatedUnseenStories) => {
     setUnseenStories((prev) => ({
@@ -206,7 +238,16 @@ export default React.forwardRef(function StorySlider(props, ref) {
     // Precargar la primera imagen
     setIsPreloading(true);
     try {
-      await Image.prefetch(stories[index].userStories[unseenIndex !== -1 ? unseenIndex : 0].storyUrl);
+      const story = stories[index];
+const fallbackImage = story.userStories[unseenIndex !== -1 ? unseenIndex : 0]?.storyUrl;
+
+if (!cachedImages[story.uid]) {
+  try {
+    await Image.prefetch(fallbackImage);
+  } catch (error) {
+    console.error("Error preloading image:", error);
+  }
+}
     } catch (error) {
       console.error("Error preloading image:", error);
     }

@@ -486,6 +486,7 @@ export function StoryViewer({
             <StoryImage
   currentStory={currentStory} // pasamos la historia actual
   style={styles.image} // aplica tus estilos base
+  isPreloaded={!!loadedImages[currentStory?.id]} // ✅ esta es la clave
   fadeDuration={0}
   priority="high"
   loadingIndicatorSource={require("../../../assets/notification-icon.png")}
