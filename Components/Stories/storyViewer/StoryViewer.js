@@ -513,7 +513,7 @@ essiveRenderingEnabled={true}
                   currentStory={stories[currentIndex]}
                   user={auth.currentUser}
                   t={t}
-                  hoursAgo={calculateHoursAgo(currentStory?.createdAt)}
+                  hoursAgo={currentStory?.hoursAgo}
                   onProfilePress={async () => {
                     // Lógica de navegación (similar a la que tienes)
                     await onClose(localUnseenStories);

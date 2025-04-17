@@ -5,6 +5,7 @@ import { Alert } from "react-native"
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import * as ImageManipulator from "expo-image-manipulator"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { calculateHoursAgo } from "../storyViewer/storyUtils";
 
 // Función para obtener la lista de amigos
 const getFriendsList = async (userId) => {
@@ -54,11 +55,16 @@ export const loadExistingStories = async (t, setStories, setUnseenStories, isUpl
     const userStoriesRef = collection(database, "users", user.uid, "stories")
     const userStoriesSnapshot = await getDocs(userStoriesRef)
     const userStories = userStoriesSnapshot.docs
-      .map((doc) => ({
+    .map((doc) => {
+      const data = doc.data();
+      return {
         id: doc.id,
-        ...doc.data(),
-      }))
-      .filter((story) => new Date(story.expiresAt.toDate()) > now)
+        ...data,
+        hoursAgo: calculateHoursAgo(data.createdAt),
+      };
+    })
+    .filter((story) => new Date(story.expiresAt.toDate()) > now);
+  
 
     if (userStories.length > 0 || isUploading) {
       loadedStories.unshift({
@@ -87,11 +93,15 @@ export const loadExistingStories = async (t, setStories, setUnseenStories, isUpl
       const friendStoriesRef = collection(database, "users", friend.friendId, "stories")
       const friendStoriesSnapshot = await getDocs(friendStoriesRef)
       const friendStories = friendStoriesSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .filter((story) => new Date(story.expiresAt.toDate()) > now)
+  .map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      hoursAgo: calculateHoursAgo(data.createdAt),
+    };
+  })
+  .filter((story) => new Date(story.expiresAt.toDate()) > now);
 
       if (friendStories.length > 0) {
         const friendDocRef = doc(database, "users", friend.friendId)
