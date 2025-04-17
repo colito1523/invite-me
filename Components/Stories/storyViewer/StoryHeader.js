@@ -32,12 +32,13 @@ const StoryHeader = ({
 
   // Función para formatear el tiempo adecuadamente
   const formatTimeAgo = (hours) => {
-    if (hours < 1) {
-      const minutes = Math.floor(hours * 60);
-      return t("storyViewer.minutesAgo", { minutes });
+    const totalMinutes = Math.floor(hours * 60);
+    if (totalMinutes < 60) {
+      return t("storyViewer.minutesAgo", { minutes: totalMinutes });
     }
     return t("storyViewer.hoursAgo", { hours: Math.floor(hours) });
   };
+  
 
   return (
     <View style={styles.userInfo}>

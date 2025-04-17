@@ -277,7 +277,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
       {isModalVisible && (
         <Modal
           visible={isModalVisible}
-          animationType="slide"
+          animationType="fade"
           transparent={false}
         >
           <StoryViewer

@@ -513,7 +513,10 @@ export const handleUserPress = async ({
             {
               uid: selectedUser.id,
               username: selectedUser.username,
-              userStories,
+              userStories: userStories.map(story => ({
+                ...story,
+                hoursAgo: calculateHoursAgo(story.createdAt), // ⬅ agregamos esto
+              })),
             },
           ],
           initialIndex: 0,
@@ -950,8 +953,7 @@ export const useStoryProgress = ({
 
 export function calculateHoursAgo(createdAt) {
   if (!createdAt) return 0;
-  
-  // Si el timestamp de Firestore tiene el método toMillis, úsalo
+
   let timeInMs;
   if (typeof createdAt.toMillis === "function") {
     timeInMs = createdAt.toMillis();
@@ -960,9 +962,9 @@ export function calculateHoursAgo(createdAt) {
   } else {
     timeInMs = new Date(createdAt).getTime();
   }
-  
+
   if (isNaN(timeInMs)) return 0;
-  
+
   const diffInMs = Date.now() - timeInMs;
-  return Math.floor(diffInMs / (1000 * 60 * 60));
+  return diffInMs / (1000 * 60 * 60); // ✅ devuelve número decimal de horas
 }
