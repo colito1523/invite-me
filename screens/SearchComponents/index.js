@@ -37,6 +37,7 @@ import RecommendedUserItem from "./RecommendedUserItem";
 import SearchHistory from "./SearchHistory";
 import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { calculateHoursAgo } from "../../Components/Stories/storyViewer/storyUtils"; // asegurate de tener esta importación
 import { styles, lightTheme, darkTheme } from "./styles";
 import SearchSkeleton from "./SearchSkeleton";
 
@@ -364,6 +365,22 @@ const [finalResults, setFinalResults] = useState([]);
 
             // 3) Si tiene historias almacenadas en `userStories`, abrir directamente el visor de historias
             if (item.userStories && item.userStories.length > 0) {
+              const enrichedUserStories = item.userStories.map((story) => {
+                const createdAt = story.createdAt?.seconds
+                  ? new Date(story.createdAt.seconds * 1000)
+                  : new Date(story.createdAt);
+              
+                const horas = calculateHoursAgo(createdAt);
+                console.log("🕓 Hora de publicación:", createdAt, "➡️", horas);
+              
+                return {
+                  ...story,
+                  hoursAgo: horas,
+                };
+              });
+              
+              
+            
               setSelectedStories([
                 {
                   uid: item.id,
@@ -372,7 +389,7 @@ const [finalResults, setFinalResults] = useState([]);
                     item.username ||
                     t("unknownUser"),
                   profileImage: item.profileImage,
-                  userStories: item.userStories,
+                  userStories: enrichedUserStories,
                 },
               ]);
               setIsModalVisible(true);
@@ -571,7 +588,7 @@ const [finalResults, setFinalResults] = useState([]);
       {isModalVisible && (
         <Modal
           visible={isModalVisible}
-          animationType="slide"
+          animationType="fade"
           transparent={false}
         >
           <StoryViewer

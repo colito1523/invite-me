@@ -7,6 +7,8 @@ import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
 import { styles } from "./styles";
 import { collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
 import { database } from "../../config/firebase"; // Asegúrate de que la ruta sea la correcta
+import { calculateHoursAgo } from "../../Components/Stories/storyViewer/storyUtils";
+
 
 const SearchHistory = ({
   user,
@@ -62,19 +64,34 @@ const SearchHistory = ({
         const storiesSnapshot = await getDocs(storiesRef);
         const now = new Date();
         const userStories = storiesSnapshot.docs
-          .map((doc) => ({
+        .map((doc) => {
+          const data = doc.data();
+      
+          const createdAt = data.createdAt?.seconds
+            ? new Date(data.createdAt.seconds * 1000)
+            : new Date(data.createdAt);
+      
+          const expiresAt = data.expiresAt?.toDate?.() ?? new Date(data.expiresAt);
+      
+          const horas = calculateHoursAgo(createdAt);
+          console.log("📜 Historial - Hora de publicación:", createdAt, "➡️", horas);
+      
+          return {
             id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt,
-            expiresAt: doc.data().expiresAt,
-            storyUrl: doc.data().storyUrl,
-            profileImage: doc.data().profileImage || updatedUser.profileImage,
+            ...data,
+            createdAt,
+            expiresAt,
+            hoursAgo: horas,
+            storyUrl: data.storyUrl,
+            profileImage: data.profileImage || updatedUser.profileImage,
             uid: item.id,
-            username: doc.data().username || updatedUser.username || t("unknownUser"),
-            viewers: doc.data().viewers || [],
-            likes: doc.data().likes || [],
-          }))
-          .filter((story) => new Date(story.expiresAt.toDate()) > now);
+            username: data.username || updatedUser.username || t("unknownUser"),
+            viewers: data.viewers || [],
+            likes: data.likes || [],
+          };
+        })
+        .filter((story) => story.expiresAt > now);
+      
   
         if (userStories.length > 0) {
           setSelectedStories([
@@ -233,7 +250,7 @@ const SearchHistory = ({
     <View>
       {filteredHistory.slice(0, 5).map((item, index) => renderHistoryItem(item, index))}
       {isModalVisible && (
-        <Modal visible={isModalVisible} animationType="slide" transparent={false}>
+        <Modal visible={isModalVisible} animationType="fade" transparent={false}>
           <StoryViewer
             stories={selectedStories}
             initialIndex={0}
