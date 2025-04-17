@@ -322,7 +322,6 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         userStories,
       };
   
-      console.log(`🧾 Historia de ${storyData.username || storyData.firstName}:`, userStories[0]);
   
       setSelectedStories([storyData]);
       setIsModalVisible(true);

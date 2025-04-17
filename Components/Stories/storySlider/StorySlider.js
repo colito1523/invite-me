@@ -157,11 +157,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
       setStories(newStories)
   
       // 👉 Log solo una vez al cargar
-      newStories.forEach((item) => {
-        if (item.userStories && item.userStories.length > 0) {
-          console.log(`Cargando historia de ${item.username}:`, item.userStories[0])
-        }
-      })
+
     }, setUnseenStories, isUploading)
   }, [])
   useEffect(() => {

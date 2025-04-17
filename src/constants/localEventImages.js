@@ -53,6 +53,7 @@ export const localEventImages = {
     baz: require("../../assets/Lisboa/baz.jpg"),
     boavista_social_club: require("../../assets/Lisboa/Boavista_Social_Club.jpg"),
     polemico: require("../../assets/Lisboa/Polemico.jpg"),
+    disque_disse: require("../../assets/Lisboa/Disque_Disse.jpg"),
 
     praia_da_luz: require("../../assets/Porto/Praia_da_Luz.jpg"),
     yakuza: require("../../assets/Porto/Yakuza.jpg"),
@@ -76,6 +77,8 @@ export const localEventImages = {
     maria_pistolas: require("../../assets/Porto/maria_pistolas.jpg"),
     guilty: require("../../assets/Porto/Guilty.jpg"),
     tony_de_angeiras: require("../../assets/Porto/tony_de_angeiras.jpg"),
+    p4_na_praia: require("../../assets/Porto/P4_Na_Praia.jpg"),
+    honi: require("../../assets/Porto/honi.jpg"),
 
     gaston: require("../../assets/Madrid/Gaston.jpg"),
     tuetano: require("../../assets/Madrid/Tuetano.jpg"),

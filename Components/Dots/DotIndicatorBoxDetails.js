@@ -178,9 +178,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
         
 
           
-            if (userStories.length > 0) {
-              console.log(`Cargando historia de ${userData.username || userData.firstName || "Usuario sin nombre"}:`, userStories[0]);
-            }
+           
 
           const hasStories = userStories.length > 0;
 

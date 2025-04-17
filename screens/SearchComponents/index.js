@@ -371,7 +371,7 @@ const [finalResults, setFinalResults] = useState([]);
                   : new Date(story.createdAt);
               
                 const horas = calculateHoursAgo(createdAt);
-                console.log("🕓 Hora de publicación:", createdAt, "➡️", horas);
+
               
                 return {
                   ...story,

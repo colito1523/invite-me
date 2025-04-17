@@ -22,6 +22,24 @@ const boxInfo = [
     priority: true, // Esto hace que aparezca en la sección de priorida
   },
   {
+    path: require("../../assets/Lisboa/Disque_Disse.jpg"),
+    title: "Disque Disse",
+    category: "Festivities",
+    details: {
+      es: "Un oasis urbano en forma de evento, una experiencia que reúne a personas, música, arte y gastronomía.",
+      en: "An urban oasis in the form of an event, an experience that brings together people, music, art and food.",
+      pt: "Um oásis urbano em forma de evento, uma experiência que reúne pessoas, música, arte e comida.",
+    },
+    number: "",
+    coordinates: {
+      latitude: 38.69606140,
+      longitude: -9.43036460,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    availableDates: ["17 May"],
+  },
+  {
     path: require("../../assets/Lisboa/SonarLisboa.jpg"),
     title: "Sónar Lisboa 2025",
     category: "Festivities",
@@ -136,6 +154,27 @@ const boxInfo = [
     city: "Lisboa",
   },
   {
+    path: require("../../assets/Lisboa/Meceiria.jpg"),
+    title: "Mercearia Pachecas",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "08:00 - 22:00",
+      Martes: "08:00 - 22:00",
+      Miércoles: "08:00 - 22:00",
+      Jueves: "08:00 - 22:00",
+      Viernes: "08:00 - 22:00",
+      Sábado: "08:00 - 22:00",
+      Domingo: "08:00 - 22:00"
+    },    
+    number: "+351 915 394 817",
+    coordinates: {
+      latitude: 38.7244767,
+      longitude: -9.1559833,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+  },
+  {
     path: require("../../assets/Lisboa/Praca_das_flores.jpg"),
     title: "Praça das Flores",
     category: "Bars & Clubs",
@@ -173,6 +212,132 @@ const boxInfo = [
     coordinates: {
       latitude: 38.7113519,
       longitude: -9.1424033,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+  },
+  {
+    path: require("../../assets/Lisboa/Bar_Badassery.jpg"),
+    title: "Bar Badassery",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 38.72007940,
+      longitude: -9.16117710 ,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+  },
+  {
+    path: require("../../assets/Lisboa/Locke_de_Santa_Joana.jpg"),
+    title: "Locke de Santa Joana",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 21 155 5590",
+    coordinates: {
+      latitude: 38.72530560,
+      longitude: -9.14744820,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+  },
+  {
+    path: require("../../assets/Lisboa/Furia.jpg"),
+    title: "Fúria",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 38.71128980,
+      longitude: -9.15258690,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+  },
+  {
+    path: require("../../assets/Lisboa/baz.jpg"),
+    title: "Baz",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 38.71128980,
+      longitude: -9.15258690,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+  },
+  {
+    path: require("../../assets/Lisboa/Boavista_Social_Club.jpg"),
+    title: "Boavista Social Club",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 38.70865120,
+      longitude: -9.14771350,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+  },
+  {
+    path: require("../../assets/Lisboa/Polemico.jpg"),
+    title: "Polémico",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 915 542 795",
+    coordinates: {
+      latitude: 38.71998310,
+      longitude: -9.16055610,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -489,27 +654,6 @@ const boxInfo = [
     coordinates: {
       latitude: 38.7142335,
       longitude: -9.1530558,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-  },
-  {
-    path: require("../../assets/Lisboa/Meceiria.jpg"),
-    title: "Mercearia Pachecas",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "08:00 - 22:00",
-      Martes: "08:00 - 22:00",
-      Miércoles: "08:00 - 22:00",
-      Jueves: "08:00 - 22:00",
-      Viernes: "08:00 - 22:00",
-      Sábado: "08:00 - 22:00",
-      Domingo: "08:00 - 22:00"
-    },    
-    number: "+351 915 394 817",
-    coordinates: {
-      latitude: 38.7244767,
-      longitude: -9.1559833,
     },
     country: "Portugal",
     city: "Lisboa",
@@ -997,132 +1141,7 @@ const boxInfo = [
     country: "Portugal",
     city: "Lisboa",
   },
-  {
-    path: require("../../assets/Lisboa/Bar_Badassery.jpg"),
-    title: "Bar Badassery",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "",
-    coordinates: {
-      latitude: 38.72007940,
-      longitude: -9.16117710 ,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-  },
-  {
-    path: require("../../assets/Lisboa/Locke_de_Santa_Joana.jpg"),
-    title: "Locke de Santa Joana",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+351 21 155 5590",
-    coordinates: {
-      latitude: 38.72530560,
-      longitude: -9.14744820,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-  },
-  {
-    path: require("../../assets/Lisboa/Furia.jpg"),
-    title: "Fúria",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "",
-    coordinates: {
-      latitude: 38.71128980,
-      longitude: -9.15258690,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-  },
-  {
-    path: require("../../assets/Lisboa/baz.jpg"),
-    title: "Baz",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "",
-    coordinates: {
-      latitude: 38.71128980,
-      longitude: -9.15258690,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-  },
-  {
-    path: require("../../assets/Lisboa/Boavista_Social_Club.jpg"),
-    title: "Boavista Social Club",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "",
-    coordinates: {
-      latitude: 38.70865120,
-      longitude: -9.14771350,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-  },
-  {
-    path: require("../../assets/Lisboa/Polemico.jpg"),
-    title: "Polémico",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+351 915 542 795",
-    coordinates: {
-      latitude: 38.71998310,
-      longitude: -9.16055610,
-    },
-    country: "Portugal",
-    city: "Lisboa",
-  },
+ 
 
   {
     path: require("../../assets/Porto/Praia_da_Luz.jpg"),
@@ -1226,6 +1245,48 @@ const boxInfo = [
     coordinates: {
       latitude: 41.14615890,
       longitude: -8.61475030,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/P4_Na_Praia.jpg"),
+    title: "P4 Na Praia",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+351 915 548 251",
+    coordinates: {
+      latitude: 41.08943350,
+      longitude: -8.65645970,
+    },
+    country: "Portugal",
+    city: "Porto",
+  },
+  {
+    path: require("../../assets/Porto/honi.jpg"),
+    title: "HONI",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 41.38627930,
+      longitude: -8.77236690 ,
     },
     country: "Portugal",
     city: "Porto",
@@ -1589,6 +1650,7 @@ const boxInfo = [
   },
 
 
+
   {
     path: require("../../assets/Madrid/Gaston.jpg"),
     title: "Gaston",
@@ -1690,6 +1752,174 @@ const boxInfo = [
     coordinates: {
       latitude: 40.4225554,
       longitude: -3.6908309,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/Casa_Salesas.jpg"),
+    title: "Casa Salesas",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+34 910 05 48 48",
+    coordinates: {
+      latitude: 40.42520890,
+      longitude: -3.69636790,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/Bar_Trafalgar.jpg"),
+    title: "Bar Trafalgar",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+34 609 70 26 73",
+    coordinates: {
+      latitude: 40.43103420,
+      longitude: -3.70087640,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/Casa_Canito.jpg"),
+    title: "Casa Canito",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 40.42193600,
+      longitude: -3.69007360,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/Juana_La_Loca.jpg"),
+    title: "Juana La Loca",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+34 914 50 02 36",
+    coordinates: {
+      latitude: 40.42177670,
+      longitude: -3.69031570,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/casa_musica.jpg"),
+    title: "CASA MÚSICA",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+34 913 323 837",
+    coordinates: {
+      latitude: 40.42572880,
+      longitude: -3.69879560,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/La_Notaria.jpg"),
+    title: "La Notaria",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+34 914 50 02 36",
+    coordinates: {
+      latitude: 40.42177670,
+      longitude: -3.69031570,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/Ficus_Bar.jpg"),
+    title: "Ficus Bar",
+    category: "Bars & Clubs",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "",
+    coordinates: {
+      latitude: 40.42370840,
+      longitude: -3.69488910,
+    },
+    country: "España",
+    city: "Madrid",
+  },
+  {
+    path: require("../../assets/Madrid/PABBLO.jpg"),
+    title: "PABBLO",
+    category: "Restaurants & Rooftops",
+    hours: {
+      Lunes: "-",
+      Martes: "-",
+      Miércoles: "-",
+      Jueves: "-",
+      Viernes: "-",
+      Sábado: "-",
+      Domingo: "-"
+    },
+    number: "+34 910 88 22 01",
+    coordinates: {
+      latitude:  40.45030670,
+      longitude: -3.69271980,
     },
     country: "España",
     city: "Madrid",
@@ -2495,174 +2725,7 @@ const boxInfo = [
     country: "España",
     city: "Madrid",
   },
-  {
-    path: require("../../assets/Madrid/Casa_Salesas.jpg"),
-    title: "Casa Salesas",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+34 910 05 48 48",
-    coordinates: {
-      latitude: 40.42520890,
-      longitude: -3.69636790,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/Bar_Trafalgar.jpg"),
-    title: "Bar Trafalgar",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+34 609 70 26 73",
-    coordinates: {
-      latitude: 40.43103420,
-      longitude: -3.70087640,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/Casa_Canito.jpg"),
-    title: "Casa Canito",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "",
-    coordinates: {
-      latitude: 40.42193600,
-      longitude: -3.69007360,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/Juana_La_Loca.jpg"),
-    title: "Juana La Loca",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+34 914 50 02 36",
-    coordinates: {
-      latitude: 40.42177670,
-      longitude: -3.69031570,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/casa_musica.jpg"),
-    title: "CASA MÚSICA",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+34 913 323 837",
-    coordinates: {
-      latitude: 40.42572880,
-      longitude: -3.69879560,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/La_Notaria.jpg"),
-    title: "La Notaria",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+34 914 50 02 36",
-    coordinates: {
-      latitude: 40.42177670,
-      longitude: -3.69031570,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/Ficus_Bar.jpg"),
-    title: "Ficus Bar",
-    category: "Bars & Clubs",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "",
-    coordinates: {
-      latitude: 40.42370840,
-      longitude: -3.69488910,
-    },
-    country: "España",
-    city: "Madrid",
-  },
-  {
-    path: require("../../assets/Madrid/PABBLO.jpg"),
-    title: "PABBLO",
-    category: "Restaurants & Rooftops",
-    hours: {
-      Lunes: "-",
-      Martes: "-",
-      Miércoles: "-",
-      Jueves: "-",
-      Viernes: "-",
-      Sábado: "-",
-      Domingo: "-"
-    },
-    number: "+34 910 88 22 01",
-    coordinates: {
-      latitude:  40.45030670,
-      longitude: -3.69271980,
-    },
-    country: "España",
-    city: "Madrid",
-  },
+ 
 
   {
     path: require("../../assets/Barcelona/Chica_Club.jpg"),

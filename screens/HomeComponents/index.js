@@ -710,7 +710,7 @@ useEffect(() => {
             <View
               style={[
                 styles.unreadIndicator,
-                { backgroundColor: isNightMode ? "white" : "black" },
+                { backgroundColor: isNightMode ? "#ebddd5" : "black" },
               ]}
             />
           )}

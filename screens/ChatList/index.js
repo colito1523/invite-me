@@ -440,9 +440,7 @@ export default function ChatList() {
           };
         });
       
-        enrichedStories.forEach((story) => {
-          console.log(`🧾 Historia de ${chatUser.username.trim()} :`, story);
-        });
+
       
         setSelectedStories([
           {

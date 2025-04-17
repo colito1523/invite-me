@@ -74,7 +74,7 @@ const SearchHistory = ({
           const expiresAt = data.expiresAt?.toDate?.() ?? new Date(data.expiresAt);
       
           const horas = calculateHoursAgo(createdAt);
-          console.log("📜 Historial - Hora de publicación:", createdAt, "➡️", horas);
+
       
           return {
             id: doc.id,
