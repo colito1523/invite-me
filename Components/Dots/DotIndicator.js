@@ -271,17 +271,67 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   }, [attendeesList]);
   
 
-  const handlePress = async (uid) => {
-    await handleUserPressDotIndicator({
-      uid,
-      navigation,
-      blockedUsers,
-      t,
-      setSelectedStories,
-      setIsModalVisible,
-      setModalVisible, // Pasar este setter
-    });
+  const calculateHoursAgo = (createdAt) => {
+    if (!createdAt) return 0;
+    const now = new Date();
+    const diffMs = now - createdAt;
+    const diffHours = diffMs / (1000 * 60 * 60);
+    return diffHours;
   };
+  
+  const handlePress = async (uid) => {
+    try {
+      const userDocRef = doc(database, "users", uid);
+      const userDoc = await getDoc(userDocRef);
+      const userData = userDoc.exists() ? userDoc.data() : null;
+  
+      if (!userData) return;
+  
+      const storiesRef = collection(database, "users", uid, "stories");
+      const storiesSnapshot = await getDocs(storiesRef);
+      const now = new Date();
+  
+      const userStories = storiesSnapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          const createdAt = data.createdAt?.toDate();
+          const expiresAt = data.expiresAt?.toDate();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt,
+            expiresAt,
+            hoursAgo: calculateHoursAgo(createdAt),
+          };
+        })
+        .filter((story) => story.expiresAt > now);
+  
+      if (userStories.length === 0) return;
+  
+      const firstName = userData.firstName || "";
+      const lastName = userData.lastName || "";
+      const username = userData.username?.trim();
+      const profileImage =
+        userData.photoUrls?.[0] || "https://via.placeholder.com/150";
+  
+        const storyData = {
+          uid,
+          firstName: userData.firstName || "",
+          lastName: userData.lastName || "",
+          secondName: userData.secondName || "",
+          profileImage: profileImage || "https://via.placeholder.com/150",
+          userStories,
+        };
+  
+      console.log(`🧾 Historia de ${username || firstName}:`, userStories[0]);
+  
+      setSelectedStories([storyData]);
+      setIsModalVisible(true);
+    } catch (error) {
+      console.error("Error al cargar la historia:", error);
+    }
+  };
+  
   const currentStyles = isNightMode ? nightStyles : dayStyles;
 
   return (
@@ -404,7 +454,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       />
 
       {isModalVisible && (
-        <Modal visible={isModalVisible} animationType="slide" transparent={false}>
+        <Modal visible={isModalVisible} animationType="fade" transparent={false}>
           <StoryViewer
             stories={selectedStories}
             initialIndex={0}
