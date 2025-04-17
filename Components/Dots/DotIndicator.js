@@ -361,9 +361,9 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
 ))}
 
 {filteredAttendees.length > 4 && (
-  <View style={[currentStyles.moreContainer, { marginLeft: -15, zIndex: 0 }]}>
+  <View style={[currentStyles.moreContainer, { marginLeft: -12, zIndex: 0 }]}>
     <Text style={currentStyles.moreText}>
-      {filteredAttendees.length - 4}
+      +{filteredAttendees.length - 4}
     </Text>
   </View>
 )}
