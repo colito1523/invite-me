@@ -154,6 +154,8 @@ export const fetchData = async ({
   selectedDate,
   setPrivateEvents, // Este debe ser pasado correctamente
 }) => {
+  const t0 = Date.now();
+  console.log("⏱ [fetchData] inicio");
   try {
     setLoading(true);
 
@@ -173,8 +175,10 @@ export const fetchData = async ({
       }),
     ]);
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("❌ [fetchData] error:", error);
   } finally {
+    const dt = Date.now() - t0;
+    console.log(`⏱ [fetchData] fin → ${dt} ms`);
     setLoading(false);
   }
 };
@@ -250,6 +254,10 @@ export const listenForNotificationChanges = (setNotificationIconState) => {
 
 
 export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxData, selectedDate }) => {
+  const t0 = Date.now();
+  let storageCalls = 0;
+  let firestoreDocs = 0;
+  console.log("⏱ [fetchBoxData] inicio");
   try {
     let blockedUsers = [];
     let userNearestCity = "";

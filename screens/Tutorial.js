@@ -11,7 +11,7 @@ import {
 import { Video } from 'expo-av';
 import { Image } from 'expo-image';
 import { auth, database } from '../config/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc  } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
@@ -126,9 +126,9 @@ export default function Tutorial() {
     try {
       if (auth.currentUser) {
         const userRef = doc(database, "users", auth.currentUser.uid);
-        await updateDoc(userRef, {
+        await setDoc(userRef, {
           hasSeenTutorial: true
-        });
+        }, { merge: true });
       }
       navigation.reset({
         index: 0,

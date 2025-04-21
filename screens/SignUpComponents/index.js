@@ -17,7 +17,7 @@ import { ProgressBar } from "react-native-paper";
 import { AntDesign, Ionicons, } from "@expo/vector-icons";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, database } from "../../config/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import i18n from "i18next";
@@ -245,6 +245,9 @@ export default function SignUp() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     try {
       const emailToLower = answers.email.trim().toLowerCase();
       const usernameToLower = answers.username.trim().toLowerCase();
