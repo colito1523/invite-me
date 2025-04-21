@@ -152,45 +152,25 @@ function AuthStack() {
 function RootNavigator() {
   const { user, setUser } = React.useContext(AuthenticatedUserContext);
   const [loading, setLoading] = React.useState(true);
-  const appState = useRef(AppState.currentState); // Trackea el estado de la app
-
-  // Escuchamos los cambios de AppState (foreground / background)
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", nextAppState => {
-      appState.current = nextAppState;
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
 
   // Solo actualizamos el usuario si es necesario
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authenticatedUser) => {
-      // ✅ Evitamos actualizar si solo volvió del background y ya estaba autenticado
-      if (
-        appState.current === "active" &&
-        user &&
-        authenticatedUser?.uid === user.uid
-      ) {
-        setLoading(false);
-        return;
-      }
-
-      if (authenticatedUser) {
+      // Solo ejecutar si el usuario cambia o si es la primera vez
+      if (!user && authenticatedUser) {
         setUser(authenticatedUser);
         const userDoc = doc(database, "users", authenticatedUser.uid);
-        await getDoc(userDoc); // Podés agregar lógica extra acá si querés
-      } else {
+        await getDoc(userDoc);
+      } else if (!authenticatedUser) {
         setUser(null);
       }
-
+  
       setLoading(false);
     });
-
+  
     return () => unsubscribe();
-  }, [user]);
+  }, []); // ← OJO: sin dependencias
+  
 
   if (loading) {
     return (

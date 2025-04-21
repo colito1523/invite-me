@@ -22,6 +22,7 @@ import Colors from "../../constants/Colors";
 import Box from "../../Components/Boxs/Box";
 import DotIndicator from "../../Components/Dots/DotIndicator";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import dayjs from "dayjs";
 import { useLocationAndTime } from "../../src/hooks/useLocationAndTime";
 import StorySlider from "../../Components/Stories/storySlider/StorySlider";
@@ -68,7 +69,10 @@ const Header = ({ isNightMode, toggleMenu, handleDateChange, setLoading }) => {
   );
 };
 
+let APP_START_TS = Date.now();   // fuera del componente
+
 const Home = React.memo(() => {
+  const firstRenderRef = useRef(Date.now());
   const { selectedDate, setSelectedDate } = useDate(); // Usar el contexto
   const [unreadNotifications, setUnreadNotifications] = useState(false);
   const { locationGranted, country, city, isNightMode } = useLocationAndTime();
@@ -80,6 +84,7 @@ const Home = React.memo(() => {
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCity, setSelectedCity] = useState("All Cities");
+  const [preferredCityLoaded, setPreferredCityLoaded] = useState(false);   // 🆕
   const [profileImage, setProfileImage] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const selectedDateRef = useRef(dayjs().format("D MMM"));
@@ -112,6 +117,36 @@ useEffect(() => {
 }, [hasUnreadMessages]); // Añade esta línea
 
 useEffect(() => {
+  const loadPreferredCity = async () => {
+    try {
+      const saved = await AsyncStorage.getItem("preferredCity");
+      if (saved) setSelectedCity(saved);
+    } catch (e) {
+      console.log("⚠️  Error leyendo preferredCity", e);
+    } finally {
+      setPreferredCityLoaded(true);
+    }
+  };
+  loadPreferredCity();
+}, []);
+
+useEffect(() => {
+  if (!preferredCityLoaded) return;               // ⬅️  espera a cargar AsyncStorage
+
+  // fallback sólo si el usuario NO eligió nada
+  setSelectedCity(prev => {
+    if (prev !== "All Cities") return prev;       // ya hay ciudad elegida
+    if (city)                       return city;
+    if (country === "Portugal")     return "Lisboa";
+    if (country === "España")       return "Madrid";
+    if (country === "Inglaterra")   return "Londres";
+    return "All Cities";
+  });
+}, [city, country, preferredCityLoaded]);
+
+
+
+useEffect(() => {
   const user = auth.currentUser;
 
   const cargarDatos = async () => {
@@ -133,6 +168,7 @@ useEffect(() => {
         setBoxData,
         selectedDate: selectedDateRef.current,
         setPrivateEvents,
+        selectedCity,
       });
     } catch (error) {
       console.error("❌ Error al cargar datos iniciales:", error);
@@ -150,6 +186,13 @@ useEffect(() => {
   selectedDateRef,
   fetchPrivateEvents,
 ]);
+
+useEffect(() => {
+  if (!loading) {
+    const dt = Date.now() - firstRenderRef.current;
+    console.log(`⏱ [Home] render completo en ${dt} ms (desde montaje)`);
+  }
+}, [loading]);
 
 
 useEffect(() => {
@@ -174,6 +217,7 @@ useEffect(() => {
         setBoxData,
         selectedDate: selectedDateRef.current,
         setPrivateEvents,
+        selectedCity,
       });
     } catch (error) {
       console.error("❌ Error al cargar por categoría:", error);
@@ -201,20 +245,36 @@ useEffect(() => {
   }, [navigation]);
 
   useEffect(() => {
-    if (city) {
-      setSelectedCity(city);
-    } else if (country === "Portugal") {
-      setSelectedCity("Lisboa");
-    } else if (country === "España") {
-      setSelectedCity("Madrid");
-    } else if (country === "Inglaterra") {
-      setSelectedCity("Londres");
-    } else {
-      setSelectedCity("All Cities");
-    }
+    const user = auth.currentUser;
+    if (!user || !preferredCityLoaded) return;
   
-    console.log("📌 País:", country, "| Ciudad seleccionada:", city);
-  }, [country, city]);
+    const cargarDatosPorCiudad = async () => {
+      setLoading(true);
+      try {
+        await fetchData({
+          setLoading,
+          fetchBoxData,
+          fetchPrivateEvents,
+          database,
+          storage,
+          boxInfo,
+          user,
+          setBoxData,
+          selectedDate: selectedDateRef.current,
+          setPrivateEvents,
+          selectedCity,
+        });
+      } catch (error) {
+        console.error("❌ Error al cargar eventos por ciudad:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    cargarDatosPorCiudad();
+  }, [selectedCity, preferredCityLoaded]);
+  
+
   
 
   useEffect(() => {
@@ -274,6 +334,7 @@ useEffect(() => {
           user,
           setBoxData,
           selectedDate: selectedDateRef.current,
+          selectedCity,    
         });
       }
 
@@ -320,6 +381,7 @@ useEffect(() => {
           setBoxData,
           selectedDate: selectedDateRef.current,
           setPrivateEvents,
+          selectedCity,
         });
         await fetchProfileImage({ setProfileImage });
         storySliderRef.current?.loadExistingStories();
@@ -356,37 +418,19 @@ useEffect(() => {
     [navigation],
   );
 
-  const handleCitySelect = useCallback((city) => {
+  const handleCitySelect = useCallback(async (city) => {
     setSelectedCity(city);
     setMenuVisible(false);
+    try {
+      await AsyncStorage.setItem("preferredCity", city);  // 🆕 persiste
+    } catch (e) {
+      console.log("⚠️  No pude guardar preferredCity", e);
+    }
   }, []);
 
   const handleSignOut = useCallback(() => {
     onSignOut(navigation, auth);
   }, [navigation, auth]);
-
-  useEffect(() => {
-    const user = auth.currentUser;
-
-    if (user) {
-      fetchBoxData({
-        database,
-        storage,
-        boxInfo,
-        user,
-        setBoxData,
-        selectedDate: selectedDateRef.current,
-      });
-    }
-  }, [
-    selectedCategory,
-    auth.currentUser,
-    database,
-    storage,
-    boxInfo,
-    selectedDateRef,
-    setBoxData,
-  ]);
 
   // Agregamos este useEffect justo después para que la fecha cambie a las 06:00 AM
   useEffect(() => {
@@ -443,48 +487,6 @@ useEffect(() => {
     // Limpiar el timeout cuando el componente se desmonte
     return () => clearTimeout(timeoutId);
   }, [handleDateChange]);
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", async (nextAppState) => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === "active"
-      ) {
-        if (!loading) { // ✅ Solo recargar si no estaba ya cargando
-          console.log("🟢 App volvió al foreground, recargando datos...");
-          setLoading(true);
-  
-          const user = auth.currentUser;
-          if (user) {
-            try {
-              await fetchData({
-                setLoading,
-                fetchBoxData,
-                fetchPrivateEvents,
-                database,
-                storage,
-                boxInfo,
-                user,
-                setBoxData,
-                selectedDate: selectedDateRef.current,
-                setPrivateEvents,
-              });
-            } catch (error) {
-              console.error("❌ Error al recargar al volver:", error);
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      }
-  
-      appState.current = nextAppState;
-    });
-  
-    return () => {
-      subscription.remove();
-    };
-  }, [loading]); // 👈 Agregá "loading" como dependencia
 
   // para modulizar inicio
 
@@ -655,6 +657,10 @@ useEffect(() => {
     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
   }
   ListHeaderComponent={renderStorySlider}
+  onLayout={() => {
+    const dt = Date.now() - APP_START_TS;
+    console.log(`⏱ [FlatList] primera pintura a los ${dt} ms`);
+  }}
 />
       {loading && (
         <View

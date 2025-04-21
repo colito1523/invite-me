@@ -85,7 +85,7 @@ const registerPushToken = async () => {
     });
     console.log("✅ Expo Push Token agregado a Firestore.");
   } else {
-    console.log("ℹ️ Token ya registrado previamente.");
+   
   }
 
   return token;

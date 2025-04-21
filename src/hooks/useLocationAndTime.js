@@ -50,14 +50,8 @@ export const useLocationAndTime = () => {
             });
 
             // LOG: Mostrar resultados por consola
-            console.log("🌍 Ubicación actual:", {
-              lat: userLat,
-              lon: userLon,
-              ciudadDetectada: detectedCity,
-              paisDetectado: detectedCountry,
-            });
 
-            console.log("📍 Ciudad más cercana según coordenadas:", nearestCity);
+
 
             // Guardar en Firestore
             if (auth.currentUser && nearestCity) {

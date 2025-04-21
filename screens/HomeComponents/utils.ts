@@ -153,6 +153,7 @@ export const fetchData = async ({
   setBoxData,
   selectedDate,
   setPrivateEvents, // Este debe ser pasado correctamente
+  selectedCity, 
 }) => {
   const t0 = Date.now();
   console.log("⏱ [fetchData] inicio");
@@ -167,6 +168,7 @@ export const fetchData = async ({
         user,
         setBoxData,
         selectedDate,
+        selectedCity,
       }),
       fetchPrivateEvents({
         database,
@@ -253,137 +255,203 @@ export const listenForNotificationChanges = (setNotificationIconState) => {
 };
 
 
-export const fetchBoxData = async ({ database, storage, boxInfo, user, setBoxData, selectedDate }) => {
+export const fetchBoxData = async ({
+  database,
+  storage,
+  boxInfo,
+  user,
+  setBoxData,
+  selectedDate,
+  selectedCity,
+}) => {
   const t0 = Date.now();
   let storageCalls = 0;
   let firestoreDocs = 0;
   console.log("⏱ [fetchBoxData] inicio");
+
   try {
     let blockedUsers = [];
     let userNearestCity = "";
 
+    // Obtener datos del usuario si existe
     if (user) {
       const userDoc = await getDoc(doc(database, "users", user.uid));
+      firestoreDocs++;
+      
       if (userDoc.exists()) {
         blockedUsers = userDoc.data()?.blockedUsers || [];
         userNearestCity = userDoc.data()?.nearestCity || "";
       }
     }
 
-    const data = await Promise.all(
-      boxInfo.map(
-        async ({ path, title, category, hours, number, coordinates, country, city, priority, availableDates, details, membersClub }) => {
-          // Verificar si el evento tiene fechas disponibles y si la fecha seleccionada está incluida
-          if (availableDates && !availableDates.includes(selectedDate)) {
-            return null; // No incluir este evento si no está disponible en la fecha seleccionada
-          }
+    // 1. Filtrado inicial de eventos no válidos (como en la segunda versión)
+    const validEvents = boxInfo.filter((event) => {
+      // 1) fecha
+      if (event.availableDates && !event.availableDates.includes(selectedDate))
+          return false;
+    
+      // 2) ciudad elegida
+      if (
+        selectedCity &&
+        selectedCity !== "All Cities" &&
+        event.city &&
+        event.city !== selectedCity
+      )
+          return false;
+    
+      return true;
+    });
+    
 
-          let url = path;
+    // 2. Procesamiento de eventos con manejo granular de errores (segunda versión mejorada)
+    const boxEvents = await Promise.all(
+      validEvents.map(async (box) => {
+        const {
+          path,
+          title,
+          category,
+          hours,
+          number,
+          coordinates,
+          country,
+          city,
+          priority,
+          details,
+          membersClub,
+        } = box;
 
-          if (typeof path === "string") {
+        let url = path;
+        
+        // Manejo de imágenes con try-catch específico
+        if (typeof path === "string") {
+          try {
             const storageRef = ref(storage, path);
             url = await getDownloadURL(storageRef);
+            storageCalls++;
+          } catch (error) {
+            console.warn(`⚠️ No se pudo cargar la imagen de ${title}:`, error);
+            url = null; // O podrías usar una imagen por defecto
           }
+        }
 
+        // Obtener asistentes con manejo de errores
+        let attendees = [];
+        try {
           const boxRef = doc(database, "GoBoxs", title);
           const boxDoc = await getDoc(boxRef);
-          let attendees = [];
-
+          firestoreDocs++;
+          
           if (boxDoc.exists()) {
-            attendees = Array.isArray(boxDoc.data()[selectedDate])
-              ? boxDoc.data()[selectedDate]
-              : [];
+            const rawAttendees = boxDoc.data()[selectedDate];
+            attendees = Array.isArray(rawAttendees) ? rawAttendees : [];
           }
-
-          // Filtrar asistentes bloqueados
-          const filteredAttendees = attendees.filter(
-            (attendee) => !blockedUsers.includes(attendee.uid)
-          );
-
-          return {
-            imageUrl: url,
-            title,
-            category,
-            hours,
-            number,
-            coordinates,
-            country,
-            city,
-            details,
-            attendees: filteredAttendees,
-            attendeesCount: filteredAttendees.length || 0,
-            priority: priority || false,
-            membersClub: membersClub || false,
-          };
+        } catch (err) {
+          console.warn(`⚠️ No se pudo obtener GoBox ${title}:`, err);
         }
-      )
+
+        // Filtrar usuarios bloqueados
+        const filteredAttendees = attendees.filter(
+          (attendee) => !blockedUsers.includes(attendee.uid)
+        );
+
+        return {
+          imageUrl: url,
+          title,
+          category,
+          hours,
+          number,
+          coordinates,
+          country,
+          city,
+          details,
+          attendees: filteredAttendees,
+          attendeesCount: filteredAttendees.length,
+          priority: priority || false,
+          membersClub: membersClub || false,
+          selectedCity, 
+        };
+      })
     );
 
-    // Filtrar los eventos que no son nulos
-    const filteredData = data.filter(event => event !== null);
-
+    // 3. Procesamiento de eventos privados (de la primera versión, mejorado)
     const userEvents = [];
     if (user) {
-      // Fetch only from EventsPriv collection
-      const privateEventsRef = collection(database, "EventsPriv");
-      const eventsQuery = query(privateEventsRef);
-      const querySnapshot = await getDocs(eventsQuery);
+      try {
+        const privateEventsRef = collection(database, "EventsPriv");
+        const eventsQuery = query(privateEventsRef);
+        const querySnapshot = await getDocs(eventsQuery);
+        firestoreDocs++;
 
-      const processedEventIds = new Set();
+        const processedEventIds = new Set();
 
-      querySnapshot.forEach((doc) => {
-        const eventData = doc.data();
-        const eventId = doc.id;
+        querySnapshot.forEach((doc) => {
+          const eventData = doc.data();
+          const eventId = doc.id;
 
-        // Solo incluir eventos si el usuario es admin o está en la lista de asistentes
-        const isAdmin = eventData.Admin === user.uid;
-        const isAttendee = eventData.attendees && eventData.attendees.some(attendee => attendee.uid === user.uid);
+          // Verificar si el usuario tiene acceso al evento
+          const isAdmin = eventData.Admin === user.uid;
+          const isAttendee = eventData.attendees?.some(attendee => attendee.uid === user.uid);
+          const isSameCity = !eventData.city || eventData.city === selectedCity;
 
-        if ((isAdmin || isAttendee) && (!eventData.city || eventData.city === userNearestCity) && !processedEventIds.has(eventId)) {
-          processedEventIds.add(eventId);
+          if ((isAdmin || isAttendee) && isSameCity && !processedEventIds.has(eventId)) {
+            processedEventIds.add(eventId);
 
-          const filteredAttendees = (eventData.attendees || []).filter(
-            (attendee) => !blockedUsers.includes(attendee.uid)
-          );
+            const filteredAttendees = (eventData.attendees || []).filter(
+              (attendee) => !blockedUsers.includes(attendee.uid)
+            );
 
-          userEvents.push({
-            id: eventId,
-            imageUrl: eventData.image,
-            title: eventData.title,
-            category: "EventoParaAmigos",
-            hours: { [eventData.day]: eventData.hour },
-            number: eventData.phoneNumber,
-            coordinates: { latitude: 0, longitude: 0 },
-            country: eventData.nearestCountry || "España",
-            city: userNearestCity,
-            date: eventData.date,
-            attendees: filteredAttendees,
-            attendeesCount: filteredAttendees.length,
-            isPrivateEvent: true,
-            Admin: eventData.Admin
-          });
-        }
-      });
+            userEvents.push({
+              id: eventId,
+              imageUrl: eventData.image,
+              title: eventData.title,
+              category: "EventoParaAmigos",
+              hours: { [eventData.day]: eventData.hour },
+              number: eventData.phoneNumber,
+              coordinates: eventData.coordinates || { latitude: 0, longitude: 0 },
+              country: eventData.nearestCountry || "España",
+              city: userNearestCity,
+              date: eventData.date,
+              attendees: filteredAttendees,
+              attendeesCount: filteredAttendees.length,
+              isPrivateEvent: true,
+              Admin: eventData.Admin
+            });
+          }
+        });
+      } catch (err) {
+        console.error("❌ Error al obtener eventos privados:", err);
+      }
     }
 
-    // Ordenar los eventos generales con prioridad primero, luego los privados, y finalmente los generales sin prioridad
-    const allEvents = [...userEvents, ...filteredData].sort((a, b) => {
-      if (a.isPrivateEvent && !b.isPrivateEvent) return -1; // Eventos privados primero
+    // 4. Combinar y ordenar resultados (de la primera versión, mejorado)
+    const allEvents = [...userEvents, ...boxEvents.filter(Boolean)].sort((a, b) => {
+      // Priorizar eventos privados
+      if (a.isPrivateEvent && !b.isPrivateEvent) return -1;
       if (!a.isPrivateEvent && b.isPrivateEvent) return 1;
-
-      if (a.priority && !b.priority) return -1; // Eventos con prioridad primero
+      
+      // Priorizar eventos con flag priority
+      if (a.priority && !b.priority) return -1;
       if (!a.priority && b.priority) return 1;
-
-      return b.attendeesCount - a.attendeesCount; // Ordenar por cantidad de asistentes
+      
+      // Ordenar por número de asistentes (descendente)
+      return b.attendeesCount - a.attendeesCount;
     });
 
     setBoxData(allEvents);
-  } catch (error) {
-    console.error("Error fetching box data:", error);
+  } catch (err) {
+    console.error("❌ [fetchBoxData] error general:", err);
+  } finally {
+    const dt = Date.now() - t0;
+    console.log(
+      `⏱ [fetchBoxData] fin → ${dt} ms · storage=${storageCalls} · docs=${firestoreDocs}`
+    );
   }
 };
 
 export const fetchPrivateEvents = async ({ database, user, setPrivateEvents }) => {
+  const t0 = Date.now();
+  let firestoreDocs = 0;
+  console.log("⏱ [fetchPrivateEvents] inicio");
   if (!user) return;
 
   try {
