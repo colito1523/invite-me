@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
     replyIndicator: {
       width: 2.5,
       height: "70%",
-      backgroundColor: "#ebddd5", // Instagram blue
+      backgroundColor: "#ebddd5",
       borderRadius: 4,
       marginRight: 10,
     },
@@ -365,6 +365,7 @@ export const styles = StyleSheet.create({
       width: 80,
       height: 150,
       borderRadius: 8,
+      marginBottom: 10,
    
     },
     storyResponseContent: {

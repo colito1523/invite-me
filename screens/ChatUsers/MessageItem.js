@@ -90,21 +90,21 @@ function StoryMessage({
               </Text>
 
               {isOwnMessage && item.seen && (
-                <View style={styles.messageFooter}>
-                  <Text style={styles.timeText}>
-                    {currentMessageDate.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit"
-                    })}
-                  </Text>
-                  <Ionicons
-                    name="checkmark-done-sharp"
-                    size={16}
-                    color="black"
-                    style={styles.seenIcon}
-                  />
-                </View>
-              )}
+  <View style={[styles.messageFooter, { alignSelf: "flex-end", marginTop: 5 }]}>
+    <Text style={styles.timeText}>
+      {currentMessageDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      })}
+    </Text>
+    <Ionicons
+      name="checkmark-done-sharp"
+      size={16}
+      color="black"
+      style={styles.seenIcon}
+    />
+  </View>
+)}
             </View>
           </TouchableOpacity>
         </Swipeable>
