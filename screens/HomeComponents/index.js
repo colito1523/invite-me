@@ -155,7 +155,12 @@ useEffect(() => {
       setLoading(false);
       return;
     }
-
+  
+    if (!preferredCityLoaded) {
+      console.warn("⏳ Esperando a que se cargue la ciudad preferida...");
+      return;
+    }
+  
     try {
       await fetchData({
         setLoading,
@@ -176,7 +181,7 @@ useEffect(() => {
       setLoading(false);
     }
   };
-
+  
   cargarDatos();
 }, [
   database,
@@ -185,6 +190,7 @@ useEffect(() => {
   setBoxData,
   selectedDateRef,
   fetchPrivateEvents,
+  selectedCity
 ]);
 
 useEffect(() => {
@@ -398,6 +404,7 @@ useEffect(() => {
     boxInfo,
     setBoxData,
     selectedDateRef,
+    selectedCity, 
   ]);
   
 
@@ -649,7 +656,7 @@ useEffect(() => {
       <FlatList
   data={filteredBoxData.flatMap((group) => group.data)}
   renderItem={renderItem}
-  initialNumToRender={42}
+  initialNumToRender={52}
   keyExtractor={keyExtractor}
   contentContainerStyle={{ paddingBottom: 20 }} // Espacio extra para mejor desplazamiento
   removeClippedSubviews={true}
