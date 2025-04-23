@@ -163,27 +163,28 @@ export default React.forwardRef(function StorySlider(props, ref) {
   useEffect(() => {
     const preloadImages = async () => {
       const newCache = {};
+
+       // Precargar en paralelo para mayor velocidad
+  const preloadPromises = stories.map(async (story) => {
+    const urls = story.userStories?.map(s => s.storyUrl).filter(Boolean) || [];
+    
+    // Precargar todas las imágenes de esta historia
+    await Promise.all(urls.map(url => 
+      Image.prefetch(url).catch(e => 
+        console.warn(`Error precargando imagen: ${url}`, e)
+      )
+    ));
+    
+    if (urls.length > 0) {
+      newCache[story.uid] = urls;
+    }
+  });
+
+  await Promise.all(preloadPromises);
+  setCachedImages(newCache);
+  console.log("📦 Todas las imágenes precargadas:", newCache);
+};
   
-      for (const story of stories) {
-        const urls = story.userStories?.map(s => s.storyUrl).filter(Boolean) || [];
-  
-        for (const url of urls) {
-          try {
-            await Image.prefetch(url);
-          } catch (e) {
-            console.warn(`Error precargando imagen de ${story.username}:`, e);
-          }
-        }
-  
-        // Guardamos la primera como referencia (podés guardarlas todas si querés)
-        if (urls.length > 0) {
-          newCache[story.uid] = urls;
-        }
-      }
-  
-      setCachedImages(newCache);
-      console.log("📦 Todas las imágenes precargadas:", newCache);
-    };
   
     if (stories.length > 0) {
       preloadImages();

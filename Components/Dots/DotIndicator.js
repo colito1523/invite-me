@@ -24,7 +24,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import StoryViewer from "../Stories/storyViewer/StoryViewer";
 import { useTranslation } from "react-i18next";
-import { handleUserPressDotIndicator } from "./utils";
 
 const { width, height } = Dimensions.get("window");
 
@@ -39,6 +38,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   // Eliminamos filteredImages para usar directamente filteredAttendees en el render
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState([]);
+  const [preloadedImages, setPreloadedImages] = useState({});
   const { t } = useTranslation();
 
   // Estado para almacenar la lista de amigos (para determinar si mostramos usuarios privados)
@@ -324,6 +324,15 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   
   
       setSelectedStories([storyData]);
+      const newPreloadedImages = {};
+      userStories.forEach((story) => {
+        if (story.id) {
+          newPreloadedImages[story.id] = true;
+        }
+      });
+      setPreloadedImages(newPreloadedImages);
+      
+
       setIsModalVisible(true);
     } catch (error) {
       console.error("Error al cargar la historia o navegar al perfil:", error);
@@ -462,6 +471,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
               setModalVisible(false); // Se cierra también el modal principal
             }}
             unseenStories={{}}
+            preloadedImages={preloadedImages}
             navigation={navigation}
           />
         </Modal>

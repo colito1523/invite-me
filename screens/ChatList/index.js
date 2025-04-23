@@ -8,9 +8,9 @@ import {
   TouchableOpacity, 
   Alert, 
   Modal,
-  RefreshControl
+  RefreshControl,
+  Image,
 } from "react-native";
-import { Image } from "expo-image";
 import {
   collection,
   query,
@@ -439,9 +439,21 @@ export default function ChatList() {
             timeAgoText,
           };
         });
+        console.log("🧪 enrichedStories:", enrichedStories.map(story => ({
+          id: story.id,
+          storyUrl: story.storyUrl,
+          createdAt: story.createdAt,
+          expiresAt: story.expiresAt,
+        })));
       
-
-      
+        console.log("🧪 setSelectedStories:", JSON.stringify([{
+          uid: chatUser.uid,
+          username: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
+          profileImage: chatUser.photoUrls?.[0],
+          userStories: enrichedStories,
+          timeAgoText: enrichedStories[0]?.timeAgoText ?? "0m"
+        }], null, 2));
+        
         setSelectedStories([
           {
             uid: chatUser.uid,
@@ -451,9 +463,14 @@ export default function ChatList() {
             timeAgoText: enrichedStories[0]?.timeAgoText ?? "0m"
           },
         ]);
+        const preloadedImages = {};
+enrichedStories.forEach((story) => {
+  if (story.id) {
+    preloadedImages[story.id] = true;
+  }
+});
         setIsModalVisible(true);
       }
-      
        else {
         handleChatPressLocalWrapper(chat);
       }
@@ -535,15 +552,24 @@ export default function ChatList() {
   };
 
   useEffect(() => {
-    if (chats.length > 0) {
-      const debounceCheckStories = setTimeout(async () => {
-        const updatedChats = await checkStories(chats, user.uid);
-        if (JSON.stringify(updatedChats) !== JSON.stringify(chats)) {
-          setChats(updatedChats);
+    if (chats.length === 0) return;
+  
+    const cachedImages = {};
+  
+    chats.forEach((chat) => {
+      if (chat.user?.hasStories && Array.isArray(chat.user.userStories)) {
+        const urls = chat.user.userStories
+          .map((story) => story.storyUrl)
+          .filter(Boolean);
+  
+        if (urls.length > 0) {
+          cachedImages[chat.user.uid] = urls;
         }
-      }, 300);
-
-      return () => clearTimeout(debounceCheckStories);
+      }
+    });
+  
+    if (Object.keys(cachedImages).length > 0) {
+      console.log("📦 Historias detectadas desde ChatList:", cachedImages);
     }
   }, [chats]);
 
@@ -891,19 +917,23 @@ export default function ChatList() {
               animationType="fade"
               transparent={false}
             >
-              <StoryViewer
-                stories={selectedStories}
-                initialIndex={0}
-                onClose={async () => {
-                  setIsModalVisible(false);
-                  const updatedChats = await checkStories(chats, user.uid);
-                  if (updatedChats) {
-                    setChats(updatedChats);
-                  }
-                }}
-                unseenStories={{}}
-                navigation={navigation}
-              />
+             <StoryViewer
+  stories={selectedStories}
+  initialIndex={0}
+  onClose={async () => {
+    setIsModalVisible(false);
+    const updatedChats = await checkStories(chats, user.uid);
+    if (updatedChats) {
+      setChats(updatedChats);
+    }
+  }}
+  unseenStories={{}}
+  preloadedImages={selectedStories?.[0]?.userStories?.reduce((acc, story) => {
+    acc[story.id] = true;
+    return acc;
+  }, {})}
+  navigation={navigation}
+/>
             </Modal>
           )}
         </LinearGradient>

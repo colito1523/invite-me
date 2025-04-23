@@ -22,6 +22,7 @@ const SearchHistory = ({
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStories, setSelectedStories] = useState(null);
+  const [preloadedImages, setPreloadedImages] = useState({});
 
   const updateHistory = (updatedUser) => {
     setTimeout(() => {
@@ -94,6 +95,14 @@ const SearchHistory = ({
       
   
         if (userStories.length > 0) {
+          const newPreloadedImages = {};
+          userStories.forEach((story) => {
+            if (story.id) {
+              newPreloadedImages[story.id] = true;
+            }
+          });
+        
+          setPreloadedImages(newPreloadedImages);
           setSelectedStories([
             {
               uid: item.id,
@@ -256,6 +265,7 @@ const SearchHistory = ({
             initialIndex={0}
             onClose={() => setIsModalVisible(false)}
             unseenStories={{}}
+            preloadedImages={preloadedImages}
             navigation={navigation}
           />
         </Modal>

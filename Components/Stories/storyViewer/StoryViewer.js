@@ -430,6 +430,8 @@ export function StoryViewer({
 
   useBackHandler(() => onClose(localUnseenStories));
 
+  console.log("🔍 storyUrl actual:", currentStory?.storyUrl);
+console.log("🧪 loadedImages:", loadedImages);
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView

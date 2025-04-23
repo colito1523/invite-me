@@ -43,6 +43,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [viewedStories, setViewedStories] = useState({});
   const [maxToRender, setMaxToRender] = useState(4);
+  const [preloadedImages, setPreloadedImages] = useState({});
   
   const { t } = useTranslation();
 
@@ -253,6 +254,15 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
   
     // Si tiene historias, mostramos el visor
     console.log("🧾 Historia seleccionada:", selectedUser.userStories[0]);
+
+    const newPreloadedImages = {};
+selectedUser.userStories.forEach((story) => {
+  if (story.id) {
+    newPreloadedImages[story.id] = true;
+  }
+});
+
+setPreloadedImages(newPreloadedImages);
   
     setSelectedStories([{
       uid: selectedUser.uid,
@@ -338,6 +348,7 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
               setIsModalVisible(false);
             }}
             unseenStories={{}}
+            preloadedImages={preloadedImages}
             navigation={navigation} 
           />
         </Modal>

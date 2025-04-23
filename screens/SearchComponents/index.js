@@ -57,6 +57,7 @@ export default function Search({ route }) {
   const [showLoadingAnimation, setShowLoadingAnimation] = useState(false);
   const searchTimeoutRef = useRef(null);
   const loadingTimeoutRef = useRef(null);
+  const [preloadedImages, setPreloadedImages] = useState({});
   const blockedUsers = useBlockedUsers();
   const [initialResults, setInitialResults] = useState([]);
 const [finalResults, setFinalResults] = useState([]);
@@ -379,7 +380,14 @@ const [finalResults, setFinalResults] = useState([]);
                 };
               });
               
-              
+              const newPreloadedImages = {};
+enrichedUserStories.forEach((story) => {
+  if (story.id) {
+    newPreloadedImages[story.id] = true;
+  }
+});
+
+setPreloadedImages(newPreloadedImages);
             
               setSelectedStories([
                 {
@@ -596,6 +604,7 @@ const [finalResults, setFinalResults] = useState([]);
             initialIndex={0}
             onClose={() => setIsModalVisible(false)}
             unseenStories={{}}
+            preloadedImages={preloadedImages}
             navigation={navigation}
           />
         </Modal>
