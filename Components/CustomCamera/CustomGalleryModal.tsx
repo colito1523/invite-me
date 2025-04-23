@@ -18,6 +18,7 @@ import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import * as FileSystem from 'expo-file-system';
+import { useTranslation } from "react-i18next";
 
 const screenWidth = Dimensions.get('window').width;
 const numColumns = 3;
@@ -48,6 +49,7 @@ const [hasNextPage, setHasNextPage] = useState(true);
 const [isFetchingMore, setIsFetchingMore] = useState(false);
 const [scrollOffset, setScrollOffset] = useState(0);
 const scrollRef = React.useRef<FlatList>(null);
+  const { t } = useTranslation();
 
 
 
@@ -187,8 +189,8 @@ const panResponder = PanResponder.create({
 
       {hasPermission === false ? (
         <View style={styles.permissionContainer}>
-          <Text style={styles.permissionText}>Permiso requerido para acceder a la galería</Text>
-          <Button title="Otorgar permiso" onPress={loadMedia} />
+          <Text style={styles.permissionText}>{t('gallery.permissionRequired')}</Text>
+          <Button title={t('gallery.grantPermission')} onPress={loadMedia} />
         </View>
       ) : isLoading ? (
         <View style={styles.centeredLoader}>

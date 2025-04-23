@@ -355,7 +355,8 @@
     "permissionRequired": "Permission is required to access the gallery",
     "imagesOnly": "Only images can be selected in this mode.",
     "videoTooLong": "The video cannot be longer than 2 minutes.",
-    "errorOpening": "An error occurred while opening the gallery. Please try again."
+    "errorOpening": "An error occurred while opening the gallery. Please try again.",
+     "grantPermission": "Grant permission"
   },
 
   "notifications": {

@@ -156,6 +156,7 @@
   "send": "Enviar para o chat"
 },
 
+
   "storyViewer": {
   "info": "Informações",
   "error": "Erro",
@@ -202,7 +203,8 @@
     "permissionRequired": "É necessário permissão para aceder à galeria",
     "imagesOnly": "Só é possível selecionar imagens neste modo.",
     "videoTooLong": "O vídeo não pode ter mais de 2 minutos.",
-    "errorOpening": "Ocorreu um erro ao abrir a galeria. Por favor, tenta novamente."
+    "errorOpening": "Ocorreu um erro ao abrir a galeria. Por favor, tenta novamente.",
+     "grantPermission": "Conceder permissão"
   },
 
 "header": {

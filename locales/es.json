@@ -3,6 +3,7 @@
     "requestingLocationPermissions" : "Solicitando permisos de ubicación...",
     "Patrocinado": "Patrocinado"
   },
+  
   "complaints": {
     "reportUser": "Denunciar usuario",
     "reportUserConfirmation": "¿Estás seguro que quieres denunciar a este usuario?",
@@ -352,10 +353,11 @@
     "permissionRequired": "Necesitamos tu permiso para mostrar la cámara"
   },
   "gallery": {
-    "permissionRequired": "Se requiere permiso para acceder a la galería",
+    "permissionRequired": "Permiso requerido para acceder a la galería",
     "imagesOnly": "Solo se pueden seleccionar imágenes en este modo.",
     "videoTooLong": "El video no puede durar más de 2 minutos.",
-    "errorOpening": "Hubo un error al abrir la galería. Por favor, intenta nuevamente."
+    "errorOpening": "Hubo un error al abrir la galería. Por favor, intenta nuevamente.",
+     "grantPermission": "Otorgar permiso"
   },
 
   "notifications": {

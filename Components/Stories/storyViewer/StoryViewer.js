@@ -11,6 +11,7 @@ import {
   Platform,
   Image,
 } from "react-native";
+import { Image as ExpoImage } from "expo-image"
 import { auth, database, storage } from "../../../config/firebase";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import styles from "./StoryViewStyles";
@@ -61,6 +62,7 @@ export function StoryViewer({
   onClose,
   unseenStories,
   navigation,
+  preloadedImages = {}, 
 }) {
   const { t } = useTranslation();
 
@@ -137,7 +139,7 @@ export function StoryViewer({
   const [likedStories, setLikedStories] = useState({}); // Estado para likes por historia
   const [viewers, setViewers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loadedImages, setLoadedImages] = useState({});
+  const [loadedImages, setLoadedImages] = React.useState(preloadedImages); 
   const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
   const [isComplaintsVisible, setIsComplaintsVisible] = useState(false);
   const [showSendConfirmation, setShowSendConfirmation] = useState(false);
@@ -490,18 +492,21 @@ export function StoryViewer({
                     progress={progress}
                   />
                 )}
-            <StoryImage
-  currentStory={currentStory} // pasamos la historia actual
-  style={styles.image} // aplica tus estilos base
-  isPreloaded={!!loadedImages[currentStory?.id]} // ✅ esta es la clave
-  fadeDuration={0}
-  priority="high"
-  loadingIndicatorSource={require("../../../assets/notification-icon.png")}
-  resizeMode="cover"
-  cachePolicy="memory-disk"
-essiveRenderingEnabled={true}
-  memoryCachePolicy="aggressive"
-/>
+               {loadedImages[currentStory?.id] ? (
+  <ExpoImage
+    source={{ uri: currentStory.storyUrl }}
+    style={styles.image}
+    contentFit="cover"            // similar a resizeMode="cover"
+    transition={0}                // elimina el fade-in al cargar
+    cachePolicy="memory-disk"     // usa caché para rendimiento
+  />
+) : (
+  <Image
+    source={require("../../../assets/notification-icon.png")}
+    style={styles.image}
+    resizeMode="cover"
+  />
+)}
                 {isTransitioning && nextStoryUrl && (
                   <Image
                     source={{ uri: nextStoryUrl }}

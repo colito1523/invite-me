@@ -163,24 +163,33 @@ export default React.forwardRef(function StorySlider(props, ref) {
   useEffect(() => {
     const preloadImages = async () => {
       const newCache = {};
+  
       for (const story of stories) {
-        const firstImage = story.userStories?.[0]?.storyUrl;
-        if (firstImage) {
+        const urls = story.userStories?.map(s => s.storyUrl).filter(Boolean) || [];
+  
+        for (const url of urls) {
           try {
-            await Image.prefetch(firstImage);
-            newCache[story.uid] = firstImage;
+            await Image.prefetch(url);
           } catch (e) {
             console.warn(`Error precargando imagen de ${story.username}:`, e);
           }
         }
+  
+        // Guardamos la primera como referencia (podés guardarlas todas si querés)
+        if (urls.length > 0) {
+          newCache[story.uid] = urls;
+        }
       }
+  
       setCachedImages(newCache);
+      console.log("📦 Todas las imágenes precargadas:", newCache);
     };
   
     if (stories.length > 0) {
       preloadImages();
     }
   }, [stories]);
+  
   
 
   const updateUnseenStories = (updatedUnseenStories) => {
@@ -225,6 +234,14 @@ export default React.forwardRef(function StorySlider(props, ref) {
     }
   }, [route.params?.photoUri])
 
+  const preloadedIds = {};
+stories.forEach(group => {
+  group.userStories.forEach(us => {
+    preloadedIds[us.id] = true;
+  });
+});
+
+
   const handleOpenViewer = async (index) => {
     const userStories = stories[index]?.userStories || [];
     const unseenIndex = userStories.findIndex(
@@ -237,7 +254,10 @@ export default React.forwardRef(function StorySlider(props, ref) {
       const story = stories[index];
 const fallbackImage = story.userStories[unseenIndex !== -1 ? unseenIndex : 0]?.storyUrl;
 
-if (!cachedImages[story.uid]) {
+// ✅ Verificamos si esa imagen ya está en el array de imágenes precargadas
+const isImageCached = cachedImages[story.uid]?.includes(fallbackImage);
+
+if (!isImageCached) {
   try {
     await Image.prefetch(fallbackImage);
   } catch (error) {
@@ -437,6 +457,7 @@ const renderStory = ({ item, index }) => {
       <StoryViewer
         stories={stories}
         initialIndex={selectedStoryIndex}
+        preloadedImages={preloadedIds}
         onClose={(updatedUnseenStories) => {
           setStoryViewerVisible(false)
           updateUnseenStories(updatedUnseenStories)
