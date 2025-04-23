@@ -261,10 +261,17 @@ const isImageCached = cachedImages[story.uid]?.includes(fallbackImage);
 if (!isImageCached) {
   try {
     await Image.prefetch(fallbackImage);
+
+    // 🧠 Extra: asegurar que la imagen fue *realmente* usada por el sistema de cache
+    await new Promise((resolve) => {
+      Image.getSize(fallbackImage, () => resolve(), () => resolve());
+    });
+
   } catch (error) {
     console.error("Error preloading image:", error);
   }
 }
+
     } catch (error) {
       console.error("Error preloading image:", error);
     }
@@ -377,9 +384,9 @@ const renderStory = ({ item, index }) => {
       <View style={styles.sliderContainer}>
         <FlatList
           data={userHasStories ? stories : [{ uid: "addStory" }, ...stories]}
-          initialNumToRender={4} // Renderiza las primeras 4 bolas al instante
-          maxToRenderPerBatch={4} // Limita el renderizado por lote
-          windowSize={5} // Ajusta el tamaño de la ventana de renderizado
+          initialNumToRender={8} // Renderiza las primeras 4 bolas al instante
+          maxToRenderPerBatch={8} // Limita el renderizado por lote
+          windowSize={10} // Ajusta el tamaño de la ventana de renderizado
           renderItem={({ item, index }) =>
             item.uid === "addStory" ? (
               <View style={[styles.addStoryCircle, styles.centeredAddStoryCircle]}>

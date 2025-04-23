@@ -6,6 +6,8 @@ import { ref as storageRef, uploadBytesResumable, getDownloadURL } from "firebas
 import * as ImageManipulator from "expo-image-manipulator"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { calculateHoursAgo } from "../storyViewer/storyUtils";
+import { Image } from "react-native";
+
 
 // Función para obtener la lista de amigos
 const getFriendsList = async (userId) => {
@@ -129,7 +131,10 @@ export const loadExistingStories = async (t, setStories, setUnseenStories, isUpl
 
     const validStories = await Promise.all(
       loadedStories.map(async (story) => {
-        const isValid = await validateStory(story.userStories[0])
+        const isValid = await Image.prefetch(story.userStories[0].storyUrl)
+        .then(() => true)
+        .catch(() => false)
+      
         return isValid ? story : null
       }),
     ).then((results) => results.filter(Boolean)) // Filtra historias válidas
