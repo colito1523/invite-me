@@ -152,57 +152,65 @@ export default function useStoriesOnSnapshot(t) {
     if (!user) return;
   
     const userDocRef = doc(database, "users", user.uid);
+    const friendsColRef = collection(database, "users", user.uid, "friends");
   
-    const unsubscribeUser = onSnapshot(userDocRef, async (userDoc) => {
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        const hidden = data.hiddenStories || [];
-        const hideFrom = data.hideStoriesFrom || [];
-        const blocked = data.blockedUsers || [];
-  
-        const friends = await getFriendsList(user.uid);
-        const validFriends = friends.filter(
-          (f) =>
-            !hidden.includes(f.friendId) &&
-            !hideFrom.includes(f.friendId) &&
-            !blocked.includes(f.friendId)
-        );
-  
-        const newValidIds = validFriends.map((f) => f.friendId).sort();
-        const prevValidIds = validFriendIdsRef.current.sort();
-  
-        const isSame = JSON.stringify(newValidIds) === JSON.stringify(prevValidIds);
-        if (isSame) return; // ✅ No hay cambios reales, no hacemos nada
-  
-        validFriendIdsRef.current = newValidIds; // 🧠 Guardamos la nueva lista
-        allStoriesRef.current = {};
-  
-        // 🔁 Reiniciamos todos los listeners
-        unsubscribesRef.current.forEach((u) => u && u());
-        unsubscribesRef.current = [];
-  
-        // Listener propio
-        const userStoriesRef = collection(database, "users", user.uid, "stories");
-        unsubscribesRef.current.push(
-          onSnapshot(userStoriesRef, (snap) => processStoriesSnapshot(user.uid, snap))
-        );
-  
-        // Listeners de amigos válidos actualizados
-        validFriends.forEach((friend) => {
-          const ref = collection(database, "users", friend.friendId, "stories");
-          unsubscribesRef.current.push(
-            onSnapshot(ref, (snap) => processStoriesSnapshot(friend.friendId, snap))
-          );
-        });
-      }
-    });
-  
-    return () => {
-      unsubscribeUser();
+    const cleanup = () => {
       unsubscribesRef.current.forEach((u) => u && u());
       unsubscribesRef.current = [];
     };
+  
+    const resync = async () => {
+      const userDoc = await getDoc(userDocRef);
+      if (!userDoc.exists()) return;
+  
+      const data = userDoc.data();
+      const hidden = data.hiddenStories || [];
+      const hideFrom = data.hideStoriesFrom || [];
+      const blocked = data.blockedUsers || [];
+  
+      const friendsSnap = await getDocs(friendsColRef);
+      const friends = friendsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  
+      const validFriends = friends.filter(
+        (f) =>
+          !hidden.includes(f.friendId) &&
+          !hideFrom.includes(f.friendId) &&
+          !blocked.includes(f.friendId)
+      );
+  
+      const newValidIds = validFriends.map((f) => f.friendId).sort();
+      const prevValidIds = validFriendIdsRef.current.sort();
+      const isSame = JSON.stringify(newValidIds) === JSON.stringify(prevValidIds);
+      if (isSame) return;
+  
+      validFriendIdsRef.current = newValidIds;
+      allStoriesRef.current = {};
+  
+      cleanup();
+  
+      const userStoriesRef = collection(database, "users", user.uid, "stories");
+      unsubscribesRef.current.push(
+        onSnapshot(userStoriesRef, (snap) => processStoriesSnapshot(user.uid, snap))
+      );
+  
+      validFriends.forEach((friend) => {
+        const ref = collection(database, "users", friend.friendId, "stories");
+        unsubscribesRef.current.push(
+          onSnapshot(ref, (snap) => processStoriesSnapshot(friend.friendId, snap))
+        );
+      });
+    };
+  
+    const unsubscribeUserDoc = onSnapshot(userDocRef, resync);
+    const unsubscribeFriends = onSnapshot(friendsColRef, resync); // 👈 esto detecta en vivo cambios de amistad
+  
+    return () => {
+      unsubscribeUserDoc();
+      unsubscribeFriends();
+      cleanup();
+    };
   }, []);
+  
   
   
 
