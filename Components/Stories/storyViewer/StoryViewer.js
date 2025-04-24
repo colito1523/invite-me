@@ -548,7 +548,7 @@ export function StoryViewer({
                           selectedUser: {
                             id: stories[currentIndex].uid,
                             username: stories[currentIndex].username,
-                            firstName: stories[currentIndex].username,
+                            firstName: stories[currentIndex].firstName ||  stories[currentIndex].username, // ⬅ corregido
                             lastName: stories[currentIndex].lastName || "",
                             profileImage: stories[currentIndex].profileImage,
                           },

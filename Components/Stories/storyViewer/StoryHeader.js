@@ -16,6 +16,16 @@ const StoryHeader = ({
   if (!currentStory) {
     return null;
   }
+  useEffect(() => {
+    console.log("🧠 [StoryHeader] Datos recibidos:", {
+      id: currentStory?.uid,
+      username: currentStory?.username,
+      firstName: currentStory?.firstName,
+      lastName: currentStory?.lastName,
+      profileImage: currentStory?.profileImage,
+      isPrivate: currentStory?.isPrivate,
+    });
+  }, [currentStory]);
 
   const [imageUri, setImageUri] = useState(
     currentStory?.lowQualityProfileImage || 

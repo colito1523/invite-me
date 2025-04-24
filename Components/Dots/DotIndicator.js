@@ -120,6 +120,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
             userData.photoUrls?.[0] || "https://via.placeholder.com/150",
           isPrivate: userData.isPrivate || false,
         },
+        
       });
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -322,6 +323,16 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
         profileImage,
         userStories,
       };
+      
+      console.log("📸 Datos del usuario al abrir historia:", {
+        id: uid,
+        username: userData.username || t("dotIndicatorBoxDetails.unknownUser"),
+        firstName: userData.firstName || t("dotIndicatorBoxDetails.unknownUser"),
+        lastName: userData.lastName || t("dotIndicatorBoxDetails.unknownUser"),
+        profileImage: profileImage,
+        isPrivate: userData.isPrivate || false,
+      });
+      
   
   
       setSelectedStories([storyData]);
