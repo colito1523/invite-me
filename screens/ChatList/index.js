@@ -11,6 +11,7 @@ import {
   RefreshControl,
   Image,
 } from "react-native";
+import { Image as ExpoImage } from "expo-image"; 
 import {
   collection,
   query,
@@ -60,6 +61,7 @@ export default function ChatList() {
   const [selectedMuteHours, setSelectedMuteHours] = useState(null);
   const [mutedChats, setMutedChats] = useState([]);
   const [selectedStories, setSelectedStories] = useState([]);
+  const [preloadedImages, setPreloadedImages] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { setHasUnreadMessages } = useUnreadMessages();
@@ -463,13 +465,19 @@ export default function ChatList() {
             timeAgoText: enrichedStories[0]?.timeAgoText ?? "0m"
           },
         ]);
-        const preloadedImages = {};
-enrichedStories.forEach((story) => {
-  if (story.id) {
-    preloadedImages[story.id] = true;
-  }
-});
-        setIsModalVisible(true);
+        const newPreloaded = {};
+              for (const story of enrichedStories) {
+                if (story.id && story.storyUrl) {
+                  try {
+                    await ExpoImage.prefetch(story.storyUrl);
+                    newPreloaded[story.id] = true;
+                  } catch (e) {
+                    console.warn("No se pudo precargar:", e.message || e);
+                  }
+                }
+              }
+              setPreloadedImages(newPreloaded);
+              setIsModalVisible(true);
       }
        else {
         handleChatPressLocalWrapper(chat);
@@ -645,7 +653,8 @@ enrichedStories.forEach((story) => {
               { padding: 2 },
             ]}
           >
-            <Image
+           <ExpoImage
+           cachePolicy="memory-disk"
               source={{
                 uri: item.user.photoUrls?.[0] || "https://via.placeholder.com/150",
               }}
@@ -928,10 +937,7 @@ enrichedStories.forEach((story) => {
     }
   }}
   unseenStories={{}}
-  preloadedImages={selectedStories?.[0]?.userStories?.reduce((acc, story) => {
-    acc[story.id] = true;
-    return acc;
-  }, {})}
+  preloadedImages={preloadedImages}
   navigation={navigation}
 />
             </Modal>

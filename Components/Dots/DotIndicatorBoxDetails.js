@@ -6,6 +6,7 @@ import {
   Dimensions,
   Animated,
   Modal,
+  Image 
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { 
@@ -17,7 +18,7 @@ import {
   getDoc 
 } from 'firebase/firestore';
 import { database, auth } from '../../config/firebase'; 
-import { Image } from 'expo-image';
+import { Image as ExpoImage } from 'expo-image'; 
 import StoryViewer from '../Stories/storyViewer/StoryViewer';
 import { useTranslation } from "react-i18next";
 import { calculateHoursAgo } from "../Stories/storyViewer/storyUtils";
@@ -254,13 +255,17 @@ const DotIndicatorBoxDetails = ({ attendeesList }) => {
     console.log("🧾 Historia seleccionada:", selectedUser.userStories[0]);
 
     const newPreloadedImages = {};
-selectedUser.userStories.forEach((story) => {
-  if (story.id) {
-    newPreloadedImages[story.id] = true;
-  }
-});
-
-setPreloadedImages(newPreloadedImages);
+        for (const story of selectedUser.userStories) {
+          if (story.id && story.storyUrl) {
+            try {
+              await ExpoImage.prefetch(story.storyUrl);   // ✅ precarga en expo-image
+              newPreloadedImages[story.id] = true;       // 🧠 marcamos como cacheada
+            } catch (e) {
+              console.warn("No se pudo precargar la historia:", e.message || e);
+            }
+          }
+        }
+        setPreloadedImages(newPreloadedImages);
   
     setSelectedStories([{
       uid: selectedUser.uid,
@@ -285,7 +290,7 @@ setPreloadedImages(newPreloadedImages);
         {item.hasStories ? (
           <View style={styles.outerBorder}>
             <View style={styles.innerBorder}>
-              <Image
+            <ExpoImage
                 cachePolicy="memory-disk"
                 source={{ uri: item.profileImage }}
                 style={styles.profileImage}
@@ -294,7 +299,7 @@ setPreloadedImages(newPreloadedImages);
           </View>
         ) : (
           <View style={styles.noBorderContainer}>
-            <Image
+            <ExpoImage
               cachePolicy="memory-disk"
               source={{ uri: item.profileImage }}
               style={styles.profileImage}

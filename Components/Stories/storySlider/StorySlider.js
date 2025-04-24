@@ -11,7 +11,8 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   Animated,
-  ActivityIndicator
+  ActivityIndicator,
+  Image
 } from "react-native"
 import * as ImagePicker from "expo-image-picker"
 import { Ionicons } from "@expo/vector-icons"
@@ -20,7 +21,7 @@ import { doc, getDoc } from "firebase/firestore"
 import { auth, database } from "../../../config/firebase"
 import StoryViewer from "../storyViewer/StoryViewer"
 import { useNavigation } from "@react-navigation/native"
-import { Image } from "react-native"
+import { Image as ExpoImage } from "expo-image" 
 import { useTranslation } from "react-i18next"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import * as ImageManipulator from "expo-image-manipulator"
@@ -169,11 +170,13 @@ export default React.forwardRef(function StorySlider(props, ref) {
     const urls = story.userStories?.map(s => s.storyUrl).filter(Boolean) || [];
     
     // Precargar todas las imágenes de esta historia
-    await Promise.all(urls.map(url => 
-      Image.prefetch(url).catch(e => 
-        console.warn(`Error precargando imagen: ${url}`, e)
-      )
-    ));
+    await Promise.all(urls.map(async (url) => {
+      try {
+        await ExpoImage.prefetch(url); 
+        (newCache[story.uid] ||= []).push(url);
+      } catch (e) {
+      }
+    }));
     
     if (urls.length > 0) {
       newCache[story.uid] = urls;
@@ -236,11 +239,13 @@ export default React.forwardRef(function StorySlider(props, ref) {
   }, [route.params?.photoUri])
 
   const preloadedIds = {};
-stories.forEach(group => {
-  group.userStories.forEach(us => {
-    preloadedIds[us.id] = true;
+  stories.forEach((group) => {
+    group.userStories.forEach((us) => {
+      if (cachedImages[group.uid]?.includes(us.storyUrl)) {
+        preloadedIds[us.id] = true;       // ➕ sólo si SÍ está en caché expo-image
+      }
+    });
   });
-});
 
 
   const handleOpenViewer = async (index) => {
@@ -260,7 +265,7 @@ const isImageCached = cachedImages[story.uid]?.includes(fallbackImage);
 
 if (!isImageCached) {
   try {
-    await Image.prefetch(fallbackImage);
+    await ExpoImage.prefetch(fallbackImage); 
 
     // 🧠 Extra: asegurar que la imagen fue *realmente* usada por el sistema de cache
     await new Promise((resolve) => {

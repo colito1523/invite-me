@@ -8,6 +8,7 @@ import {
   FlatList,
   Dimensions,
   TextInput,
+  Image
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -21,7 +22,7 @@ import {
 import { database, auth } from "../../config/firebase";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
+import { Image as ExpoImage } from "expo-image";
 import StoryViewer from "../Stories/storyViewer/StoryViewer";
 import { useTranslation } from "react-i18next";
 
@@ -325,15 +326,19 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
   
       setSelectedStories([storyData]);
       const newPreloadedImages = {};
-      userStories.forEach((story) => {
+      for (const story of userStories) {
         if (story.id) {
-          newPreloadedImages[story.id] = true;
+          try {
+            await ExpoImage.prefetch(story.storyUrl); // ✅ precarga en la caché de expo-image
+            newPreloadedImages[story.id] = true;       // 🧠 marcamos como precargada
+          } catch (e) {
+            console.warn("No se pudo precargar la historia:", e?.message || e);
+          }
         }
-      });
+      }
       setPreloadedImages(newPreloadedImages);
-      
-
       setIsModalVisible(true);
+      
     } catch (error) {
       console.error("Error al cargar la historia o navegar al perfil:", error);
     }
@@ -359,7 +364,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
       },
     ]}
   >
-    <Image
+  <ExpoImage
       source={{
         uri: attendee.profileImage || "https://via.placeholder.com/150",
       }}
@@ -441,7 +446,7 @@ const DotIndicator = ({ profileImages, attendeesList }) => {
                   },
                 ]}
               >
-                <Image
+            <ExpoImage
                   source={{
                     uri:
                       item.profileImage ||

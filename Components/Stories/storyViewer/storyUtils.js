@@ -1,4 +1,5 @@
 import { PanResponder, Alert, Image, Platform } from "react-native";
+import { Image as ExpoImage } from "expo-image";
 import {
   doc,
   updateDoc,
@@ -880,7 +881,7 @@ export const preloadNextStories = ({
       logInfo("ImagePreload", "Story ya pre-cargada:", nextStory.storyUrl);
     } else {
       const startTime = Date.now();
-      Image.prefetch(nextStory.storyUrl)
+      ExpoImage.prefetch(nextStory.storyUrl)       
         .then(() => {
           const duration = Date.now() - startTime;
           logInfo("ImagePreload", "Story pre-cargada:", nextStory.storyUrl, "en", duration, "ms");
