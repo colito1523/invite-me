@@ -29,6 +29,7 @@ import StoryNavigationButtons from "./StoryNavigationButtons";
 import useBackHandler from "./useBackHandler";
 import { Animated } from "react-native";
 import useUserRelations from "./useUserRelations";
+import { logInfo } from "./logger"; // ajustá el path si es necesario
 import {
   createStoryPanResponder,
   handleNextUser,
@@ -62,7 +63,7 @@ export function StoryViewer({
   onClose,
   unseenStories,
   navigation,
-  preloadedImages = {}, 
+  preloadedImages = {},
 }) {
   const { t } = useTranslation();
 
@@ -430,8 +431,15 @@ export function StoryViewer({
 
   useBackHandler(() => onClose(localUnseenStories));
 
-  console.log("🔍 storyUrl actual:", currentStory?.storyUrl);
-console.log("🧪 loadedImages:", loadedImages);
+  useEffect(() => {
+    if (currentStory?.storyUrl) {
+      logInfo("StoryViewer", "🔍 storyUrl actual:", currentStory.storyUrl);
+    }
+  }, [currentStory?.storyUrl]);
+  
+  useEffect(() => {
+    logInfo("StoryViewer", "🧪 loadedImages:", loadedImages);
+  }, [loadedImages]);
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView

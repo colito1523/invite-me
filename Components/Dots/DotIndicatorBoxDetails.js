@@ -6,7 +6,6 @@ import {
   Dimensions,
   Animated,
   Modal,
-  Text
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { 
@@ -21,7 +20,6 @@ import { database, auth } from '../../config/firebase';
 import { Image } from 'expo-image';
 import StoryViewer from '../Stories/storyViewer/StoryViewer';
 import { useTranslation } from "react-i18next";
-import { handleUserPress } from "./utils";
 import { calculateHoursAgo } from "../Stories/storyViewer/storyUtils";
 
 

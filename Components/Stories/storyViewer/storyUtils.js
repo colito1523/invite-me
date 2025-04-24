@@ -15,6 +15,8 @@ import {
 import { useEffect } from "react";
 import { ref, deleteObject} from "firebase/storage";
 import { database } from "../../../config/firebase";
+import { logInfo, } from "./logger"; // ajustá el path si es necesario
+
 
 
 export const createStoryPanResponder = ({
@@ -851,41 +853,51 @@ export const preloadNextStories = ({
   stories,
   loadedImages,
   setLoadedImages,
-  preloadBuffer = 7, // Cantidad de historias a pre-cargar
+  preloadBuffer = 7,
 }) => {
   let nextCurrentIndex = currentIndex;
   let nextStoryIndex = storyIndex + 1;
 
+  const visitedStoryIds = new Set();
+
   for (let i = 0; i < preloadBuffer; i++) {
-    if (nextStoryIndex >= stories[nextCurrentIndex].userStories.length) {
+    // Saltar al siguiente usuario si se acaban las historias de uno
+    if (nextStoryIndex >= stories[nextCurrentIndex]?.userStories?.length) {
       nextCurrentIndex++;
       nextStoryIndex = 0;
     }
 
     if (nextCurrentIndex >= stories.length) return;
 
-    const nextStory = stories[nextCurrentIndex].userStories[nextStoryIndex];
+    const nextStory = stories[nextCurrentIndex]?.userStories?.[nextStoryIndex];
     if (!nextStory) return;
 
-    if (loadedImages[nextStory.id]) {
-      console.log("Story ya pre-cargada:", nextStory.storyUrl);
-      continue;
-    }
+    // Evitar loops infinitos
+    if (visitedStoryIds.has(nextStory.id)) return;
+    visitedStoryIds.add(nextStory.id);
 
-    const startTime = Date.now();
-    Image.prefetch(nextStory.storyUrl)
-      .then(() => {
-        const duration = Date.now() - startTime;
-        console.log("Story pre-cargada:", nextStory.storyUrl, "en", duration, "ms");
-        setLoadedImages(prev => ({ ...prev, [nextStory.id]: true }));
-      })
-      .catch(err => {
-        console.error("Error pre-cargando historia:", err);
-      });
+    if (loadedImages[nextStory.id]) {
+      logInfo("ImagePreload", "Story ya pre-cargada:", nextStory.storyUrl);
+    } else {
+      const startTime = Date.now();
+      Image.prefetch(nextStory.storyUrl)
+        .then(() => {
+          const duration = Date.now() - startTime;
+          logInfo("ImagePreload", "Story pre-cargada:", nextStory.storyUrl, "en", duration, "ms");
+          setLoadedImages((prev) => ({
+            ...prev,
+            [nextStory.id]: true,
+          }));
+        })
+        .catch((err) => {
+          console.error("Error pre-cargando historia:", err);
+        });
+    }
 
     nextStoryIndex++;
   }
 };
+
 
 
 
