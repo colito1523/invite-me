@@ -17,6 +17,7 @@ import {
 import * as ImagePicker from "expo-image-picker"
 import { Ionicons } from "@expo/vector-icons"
 import { loadExistingStories, uploadStory, loadStoriesInBatches, compressImage } from "./storySliderUtils"
+import useStoriesOnSnapshot from "./useStoriesOnSnapshot"
 import { doc, getDoc } from "firebase/firestore"
 import { auth, database } from "../../../config/firebase"
 import StoryViewer from "../storyViewer/StoryViewer"
@@ -29,15 +30,14 @@ import styles from "./StorySliderStyles"
 
 export default React.forwardRef(function StorySlider(props, ref) {
   React.useImperativeHandle(ref, () => ({
-    loadExistingStories: () => loadExistingStories(t, setStories, setUnseenStories, isUploading),
+    loadExistingStories: () => reload(),
     forceUpdate: () => {
       loadStoriesInBatches(stories)
-      loadExistingStories(t, setStories, setUnseenStories, isUploading)
+      reload()
     },
   }))
   const { t } = useTranslation()
   const navigation = useNavigation()
-  const [stories, setStories] = useState([])
   const [storyViewerVisible, setStoryViewerVisible] = useState(false)
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0)
   const [isModalVisible, setIsModalVisible] = useState(false)
@@ -48,17 +48,11 @@ export default React.forwardRef(function StorySlider(props, ref) {
   // Add default value for props.route
   const route = props.route || {}
 
-  useEffect(() => {
-    if (stories.length > 0) {
-      loadStoriesInBatches(stories)
-    }
-  }, [stories])
-
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
-  const [unseenStories, setUnseenStories] = useState({})
   const [blockedUsers, setBlockedUsers] = useState([])
+  const { stories, unseenStories, reload } = useStoriesOnSnapshot(t)
   const [pendingAction, setPendingAction] = useState(null)
 
   // Función para obtener la URL de la imagen de perfil del usuario actual
@@ -153,14 +147,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
     return () => clearInterval(interval)
   }, [])
 
-  useEffect(() => {
-    loadExistingStories(t, (newStories) => {
-      setStories(newStories)
   
-      // 👉 Log solo una vez al cargar
-
-    }, setUnseenStories, isUploading)
-  }, [])
   useEffect(() => {
     const preloadImages = async () => {
       const newCache = {};
@@ -215,21 +202,6 @@ export default React.forwardRef(function StorySlider(props, ref) {
     })
   }
 
-  useEffect(() => {
-    let isMounted = true
-    const safeSetStories = (stories) => {
-      if (isMounted) setStories(stories)
-    }
-    const safeSetUnseenStories = (unseen) => {
-      if (isMounted) setUnseenStories(unseen)
-    }
-
-    loadExistingStories(t, safeSetStories, safeSetUnseenStories, isUploading)
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
 
   useEffect(() => {
     if (route.params?.photoUri) {
@@ -472,8 +444,8 @@ const renderStory = ({ item, index }) => {
         preloadedImages={preloadedIds}
         onClose={(updatedUnseenStories) => {
           setStoryViewerVisible(false)
-          updateUnseenStories(updatedUnseenStories)
-          loadExistingStories(t, setStories, setUnseenStories, isUploading)
+          if (updatedUnseenStories) updateUnseenStories(updatedUnseenStories)
+          reload()
         }}
         onStoryDeleted={handleStoryDeleted}
         unseenStories={unseenStories}
