@@ -54,6 +54,7 @@ export const localEventImages = {
     boavista_social_club: require("../../assets/Lisboa/Boavista_Social_Club.jpg"),
     polemico: require("../../assets/Lisboa/Polemico.jpg"),
     disque_disse: require("../../assets/Lisboa/Disque_Disse.jpg"),
+    sacro_lisbon: require("../../assets/Lisboa/Sacro_Lisbon.jpg"),
 
     praia_da_luz: require("../../assets/Porto/Praia_da_Luz.jpg"),
     yakuza: require("../../assets/Porto/Yakuza.jpg"),

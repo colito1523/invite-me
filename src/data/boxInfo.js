@@ -22,6 +22,24 @@ const boxInfo = [
     priority: true, // Esto hace que aparezca en la sección de priorida
   },
   {
+    path: require("../../assets/Lisboa/Sacro_Lisbon.jpg"),
+    title: "Sacro Lisbon",
+    category: "Festivities",
+    details: {
+      es: "Por primera vez en Portugal, el dúo español de DJs MËSTIZA pone sobre el escenario sus ritmos electrónicos impregnados de flamenco este 26 de abril.",
+      en: "For the first time in Portugal, the Spanish DJ duo MËSTIZA brings their flamenco-infused electronic beats to the stage this April 26th.",
+      pt: "Pela primeira vez em Portugal, a dupla de DJs espanhóis MËSTIZA traz ao palco, no próximo dia 26 de abril, as suas batidas electrónicas de inspiração flamenca.",
+    },
+    number: "",
+    coordinates: {
+      latitude: 38.7271,
+      longitude: -9.1555,
+    },
+    country: "Portugal",
+    city: "Lisboa",
+    availableDates: ["26 Apr"],
+  },
+  {
     path: require("../../assets/Lisboa/Disque_Disse.jpg"),
     title: "Disque Disse",
     category: "Festivities",
