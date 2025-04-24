@@ -447,7 +447,7 @@ const renderStory = ({ item, index }) => {
         onClose={(updatedUnseenStories) => {
           setStoryViewerVisible(false)
           if (updatedUnseenStories) updateUnseenStories(updatedUnseenStories)
-          reload()
+          // reload()
         }}
         onUpdateUnseenStories={updateUnseenStories}
         unseenStories={unseenStories}

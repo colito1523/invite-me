@@ -70,7 +70,6 @@ export default function useStoriesOnSnapshot(t) {
     }
 
     if (docs.length === 0) {
-        // 🧼 Eliminamos al usuario si ya no tiene historias
         delete allStoriesRef.current[uid];
       
         setUnseenStories((prev) => {
@@ -84,7 +83,7 @@ export default function useStoriesOnSnapshot(t) {
         return;
       }
       
-      // ✅ Si tiene historias, lo guardamos y actualizamos
+      // ✅ Guardamos historias activas
       allStoriesRef.current[uid] = {
         uid,
         username,
@@ -93,6 +92,7 @@ export default function useStoriesOnSnapshot(t) {
         userStories: docs,
       };
       
+      // ✅ Solo una llamada a setUnseenStories
       setUnseenStories((prev) => {
         const newUnseen = {
           ...prev,
@@ -106,21 +106,9 @@ export default function useStoriesOnSnapshot(t) {
         return newUnseen;
       });
       
+      
+      
 
-
-allStoriesRef.current[uid] = {
-    uid,
-    username,
-    lastName,
-    profileImage,
-    userStories: docs,
-  };
-
-
-    setUnseenStories((prev) => ({
-      ...prev,
-      [uid]: docs.filter((d) => !d.viewers?.some((v) => v.uid === auth.currentUser.uid)),
-    }));
   };
 
   const init = async () => {
@@ -158,46 +146,6 @@ allStoriesRef.current[uid] = {
     };
   }, [forceReloadFlag]); // 👈 se vuelve a ejecutar si cambia forceReloadFlag
 
-
-  useEffect(() => {
-    async function init() {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      // 👉 Recuperamos posibles historias en caché para UX instantánea
-      const cached = await AsyncStorage.getItem("cachedStories");
-      if (cached) setStories(JSON.parse(cached));
-
-      const userDoc = await getDoc(doc(database, "users", user.uid));
-      const userData = userDoc.data();
-      const hidden = userData.hiddenStories || [];
-      const hideFrom = userData.hideStoriesFrom || [];
-      const blocked = userData.blockedUsers || [];
-
-      const friends = await getFriendsList(user.uid);
-      const validFriends = friends.filter(
-        (f) => !hidden.includes(f.friendId) && !hideFrom.includes(f.friendId) && !blocked.includes(f.friendId),
-      );
-
-      // ➕ Listener para el usuario actual
-      const userColRef = collection(database, "users", user.uid, "stories");
-      unsubscribesRef.current.push(onSnapshot(userColRef, (snap) => processStoriesSnapshot(user.uid, snap)));
-
-      // ➕ Listeners para cada amigo válido
-      validFriends.forEach((friend) => {
-        const ref = collection(database, "users", friend.friendId, "stories");
-        unsubscribesRef.current.push(onSnapshot(ref, (snap) => processStoriesSnapshot(friend.friendId, snap)));
-      });
-    }
-
-    init();
-
-    return () => {
-      // 🔌 Limpieza segura de listeners
-      unsubscribesRef.current.forEach((unsub) => unsub && unsub());
-      unsubscribesRef.current = [];
-    };
-  }, []);
 
   // 🪄 Mantener orden: propias → no vistas → vistas
   const sortStories = (arr, unseen) => {
