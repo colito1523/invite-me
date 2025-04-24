@@ -466,18 +466,18 @@ export default function ChatList() {
           },
         ]);
         const newPreloaded = {};
-              for (const story of enrichedStories) {
-                if (story.id && story.storyUrl) {
-                  try {
-                    await ExpoImage.prefetch(story.storyUrl);
-                    newPreloaded[story.id] = true;
-                  } catch (e) {
-                    console.warn("No se pudo precargar:", e.message || e);
-                  }
-                }
-              }
-              setPreloadedImages(newPreloaded);
-              setIsModalVisible(true);
+        for (const story of enrichedStories) {
+          if (story.id && story.storyUrl) {
+            try {
+              await ExpoImage.prefetch(story.storyUrl);    // descarga + cache
+              newPreloaded[story.id] = true;
+            } catch (e) {
+              console.warn("No se pudo precargar la historia:", e?.message || e);
+            }
+          }
+        }
+        setPreloadedImages(newPreloaded);
+        setIsModalVisible(true);
       }
        else {
         handleChatPressLocalWrapper(chat);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Modal, Alert } from "react-native";
-import { Image } from "expo-image";
+import { View, Text, TouchableOpacity, Modal, Alert, Image } from "react-native";
+import { Image as ExpoImage } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { saveSearchHistory } from "./utils";
 import StoryViewer from "../../Components/Stories/storyViewer/StoryViewer";
@@ -95,14 +95,18 @@ const SearchHistory = ({
       
   
         if (userStories.length > 0) {
-          const newPreloadedImages = {};
-          userStories.forEach((story) => {
-            if (story.id) {
-              newPreloadedImages[story.id] = true;
+          const newPreloaded = {};
+          for (const story of userStories) {
+            if (story.id && story.storyUrl) {
+              try {
+                await ExpoImage.prefetch(story.storyUrl);     // ← ahora sí precarga correctamente
+                newPreloaded[story.id] = true;
+              } catch (e) {
+                console.warn("No se pudo precargar historia:", e?.message || e);
+              }
             }
-          });
-        
-          setPreloadedImages(newPreloadedImages);
+          }
+          setPreloadedImages(newPreloaded);
           setSelectedStories([
             {
               uid: item.id,
