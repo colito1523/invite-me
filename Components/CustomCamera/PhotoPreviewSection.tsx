@@ -108,17 +108,22 @@ const PhotoPreviewSection = ({
     }
 };
 
-  const handleUploadStory = async () => {
-    await handleUploadStoryUtil({
-      photo,
-      viewShotRef,
-      navigation,
-      setIsUploading,
-      setUploadProgress,
-      setStories,
-      setUnseenStories,
-    });
-  };
+const handleUploadStory = async () => {
+  await handleUploadStoryUtil({
+    photo,
+    viewShotRef,
+    navigation,
+    setIsUploading,
+    setUploadProgress,
+    setStories,
+    setUnseenStories,
+  });
+
+  // En vez de solo ir a "Home", pasamos un parámetro que evita recarga completa
+  navigation.navigate("Home", {
+    storyUpdateOnly: true // 💡 nuevo flag
+  });
+};
 
   const handleSendToChat = async () => {
     await handleSendToChatUtil({

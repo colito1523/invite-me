@@ -185,7 +185,6 @@ export default React.forwardRef(function StorySlider(props, ref) {
 
   await Promise.all(preloadPromises);
   setCachedImages(newCache);
-  console.log("📦 Todas las imágenes precargadas:", newCache);
 };
   
   
