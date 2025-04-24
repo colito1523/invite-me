@@ -69,22 +69,52 @@ export default function useStoriesOnSnapshot(t) {
       ExpoImage.prefetch(docs[0].storyUrl).catch(() => {});
     }
 
-   setStories((prev) => {
-  const other = prev.filter((s) => s.uid !== uid);
+    if (docs.length === 0) {
+        // 🧼 Eliminamos al usuario si ya no tiene historias
+        delete allStoriesRef.current[uid];
+      
+        setUnseenStories((prev) => {
+          const { [uid]: _, ...rest } = prev;
+          const all = Object.values(allStoriesRef.current);
+          const sorted = sortStories(all, rest);
+          setStories(sorted);
+          return rest;
+        });
+      
+        return;
+      }
+      
+      // ✅ Si tiene historias, lo guardamos y actualizamos
+      allStoriesRef.current[uid] = {
+        uid,
+        username,
+        lastName,
+        profileImage,
+        userStories: docs,
+      };
+      
+      setUnseenStories((prev) => {
+        const newUnseen = {
+          ...prev,
+          [uid]: docs.filter((d) => !d.viewers?.some((v) => v.uid === auth.currentUser.uid)),
+        };
+      
+        const all = Object.values(allStoriesRef.current);
+        const sorted = sortStories(all, newUnseen);
+        setStories(sorted);
+      
+        return newUnseen;
+      });
+      
 
-  if (docs.length === 0) return other; // ⛔️ No agregues si no hay historias
 
-  const currentGroup = {
+allStoriesRef.current[uid] = {
     uid,
     username,
     lastName,
     profileImage,
     userStories: docs,
   };
-
-  return sortStories([currentGroup, ...other], unseenStories);
-});
-
 
 
     setUnseenStories((prev) => ({
@@ -192,6 +222,6 @@ export default function useStoriesOnSnapshot(t) {
     setForceReloadFlag(prev => !prev); // 👈 fuerza que el useEffect se dispare de nuevo
   };
 
+  return { stories, unseenStories, reload, setUnseenStories };
 
-  return { stories, unseenStories, reload };
 }

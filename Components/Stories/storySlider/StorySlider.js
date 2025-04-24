@@ -44,6 +44,7 @@ export default React.forwardRef(function StorySlider(props, ref) {
   const [isNightMode, setIsNightMode] = useState(false)
   const [isPreloading, setIsPreloading] = useState(false);
   const [cachedImages, setCachedImages] = useState({});
+  
 
   // Add default value for props.route
   const route = props.route || {}
@@ -52,7 +53,8 @@ export default React.forwardRef(function StorySlider(props, ref) {
   const [isUploading, setIsUploading] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
   const [blockedUsers, setBlockedUsers] = useState([])
-  const { stories, unseenStories, reload } = useStoriesOnSnapshot(t)
+  const { stories, unseenStories, reload, setUnseenStories } = useStoriesOnSnapshot(t);
+
   const [pendingAction, setPendingAction] = useState(null)
 
   // Función para obtener la URL de la imagen de perfil del usuario actual
@@ -447,7 +449,7 @@ const renderStory = ({ item, index }) => {
           if (updatedUnseenStories) updateUnseenStories(updatedUnseenStories)
           reload()
         }}
-        onStoryDeleted={handleStoryDeleted}
+        onUpdateUnseenStories={updateUnseenStories}
         unseenStories={unseenStories}
         navigation={navigation}
       />

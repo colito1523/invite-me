@@ -64,6 +64,7 @@ export function StoryViewer({
   unseenStories,
   navigation,
   preloadedImages = {},
+  onUpdateUnseenStories, // 👈 nuevo prop
 }) {
   const { t } = useTranslation();
 
