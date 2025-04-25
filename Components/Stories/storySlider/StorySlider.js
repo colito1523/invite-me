@@ -44,6 +44,8 @@ export default React.forwardRef(function StorySlider(props, ref) {
   const [isNightMode, setIsNightMode] = useState(false)
   const [isPreloading, setIsPreloading] = useState(false);
   const [cachedImages, setCachedImages] = useState({});
+  const [frozenStories, setFrozenStories] = useState([]);
+
   
 
   // Add default value for props.route
@@ -255,6 +257,7 @@ if (!isImageCached) {
     }
     setIsPreloading(false);
   
+    setFrozenStories(JSON.parse(JSON.stringify(stories)));// congelamos el array
     setSelectedStoryIndex(index);
     setStoryViewerVisible(true);
     await AsyncStorage.setItem("lastViewedStoryIndex", JSON.stringify(index));
@@ -441,7 +444,7 @@ const renderStory = ({ item, index }) => {
       </View>
     ) : (
       <StoryViewer
-        stories={stories}
+      stories={frozenStories}
         initialIndex={selectedStoryIndex}
         preloadedImages={preloadedIds}
         onClose={(updatedUnseenStories) => {
