@@ -503,7 +503,7 @@ export function StoryViewer({
                     progress={progress}
                   />
                 )}
-               {loadedImages[currentStory?.id] ? (
+
   <ExpoImage
     source={{ uri: currentStory.storyUrl }}
     style={styles.image}
@@ -511,13 +511,7 @@ export function StoryViewer({
     transition={0}                // elimina el fade-in al cargar
     cachePolicy="memory-disk"     // usa caché para rendimiento
   />
-) : (
-  <Image
-    source={require("../../../assets/notification-icon.png")}
-    style={styles.image}
-    resizeMode="cover"
-  />
-)}
+
                 {isTransitioning && nextStoryUrl && (
                   <Image
                     source={{ uri: nextStoryUrl }}

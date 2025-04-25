@@ -29,13 +29,7 @@ import * as ImageManipulator from "expo-image-manipulator"
 import styles from "./StorySliderStyles"
 
 export default React.forwardRef(function StorySlider(props, ref) {
-  React.useImperativeHandle(ref, () => ({
-    loadExistingStories: () => reload(),
-    forceUpdate: () => {
-      loadStoriesInBatches(stories)
-      reload()
-    },
-  }))
+
   const { t } = useTranslation()
   const navigation = useNavigation()
   const [storyViewerVisible, setStoryViewerVisible] = useState(false)

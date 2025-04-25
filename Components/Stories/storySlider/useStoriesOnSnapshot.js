@@ -215,11 +215,11 @@ allStoriesRef.current[uid] = {
   };
 
   const reload = () => {
+    // 🔥 Limpia visualmente los datos para evitar flash o delay de orden
+    setStories([]); 
     unsubscribesRef.current.forEach((u) => u && u());
     unsubscribesRef.current = [];
-    setStories([]);
-    setUnseenStories({});
-    setForceReloadFlag(prev => !prev); // 👈 fuerza que el useEffect se dispare de nuevo
+    setForceReloadFlag((prev) => !prev);
   };
 
   return { stories, unseenStories, reload, setUnseenStories };
