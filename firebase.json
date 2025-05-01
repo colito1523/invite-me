@@ -22,7 +22,13 @@
       "codebase": "searchindex",
       "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"],
       "runtime": "nodejs20"
-    }    
+    },    
+    {
+      "source": "eventCleanUpGoBoxs",
+      "codebase": "eventcleanupgoboxs",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"],
+      "runtime": "nodejs20"
+    }
   ],
   "firestore": {
     "rules": "firestore.rules",
