@@ -78,7 +78,7 @@ export const styles = StyleSheet.create({
   resultItem: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    paddingHorizontal: 10,
     borderRadius: 12,
     marginVertical: 0,
   },

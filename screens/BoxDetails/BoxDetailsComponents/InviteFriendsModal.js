@@ -41,10 +41,6 @@ const InviteFriendsModal = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
-    Alert.alert(
-      t("userProfile.success"),
-      t("boxDetails.friendInvitedMessage")
-    );
   };
 
   const renderFriendItemWithInvite = ({ item }) => {

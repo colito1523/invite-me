@@ -656,10 +656,6 @@ export default memo(function BoxDetails({ route, navigation }) {
           t,
         });
       }
-      Alert.alert(
-        t("userProfile.success"),
-        t("boxDetails.friendInvitedMessage")
-      );
     };
 
     return (
