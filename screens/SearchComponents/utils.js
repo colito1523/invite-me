@@ -1,6 +1,6 @@
 import { collection, getDocs, query, where, addDoc, getDoc, deleteDoc, doc, documentId } from "firebase/firestore";
 import { database} from "../../config/firebase";
-import { getAuth } from "firebase/auth"; 
+import { auth } from "../../config/firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import { limit } from "firebase/firestore";
@@ -32,7 +32,6 @@ export const normalizeText = (text) => {
 };
 
 export const prefetchUsers = async () => {
-  const auth = getAuth();
   const user = auth.currentUser;
   if (!user) return;
 
@@ -88,7 +87,6 @@ export const filterPrefetchedUsers = async (searchTerm) => {
 
 
 export const fetchUsers = async (searchTerm, setResults, useCache = true) => {
-  const auth = getAuth();
   const user = auth.currentUser;
   if (!user) return;
 
@@ -213,7 +211,6 @@ try {
 
 
 export const fetchRecommendations = async (user, setRecommendations, forceRefresh = false) => {
-  const auth = getAuth();
   
   if (!user || !user.uid) {
     console.error("fetchRecommendations: Usuario no autenticado o sin UID.");
@@ -319,7 +316,6 @@ await AsyncStorage.setItem(
 
 
 export const sendFriendRequest = async (user, setStatus) => {
-  const auth = getAuth(); 
   if (!auth.currentUser || !user) return;
 
   const currentUser = auth.currentUser;
@@ -384,7 +380,6 @@ export const sendFriendRequest = async (user, setStatus) => {
 };
 
 export const cancelFriendRequest = async (user, setStatus, t) => {
-  const auth = getAuth();
   if (!auth.currentUser || !user) return;
 
   try {
@@ -410,7 +405,6 @@ export const cancelFriendRequest = async (user, setStatus, t) => {
 
 
 export const deleteFriendRequest = async (user, setStatus) => {
-  const auth = getAuth();
   if (!auth.currentUser || !user) return;
 
   try {

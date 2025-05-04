@@ -1,8 +1,6 @@
 // eventCleanUpGoBoxs/index.js
 const functions = require("firebase-functions/v1");
-const admin = require("firebase-admin");
-
-admin.initializeApp();
+const admin = require("./firebaseAdmin");
 const db = admin.firestore();
 
 exports.deleteExpiredGoBoxEvents = functions.runWith({

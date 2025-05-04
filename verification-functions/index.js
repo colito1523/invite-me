@@ -1,9 +1,6 @@
 // verification-functions/index.js
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-
-// Inicializa Admin si no se hizo antes
-admin.initializeApp();
+const admin = require('./firebaseAdmin'); // ⬅️ Cambio clave
 
 const db = admin.firestore();
 

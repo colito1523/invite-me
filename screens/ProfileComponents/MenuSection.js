@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { View, TouchableOpacity, StyleSheet, Alert, Platform, Modal, Text, Dimensions, ActivityIndicator, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../config/firebase";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, getAuth, deleteUser } from "firebase/auth";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, deleteUser } from "firebase/auth";
 import { getFirestore, deleteDoc, doc, collection, getDocs, writeBatch } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 
@@ -96,7 +96,6 @@ const MenuSection = React.memo(({
                               setLoading(true); // Mostrar indicador de carga
 
                               try {
-                                const auth = getAuth();
                                 const database = getFirestore();
                                 const user = auth.currentUser;
 
@@ -628,7 +627,6 @@ const MenuSection = React.memo(({
                       setLoading(true); // Mostrar indicador de carga
 
                       try {
-                        const auth = getAuth();
                         const database = getFirestore();
                         const user = auth.currentUser;
 

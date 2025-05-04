@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { getAuth } from "firebase/auth";
+import { auth } from "../../config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { database } from "../../config/firebase";
 import { sendFriendRequest, cancelFriendRequest } from "./utils";
@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import { styles } from "./styles";
 
 const RecommendedUserItem = ({ item, index, onUserPress, theme, isNightMode }) => {
-  const auth = getAuth();
   const { t } = useTranslation();
   const [status, setStatus] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);

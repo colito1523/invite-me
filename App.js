@@ -213,14 +213,16 @@ export default function App() {
   useEffect(() => {
     const prepare = async () => {
       try {
-        // Carga inicial: fuentes, datos, etc.
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simula un retraso
-
+        // 🔒 Esperar a que Firebase Auth esté listo
+        await auth.authStateReady(); // ✅ esto evita el error runtime
+  
+        // Simula un retraso (puede quedar)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+  
         const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
         if (savedLanguage) {
           await i18n.changeLanguage(savedLanguage);
         } else if (auth.currentUser) {
-          // Fetch preferred language from Firestore
           const userRef = doc(database, "users", auth.currentUser.uid);
           const userDoc = await getDoc(userRef);
           if (userDoc.exists()) {
@@ -231,10 +233,9 @@ export default function App() {
             }
           }
         }
+  
         setIsI18nInitialized(true);
-
-        // Notifications will be handled by the useEffect hook in the component
-
+  
       } catch (e) {
         console.warn(e);
       } finally {
@@ -242,9 +243,10 @@ export default function App() {
         await SplashScreen.hideAsync(); // Oculta la splash screen
       }
     };
-
+  
     prepare();
   }, []);
+  
 
   useEffect(() => {
     async function checkForUpdates() {

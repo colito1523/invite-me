@@ -17,7 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useBlockedUsers } from "../../src/contexts/BlockContext";
 import { useTranslation } from "react-i18next";
-import { getAuth } from "firebase/auth";
+import { auth } from "../../config/firebase";
 import {
   fetchUsers,
   fetchRecommendations,
@@ -42,7 +42,6 @@ import { styles, lightTheme, darkTheme } from "./styles";
 import SearchSkeleton from "./SearchSkeleton";
 
 export default function Search({ route }) {
-  const auth = getAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [recommendations, setRecommendations] = useState([]);

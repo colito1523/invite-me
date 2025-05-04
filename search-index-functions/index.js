@@ -1,7 +1,6 @@
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
+const admin = require('./firebaseAdmin'); // ⬅️ Cambio clave
 
-admin.initializeApp();
 const db = admin.firestore();
 
 const normalizeText = (text) => {
